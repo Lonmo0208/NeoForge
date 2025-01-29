@@ -143,7 +143,6 @@ task downloadJson(type: Download, dependsOn: downloadVersionManifest) {
         quiet true
     }
 }
-
 subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'eclipse'
@@ -165,6 +164,8 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        maven{url = 'https://maven.minecraftforge.net/'}
+
         maven {
             name = 'forge'
             url = 'https://maven.neoforged.net/releases'
@@ -247,6 +248,7 @@ project(':clean') {
 
     dependencies {
         implementation 'net.minecraftforge:forgespi:' + SPI_VERSION
+        implementation fileTree(dir: 'custom', include: ['*.jar'])
     }
 
     patcher {
@@ -359,8 +361,12 @@ project(':forge') {
             canBeResolved = true
         }
     }
-
     dependencies {
+        implementation fileTree(dir: 'custom', include: ['*.jar'])
+
+        testImplementation 'net.minecraft:client:1.20.1-20230612.114412:extra'
+        testImplementation 'net.minecraft:client:1.20.1-20230612.114412:slim'
+        testImplementation 'net.minecraft:client:1.20.1-20230612.114412:srg'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
         testImplementation 'org.junit.vintage:junit-vintage-engine:5.+'
         testImplementation 'org.opentest4j:opentest4j:1.2.0' // needed for junit 5
