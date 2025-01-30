@@ -1,53 +1,30 @@
-name: Build and test PRs
+name: Release
 
 on:
-  pull_request:
-    types:
-      - synchronize
-      - opened
-      - ready_for_review
-      - reopened
-  workflow_dispatch:
+  push:
+    branches:
+      - '1.*'
+
+permissions:
+  contents: read
+  statuses: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1000
-          fetch-tags: true
+  release:
+    uses: Lonmo0208/actions/.github/workflows/gradle-publish.yml@main
+    with:
+      java: 17
+      pre_gradle_tasks: setup
+      gradle_tasks: publish
+      # Unlike on 1.20.2+, 1.20.1 still uses the 'old' versioning scheme
+      # version_labels: -beta, -stable
 
-      # GradleUtils will append the branch name to the version,
-      # but for that we need a properly checked out branch
-      - name: Create branch for commit
-        run:
-          git switch -C pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.ref }}
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup with Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: setup
-          cache-read-only: false
-
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: build
-
-      - name: Checks ATs, patches, etc...
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: checkAll
-
-      - name: Checks JAR compatibility
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: checkJarCompatibility
+    # We only publish the main repository. This way we avoid publishing Kits
+    if: ${{ github.repository == 'Lonmo0208/NeoForge' }}
+    secrets:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      MAVEN_USER: ${{ secrets.MAVEN_USER }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      GPG_SUBKEY: ${{ secrets.GPG_SUBKEY }}
+      GPG_SUBKEY_ID: ${{ secrets.GPG_SUBKEY_ID }}
+      GPG_SUBKEY_PASSWORD: ${{ secrets.GPG_SUBKEY_PASSWORD }}

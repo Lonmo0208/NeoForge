@@ -1,0 +1,9 @@
+JVM info: Azul Systems, Inc. - 17.0.13 - 17.0.13+11-LTS
+java.net.preferIPv4Stack=true
+Current Time: 29/01/2025 23:48:01
+Host: maven.neoforged.net [89.187.187.10, 89.187.187.18, 89.187.187.5, 143.244.51.246, 143.244.51.249, 89.187.187.13, 143.244.51.59, 143.244.51.53]
+Host: libraries.minecraft.net [13.107.246.73]
+Host: launchermeta.mojang.com [13.107.246.73]
+Host: piston-meta.mojang.com [13.107.246.73]
+Host: sessionserver.mojang.com [13.107.246.73]
+Found java version 17.0.13
