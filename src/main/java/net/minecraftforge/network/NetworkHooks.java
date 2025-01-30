@@ -186,7 +186,7 @@ public class NetworkHooks
      */
     public static void openScreen(ServerPlayer player, MenuProvider containerSupplier, Consumer<FriendlyByteBuf> extraDataWriter)
     {
-        if (player.level().isClientSide) return;
+        if (player.level.isClientSide) return;
         player.doCloseContainer();
         player.nextContainerCounter();
         int openContainerId = player.containerCounter;
@@ -201,9 +201,7 @@ public class NetworkHooks
         if (output.readableBytes() > 32600 || output.readableBytes() < 1) {
             throw new IllegalArgumentException("Invalid PacketBuffer for openGui, found "+ output.readableBytes()+ " bytes");
         }
-        var c = containerSupplier.createMenu(openContainerId, player.getInventory(), player);
-        if (c == null)
-            return;
+        AbstractContainerMenu c = containerSupplier.createMenu(openContainerId, player.getInventory(), player);
         MenuType<?> type = c.getType();
         PlayMessages.OpenContainer msg = new PlayMessages.OpenContainer(type, openContainerId, containerSupplier.getDisplayName(), output);
         NetworkConstants.playChannel.sendTo(msg, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);

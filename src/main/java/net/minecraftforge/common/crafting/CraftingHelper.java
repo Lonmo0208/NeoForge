@@ -95,7 +95,7 @@ public class CraftingHelper
         return serializer.parse(buffer);
     }
 
-    public static Ingredient getIngredient(JsonElement json, boolean allowEmpty)
+    public static Ingredient getIngredient(JsonElement json)
     {
         if (json == null || json.isJsonNull())
             throw new JsonSyntaxException("Json cannot be null");
@@ -106,7 +106,7 @@ public class CraftingHelper
             List<Ingredient> vanilla = Lists.newArrayList();
             json.getAsJsonArray().forEach((ele) ->
             {
-                Ingredient ing = CraftingHelper.getIngredient(ele, allowEmpty);
+                Ingredient ing = CraftingHelper.getIngredient(ele);
 
                 if (ing.getClass() == Ingredient.class) //Vanilla, Due to how we read it splits each itemstack, so we pull out to re-merge later
                     vanilla.add(ing);
@@ -118,13 +118,7 @@ public class CraftingHelper
                 ingredients.add(Ingredient.merge(vanilla));
 
             if (ingredients.size() == 0)
-            {
-                if (allowEmpty)
-                {
-                    return Ingredient.EMPTY;
-                }
                 throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
-            }
 
             if (ingredients.size() == 1)
                 return ingredients.get(0);

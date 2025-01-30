@@ -5,6 +5,7 @@
 
 package net.minecraftforge.client.model.generators;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -58,7 +59,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
 
 /**
  * Data provider for blockstate files. Extends {@link BlockModelProvider} so that

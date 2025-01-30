@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,13 +34,10 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.event.ForgeEventFactory;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.Objects;
 
 /*
  * Extension added to ItemStack that bounces to ItemSack sensitive Item methods. Typically this is just for convince.
@@ -90,7 +86,7 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
        Player entityplayer = context.getPlayer();
        BlockPos blockpos = context.getClickedPos();
        BlockInWorld blockworldstate = new BlockInWorld(context.getLevel(), blockpos, false);
-       Registry<Block> registry = entityplayer.level().registryAccess().registryOrThrow(Registries.BLOCK);
+       Registry<Block> registry = entityplayer.level.registryAccess().registryOrThrow(Registries.BLOCK);
        if (entityplayer != null && !entityplayer.getAbilities().mayBuild && !self().hasAdventureModePlaceTagForBlock(registry, blockworldstate)) {
           return InteractionResult.PASS;
        } else {
@@ -167,40 +163,35 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
     }
 
     /**
-     * Gets the gameplay level of the target enchantment on this stack.
-     * <p>
-     * Equivalent to calling {@link EnchantmentHelper#getItemEnchantmentLevel(Enchantment, ItemStack)}.
-     * <p>
-     * Use in place of {@link EnchantmentHelper#getTagEnchantmentLevel(Enchantment, ItemStack)} for gameplay logic.
-     * <p>
-     * Use {@link EnchantmentHelper#getTagEnchantmentLevel(Enchantment, ItemStack)} instead when modifying the item's enchantments.
+     * Gets the level of the enchantment currently present on the stack. By default, returns the enchantment level present in NBT.
      *
-     * @param enchantment The enchantment being checked for
-     * @return The level of the enchantment, or 0 if not present.
+     * Equivalent to calling {@link net.minecraft.world.item.enchantment.EnchantmentHelper#getItemEnchantmentLevel(Enchantment, ItemStack)}
+     * Use in place of {@link net.minecraft.world.item.enchantment.EnchantmentHelper#getTagEnchantmentLevel(Enchantment, ItemStack)} for checking presence of an enchantment in logic implementing the enchantment behavior.
+     * Use {@link net.minecraft.world.item.enchantment.EnchantmentHelper#getTagEnchantmentLevel(Enchantment, ItemStack)} instead when modifying an item's enchantments.
+     *
+     * @param enchantment  the enchantment being checked for
+     * @return  Level of the enchantment, or 0 if not present
      * @see #getAllEnchantments()
-     * @see EnchantmentHelper#getTagEnchantmentLevel(Enchantment, ItemStack)
+     * @see net.minecraft.world.item.enchantment.EnchantmentHelper#getTagEnchantmentLevel(Enchantment, ItemStack)
      */
     default int getEnchantmentLevel(Enchantment enchantment)
     {
-        int level = self().getItem().getEnchantmentLevel(self(), enchantment);
-        return ForgeEventFactory.getEnchantmentLevelSpecific(level, self(), enchantment);
+        return self().getItem().getEnchantmentLevel(self(), enchantment);
     }
 
     /**
-     * Gets the gameplay level of all enchantments on this stack.
-     * <p>
-     * Use in place of {@link EnchantmentHelper#getEnchantments(ItemStack)} for gameplay logic.
-     * <p>
-     * Use {@link EnchantmentHelper#getEnchantments(ItemStack)} instead when modifying the item's enchantments.
+     * Gets a map of all enchantments present on the stack. By default, returns the enchantments present in NBT, ignoring book enchantments.
      *
-     * @return  Map of all enchantments on the stack, or an empty map if no enchantments are present
+     * Use in place of {@link net.minecraft.world.item.enchantment.EnchantmentHelper#getEnchantments(ItemStack)} for checking presence of an enchantment in logic implementing the enchantment behavior.
+     * Use {@link net.minecraft.world.item.enchantment.EnchantmentHelper#getEnchantments(ItemStack)} instead when modifying an item's enchantments.
+     *
+     * @return  Map of all enchantments on the stack, empty if no enchantments are present
      * @see #getEnchantmentLevel(Enchantment)
-     * @see EnchantmentHelper#getEnchantments(ItemStack)
+     * @see net.minecraft.world.item.enchantment.EnchantmentHelper#getEnchantments(ItemStack)
      */
     default Map<Enchantment, Integer> getAllEnchantments()
     {
-        Map<Enchantment, Integer> map = self().getItem().getAllEnchantments(self());
-        return ForgeEventFactory.getEnchantmentLevel(map, self());
+        return self().getItem().getAllEnchantments(self());
     }
 
     /**
@@ -250,6 +241,21 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
     default boolean onEntitySwing(LivingEntity entity)
     {
         return self().getItem().onEntitySwing(self(), entity);
+    }
+
+    /**
+     * Called each tick while using an item.
+     *
+     * @param player The Player using the item
+     * @param count  The amount of time in tick the item has been used for
+     *               continuously
+     *
+     * @deprecated {@link net.minecraft.world.item.ItemStack#onUseTick(Level, LivingEntity, int) Use Vanilla's Version}
+     */
+    @Deprecated(since = "1.19.4", forRemoval = true)
+    default void onUsingTick(LivingEntity player, int count)
+    {
+        self().getItem().onUsingTick(self(), player, count);
     }
 
     /**
@@ -438,7 +444,7 @@ public interface IForgeItemStack extends ICapabilitySerializable<CompoundTag>
             return other.isEmpty();
         else
             return !other.isEmpty() && self().getCount() == other.getCount() && self().getItem() == other.getItem() &&
-            (limitTags ? self().areShareTagsEqual(other) : Objects.equals(self().getTag(), other.getTag()));
+            (limitTags ? self().areShareTagsEqual(other) : ItemStack.tagMatches(self(), other));
     }
 
     /**

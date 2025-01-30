@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: LGPL-2.1-only
  */
 
-package net.minecraftforge.common.extensions;
+package net.minecraftforge.client.extensions;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.core.Direction;
 
 import com.mojang.math.Transformation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -15,6 +18,7 @@ import org.joml.Vector4f;
 /**
  * Extension interface for {@link Transformation}.
  */
+// TODO - 1.20: Transformation is not client-only, move this extension outside the client package
 public interface IForgeTransformation
 {
     private Transformation self()
@@ -30,6 +34,21 @@ public interface IForgeTransformation
     default boolean isIdentity()
     {
         return self().equals(Transformation.identity());
+    }
+
+    /**
+     * Pushes and applies this transformation to the pose stack. The effects of this method can be reversed by a
+     * corresponding {@link PoseStack#popPose()}.
+     *
+     * @deprecated Use {@linkplain PoseStack#pushTransformation(Transformation)}, as {@linkplain Transformation} can be present in common code.
+     *
+     * @param stack the pose stack to modify
+     */
+    @OnlyIn(Dist.CLIENT) // TODO - 1.20: Remove in favour of client-only PoseStack extension
+    @Deprecated(forRemoval = true, since = "1.19.2")
+    default void push(PoseStack stack)
+    {
+        stack.pushTransformation(self());
     }
 
     /**

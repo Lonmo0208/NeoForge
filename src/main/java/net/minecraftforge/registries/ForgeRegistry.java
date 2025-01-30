@@ -48,7 +48,6 @@ import org.apache.logging.log4j.MarkerManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 @ApiStatus.Internal
 public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegistryModifiable<V>
@@ -71,12 +70,16 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
     private final BakeCallback<V> bake;
     private final MissingFactory<V> missing;
     private final BitSet availabilityMap;
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    private final Set<ResourceLocation> dummies = Sets.newHashSet();
     private final Set<Integer> blocked = Sets.newHashSet();
     private final Multimap<ResourceLocation, V> overrides = ArrayListMultimap.create();
     private final Map<ResourceLocation, Holder.Reference<V>> delegatesByName = Maps.newHashMap();
     private final Map<V, Holder.Reference<V>> delegatesByValue = Maps.newHashMap();
     private final BiMap<OverrideOwner<V>, V> owners = HashBiMap.create();
     private final ForgeRegistryTagManager<V> tagManager;
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    private final DummyFactory<V> dummyFactory;
     private final int min;
     private final int max;
     private final boolean allowOverrides;
@@ -110,6 +113,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         this.validate = builder.getValidate();
         this.bake = builder.getBake();
         this.missing = builder.getMissingFactory();
+        this.dummyFactory = builder.getDummyFactory();
         this.allowOverrides = builder.getAllowOverrides();
         this.isModifiable = builder.getAllowModifications();
         this.hasWrapper = builder.getHasWrapper();
@@ -460,6 +464,9 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         if (this.add != null)
             this.add.onAdd(this, this.stage, idToUse, rkey, value, oldEntry);
 
+        if (this.dummies.remove(key))
+            LOGGER.debug(REGISTRIES,"Registry {} Dummy Remove: {}", this.name, key);
+
         LOGGER.trace(REGISTRIES,"Registry {} add: {} {} {} (req. id {})", this.name, key, idToUse, value, id);
 
         return idToUse;
@@ -477,7 +484,14 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         return ret;
     }
 
-    @Override
+    /**
+     * Adds an alias that maps from the name specified by <code>src</code> to the name specified by <code>dst</code>.<p>
+     * Any registry lookups that target the first name will resolve as the second name, if the first name is not present.
+     * @param src The source registry name to alias from.
+     * @param dst The target registry name to alias to.
+     * 
+     * TODO: Add as public API in IForgeRegistry and DeferredRegister.
+     */
     public void addAlias(ResourceLocation src, ResourceLocation dst)
     {
         if (this.isLocked())
@@ -491,6 +505,15 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
 
         this.aliases.put(src, dst);
         LOGGER.trace(REGISTRIES,"Registry {} alias: {} -> {}", this.name, src, dst);
+    }
+
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    void addDummy(ResourceLocation key)
+    {
+        if (this.isLocked())
+            throw new IllegalStateException(String.format(Locale.ENGLISH, "Attempted to register the dummy %s too late", key));
+        this.dummies.add(key);
+        LOGGER.trace(REGISTRIES,"Registry {} dummy: {}", this.name, key);
     }
 
     @NotNull
@@ -559,6 +582,12 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
     V getDefault()
     {
         return this.defaultValue;
+    }
+
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    boolean isDummied(ResourceLocation key)
+    {
+        return this.dummies.contains(key);
     }
 
 
@@ -686,6 +715,10 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
             }
         }
 
+        //Needs to be below add so that dummies are persisted
+        this.dummies.clear();
+        from.dummies.forEach(this::addDummy);
+
         if (errored)
             throw new RuntimeException("One of more entry values did not copy to the correct id. Check log for details!");
     }
@@ -694,7 +727,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
     public void clear()
     {
         if (!this.isModifiable)
-            throw new UnsupportedOperationException("Attempted to clear a non-modifiable NeoForge Registry");
+            throw new UnsupportedOperationException("Attempted to clear a non-modifiable Forge Registry");
 
         if (this.isLocked())
             throw new IllegalStateException("Attempted to clear the registry to late.");
@@ -704,6 +737,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
 
 
         this.aliases.clear();
+        this.dummies.clear();
 
         this.ids.clear();
         this.names.clear();
@@ -715,7 +749,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
     public V remove(ResourceLocation key)
     {
         if (!this.isModifiable)
-            throw new UnsupportedOperationException("Attempted to remove from a non-modifiable NeoForge Registry");
+            throw new UnsupportedOperationException("Attempted to remove from a non-modifiable Forge Registry");
 
         if (this.isLocked())
             throw new IllegalStateException("Attempted to remove from the registry to late.");
@@ -770,6 +804,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         {
             TablePrinter<DumpRow> tab = new TablePrinter<DumpRow>()
                 .header("ID",    r -> r.id)
+                .header("Dummy", r -> r.dummied)
                 .header("Key",   r -> r.key)
                 .header("Value", r -> r.value);
 
@@ -780,14 +815,14 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
                 getKeys().stream().map(this::getID).sorted().map(id -> {
                     V val = getValue(id);
                     ResourceLocation key = getKey(val);
-                    return new DumpRow(Integer.toString(id), getKey(val).toString(), val.toString());
+                    return new DumpRow(Integer.toString(id), getKey(val).toString(), val.toString(), Boolean.toString(this.dummies.contains(key)));
                 }).forEach(tab::add);
                 tab.build(sb);
             }));
         }
     }
 
-    private record DumpRow(String id, String key, String value) {}
+    private record DumpRow(String id, String key, String value, @Deprecated(forRemoval = true, since = "1.19.4") String dummied) {}
 
     public void loadIds(Map<ResourceLocation, Integer> ids, Map<ResourceLocation, String> overrides, Map<ResourceLocation, Integer> missing, Map<ResourceLocation, IdMappingEvent.IdRemapping> remapped, ForgeRegistry<V> old, ResourceLocation name)
     {
@@ -795,6 +830,20 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         for (Map.Entry<ResourceLocation, Integer> entry : ids.entrySet())
         {
             ResourceLocation itemName = entry.getKey();
+            /*
+             *  Due to the way that Mojang wrote the world loading and validation code.
+             *  Single player gets loaded twice and the 'active' registry is one we have loaded from
+             *  from the world and potentially injected dummies into.
+             *  The real fix would be to figure out how to revert the registries to the frozen state
+             *  after validating data packs, but before injecting world data.
+             *  But this should work for now, as we never want to inject dummies, this would be done
+             *  further down the load stack.
+             */
+            if (old.isDummied(itemName))
+            {
+                LOGGER.info(REGISTRIES, "Registry {}: Skipping injection of dummied object {}", this.name, itemName);
+                continue;
+            }
 
             int newId = entry.getValue();
             int currId = old.getIDRaw(itemName);
@@ -875,6 +924,68 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         }
     }
 
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    boolean markDummy(ResourceLocation key, int id)
+    {
+        if (this.dummyFactory == null)
+            return false;
+
+        ForgeRegistry<V> active = RegistryManager.ACTIVE.getRegistry(getRegistryKey());
+        NamespacedWrapper<V> wrapper = active.getWrapper();
+        if (wrapper != null && wrapper.isIntrusive() && wrapper.isFrozen())
+        {
+            try
+            {
+                // We have to unfreeze the ACTIVE registry because a lot of vanilla objects use intrusive handlers in object init.
+                wrapper.unfreeze();
+                createAndAddDummy(key, id);
+            }
+            finally
+            {
+                wrapper.freeze();
+            }
+        }
+        else
+            createAndAddDummy(key, id);
+
+        return true;
+    }
+
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    private void createAndAddDummy(ResourceLocation key, int id)
+    {
+        V dummy = this.dummyFactory.createDummy(key);
+        LOGGER.debug(REGISTRIES,"Registry {} Dummy Add: {} {} -> {}", this.name, key, id, dummy);
+
+        //It was blocked before so we need to unset the blocking map
+        this.availabilityMap.clear(id);
+        if (this.containsKey(key))
+        {
+            //If the entry already exists, we need to delete it so we can add a dummy...
+            V value = this.names.remove(key);
+            if (value == null)
+                throw new IllegalStateException("ContainsKey for " + key + " was true, but removing by name returned no value.. This should never happen unless hackery!");
+
+            ResourceKey<V> rkey = this.keys.inverse().remove(value); // Remove from the RegistryKey -> Value map
+            if (rkey == null)
+                throw new IllegalStateException("Removed a entry that did not have an associated RegistryKey: " + key + " " + value.toString() + " This should never happen unless hackery!");
+
+            Integer oldid = this.ids.inverse().remove(value);
+            if (oldid == null)
+                throw new IllegalStateException("Removed a entry that did not have an associated id: " + key + " " + value.toString() + " This should never happen unless hackery!");
+
+            if (oldid != id)
+                LOGGER.debug(REGISTRIES,"Registry {}: Dummy ID mismatch {} {} -> {}", this.name, key, oldid, id);
+
+            LOGGER.debug(REGISTRIES,"Registry {} remove: {} {}", this.name, key, oldid);
+        }
+
+        int realId = this.add(id, key, dummy);
+        if (realId != id)
+            LOGGER.warn(REGISTRIES,"Registry {}: Object did not get ID it asked for. Name: {} Expected: {} Got: {}", this.name, key, id, realId);
+        this.dummies.add(key);
+    }
+
     //Public for tests
     public Snapshot makeSnapshot()
     {
@@ -882,6 +993,7 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         this.ids.forEach((id, value) -> ret.ids.put(getKey(value), id));
         ret.aliases.putAll(this.aliases);
         ret.blocked.addAll(this.blocked);
+        ret.dummied.addAll(this.dummies);
         ret.overrides.putAll(getOverrideOwners());
         return ret;
     }
@@ -945,6 +1057,8 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
         public final Map<ResourceLocation, Integer> ids = Maps.newTreeMap(sorter);
         public final Map<ResourceLocation, ResourceLocation> aliases = Maps.newTreeMap(sorter);
         public final Set<Integer> blocked = Sets.newTreeSet();
+        @Deprecated(forRemoval = true, since = "1.19.4")
+        public final Set<ResourceLocation> dummied = Sets.newTreeSet(sorter);
         public final Map<ResourceLocation, String> overrides = Maps.newTreeMap(sorter);
         private FriendlyByteBuf binary = null;
 
@@ -985,6 +1099,10 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
             int[] blocked = this.blocked.stream().mapToInt(x->x).sorted().toArray();
             data.putIntArray("blocked", blocked);
 
+            ListTag dummied = new ListTag();
+            this.dummied.stream().sorted().forEach(e -> dummied.add(StringTag.valueOf(e.toString())));
+            data.put("dummied", dummied);
+
             return data;
         }
 
@@ -1023,6 +1141,9 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
                 ret.blocked.add(i);
             }
 
+            list = nbt.getList("dummied", 8);
+            list.forEach(e -> ret.dummied.add(new ResourceLocation(((StringTag)e).getAsString())));
+
             return ret;
         }
 
@@ -1052,6 +1173,9 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
                 pkt.writeVarInt(this.blocked.size());
                 this.blocked.forEach(pkt::writeVarInt);
 
+                pkt.writeVarInt(this.dummied.size());
+                this.dummied.forEach(pkt::writeResourceLocation);
+
                 this.binary = pkt;
             }
 
@@ -1080,6 +1204,10 @@ public class ForgeRegistry<V> implements IForgeRegistryInternal<V>, IForgeRegist
             len = buff.readVarInt();
             for (int x = 0; x < len; x++)
                 ret.blocked.add(buff.readVarInt());
+
+            len = buff.readVarInt();
+            for (int x = 0; x < len; x++)
+                ret.dummied.add(buff.readResourceLocation());
 
             return ret;
         }

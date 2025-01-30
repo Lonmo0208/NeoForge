@@ -6,6 +6,7 @@
 package net.minecraftforge.client.event;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.SkullModelBase;
@@ -142,14 +143,13 @@ public abstract class EntityRenderersEvent extends Event implements IModBusEvent
     {
         private final Map<EntityType<?>, EntityRenderer<?>> renderers;
         private final Map<String, EntityRenderer<? extends Player>> skinMap;
-        private final EntityRendererProvider.Context context;
+        private final EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
 
         @ApiStatus.Internal
-        public AddLayers(Map<EntityType<?>, EntityRenderer<?>> renderers, Map<String, EntityRenderer<? extends Player>> playerRenderers, EntityRendererProvider.Context context)
+        public AddLayers(Map<EntityType<?>, EntityRenderer<?>> renderers, Map<String, EntityRenderer<? extends Player>> playerRenderers)
         {
             this.renderers = renderers;
             this.skinMap = playerRenderers;
-            this.context = context;
         }
 
         /**
@@ -169,19 +169,14 @@ public abstract class EntityRenderersEvent extends Event implements IModBusEvent
          *
          * @param skinName the name of the skin to get the renderer for
          * @param <R>      the type of the skin renderer, usually {@link PlayerRenderer}
-         * @return the skin renderer, or {@code null} if no {@link LivingEntityRenderer} is registered for that skin name
+         * @return the skin renderer, or {@code null} if no renderer is registered for that skin name
          * @see #getSkins()
          */
         @Nullable
         @SuppressWarnings("unchecked")
         public <R extends LivingEntityRenderer<? extends Player, ? extends EntityModel<? extends Player>>> R getSkin(String skinName)
         {
-            var entityRenderer = skinMap.get(skinName);
-            if (entityRenderer instanceof LivingEntityRenderer<?,?>) {
-                return (R)entityRenderer;
-            } else {
-                return null;
-            }
+            return (R) skinMap.get(skinName);
         }
 
         /**
@@ -190,18 +185,13 @@ public abstract class EntityRenderersEvent extends Event implements IModBusEvent
          * @param entityType the entity type to return a renderer for
          * @param <T>        the type of entity the renderer is for
          * @param <R>        the type of the renderer
-         * @return the renderer, or {@code null} if no {@link LivingEntityRenderer} is registered for that entity type
+         * @return the renderer, or {@code null} if no renderer is registered for that entity type
          */
         @Nullable
         @SuppressWarnings("unchecked")
         public <T extends LivingEntity, R extends LivingEntityRenderer<T, ? extends EntityModel<T>>> R getRenderer(EntityType<? extends T> entityType)
         {
-            var entityRenderer = renderers.get(entityType);
-            if (entityRenderer instanceof LivingEntityRenderer<?,?>) {
-                return (R)entityRenderer;
-            } else {
-                return null;
-            }
+            return (R) renderers.get(entityType);
         }
 
         /**
@@ -209,15 +199,7 @@ public abstract class EntityRenderersEvent extends Event implements IModBusEvent
          */
         public EntityModelSet getEntityModels()
         {
-            return this.context.getModelSet();
-        }
-
-        /**
-         * {@return the context for the entity renderer provider}
-         */
-        public EntityRendererProvider.Context getContext()
-        {
-            return context;
+            return entityModels;
         }
     }
 

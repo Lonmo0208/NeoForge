@@ -46,6 +46,8 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static net.minecraftforge.registries.ForgeRegistry.REGISTRIES;
+
 /**
  * Instance responsible for handling the overall FML impl handshake.
  *
@@ -216,7 +218,7 @@ public class HandshakeHandler
 
         this.registriesToReceive = new HashSet<>(serverModList.getRegistries());
         this.registrySnapshots = Maps.newHashMap();
-        LOGGER.debug(ForgeRegistry.REGISTRIES, "Expecting {} registries: {}", ()->this.registriesToReceive.size(), ()->this.registriesToReceive);
+        LOGGER.debug(REGISTRIES, "Expecting {} registries: {}", ()->this.registriesToReceive.size(), ()->this.registriesToReceive);
     }
 
     void handleModData(HandshakeMessages.S2CModData serverModData, Supplier<NetworkEvent.Context> c)

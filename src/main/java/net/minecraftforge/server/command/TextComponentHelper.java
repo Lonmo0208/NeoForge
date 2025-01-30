@@ -13,6 +13,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.locale.Language;
 import net.minecraftforge.network.ConnectionType;
 import net.minecraftforge.network.NetworkHooks;
+import org.spongepowered.asm.mixin.Mutable;
 
 import java.util.Locale;
 

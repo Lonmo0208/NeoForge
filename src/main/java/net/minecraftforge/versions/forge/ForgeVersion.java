@@ -5,7 +5,6 @@
 
 package net.minecraftforge.versions.forge;
 
-import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -13,6 +12,8 @@ import net.minecraftforge.fml.loading.JarVersionLookupHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
+import static net.minecraftforge.fml.Logging.CORE;
 
 public class ForgeVersion
 {
@@ -25,21 +26,21 @@ public class ForgeVersion
     private static final String forgeGroup;
 
     static {
-        LOGGER.debug(Logging.CORE, "NeoForge Version package {} from {}", ForgeVersion.class.getPackage(), ForgeVersion.class.getClassLoader());
+        LOGGER.debug(CORE, "Forge Version package {} from {}", ForgeVersion.class.getPackage(), ForgeVersion.class.getClassLoader());
         String vers = JarVersionLookupHandler.getImplementationVersion(ForgeVersion.class).orElse(FMLLoader.versionInfo().forgeVersion());
         if (vers == null) throw new RuntimeException("Missing forge version, cannot continue");
         String spec = JarVersionLookupHandler.getSpecificationVersion(ForgeVersion.class).orElse(System.getenv("FORGE_SPEC"));
         if (spec == null) throw new RuntimeException("Missing forge spec, cannot continue");
-        String group = JarVersionLookupHandler.getImplementationTitle(ForgeVersion.class).orElse("net.neoforged");
+        String group = JarVersionLookupHandler.getImplementationTitle(ForgeVersion.class).orElse(FMLLoader.versionInfo().forgeGroup());
         if (group == null) {
-            group = "net.neoforged"; // If all else fails, Our normal group
+            group = "net.minecraftforge"; // If all else fails, Our normal group
         }
         forgeVersion = vers;
         forgeSpec = spec;
         forgeGroup = group;
-        LOGGER.debug(Logging.CORE, "Found NeoForge version {}", forgeVersion);
-        LOGGER.debug(Logging.CORE, "Found NeoForge spec {}", forgeSpec);
-        LOGGER.debug(Logging.CORE, "Found NeoForge group {}", forgeGroup);
+        LOGGER.debug(CORE, "Found Forge version {}", forgeVersion);
+        LOGGER.debug(CORE, "Found Forge spec {}", forgeSpec);
+        LOGGER.debug(CORE, "Found Forge group {}", forgeGroup);
     }
 
     public static String getVersion()

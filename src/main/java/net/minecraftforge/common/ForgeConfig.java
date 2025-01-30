@@ -5,8 +5,9 @@
 
 package net.minecraftforge.common;
 
+import static net.minecraftforge.fml.Logging.FORGEMOD;
+
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+
 
 public class ForgeConfig {
     public static class Server {
@@ -27,8 +29,6 @@ public class ForgeConfig {
         public final DoubleValue zombieBabyChance;
 
         public final ConfigValue<String> permissionHandler;
-
-        public final BooleanValue advertiseDedicatedServerToLan;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Server configuration settings")
@@ -69,11 +69,6 @@ public class ForgeConfig {
                     .translation("forge.configgui.permissionHandler")
                     .define("permissionHandler", "forge:default_handler");
 
-            advertiseDedicatedServerToLan = builder
-                    .comment("Set this to true to enable advertising the dedicated server to local LAN clients so that it shows up in the Multiplayer screen automatically.")
-                    .translation("forge.configgui.advertiseDedicatedServerToLan")
-                    .define("advertiseDedicatedServerToLan", true);
-
             builder.pop();
         }
     }
@@ -82,10 +77,35 @@ public class ForgeConfig {
      * General configuration that doesn't need to be synchronized but needs to be available before server startup
      */
     public static class Common {
+        @Deprecated(since = "1.19.2", forRemoval = true)
+        public final BooleanValue cachePackAccess;
+        @Deprecated(since = "1.19.2", forRemoval = true)
+        public final BooleanValue indexVanillaPackCachesOnThread;
+        @Deprecated(since = "1.19.2", forRemoval = true)
+        public final BooleanValue indexModPackCachesOnThread;
 
         Common(ForgeConfigSpec.Builder builder) {
             builder.comment("[DEPRECATED / NO EFFECT]: General configuration settings")
                     .push("general");
+
+            cachePackAccess = builder
+                    .comment("[DEPRECATED / NO EFFECT] [NOW IN RESOURCE-CACHING CONFIG]: Set this to true to cache resource listings in resource and data packs")
+                    .translation("forge.configgui.cachePackAccess")
+                    .worldRestart()
+                    .define("cachePackAccess", true);
+
+            indexVanillaPackCachesOnThread = builder
+                    .comment("[DEPRECATED / NO EFFECT] [NOW IN RESOURCE-CACHING CONFIG]: Set this to true to index vanilla resource and data packs on thread")
+                    .translation("forge.configgui.indexVanillaPackCachesOnThread")
+                    .worldRestart()
+                    .define("indexVanillaPackCachesOnThread", false);
+
+            indexModPackCachesOnThread = builder
+                    .comment("[DEPRECATED / NO EFFECT] [NOW IN RESOURCE-CACHING CONFIG]: Set this to true to index mod resource and data packs on thread")
+                    .translation("forge.configgui.indexModPackCachesOnThread")
+                    .worldRestart()
+                    .define("indexModPackCachesOnThread", false);
+
 
             builder.pop();
         }
@@ -103,7 +123,6 @@ public class ForgeConfig {
 
         public final BooleanValue useCombinedDepthStencilAttachment;
 
-        @Deprecated(since = "1.20.1", forRemoval = true) // Config option ignored.
         public final BooleanValue compressLanIPv6Addresses;
 
         Client(ForgeConfigSpec.Builder builder) {
@@ -111,19 +130,19 @@ public class ForgeConfig {
                    .push("client");
 
             alwaysSetupTerrainOffThread = builder
-                .comment("Enable NeoForge to queue all chunk updates to the Chunk Update thread.",
+                .comment("Enable Forge to queue all chunk updates to the Chunk Update thread.",
                         "May increase FPS significantly, but may also cause weird rendering lag.",
                         "Not recommended for computers without a significant number of cores available.")
                 .translation("forge.configgui.alwaysSetupTerrainOffThread")
                 .define("alwaysSetupTerrainOffThread", false);
 
             experimentalForgeLightPipelineEnabled = builder
-                .comment("EXPERIMENTAL: Enable the NeoForge block rendering pipeline - fixes the lighting of custom models.")
+                .comment("EXPERIMENTAL: Enable the Forge block rendering pipeline - fixes the lighting of custom models.")
                 .translation("forge.configgui.forgeLightPipelineEnabled")
                 .define("experimentalForgeLightPipelineEnabled", false);
 
             showLoadWarnings = builder
-                .comment("When enabled, NeoForge will show any warnings that occurred during loading.")
+                .comment("When enabled, Forge will show any warnings that occurred during loading.")
                 .translation("forge.configgui.showLoadWarnings")
                 .define("showLoadWarnings", true);
 
@@ -133,7 +152,7 @@ public class ForgeConfig {
                     .define("useCombinedDepthStencilAttachment", false);
 
             compressLanIPv6Addresses = builder
-                    .comment("[Deprecated for Removal] IPv6 addresses will always be compressed")
+                    .comment("When enabled, Forge will convert discovered 'Open to LAN' IPv6 addresses to their more compact, compressed representation")
                     .translation("forge.configgui.compressLanIPv6Addresses")
                     .define("compressLanIPv6Addresses", true);
 
@@ -169,12 +188,12 @@ public class ForgeConfig {
 
     @SubscribeEvent
     public static void onLoad(final ModConfigEvent.Loading configEvent) {
-        LogManager.getLogger().debug(Logging.FORGEMOD, "Loaded forge config file {}", configEvent.getConfig().getFileName());
+        LogManager.getLogger().debug(FORGEMOD, "Loaded forge config file {}", configEvent.getConfig().getFileName());
     }
 
     @SubscribeEvent
     public static void onFileChange(final ModConfigEvent.Reloading configEvent) {
-        LogManager.getLogger().debug(Logging.FORGEMOD, "NeoForge config just got changed on the file system!");
+        LogManager.getLogger().debug(FORGEMOD, "Forge config just got changed on the file system!");
     }
 
     //General

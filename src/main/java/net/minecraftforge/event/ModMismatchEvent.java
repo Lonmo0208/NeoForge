@@ -45,6 +45,7 @@ public class ModMismatchEvent extends Event implements IModBusEvent
      * The level being loaded. Useful for things like {@link net.minecraft.world.level.storage.DimensionDataStorage}
      * to manage multiple files changing between mod versions.
      */
+    @Nullable
     private final LevelStorageSource.LevelDirectory levelDirectory;
 
     /**
@@ -58,7 +59,7 @@ public class ModMismatchEvent extends Event implements IModBusEvent
     private final HashMap<String, ModContainer> resolved;
 
     @ApiStatus.Internal
-    public ModMismatchEvent(LevelStorageSource.LevelDirectory levelDirectory, Map<String, ArtifactVersion> previousVersions, Map<String, ArtifactVersion> missingVersions)
+    public ModMismatchEvent(@Nullable LevelStorageSource.LevelDirectory levelDirectory, Map<String, ArtifactVersion> previousVersions, Map<String, ArtifactVersion> missingVersions)
     {
         this.levelDirectory = levelDirectory;
         this.resolved = new HashMap<>(previousVersions.size());
@@ -76,6 +77,7 @@ public class ModMismatchEvent extends Event implements IModBusEvent
      * Gets the current level directory for the world being loaded.
      * Can be used for file operations and manual modification of mod files before world load.
      */
+    @Nullable
     public LevelStorageSource.LevelDirectory getLevelDirectory()
     {
         return this.levelDirectory;

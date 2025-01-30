@@ -14,6 +14,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Either;
+import net.minecraft.ChatFormatting;
 import net.minecraft.FileUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
@@ -23,14 +24,13 @@ import net.minecraft.client.Options;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
@@ -74,12 +74,10 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.Resource;
@@ -130,6 +128,7 @@ import net.minecraftforge.client.event.RenderArmEvent;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderHighlightEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -146,12 +145,11 @@ import net.minecraftforge.client.gui.overlay.GuiOverlayManager;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.textures.ForgeTextureMetadata;
 import net.minecraftforge.client.textures.TextureAtlasSpriteLoaderManager;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeI18n;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.MutableHashedLinkedMap;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -159,7 +157,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.snapshots.ForgeSnapshotsModClient;
 import net.minecraftforge.gametest.ForgeGameTestHooks;
 import net.minecraftforge.network.NetworkConstants;
 import net.minecraftforge.network.NetworkRegistry;
@@ -195,6 +192,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static net.minecraftforge.fml.VersionChecker.Status.BETA;
+import static net.minecraftforge.fml.VersionChecker.Status.BETA_OUTDATED;
 
 @ApiStatus.Internal
 public class ForgeHooksClient
@@ -252,9 +252,9 @@ public class ForgeHooksClient
     public static float getGuiFarPlane()
     {
         // 1000 units for the overlay background,
-        // and 10000 units for each layered Screen,
+        // and 2000 units for each layered Screen,
 
-        return 1000.0F + 10000.0F * (1 + guiLayers.size());
+        return 1000.0F + 2000.0F * (1 + guiLayers.size());
     }
 
     public static String getArmorTexture(Entity entity, ItemStack armor, String _default, EquipmentSlot slot, String type)
@@ -275,6 +275,12 @@ public class ForgeHooksClient
             default:
                 return false; // NO-OP - This doesn't even get called for anything other than blocks and entities
         }
+    }
+
+    @Deprecated(forRemoval = true, since = "1.19")
+    public static void dispatchRenderLast(LevelRenderer context, PoseStack poseStack, float partialTick, Matrix4f projectionMatrix, long finishTimeNano)
+    {
+        MinecraftForge.EVENT_BUS.post(new RenderLevelLastEvent(context, poseStack, partialTick, projectionMatrix, finishTimeNano));
     }
 
     public static void dispatchRenderStage(RenderLevelStageEvent.Stage stage, LevelRenderer levelRenderer, PoseStack poseStack, Matrix4f projectionMatrix, int renderTick, Camera camera, Frustum frustum)
@@ -382,19 +388,30 @@ public class ForgeHooksClient
         //RenderingRegistry.registerBlockHandler(RenderBlockFluid.instance);
     }
 
-    public static void renderMainMenu(TitleScreen gui, GuiGraphics guiGraphics, Font font, int width, int height, int alpha)
+    public static void renderMainMenu(TitleScreen gui, PoseStack poseStack, Font font, int width, int height, int alpha)
     {
         VersionChecker.Status status = ForgeVersion.getStatus();
-        ForgeSnapshotsModClient.renderMainMenuWarning(status, gui, guiGraphics, font, width, height, alpha);
-
-        forgeStatusLine = switch(status)
+        if (status == BETA || status == BETA_OUTDATED)
         {
-            // case FAILED -> " Version check failed";
-            // case UP_TO_DATE -> "Forge up to date";
-            // case AHEAD -> "Using non-recommended Forge build, issues may arise.";
-            case OUTDATED, BETA_OUTDATED -> I18n.get("forge.update.newversion", ForgeVersion.getTarget());
-            default -> null;
-        };
+            // render a warning at the top of the screen,
+            Component line = Component.translatable("forge.update.beta.1", ChatFormatting.RED, ChatFormatting.RESET).withStyle(ChatFormatting.RED);
+            GuiComponent.drawCenteredString(poseStack, font, line, width / 2, 4 + (0 * (font.lineHeight + 1)), 0xFFFFFF | alpha);
+            line = Component.translatable("forge.update.beta.2");
+            GuiComponent.drawCenteredString(poseStack, font, line, width / 2, 4 + (1 * (font.lineHeight + 1)), 0xFFFFFF | alpha);
+        }
+
+        String line = null;
+        switch(status)
+        {
+            //case FAILED:        line = " Version check failed"; break;
+            //case UP_TO_DATE:    line = "Forge up to date"}; break;
+            //case AHEAD:         line = "Using non-recommended Forge build, issues may arise."}; break;
+            case OUTDATED:
+            case BETA_OUTDATED: line = I18n.get("forge.update.newversion", ForgeVersion.getTarget()); break;
+            default: break;
+        }
+
+        forgeStatusLine = line;
     }
 
     public static String forgeStatusLine;
@@ -406,23 +423,23 @@ public class ForgeHooksClient
         return e.getSound();
     }
 
-    public static void drawScreen(Screen screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    public static void drawScreen(Screen screen, PoseStack poseStack, int mouseX, int mouseY, float partialTick)
     {
-        guiGraphics.pose().pushPose();
+        poseStack.pushPose();
         guiLayers.forEach(layer -> {
             // Prevent the background layers from thinking the mouse is over their controls and showing them as highlighted.
-            drawScreenInternal(layer, guiGraphics, Integer.MAX_VALUE, Integer.MAX_VALUE, partialTick);
-            guiGraphics.pose().translate(0,0,2000);
+            drawScreenInternal(layer, poseStack, Integer.MAX_VALUE, Integer.MAX_VALUE, partialTick);
+            poseStack.translate(0,0,2000);
         });
-        drawScreenInternal(screen, guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.pose().popPose();
+        drawScreenInternal(screen, poseStack, mouseX, mouseY, partialTick);
+        poseStack.popPose();
     }
 
-    private static void drawScreenInternal(Screen screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    private static void drawScreenInternal(Screen screen, PoseStack poseStack, int mouseX, int mouseY, float partialTick)
     {
-        if (!MinecraftForge.EVENT_BUS.post(new ScreenEvent.Render.Pre(screen, guiGraphics, mouseX, mouseY, partialTick)))
-            screen.renderWithTooltip(guiGraphics, mouseX, mouseY, partialTick);
-        MinecraftForge.EVENT_BUS.post(new ScreenEvent.Render.Post(screen, guiGraphics, mouseX, mouseY, partialTick));
+        if (!MinecraftForge.EVENT_BUS.post(new ScreenEvent.Render.Pre(screen, poseStack, mouseX, mouseY, partialTick)))
+            screen.renderWithTooltip(poseStack, mouseX, mouseY, partialTick);
+        MinecraftForge.EVENT_BUS.post(new ScreenEvent.Render.Post(screen, poseStack, mouseX, mouseY, partialTick));
     }
 
     public static Vector3f getFogColor(Camera camera, float partialTick, ClientLevel level, int renderDistance, float darkenWorldAmount, float fogRed, float fogGreen, float fogBlue)
@@ -443,8 +460,8 @@ public class ForgeHooksClient
     public static void onFogRender(FogRenderer.FogMode mode, FogType type, Camera camera, float partialTick, float renderDistance, float nearDistance, float farDistance, FogShape shape)
     {
         // Modify fog rendering depending on the fluid
-        FluidState state = camera.getEntity().level().getFluidState(camera.getBlockPosition());
-        if (camera.getPosition().y < (double)((float)camera.getBlockPosition().getY() + state.getHeight(camera.getEntity().level(), camera.getBlockPosition())))
+        FluidState state = camera.getEntity().level.getFluidState(camera.getBlockPosition());
+        if (camera.getPosition().y < (double)((float)camera.getBlockPosition().getY() + state.getHeight(camera.getEntity().level, camera.getBlockPosition())))
             IClientFluidTypeExtensions.of(state).modifyFogRender(camera, mode, renderDistance, partialTick, nearDistance, farDistance, shape);
 
         ViewportEvent.RenderFog event = new ViewportEvent.RenderFog(mode, type, camera, partialTick, nearDistance, farDistance, shape);
@@ -578,9 +595,9 @@ public class ForgeHooksClient
         return from.getItem().shouldCauseReequipAnimation(from, to, changed);
     }
 
-    public static CustomizeGuiOverlayEvent.BossEventProgress onCustomizeBossEventProgress(GuiGraphics guiGraphics, Window window, LerpingBossEvent bossInfo, int x, int y, int increment)
+    public static CustomizeGuiOverlayEvent.BossEventProgress onCustomizeBossEventProgress(PoseStack poseStack, Window window, LerpingBossEvent bossInfo, int x, int y, int increment)
     {
-        CustomizeGuiOverlayEvent.BossEventProgress evt = new CustomizeGuiOverlayEvent.BossEventProgress(window, guiGraphics,
+        CustomizeGuiOverlayEvent.BossEventProgress evt = new CustomizeGuiOverlayEvent.BossEventProgress(window, poseStack,
                 Minecraft.getInstance().getPartialTick(), bossInfo, x, y, increment);
         MinecraftForge.EVENT_BUS.post(evt);
         return evt;
@@ -773,7 +790,7 @@ public class ForgeHooksClient
         }
         catch (IOException e)
         {
-            LOGGER.error("Unable to get NeoForge metadata for {}, falling back to vanilla loading", name);
+            LOGGER.error("Unable to get Forge metadata for {}, falling back to vanilla loading", name);
             e.printStackTrace();
             return null;
         }
@@ -862,7 +879,7 @@ public class ForgeHooksClient
     }
 
     private static final ResourceLocation ICON_SHEET = new ResourceLocation(ForgeVersion.MOD_ID, "textures/gui/icons.png");
-    public static void drawForgePingInfo(JoinMultiplayerScreen gui, ServerData target, GuiGraphics guiGraphics, int x, int y, int width, int relativeMouseX, int relativeMouseY) {
+    public static void drawForgePingInfo(JoinMultiplayerScreen gui, ServerData target, PoseStack poseStack, int x, int y, int width, int relativeMouseX, int relativeMouseY) {
         int idx;
         String tooltip;
         if (target.forgeData == null)
@@ -900,7 +917,8 @@ public class ForgeHooksClient
                 tooltip = ForgeI18n.parseMessage("fml.menu.multiplayer.unknown", target.forgeData.type());
         }
 
-        guiGraphics.blit(ICON_SHEET, x + width - 18, y + 10, 16, 16, 0, idx, 16, 16, 256, 256);
+        RenderSystem.setShaderTexture(0, ICON_SHEET);
+        GuiComponent.blit(poseStack, x + width - 18, y + 10, 16, 16, 0, idx, 16, 16, 256, 256);
 
         if(relativeMouseX > width - 15 && relativeMouseX < width && relativeMouseY > 10 && relativeMouseY < 26) {
             //this is not the most proper way to do it,
@@ -1010,34 +1028,38 @@ public class ForgeHooksClient
         }
     }
 
-    public static Font getTooltipFont(@NotNull ItemStack stack, Font fallbackFont)
+    public static Font getTooltipFont(@Nullable Font forcedFont, @NotNull ItemStack stack, Font fallbackFont)
     {
+        if (forcedFont != null)
+        {
+            return forcedFont;
+        }
         Font stackFont = IClientItemExtensions.of(stack).getFont(stack, IClientItemExtensions.FontContext.TOOLTIP);
         return stackFont == null ? fallbackFont : stackFont;
     }
 
-    public static RenderTooltipEvent.Pre onRenderTooltipPre(@NotNull ItemStack stack, GuiGraphics graphics, int x, int y, int screenWidth, int screenHeight, @NotNull List<ClientTooltipComponent> components, @NotNull Font fallbackFont, @NotNull ClientTooltipPositioner positioner)
+    public static RenderTooltipEvent.Pre onRenderTooltipPre(@NotNull ItemStack stack, PoseStack poseStack, int x, int y, int screenWidth, int screenHeight, @NotNull List<ClientTooltipComponent> components, @Nullable Font forcedFont, @NotNull Font fallbackFont)
     {
-        var preEvent = new RenderTooltipEvent.Pre(stack, graphics, x, y, screenWidth, screenHeight, getTooltipFont(stack, fallbackFont), components, positioner);
+        var preEvent = new RenderTooltipEvent.Pre(stack, poseStack, x, y, screenWidth, screenHeight, getTooltipFont(forcedFont, stack, fallbackFont), components);
         MinecraftForge.EVENT_BUS.post(preEvent);
         return preEvent;
     }
 
-    public static RenderTooltipEvent.Color onRenderTooltipColor(@NotNull ItemStack stack, GuiGraphics graphics, int x, int y, @NotNull Font font, @NotNull List<ClientTooltipComponent> components)
+    public static RenderTooltipEvent.Color onRenderTooltipColor(@NotNull ItemStack stack, PoseStack poseStack, int x, int y, @NotNull Font font, @NotNull List<ClientTooltipComponent> components)
     {
-        var colorEvent = new RenderTooltipEvent.Color(stack, graphics, x, y, font, 0xf0100010, 0x505000FF, 0x5028007f, components);
+        var colorEvent = new RenderTooltipEvent.Color(stack, poseStack, x, y, font, 0xf0100010, 0x505000FF, 0x5028007f, components);
         MinecraftForge.EVENT_BUS.post(colorEvent);
         return colorEvent;
     }
 
-    public static List<ClientTooltipComponent> gatherTooltipComponents(ItemStack stack, List<? extends FormattedText> textElements, int mouseX, int screenWidth, int screenHeight, Font fallbackFont)
+    public static List<ClientTooltipComponent> gatherTooltipComponents(ItemStack stack, List<? extends FormattedText> textElements, int mouseX, int screenWidth, int screenHeight, @Nullable Font forcedFont, Font fallbackFont)
     {
-        return gatherTooltipComponents(stack, textElements, Optional.empty(), mouseX, screenWidth, screenHeight, fallbackFont);
+        return gatherTooltipComponents(stack, textElements, Optional.empty(), mouseX, screenWidth, screenHeight, forcedFont, fallbackFont);
     }
 
-    public static List<ClientTooltipComponent> gatherTooltipComponents(ItemStack stack, List<? extends FormattedText> textElements, Optional<TooltipComponent> itemComponent, int mouseX, int screenWidth, int screenHeight, Font fallbackFont)
+    public static List<ClientTooltipComponent> gatherTooltipComponents(ItemStack stack, List<? extends FormattedText> textElements, Optional<TooltipComponent> itemComponent, int mouseX, int screenWidth, int screenHeight, @Nullable Font forcedFont, Font fallbackFont)
     {
-        Font font = getTooltipFont(stack, fallbackFont);
+        Font font = getTooltipFont(forcedFont, stack, fallbackFont);
         List<Either<FormattedText, TooltipComponent>> elements = textElements.stream()
                 .map((Function<FormattedText, Either<FormattedText, TooltipComponent>>) Either::left)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -1080,7 +1102,7 @@ public class ForgeHooksClient
         {
             return event.getTooltipElements().stream()
                     .flatMap(either -> either.map(
-                            text -> splitLine(text, font, tooltipTextWidthF),
+                            text -> font.split(text, tooltipTextWidthF).stream().map(ClientTooltipComponent::create),
                             component -> Stream.of(ClientTooltipComponent.create(component))
                     ))
                     .toList();
@@ -1091,15 +1113,6 @@ public class ForgeHooksClient
                         ClientTooltipComponent::create
                 ))
                 .toList();
-    }
-
-    private static Stream<ClientTooltipComponent> splitLine(FormattedText text, Font font, int maxWidth)
-    {
-        if (text instanceof Component component && component.getString().isEmpty())
-        {
-            return Stream.of(component.getVisualOrderText()).map(ClientTooltipComponent::create);
-        }
-        return font.split(text, maxWidth).stream().map(ClientTooltipComponent::create);
     }
 
     public static Comparator<ParticleRenderType> makeParticleRenderTypeComparator(List<ParticleRenderType> renderOrder)
@@ -1193,10 +1206,27 @@ public class ForgeHooksClient
         return new ResourceLocation(loc.getNamespace(), normalised);
     }
 
-    @Deprecated
-    public static void onCreativeModeTabBuildContents(CreativeModeTab tab, ResourceKey<CreativeModeTab> tabKey, CreativeModeTab.DisplayItemsGenerator originalGenerator, CreativeModeTab.ItemDisplayParameters params, CreativeModeTab.Output output)
+    public static void onCreativeModeTabBuildContents(CreativeModeTab tab, CreativeModeTab.DisplayItemsGenerator originalGenerator, CreativeModeTab.ItemDisplayParameters params, CreativeModeTab.Output output)
     {
-        ForgeHooks.onCreativeModeTabBuildContents(tab, tabKey, originalGenerator, params, output);
+        final var entries = new MutableHashedLinkedMap<ItemStack, CreativeModeTab.TabVisibility>(ItemStackLinkedSet.TYPE_AND_TAG,
+            (key, left, right) -> {
+                //throw new IllegalStateException("Accidentally adding the same item stack twice " + key.getDisplayName().getString() + " to a Creative Mode Tab: " + tab.getDisplayName().getString());
+                // Vanilla adds enchanting books twice in both visibilities.
+                // This is just code cleanliness for them. For us lets just increase the visibility and merge the entries.
+                return CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS;
+            }
+        );
+
+        originalGenerator.accept(params, (stack, vis) -> {
+            if (stack.getCount() != 1)
+                throw new IllegalArgumentException("The stack count must be 1");
+            entries.put(stack, vis);
+        });
+
+        ModLoader.get().postEvent(new CreativeModeTabEvent.BuildContents(tab, params, entries));
+
+        for (var entry : entries)
+            output.accept(entry.getKey(), entry.getValue());
     }
 
     // Make sure the below method is only ever called once (by forge).

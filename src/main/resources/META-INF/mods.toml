@@ -1,17 +1,18 @@
 modLoader="javafml"
 loaderVersion="[24,]"
-issueTrackerURL="https://github.com/neoforged/NeoForge/issues"
-logoFile="neoforged_logo.png"
+issueTrackerURL="http://www.minecraftforge.net/"
+logoFile="forge_logo.png"
 license="LGPL v2.1"
 
 [[mods]]
     modId="forge"
     # We use the global forge version
     version="${global.forgeVersion}"
-    #updateJSONURL="https://maven.neoforged.net/releases/net/neoforged/forge/promotions_slim.json"
-    displayName="NeoForge"
+    updateJSONURL="https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"
+    displayName="Forge"
     credits="Anyone who has contributed on Github and supports our development"
-    authors="The NeoForged Team"
+    authors="LexManos,cpw"
     description='''
-    NeoForge, a NEW broad compatibility API.
+    Forge, a broad compatibility API.
     '''
+    

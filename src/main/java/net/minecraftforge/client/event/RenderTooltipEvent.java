@@ -5,11 +5,10 @@
 
 package net.minecraftforge.client.event;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -32,21 +31,21 @@ import java.util.List;
  * @see RenderTooltipEvent.Pre
  * @see RenderTooltipEvent.Color
  */
-public abstract class RenderTooltipEvent extends Event
+public abstract class RenderTooltipEvent extends net.minecraftforge.eventbus.api.Event
 {
     @NotNull
     protected final ItemStack itemStack;
-    protected final GuiGraphics graphics;
+    protected final PoseStack poseStack;
     protected int x;
     protected int y;
     protected Font font;
     protected final List<ClientTooltipComponent> components;
 
     @ApiStatus.Internal
-    protected RenderTooltipEvent(@NotNull ItemStack itemStack, GuiGraphics graphics, int x, int y, @NotNull Font font, @NotNull List<ClientTooltipComponent> components)
+    protected RenderTooltipEvent(@NotNull ItemStack itemStack, PoseStack poseStack, int x, int y, @NotNull Font font, @NotNull List<ClientTooltipComponent> components)
     {
         this.itemStack = itemStack;
-        this.graphics = graphics;
+        this.poseStack = poseStack;
         this.components = Collections.unmodifiableList(components);
         this.x = x;
         this.y = y;
@@ -64,11 +63,11 @@ public abstract class RenderTooltipEvent extends Event
     }
 
     /**
-     * {@return the graphics helper for the gui}
+     * {@return the pose stack used for rendering}
      */
-    public GuiGraphics getGraphics()
+    public PoseStack getPoseStack()
     {
-        return this.graphics;
+        return poseStack;
     }
 
     /**
@@ -212,15 +211,13 @@ public abstract class RenderTooltipEvent extends Event
     {
         private final int screenWidth;
         private final int screenHeight;
-        private final ClientTooltipPositioner positioner;
 
         @ApiStatus.Internal
-        public Pre(@NotNull ItemStack stack, GuiGraphics graphics, int x, int y, int screenWidth, int screenHeight, @NotNull Font font, @NotNull List<ClientTooltipComponent> components, @NotNull ClientTooltipPositioner positioner)
+        public Pre(@NotNull ItemStack stack, PoseStack poseStack, int x, int y, int screenWidth, int screenHeight, @NotNull Font font, @NotNull List<ClientTooltipComponent> components)
         {
-            super(stack, graphics, x, y, font, components);
+            super(stack, poseStack, x, y, font, components);
             this.screenWidth = screenWidth;
             this.screenHeight = screenHeight;
-            this.positioner = positioner;
         }
 
         /**
@@ -240,11 +237,6 @@ public abstract class RenderTooltipEvent extends Event
         public int getScreenHeight()
         {
             return screenHeight;
-        }
-
-        public ClientTooltipPositioner getTooltipPositioner()
-        {
-            return positioner;
         }
 
         /**
@@ -298,9 +290,9 @@ public abstract class RenderTooltipEvent extends Event
         private int borderEnd;
 
         @ApiStatus.Internal
-        public Color(@NotNull ItemStack stack, GuiGraphics graphics, int x, int y, @NotNull Font fr, int background, int borderStart, int borderEnd, @NotNull List<ClientTooltipComponent> components)
+        public Color(@NotNull ItemStack stack, PoseStack poseStack, int x, int y, @NotNull Font fr, int background, int borderStart, int borderEnd, @NotNull List<ClientTooltipComponent> components)
         {
-            super(stack, graphics, x, y, fr, components);
+            super(stack, poseStack, x, y, fr, components);
             this.originalBackground = background;
             this.originalBorderStart = borderStart;
             this.originalBorderEnd = borderEnd;

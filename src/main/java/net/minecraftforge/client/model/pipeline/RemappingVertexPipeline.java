@@ -137,7 +137,6 @@ public class RemappingVertexPipeline implements VertexConsumer
             else
                 parent.misc(element, misc[miscElementIds.get(element)]);
         }
-        parent.endVertex();
     }
 
     @Override

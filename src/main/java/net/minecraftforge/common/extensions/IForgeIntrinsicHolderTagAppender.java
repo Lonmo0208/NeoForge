@@ -12,8 +12,7 @@ import net.minecraft.tags.TagKey;
 
 public interface IForgeIntrinsicHolderTagAppender<T> extends IForgeTagAppender<T>
 {
-    private IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> self()
-    {
+    private IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> self() {
         return (IntrinsicHolderTagsProvider.IntrinsicTagAppender<T>) this;
     }
 
@@ -37,11 +36,13 @@ public interface IForgeIntrinsicHolderTagAppender<T> extends IForgeTagAppender<T
      * @return The builder for chaining
      */
     @SuppressWarnings("unchecked")
-    default IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> remove(final T first, final T... entries)
+    default IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> remove(final T first, final T...entries)
     {
         this.remove(first);
         for (T entry : entries)
+        {
             this.remove(entry);
+        }
         return self();
     }
 
@@ -105,7 +106,7 @@ public interface IForgeIntrinsicHolderTagAppender<T> extends IForgeTagAppender<T
 
     @Override
     @SuppressWarnings("unchecked")
-    default IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> remove(TagKey<T> first, TagKey<T>... tags)
+    default IntrinsicHolderTagsProvider.IntrinsicTagAppender<T> remove(TagKey<T> first, TagKey<T>...tags)
     {
         IForgeTagAppender.super.remove(first, tags);
         return self();

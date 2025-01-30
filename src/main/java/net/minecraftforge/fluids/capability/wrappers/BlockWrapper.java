@@ -15,6 +15,8 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.templates.VoidFluidHandler;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 /**
  * Wrapper around any block, only accounts for fluid placement, otherwise the block acts a void.
  * If the block in question inherits from the Forge implementations,
@@ -71,11 +73,11 @@ public class BlockWrapper extends VoidFluidHandler
                 BlockState state = world.getBlockState(blockPos);
                 if (liquidContainer.canPlaceLiquid(world, blockPos, state, resource.getFluid()))
                 {
-                    if (action.execute())
+                    //If we are executing try to actually fill the container, if it failed return that we failed
+                    if (action.simulate() || liquidContainer.placeLiquid(world, blockPos, state, resource.getFluid().getFluidType().getStateForPlacement(world, blockPos, resource)))
                     {
-                        liquidContainer.placeLiquid(world, blockPos, state, resource.getFluid().getFluidType().getStateForPlacement(world, blockPos, resource));
+                        return FluidType.BUCKET_VOLUME;
                     }
-                    return FluidType.BUCKET_VOLUME;
                 }
             }
             return 0;

@@ -16,12 +16,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -232,6 +233,6 @@ public class ShulkerItemStackInvWrapper implements IItemHandlerModifiable, ICapa
     @NotNull
     public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side)
     {
-        return ForgeCapabilities.ITEM_HANDLER.orEmpty(cap, this.holder);
+        return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.orEmpty(cap, this.holder);
     }
 }

@@ -25,22 +25,36 @@ import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import net.minecraftforge.client.model.geometry.SimpleUnbakedGeometry;
 import net.minecraftforge.client.model.geometry.UnbakedGeometryHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A model composed of vanilla {@linkplain BlockElement block elements}.
  */
 public class ElementsModel extends SimpleUnbakedGeometry<ElementsModel>
 {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private final List<BlockElement> elements;
+    private final boolean deprecatedLoader;
 
     public ElementsModel(List<BlockElement> elements)
     {
+        this(elements, false);
+    }
+
+    private ElementsModel(List<BlockElement> elements, boolean deprecatedLoader)
+    {
         this.elements = elements;
+        this.deprecatedLoader = deprecatedLoader;
     }
 
     @Override
     protected void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ResourceLocation modelLocation)
     {
+        if (deprecatedLoader)
+            LOGGER.warn("Model \"" + modelLocation + "\" is using the deprecated loader \"minecraft:elements\" instead of \"forge:elements\". This loader will be removed in 1.20.");
+
         // If there is a root transform, undo the ModelState transform, apply it, then re-apply the ModelState transform.
         // This is necessary because of things like UV locking, which should only respond to the ModelState, and as such
         // that is the only transform that should be applied during face bake.
@@ -68,10 +82,15 @@ public class ElementsModel extends SimpleUnbakedGeometry<ElementsModel>
 
     public static final class Loader implements IGeometryLoader<ElementsModel>
     {
-        public static final Loader INSTANCE = new Loader();
+        public static final Loader INSTANCE = new Loader(false);
+        @Deprecated(forRemoval = true, since = "1.19")
+        public static final Loader INSTANCE_DEPRECATED = new Loader(true);
 
-        private Loader()
+        private final boolean deprecated;
+
+        private Loader(boolean deprecated)
         {
+            this.deprecated = deprecated;
         }
 
         @Override
@@ -86,7 +105,7 @@ public class ElementsModel extends SimpleUnbakedGeometry<ElementsModel>
                 elements.add(deserializationContext.deserialize(element, BlockElement.class));
             }
 
-            return new ElementsModel(elements);
+            return new ElementsModel(elements, deprecated);
         }
     }
 }

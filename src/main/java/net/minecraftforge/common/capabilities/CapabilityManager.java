@@ -5,7 +5,6 @@
 
 package net.minecraftforge.common.capabilities;
 
-import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +14,8 @@ import org.objectweb.asm.Type;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
+
+import static net.minecraftforge.fml.Logging.CAPABILITIES;
 
 public enum CapabilityManager
 {
@@ -45,7 +46,7 @@ public enum CapabilityManager
             {
                 if (cap.isRegistered())
                 {
-                    LOGGER.error(Logging.CAPABILITIES, "Cannot register capability implementation multiple times : {}", realName);
+                    LOGGER.error(CAPABILITIES, "Cannot register capability implementation multiple times : {}", realName);
                     throw new IllegalArgumentException("Cannot register a capability implementation multiple times : "+ realName);
                 }
                 else
@@ -73,7 +74,7 @@ public enum CapabilityManager
 
         for (var auto : autos)
         {
-            LOGGER.debug(Logging.CAPABILITIES, "Attempting to automatically register: " + auto);
+            LOGGER.debug(CAPABILITIES, "Attempting to automatically register: " + auto);
             get(auto.getInternalName(), true);
         }
 

@@ -47,6 +47,8 @@ import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import net.minecraftforge.client.model.geometry.UnbakedGeometryHelper;
 import net.minecraftforge.common.util.ConcatenatedListView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,18 +60,30 @@ import org.jetbrains.annotations.Nullable;
  */
 public class CompositeModel implements IUnbakedGeometry<CompositeModel>
 {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private final ImmutableMap<String, BlockModel> children;
     private final ImmutableList<String> itemPasses;
+    private final boolean logWarning;
 
     public CompositeModel(ImmutableMap<String, BlockModel> children, ImmutableList<String> itemPasses)
     {
+        this(children, itemPasses, false);
+    }
+
+    private CompositeModel(ImmutableMap<String, BlockModel> children, ImmutableList<String> itemPasses, boolean logWarning)
+    {
         this.children = children;
         this.itemPasses = itemPasses;
+        this.logWarning = logWarning;
     }
 
     @Override
     public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation)
     {
+        if (logWarning)
+            LOGGER.warn("Model \"" + modelLocation + "\" is using the deprecated \"parts\" field in its composite model instead of \"children\". This field will be removed in 1.20.");
+
         Material particleLocation = context.getMaterial("particle");
         TextureAtlasSprite particle = spriteGetter.apply(particleLocation);
 
@@ -391,7 +405,8 @@ public class CompositeModel implements IUnbakedGeometry<CompositeModel>
         {
             List<String> itemPasses = new ArrayList<>();
             ImmutableMap.Builder<String, BlockModel> childrenBuilder = ImmutableMap.builder();
-            readChildren(jsonObject, "children", deserializationContext, childrenBuilder, itemPasses);
+            readChildren(jsonObject, "children", deserializationContext, childrenBuilder, itemPasses, false);
+            boolean logWarning = readChildren(jsonObject, "parts", deserializationContext, childrenBuilder, itemPasses, true);
 
             var children = childrenBuilder.build();
             if (children.isEmpty())
@@ -409,19 +424,20 @@ public class CompositeModel implements IUnbakedGeometry<CompositeModel>
                 }
             }
 
-            return new CompositeModel(children, ImmutableList.copyOf(itemPasses));
+            return new CompositeModel(children, ImmutableList.copyOf(itemPasses), logWarning);
         }
 
-        private void readChildren(JsonObject jsonObject, String name, JsonDeserializationContext deserializationContext, ImmutableMap.Builder<String, BlockModel> children, List<String> itemPasses)
+        private boolean readChildren(JsonObject jsonObject, String name, JsonDeserializationContext deserializationContext, ImmutableMap.Builder<String, BlockModel> children, List<String> itemPasses, boolean logWarning)
         {
             if (!jsonObject.has(name))
-                return;
+                return false;
             var childrenJsonObject = jsonObject.getAsJsonObject(name);
             for (Map.Entry<String, JsonElement> entry : childrenJsonObject.entrySet())
             {
                 children.put(entry.getKey(), deserializationContext.deserialize(entry.getValue(), BlockModel.class));
                 itemPasses.add(entry.getKey()); // We can do this because GSON preserves ordering during deserialization
             }
+            return logWarning;
         }
     }
 }

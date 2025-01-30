@@ -47,6 +47,7 @@ public final class GeometryLoaderManager
     public static void init()
     {
         var loaders = new HashMap<ResourceLocation, IGeometryLoader<?>>();
+        loaders.put(new ResourceLocation("minecraft:elements"), ElementsModel.Loader.INSTANCE_DEPRECATED); // TODO: Deprecated. To be removed in 1.20
         var event = new ModelEvent.RegisterGeometryLoaders(loaders);
         ModLoader.get().postEventWrapContainerInModOrder(event);
         LOADERS = ImmutableMap.copyOf(loaders);

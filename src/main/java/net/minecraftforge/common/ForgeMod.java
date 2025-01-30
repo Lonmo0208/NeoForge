@@ -6,7 +6,6 @@
 package net.minecraftforge.common;
 
 import net.minecraft.DetectedVersion;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -21,16 +20,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.commands.Commands;
-import net.minecraft.world.damagesource.DamageSources;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
@@ -52,7 +47,6 @@ import net.minecraftforge.common.crafting.DifferenceIngredient;
 import net.minecraftforge.common.crafting.IntersectionIngredient;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.ForgeBiomeTagsProvider;
-import net.minecraftforge.common.data.ForgeDamageTypeTagsProvider;
 import net.minecraftforge.common.data.ForgeFluidTagsProvider;
 import net.minecraftforge.common.data.ForgeSpriteSourceProvider;
 import net.minecraftforge.common.data.VanillaSoundDefinitionsProvider;
@@ -74,7 +68,6 @@ import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.*;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.*;
-import net.minecraftforge.forge.snapshots.ForgeSnapshotsMod;
 import net.minecraftforge.registries.*;
 import net.minecraftforge.registries.holdersets.AndHolderSet;
 import net.minecraftforge.registries.holdersets.AnyHolderSet;
@@ -98,7 +91,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.data.DataGenerator;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
@@ -131,7 +123,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Mod("forge")
@@ -166,6 +157,13 @@ public class ForgeMod
     public static final RegistryObject<Attribute> BLOCK_REACH = ATTRIBUTES.register("block_reach", () -> new RangedAttribute("forge.block_reach", 4.5D, 0.0D, 1024.0D).setSyncable(true));
 
     /**
+     * TODO: Remove
+     * @deprecated - use {@link #BLOCK_REACH}
+     */
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    public static final RegistryObject<Attribute> REACH_DISTANCE = BLOCK_REACH;
+
+    /**
      * Attack Range represents the distance at which a player may attack an entity.  The default is 3 blocks.  Players in creative mode have an additional 3 blocks of entity reach.
      * The default of 3.0 is technically considered a bug by Mojang - see MC-172289 and MC-92484. However, updating this value would allow for longer-range attacks on vanilla servers, which makes some people mad.
      * @see IForgePlayer#getEntityReach()
@@ -175,17 +173,18 @@ public class ForgeMod
     public static final RegistryObject<Attribute> ENTITY_REACH = ATTRIBUTES.register("entity_reach", () -> new RangedAttribute("forge.entity_reach", 3.0D, 0.0D, 1024.0D).setSyncable(true));
 
     /**
+     * TODO: Remove
+     * @deprecated - use {@link #ENTITY_REACH}
+     */
+    @Deprecated(forRemoval = true, since = "1.19.4")
+    public static final RegistryObject<Attribute> ATTACK_RANGE = ENTITY_REACH;
+
+    /**
      * Step Height Addition modifies the amount of blocks an entity may walk up without jumping.
      * @see IForgeEntity#getStepHeight()
      */
-    public static final RegistryObject<Attribute> STEP_HEIGHT = ATTRIBUTES.register("step_height", () -> new RangedAttribute("forge.step_height", 0.0D, -512.0D, 512.0D).setSyncable(true));
+    public static final RegistryObject<Attribute> STEP_HEIGHT_ADDITION = ATTRIBUTES.register("step_height_addition", () -> new RangedAttribute("forge.step_height", 0.0D, -512.0D, 512.0D).setSyncable(true));
 
-    /**
-     * @deprecated Use {@link #STEP_HEIGHT}
-     */
-    @Deprecated(forRemoval = true, since = "1.20.1")
-    public static final RegistryObject<Attribute> STEP_HEIGHT_ADDITION = STEP_HEIGHT;
-    
     /**
      * Noop biome modifier. Can be used in a biome modifier json with "type": "forge:none".
      */
@@ -372,7 +371,7 @@ public class ForgeMod
                 @Override
                 public double motionScale(Entity entity)
                 {
-                    return entity.level().dimensionType().ultraWarm() ? 0.007D : 0.0023333333333333335D;
+                    return entity.level.dimensionType().ultraWarm() ? 0.007D : 0.0023333333333333335D;
                 }
 
                 @Override
@@ -412,12 +411,6 @@ public class ForgeMod
     public static final RegistryObject<Fluid> MILK = RegistryObject.create(new ResourceLocation("milk"), ForgeRegistries.FLUIDS);
     public static final RegistryObject<Fluid> FLOWING_MILK = RegistryObject.create(new ResourceLocation("flowing_milk"), ForgeRegistries.FLUIDS);
 
-    /**
-     * Used in place of {@link DamageSources#magic()} for damage dealt by {@link MobEffects#POISON}.
-     * @see {@link Tags.DamageTypes#IS_POISON}
-     */
-    public static final ResourceKey<DamageType> POISON_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("forge", "poison"));
-
     private static ForgeMod INSTANCE;
     public static ForgeMod getInstance()
     {
@@ -434,8 +427,7 @@ public class ForgeMod
 
     public ForgeMod()
     {
-        LOGGER.info(FORGEMOD,"NeoForge mod loading, version {}, for MC {} with MCP {}", ForgeVersion.getVersion(), MCPVersion.getMCVersion(), MCPVersion.getMCPVersion());
-        ForgeSnapshotsMod.logStartupWarning();
+        LOGGER.info(FORGEMOD,"Forge mod loading, version {}, for MC {} with MCP {}", ForgeVersion.getVersion(), MCPVersion.getMCVersion(), MCPVersion.getMCPVersion());
         INSTANCE = this;
         MinecraftForge.initialize();
         CrashReportCallables.registerCrashCallable("Crash Report UUID", ()-> {
@@ -446,7 +438,7 @@ public class ForgeMod
 
         LOGGER.debug(FORGEMOD, "Loading Network data for FML net version: {}", NetworkConstants.init());
         CrashReportCallables.registerCrashCallable("FML", ForgeVersion::getSpec);
-        CrashReportCallables.registerCrashCallable("NeoForge", ()->ForgeVersion.getGroup()+":"+ForgeVersion.getVersion());
+        CrashReportCallables.registerCrashCallable("Forge", ()->ForgeVersion.getGroup()+":"+ForgeVersion.getVersion());
 
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         // Forge-provided datapack registries
@@ -458,7 +450,6 @@ public class ForgeMod
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(this::loadComplete);
         modEventBus.addListener(this::registerFluids);
-        modEventBus.addListener(this::registerVanillaDisplayContexts);
         modEventBus.addListener(this::registerRecipeSerializers);
         modEventBus.addListener(this::registerLootData);
         modEventBus.register(this);
@@ -477,7 +468,7 @@ public class ForgeMod
         ForgeDeferredRegistriesSetup.setup(modEventBus);
         // Forge does not display problems when the remote is not matching.
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.DisplayTest(()->"ANY", (remote, isServer)-> true));
-        StartupMessageManager.addModMessage("NeoForge version "+ForgeVersion.getVersion());
+        StartupMessageManager.addModMessage("Forge version "+ForgeVersion.getVersion());
 
         MinecraftForge.EVENT_BUS.addListener(VillagerTradingManager::loadTrades);
         MinecraftForge.EVENT_BUS.register(MinecraftForge.INTERNAL_HANDLER);
@@ -486,13 +477,9 @@ public class ForgeMod
 
         ForgeRegistries.ITEMS.tags().addOptionalTagDefaults(Tags.Items.ENCHANTING_FUELS, Set.of(ForgeRegistries.ITEMS.getDelegateOrThrow(Items.LAPIS_LAZULI)));
 
-        // TODO: Remove 1.20.2.
-        if ("1.20.1".equals(SharedConstants.getCurrentVersion().getName()))
-        {
-            ForgeRegistries.ATTRIBUTES.addAlias(new ResourceLocation("forge", "reach_distance"), new ResourceLocation("forge", "block_reach"));
-            ForgeRegistries.ATTRIBUTES.addAlias(new ResourceLocation("forge", "attack_range"), new ResourceLocation("forge", "entity_reach"));
-            ForgeRegistries.ATTRIBUTES.addAlias(new ResourceLocation("forge", "step_height_addition"), new ResourceLocation("forge", "step_height"));
-        }
+        // TODO: Remove when addAlias becomes proper API, as this should be done in the DR's above.
+        addAlias(ForgeRegistries.ATTRIBUTES, new ResourceLocation("forge", "reach_distance"), new ResourceLocation("forge", "block_reach"));
+        addAlias(ForgeRegistries.ATTRIBUTES, new ResourceLocation("forge", "attack_range"), new ResourceLocation("forge", "entity_reach"));
     }
 
     public void preInit(FMLCommonSetupEvent evt)
@@ -537,7 +524,6 @@ public class ForgeMod
         gen.addProvider(event.includeServer(), new ForgeRecipeProvider(packOutput));
         gen.addProvider(event.includeServer(), new ForgeLootTableProvider(packOutput));
         gen.addProvider(event.includeServer(), new ForgeBiomeTagsProvider(packOutput, lookupProvider, existingFileHelper));
-        gen.addProvider(event.includeServer(), new ForgeDamageTypeTagsProvider(packOutput, lookupProvider, existingFileHelper));
 
         gen.addProvider(event.includeClient(), new ForgeSpriteSourceProvider(packOutput, existingFileHelper));
         gen.addProvider(event.includeClient(), new VanillaSoundDefinitionsProvider(packOutput, existingFileHelper));
@@ -617,20 +603,6 @@ public class ForgeMod
         }
     }
 
-    public void registerVanillaDisplayContexts(RegisterEvent event)
-    {
-        if (event.getRegistryKey().equals(ForgeRegistries.Keys.DISPLAY_CONTEXTS))
-        {
-            IForgeRegistryInternal<ItemDisplayContext> forgeRegistry = (IForgeRegistryInternal<ItemDisplayContext>) event.<ItemDisplayContext>getForgeRegistry();
-            if (forgeRegistry == null)
-                throw new IllegalStateException("Item display context was not a forge registry, wtf???");
-
-            Arrays.stream(ItemDisplayContext.values())
-                    .filter(Predicate.not(ItemDisplayContext::isModded))
-                    .forEach(ctx -> forgeRegistry.register(ctx.getId(), new ResourceLocation("minecraft", ctx.getSerializedName()), ctx));
-        }
-    }
-
     public void registerRecipeSerializers(RegisterEvent event)
     {
         if (event.getRegistryKey().equals(ForgeRegistries.Keys.RECIPE_SERIALIZERS))
@@ -670,5 +642,15 @@ public class ForgeMod
     public void registerPermissionNodes(PermissionGatherEvent.Nodes event)
     {
         event.addNodes(USE_SELECTORS_PERMISSION);
+    }
+
+    /**
+     * TODO: Remove when {@link ForgeRegistry#addAlias(ResourceLocation, ResourceLocation)} is elevated to {@link IForgeRegistry}.
+     */
+    @Deprecated(forRemoval = true, since = "1.19.3")
+    private static <T> void addAlias(IForgeRegistry<T> registry, ResourceLocation from, ResourceLocation to)
+    {
+        ForgeRegistry<T> fReg = (ForgeRegistry<T>) registry;
+        fReg.addAlias(from, to);
     }
 }

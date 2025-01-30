@@ -16,6 +16,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.util.List;
 
+import static net.minecraftforge.fml.Logging.LOADING;
+
 public class ServerModLoader
 {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -39,8 +41,8 @@ public class ServerModLoader
         }
         List<ModLoadingWarning> warnings = ModLoader.get().getWarnings();
         if (!warnings.isEmpty()) {
-            LOGGER.warn(Logging.LOADING, "Mods loaded with {} warnings", warnings.size());
-            warnings.forEach(warning -> LOGGER.warn(Logging.LOADING, warning.formatToString()));
+            LOGGER.warn(LOADING, "Mods loaded with {} warnings", warnings.size());
+            warnings.forEach(warning -> LOGGER.warn(LOADING, warning.formatToString()));
         }
         MinecraftForge.EVENT_BUS.start();
     }

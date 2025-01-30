@@ -36,6 +36,8 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,18 +46,30 @@ import org.jetbrains.annotations.Nullable;
  */
 public class SeparateTransformsModel implements IUnbakedGeometry<SeparateTransformsModel>
 {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private final BlockModel baseModel;
     private final ImmutableMap<ItemDisplayContext, BlockModel> perspectives;
+    private final boolean deprecatedLoader;
 
     public SeparateTransformsModel(BlockModel baseModel, ImmutableMap<ItemDisplayContext, BlockModel> perspectives)
     {
+        this(baseModel, perspectives, false);
+    }
+
+    private SeparateTransformsModel(BlockModel baseModel, ImmutableMap<ItemDisplayContext, BlockModel> perspectives, boolean deprecatedLoader)
+    {
         this.baseModel = baseModel;
         this.perspectives = perspectives;
+        this.deprecatedLoader = deprecatedLoader;
     }
 
     @Override
     public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation)
     {
+        if (deprecatedLoader)
+            LOGGER.warn("Model \"" + modelLocation + "\" is using the deprecated loader \"forge:separate-perspective\" instead of \"forge:separate_transforms\". This loader will be removed in 1.20.");
+
         return new Baked(
                 context.useAmbientOcclusion(), context.isGui3d(), context.useBlockLight(),
                 spriteGetter.apply(context.getMaterial("particle")), overrides,
@@ -163,10 +177,15 @@ public class SeparateTransformsModel implements IUnbakedGeometry<SeparateTransfo
 
     public static final class Loader implements IGeometryLoader<SeparateTransformsModel>
     {
-        public static final Loader INSTANCE = new Loader();
+        public static final Loader INSTANCE = new Loader(false);
+        @Deprecated(forRemoval = true, since = "1.19")
+        public static final Loader INSTANCE_DEPRECATED = new Loader(true);
 
-        private Loader()
+        private final boolean deprecated;
+
+        private Loader(boolean deprecated)
         {
+            this.deprecated = deprecated;
         }
 
         @Override
@@ -186,7 +205,7 @@ public class SeparateTransformsModel implements IUnbakedGeometry<SeparateTransfo
                 }
             }
 
-            return new SeparateTransformsModel(baseModel, ImmutableMap.copyOf(perspectives));
+            return new SeparateTransformsModel(baseModel, ImmutableMap.copyOf(perspectives), deprecated);
         }
     }
 }

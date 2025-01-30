@@ -11,10 +11,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
 /**
- * Base class used for advancement-related events. Should not be used directly.
- * @see AdvancementEarnEvent
- * @see AdvancementProgressEvent
+ * This event is fired when a player gets an advancement.
+ * <br>
+ * This event is not {@link net.minecraftforge.eventbus.api.Cancelable}.<br>
+ * <br>
+ * This event does not have a result. {@link HasResult}<br>
+ * <br>
+ * This event is fired on the {@link MinecraftForge#EVENT_BUS}.
+ * @deprecated Use {@link net.minecraftforge.event.entity.player.AdvancementEvent.AdvancementEarnEvent} and {@link net.minecraftforge.event.entity.player.AdvancementEvent.AdvancementProgressEvent} instead
  */
+@Deprecated(since = "1.19.2")
 public class AdvancementEvent extends PlayerEvent
 {
     private final Advancement advancement;
@@ -43,22 +49,24 @@ public class AdvancementEvent extends PlayerEvent
      *
      * @see AdvancementProgress#isDone()
      */
-    public static class AdvancementEarnEvent extends AdvancementEvent
+    //todo: should extend AdvancementEvent in 1.20
+    public static class AdvancementEarnEvent extends PlayerEvent
     {
+        private final Advancement advancement;
 
         public AdvancementEarnEvent(Player player, Advancement earned)
         {
-            super(player, earned);
+            super(player);
+            this.advancement = earned;
         }
 
         /**
          *
          * {@return the advancement that was earned}
          */
-        @Override
         public Advancement getAdvancement()
         {
-            return super.getAdvancement();
+            return advancement;
         }
     }
 
@@ -74,15 +82,18 @@ public class AdvancementEvent extends PlayerEvent
      * @see net.minecraft.server.PlayerAdvancements#award(Advancement, String)
      * @see net.minecraft.server.PlayerAdvancements#revoke(Advancement, String)
      */
-    public static class AdvancementProgressEvent extends AdvancementEvent
+    //todo: should extend AdvancementEvent in 1.20
+    public static class AdvancementProgressEvent extends PlayerEvent
     {
+        private final Advancement advancement;
         private final AdvancementProgress advancementProgress;
         private final String criterionName;
         private final AdvancementEvent.AdvancementProgressEvent.ProgressType progressType;
 
         public AdvancementProgressEvent(Player player, Advancement progressed, AdvancementProgress advancementProgress, String criterionName, AdvancementEvent.AdvancementProgressEvent.ProgressType progressType)
         {
-            super(player, progressed);
+            super(player);
+            this.advancement = progressed;
             this.advancementProgress = advancementProgress;
             this.criterionName = criterionName;
             this.progressType = progressType;
@@ -92,10 +103,9 @@ public class AdvancementEvent extends PlayerEvent
          *
          * {@return The advancement that was progressed}
          */
-        @Override
         public Advancement getAdvancement()
         {
-            return super.getAdvancement();
+            return advancement;
         }
 
         /**

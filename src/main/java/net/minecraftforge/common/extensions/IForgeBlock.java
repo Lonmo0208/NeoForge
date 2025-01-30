@@ -23,14 +23,12 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.core.Direction;
@@ -88,27 +86,7 @@ public interface IForgeBlock
     /**
      * Get a light value for this block, taking into account the given state and coordinates, normal ranges are between 0 and 15
      *
-     * @param state The state of this block
-     * @param level The level this block is in
-     * @param pos The position of this block in the level, will be {@link BlockPos#ZERO} when the chunk being loaded or
-     *            generated calls this to check whether it contains any light sources
      * @return The light value
-     * @implNote <ul>
-     *     <li>
-     *         If the given state of this block may emit light but requires position context to determine the light
-     *         value, then it must return a non-zero light value if {@code (pos == BlockPos.ZERO)} in order for the
-     *         chunk calling this to be considered as containing light sources.
-     *     </li>
-     *     <li>
-     *         The given {@link BlockGetter} may be a chunk. Block, fluid or block entity accesses outside of its bounds
-     *         will cause issues such as wrapping coordinates returning values from the opposing chunk edge
-     *     </li>
-     *     <li>
-     *         This method may be called on a worker thread and must therefore use
-     *         {@link IForgeBlockGetter#getExistingBlockEntity(BlockPos)} to retrieve the {@link BlockEntity}
-     *         at the given position
-     *     </li>
-     * </ul>
      */
     default int getLightEmission(BlockState state, BlockGetter level, BlockPos pos)
     {
@@ -452,7 +430,7 @@ public interface IForgeBlock
     */
     default float getEnchantPowerBonus(BlockState state, LevelReader level, BlockPos pos)
     {
-        return state.is(BlockTags.ENCHANTMENT_POWER_PROVIDER) ? 1: 0;
+        return state.is(Blocks.BOOKSHELF) ? 1: 0;
     }
 
    /**
@@ -464,13 +442,13 @@ public interface IForgeBlock
     default void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor){}
 
    /**
-    * Called to determine whether to allow the block to handle its own indirect power rather than using the default rules.
+    * Called to determine whether to allow the a block to handle its own indirect power rather than using the default rules.
     * @param level The level
     * @param pos Block position in level
     * @param side The INPUT side of the block to be powered - ie the opposite of this block's output side
     * @return Whether Block#isProvidingWeakPower should be called when determining indirect power
     */
-    default boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side)
+    default boolean shouldCheckWeakPower(BlockState state, LevelReader level, BlockPos pos, Direction side)
     {
         return state.isRedstoneConductor(level, pos);
     }
@@ -628,7 +606,7 @@ public interface IForgeBlock
      */
     default boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
     {
-        return state.ignitedByLava() || state.getFlammability(level, pos, direction) > 0;
+        return state.getFlammability(level, pos, direction) > 0;
     }
 
     /**
@@ -933,14 +911,14 @@ public interface IForgeBlock
     }
 
     /**
-     * Returns the {@link MapColor} shown on the map.
+     * Returns the {@link MaterialColor} shown on the map.
      *
      * @param state The state of this block
      * @param level The level this block is in
      * @param pos The blocks position in the level
-     * @param defaultColor The {@code MapColor} configured for the given {@code BlockState} in the {@link BlockBehaviour.Properties}
+     * @param defaultColor The {@code MaterialColor} configured for the given {@code BlockState} in the {@link BlockBehaviour.Properties}
      */
-    default MapColor getMapColor(BlockState state, BlockGetter level, BlockPos pos, MapColor defaultColor)
+    default MaterialColor getMapColor(BlockState state, BlockGetter level, BlockPos pos, MaterialColor defaultColor)
     {
         return defaultColor;
     }
@@ -971,25 +949,5 @@ public interface IForgeBlock
     default BlockState getAppearance(BlockState state, BlockAndTintGetter level, BlockPos pos, Direction side, @Nullable BlockState queryState, @Nullable BlockPos queryPos)
     {
         return state;
-    }
-
-    /**
-     * Returns the reaction of the block when pushed or pulled by a piston. This method should be not called directly, instead via {@link BlockState#getPistonPushReaction()}.
-     * <ul>
-     *     <li>NORMAL: is pushable and pullable by sticky pistons</li>
-     *     <li>DESTROY: is being destroyed on pushing and pulling</li>
-     *     <li>BLOCK: is not being able to be moved</li>
-     *     <li>IGNORE: only usable by entities</li>
-     *     <li>PUSH_ONLY: can only be pushed, blocks on trying to be pulled</li>
-     *     <li>{@code null}: use the PistonPushReaction from the BlockBehaviour.Properties passed into the Block Constructor</li>
-     * </ul>
-     *
-     * @param state The state of this block
-     * @return the PushReaction of this state or {@code null} if the one passed into the block properties should be used
-     */
-    @Nullable
-    default PushReaction getPistonPushReaction(BlockState state)
-    {
-        return null;
     }
 }
