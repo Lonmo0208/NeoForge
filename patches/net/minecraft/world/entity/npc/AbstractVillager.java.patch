@@ -8,7 +8,7 @@
      }
  
      protected abstract void rewardTradeXp(MerchantOffer p_35299_);
-@@ -181,9 +_,9 @@
+@@ -185,9 +_,9 @@
  
      @Nullable
      @Override

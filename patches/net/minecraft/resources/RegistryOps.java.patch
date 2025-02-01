@@ -10,7 +10,7 @@
 +    }
 +
      public <U> RegistryOps<U> withParent(DynamicOps<U> p_330654_) {
-         return (RegistryOps<U>)(p_330654_ == this.delegate ? this : new RegistryOps<>(p_330654_, this.lookupProvider));
+         return p_330654_ == this.delegate ? (RegistryOps<U>)this : new RegistryOps<>(p_330654_, this.lookupProvider);
      }
 @@ -73,6 +_,20 @@
                          : DataResult.error(() -> "Not a registry ops")

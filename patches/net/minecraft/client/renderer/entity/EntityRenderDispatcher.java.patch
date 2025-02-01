@@ -10,7 +10,7 @@
              double d1 = -Mth.lerp((double)p_114445_, p_114444_.yOld, p_114444_.getY());
              double d2 = -Mth.lerp((double)p_114445_, p_114444_.zOld, p_114444_.getZ());
  
--            for (EnderDragonPart enderdragonpart : ((EnderDragon)p_114444_).getSubEntities()) {
+-            for(EnderDragonPart enderdragonpart : ((EnderDragon)p_114444_).getSubEntities()) {
 +            for(net.neoforged.neoforge.entity.PartEntity<?> enderdragonpart : p_114444_.getParts()) {
                  p_114442_.pushPose();
                  double d3 = d0 + Mth.lerp((double)p_114445_, enderdragonpart.xOld, enderdragonpart.getX());

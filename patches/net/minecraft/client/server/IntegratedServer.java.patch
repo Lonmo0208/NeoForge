@@ -19,5 +19,5 @@
      public void halt(boolean p_120053_) {
 +        if (isRunning())
          this.executeBlocking(() -> {
-             for (ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
+             for(ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
                  if (!serverplayer.getUUID().equals(this.uuid)) {

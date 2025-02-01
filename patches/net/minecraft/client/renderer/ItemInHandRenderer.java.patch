@@ -31,13 +31,13 @@
 +                if (!net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(p_109377_).applyForgeHandTransform(p_109379_, minecraft.player, humanoidarm, p_109377_, p_109373_, p_109378_, p_109376_)) // FORGE: Allow items to define custom arm animation
                  if (p_109372_.isUsingItem() && p_109372_.getUseItemRemainingTicks() > 0 && p_109372_.getUsedItemHand() == p_109375_) {
                      int k = flag3 ? 1 : -1;
-                     switch (p_109377_.getUseAnimation()) {
+                     switch(p_109377_.getUseAnimation()) {
 @@ -566,8 +_,16 @@
              this.offHandHeight = Mth.clamp(this.offHandHeight - 0.4F, 0.0F, 1.0F);
          } else {
              float f = localplayer.getAttackStrengthScale(1.0F);
--            this.mainHandHeight = this.mainHandHeight + Mth.clamp((this.mainHandItem == itemstack ? f * f * f : 0.0F) - this.mainHandHeight, -0.4F, 0.4F);
--            this.offHandHeight = this.offHandHeight + Mth.clamp((float)(this.offHandItem == itemstack1 ? 1 : 0) - this.offHandHeight, -0.4F, 0.4F);
+-            this.mainHandHeight += Mth.clamp((this.mainHandItem == itemstack ? f * f * f : 0.0F) - this.mainHandHeight, -0.4F, 0.4F);
+-            this.offHandHeight += Mth.clamp((float)(this.offHandItem == itemstack1 ? 1 : 0) - this.offHandHeight, -0.4F, 0.4F);
 +            boolean requipM = net.neoforged.neoforge.client.ClientHooks.shouldCauseReequipAnimation(this.mainHandItem, itemstack, localplayer.getInventory().selected);
 +            boolean requipO = net.neoforged.neoforge.client.ClientHooks.shouldCauseReequipAnimation(this.offHandItem, itemstack1, -1);
 +

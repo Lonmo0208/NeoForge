@@ -10,7 +10,7 @@
      private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_LEFT = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.BOOLEAN);
      private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_RIGHT = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.BOOLEAN);
 @@ -471,7 +_,7 @@
-                 for (int i2 = i1; i2 < j1; i2++) {
+                 for(int i2 = i1; i2 < j1; ++i2) {
                      blockpos$mutableblockpos.set(l1, k1, i2);
                      FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
 -                    if (fluidstate.is(FluidTags.WATER)) {
@@ -24,11 +24,11 @@
                                  )) {
 -                                f += blockstate.getBlock().getFriction();
 +                                f += blockstate.getFriction(this.level(), blockpos$mutableblockpos, this);
-                                 k1++;
+                                 ++k1;
                              }
                          }
 @@ -546,7 +_,7 @@
-                 for (int i2 = i1; i2 < j1; i2++) {
+                 for(int i2 = i1; i2 < j1; ++i2) {
                      blockpos$mutableblockpos.set(k1, l1, i2);
                      FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
 -                    if (fluidstate.is(FluidTags.WATER)) {
@@ -37,7 +37,7 @@
                          this.waterLevel = Math.max((double)f, this.waterLevel);
                          flag |= aabb.minY < (double)f;
 @@ -576,7 +_,7 @@
-                 for (int i2 = i1; i2 < j1; i2++) {
+                 for(int i2 = i1; i2 < j1; ++i2) {
                      blockpos$mutableblockpos.set(k1, l1, i2);
                      FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
 -                    if (fluidstate.is(FluidTags.WATER)

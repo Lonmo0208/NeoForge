@@ -73,13 +73,13 @@
 +            if (canBeRidden() && this.getDeltaMovement().horizontalDistanceSqr() > 0.01D) {
 +                List<Entity> list = this.level().getEntities(this, box, EntitySelector.pushableBy(this));
                  if (!list.isEmpty()) {
-                     for (Entity entity1 : list) {
+                     for(Entity entity1 : list) {
                          if (!(entity1 instanceof Player)
 @@ -314,7 +_,7 @@
                      }
                  }
              } else {
--                for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F))) {
+-                for(Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F))) {
 +                for(Entity entity : this.level().getEntities(this, box)) {
                      if (!this.hasPassenger(entity) && entity.isPushable() && entity instanceof AbstractMinecart) {
                          entity.push(this);
@@ -130,7 +130,7 @@
          Vec3 vec31 = this.getDeltaMovement();
 -        RailShape railshape = p_38157_.getValue(((BaseRailBlock)p_38157_.getBlock()).getShapeProperty());
 +        RailShape railshape = ((BaseRailBlock)p_38157_.getBlock()).getRailDirection(p_38157_, this.level(), p_38156_, this);
-         switch (railshape) {
+         switch(railshape) {
              case ASCENDING_EAST:
                  this.setDeltaMovement(vec31.add(-d3, 0.0, 0.0));
 @@ -418,7 +_,7 @@

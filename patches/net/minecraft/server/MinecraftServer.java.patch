@@ -42,7 +42,7 @@
          }
  
 @@ -610,6 +_,7 @@
-         for (ServerLevel serverlevel2 : this.getAllLevels()) {
+         for(ServerLevel serverlevel2 : this.getAllLevels()) {
              if (serverlevel2 != null) {
                  try {
 +                    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Unload(serverlevel2));
@@ -59,7 +59,7 @@
              this.status = this.buildServerStatus();
 +            resetStatusCache(status);
  
-             while (this.running) {
+             while(this.running) {
                  long i;
 @@ -704,6 +_,8 @@
                  this.isReady = true;
@@ -91,7 +91,7 @@
      public void tickServer(BooleanSupplier p_129871_) {
          long i = Util.getNanos();
 +        net.neoforged.neoforge.event.EventHooks.onPreServerTick(p_129871_, this);
-         this.tickCount++;
+         ++this.tickCount;
          this.tickRateManager.tick();
          this.tickChildren(p_129871_);
          if (i - this.lastServerStatus >= STATUS_EXPIRE_TIME_NANOS) {
@@ -100,7 +100,7 @@
 +            resetStatusCache(status);
          }
  
-         this.ticksUntilAutosave--;
+         --this.ticksUntilAutosave;
 @@ -899,6 +_,7 @@
          this.smoothedTickTimeMillis = this.smoothedTickTimeMillis * 0.8F + (float)j / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND * 0.19999999F;
          this.logTickMethodTime(i);
@@ -140,7 +140,7 @@
          this.getFunctions().tick();
          this.profiler.popPush("levels");
  
--        for (ServerLevel serverlevel : this.getAllLevels()) {
+-        for(ServerLevel serverlevel : this.getAllLevels()) {
 +        for(ServerLevel serverlevel : this.getWorldArray()) {
 +            long tickStart = Util.getNanos();
              this.profiler.push(() -> serverlevel + " " + serverlevel.dimension().location());
@@ -200,9 +200,11 @@
                  },
                  this
              );
-@@ -1470,9 +_,11 @@
+@@ -1469,10 +_,13 @@
+     public static WorldDataConfiguration configurePackRepository(
          PackRepository p_248681_, DataPackConfig p_248920_, boolean p_249869_, FeatureFlagSet p_251243_
      ) {
++        net.neoforged.neoforge.resource.ResourcePackLoader.loadResourcePacks(p_248681_, map -> net.neoforged.neoforge.resource.ResourcePackLoader.buildPackFinder(map, PackType.SERVER_DATA));
          p_248681_.reload();
 +        DataPackConfig.DEFAULT.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
 +        p_248920_.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());

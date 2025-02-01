@@ -106,7 +106,7 @@
              double d0 = p_98531_ - (double)this.leftPos;
              double d1 = p_98532_ - (double)this.topPos;
  
--            for (CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
+-            for(CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
 +            for(CreativeModeTab creativemodetab : currentPage.getVisibleTabs()) {
                  if (this.checkTabClicked(creativemodetab, d0, d1)) {
                      return true;
@@ -115,7 +115,7 @@
              double d1 = p_98623_ - (double)this.topPos;
              this.scrolling = false;
  
--            for (CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
+-            for(CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
 +            for(CreativeModeTab creativemodetab : currentPage.getVisibleTabs()) {
                  if (this.checkTabClicked(creativemodetab, d0, d1)) {
                      this.selectTab(creativemodetab);
@@ -149,7 +149,7 @@
      public void render(GuiGraphics p_283000_, int p_281317_, int p_282770_, float p_281295_) {
          super.render(p_283000_, p_281317_, p_282770_, p_281295_);
  
--        for (CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
+-        for(CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
 +        for(CreativeModeTab creativemodetab : currentPage.getVisibleTabs()) {
              if (this.checkTabHovering(p_283000_, creativemodetab, p_281317_, p_282770_)) {
                  break;
@@ -178,11 +178,11 @@
 +        boolean flag2 = selectedTab.hasSearchBar();
          TooltipFlag.Default tooltipflag$default = this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
          TooltipFlag tooltipflag = flag ? tooltipflag$default.asCreative() : tooltipflag$default;
-         List<Component> list = p_281769_.getTooltipLines(Item.TooltipContext.of(this.minecraft.level), this.minecraft.player, tooltipflag);
+         List<Component> list = p_281769_.getTooltipLines(this.minecraft.player, tooltipflag);
 @@ -684,7 +_,7 @@
              int i = 1;
  
-             for (CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
+             for(CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
 -                if (creativemodetab.getType() != CreativeModeTab.Type.SEARCH && creativemodetab.contains(p_281769_)) {
 +                if (!creativemodetab.hasSearchBar() && creativemodetab.contains(p_281769_)) {
                      list1.add(i++, creativemodetab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
@@ -192,7 +192,7 @@
  
      @Override
      protected void renderBg(GuiGraphics p_282663_, float p_282504_, int p_282089_, int p_282249_) {
--        for (CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
+-        for(CreativeModeTab creativemodetab : CreativeModeTabs.tabs()) {
 +        for(CreativeModeTab creativemodetab : currentPage.getVisibleTabs()) {
              if (creativemodetab != selectedTab) {
                  this.renderTabButton(p_282663_, creativemodetab);
@@ -270,7 +270,7 @@
      @OnlyIn(Dist.CLIENT)
      static class CustomCreativeSlot extends Slot {
          public CustomCreativeSlot(Container p_98633_, int p_98634_, int p_98635_, int p_98636_) {
-@@ -1013,6 +_,22 @@
+@@ -1015,6 +_,22 @@
          @Override
          public boolean mayPickup(Player p_98665_) {
              return this.target.mayPickup(p_98665_);

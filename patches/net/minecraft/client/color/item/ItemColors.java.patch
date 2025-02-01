@@ -27,7 +27,7 @@
 +    /** @deprecated Register via {@link net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Item} */
 +    @Deprecated
      public void register(ItemColor p_92690_, ItemLike... p_92691_) {
-         for (ItemLike itemlike : p_92691_) {
+         for(ItemLike itemlike : p_92691_) {
 -            this.itemColors.addMapping(p_92690_, Item.getId(itemlike.asItem()));
 +            this.itemColors.put(itemlike.asItem(), p_92690_);
          }

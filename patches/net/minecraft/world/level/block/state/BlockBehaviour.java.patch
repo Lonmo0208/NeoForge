@@ -95,7 +95,7 @@
      public abstract static class BlockStateBase extends StateHolder<Block, BlockState> {
          private final int lightEmission;
          private final boolean useShapeForLightOcclusion;
-@@ -523,12 +_,14 @@
+@@ -527,12 +_,14 @@
              return this.useShapeForLightOcclusion;
          }
  
@@ -111,7 +111,7 @@
          }
  
          public boolean ignitedByLava() {
-@@ -541,9 +_,11 @@
+@@ -545,9 +_,11 @@
          }
  
          public MapColor getMapColor(BlockGetter p_285002_, BlockPos p_285293_) {
@@ -124,7 +124,7 @@
          public BlockState rotate(Rotation p_60718_) {
              return this.getBlock().rotate(this.asState(), p_60718_);
          }
-@@ -597,6 +_,8 @@
+@@ -601,6 +_,8 @@
          }
  
          public PushReaction getPistonPushReaction() {
@@ -133,7 +133,7 @@
              return this.pushReaction;
          }
  
-@@ -723,6 +_,9 @@
+@@ -727,6 +_,9 @@
          }
  
          public ItemInteractionResult useItemOn(ItemStack p_316374_, Level p_316651_, Player p_316623_, InteractionHand p_316469_, BlockHitResult p_316877_) {
@@ -143,7 +143,7 @@
              return this.getBlock().useItemOn(p_316374_, this.asState(), p_316651_, p_316877_.getBlockPos(), p_316623_, p_316469_, p_316877_);
          }
  
-@@ -824,6 +_,7 @@
+@@ -828,6 +_,7 @@
              return this.getBlock().getSeed(this.asState(), p_60727_);
          }
  
@@ -151,7 +151,7 @@
          public SoundType getSoundType() {
              return this.getBlock().getSoundType(this.asState());
          }
-@@ -958,11 +_,12 @@
+@@ -962,11 +_,12 @@
          PushReaction pushReaction = PushReaction.NORMAL;
          boolean spawnTerrainParticles = true;
          NoteBlockInstrument instrument = NoteBlockInstrument.HARP;
@@ -165,7 +165,7 @@
          BlockBehaviour.StatePredicate isRedstoneConductor = (p_284888_, p_284889_, p_284890_) -> p_284888_.isCollisionShapeFullBlock(p_284889_, p_284890_);
          BlockBehaviour.StatePredicate isSuffocating = (p_284885_, p_284886_, p_284887_) -> p_284885_.blocksMotion()
                  && p_284885_.isCollisionShapeFullBlock(p_284886_, p_284887_);
-@@ -1103,9 +_,15 @@
+@@ -1107,9 +_,15 @@
              return this;
          }
  

@@ -18,7 +18,7 @@
                  BlockPos blockpos = entity.blockPosition();
                  p_186527_.query(
 @@ -199,7 +_,7 @@
-                                     l1++;
+                                     ++l1;
                                      p_47040_.addFreshEntityWithPassengers(mob);
                                      p_47044_.run(mob, p_47041_);
 -                                    if (j >= mob.getMaxSpawnClusterSize()) {
@@ -26,16 +26,16 @@
                                          return;
                                      }
  
-@@ -272,7 +_,7 @@
-         return p_46994_ > (double)(p_46993_.getType().getCategory().getDespawnDistance() * p_46993_.getType().getCategory().getDespawnDistance())
-                 && p_46993_.removeWhenFarAway(p_46994_)
-             ? false
--            : p_46993_.checkSpawnRules(p_46992_, MobSpawnType.NATURAL) && p_46993_.checkSpawnObstruction(p_46992_);
-+            : net.neoforged.neoforge.event.EventHooks.checkSpawnPosition(p_46993_, p_46992_, MobSpawnType.NATURAL);
+@@ -273,7 +_,7 @@
+             && p_46993_.removeWhenFarAway(p_46994_)) {
+             return false;
+         } else {
+-            return p_46993_.checkSpawnRules(p_46992_, MobSpawnType.NATURAL) && p_46993_.checkSpawnObstruction(p_46992_);
++            return net.neoforged.neoforge.event.EventHooks.checkSpawnPosition(p_46993_, p_46992_, MobSpawnType.NATURAL);
+         }
      }
  
-     private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
-@@ -303,9 +_,14 @@
+@@ -305,9 +_,14 @@
          BlockPos p_220448_,
          @Nullable Holder<Biome> p_220449_
      ) {
@@ -53,7 +53,7 @@
      }
  
      public static boolean isInNetherFortressBounds(BlockPos p_220456_, ServerLevel p_220457_, MobCategory p_220458_, StructureManager p_220459_) {
-@@ -392,8 +_,7 @@
+@@ -396,8 +_,7 @@
  
                                  entity.moveTo(d0, (double)blockpos.getY(), d1, p_220454_.nextFloat() * 360.0F, 0.0F);
                                  if (entity instanceof Mob mob

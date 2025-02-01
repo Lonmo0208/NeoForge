@@ -1,16 +1,16 @@
 --- a/net/minecraft/client/multiplayer/ClientConfigurationPacketListenerImpl.java
 +++ b/net/minecraft/client/multiplayer/ClientConfigurationPacketListenerImpl.java
-@@ -44,6 +_,9 @@
-     private KnownPacksManager knownPacks;
+@@ -40,6 +_,9 @@
+     private final RegistryDataCollector registryDataCollector = new RegistryDataCollector();
      @Nullable
-     protected ChatComponent.State chatState;
+     private KnownPacksManager knownPacks;
 +    private net.neoforged.neoforge.network.connection.ConnectionType connectionType = net.neoforged.neoforge.network.connection.ConnectionType.VANILLA;
 +    private boolean initializedConnection = false;
 +    private java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.network.chat.Component> failureReasons = new java.util.HashMap<>();
  
      public ClientConfigurationPacketListenerImpl(Minecraft p_295262_, Connection p_296339_, CommonListenerCookie p_294706_) {
          super(p_295262_, p_296339_, p_294706_);
-@@ -59,7 +_,41 @@
+@@ -54,7 +_,41 @@
      }
  
      @Override
@@ -53,7 +53,7 @@
          this.handleUnknownCustomPayload(p_295411_);
      }
  
-@@ -82,6 +_,11 @@
+@@ -77,6 +_,11 @@
      @Override
      public void handleEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket p_294410_) {
          this.enabledFeatures = FeatureFlags.REGISTRY.fromNames(p_294410_.features());
@@ -65,12 +65,12 @@
      }
  
      @Override
-@@ -134,10 +_,17 @@
+@@ -123,10 +_,17 @@
+                         this.serverBrand,
                          this.serverData,
                          this.postDisconnectScreen,
-                         this.serverCookies,
--                        this.chatState
-+                        this.chatState,
+-                        this.serverCookies
++                        this.serverCookies,
 +                        this.connectionType
                      )
                  )
@@ -84,7 +84,7 @@
          this.connection.send(ServerboundFinishConfigurationPacket.INSTANCE);
          this.connection.setupOutboundProtocol(GameProtocols.SERVERBOUND.bind(RegistryFriendlyByteBuf.decorator(registryaccess$frozen)));
      }
-@@ -151,5 +_,18 @@
+@@ -140,5 +_,18 @@
      public void onDisconnect(Component p_314649_) {
          super.onDisconnect(p_314649_);
          this.minecraft.clearDownloadedResourcePacks();

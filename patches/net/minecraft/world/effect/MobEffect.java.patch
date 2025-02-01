@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/effect/MobEffect.java
 +++ b/net/minecraft/world/effect/MobEffect.java
-@@ -30,7 +_,7 @@
- import net.minecraft.world.flag.FeatureFlagSet;
- import net.minecraft.world.flag.FeatureFlags;
+@@ -23,7 +_,7 @@
+ import net.minecraft.world.entity.ai.attributes.AttributeMap;
+ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
  
--public class MobEffect implements FeatureElement {
-+public class MobEffect implements FeatureElement, net.neoforged.neoforge.common.extensions.IMobEffectExtension {
+-public class MobEffect {
++public class MobEffect implements net.neoforged.neoforge.common.extensions.IMobEffectExtension {
      private static final int AMBIENT_ALPHA = Mth.floor(38.25F);
      private final Map<Holder<Attribute>, MobEffect.AttributeTemplate> attributeModifiers = new Object2ObjectOpenHashMap<>();
      private final MobEffectCategory category;
-@@ -49,6 +_,7 @@
+@@ -40,6 +_,7 @@
              int i = p_333517_.isAmbient() ? AMBIENT_ALPHA : 255;
              return ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, FastColor.ARGB32.color(i, p_19452_));
          };
@@ -17,9 +17,9 @@
      }
  
      protected MobEffect(MobEffectCategory p_333963_, int p_333864_, ParticleOptions p_333716_) {
-@@ -174,6 +_,28 @@
-     public FeatureFlagSet requiredFeatures() {
-         return this.requiredFeatures;
+@@ -135,6 +_,28 @@
+     public ParticleOptions createParticleOptions(MobEffectInstance p_333815_) {
+         return this.particleFactory.apply(p_333815_);
      }
 +
 +    // NEO START

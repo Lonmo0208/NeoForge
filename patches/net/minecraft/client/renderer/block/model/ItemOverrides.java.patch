@@ -18,7 +18,7 @@
              .map(ItemOverride.Predicate::getProperty)
 @@ -47,7 +_,7 @@
  
-         for (int j = p_111743_.size() - 1; j >= 0; j--) {
+         for(int j = p_111743_.size() - 1; j >= 0; --j) {
              ItemOverride itemoverride = p_111743_.get(j);
 -            BakedModel bakedmodel = this.bakeModel(p_251211_, p_111741_, itemoverride);
 +            BakedModel bakedmodel = this.bakeModel(p_251211_, p_111741_, itemoverride, spriteGetter);

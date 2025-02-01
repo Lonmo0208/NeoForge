@@ -3,7 +3,7 @@
 @@ -161,7 +_,7 @@
          HoglinAi.updateActivity(this);
          if (this.isConverting()) {
-             this.timeInOverworld++;
+             ++this.timeInOverworld;
 -            if (this.timeInOverworld > 300) {
 +            if (this.timeInOverworld > 300 && net.neoforged.neoforge.event.EventHooks.canLivingConvert(this, EntityType.ZOGLIN, (timer) -> this.timeInOverworld = timer)) {
                  this.makeSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED);

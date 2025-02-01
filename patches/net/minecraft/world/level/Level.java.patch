@@ -129,7 +129,7 @@
      }
  
 @@ -655,7 +_,7 @@
-         Explosion.BlockInteraction explosion$blockinteraction = switch (p_312265_) {
+         Explosion.BlockInteraction explosion$blockinteraction = switch(p_312265_) {
              case NONE -> Explosion.BlockInteraction.KEEP;
              case BLOCK -> this.getDestroyType(GameRules.RULE_BLOCK_EXPLOSION_DROP_DECAY);
 -            case MOB -> this.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
@@ -159,7 +159,7 @@
  
 +            if (false)
              if (p_151522_ instanceof EnderDragon) {
-                 for (EnderDragonPart enderdragonpart : ((EnderDragon)p_151522_).getSubEntities()) {
+                 for(EnderDragonPart enderdragonpart : ((EnderDragon)p_151522_).getSubEntities()) {
                      if (p_151522_ != p_46536_ && p_46538_.test(enderdragonpart)) {
 @@ -796,6 +_,11 @@
                  }
@@ -180,7 +180,7 @@
 +
 +            if (false)
              if (p_261454_ instanceof EnderDragon enderdragon) {
-                 for (EnderDragonPart enderdragonpart : enderdragon.getSubEntities()) {
+                 for(EnderDragonPart enderdragonpart : enderdragon.getSubEntities()) {
                      T t = p_261885_.tryCast(enderdragonpart);
 @@ -836,6 +_,15 @@
  
@@ -198,11 +198,11 @@
      }
  
      @Nullable
-@@ -964,16 +_,15 @@
+@@ -968,16 +_,15 @@
      public abstract Scoreboard getScoreboard();
  
      public void updateNeighbourForOutputSignal(BlockPos p_46718_, Block p_46719_) {
--        for (Direction direction : Direction.Plane.HORIZONTAL) {
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
 +        for(Direction direction : Direction.values()) {
              BlockPos blockpos = p_46718_.relative(direction);
              if (this.hasChunkAt(blockpos)) {
@@ -219,7 +219,7 @@
                          this.neighborChanged(blockstate, blockpos, p_46719_, p_46718_, false);
                      }
                  }
-@@ -1061,6 +_,24 @@
+@@ -1065,6 +_,24 @@
      @Override
      public BiomeManager getBiomeManager() {
          return this.biomeManager;

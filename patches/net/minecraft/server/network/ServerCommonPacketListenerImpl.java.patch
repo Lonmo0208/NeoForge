@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/network/ServerCommonPacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerCommonPacketListenerImpl.java
-@@ -140,7 +_,12 @@
+@@ -118,7 +_,12 @@
          this.send(p_294278_, null);
      }
  
@@ -10,10 +10,10 @@
 +            return;
 +        }
 +
-         if (p_295099_.isTerminal()) {
-             this.close();
-         }
-@@ -178,7 +_,36 @@
+         boolean flag = !this.suspendFlushingOnServerThread || !this.server.isSameThread();
+ 
+         try {
+@@ -152,7 +_,36 @@
          return this.latency;
      }
  

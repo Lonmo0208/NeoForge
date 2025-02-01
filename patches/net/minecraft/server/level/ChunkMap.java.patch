@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/level/ChunkMap.java
 +++ b/net/minecraft/server/level/ChunkMap.java
-@@ -421,6 +_,7 @@
+@@ -422,6 +_,7 @@
                  this.modified = true;
              }
  
@@ -8,7 +8,7 @@
              return p_140179_;
          }
      }
-@@ -534,6 +_,7 @@
+@@ -536,6 +_,7 @@
                  if (this.pendingUnloads.remove(p_140182_, p_140183_) && p_203002_ != null) {
                      if (p_203002_ instanceof LevelChunk) {
                          ((LevelChunk)p_203002_).setLoaded(false);
@@ -67,7 +67,7 @@
              this.updateChunkTracking(p_140185_);
          }
      }
-@@ -1149,7 +_,7 @@
+@@ -1150,7 +_,7 @@
      }
  
      protected void addEntity(Entity p_140200_) {

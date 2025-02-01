@@ -18,9 +18,9 @@
 +                            if (event != null && spawndata.getEntityToSpawn().size() == 1 && spawndata.getEntityToSpawn().contains("id", 8)) {
 +                                ((Mob)entity).finalizeSpawn(p_151312_, event.getDifficulty(), event.getSpawnType(), event.getSpawnData());
                              }
+                         }
  
-                             spawndata.getEquipmentLootTable().ifPresent(mob::equip);
-@@ -309,4 +_,12 @@
+@@ -305,4 +_,12 @@
      public double getoSpin() {
          return this.oSpin;
      }

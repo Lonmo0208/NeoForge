@@ -42,7 +42,7 @@
 +
 +                Zombie zombie = event.getCustomSummonedAid() != null && event.getResult() == net.neoforged.bus.api.Event.Result.ALLOW ? event.getCustomSummonedAid() : EntityType.ZOMBIE.create(this.level());
  
-                 for (int l = 0; l < 50; l++) {
+                 for(int l = 0; l < 50; ++l) {
                      int i1 = i + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
 @@ -304,7 +_,9 @@
                              && this.level().isUnobstructed(zombie)

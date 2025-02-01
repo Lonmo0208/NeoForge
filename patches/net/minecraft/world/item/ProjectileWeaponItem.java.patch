@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/ProjectileWeaponItem.java
 +++ b/net/minecraft/world/item/ProjectileWeaponItem.java
-@@ -108,7 +_,7 @@
+@@ -109,7 +_,7 @@
              abstractarrow.setPierceLevel((byte)j);
          }
  
@@ -9,7 +9,7 @@
      }
  
      protected static boolean hasInfiniteArrows(ItemStack p_330642_, ItemStack p_332202_, boolean p_331512_) {
-@@ -133,7 +_,7 @@
+@@ -134,7 +_,7 @@
      }
  
      protected static ItemStack useAmmo(ItemStack p_331207_, ItemStack p_331434_, LivingEntity p_330302_, boolean p_330934_) {
@@ -18,7 +18,7 @@
          if (!flag) {
              ItemStack itemstack1 = p_331434_.copyWithCount(1);
              itemstack1.set(DataComponents.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
-@@ -146,5 +_,9 @@
+@@ -147,5 +_,9 @@
  
              return itemstack;
          }

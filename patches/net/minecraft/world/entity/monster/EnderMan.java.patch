@@ -37,15 +37,15 @@
              if (flag2) {
                  this.level().gameEvent(GameEvent.TELEPORT, vec3, GameEvent.Context.of(this));
                  if (!this.isSilent()) {
-@@ -451,7 +_,7 @@
+@@ -450,7 +_,7 @@
+         public boolean canUse() {
              if (this.enderman.getCarriedBlock() == null) {
                  return false;
+-            } else if (!this.enderman.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
++            } else if (!net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.enderman.level(), this.enderman)) {
+                 return false;
              } else {
--                return !this.enderman.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
-+                return !net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.enderman.level(), this.enderman)
-                     ? false
-                     : this.enderman.getRandom().nextInt(reducedTickDelay(2000)) == 0;
-             }
+                 return this.enderman.getRandom().nextInt(reducedTickDelay(2000)) == 0;
 @@ -471,7 +_,7 @@
              BlockState blockstate2 = this.enderman.getCarriedBlock();
              if (blockstate2 != null) {
@@ -63,12 +63,12 @@
                  && p_32563_.isCollisionShapeFullBlock(p_32559_, p_32564_)
                  && p_32561_.canSurvive(p_32559_, p_32560_)
                  && p_32559_.getEntities(this.enderman, AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(p_32560_))).isEmpty();
-@@ -594,7 +_,7 @@
+@@ -593,7 +_,7 @@
+         public boolean canUse() {
              if (this.enderman.getCarriedBlock() != null) {
                  return false;
+-            } else if (!this.enderman.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
++            } else if (!net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.enderman.level(), this.enderman)) {
+                 return false;
              } else {
--                return !this.enderman.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
-+                return !net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.enderman.level(), this.enderman)
-                     ? false
-                     : this.enderman.getRandom().nextInt(reducedTickDelay(20)) == 0;
-             }
+                 return this.enderman.getRandom().nextInt(reducedTickDelay(20)) == 0;

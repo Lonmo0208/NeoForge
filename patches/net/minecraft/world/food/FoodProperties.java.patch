@@ -24,9 +24,9 @@
 -    public static record PossibleEffect(MobEffectInstance effect, float probability) {
 +    public static record PossibleEffect(java.util.function.Supplier<MobEffectInstance> effectSupplier, float probability) {
          public static final Codec<FoodProperties.PossibleEffect> CODEC = RecordCodecBuilder.create(
-             p_337893_ -> p_337893_.group(
+             p_336029_ -> p_336029_.group(
                          MobEffectInstance.CODEC.fieldOf("effect").forGetter(FoodProperties.PossibleEffect::effect),
-@@ -94,8 +_,12 @@
+@@ -95,8 +_,12 @@
              FoodProperties.PossibleEffect::new
          );
  

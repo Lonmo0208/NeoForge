@@ -23,7 +23,7 @@
 @@ -185,10 +_,9 @@
                  this.level().addFreshEntity(cow);
  
-                 for (int i = 0; i < 5; i++) {
+                 for(int i = 0; i < 5; ++i) {
 -                    this.level()
 -                        .addFreshEntity(
 -                            new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), new ItemStack(this.getVariant().blockState.getBlock()))

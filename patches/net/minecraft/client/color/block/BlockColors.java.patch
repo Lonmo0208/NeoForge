@@ -36,7 +36,7 @@
 +    /** @deprecated Register via {@link net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Block} */
 +    @Deprecated
      public void register(BlockColor p_92590_, Block... p_92591_) {
-         for (Block block : p_92591_) {
+         for(Block block : p_92591_) {
 -            this.blockColors.addMapping(p_92590_, BuiltInRegistries.BLOCK.getId(block));
 +            this.blockColors.put(block, p_92590_);
          }

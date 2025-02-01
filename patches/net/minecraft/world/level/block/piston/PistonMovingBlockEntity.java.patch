@@ -8,4 +8,4 @@
 +                boolean flag = p_155914_.movedState.isSlimeBlock(); //TODO: is this patch really needed the logic of the original seems sound revisit later
                  Iterator iterator = list.iterator();
  
-                 while (true) {
+                 while(true) {

@@ -15,7 +15,7 @@
 +        if (net.neoforged.neoforge.event.EventHooks.onPotionAttemptBrew(p_155293_)) return;
          ItemStack itemstack = p_155293_.get(3);
  
--        for (int i = 0; i < 3; i++) {
+-        for(int i = 0; i < 3; ++i) {
 -            p_155293_.set(i, PotionBrewing.mix(itemstack, p_155293_.get(i)));
 -        }
 -
@@ -43,11 +43,11 @@
          if (p_59017_ == 3) {
 -            return PotionBrewing.isIngredient(p_59018_);
 +            return net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry.isValidIngredient(p_59018_);
+         } else if (p_59017_ == 4) {
+             return p_59018_.is(Items.BLAZE_POWDER);
          } else {
-             return p_59017_ == 4
-                 ? p_59018_.is(Items.BLAZE_POWDER)
--                : (p_59018_.is(Items.POTION) || p_59018_.is(Items.SPLASH_POTION) || p_59018_.is(Items.LINGERING_POTION) || p_59018_.is(Items.GLASS_BOTTLE))
-+                : net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry.isValidInput(p_59018_)
-                     && this.getItem(p_59017_).isEmpty();
+-            return (p_59018_.is(Items.POTION) || p_59018_.is(Items.SPLASH_POTION) || p_59018_.is(Items.LINGERING_POTION) || p_59018_.is(Items.GLASS_BOTTLE))
++            return net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry.isValidInput(p_59018_)
+                 && this.getItem(p_59017_).isEmpty();
          }
      }

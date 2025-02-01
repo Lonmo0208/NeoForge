@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/item/enchantment/Enchantment.java
 +++ b/net/minecraft/world/item/enchantment/Enchantment.java
-@@ -23,7 +_,7 @@
+@@ -20,7 +_,7 @@
  import net.minecraft.world.item.Item;
  import net.minecraft.world.item.ItemStack;
  
--public class Enchantment implements FeatureElement {
-+public class Enchantment implements FeatureElement, net.neoforged.neoforge.common.extensions.IEnchantmentExtension {
+-public class Enchantment {
++public class Enchantment implements net.neoforged.neoforge.common.extensions.IEnchantmentExtension {
      private final Enchantment.EnchantmentDefinition definition;
      @Nullable
      protected String descriptionId;
-@@ -131,6 +_,7 @@
+@@ -111,6 +_,7 @@
          return 0;
      }
  
@@ -17,7 +17,7 @@
      public float getDamageBonus(int p_44682_, @Nullable EntityType<?> p_320800_) {
          return 0.0F;
      }
-@@ -171,7 +_,7 @@
+@@ -151,7 +_,7 @@
      }
  
      public boolean canEnchant(ItemStack p_44689_) {
@@ -26,7 +26,7 @@
      }
  
      public void doPostAttack(LivingEntity p_44686_, Entity p_44687_, int p_44688_) {
-@@ -196,6 +_,24 @@
+@@ -173,6 +_,24 @@
      }
  
      public boolean isDiscoverable() {

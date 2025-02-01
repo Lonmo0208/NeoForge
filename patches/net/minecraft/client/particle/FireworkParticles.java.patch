@@ -8,6 +8,6 @@
 +                if (factory != null)
 +                    factory.build(this, flag3, flag4, intlist.toIntArray(), intlist1.toIntArray());
 +                else
-                 switch (fireworkexplosion1.shape()) {
+                 switch(fireworkexplosion1.shape()) {
                      case SMALL_BALL:
                          this.createParticleBall(0.25, 2, intlist, intlist1, flag3, flag4);

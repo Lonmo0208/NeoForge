@@ -1,18 +1,16 @@
 --- a/net/minecraft/client/multiplayer/CommonListenerCookie.java
 +++ b/net/minecraft/client/multiplayer/CommonListenerCookie.java
-@@ -22,6 +_,25 @@
+@@ -20,6 +_,22 @@
+     @Nullable String serverBrand,
      @Nullable ServerData serverData,
      @Nullable Screen postDisconnectScreen,
-     Map<ResourceLocation, byte[]> serverCookies,
--    @Nullable ChatComponent.State chatState
-+    @Nullable ChatComponent.State chatState,
+-    Map<ResourceLocation, byte[]> serverCookies
++    Map<ResourceLocation, byte[]> serverCookies,
 +    net.neoforged.neoforge.network.connection.ConnectionType connectionType
  ) {
 +    /**
-+     * @deprecated Use {@link #CommonListenerCookie(GameProfile, WorldSessionTelemetryManager, RegistryAccess.Frozen, FeatureFlagSet, String, ServerData, Screen, Map, ChatComponent.State, net.neoforged.neoforge.network.connection.ConnectionType)}
-+     * instead,to indicate whether the connection is modded.
++     * @deprecated Use {@link #CommonListenerCookie(GameProfile, WorldSessionTelemetryManager, RegistryAccess.Frozen, FeatureFlagSet, String, ServerData, Screen, Map, net.neoforged.neoforge.network.connection.ConnectionType)} instead, to indicate whether the connection is modded.
 +     */
-+    @Deprecated
 +    public CommonListenerCookie(
 +            GameProfile localGameProfile,
 +            WorldSessionTelemetryManager telemetryManager,
@@ -21,9 +19,8 @@
 +            @Nullable String serverBrand,
 +            @Nullable ServerData serverData,
 +            @Nullable Screen postDisconnectScreen,
-+            Map<ResourceLocation, byte[]> serverCookies,
-+            @Nullable ChatComponent.State chatState
++            Map<ResourceLocation, byte[]> serverCookies
 +    ) {
-+        this(localGameProfile, telemetryManager, receivedRegistries, enabledFeatures, serverBrand, serverData, postDisconnectScreen, serverCookies, chatState, net.neoforged.neoforge.network.connection.ConnectionType.VANILLA);
++        this(localGameProfile, telemetryManager, receivedRegistries, enabledFeatures, serverBrand, serverData, postDisconnectScreen, serverCookies, net.neoforged.neoforge.network.connection.ConnectionType.VANILLA);
 +    }
  }

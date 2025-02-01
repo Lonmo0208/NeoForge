@@ -17,7 +17,7 @@
          Container container = getSourceContainer(p_155553_, p_155554_, blockpos, blockstate);
          if (container != null) {
              Direction direction = Direction.DOWN;
-@@ -470,5 +_,9 @@
+@@ -475,5 +_,9 @@
      @Override
      protected AbstractContainerMenu createMenu(int p_59312_, Inventory p_59313_) {
          return new HopperMenu(p_59312_, p_59313_, this);

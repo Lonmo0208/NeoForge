@@ -18,7 +18,7 @@
  
      public static RegistryAccess.Frozen load(ResourceManager p_252046_, RegistryAccess p_249916_, List<RegistryDataLoader.RegistryData<?>> p_250344_) {
          return load((p_321412_, p_321413_) -> p_321412_.loadFromResources(p_252046_, p_321413_), p_249916_, p_250344_);
-@@ -182,7 +_,7 @@
+@@ -185,7 +_,7 @@
      }
  
      private static String registryDirPath(ResourceLocation p_252033_) {
@@ -27,7 +27,7 @@
      }
  
      private static <E> void loadElementFromResource(
-@@ -193,11 +_,16 @@
+@@ -196,12 +_,17 @@
          Resource p_326141_,
          RegistrationInfo p_326033_
      ) throws IOException {
@@ -35,9 +35,10 @@
          try (Reader reader = p_326141_.openAsReader()) {
              JsonElement jsonelement = JsonParser.parseReader(reader);
 -            DataResult<E> dataresult = p_326476_.parse(p_325932_, jsonelement);
--            E e = dataresult.getOrThrow();
+-            E e = dataresult.getOrThrow(false, p_321404_ -> {
 +            DataResult<Optional<E>> dataresult = decoder.parse(p_325932_, jsonelement);
-+            Optional<E> candidate = dataresult.getOrThrow();
++            Optional<E> candidate = dataresult.getOrThrow(false, p_321404_ -> {
+             });
 +            candidate.ifPresentOrElse(e -> {
              p_326195_.register(p_326054_, e, p_326033_);
 +            }, () -> {
@@ -46,12 +47,12 @@
          }
      }
  
-@@ -210,7 +_,7 @@
+@@ -214,7 +_,7 @@
      ) {
          String s = registryDirPath(p_321557_.key().location());
          FileToIdConverter filetoidconverter = FileToIdConverter.json(s);
 -        RegistryOps<JsonElement> registryops = RegistryOps.create(JsonOps.INSTANCE, p_321612_);
 +        RegistryOps<JsonElement> registryops = new net.neoforged.neoforge.common.conditions.ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, p_321612_), net.neoforged.neoforge.common.conditions.ICondition.IContext.TAGS_INVALID);
  
-         for (Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_321535_).entrySet()) {
+         for(Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_321535_).entrySet()) {
              ResourceLocation resourcelocation = entry.getKey();

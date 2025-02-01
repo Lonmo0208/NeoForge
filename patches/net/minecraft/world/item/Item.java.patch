@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/Item.java
 +++ b/net/minecraft/world/item/Item.java
-@@ -54,9 +_,9 @@
+@@ -55,9 +_,9 @@
  import net.minecraft.world.phys.Vec3;
  import org.slf4j.Logger;
  
@@ -12,7 +12,7 @@
      public static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
      public static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
      public static final int DEFAULT_MAX_STACK_SIZE = 64;
-@@ -87,12 +_,14 @@
+@@ -88,12 +_,14 @@
          this.components = p_41383_.buildAndValidateComponents();
          this.craftingRemainingItem = p_41383_.craftingRemainingItem;
          this.requiredFeatures = p_41383_.requiredFeatures;
@@ -28,7 +28,7 @@
      }
  
      @Deprecated
-@@ -111,6 +_,8 @@
+@@ -112,6 +_,8 @@
      public void onUseTick(Level p_41428_, LivingEntity p_41429_, ItemStack p_41430_, int p_41431_) {
      }
  
@@ -37,7 +37,7 @@
      public void onDestroyed(ItemEntity p_150887_) {
      }
  
-@@ -137,7 +_,7 @@
+@@ -138,7 +_,7 @@
  
      public InteractionResultHolder<ItemStack> use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) {
          ItemStack itemstack = p_41433_.getItemInHand(p_41434_);
@@ -46,7 +46,7 @@
          if (foodproperties != null) {
              if (p_41433_.canEat(foodproperties.canAlwaysEat())) {
                  p_41433_.startUsingItem(p_41434_);
-@@ -159,12 +_,13 @@
+@@ -160,12 +_,13 @@
      }
  
      public int getBarWidth(ItemStack p_150900_) {
@@ -62,7 +62,7 @@
          return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
      }
  
-@@ -214,7 +_,7 @@
+@@ -215,7 +_,7 @@
  
      @Override
      public String toString() {
@@ -71,7 +71,7 @@
      }
  
      protected String getOrCreateDescriptionId() {
-@@ -234,10 +_,12 @@
+@@ -235,10 +_,12 @@
      }
  
      @Nullable
@@ -84,7 +84,7 @@
      public boolean hasCraftingRemainingItem() {
          return this.craftingRemainingItem != null;
      }
-@@ -261,7 +_,7 @@
+@@ -262,7 +_,7 @@
      }
  
      public int getUseDuration(ItemStack p_41454_) {
@@ -93,7 +93,7 @@
          return foodproperties != null ? foodproperties.eatDurationTicks() : 0;
      }
  
-@@ -293,6 +_,8 @@
+@@ -294,6 +_,8 @@
          return p_41436_.clip(new ClipContext(vec3, vec31, ClipContext.Block.OUTLINE, p_41438_, p_41437_));
      }
  
@@ -102,14 +102,14 @@
      public int getEnchantmentValue() {
          return 0;
      }
-@@ -301,13 +_,20 @@
+@@ -302,13 +_,20 @@
          return false;
      }
  
 -    @Deprecated
 +    @Deprecated // Use ItemStack sensitive version or data components. (deprecated by vanilla too)
-     public ItemAttributeModifiers getDefaultAttributeModifiers() {
-         return ItemAttributeModifiers.EMPTY;
+     public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot p_41388_) {
+         return ImmutableMultimap.of();
      }
  
 +    protected final boolean canRepair;
@@ -125,7 +125,7 @@
      }
  
      public ItemStack getDefaultInstance() {
-@@ -335,6 +_,32 @@
+@@ -336,6 +_,32 @@
          return this.requiredFeatures;
      }
  
@@ -158,7 +158,7 @@
      public static class Properties {
          private static final Interner<DataComponentMap> COMPONENT_INTERNER = Interners.newStrongInterner();
          @Nullable
-@@ -342,6 +_,7 @@
+@@ -343,6 +_,7 @@
          @Nullable
          Item craftingRemainingItem;
          FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
@@ -166,7 +166,7 @@
  
          public Item.Properties food(FoodProperties p_41490_) {
              return this.component(DataComponents.FOOD, p_41490_);
-@@ -371,12 +_,18 @@
+@@ -372,12 +_,18 @@
              return this.component(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
          }
  

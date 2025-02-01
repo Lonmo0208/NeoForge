@@ -10,7 +10,7 @@
      int litDuration;
 @@ -72,9 +_,14 @@
          public int get(int p_58431_) {
-             switch (p_58431_) {
+             switch(p_58431_) {
                  case 0:
 +                    if (litDuration > Short.MAX_VALUE) {
 +                        // Neo: preserve litTime / litDuration ratio on the client as data slots are synced as shorts.
@@ -24,7 +24,7 @@
                  case 2:
                      return AbstractFurnaceBlockEntity.this.cookingProgress;
                  case 3:
-@@ -114,18 +_,40 @@
+@@ -114,18 +_,38 @@
      ) {
          super(p_154991_, p_154992_, p_154993_);
          this.quickCheck = RecipeManager.createCheck((RecipeType<AbstractCookingRecipe>)p_154994_);
@@ -35,9 +35,7 @@
          fuelCache = null;
      }
  
-+    /**
-+     * @deprecated Neo: get burn times by calling {@link net.neoforged.neoforge.common.extensions.IItemStackExtension#getBurnTime(RecipeType)}
-+     */
++    /**@deprecated Forge: get burn times by calling CommonHooks#getBurnTime(ItemStack)*/
 +    @Deprecated
      public static Map<Item, Integer> getFuel() {
          Map<Item, Integer> map = fuelCache;
@@ -75,7 +73,7 @@
      }
  
 @@ -226,9 +_,9 @@
-         super.loadAdditional(p_155025_, p_323468_);
+         super.load(p_155025_, p_323468_);
          this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
          ContainerHelper.loadAllItems(p_155025_, this.items, p_323468_);
 -        this.litTime = p_155025_.getShort("BurnTime");
@@ -127,7 +125,7 @@
  
 -            if (p_155017_.isLit() && canBurn(p_155014_.registryAccess(), recipeholder, p_155017_.items, i)) {
 +            if (p_155017_.isLit() && p_155017_.canBurn(p_155014_.registryAccess(), recipeholder, p_155017_.items, i)) {
-                 p_155017_.cookingProgress++;
+                 ++p_155017_.cookingProgress;
                  if (p_155017_.cookingProgress == p_155017_.cookingTotalTime) {
                      p_155017_.cookingProgress = 0;
                      p_155017_.cookingTotalTime = getTotalCookTime(p_155014_, p_155017_);
@@ -148,15 +146,16 @@
              if (itemstack.isEmpty()) {
                  return false;
              } else {
-@@ -325,9 +_,9 @@
+@@ -324,10 +_,10 @@
+                     return true;
                  } else if (!ItemStack.isSameItemSameComponents(itemstack1, itemstack)) {
                      return false;
+-                } else if (itemstack1.getCount() < p_155008_ && itemstack1.getCount() < itemstack1.getMaxStackSize()) {
++                } else if (itemstack1.getCount() + itemstack.getCount() <= p_155008_ && itemstack1.getCount() + itemstack.getCount() <= itemstack1.getMaxStackSize()) { // Forge fix: make furnace respect stack sizes in furnace recipes
+                     return true;
                  } else {
--                    return itemstack1.getCount() < p_155008_ && itemstack1.getCount() < itemstack1.getMaxStackSize()
-+                    return itemstack1.getCount() + itemstack.getCount() <= p_155008_ && itemstack1.getCount() + itemstack.getCount() <= itemstack1.getMaxStackSize() // Neo fix: make furnace respect stack sizes in furnace recipes
-                         ? true
--                        : itemstack1.getCount() < itemstack.getMaxStackSize();
-+                        : itemstack1.getCount() + itemstack.getCount() <= itemstack.getMaxStackSize(); // Neo fix: make furnace respect stack sizes in furnace recipes
+-                    return itemstack1.getCount() < itemstack.getMaxStackSize();
++                    return itemstack1.getCount() + itemstack.getCount() <= itemstack.getMaxStackSize(); // Forge fix: make furnace respect stack sizes in furnace recipes
                  }
              }
          } else {
@@ -180,13 +179,12 @@
              }
  
              if (itemstack.is(Blocks.WET_SPONGE.asItem()) && !p_267073_.get(1).isEmpty() && p_267073_.get(1).is(Items.BUCKET)) {
-@@ -361,8 +_,7 @@
-         if (p_58343_.isEmpty()) {
+@@ -362,7 +_,7 @@
              return 0;
          } else {
--            Item item = p_58343_.getItem();
+             Item item = p_58343_.getItem();
 -            return getFuel().getOrDefault(item, 0);
-+            return p_58343_.getBurnTime(this.recipeType);
++            return net.neoforged.neoforge.common.CommonHooks.getBurnTime(p_58343_, this.recipeType);
          }
      }
  
@@ -195,16 +193,16 @@
  
      public static boolean isFuel(ItemStack p_58400_) {
 -        return getFuel().containsKey(p_58400_.getItem());
-+        return p_58400_.getBurnTime(null) > 0;
++        return net.neoforged.neoforge.common.CommonHooks.getBurnTime(p_58400_, null) > 0;
      }
  
      @Override
-@@ -429,7 +_,7 @@
+@@ -433,7 +_,7 @@
              return true;
          } else {
              ItemStack itemstack = this.items.get(1);
 -            return isFuel(p_58390_) || p_58390_.is(Items.BUCKET) && !itemstack.is(Items.BUCKET);
-+            return p_58390_.getBurnTime(this.recipeType) > 0 || p_58390_.is(Items.BUCKET) && !itemstack.is(Items.BUCKET);
++            return net.neoforged.neoforge.common.CommonHooks.getBurnTime(p_58390_, this.recipeType) > 0 || p_58390_.is(Items.BUCKET) && !itemstack.is(Items.BUCKET);
          }
      }
  

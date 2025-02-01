@@ -15,7 +15,7 @@
          }
  
 +        boolean shouldSpread = net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(p_323718_).shouldSpreadAsEntity(p_323718_);
-         for (int j = 0; j < i; j++) {
+         for(int j = 0; j < i; ++j) {
              p_323733_.pushPose();
 -            if (j > 0) {
 +            if (j > 0 && shouldSpread) {

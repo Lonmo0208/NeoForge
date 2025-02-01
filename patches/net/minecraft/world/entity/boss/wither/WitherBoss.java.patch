@@ -3,7 +3,7 @@
 @@ -320,7 +_,7 @@
  
              if (this.destroyBlocksTick > 0) {
-                 this.destroyBlocksTick--;
+                 --this.destroyBlocksTick;
 -                if (this.destroyBlocksTick == 0 && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 +                if (this.destroyBlocksTick == 0 && net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.level(), this)) {
                      boolean flag = false;

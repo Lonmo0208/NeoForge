@@ -22,10 +22,10 @@
 +        java.util.List<ItemStack> inputs = new java.util.ArrayList<>();
          int i = 0;
  
-         for (int j = 0; j < p_44262_.getContainerSize(); j++) {
+         for(int j = 0; j < p_44262_.getContainerSize(); ++j) {
              ItemStack itemstack = p_44262_.getItem(j);
              if (!itemstack.isEmpty()) {
-                 i++;
+                 ++i;
 +                if (isSimple)
                  stackedcontents.accountStack(itemstack, 1);
 +                else inputs.add(itemstack);
@@ -37,12 +37,23 @@
      }
  
      public ItemStack assemble(CraftingContainer p_44260_, HolderLookup.Provider p_335725_) {
-@@ -88,12 +_,12 @@
+@@ -78,6 +_,7 @@
+     }
+ 
+     public static class Serializer implements RecipeSerializer<ShapelessRecipe> {
++        private static final net.minecraft.resources.ResourceLocation NAME = new net.minecraft.resources.ResourceLocation("minecraft", "crafting_shapeless");
+         private static final Codec<ShapelessRecipe> CODEC = RecordCodecBuilder.create(
+             p_332625_ -> p_332625_.group(
+                         ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(p_301127_ -> p_301127_.group),
+@@ -88,14 +_,13 @@
                              .fieldOf("ingredients")
                              .flatXmap(
                                  p_301021_ -> {
--                                    Ingredient[] aingredient = p_301021_.stream().filter(p_300883_ -> !p_300883_.isEmpty()).toArray(Ingredient[]::new);
-+                                    Ingredient[] aingredient = p_301021_.toArray(Ingredient[]::new); // Neo skip the empty check and immediately create the array.
+-                                    Ingredient[] aingredient = p_301021_.stream()
+-                                        .filter(p_300883_ -> !p_300883_.isEmpty())
+-                                        .toArray(p_300865_ -> new Ingredient[p_300865_]);
++                                    Ingredient[] aingredient = p_301021_
++                                              .toArray(Ingredient[]::new); //Forge skip the empty check and immediatly create the array.
                                      if (aingredient.length == 0) {
                                          return DataResult.error(() -> "No ingredients for shapeless recipe");
                                      } else {

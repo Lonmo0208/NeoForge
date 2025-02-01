@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/OptionsScreen.java
 +++ b/net/minecraft/client/gui/screens/OptionsScreen.java
-@@ -104,7 +_,10 @@
+@@ -97,7 +_,10 @@
  
      @Override
      public void onClose() {

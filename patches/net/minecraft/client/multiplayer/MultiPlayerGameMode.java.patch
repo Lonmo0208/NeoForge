@@ -66,7 +66,7 @@
              });
 @@ -215,7 +_,7 @@
              } else {
-                 this.destroyProgress = this.destroyProgress + blockstate.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), p_105284_);
+                 this.destroyProgress += blockstate.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), p_105284_);
                  if (this.destroyTicks % 4.0F == 0.0F) {
 -                    SoundType soundtype = blockstate.getSoundType();
 +                    SoundType soundtype = blockstate.getSoundType(this.minecraft.level, p_105284_, this.minecraft.player);
@@ -75,7 +75,7 @@
                          .play(
 @@ -232,6 +_,7 @@
  
-                 this.destroyTicks++;
+                 ++this.destroyTicks;
                  this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, p_105284_, blockstate, Mth.clamp(this.destroyProgress, 0.0F, 1.0F));
 +                if (net.neoforged.neoforge.common.CommonHooks.onClientMineHold(this.minecraft.player, p_105284_, p_105285_).getUseItem() == net.neoforged.bus.api.Event.Result.DENY) return true;
                  if (this.destroyProgress >= 1.0F) {

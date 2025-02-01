@@ -3,7 +3,7 @@
 @@ -33,7 +_,7 @@
          this.keyBindsList = this.addRenderableWidget(new KeyBindsList(this, this.minecraft));
          this.resetButton = Button.builder(Component.translatable("controls.resetAll"), p_269619_ -> {
-             for (KeyMapping keymapping : this.options.keyMappings) {
+             for(KeyMapping keymapping : this.options.keyMappings) {
 -                keymapping.setKey(keymapping.getDefaultKey());
 +                keymapping.setToDefault();
              }

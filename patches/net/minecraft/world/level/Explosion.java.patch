@@ -7,4 +7,4 @@
 +        net.neoforged.neoforge.event.EventHooks.onExplosionDetonate(this.level, this, list, f2);
          Vec3 vec3 = new Vec3(this.x, this.y, this.z);
  
-         for (Entity entity : list) {
+         for(Entity entity : list) {

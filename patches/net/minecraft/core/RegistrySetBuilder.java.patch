@@ -11,7 +11,7 @@
      private RegistrySetBuilder.BuildState createState(RegistryAccess p_256400_) {
          RegistrySetBuilder.BuildState registrysetbuilder$buildstate = RegistrySetBuilder.BuildState.create(
              p_256400_, this.entries.stream().map(RegistrySetBuilder.RegistryStub::key)
-@@ -185,16 +_,22 @@
+@@ -178,16 +_,22 @@
                  lazyholder.supplier = () -> cloner.clone((T)p_311483_.value(), p_312115_, p_311797_.getValue());
                  map.put(resourcekey, lazyholder);
              });
@@ -43,7 +43,7 @@
              return lookupFromMap(p_311836_, lifecycle, p_312323_, map);
          }
      }
-@@ -236,7 +_,7 @@
+@@ -224,7 +_,7 @@
              RegistrySetBuilder.UniversalLookup registrysetbuilder$universallookup = new RegistrySetBuilder.UniversalLookup(registrysetbuilder$universalowner);
              Builder<ResourceLocation, HolderGetter<?>> builder = ImmutableMap.builder();
              p_255995_.registries()
@@ -52,7 +52,7 @@
              p_256495_.forEach(p_256603_ -> builder.put(p_256603_.location(), registrysetbuilder$universallookup));
              return new RegistrySetBuilder.BuildState(
                  registrysetbuilder$universalowner, registrysetbuilder$universallookup, builder.build(), new HashMap<>(), list
-@@ -260,6 +_,11 @@
+@@ -248,6 +_,11 @@
                  @Override
                  public <S> HolderGetter<S> lookup(ResourceKey<? extends Registry<? extends S>> p_255961_) {
                      return (HolderGetter<S>)BuildState.this.registries.getOrDefault(p_255961_.location(), BuildState.this.lookup);

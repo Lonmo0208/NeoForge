@@ -32,7 +32,7 @@
      }
  
      @Override
-@@ -683,6 +_,7 @@
+@@ -684,6 +_,7 @@
              && (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
          float f = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(this), 0.0F, 1.0F);
          this.input.tick(this.isMovingSlowly(), f);
@@ -40,7 +40,7 @@
          this.minecraft.getTutorial().onInput(this.input);
          if (this.isUsingItem() && !this.isPassenger()) {
              this.input.leftImpulse *= 0.2F;
-@@ -711,7 +_,7 @@
+@@ -712,7 +_,7 @@
          boolean flag4 = this.canStartSprinting();
          boolean flag5 = this.isPassenger() ? this.getVehicle().onGround() : this.onGround();
          boolean flag6 = !flag1 && !flag2;
@@ -49,7 +49,7 @@
              if (this.sprintTriggerTime <= 0 && !this.minecraft.options.keySprint.isDown()) {
                  this.sprintTriggerTime = 7;
              } else {
-@@ -719,15 +_,15 @@
+@@ -720,15 +_,15 @@
              }
          }
  
@@ -68,16 +68,7 @@
                      this.setSprinting(false);
                  }
              } else if (flag8) {
-@@ -736,7 +_,7 @@
-         }
- 
-         boolean flag9 = false;
--        if (this.getAbilities().mayfly) {
-+        if (this.mayFly()) {
-             if (this.minecraft.gameMode.isAlwaysFlying()) {
-                 if (!this.getAbilities().flying) {
-                     this.getAbilities().flying = true;
-@@ -757,14 +_,15 @@
+@@ -758,14 +_,15 @@
  
          if (this.input.jumping && !flag9 && !flag && !this.getAbilities().flying && !this.isPassenger() && !this.onClimbable()) {
              ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
@@ -96,20 +87,11 @@
          }
  
          if (this.isEyeInFluid(FluidTags.WATER)) {
-@@ -866,6 +_,7 @@
+@@ -867,6 +_,7 @@
      @Override
      public void rideTick() {
          super.rideTick();
 +        if (this.wantsToStopRiding() && this.isPassenger()) this.input.shiftKeyDown = false;
          this.handsBusy = false;
-         if (this.getControlledVehicle() instanceof Boat boat) {
-             boat.setInput(this.input.left, this.input.right, this.input.up, this.input.down);
-@@ -1052,7 +_,7 @@
-     }
- 
-     private boolean hasEnoughFoodToStartSprinting() {
--        return this.isPassenger() || (float)this.getFoodData().getFoodLevel() > 6.0F || this.getAbilities().mayfly;
-+        return this.isPassenger() || (float)this.getFoodData().getFoodLevel() > 6.0F || this.mayFly();
-     }
- 
-     public float getWaterVision() {
+         Entity entity = this.getControlledVehicle();
+         if (entity instanceof Boat boat) {
