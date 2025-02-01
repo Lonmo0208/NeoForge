@@ -1,0 +1,21 @@
+--- a/net/minecraft/client/gui/screens/worldselection/EditWorldScreen.java
++++ b/net/minecraft/client/gui/screens/worldselection/EditWorldScreen.java
+@@ -11,6 +_,7 @@
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.gui.Font;
+ import net.minecraft.client.gui.GuiGraphics;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.EditBox;
+ import net.minecraft.client.gui.components.StringWidget;
+@@ -113,7 +_,9 @@
+             );
+         this.layout.addChild(new SpacerElement(200, 20));
+         this.layout.addChild(linearlayout);
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_321379_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321379_);
++        });
+     }
+ 
+     @Override

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/BigDripleafStemBlock.java
++++ b/net/minecraft/world/level/block/BigDripleafStemBlock.java
+@@ -44,7 +_,7 @@
+ 
+     @Override
+     protected VoxelShape getShape(BlockState p_152360_, BlockGetter p_152361_, BlockPos p_152362_, CollisionContext p_152363_) {
+-        switch((Direction)p_152360_.getValue(FACING)) {
++        switch ((Direction)p_152360_.getValue(FACING)) {
+             case SOUTH:
+                 return SOUTH_SHAPE;
+             case NORTH:

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/PeriodicNotificationManager.java
++++ b/net/minecraft/client/PeriodicNotificationManager.java
+@@ -158,7 +_,7 @@
+             long i = this.elapsed.getAndAdd(this.period);
+             long j = this.elapsed.get();
+ 
+-            for(PeriodicNotificationManager.Notification periodicnotificationmanager$notification : this.notifications) {
++            for (PeriodicNotificationManager.Notification periodicnotificationmanager$notification : this.notifications) {
+                 if (i >= periodicnotificationmanager$notification.delay) {
+                     long k = i / periodicnotificationmanager$notification.period;
+                     long l = j / periodicnotificationmanager$notification.period;

@@ -1,0 +1,16 @@
+--- a/net/minecraft/server/players/ServerOpList.java
++++ b/net/minecraft/server/players/ServerOpList.java
+@@ -17,12 +_,7 @@
+ 
+     @Override
+     public String[] getUserList() {
+-        return this.getEntries()
+-            .stream()
+-            .map(StoredUserEntry::getUser)
+-            .filter(Objects::nonNull)
+-            .map(GameProfile::getName)
+-            .toArray(p_143997_ -> new String[p_143997_]);
++        return this.getEntries().stream().map(StoredUserEntry::getUser).filter(Objects::nonNull).map(GameProfile::getName).toArray(String[]::new);
+     }
+ 
+     public boolean canBypassPlayerLimit(GameProfile p_11352_) {

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/sounds/ChannelAccess.java
++++ b/net/minecraft/client/sounds/ChannelAccess.java
+@@ -48,7 +_,7 @@
+         this.executor.execute(() -> {
+             Iterator<ChannelAccess.ChannelHandle> iterator = this.channels.iterator();
+ 
+-            while(iterator.hasNext()) {
++            while (iterator.hasNext()) {
+                 ChannelAccess.ChannelHandle channelaccess$channelhandle = iterator.next();
+                 channelaccess$channelhandle.channel.updateStream();
+                 if (channelaccess$channelhandle.channel.stopped()) {

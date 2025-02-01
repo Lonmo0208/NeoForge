@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/model/LavaSlimeModel.java
++++ b/net/minecraft/client/model/LavaSlimeModel.java
+@@ -31,7 +_,7 @@
+         MeshDefinition meshdefinition = new MeshDefinition();
+         PartDefinition partdefinition = meshdefinition.getRoot();
+ 
+-        for(int i = 0; i < 8; ++i) {
++        for (int i = 0; i < 8; i++) {
+             int j = 0;
+             int k = i;
+             if (i == 2) {
+@@ -60,7 +_,7 @@
+             f = 0.0F;
+         }
+ 
+-        for(int i = 0; i < this.bodyCubes.length; ++i) {
++        for (int i = 0; i < this.bodyCubes.length; i++) {
+             this.bodyCubes[i].y = (float)(-(4 - i)) * f * 1.7F;
+         }
+     }

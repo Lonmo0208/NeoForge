@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/effect/WitherMobEffect.java
++++ b/net/minecraft/world/effect/WitherMobEffect.java
+@@ -16,10 +_,6 @@
+     @Override
+     public boolean shouldApplyEffectTickThisTick(int p_295629_, int p_295734_) {
+         int i = 40 >> p_295734_;
+-        if (i > 0) {
+-            return p_295629_ % i == 0;
+-        } else {
+-            return true;
+-        }
++        return i > 0 ? p_295629_ % i == 0 : true;
+     }
+ }

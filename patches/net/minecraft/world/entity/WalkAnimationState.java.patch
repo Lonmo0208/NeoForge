@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/entity/WalkAnimationState.java
++++ b/net/minecraft/world/entity/WalkAnimationState.java
+@@ -13,8 +_,8 @@
+ 
+     public void update(float p_267993_, float p_267967_) {
+         this.speedOld = this.speed;
+-        this.speed += (p_267993_ - this.speed) * p_267967_;
+-        this.position += this.speed;
++        this.speed = this.speed + (p_267993_ - this.speed) * p_267967_;
++        this.position = this.position + this.speed;
+     }
+ 
+     public float speed() {

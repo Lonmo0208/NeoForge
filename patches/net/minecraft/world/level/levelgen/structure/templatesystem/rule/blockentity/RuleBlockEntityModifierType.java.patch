@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/level/levelgen/structure/templatesystem/rule/blockentity/RuleBlockEntityModifierType.java
++++ b/net/minecraft/world/level/levelgen/structure/templatesystem/rule/blockentity/RuleBlockEntityModifierType.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import net.minecraft.core.Registry;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ 
+@@ -10,9 +_,9 @@
+     RuleBlockEntityModifierType<AppendStatic> APPEND_STATIC = register("append_static", AppendStatic.CODEC);
+     RuleBlockEntityModifierType<AppendLoot> APPEND_LOOT = register("append_loot", AppendLoot.CODEC);
+ 
+-    Codec<P> codec();
++    MapCodec<P> codec();
+ 
+-    private static <P extends RuleBlockEntityModifier> RuleBlockEntityModifierType<P> register(String p_277659_, Codec<P> p_277876_) {
+-        return Registry.register(BuiltInRegistries.RULE_BLOCK_ENTITY_MODIFIER, p_277659_, () -> p_277876_);
++    private static <P extends RuleBlockEntityModifier> RuleBlockEntityModifierType<P> register(String p_277659_, MapCodec<P> p_338294_) {
++        return Registry.register(BuiltInRegistries.RULE_BLOCK_ENTITY_MODIFIER, p_277659_, () -> p_338294_);
+     }
+ }

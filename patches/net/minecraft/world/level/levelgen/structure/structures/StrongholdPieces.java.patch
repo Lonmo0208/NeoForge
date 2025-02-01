@@ -1,0 +1,285 @@
+--- a/net/minecraft/world/level/levelgen/structure/structures/StrongholdPieces.java
++++ b/net/minecraft/world/level/levelgen/structure/structures/StrongholdPieces.java
+@@ -21,7 +_,6 @@
+ import net.minecraft.world.level.block.SlabBlock;
+ import net.minecraft.world.level.block.StairBlock;
+ import net.minecraft.world.level.block.WallTorchBlock;
+-import net.minecraft.world.level.block.entity.BlockEntity;
+ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+@@ -72,7 +_,7 @@
+     public static void resetPieces() {
+         currentPieces = Lists.newArrayList();
+ 
+-        for(StrongholdPieces.PieceWeight strongholdpieces$pieceweight : STRONGHOLD_PIECE_WEIGHTS) {
++        for (StrongholdPieces.PieceWeight strongholdpieces$pieceweight : STRONGHOLD_PIECE_WEIGHTS) {
+             strongholdpieces$pieceweight.placeCount = 0;
+             currentPieces.add(strongholdpieces$pieceweight);
+         }
+@@ -84,12 +_,12 @@
+         boolean flag = false;
+         totalWeight = 0;
+ 
+-        for(StrongholdPieces.PieceWeight strongholdpieces$pieceweight : currentPieces) {
++        for (StrongholdPieces.PieceWeight strongholdpieces$pieceweight : currentPieces) {
+             if (strongholdpieces$pieceweight.maxPlaceCount > 0 && strongholdpieces$pieceweight.placeCount < strongholdpieces$pieceweight.maxPlaceCount) {
+                 flag = true;
+             }
+ 
+-            totalWeight += strongholdpieces$pieceweight.weight;
++            totalWeight = totalWeight + strongholdpieces$pieceweight.weight;
+         }
+ 
+         return flag;
+@@ -176,11 +_,11 @@
+ 
+             int j = 0;
+ 
+-            while(j < 5) {
+-                ++j;
++            while (j < 5) {
++                j++;
+                 int i = p_229420_.nextInt(totalWeight);
+ 
+-                for(StrongholdPieces.PieceWeight strongholdpieces$pieceweight : currentPieces) {
++                for (StrongholdPieces.PieceWeight strongholdpieces$pieceweight : currentPieces) {
+                     i -= strongholdpieces$pieceweight.weight;
+                     if (i < 0) {
+                         if (!strongholdpieces$pieceweight.doPlace(p_229425_) || strongholdpieces$pieceweight == p_229418_.previousPiece) {
+@@ -191,7 +_,7 @@
+                             strongholdpieces$pieceweight.pieceClass, p_229419_, p_229420_, p_229421_, p_229422_, p_229423_, p_229424_, p_229425_
+                         );
+                         if (strongholdpieces$strongholdpiece1 != null) {
+-                            ++strongholdpieces$pieceweight.placeCount;
++                            strongholdpieces$pieceweight.placeCount++;
+                             p_229418_.previousPiece = strongholdpieces$pieceweight;
+                             if (!strongholdpieces$pieceweight.isValid()) {
+                                 currentPieces.remove(strongholdpieces$pieceweight);
+@@ -291,7 +_,7 @@
+             this.placeBlock(p_229472_, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 3, 2, 2, p_229476_);
+             this.placeBlock(p_229472_, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 3, 2, 4, p_229476_);
+ 
+-            for(int i = 2; i <= 4; ++i) {
++            for (int i = 2; i <= 4; i++) {
+                 this.placeBlock(p_229472_, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 2, 1, i, p_229476_);
+             }
+ 
+@@ -332,7 +_,7 @@
+                 return null;
+             } else {
+                 if (structurepiece.getBoundingBox().minY() == boundingbox.minY()) {
+-                    for(int j = 2; j >= 1; --j) {
++                    for (int j = 2; j >= 1; j--) {
+                         boundingbox = BoundingBox.orientBox(p_229512_, p_229513_, p_229514_, -1, -1, 0, 5, 5, j, p_229515_);
+                         if (!structurepiece.getBoundingBox().intersects(boundingbox)) {
+                             return BoundingBox.orientBox(p_229512_, p_229513_, p_229514_, -1, -1, 0, 5, 5, j + 1, p_229515_);
+@@ -354,14 +_,14 @@
+             ChunkPos p_229507_,
+             BlockPos p_229508_
+         ) {
+-            for(int i = 0; i < this.steps; ++i) {
++            for (int i = 0; i < this.steps; i++) {
+                 this.placeBlock(p_229502_, Blocks.STONE_BRICKS.defaultBlockState(), 0, 0, i, p_229506_);
+                 this.placeBlock(p_229502_, Blocks.STONE_BRICKS.defaultBlockState(), 1, 0, i, p_229506_);
+                 this.placeBlock(p_229502_, Blocks.STONE_BRICKS.defaultBlockState(), 2, 0, i, p_229506_);
+                 this.placeBlock(p_229502_, Blocks.STONE_BRICKS.defaultBlockState(), 3, 0, i, p_229506_);
+                 this.placeBlock(p_229502_, Blocks.STONE_BRICKS.defaultBlockState(), 4, 0, i, p_229506_);
+ 
+-                for(int j = 1; j <= 3; ++j) {
++                for (int j = 1; j <= 3; j++) {
+                     this.placeBlock(p_229502_, Blocks.STONE_BRICKS.defaultBlockState(), 0, j, i, p_229506_);
+                     this.placeBlock(p_229502_, Blocks.CAVE_AIR.defaultBlockState(), 1, j, i, p_229506_);
+                     this.placeBlock(p_229502_, Blocks.CAVE_AIR.defaultBlockState(), 2, j, i, p_229506_);
+@@ -634,7 +_,7 @@
+             int j = 1;
+             int k = 12;
+ 
+-            for(int l = 1; l <= 13; ++l) {
++            for (int l = 1; l <= 13; l++) {
+                 if ((l - 1) % 4 == 0) {
+                     this.generateBox(
+                         p_229596_, p_229600_, 1, 1, l, 1, 4, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false
+@@ -668,7 +_,7 @@
+                 }
+             }
+ 
+-            for(int l1 = 3; l1 < 12; l1 += 2) {
++            for (int l1 = 3; l1 < 12; l1 += 2) {
+                 this.generateBox(p_229596_, p_229600_, 3, 1, l1, 4, 3, l1, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                 this.generateBox(p_229596_, p_229600_, 6, 1, l1, 7, 3, l1, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                 this.generateBox(p_229596_, p_229600_, 9, 1, l1, 10, 3, l1, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+@@ -719,7 +_,7 @@
+                     p_229600_
+                 );
+ 
+-                for(int i1 = 0; i1 <= 2; ++i1) {
++                for (int i1 = 0; i1 <= 2; i1++) {
+                     this.placeBlock(
+                         p_229596_,
+                         Blocks.OAK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, Boolean.valueOf(true)).setValue(FenceBlock.WEST, Boolean.valueOf(true)),
+@@ -876,12 +_,12 @@
+                 .setValue(IronBarsBlock.WEST, Boolean.valueOf(true))
+                 .setValue(IronBarsBlock.EAST, Boolean.valueOf(true));
+ 
+-            for(int j = 3; j < 14; j += 2) {
++            for (int j = 3; j < 14; j += 2) {
+                 this.generateBox(p_229635_, p_229639_, 0, 3, j, 0, 4, j, blockstate, blockstate, false);
+                 this.generateBox(p_229635_, p_229639_, 10, 3, j, 10, 4, j, blockstate, blockstate, false);
+             }
+ 
+-            for(int i1 = 2; i1 < 9; i1 += 2) {
++            for (int i1 = 2; i1 < 9; i1 += 2) {
+                 this.generateBox(p_229635_, p_229639_, i1, 3, 15, i1, 4, 15, blockstate1, blockstate1, false);
+             }
+ 
+@@ -890,7 +_,7 @@
+             this.generateBox(p_229635_, p_229639_, 4, 2, 6, 6, 2, 7, false, p_229638_, StrongholdPieces.SMOOTH_STONE_SELECTOR);
+             this.generateBox(p_229635_, p_229639_, 4, 3, 7, 6, 3, 7, false, p_229638_, StrongholdPieces.SMOOTH_STONE_SELECTOR);
+ 
+-            for(int k = 4; k <= 6; ++k) {
++            for (int k = 4; k <= 6; k++) {
+                 this.placeBlock(p_229635_, blockstate5, k, 1, 4, p_229639_);
+                 this.placeBlock(p_229635_, blockstate5, k, 2, 5, p_229639_);
+                 this.placeBlock(p_229635_, blockstate5, k, 3, 6, p_229639_);
+@@ -903,7 +_,7 @@
+             boolean flag = true;
+             boolean[] aboolean = new boolean[12];
+ 
+-            for(int l = 0; l < aboolean.length; ++l) {
++            for (int l = 0; l < aboolean.length; l++) {
+                 aboolean[l] = p_229638_.nextFloat() > 0.9F;
+                 flag &= aboolean[l];
+             }
+@@ -920,7 +_,6 @@
+             this.placeBlock(p_229635_, blockstate4.setValue(EndPortalFrameBlock.HAS_EYE, Boolean.valueOf(aboolean[9])), 7, 3, 9, p_229639_);
+             this.placeBlock(p_229635_, blockstate4.setValue(EndPortalFrameBlock.HAS_EYE, Boolean.valueOf(aboolean[10])), 7, 3, 10, p_229639_);
+             this.placeBlock(p_229635_, blockstate4.setValue(EndPortalFrameBlock.HAS_EYE, Boolean.valueOf(aboolean[11])), 7, 3, 11, p_229639_);
+-            this.placeBlock(p_229635_, Blocks.PEDESTAL.defaultBlockState(), 5, 2, 10, p_229639_);
+             if (flag) {
+                 BlockState blockstate7 = Blocks.END_PORTAL.defaultBlockState();
+                 this.placeBlock(p_229635_, blockstate7, 4, 3, 9, p_229639_);
+@@ -939,8 +_,7 @@
+                 if (p_229639_.isInside(blockpos)) {
+                     this.hasPlacedSpawner = true;
+                     p_229635_.setBlock(blockpos, Blocks.SPAWNER.defaultBlockState(), 2);
+-                    BlockEntity blockentity = p_229635_.getBlockEntity(blockpos);
+-                    if (blockentity instanceof SpawnerBlockEntity spawnerblockentity) {
++                    if (p_229635_.getBlockEntity(blockpos) instanceof SpawnerBlockEntity spawnerblockentity) {
+                         spawnerblockentity.setEntityId(EntityType.SILVERFISH, p_229638_);
+                     }
+                 }
+@@ -995,7 +_,7 @@
+             this.generateBox(p_229667_, p_229671_, 4, 1, 7, 4, 3, 7, false, p_229670_, StrongholdPieces.SMOOTH_STONE_SELECTOR);
+             this.generateBox(p_229667_, p_229671_, 4, 1, 9, 4, 3, 9, false, p_229670_, StrongholdPieces.SMOOTH_STONE_SELECTOR);
+ 
+-            for(int i = 1; i <= 3; ++i) {
++            for (int i = 1; i <= 3; i++) {
+                 this.placeBlock(
+                     p_229667_,
+                     Blocks.IRON_BARS
+@@ -1199,7 +_,7 @@
+             this.generateBox(p_229725_, p_229729_, 4, 1, 10, 6, 3, 10, CAVE_AIR, CAVE_AIR, false);
+             this.generateBox(p_229725_, p_229729_, 0, 1, 4, 0, 3, 6, CAVE_AIR, CAVE_AIR, false);
+             this.generateBox(p_229725_, p_229729_, 10, 1, 4, 10, 3, 6, CAVE_AIR, CAVE_AIR, false);
+-            switch(this.type) {
++            switch (this.type) {
+                 case 0:
+                     this.placeBlock(p_229725_, Blocks.STONE_BRICKS.defaultBlockState(), 5, 1, 5, p_229729_);
+                     this.placeBlock(p_229725_, Blocks.STONE_BRICKS.defaultBlockState(), 5, 2, 5, p_229729_);
+@@ -1218,7 +_,7 @@
+                     this.placeBlock(p_229725_, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), 5, 1, 6, p_229729_);
+                     break;
+                 case 1:
+-                    for(int i1 = 0; i1 < 5; ++i1) {
++                    for (int i1 = 0; i1 < 5; i1++) {
+                         this.placeBlock(p_229725_, Blocks.STONE_BRICKS.defaultBlockState(), 3, 1, 3 + i1, p_229729_);
+                         this.placeBlock(p_229725_, Blocks.STONE_BRICKS.defaultBlockState(), 7, 1, 3 + i1, p_229729_);
+                         this.placeBlock(p_229725_, Blocks.STONE_BRICKS.defaultBlockState(), 3 + i1, 1, 3, p_229729_);
+@@ -1231,12 +_,12 @@
+                     this.placeBlock(p_229725_, Blocks.WATER.defaultBlockState(), 5, 4, 5, p_229729_);
+                     break;
+                 case 2:
+-                    for(int i = 1; i <= 9; ++i) {
++                    for (int i = 1; i <= 9; i++) {
+                         this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), 1, 3, i, p_229729_);
+                         this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), 9, 3, i, p_229729_);
+                     }
+ 
+-                    for(int j = 1; j <= 9; ++j) {
++                    for (int j = 1; j <= 9; j++) {
+                         this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), j, 3, 1, p_229729_);
+                         this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), j, 3, 9, p_229729_);
+                     }
+@@ -1250,7 +_,7 @@
+                     this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), 4, 3, 5, p_229729_);
+                     this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), 6, 3, 5, p_229729_);
+ 
+-                    for(int k = 1; k <= 3; ++k) {
++                    for (int k = 1; k <= 3; k++) {
+                         this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), 4, k, 4, p_229729_);
+                         this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), 6, k, 4, p_229729_);
+                         this.placeBlock(p_229725_, Blocks.COBBLESTONE.defaultBlockState(), 4, k, 6, p_229729_);
+@@ -1259,7 +_,7 @@
+ 
+                     this.placeBlock(p_229725_, Blocks.WALL_TORCH.defaultBlockState(), 5, 3, 5, p_229729_);
+ 
+-                    for(int l = 2; l <= 8; ++l) {
++                    for (int l = 2; l <= 8; l++) {
+                         this.placeBlock(p_229725_, Blocks.OAK_PLANKS.defaultBlockState(), 2, 3, l, p_229729_);
+                         this.placeBlock(p_229725_, Blocks.OAK_PLANKS.defaultBlockState(), 3, 3, l, p_229729_);
+                         if (l <= 3 || l >= 7) {
+@@ -1529,7 +_,7 @@
+             this.generateSmallDoor(p_229853_, p_229856_, p_229857_, StrongholdPieces.StrongholdPiece.SmallDoorType.OPENING, 1, 1, 7);
+             BlockState blockstate = Blocks.COBBLESTONE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
+ 
+-            for(int i = 0; i < 6; ++i) {
++            for (int i = 0; i < 6; i++) {
+                 this.placeBlock(p_229853_, blockstate, 1, 6 - i, 1 + i, p_229857_);
+                 this.placeBlock(p_229853_, blockstate, 2, 6 - i, 1 + i, p_229857_);
+                 this.placeBlock(p_229853_, blockstate, 3, 6 - i, 1 + i, p_229857_);
+@@ -1568,7 +_,7 @@
+             int p_229886_,
+             int p_229887_
+         ) {
+-            switch(p_229884_) {
++            switch (p_229884_) {
+                 case OPENING:
+                     this.generateBox(
+                         p_229881_, p_229883_, p_229885_, p_229886_, p_229887_, p_229885_ + 3 - 1, p_229886_ + 3 - 1, p_229887_, CAVE_AIR, CAVE_AIR, false
+@@ -1699,7 +_,7 @@
+ 
+         protected StrongholdPieces.StrongholdPiece.SmallDoorType randomSmallDoor(RandomSource p_229900_) {
+             int i = p_229900_.nextInt(5);
+-            switch(i) {
++            switch (i) {
+                 case 0:
+                 case 1:
+                 default:
+@@ -1719,7 +_,7 @@
+         ) {
+             Direction direction = this.getOrientation();
+             if (direction != null) {
+-                switch(direction) {
++                switch (direction) {
+                     case NORTH:
+                         return StrongholdPieces.generateAndAddPiece(
+                             p_229894_,
+@@ -1776,7 +_,7 @@
+         ) {
+             Direction direction = this.getOrientation();
+             if (direction != null) {
+-                switch(direction) {
++                switch (direction) {
+                     case NORTH:
+                         return StrongholdPieces.generateAndAddPiece(
+                             p_229902_,
+@@ -1833,7 +_,7 @@
+         ) {
+             Direction direction = this.getOrientation();
+             if (direction != null) {
+-                switch(direction) {
++                switch (direction) {
+                     case NORTH:
+                         return StrongholdPieces.generateAndAddPiece(
+                             p_229908_,

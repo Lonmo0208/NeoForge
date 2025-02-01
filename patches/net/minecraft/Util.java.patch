@@ -1,5 +1,32 @@
 --- a/net/minecraft/Util.java
 +++ b/net/minecraft/Util.java
+@@ -14,7 +_,6 @@
+ import com.mojang.logging.LogUtils;
+ import com.mojang.serialization.DataResult;
+ import com.mojang.serialization.Dynamic;
+-import com.mojang.serialization.DataResult.PartialResult;
+ import it.unimi.dsi.fastutil.ints.IntArrayList;
+ import it.unimi.dsi.fastutil.objects.Object2IntMap;
+ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+@@ -110,13 +_,17 @@
+         .filter(p_201865_ -> p_201865_.getScheme().equalsIgnoreCase("jar"))
+         .findFirst()
+         .orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
+-    private static Consumer<String> thePauser = p_313412_ -> {
++    private static Consumer<String> thePauser = p_201905_ -> {
+     };
+ 
+     public static <K, V> Collector<Entry<? extends K, ? extends V>, ?, Map<K, V>> toMap() {
+         return Collectors.toMap(Entry::getKey, Entry::getValue);
+     }
+ 
++    public static <T> Collector<T, ?, List<T>> toMutableList() {
++        return Collectors.toCollection(Lists::newArrayList);
++    }
++
+     public static <T extends Comparable<T>> String getPropertyName(Property<T> p_137454_, Object p_137455_) {
+         return p_137454_.getName((T)p_137455_);
+     }
 @@ -264,8 +_,8 @@
                  .getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getDataVersion().getVersion()))
                  .getChoiceType(p_137552_, p_137553_);
@@ -11,6 +38,93 @@
                  throw illegalargumentexception;
              }
          }
+@@ -312,12 +_,12 @@
+     public static <T> Predicate<T> allOf(List<? extends Predicate<T>> p_323679_) {
+         List<Predicate<T>> list = List.copyOf(p_323679_);
+ 
+-        return switch(list.size()) {
++        return switch (list.size()) {
+             case 0 -> p_323042_ -> true;
+             case 1 -> (Predicate)list.get(0);
+             case 2 -> list.get(0).and(list.get(1));
+             default -> p_323044_ -> {
+-            for(Predicate<T> predicate : list) {
++            for (Predicate<T> predicate : list) {
+                 if (!predicate.test((T)p_323044_)) {
+                     return false;
+                 }
+@@ -331,12 +_,12 @@
+     public static <T> Predicate<T> anyOf(List<? extends Predicate<T>> p_323722_) {
+         List<Predicate<T>> list = List.copyOf(p_323722_);
+ 
+-        return switch(list.size()) {
++        return switch (list.size()) {
+             case 0 -> p_323047_ -> false;
+             case 1 -> (Predicate)list.get(0);
+             case 2 -> list.get(0).or(list.get(1));
+             default -> p_323046_ -> {
+-            for(Predicate<T> predicate : list) {
++            for (Predicate<T> predicate : list) {
+                 if (predicate.test((T)p_323046_)) {
+                     return true;
+                 }
+@@ -379,7 +_,7 @@
+         if (p_137468_ != null) {
+             T t1 = t;
+ 
+-            while(t1 != p_137468_) {
++            while (t1 != p_137468_) {
+                 if (iterator.hasNext()) {
+                     t1 = iterator.next();
+                 }
+@@ -395,17 +_,18 @@
+ 
+     public static <T> T findPreviousInIterable(Iterable<T> p_137555_, @Nullable T p_137556_) {
+         Iterator<T> iterator = p_137555_.iterator();
++        T t = null;
+ 
+-        T t;
+-        T t1;
+-        for(t = null; iterator.hasNext(); t = t1) {
+-            t1 = iterator.next();
++        while (iterator.hasNext()) {
++            T t1 = iterator.next();
+             if (t1 == p_137556_) {
+                 if (t == null) {
+-                    t = (T)(iterator.hasNext() ? Iterators.getLast(iterator) : p_137556_);
++                    t = iterator.hasNext() ? Iterators.getLast(iterator) : p_137556_;
+                 }
+                 break;
+             }
++
++            t = t1;
+         }
+ 
+         return t;
+@@ -440,7 +_,7 @@
+         CompletableFuture<List<V>> completablefuture = new CompletableFuture<>();
+         return fallibleSequence(p_214685_, p_274642_ -> {
+             if (completablefuture.completeExceptionally(p_274642_)) {
+-                for(CompletableFuture<? extends V> completablefuture1 : p_214685_) {
++                for (CompletableFuture<? extends V> completablefuture1 : p_214685_) {
+                     completablefuture1.cancel(true);
+                 }
+             }
+@@ -452,12 +_,12 @@
+         CompletableFuture<?>[] completablefuture = new CompletableFuture[p_214632_.size()];
+         p_214632_.forEach(p_214641_ -> {
+             int i = list.size();
+-            list.add((V)null);
++            list.add(null);
+             completablefuture[i] = p_214641_.whenComplete((p_214650_, p_214651_) -> {
+                 if (p_214651_ != null) {
+                     p_214633_.accept(p_214651_);
+                 } else {
+-                    list.set(i, p_214650_);
++                    list.set(i, (V)p_214650_);
+                 }
+             });
+         });
 @@ -484,20 +_,20 @@
  
      public static void logAndPauseIfInIde(String p_143786_) {
@@ -35,3 +149,140 @@
              LOGGER.error("Trying to throw a fatal exception, pausing in IDE", p_137571_);
              doPause(p_137571_.getMessage());
          }
+@@ -611,7 +_,7 @@
+     }
+ 
+     private static boolean executeInSequence(BooleanSupplier... p_137549_) {
+-        for(BooleanSupplier booleansupplier : p_137549_) {
++        for (BooleanSupplier booleansupplier : p_137549_) {
+             if (!booleansupplier.getAsBoolean()) {
+                 LOGGER.warn("Failed to execute {}", booleansupplier);
+                 return false;
+@@ -622,7 +_,7 @@
+     }
+ 
+     private static boolean runWithRetries(int p_137450_, String p_137451_, BooleanSupplier... p_137452_) {
+-        for(int i = 0; i < p_137450_; ++i) {
++        for (int i = 0; i < p_137450_; i++) {
+             if (executeInSequence(p_137452_)) {
+                 return true;
+             }
+@@ -658,16 +_,16 @@
+     public static int offsetByCodepoints(String p_137480_, int p_137481_, int p_137482_) {
+         int i = p_137480_.length();
+         if (p_137482_ >= 0) {
+-            for(int j = 0; p_137481_ < i && j < p_137482_; ++j) {
++            for (int j = 0; p_137481_ < i && j < p_137482_; j++) {
+                 if (Character.isHighSurrogate(p_137480_.charAt(p_137481_++)) && p_137481_ < i && Character.isLowSurrogate(p_137480_.charAt(p_137481_))) {
+-                    ++p_137481_;
++                    p_137481_++;
+                 }
+             }
+         } else {
+-            for(int k = p_137482_; p_137481_ > 0 && k < 0; ++k) {
+-                --p_137481_;
++            for (int k = p_137482_; p_137481_ > 0 && k < 0; k++) {
++                p_137481_--;
+                 if (Character.isLowSurrogate(p_137480_.charAt(p_137481_)) && p_137481_ > 0 && Character.isHighSurrogate(p_137480_.charAt(p_137481_ - 1))) {
+-                    --p_137481_;
++                    p_137481_--;
+                 }
+             }
+         }
+@@ -712,7 +_,7 @@
+         Thread thread = new Thread("Timer hack thread") {
+             @Override
+             public void run() {
+-                while(true) {
++                while (true) {
+                     try {
+                         Thread.sleep(2147483647L);
+                     } catch (InterruptedException interruptedexception) {
+@@ -786,7 +_,7 @@
+         IntArrayList intarraylist = IntArrayList.wrap(p_214659_.toArray());
+         int i = intarraylist.size();
+ 
+-        for(int j = i; j > 1; --j) {
++        for (int j = i; j > 1; j--) {
+             int k = p_214660_.nextInt(j);
+             intarraylist.set(j - 1, intarraylist.set(k, intarraylist.getInt(j - 1)));
+         }
+@@ -809,7 +_,7 @@
+     public static <T> void shuffle(List<T> p_309187_, RandomSource p_214675_) {
+         int i = p_309187_.size();
+ 
+-        for(int j = i; j > 1; --j) {
++        for (int j = i; j > 1; j--) {
+             int k = p_214675_.nextInt(j);
+             p_309187_.set(j - 1, p_309187_.set(k, p_309187_.get(j - 1)));
+         }
+@@ -823,7 +_,7 @@
+         BlockingQueue<Runnable> blockingqueue = new LinkedBlockingQueue<>();
+         T t = p_214653_.apply(blockingqueue::add);
+ 
+-        while(!p_214654_.test(t)) {
++        while (!p_214654_.test(t)) {
+             try {
+                 Runnable runnable = blockingqueue.poll(100L, TimeUnit.MILLISECONDS);
+                 if (runnable != null) {
+@@ -851,7 +_,7 @@
+             Object2IntMap<T> object2intmap = new Object2IntOpenHashMap<>(i);
+             object2intmap.defaultReturnValue(-1);
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 object2intmap.put(p_214687_.get(j), j);
+             }
+ 
+@@ -868,7 +_,7 @@
+             Reference2IntMap<T> reference2intmap = new Reference2IntOpenHashMap<>(i);
+             reference2intmap.defaultReturnValue(-1);
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 reference2intmap.put(p_304758_.get(j), j);
+             }
+ 
+@@ -876,32 +_,8 @@
+         }
+     }
+ 
+-    public static <T, E extends Throwable> T getOrThrow(DataResult<T> p_261812_, Function<String, E> p_261468_) throws E {
+-        Optional<PartialResult<T>> optional = p_261812_.error();
+-        if (optional.isPresent()) {
+-            throw p_261468_.apply(optional.get().message());
+-        } else {
+-            return p_261812_.result().orElseThrow();
+-        }
+-    }
+-
+-    public static <T, E extends Throwable> T getPartialOrThrow(DataResult<T> p_313827_, Function<String, E> p_313841_) throws E {
+-        Optional<PartialResult<T>> optional = p_313827_.error();
+-        if (optional.isPresent()) {
+-            Optional<T> optional1 = p_313827_.resultOrPartial(p_201905_ -> {
+-            });
+-            if (optional1.isPresent()) {
+-                return optional1.get();
+-            } else {
+-                throw p_313841_.apply(optional.get().message());
+-            }
+-        } else {
+-            return p_313827_.result().orElseThrow();
+-        }
+-    }
+-
+     public static <A, B> Typed<B> writeAndReadTypedOrThrow(Typed<A> p_311873_, Type<B> p_312554_, UnaryOperator<Dynamic<?>> p_311990_) {
+-        Dynamic<?> dynamic = getOrThrow(p_311873_.write(), IllegalStateException::new);
++        Dynamic<?> dynamic = (Dynamic<?>)p_311873_.write().getOrThrow();
+         return readTypedOrThrow(p_312554_, p_311990_.apply(dynamic), true);
+     }
+ 
+@@ -913,7 +_,7 @@
+         DataResult<Typed<T>> dataresult = p_313853_.readTyped(p_313851_).map(Pair::getFirst);
+ 
+         try {
+-            return p_313933_ ? getPartialOrThrow(dataresult, IllegalStateException::new) : getOrThrow(dataresult, IllegalStateException::new);
++            return p_313933_ ? dataresult.getPartialOrThrow(IllegalStateException::new) : dataresult.getOrThrow(IllegalStateException::new);
+         } catch (IllegalStateException illegalstateexception) {
+             CrashReport crashreport = CrashReport.forThrowable(illegalstateexception, "Reading type");
+             CrashReportCategory crashreportcategory = crashreport.addCategory("Info");

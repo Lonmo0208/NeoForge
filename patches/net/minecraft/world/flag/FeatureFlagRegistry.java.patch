@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/flag/FeatureFlagRegistry.java
++++ b/net/minecraft/world/flag/FeatureFlagRegistry.java
+@@ -45,7 +_,7 @@
+     public FeatureFlagSet fromNames(Iterable<ResourceLocation> p_251769_, Consumer<ResourceLocation> p_251521_) {
+         Set<FeatureFlag> set = Sets.newIdentityHashSet();
+ 
+-        for(ResourceLocation resourcelocation : p_251769_) {
++        for (ResourceLocation resourcelocation : p_251769_) {
+             FeatureFlag featureflag = this.names.get(resourcelocation);
+             if (featureflag == null) {
+                 p_251521_.accept(resourcelocation);

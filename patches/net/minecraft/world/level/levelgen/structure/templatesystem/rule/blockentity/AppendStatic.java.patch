@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/structure/templatesystem/rule/blockentity/AppendStatic.java
++++ b/net/minecraft/world/level/levelgen/structure/templatesystem/rule/blockentity/AppendStatic.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import javax.annotation.Nullable;
+@@ -8,7 +_,7 @@
+ import net.minecraft.util.RandomSource;
+ 
+ public class AppendStatic implements RuleBlockEntityModifier {
+-    public static final Codec<AppendStatic> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<AppendStatic> CODEC = RecordCodecBuilder.mapCodec(
+         p_277505_ -> p_277505_.group(CompoundTag.CODEC.fieldOf("data").forGetter(p_278105_ -> p_278105_.tag)).apply(p_277505_, AppendStatic::new)
+     );
+     private final CompoundTag tag;

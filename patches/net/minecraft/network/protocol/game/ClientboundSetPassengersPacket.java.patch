@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/protocol/game/ClientboundSetPassengersPacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundSetPassengersPacket.java
+@@ -19,7 +_,7 @@
+         List<Entity> list = p_133276_.getPassengers();
+         this.passengers = new int[list.size()];
+ 
+-        for(int i = 0; i < list.size(); ++i) {
++        for (int i = 0; i < list.size(); i++) {
+             this.passengers[i] = list.get(i).getId();
+         }
+     }

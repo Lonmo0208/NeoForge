@@ -1,0 +1,53 @@
+--- a/net/minecraft/world/level/levelgen/structure/structures/EndCityPieces.java
++++ b/net/minecraft/world/level/levelgen/structure/structures/EndCityPieces.java
+@@ -113,7 +_,7 @@
+             EndCityPieces.EndCityPiece endcitypieces$endcitypiece1 = p_227470_.nextInt(3) == 0 ? $$7 : null;
+             int i = 1 + p_227470_.nextInt(3);
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 $$7 = EndCityPieces.addHelper(p_227469_, EndCityPieces.addPiece(p_227465_, $$7, new BlockPos(0, 4, 0), "tower_piece", rotation, true));
+                 if (j < i - 1 && p_227470_.nextBoolean()) {
+                     endcitypieces$endcitypiece1 = $$7;
+@@ -121,7 +_,7 @@
+             }
+ 
+             if (endcitypieces$endcitypiece1 != null) {
+-                for(Tuple<Rotation, BlockPos> tuple : EndCityPieces.TOWER_BRIDGES) {
++                for (Tuple<Rotation, BlockPos> tuple : EndCityPieces.TOWER_BRIDGES) {
+                     if (p_227470_.nextBoolean()) {
+                         EndCityPieces.EndCityPiece endcitypieces$endcitypiece2 = EndCityPieces.addHelper(
+                             p_227469_,
+@@ -170,7 +_,7 @@
+             endcitypieces$endcitypiece.setGenDepth(-1);
+             int j = 0;
+ 
+-            for(int k = 0; k < i; ++k) {
++            for (int k = 0; k < i; k++) {
+                 if (p_227480_.nextBoolean()) {
+                     endcitypieces$endcitypiece = EndCityPieces.addHelper(
+                         p_227479_, EndCityPieces.addPiece(p_227475_, endcitypieces$endcitypiece, new BlockPos(0, j, -4), "bridge_piece", rotation, true)
+@@ -245,12 +_,12 @@
+                 p_227488_, EndCityPieces.addPiece(p_227484_, endcitypieces$endcitypiece, new BlockPos(0, 4, 0), "fat_tower_middle", rotation, true)
+             );
+ 
+-            for(int i = 0; i < 2 && p_227489_.nextInt(3) != 0; ++i) {
++            for (int i = 0; i < 2 && p_227489_.nextInt(3) != 0; i++) {
+                 endcitypieces$endcitypiece = EndCityPieces.addHelper(
+                     p_227488_, EndCityPieces.addPiece(p_227484_, endcitypieces$endcitypiece, new BlockPos(0, 8, 0), "fat_tower_middle", rotation, true)
+                 );
+ 
+-                for(Tuple<Rotation, BlockPos> tuple : EndCityPieces.FAT_TOWER_BRIDGES) {
++                for (Tuple<Rotation, BlockPos> tuple : EndCityPieces.FAT_TOWER_BRIDGES) {
+                     if (p_227489_.nextBoolean()) {
+                         EndCityPieces.EndCityPiece endcitypieces$endcitypiece1 = EndCityPieces.addHelper(
+                             p_227488_,
+@@ -326,7 +_,7 @@
+                 boolean flag = false;
+                 int i = p_227443_.nextInt();
+ 
+-                for(StructurePiece structurepiece : list) {
++                for (StructurePiece structurepiece : list) {
+                     structurepiece.setGenDepth(i);
+                     StructurePiece structurepiece1 = StructurePiece.findCollisionPiece(p_227442_, structurepiece.getBoundingBox());
+                     if (structurepiece1 != null && structurepiece1.getGenDepth() != p_227440_.getGenDepth()) {

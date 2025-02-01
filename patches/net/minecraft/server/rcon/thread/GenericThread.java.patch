@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/rcon/thread/GenericThread.java
++++ b/net/minecraft/server/rcon/thread/GenericThread.java
+@@ -37,7 +_,7 @@
+         if (null != this.thread) {
+             int i = 0;
+ 
+-            while(this.thread.isAlive()) {
++            while (this.thread.isAlive()) {
+                 try {
+                     this.thread.join(1000L);
+                     if (++i >= 5) {

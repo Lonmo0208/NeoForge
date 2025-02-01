@@ -1,0 +1,28 @@
+--- a/net/minecraft/commands/synchronization/brigadier/StringArgumentSerializer.java
++++ b/net/minecraft/commands/synchronization/brigadier/StringArgumentSerializer.java
+@@ -18,10 +_,11 @@
+     }
+ 
+     public void serializeToJson(StringArgumentSerializer.Template p_235613_, JsonObject p_235614_) {
+-        p_235614_.addProperty("type", switch(p_235613_.type) {
++        p_235614_.addProperty("type", switch (p_235613_.type) {
+             case SINGLE_WORD -> "word";
+             case QUOTABLE_PHRASE -> "phrase";
+             case GREEDY_PHRASE -> "greedy";
++            default -> throw new MatchException(null, null);
+         });
+     }
+ 
+@@ -37,10 +_,11 @@
+         }
+ 
+         public StringArgumentType instantiate(CommandBuildContext p_235629_) {
+-            return switch(this.type) {
++            return switch (this.type) {
+                 case SINGLE_WORD -> StringArgumentType.word();
+                 case QUOTABLE_PHRASE -> StringArgumentType.string();
+                 case GREEDY_PHRASE -> StringArgumentType.greedyString();
++                default -> throw new MatchException(null, null);
+             };
+         }
+ 

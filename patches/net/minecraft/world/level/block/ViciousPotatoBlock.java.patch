@@ -1,0 +1,101 @@
+--- a/net/minecraft/world/level/block/ViciousPotatoBlock.java
++++ /dev/null
+@@ -1,98 +_,0 @@
+-package net.minecraft.world.level.block;
+-
+-import com.mojang.serialization.MapCodec;
+-import java.util.ArrayList;
+-import java.util.List;
+-import java.util.Optional;
+-import net.minecraft.Util;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.server.level.ServerLevel;
+-import net.minecraft.util.RandomSource;
+-import net.minecraft.world.entity.Entity;
+-import net.minecraft.world.entity.EntitySelector;
+-import net.minecraft.world.entity.EntityType;
+-import net.minecraft.world.entity.LivingEntity;
+-import net.minecraft.world.entity.projectile.VineProjectile;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.state.BlockBehaviour;
+-import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.block.state.StateDefinition;
+-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+-import net.minecraft.world.level.entity.EntityTypeTest;
+-import net.minecraft.world.phys.AABB;
+-import net.minecraft.world.phys.Vec3;
+-
+-public class ViciousPotatoBlock extends Block {
+-    private static final EntityTypeTest<Entity, LivingEntity> LIVING_ENTITIES_SELECTOR = EntityTypeTest.forClass(LivingEntity.class);
+-    public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
+-    public static final MapCodec<ViciousPotatoBlock> CODEC = simpleCodec(ViciousPotatoBlock::new);
+-
+-    public ViciousPotatoBlock(BlockBehaviour.Properties p_342442_) {
+-        super(p_342442_);
+-        this.registerDefaultState(this.stateDefinition.any().setValue(ENABLED, Boolean.valueOf(false)));
+-    }
+-
+-    @Override
+-    public MapCodec<ViciousPotatoBlock> codec() {
+-        return CODEC;
+-    }
+-
+-    @Override
+-    protected void neighborChanged(BlockState p_340819_, Level p_341370_, BlockPos p_341991_, Block p_340366_, BlockPos p_340616_, boolean p_341135_) {
+-        if (p_341370_ instanceof ServerLevel serverlevel) {
+-            boolean flag = p_341370_.hasNeighborSignal(p_341991_) || p_341370_.hasNeighborSignal(p_341991_.above());
+-            if (flag) {
+-                this.attack(serverlevel, p_341991_, 5.0F);
+-            }
+-        }
+-    }
+-
+-    @Override
+-    protected void randomTick(BlockState p_342140_, ServerLevel p_341399_, BlockPos p_341045_, RandomSource p_342371_) {
+-        super.randomTick(p_342140_, p_341399_, p_341045_, p_342371_);
+-        if (this.attack(p_341399_, p_341045_, 5.0F)) {
+-            p_341399_.setBlock(p_341045_, p_342140_.setValue(ENABLED, Boolean.valueOf(true)), 2);
+-            p_341399_.scheduleTick(p_341045_, this, 20 + p_342371_.nextInt(100));
+-        }
+-    }
+-
+-    @Override
+-    protected void tick(BlockState p_341407_, ServerLevel p_340362_, BlockPos p_342235_, RandomSource p_340394_) {
+-        super.tick(p_341407_, p_340362_, p_342235_, p_340394_);
+-        float f = p_340394_.nextFloat() * 0.7F;
+-        if (this.attack(p_340362_, p_342235_, f) && p_340394_.nextFloat() < 1.0F - f * f) {
+-            p_340362_.scheduleTick(p_342235_, this, 20 + p_340394_.nextInt(1 + (int)(f * 100.0F)));
+-        } else {
+-            p_340362_.setBlock(p_342235_, p_341407_.setValue(ENABLED, Boolean.valueOf(false)), 2);
+-        }
+-    }
+-
+-    private boolean attack(ServerLevel p_341855_, BlockPos p_341419_, float p_342459_) {
+-        Vec3 vec3 = Vec3.atCenterOf(p_341419_);
+-        AABB aabb = AABB.ofSize(vec3, 16.0, 16.0, 16.0);
+-        List<LivingEntity> list = new ArrayList<>();
+-        p_341855_.getEntities(LIVING_ENTITIES_SELECTOR, aabb, EntitySelector.NO_CREATIVE_OR_SPECTATOR, list, 10);
+-        Optional<LivingEntity> optional = Util.getRandomSafe(list, p_341855_.getRandom());
+-        if (optional.isEmpty()) {
+-            return false;
+-        } else {
+-            LivingEntity livingentity = optional.get();
+-            Vec3 vec31 = livingentity.getBoundingBox().getCenter();
+-            Vec3 vec32 = vec31.subtract(vec3).normalize();
+-            Vec3 vec33 = vec32.add(vec3);
+-            VineProjectile vineprojectile = EntityType.VINE_PROJECTILE.create(p_341855_);
+-            vineprojectile.setStrength(p_342459_);
+-            vineprojectile.setPos(vec33.x(), vec33.y(), vec33.z());
+-            vineprojectile.shoot(vec32.x, vec32.y, vec32.z, 0.5F, 0.0F);
+-            p_341855_.addFreshEntity(vineprojectile);
+-            p_341855_.levelEvent(1002, p_341419_, 0);
+-            return true;
+-        }
+-    }
+-
+-    @Override
+-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_342575_) {
+-        p_342575_.add(ENABLED);
+-    }
+-}

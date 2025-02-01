@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/model/DolphinModel.java
++++ b/net/minecraft/client/model/DolphinModel.java
+@@ -73,7 +_,7 @@
+         this.body.xRot = p_102480_ * (float) (Math.PI / 180.0);
+         this.body.yRot = p_102479_ * (float) (Math.PI / 180.0);
+         if (p_102475_.getDeltaMovement().horizontalDistanceSqr() > 1.0E-7) {
+-            this.body.xRot += -0.05F - 0.05F * Mth.cos(p_102478_ * 0.3F);
++            this.body.xRot = this.body.xRot + (-0.05F - 0.05F * Mth.cos(p_102478_ * 0.3F));
+             this.tail.xRot = -0.1F * Mth.cos(p_102478_ * 0.3F);
+             this.tailFin.xRot = -0.2F * Mth.cos(p_102478_ * 0.3F);
+         }

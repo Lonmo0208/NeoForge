@@ -1,0 +1,33 @@
+--- a/net/minecraft/util/profiling/metrics/storage/MetricsPersister.java
++++ b/net/minecraft/util/profiling/metrics/storage/MetricsPersister.java
+@@ -67,7 +_,7 @@
+             throw new IllegalArgumentException("Expected at least one sampler to persist");
+         } else {
+             Map<MetricCategory, List<MetricSampler>> map = p_146248_.stream().collect(Collectors.groupingBy(MetricSampler::getCategory));
+-            map.forEach((p_146232_, p_146233_) -> this.saveCategory(p_146232_, p_146233_, p_146249_));
++            map.forEach((p_146232_, p_146233_) -> this.saveCategory(p_146232_, (List<MetricSampler>)p_146233_, p_146249_));
+         }
+     }
+ 
+@@ -81,7 +_,7 @@
+             CsvOutput.Builder csvoutput$builder = CsvOutput.builder();
+             csvoutput$builder.addColumn("@tick");
+ 
+-            for(MetricSampler metricsampler : p_146228_) {
++            for (MetricSampler metricsampler : p_146228_) {
+                 csvoutput$builder.addColumn(metricsampler.getName());
+             }
+ 
+@@ -90,10 +_,10 @@
+             int i = list.stream().mapToInt(MetricSampler.SamplerResult::getFirstTick).summaryStatistics().getMin();
+             int j = list.stream().mapToInt(MetricSampler.SamplerResult::getLastTick).summaryStatistics().getMax();
+ 
+-            for(int k = i; k <= j; ++k) {
++            for (int k = i; k <= j; k++) {
+                 int l = k;
+                 Stream<String> stream = list.stream().map(p_146222_ -> String.valueOf(p_146222_.valueAtTick(l)));
+-                Object[] aobject = Stream.concat(Stream.of(String.valueOf(k)), stream).toArray(p_146219_ -> new String[p_146219_]);
++                Object[] aobject = Stream.concat(Stream.of(String.valueOf(k)), stream).toArray(String[]::new);
+                 csvoutput.writeRow(aobject);
+             }
+ 

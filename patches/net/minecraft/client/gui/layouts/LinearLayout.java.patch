@@ -1,0 +1,24 @@
+--- a/net/minecraft/client/gui/layouts/LinearLayout.java
++++ b/net/minecraft/client/gui/layouts/LinearLayout.java
+@@ -99,7 +_,7 @@
+         VERTICAL;
+ 
+         void setSpacing(GridLayout p_295925_, int p_295045_) {
+-            switch(this) {
++            switch (this) {
+                 case HORIZONTAL:
+                     p_295925_.columnSpacing(p_295045_);
+                     break;
+@@ -109,9 +_,9 @@
+         }
+ 
+         public <T extends LayoutElement> T addChild(GridLayout p_296325_, T p_294747_, int p_296492_, LayoutSettings p_295163_) {
+-            return (T)(switch(this) {
+-                case HORIZONTAL -> p_296325_.addChild(p_294747_, 0, p_296492_, p_295163_);
+-                case VERTICAL -> p_296325_.addChild(p_294747_, p_296492_, 0, p_295163_);
++            return (T)(switch (this) {
++                case HORIZONTAL -> (LayoutElement)p_296325_.addChild(p_294747_, 0, p_296492_, p_295163_);
++                case VERTICAL -> (LayoutElement)p_296325_.addChild(p_294747_, p_296492_, 0, p_295163_);
+             });
+         }
+     }

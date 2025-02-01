@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/goal/DolphinJumpGoal.java
++++ b/net/minecraft/world/entity/ai/goal/DolphinJumpGoal.java
+@@ -30,7 +_,7 @@
+             int j = direction.getStepZ();
+             BlockPos blockpos = this.dolphin.blockPosition();
+ 
+-            for(int k : STEPS_TO_CHECK) {
++            for (int k : STEPS_TO_CHECK) {
+                 if (!this.waterIsClear(blockpos, i, j, k) || !this.surfaceIsClear(blockpos, i, j, k)) {
+                     return false;
+                 }

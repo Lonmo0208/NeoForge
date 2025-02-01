@@ -1,0 +1,20 @@
+--- a/net/minecraft/gametest/framework/StructureUtils.java
++++ b/net/minecraft/gametest/framework/StructureUtils.java
+@@ -36,7 +_,7 @@
+     public static String testStructuresDir = "gameteststructures";
+ 
+     public static Rotation getRotationForRotationSteps(int p_127836_) {
+-        switch(p_127836_) {
++        switch (p_127836_) {
+             case 0:
+                 return Rotation.NONE;
+             case 1:
+@@ -51,7 +_,7 @@
+     }
+ 
+     public static int getRotationStepsForRotation(Rotation p_177752_) {
+-        switch(p_177752_) {
++        switch (p_177752_) {
+             case NONE:
+                 return 0;
+             case CLOCKWISE_90:

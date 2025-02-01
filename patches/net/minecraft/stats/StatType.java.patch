@@ -1,0 +1,11 @@
+--- a/net/minecraft/stats/StatType.java
++++ b/net/minecraft/stats/StatType.java
+@@ -30,7 +_,7 @@
+     }
+ 
+     public Stat<T> get(T p_12900_, StatFormatter p_12901_) {
+-        return this.map.computeIfAbsent(p_12900_, p_12896_ -> new Stat<>(this, p_12896_, p_12901_));
++        return this.map.computeIfAbsent(p_12900_, p_12896_ -> new Stat<>(this, (T)p_12896_, p_12901_));
+     }
+ 
+     public Registry<T> getRegistry() {

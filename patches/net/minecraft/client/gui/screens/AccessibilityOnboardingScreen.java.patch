@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/AccessibilityOnboardingScreen.java
++++ b/net/minecraft/client/gui/screens/AccessibilityOnboardingScreen.java
+@@ -118,7 +_,7 @@
+     private void handleInitialNarrationDelay() {
+         if (!this.hasNarrated && this.narratorAvailable) {
+             if (this.timer < 40.0F) {
+-                ++this.timer;
++                this.timer++;
+             } else if (this.minecraft.isWindowActive()) {
+                 Narrator.getNarrator().say(ONBOARDING_NARRATOR_MESSAGE.getString(), true);
+                 this.hasNarrated = true;

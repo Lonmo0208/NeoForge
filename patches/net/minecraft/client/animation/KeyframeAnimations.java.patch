@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/animation/KeyframeAnimations.java
++++ b/net/minecraft/client/animation/KeyframeAnimations.java
+@@ -15,7 +_,7 @@
+     public static void animate(HierarchicalModel<?> p_232320_, AnimationDefinition p_232321_, long p_232322_, float p_232323_, Vector3f p_253861_) {
+         float f = getElapsedSeconds(p_232321_, p_232322_);
+ 
+-        for(Entry<String, List<AnimationChannel>> entry : p_232321_.boneAnimations().entrySet()) {
++        for (Entry<String, List<AnimationChannel>> entry : p_232321_.boneAnimations().entrySet()) {
+             Optional<ModelPart> optional = p_232320_.getAnyDescendantWithName(entry.getKey());
+             List<AnimationChannel> list = entry.getValue();
+             optional.ifPresent(p_232330_ -> list.forEach(p_288241_ -> {

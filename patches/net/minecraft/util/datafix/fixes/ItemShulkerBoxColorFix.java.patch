@@ -1,0 +1,15 @@
+--- a/net/minecraft/util/datafix/fixes/ItemShulkerBoxColorFix.java
++++ b/net/minecraft/util/datafix/fixes/ItemShulkerBoxColorFix.java
+@@ -51,10 +_,10 @@
+                 if (optional.isPresent() && Objects.equals(optional.get().getSecond(), "minecraft:shulker_box")) {
+                     Optional<? extends Typed<?>> optional1 = p_16029_.getOptionalTyped(opticfinder1);
+                     if (optional1.isPresent()) {
+-                        Typed<?> typed = optional1.get();
++                        Typed<?> typed = (Typed<?>)optional1.get();
+                         Optional<? extends Typed<?>> optional2 = typed.getOptionalTyped(opticfinder2);
+                         if (optional2.isPresent()) {
+-                            Typed<?> typed1 = optional2.get();
++                            Typed<?> typed1 = (Typed<?>)optional2.get();
+                             Dynamic<?> dynamic = typed1.get(DSL.remainderFinder());
+                             int i = dynamic.get("Color").asInt(0);
+                             dynamic.remove("Color");

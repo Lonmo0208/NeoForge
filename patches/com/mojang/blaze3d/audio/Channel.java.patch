@@ -1,0 +1,11 @@
+--- a/com/mojang/blaze3d/audio/Channel.java
++++ b/com/mojang/blaze3d/audio/Channel.java
+@@ -139,7 +_,7 @@
+     private void pumpBuffers(int p_83653_) {
+         if (this.stream != null) {
+             try {
+-                for(int i = 0; i < p_83653_; ++i) {
++                for (int i = 0; i < p_83653_; i++) {
+                     ByteBuffer bytebuffer = this.stream.read(this.streamingBufferSize);
+                     if (bytebuffer != null) {
+                         new SoundBuffer(bytebuffer, this.stream.getFormat())

@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/tutorial/PunchTreeTutorialStepInstance.java
++++ b/net/minecraft/client/tutorial/PunchTreeTutorialStepInstance.java
+@@ -28,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        ++this.timeWaiting;
++        this.timeWaiting++;
+         if (!this.tutorial.isSurvival()) {
+             this.tutorial.setStep(TutorialSteps.NONE);
+         } else {
+@@ -76,7 +_,7 @@
+         } else if (this.toast != null) {
+             this.toast.updateProgress(0.0F);
+         } else if (flag) {
+-            ++this.resetCount;
++            this.resetCount++;
+         }
+     }
+ 

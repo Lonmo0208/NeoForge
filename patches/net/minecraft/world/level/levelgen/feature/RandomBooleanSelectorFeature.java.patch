@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/levelgen/feature/RandomBooleanSelectorFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RandomBooleanSelectorFeature.java
+@@ -6,7 +_,6 @@
+ import net.minecraft.world.level.WorldGenLevel;
+ import net.minecraft.world.level.chunk.ChunkGenerator;
+ import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
+-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+ 
+ public class RandomBooleanSelectorFeature extends Feature<RandomBooleanFeatureConfiguration> {
+     public RandomBooleanSelectorFeature(Codec<RandomBooleanFeatureConfiguration> p_66591_) {
+@@ -21,7 +_,8 @@
+         ChunkGenerator chunkgenerator = p_160208_.chunkGenerator();
+         BlockPos blockpos = p_160208_.origin();
+         boolean flag = randomsource.nextBoolean();
+-        return ((PlacedFeature)(flag ? randombooleanfeatureconfiguration.featureTrue : randombooleanfeatureconfiguration.featureFalse).value())
++        return (flag ? randombooleanfeatureconfiguration.featureTrue : randombooleanfeatureconfiguration.featureFalse)
++            .value()
+             .place(worldgenlevel, chunkgenerator, randomsource, blockpos);
+     }
+ }

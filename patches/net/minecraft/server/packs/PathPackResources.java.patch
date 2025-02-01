@@ -1,0 +1,61 @@
+--- a/net/minecraft/server/packs/PathPackResources.java
++++ b/net/minecraft/server/packs/PathPackResources.java
+@@ -3,7 +_,7 @@
+ import com.google.common.base.Joiner;
+ import com.google.common.collect.Sets;
+ import com.mojang.logging.LogUtils;
+-import com.mojang.serialization.DataResult.PartialResult;
++import com.mojang.serialization.DataResult.Error;
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.nio.file.DirectoryStream;
+@@ -54,12 +_,13 @@
+         return getResource(p_251715_, path);
+     }
+ 
++    @Nullable
+     public static IoSupplier<InputStream> getResource(ResourceLocation p_250145_, Path p_251046_) {
+-        return FileUtil.decomposePath(p_250145_.getPath()).get().map(p_251647_ -> {
+-            Path path = FileUtil.resolvePath(p_251046_, p_251647_);
++        return FileUtil.decomposePath(p_250145_.getPath()).mapOrElse(p_251647_ -> {
++            Path path = FileUtil.resolvePath(p_251046_, (List<String>)p_251647_);
+             return returnFileIfExists(path);
+-        }, p_248714_ -> {
+-            LOGGER.error("Invalid path {}: {}", p_250145_, p_248714_.message());
++        }, p_337558_ -> {
++            LOGGER.error("Invalid path {}: {}", p_250145_, p_337558_.message());
+             return null;
+         });
+     }
+@@ -71,10 +_,10 @@
+ 
+     @Override
+     public void listResources(PackType p_251452_, String p_249854_, String p_248650_, PackResources.ResourceOutput p_248572_) {
+-        FileUtil.decomposePath(p_248650_).get().ifLeft(p_250225_ -> {
++        FileUtil.decomposePath(p_248650_).ifSuccess(p_250225_ -> {
+             Path path = this.root.resolve(p_251452_.getDirectory()).resolve(p_249854_);
+-            listPath(p_249854_, path, p_250225_, p_248572_);
+-        }).ifRight(p_252338_ -> LOGGER.error("Invalid path {}: {}", p_248650_, p_252338_.message()));
++            listPath(p_249854_, path, (List<String>)p_250225_, p_248572_);
++        }).ifError(p_337560_ -> LOGGER.error("Invalid path {}: {}", p_248650_, p_337560_.message()));
+     }
+ 
+     public static void listPath(String p_249455_, Path p_249514_, List<String> p_251918_, PackResources.ResourceOutput p_249964_) {
+@@ -102,7 +_,7 @@
+         Path path = this.root.resolve(p_251896_.getDirectory());
+ 
+         try (DirectoryStream<Path> directorystream = Files.newDirectoryStream(path)) {
+-            for(Path path1 : directorystream) {
++            for (Path path1 : directorystream) {
+                 String s = path1.getFileName().toString();
+                 if (ResourceLocation.isValidNamespace(s)) {
+                     set.add(s);
+@@ -143,7 +_,7 @@
+             } else {
+                 List<PackResources> list1 = new ArrayList<>(list.size());
+ 
+-                for(String s : list) {
++                for (String s : list) {
+                     Path path = this.content.resolve(s);
+                     list1.add(new PathPackResources(p_326066_, path));
+                 }

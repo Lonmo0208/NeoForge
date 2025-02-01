@@ -1,0 +1,102 @@
+--- a/net/minecraft/client/gui/font/FontManager.java
++++ b/net/minecraft/client/gui/font/FontManager.java
+@@ -89,13 +_,13 @@
+     private CompletableFuture<FontManager.Preparation> prepare(ResourceManager p_285252_, Executor p_284969_) {
+         List<CompletableFuture<FontManager.UnresolvedBuilderBundle>> list = new ArrayList<>();
+ 
+-        for(Entry<ResourceLocation, List<Resource>> entry : FONT_DEFINITIONS.listMatchingResourceStacks(p_285252_).entrySet()) {
++        for (Entry<ResourceLocation, List<Resource>> entry : FONT_DEFINITIONS.listMatchingResourceStacks(p_285252_).entrySet()) {
+             ResourceLocation resourcelocation = FONT_DEFINITIONS.fileToId(entry.getKey());
+             list.add(CompletableFuture.supplyAsync(() -> {
+                 List<Pair<FontManager.BuilderId, GlyphProviderDefinition.Conditional>> list1 = loadResourceStack(entry.getValue(), resourcelocation);
+                 FontManager.UnresolvedBuilderBundle fontmanager$unresolvedbuilderbundle = new FontManager.UnresolvedBuilderBundle(resourcelocation);
+ 
+-                for(Pair<FontManager.BuilderId, GlyphProviderDefinition.Conditional> pair : list1) {
++                for (Pair<FontManager.BuilderId, GlyphProviderDefinition.Conditional> pair : list1) {
+                     FontManager.BuilderId fontmanager$builderid = pair.getFirst();
+                     FontOption.Filter fontoption$filter = pair.getSecond().filter();
+                     pair.getSecond().definition().unpack().ifLeft(p_325476_ -> {
+@@ -127,7 +_,7 @@
+                                                 () -> this.finalizeProviderLoading(p_284585_, glyphprovider$conditional), p_284969_
+                                             )
+                                     )
+-                                    .toArray(p_284587_ -> new CompletableFuture[p_284587_]);
++                                    .toArray(CompletableFuture[]::new);
+                                 return CompletableFuture.allOf(completablefuture).thenApply(p_284595_ -> {
+                                     List<GlyphProvider> list2 = p_284618_.stream().flatMap(Optional::stream).toList();
+                                     return new FontManager.Preparation(map, list2);
+@@ -155,7 +_,9 @@
+         Map<ResourceLocation, List<GlyphProvider.Conditional>> map = new HashMap<>();
+         DependencySorter<ResourceLocation, FontManager.UnresolvedBuilderBundle> dependencysorter = new DependencySorter<>();
+         p_285282_.forEach(p_284626_ -> dependencysorter.addEntry(p_284626_.fontId, p_284626_));
+-        dependencysorter.orderByDependencies((p_284620_, p_284621_) -> p_284621_.resolve(map::get).ifPresent(p_284590_ -> map.put(p_284620_, p_284590_)));
++        dependencysorter.orderByDependencies(
++            (p_284620_, p_284621_) -> p_284621_.resolve(map::get).ifPresent(p_284590_ -> map.put(p_284620_, (List<GlyphProvider.Conditional>)p_284590_))
++        );
+         return map;
+     }
+ 
+@@ -163,13 +_,13 @@
+         p_285520_.add(0, p_326102_);
+         IntSet intset = new IntOpenHashSet();
+ 
+-        for(GlyphProvider.Conditional glyphprovider$conditional : p_285520_) {
++        for (GlyphProvider.Conditional glyphprovider$conditional : p_285520_) {
+             intset.addAll(glyphprovider$conditional.provider().getSupportedGlyphs());
+         }
+ 
+         intset.forEach(p_325466_ -> {
+             if (p_325466_ != 32) {
+-                for(GlyphProvider.Conditional glyphprovider$conditional1 : Lists.reverse(p_285520_)) {
++                for (GlyphProvider.Conditional glyphprovider$conditional1 : Lists.reverse(p_285520_)) {
+                     if (glyphprovider$conditional1.provider().getGlyph(p_325466_) != null) {
+                         break;
+                     }
+@@ -202,7 +_,7 @@
+         p_285407_.popPush("reloading");
+         p_284939_.fontSets().forEach((p_325478_, p_325479_) -> {
+             FontSet fontset = new FontSet(this.textureManager, p_325478_);
+-            fontset.reload(Lists.reverse(p_325479_), set);
++            fontset.reload(Lists.reverse((List<GlyphProvider.Conditional>)p_325479_), set);
+             this.fontSets.put(p_325478_, fontset);
+         });
+         this.providersToClose.addAll(p_284939_.allProviders);
+@@ -217,7 +_,7 @@
+     public void updateOptions(Options p_326271_) {
+         Set<FontOption> set = getFontOptions(p_326271_);
+ 
+-        for(FontSet fontset : this.fontSets.values()) {
++        for (FontSet fontset : this.fontSets.values()) {
+             fontset.reload(set);
+         }
+     }
+@@ -227,15 +_,15 @@
+     ) {
+         List<Pair<FontManager.BuilderId, GlyphProviderDefinition.Conditional>> list = new ArrayList<>();
+ 
+-        for(Resource resource : p_284976_) {
++        for (Resource resource : p_284976_) {
+             try (Reader reader = resource.openAsReader()) {
+                 JsonElement jsonelement = GSON.fromJson(reader, JsonElement.class);
+-                FontManager.FontDefinitionFile fontmanager$fontdefinitionfile = Util.getOrThrow(
+-                    FontManager.FontDefinitionFile.CODEC.parse(JsonOps.INSTANCE, jsonelement), JsonParseException::new
+-                );
++                FontManager.FontDefinitionFile fontmanager$fontdefinitionfile = FontManager.FontDefinitionFile.CODEC
++                    .parse(JsonOps.INSTANCE, jsonelement)
++                    .getOrThrow(JsonParseException::new);
+                 List<GlyphProviderDefinition.Conditional> list1 = fontmanager$fontdefinitionfile.providers;
+ 
+-                for(int i = list1.size() - 1; i >= 0; --i) {
++                for (int i = list1.size() - 1; i >= 0; i--) {
+                     FontManager.BuilderId fontmanager$builderid = new FontManager.BuilderId(p_285272_, resource.sourcePackId(), i);
+                     list.add(Pair.of(fontmanager$builderid, list1.get(i)));
+                 }
+@@ -350,7 +_,7 @@
+         public Optional<List<GlyphProvider.Conditional>> resolve(Function<ResourceLocation, List<GlyphProvider.Conditional>> p_285118_) {
+             List<GlyphProvider.Conditional> list = new ArrayList<>();
+ 
+-            for(FontManager.BuilderResult fontmanager$builderresult : this.builders) {
++            for (FontManager.BuilderResult fontmanager$builderresult : this.builders) {
+                 Optional<List<GlyphProvider.Conditional>> optional = fontmanager$builderresult.resolve(p_285118_);
+                 if (!optional.isPresent()) {
+                     return Optional.empty();

@@ -1,0 +1,180 @@
+--- a/net/minecraft/world/level/levelgen/feature/PotatoFieldFeature.java
++++ /dev/null
+@@ -1,177 +_,0 @@
+-package net.minecraft.world.level.levelgen.feature;
+-
+-import com.mojang.serialization.Codec;
+-import java.util.ArrayList;
+-import java.util.List;
+-import java.util.function.Function;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.core.Direction;
+-import net.minecraft.util.RandomSource;
+-import net.minecraft.world.level.WorldGenLevel;
+-import net.minecraft.world.level.block.Blocks;
+-import net.minecraft.world.level.block.CropBlock;
+-import net.minecraft.world.level.block.FarmBlock;
+-import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+-import net.minecraft.world.level.levelgen.DensityFunction;
+-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+-import net.minecraft.world.level.levelgen.structure.BoundingBox;
+-
+-public class PotatoFieldFeature extends Feature<NoneFeatureConfiguration> {
+-    public PotatoFieldFeature(Codec<NoneFeatureConfiguration> p_341659_) {
+-        super(p_341659_);
+-    }
+-
+-    @Override
+-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> p_341141_) {
+-        BlockPos blockpos = p_341141_.origin();
+-        WorldGenLevel worldgenlevel = p_341141_.level();
+-        RandomSource randomsource = p_341141_.random();
+-        if (!this.isValidPlacementLocation(worldgenlevel, blockpos)) {
+-            return false;
+-        } else {
+-            for(Direction direction : Direction.Plane.HORIZONTAL) {
+-                if (!this.isValidPlacementLocation(worldgenlevel, blockpos.relative(direction))) {
+-                    return false;
+-                }
+-            }
+-
+-            double d0 = worldgenlevel.getLevel()
+-                .getChunkSource()
+-                .randomState()
+-                .router()
+-                .continents()
+-                .compute(new DensityFunction.SinglePointContext(blockpos.getX(), blockpos.getY(), blockpos.getZ()));
+-            Direction direction1 = Direction.from2DDataValue((int)((d0 + 1.0) * 5.0));
+-            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+-            if (randomsource.nextInt(8) == 0) {
+-                worldgenlevel.setBlock(
+-                    blockpos.below(), Blocks.POTATO_FENCE.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true)), 2
+-                );
+-                worldgenlevel.setBlock(blockpos, Blocks.POTATO_FENCE.defaultBlockState(), 2);
+-                worldgenlevel.setBlock(blockpos.above(), Blocks.LANTERN.defaultBlockState(), 2);
+-            } else {
+-                worldgenlevel.setBlock(blockpos.below(), Blocks.WATER.defaultBlockState(), 2);
+-            }
+-
+-            worldgenlevel.setBlock(blockpos.below(2), Blocks.TERREDEPOMME.defaultBlockState(), 2);
+-            BoundingBox boundingbox = new BoundingBox(blockpos.below()).inflatedBy(4, 1, 4);
+-
+-            for(int i = 0; i < 2; ++i) {
+-                blockpos$mutableblockpos.set(blockpos);
+-                float f = 1.0F;
+-                int j = 0;
+-                direction1 = direction1.getOpposite();
+-
+-                while(randomsource.nextFloat() < f) {
+-                    if (++j > 6) {
+-                        break;
+-                    }
+-
+-                    blockpos$mutableblockpos.move(direction1);
+-                    if (!this.isValidPlacementLocation(worldgenlevel, blockpos$mutableblockpos)) {
+-                        break;
+-                    }
+-
+-                    f *= 0.8F;
+-                    Function<BlockPos, BlockState> function = p_342316_ -> Blocks.POTATOES
+-                            .defaultBlockState()
+-                            .setValue(CropBlock.AGE, Integer.valueOf(randomsource.nextInt(7)));
+-                    Function<BlockPos, BlockState> function1 = p_340487_ -> {
+-                        BlockState blockstate = Blocks.POISON_FARMLAND.defaultBlockState();
+-                        return boundingbox.isInside(p_340487_) ? blockstate.setValue(FarmBlock.MOISTURE, Integer.valueOf(7)) : blockstate;
+-                    };
+-                    this.runRowOfPotatoes(worldgenlevel, randomsource, blockpos$mutableblockpos, direction1.getClockWise(), function1, function);
+-                    Direction direction2 = direction1.getCounterClockWise();
+-                    this.runRowOfPotatoes(worldgenlevel, randomsource, blockpos$mutableblockpos.relative(direction2), direction2, function1, function);
+-                }
+-
+-                if (randomsource.nextInt(10) == 0) {
+-                    blockpos$mutableblockpos.move(direction1);
+-                    if (!this.isValidPlacementLocation(worldgenlevel, blockpos$mutableblockpos)) {
+-                        break;
+-                    }
+-
+-                    List<BlockPos> list = new ArrayList<>();
+-                    Function<BlockPos, BlockState> function2 = p_341900_ -> {
+-                        list.add(p_341900_.immutable());
+-                        return Blocks.POTATO_FENCE.defaultBlockState();
+-                    };
+-                    this.runRowOfPotatoes(
+-                        worldgenlevel,
+-                        randomsource,
+-                        blockpos$mutableblockpos,
+-                        direction1.getClockWise(),
+-                        p_341016_ -> Blocks.PEELGRASS_BLOCK.defaultBlockState(),
+-                        function2
+-                    );
+-                    Direction direction4 = direction1.getCounterClockWise();
+-                    this.runRowOfPotatoes(
+-                        worldgenlevel,
+-                        randomsource,
+-                        blockpos$mutableblockpos.relative(direction4),
+-                        direction4,
+-                        p_342075_ -> Blocks.PEELGRASS_BLOCK.defaultBlockState(),
+-                        function2
+-                    );
+-
+-                    for(BlockPos blockpos1 : list) {
+-                        worldgenlevel.getChunk(blockpos1).markPosForPostprocessing(blockpos1);
+-                    }
+-                }
+-            }
+-
+-            Direction direction3 = direction1.getCounterClockWise();
+-            this.runRowOfPotatoes(
+-                worldgenlevel,
+-                randomsource,
+-                blockpos.relative(direction3),
+-                direction3,
+-                p_340771_ -> Blocks.POISON_PATH.defaultBlockState(),
+-                p_342606_ -> Blocks.AIR.defaultBlockState()
+-            );
+-            direction3 = direction3.getOpposite();
+-            this.runRowOfPotatoes(
+-                worldgenlevel,
+-                randomsource,
+-                blockpos.relative(direction3),
+-                direction3,
+-                p_340343_ -> Blocks.POISON_PATH.defaultBlockState(),
+-                p_341994_ -> Blocks.AIR.defaultBlockState()
+-            );
+-            return false;
+-        }
+-    }
+-
+-    private void runRowOfPotatoes(
+-        WorldGenLevel p_340982_,
+-        RandomSource p_340900_,
+-        BlockPos p_341133_,
+-        Direction p_340820_,
+-        Function<BlockPos, BlockState> p_341511_,
+-        Function<BlockPos, BlockState> p_340379_
+-    ) {
+-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(p_341133_);
+-        int i = p_340900_.nextInt(3, 15);
+-
+-        for(int j = 0; j < i; ++j) {
+-            if (!this.isValidPlacementLocation(p_340982_, blockpos$mutableblockpos)) {
+-                blockpos$mutableblockpos.move(Direction.UP);
+-                if (!this.isValidPlacementLocation(p_340982_, blockpos$mutableblockpos)) {
+-                    blockpos$mutableblockpos.move(Direction.DOWN, 2);
+-                    if (!this.isValidPlacementLocation(p_340982_, blockpos$mutableblockpos)) {
+-                        break;
+-                    }
+-                }
+-            }
+-
+-            p_340982_.setBlock(blockpos$mutableblockpos.below(), p_341511_.apply(blockpos$mutableblockpos.below()), 3);
+-            p_340982_.setBlock(blockpos$mutableblockpos, p_340379_.apply(blockpos$mutableblockpos), 3);
+-            blockpos$mutableblockpos.move(p_340820_);
+-        }
+-    }
+-
+-    private boolean isValidPlacementLocation(WorldGenLevel p_340549_, BlockPos p_340569_) {
+-        return p_340549_.isEmptyBlock(p_340569_) && p_340549_.getBlockState(p_340569_.below()).is(Blocks.PEELGRASS_BLOCK);
+-    }
+-}

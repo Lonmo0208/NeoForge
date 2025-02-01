@@ -1,0 +1,50 @@
+--- a/com/mojang/math/OctahedralGroup.java
++++ b/com/mojang/math/OctahedralGroup.java
+@@ -76,16 +_,16 @@
+         new OctahedralGroup[values().length][values().length],
+         p_56533_ -> {
+             Map<Pair<SymmetricGroup3, BooleanList>, OctahedralGroup> map = Arrays.stream(values())
+-                .collect(Collectors.toMap(p_174952_ -> Pair.of(p_174952_.permutation, p_174952_.packInversions()), p_174950_ -> p_174950_));
++                .collect(Collectors.toMap(p_174952_ -> Pair.of(p_174952_.permutation, p_174952_.packInversions()), p_174950_ -> (OctahedralGroup)p_174950_));
+     
+-            for(OctahedralGroup octahedralgroup : values()) {
+-                for(OctahedralGroup octahedralgroup1 : values()) {
++            for (OctahedralGroup octahedralgroup : values()) {
++                for (OctahedralGroup octahedralgroup1 : values()) {
+                     BooleanList booleanlist = octahedralgroup.packInversions();
+                     BooleanList booleanlist1 = octahedralgroup1.packInversions();
+                     SymmetricGroup3 symmetricgroup3 = octahedralgroup1.permutation.compose(octahedralgroup.permutation);
+                     BooleanArrayList booleanarraylist = new BooleanArrayList(3);
+     
+-                    for(int i = 0; i < 3; ++i) {
++                    for (int i = 0; i < 3; i++) {
+                         booleanarraylist.add(booleanlist.getBoolean(i) ^ booleanlist1.getBoolean(octahedralgroup.permutation.permutation(i)));
+                     }
+     
+@@ -96,7 +_,7 @@
+     );
+     private static final OctahedralGroup[] inverseTable = Arrays.stream(values())
+         .map(p_56536_ -> Arrays.stream(values()).filter(p_174947_ -> p_56536_.compose(p_174947_) == IDENTITY).findAny().get())
+-        .toArray(p_56520_ -> new OctahedralGroup[p_56520_]);
++        .toArray(OctahedralGroup[]::new);
+ 
+     private OctahedralGroup(String p_56513_, SymmetricGroup3 p_56514_, boolean p_56515_, boolean p_56516_, boolean p_56517_) {
+         this.name = p_56513_;
+@@ -139,7 +_,7 @@
+             this.rotatedDirections = Maps.newEnumMap(Direction.class);
+             Direction.Axis[] adirection$axis = Direction.Axis.values();
+ 
+-            for(Direction direction : Direction.values()) {
++            for (Direction direction : Direction.values()) {
+                 Direction.Axis direction$axis = direction.getAxis();
+                 Direction.AxisDirection direction$axisdirection = direction.getAxisDirection();
+                 Direction.Axis direction$axis1 = adirection$axis[this.permutation.permutation(direction$axis.ordinal())];
+@@ -153,7 +_,7 @@
+     }
+ 
+     public boolean inverts(Direction.Axis p_56527_) {
+-        switch(p_56527_) {
++        switch (p_56527_) {
+             case X:
+                 return this.invertX;
+             case Y:

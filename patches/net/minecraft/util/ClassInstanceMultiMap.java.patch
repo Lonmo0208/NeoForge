@@ -1,0 +1,38 @@
+--- a/net/minecraft/util/ClassInstanceMultiMap.java
++++ b/net/minecraft/util/ClassInstanceMultiMap.java
+@@ -11,7 +_,7 @@
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Map.Entry;
+-import java.util.stream.Collectors;
++import net.minecraft.Util;
+ 
+ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
+     private final Map<Class<?>, List<T>> byClass = Maps.newHashMap();
+@@ -27,7 +_,7 @@
+     public boolean add(T p_13536_) {
+         boolean flag = false;
+ 
+-        for(Entry<Class<?>, List<T>> entry : this.byClass.entrySet()) {
++        for (Entry<Class<?>, List<T>> entry : this.byClass.entrySet()) {
+             if (entry.getKey().isInstance(p_13536_)) {
+                 flag |= entry.getValue().add(p_13536_);
+             }
+@@ -40,7 +_,7 @@
+     public boolean remove(Object p_13543_) {
+         boolean flag = false;
+ 
+-        for(Entry<Class<?>, List<T>> entry : this.byClass.entrySet()) {
++        for (Entry<Class<?>, List<T>> entry : this.byClass.entrySet()) {
+             if (entry.getKey().isInstance(p_13543_)) {
+                 List<T> list = entry.getValue();
+                 flag |= list.remove(p_13543_);
+@@ -60,7 +_,7 @@
+             throw new IllegalArgumentException("Don't know how to search for " + p_13534_);
+         } else {
+             List<? extends T> list = this.byClass
+-                .computeIfAbsent(p_13534_, p_13538_ -> this.allInstances.stream().filter(p_13538_::isInstance).collect(Collectors.toList()));
++                .computeIfAbsent(p_13534_, p_337572_ -> this.allInstances.stream().filter(p_337572_::isInstance).collect(Util.toMutableList()));
+             return (Collection<S>)Collections.unmodifiableCollection(list);
+         }
+     }

@@ -1,0 +1,54 @@
+--- a/com/mojang/blaze3d/audio/OggAudioStream.java
++++ b/com/mojang/blaze3d/audio/OggAudioStream.java
+@@ -35,7 +_,7 @@
+             IntBuffer intbuffer = memorystack.mallocInt(1);
+             IntBuffer intbuffer1 = memorystack.mallocInt(1);
+ 
+-            while(this.handle == 0L) {
++            while (this.handle == 0L) {
+                 if (!this.refillFromStream()) {
+                     throw new IOException("Failed to find Ogg header");
+                 }
+@@ -104,7 +_,7 @@
+                 IntBuffer intbuffer = memorystack.mallocInt(1);
+                 IntBuffer intbuffer1 = memorystack.mallocInt(1);
+ 
+-                while(true) {
++                while (true) {
+                     int i = STBVorbis.stb_vorbis_decode_frame_pushdata(this.handle, this.buffer, intbuffer, pointerbuffer, intbuffer1);
+                     this.buffer.position(this.buffer.position() + i);
+                     int j = STBVorbis.stb_vorbis_get_error(this.handle);
+@@ -141,13 +_,13 @@
+     }
+ 
+     private void convertMono(FloatBuffer p_83758_, OggAudioStream.OutputConcat p_83759_) {
+-        while(p_83758_.hasRemaining()) {
++        while (p_83758_.hasRemaining()) {
+             p_83759_.put(p_83758_.get());
+         }
+     }
+ 
+     private void convertStereo(FloatBuffer p_83761_, FloatBuffer p_83762_, OggAudioStream.OutputConcat p_83763_) {
+-        while(p_83761_.hasRemaining() && p_83762_.hasRemaining()) {
++        while (p_83761_.hasRemaining() && p_83762_.hasRemaining()) {
+             p_83763_.put(p_83761_.get());
+             p_83763_.put(p_83762_.get());
+         }
+@@ -173,7 +_,7 @@
+     public ByteBuffer read(int p_83754_) throws IOException {
+         OggAudioStream.OutputConcat oggaudiostream$outputconcat = new OggAudioStream.OutputConcat(p_83754_ + 8192);
+ 
+-        while(this.readFrame(oggaudiostream$outputconcat) && oggaudiostream$outputconcat.byteCount < p_83754_) {
++        while (this.readFrame(oggaudiostream$outputconcat) && oggaudiostream$outputconcat.byteCount < p_83754_) {
+         }
+ 
+         return oggaudiostream$outputconcat.get();
+@@ -182,7 +_,7 @@
+     public ByteBuffer readAll() throws IOException {
+         OggAudioStream.OutputConcat oggaudiostream$outputconcat = new OggAudioStream.OutputConcat(16384);
+ 
+-        while(this.readFrame(oggaudiostream$outputconcat)) {
++        while (this.readFrame(oggaudiostream$outputconcat)) {
+         }
+ 
+         return oggaudiostream$outputconcat.get();

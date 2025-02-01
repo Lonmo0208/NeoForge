@@ -1,0 +1,22 @@
+--- a/net/minecraft/server/commands/FillBiomeCommand.java
++++ b/net/minecraft/server/commands/FillBiomeCommand.java
+@@ -128,8 +_,8 @@
+         } else {
+             List<ChunkAccess> list = new ArrayList<>();
+ 
+-            for(int k = SectionPos.blockToSectionCoord(boundingbox.minZ()); k <= SectionPos.blockToSectionCoord(boundingbox.maxZ()); ++k) {
+-                for(int l = SectionPos.blockToSectionCoord(boundingbox.minX()); l <= SectionPos.blockToSectionCoord(boundingbox.maxX()); ++l) {
++            for (int k = SectionPos.blockToSectionCoord(boundingbox.minZ()); k <= SectionPos.blockToSectionCoord(boundingbox.maxZ()); k++) {
++                for (int l = SectionPos.blockToSectionCoord(boundingbox.minX()); l <= SectionPos.blockToSectionCoord(boundingbox.maxX()); l++) {
+                     ChunkAccess chunkaccess = p_313779_.getChunk(l, k, ChunkStatus.FULL, false);
+                     if (chunkaccess == null) {
+                         return Either.right(ERROR_NOT_LOADED.create());
+@@ -141,7 +_,7 @@
+ 
+             MutableInt mutableint = new MutableInt(0);
+ 
+-            for(ChunkAccess chunkaccess1 : list) {
++            for (ChunkAccess chunkaccess1 : list) {
+                 chunkaccess1.fillBiomesFromNoise(
+                     makeResolver(mutableint, chunkaccess1, boundingbox, p_313905_, p_313945_), p_313779_.getChunkSource().randomState().sampler()
+                 );

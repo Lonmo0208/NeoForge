@@ -1,0 +1,324 @@
+--- a/net/minecraft/world/level/block/entity/trialspawner/TrialSpawner.java
++++ b/net/minecraft/world/level/block/entity/trialspawner/TrialSpawner.java
+@@ -10,11 +_,14 @@
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
++import net.minecraft.core.particles.ParticleOptions;
+ import net.minecraft.core.particles.ParticleTypes;
++import net.minecraft.core.particles.SimpleParticleType;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.nbt.ListTag;
+ import net.minecraft.resources.ResourceKey;
+ import net.minecraft.server.level.ServerLevel;
++import net.minecraft.sounds.SoundEvent;
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.util.Mth;
+@@ -30,6 +_,7 @@
+ import net.minecraft.world.level.GameRules;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.SpawnData;
++import net.minecraft.world.level.block.TrialSpawnerBlock;
+ import net.minecraft.world.level.gameevent.GameEvent;
+ import net.minecraft.world.level.storage.loot.LootParams;
+ import net.minecraft.world.level.storage.loot.LootTable;
+@@ -40,56 +_,115 @@
+ import net.minecraft.world.phys.shapes.CollisionContext;
+ 
+ public final class TrialSpawner {
++    public static final String NORMAL_CONFIG_TAG_NAME = "normal_config";
++    public static final String OMINOUS_CONFIG_TAG_NAME = "ominous_config";
+     public static final int DETECT_PLAYER_SPAWN_BUFFER = 40;
++    private static final int DEFAULT_TARGET_COOLDOWN_LENGTH = 36000;
++    private static final int DEFAULT_PLAYER_SCAN_RANGE = 14;
+     private static final int MAX_MOB_TRACKING_DISTANCE = 47;
+     private static final int MAX_MOB_TRACKING_DISTANCE_SQR = Mth.square(47);
+     private static final float SPAWNING_AMBIENT_SOUND_CHANCE = 0.02F;
+-    private final TrialSpawnerConfig config;
++    private final TrialSpawnerConfig normalConfig;
++    private final TrialSpawnerConfig ominousConfig;
+     private final TrialSpawnerData data;
++    private final int requiredPlayerRange;
++    private final int targetCooldownLength;
+     private final TrialSpawner.StateAccessor stateAccessor;
+     private PlayerDetector playerDetector;
+     private final PlayerDetector.EntitySelector entitySelector;
+     private boolean overridePeacefulAndMobSpawnRule;
++    private boolean isOminous;
+ 
+     public Codec<TrialSpawner> codec() {
+         return RecordCodecBuilder.create(
+-            p_312551_ -> p_312551_.group(
+-                        TrialSpawnerConfig.MAP_CODEC.forGetter(TrialSpawner::getConfig), TrialSpawnerData.MAP_CODEC.forGetter(TrialSpawner::getData)
++            p_338040_ -> p_338040_.group(
++                        TrialSpawnerConfig.CODEC.optionalFieldOf("normal_config", TrialSpawnerConfig.DEFAULT).forGetter(TrialSpawner::getNormalConfig),
++                        TrialSpawnerConfig.CODEC
++                            .optionalFieldOf("ominous_config", TrialSpawnerConfig.DEFAULT)
++                            .forGetter(TrialSpawner::getOminousConfigForSerialization),
++                        TrialSpawnerData.MAP_CODEC.forGetter(TrialSpawner::getData),
++                        Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("target_cooldown_length", 36000).forGetter(TrialSpawner::getTargetCooldownLength),
++                        Codec.intRange(1, 128).optionalFieldOf("required_player_range", 14).forGetter(TrialSpawner::getRequiredPlayerRange)
+                     )
+                     .apply(
+-                        p_312551_,
+-                        (p_323438_, p_323439_) -> new TrialSpawner(p_323438_, p_323439_, this.stateAccessor, this.playerDetector, this.entitySelector)
++                        p_338040_,
++                        (p_338035_, p_338036_, p_338037_, p_338038_, p_338039_) -> new TrialSpawner(
++                                p_338035_, p_338036_, p_338037_, p_338038_, p_338039_, this.stateAccessor, this.playerDetector, this.entitySelector
++                            )
+                     )
+         );
+     }
+ 
+     public TrialSpawner(TrialSpawner.StateAccessor p_312676_, PlayerDetector p_312004_, PlayerDetector.EntitySelector p_323917_) {
+-        this(TrialSpawnerConfig.DEFAULT, new TrialSpawnerData(), p_312676_, p_312004_, p_323917_);
++        this(TrialSpawnerConfig.DEFAULT, TrialSpawnerConfig.DEFAULT, new TrialSpawnerData(), 36000, 14, p_312676_, p_312004_, p_323917_);
+     }
+ 
+     public TrialSpawner(
+         TrialSpawnerConfig p_323942_,
++        TrialSpawnerConfig p_338891_,
+         TrialSpawnerData p_323470_,
++        int p_338747_,
++        int p_338885_,
+         TrialSpawner.StateAccessor p_312198_,
+         PlayerDetector p_312690_,
+         PlayerDetector.EntitySelector p_323834_
+     ) {
+-        this.config = p_323942_;
++        this.normalConfig = p_323942_;
++        this.ominousConfig = p_338891_;
+         this.data = p_323470_;
+-        this.data.setSpawnPotentialsFromConfig(p_323942_);
++        this.targetCooldownLength = p_338747_;
++        this.requiredPlayerRange = p_338885_;
+         this.stateAccessor = p_312198_;
+         this.playerDetector = p_312690_;
+         this.entitySelector = p_323834_;
+     }
+ 
+     public TrialSpawnerConfig getConfig() {
+-        return this.config;
++        return this.isOminous ? this.ominousConfig : this.normalConfig;
++    }
++
++    @VisibleForTesting
++    public TrialSpawnerConfig getNormalConfig() {
++        return this.normalConfig;
++    }
++
++    @VisibleForTesting
++    public TrialSpawnerConfig getOminousConfig() {
++        return this.ominousConfig;
++    }
++
++    private TrialSpawnerConfig getOminousConfigForSerialization() {
++        return !this.ominousConfig.equals(this.normalConfig) ? this.ominousConfig : TrialSpawnerConfig.DEFAULT;
++    }
++
++    public void applyOminous(ServerLevel p_338315_, BlockPos p_338416_) {
++        p_338315_.setBlock(p_338416_, p_338315_.getBlockState(p_338416_).setValue(TrialSpawnerBlock.OMINOUS, Boolean.valueOf(true)), 3);
++        p_338315_.levelEvent(3020, p_338416_, 1);
++        this.isOminous = true;
++        this.data.resetAfterBecomingOminous(this, p_338315_);
++    }
++
++    public void removeOminous(ServerLevel p_338672_, BlockPos p_338318_) {
++        p_338672_.setBlock(p_338318_, p_338672_.getBlockState(p_338318_).setValue(TrialSpawnerBlock.OMINOUS, Boolean.valueOf(false)), 3);
++        this.isOminous = false;
++    }
++
++    public boolean isOminous() {
++        return this.isOminous;
+     }
+ 
+     public TrialSpawnerData getData() {
+         return this.data;
+     }
+ 
++    public int getTargetCooldownLength() {
++        return this.targetCooldownLength;
++    }
++
++    public int getRequiredPlayerRange() {
++        return this.requiredPlayerRange;
++    }
++
+     public TrialSpawnerState getState() {
+         return this.stateAccessor.getState();
+     }
+@@ -130,12 +_,12 @@
+             int i = listtag.size();
+             double d0 = i >= 1
+                 ? listtag.getDouble(0)
+-                : (double)p_312518_.getX() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double)this.config.spawnRange() + 0.5;
++                : (double)p_312518_.getX() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double)this.getConfig().spawnRange() + 0.5;
+             double d1 = i >= 2 ? listtag.getDouble(1) : (double)(p_312518_.getY() + randomsource.nextInt(3) - 1);
+             double d2 = i >= 3
+                 ? listtag.getDouble(2)
+-                : (double)p_312518_.getZ() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double)this.config.spawnRange() + 0.5;
+-            if (!p_312582_.noCollision(optional.get().getAABB(d0, d1, d2))) {
++                : (double)p_312518_.getZ() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double)this.getConfig().spawnRange() + 0.5;
++            if (!p_312582_.noCollision(optional.get().getSpawnAABB(d0, d1, d2))) {
+                 return Optional.empty();
+             } else {
+                 Vec3 vec3 = new Vec3(d0, d1, d2);
+@@ -171,13 +_,17 @@
+                                 }
+ 
+                                 mob.setPersistenceRequired();
++                                spawndata.getEquipmentLootTable().ifPresent(mob::equip);
+                             }
+ 
+                             if (!p_312582_.tryAddFreshEntityWithPassengers(entity)) {
+                                 return Optional.empty();
+                             } else {
+-                                p_312582_.levelEvent(3011, p_312518_, 0);
+-                                p_312582_.levelEvent(3012, blockpos, 0);
++                                TrialSpawner.FlameParticle trialspawner$flameparticle = this.isOminous
++                                    ? TrialSpawner.FlameParticle.OMINOUS
++                                    : TrialSpawner.FlameParticle.NORMAL;
++                                p_312582_.levelEvent(3011, p_312518_, trialspawner$flameparticle.encode());
++                                p_312582_.levelEvent(3012, blockpos, trialspawner$flameparticle.encode());
+                                 p_312582_.gameEvent(entity, GameEvent.ENTITY_PLACE, blockpos);
+                                 return Optional.of(entity.getUUID());
+                             }
+@@ -193,7 +_,7 @@
+         LootParams lootparams = new LootParams.Builder(p_312892_).create(LootContextParamSets.EMPTY);
+         ObjectArrayList<ItemStack> objectarraylist = loottable.getRandomItems(lootparams);
+         if (!objectarraylist.isEmpty()) {
+-            for(ItemStack itemstack : objectarraylist) {
++            for (ItemStack itemstack : objectarraylist) {
+                 DefaultDispenseItemBehavior.spawnItem(p_312892_, itemstack, 2, Direction.UP, Vec3.atBottomCenterOf(p_312668_).relative(Direction.UP, 1.2));
+             }
+ 
+@@ -201,12 +_,12 @@
+         }
+     }
+ 
+-    public void tickClient(Level p_312771_, BlockPos p_312484_) {
++    public void tickClient(Level p_312771_, BlockPos p_312484_, boolean p_338382_) {
+         if (!this.canSpawnInLevel(p_312771_)) {
+             this.data.oSpin = this.data.spin;
+         } else {
+             TrialSpawnerState trialspawnerstate = this.getState();
+-            trialspawnerstate.emitParticles(p_312771_, p_312484_);
++            trialspawnerstate.emitParticles(p_312771_, p_312484_, p_338382_);
+             if (trialspawnerstate.hasSpinningMob()) {
+                 double d0 = (double)Math.max(0L, this.data.nextMobSpawnsAt - p_312771_.getGameTime());
+                 this.data.oSpin = this.data.spin;
+@@ -216,20 +_,17 @@
+             if (trialspawnerstate.isCapableOfSpawning()) {
+                 RandomSource randomsource = p_312771_.getRandom();
+                 if (randomsource.nextFloat() <= 0.02F) {
++                    SoundEvent soundevent = p_338382_ ? SoundEvents.TRIAL_SPAWNER_AMBIENT_OMINOUS : SoundEvents.TRIAL_SPAWNER_AMBIENT;
+                     p_312771_.playLocalSound(
+-                        p_312484_,
+-                        SoundEvents.TRIAL_SPAWNER_AMBIENT,
+-                        SoundSource.BLOCKS,
+-                        randomsource.nextFloat() * 0.25F + 0.75F,
+-                        randomsource.nextFloat() + 0.5F,
+-                        false
++                        p_312484_, soundevent, SoundSource.BLOCKS, randomsource.nextFloat() * 0.25F + 0.75F, randomsource.nextFloat() + 0.5F, false
+                     );
+                 }
+             }
+         }
+     }
+ 
+-    public void tickServer(ServerLevel p_312132_, BlockPos p_312062_) {
++    public void tickServer(ServerLevel p_312132_, BlockPos p_312062_, boolean p_338207_) {
++        this.isOminous = p_338207_;
+         TrialSpawnerState trialspawnerstate = this.getState();
+         if (!this.canSpawnInLevel(p_312132_)) {
+             if (trialspawnerstate.isCapableOfSpawning()) {
+@@ -238,7 +_,7 @@
+             }
+         } else {
+             if (this.data.currentMobs.removeIf(p_312870_ -> shouldMobBeUntracked(p_312132_, p_312062_, p_312870_))) {
+-                this.data.nextMobSpawnsAt = p_312132_.getGameTime() + (long)this.config.ticksBetweenSpawn();
++                this.data.nextMobSpawnsAt = p_312132_.getGameTime() + (long)this.getConfig().ticksBetweenSpawn();
+             }
+ 
+             TrialSpawnerState trialspawnerstate1 = trialspawnerstate.tickAndGetNext(p_312062_, this, p_312132_);
+@@ -263,29 +_,42 @@
+         return blockhitresult.getBlockPos().equals(BlockPos.containing(p_312390_)) || blockhitresult.getType() == HitResult.Type.MISS;
+     }
+ 
+-    public static void addSpawnParticles(Level p_312303_, BlockPos p_312392_, RandomSource p_312825_) {
+-        for(int i = 0; i < 20; ++i) {
++    public static void addSpawnParticles(Level p_312303_, BlockPos p_312392_, RandomSource p_312825_, SimpleParticleType p_338426_) {
++        for (int i = 0; i < 20; i++) {
+             double d0 = (double)p_312392_.getX() + 0.5 + (p_312825_.nextDouble() - 0.5) * 2.0;
+             double d1 = (double)p_312392_.getY() + 0.5 + (p_312825_.nextDouble() - 0.5) * 2.0;
+             double d2 = (double)p_312392_.getZ() + 0.5 + (p_312825_.nextDouble() - 0.5) * 2.0;
+             p_312303_.addParticle(ParticleTypes.SMOKE, d0, d1, d2, 0.0, 0.0, 0.0);
+-            p_312303_.addParticle(ParticleTypes.FLAME, d0, d1, d2, 0.0, 0.0, 0.0);
+-        }
+-    }
+-
+-    public static void addDetectPlayerParticles(Level p_312225_, BlockPos p_311759_, RandomSource p_312553_, int p_312188_) {
+-        for(int i = 0; i < 30 + Math.min(p_312188_, 10) * 5; ++i) {
++            p_312303_.addParticle(p_338426_, d0, d1, d2, 0.0, 0.0, 0.0);
++        }
++    }
++
++    public static void addBecomeOminousParticles(Level p_338657_, BlockPos p_338406_, RandomSource p_338527_) {
++        for (int i = 0; i < 20; i++) {
++            double d0 = (double)p_338406_.getX() + 0.5 + (p_338527_.nextDouble() - 0.5) * 2.0;
++            double d1 = (double)p_338406_.getY() + 0.5 + (p_338527_.nextDouble() - 0.5) * 2.0;
++            double d2 = (double)p_338406_.getZ() + 0.5 + (p_338527_.nextDouble() - 0.5) * 2.0;
++            double d3 = p_338527_.nextGaussian() * 0.02;
++            double d4 = p_338527_.nextGaussian() * 0.02;
++            double d5 = p_338527_.nextGaussian() * 0.02;
++            p_338657_.addParticle(ParticleTypes.TRIAL_OMEN, d0, d1, d2, d3, d4, d5);
++            p_338657_.addParticle(ParticleTypes.SOUL_FIRE_FLAME, d0, d1, d2, d3, d4, d5);
++        }
++    }
++
++    public static void addDetectPlayerParticles(Level p_312225_, BlockPos p_311759_, RandomSource p_312553_, int p_312188_, ParticleOptions p_338522_) {
++        for (int i = 0; i < 30 + Math.min(p_312188_, 10) * 5; i++) {
+             double d0 = (double)(2.0F * p_312553_.nextFloat() - 1.0F) * 0.65;
+             double d1 = (double)(2.0F * p_312553_.nextFloat() - 1.0F) * 0.65;
+             double d2 = (double)p_311759_.getX() + 0.5 + d0;
+             double d3 = (double)p_311759_.getY() + 0.1 + (double)p_312553_.nextFloat() * 0.8;
+             double d4 = (double)p_311759_.getZ() + 0.5 + d1;
+-            p_312225_.addParticle(ParticleTypes.TRIAL_SPAWNER_DETECTION, d2, d3, d4, 0.0, 0.0, 0.0);
++            p_312225_.addParticle(p_338522_, d2, d3, d4, 0.0, 0.0, 0.0);
+         }
+     }
+ 
+     public static void addEjectItemParticles(Level p_312009_, BlockPos p_312583_, RandomSource p_312715_) {
+-        for(int i = 0; i < 20; ++i) {
++        for (int i = 0; i < 20; i++) {
+             double d0 = (double)p_312583_.getX() + 0.4 + p_312715_.nextDouble() * 0.2;
+             double d1 = (double)p_312583_.getY() + 0.4 + p_312715_.nextDouble() * 0.2;
+             double d2 = (double)p_312583_.getZ() + 0.4 + p_312715_.nextDouble() * 0.2;
+@@ -311,6 +_,26 @@
+     @VisibleForTesting
+     public void overridePeacefulAndMobSpawnRule() {
+         this.overridePeacefulAndMobSpawnRule = true;
++    }
++
++    public static enum FlameParticle {
++        NORMAL(ParticleTypes.FLAME),
++        OMINOUS(ParticleTypes.SOUL_FIRE_FLAME);
++
++        public final SimpleParticleType particleType;
++
++        private FlameParticle(SimpleParticleType p_338374_) {
++            this.particleType = p_338374_;
++        }
++
++        public static TrialSpawner.FlameParticle decode(int p_338695_) {
++            TrialSpawner.FlameParticle[] atrialspawner$flameparticle = values();
++            return p_338695_ <= atrialspawner$flameparticle.length && p_338695_ >= 0 ? atrialspawner$flameparticle[p_338695_] : NORMAL;
++        }
++
++        public int encode() {
++            return this.ordinal();
++        }
+     }
+ 
+     public interface StateAccessor {

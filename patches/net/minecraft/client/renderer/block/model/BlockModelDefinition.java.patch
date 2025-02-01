@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/renderer/block/model/BlockModelDefinition.java
++++ b/net/minecraft/client/renderer/block/model/BlockModelDefinition.java
+@@ -48,7 +_,7 @@
+     public BlockModelDefinition(List<BlockModelDefinition> p_111535_) {
+         BlockModelDefinition blockmodeldefinition = null;
+ 
+-        for(BlockModelDefinition blockmodeldefinition1 : p_111535_) {
++        for (BlockModelDefinition blockmodeldefinition1 : p_111535_) {
+             if (blockmodeldefinition1.isMultiPart()) {
+                 this.variants.clear();
+                 blockmodeldefinition = blockmodeldefinition1;
+@@ -155,7 +_,7 @@
+             if (p_111557_.has("variants")) {
+                 JsonObject jsonobject = GsonHelper.getAsJsonObject(p_111557_, "variants");
+ 
+-                for(Entry<String, JsonElement> entry : jsonobject.entrySet()) {
++                for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
+                     map.put(entry.getKey(), p_111556_.deserialize(entry.getValue(), MultiVariant.class));
+                 }
+             }

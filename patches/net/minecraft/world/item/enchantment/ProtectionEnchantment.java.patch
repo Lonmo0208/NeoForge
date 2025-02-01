@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/item/enchantment/ProtectionEnchantment.java
++++ b/net/minecraft/world/item/enchantment/ProtectionEnchantment.java
+@@ -33,11 +_,9 @@
+     @Override
+     public boolean checkCompatibility(Enchantment p_45142_) {
+         if (p_45142_ instanceof ProtectionEnchantment protectionenchantment) {
+-            if (this.type == protectionenchantment.type) {
+-                return false;
+-            } else {
+-                return this.type == ProtectionEnchantment.Type.FALL || protectionenchantment.type == ProtectionEnchantment.Type.FALL;
+-            }
++            return this.type == protectionenchantment.type
++                ? false
++                : this.type == ProtectionEnchantment.Type.FALL || protectionenchantment.type == ProtectionEnchantment.Type.FALL;
+         } else {
+             return super.checkCompatibility(p_45142_);
+         }

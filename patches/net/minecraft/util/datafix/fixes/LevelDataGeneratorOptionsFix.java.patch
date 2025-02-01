@@ -1,0 +1,28 @@
+--- a/net/minecraft/util/datafix/fixes/LevelDataGeneratorOptionsFix.java
++++ b/net/minecraft/util/datafix/fixes/LevelDataGeneratorOptionsFix.java
+@@ -146,14 +_,14 @@
+                 if (iterator.hasNext()) {
+                     String[] astring = iterator.next().toLowerCase(Locale.ROOT).split(",");
+ 
+-                    for(String s1 : astring) {
++                    for (String s1 : astring) {
+                         String[] astring1 = s1.split("\\(", 2);
+                         if (!astring1[0].isEmpty()) {
+                             map.put(astring1[0], Maps.newHashMap());
+                             if (astring1.length > 1 && astring1[1].endsWith(")") && astring1[1].length() > 1) {
+                                 String[] astring2 = astring1[1].substring(0, astring1[1].length() - 1).split(" ");
+ 
+-                                for(String s2 : astring2) {
++                                for (String s2 : astring2) {
+                                     String[] astring3 = s2.split("=", 2);
+                                     if (astring3.length == 2) {
+                                         map.get(astring1[0]).put(astring3[0], astring3[1]);
+@@ -236,7 +_,7 @@
+         List<Pair<Integer, String>> list = Lists.newArrayList();
+         String[] astring = p_16335_.split(",");
+ 
+-        for(String s : astring) {
++        for (String s : astring) {
+             Pair<Integer, String> pair = getLayerInfoFromString(s);
+             if (pair == null) {
+                 return Collections.emptyList();

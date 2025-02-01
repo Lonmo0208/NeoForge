@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/item/crafting/TippedArrowRecipe.java
++++ b/net/minecraft/world/item/crafting/TippedArrowRecipe.java
+@@ -14,8 +_,8 @@
+ 
+     public boolean matches(CraftingContainer p_44515_, Level p_44516_) {
+         if (p_44515_.getWidth() == 3 && p_44515_.getHeight() == 3) {
+-            for(int i = 0; i < p_44515_.getWidth(); ++i) {
+-                for(int j = 0; j < p_44515_.getHeight(); ++j) {
++            for (int i = 0; i < p_44515_.getWidth(); i++) {
++                for (int j = 0; j < p_44515_.getHeight(); j++) {
+                     ItemStack itemstack = p_44515_.getItem(i + j * p_44515_.getWidth());
+                     if (itemstack.isEmpty()) {
+                         return false;

@@ -1,0 +1,41 @@
+--- a/net/minecraft/client/gui/screens/inventory/BeaconScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/BeaconScreen.java
+@@ -74,11 +_,11 @@
+         this.addBeaconButton(new BeaconScreen.BeaconConfirmButton(this.leftPos + 164, this.topPos + 107));
+         this.addBeaconButton(new BeaconScreen.BeaconCancelButton(this.leftPos + 190, this.topPos + 107));
+ 
+-        for(int i = 0; i <= 2; ++i) {
++        for (int i = 0; i <= 2; i++) {
+             int j = BeaconBlockEntity.BEACON_EFFECTS.get(i).size();
+             int k = j * 22 + (j - 1) * 2;
+ 
+-            for(int l = 0; l < j; ++l) {
++            for (int l = 0; l < j; l++) {
+                 Holder<MobEffect> holder = BeaconBlockEntity.BEACON_EFFECTS.get(i).get(l);
+                 BeaconScreen.BeaconPowerButton beaconscreen$beaconpowerbutton = new BeaconScreen.BeaconPowerButton(
+                     this.leftPos + 76 + l * 24 - k / 2, this.topPos + 22 + i * 25, holder, true, i
+@@ -92,7 +_,7 @@
+         int j1 = BeaconBlockEntity.BEACON_EFFECTS.get(3).size() + 1;
+         int k1 = j1 * 22 + (j1 - 1) * 2;
+ 
+-        for(int l1 = 0; l1 < j1 - 1; ++l1) {
++        for (int l1 = 0; l1 < j1 - 1; l1++) {
+             Holder<MobEffect> holder2 = BeaconBlockEntity.BEACON_EFFECTS.get(3).get(l1);
+             BeaconScreen.BeaconPowerButton beaconscreen$beaconpowerbutton2 = new BeaconScreen.BeaconPowerButton(
+                 this.leftPos + 167 + l1 * 24 - k1 / 2, this.topPos + 47, holder2, false, 3
+@@ -134,11 +_,10 @@
+         p_282454_.pose().pushPose();
+         p_282454_.pose().translate(0.0F, 0.0F, 100.0F);
+         p_282454_.renderItem(new ItemStack(Items.NETHERITE_INGOT), i + 20, j + 109);
+-        p_282454_.renderItem(new ItemStack(Items.AMBER_GEM), i + 41, j + 109);
+-        p_282454_.renderItem(new ItemStack(Items.DIAMOND), i + 41 + 18, j + 109);
+-        p_282454_.renderItem(new ItemStack(Items.EMERALD), i + 41 + 37, j + 109);
+-        p_282454_.renderItem(new ItemStack(Items.GOLD_INGOT), i + 42 + 55, j + 109);
+-        p_282454_.renderItem(new ItemStack(Items.IRON_INGOT), i + 42 + 74, j + 109);
++        p_282454_.renderItem(new ItemStack(Items.EMERALD), i + 41, j + 109);
++        p_282454_.renderItem(new ItemStack(Items.DIAMOND), i + 41 + 22, j + 109);
++        p_282454_.renderItem(new ItemStack(Items.GOLD_INGOT), i + 42 + 44, j + 109);
++        p_282454_.renderItem(new ItemStack(Items.IRON_INGOT), i + 42 + 66, j + 109);
+         p_282454_.pose().popPose();
+     }
+ 

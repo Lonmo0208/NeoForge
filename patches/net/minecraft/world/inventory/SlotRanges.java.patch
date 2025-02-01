@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/inventory/SlotRanges.java
++++ b/net/minecraft/world/inventory/SlotRanges.java
+@@ -66,7 +_,7 @@
+     private static void addSlotRange(List<SlotRange> p_332790_, String p_332813_, int p_332763_, int p_332721_) {
+         IntList intlist = new IntArrayList(p_332721_);
+ 
+-        for(int i = 0; i < p_332721_; ++i) {
++        for (int i = 0; i < p_332721_; i++) {
+             int j = p_332763_ + i;
+             p_332790_.add(create(p_332813_ + i, j));
+             intlist.add(j);

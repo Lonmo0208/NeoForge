@@ -1,0 +1,32 @@
+--- a/net/minecraft/advancements/critereon/EntityFlagsPredicate.java
++++ b/net/minecraft/advancements/critereon/EntityFlagsPredicate.java
+@@ -4,7 +_,6 @@
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Optional;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
+ 
+@@ -12,14 +_,14 @@
+     Optional<Boolean> isOnFire, Optional<Boolean> isCrouching, Optional<Boolean> isSprinting, Optional<Boolean> isSwimming, Optional<Boolean> isBaby
+ ) {
+     public static final Codec<EntityFlagsPredicate> CODEC = RecordCodecBuilder.create(
+-        p_298614_ -> p_298614_.group(
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "is_on_fire").forGetter(EntityFlagsPredicate::isOnFire),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "is_sneaking").forGetter(EntityFlagsPredicate::isCrouching),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "is_sprinting").forGetter(EntityFlagsPredicate::isSprinting),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "is_swimming").forGetter(EntityFlagsPredicate::isSwimming),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "is_baby").forGetter(EntityFlagsPredicate::isBaby)
++        p_337360_ -> p_337360_.group(
++                    Codec.BOOL.optionalFieldOf("is_on_fire").forGetter(EntityFlagsPredicate::isOnFire),
++                    Codec.BOOL.optionalFieldOf("is_sneaking").forGetter(EntityFlagsPredicate::isCrouching),
++                    Codec.BOOL.optionalFieldOf("is_sprinting").forGetter(EntityFlagsPredicate::isSprinting),
++                    Codec.BOOL.optionalFieldOf("is_swimming").forGetter(EntityFlagsPredicate::isSwimming),
++                    Codec.BOOL.optionalFieldOf("is_baby").forGetter(EntityFlagsPredicate::isBaby)
+                 )
+-                .apply(p_298614_, EntityFlagsPredicate::new)
++                .apply(p_337360_, EntityFlagsPredicate::new)
+     );
+ 
+     public boolean matches(Entity p_33697_) {

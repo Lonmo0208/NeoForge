@@ -1,0 +1,54 @@
+--- a/net/minecraft/world/level/levelgen/feature/VegetationPatchFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/VegetationPatchFeature.java
+@@ -47,10 +_,10 @@
+         Direction direction1 = direction.getOpposite();
+         Set<BlockPos> set = new HashSet<>();
+ 
+-        for(int i = -p_225316_; i <= p_225316_; ++i) {
++        for (int i = -p_225316_; i <= p_225316_; i++) {
+             boolean flag = i == -p_225316_ || i == p_225316_;
+ 
+-            for(int j = -p_225317_; j <= p_225317_; ++j) {
++            for (int j = -p_225317_; j <= p_225317_; j++) {
+                 boolean flag1 = j == -p_225317_ || j == p_225317_;
+                 boolean flag2 = flag || flag1;
+                 boolean flag3 = flag && flag1;
+@@ -58,16 +_,16 @@
+                 if (!flag3 && (!flag4 || p_225312_.extraEdgeColumnChance != 0.0F && !(p_225313_.nextFloat() > p_225312_.extraEdgeColumnChance))) {
+                     blockpos$mutableblockpos.setWithOffset(p_225314_, i, 0, j);
+ 
+-                    for(int k = 0;
++                    for (int k = 0;
+                         p_225311_.isStateAtPosition(blockpos$mutableblockpos, BlockBehaviour.BlockStateBase::isAir) && k < p_225312_.verticalRange;
+-                        ++k
++                        k++
+                     ) {
+                         blockpos$mutableblockpos.move(direction);
+                     }
+ 
+-                    for(int i1 = 0;
++                    for (int i1 = 0;
+                         p_225311_.isStateAtPosition(blockpos$mutableblockpos, p_284926_ -> !p_284926_.isAir()) && i1 < p_225312_.verticalRange;
+-                        ++i1
++                        i1++
+                     ) {
+                         blockpos$mutableblockpos.move(direction1);
+                     }
+@@ -100,7 +_,7 @@
+         int p_225336_,
+         int p_225337_
+     ) {
+-        for(BlockPos blockpos : p_225335_) {
++        for (BlockPos blockpos : p_225335_) {
+             if (p_225333_.vegetationChance > 0.0F && p_225334_.nextFloat() < p_225333_.vegetationChance) {
+                 this.placeVegetation(p_225332_, p_225333_, p_225331_.chunkGenerator(), p_225334_, blockpos);
+             }
+@@ -121,7 +_,7 @@
+         BlockPos.MutableBlockPos p_225328_,
+         int p_225329_
+     ) {
+-        for(int i = 0; i < p_225329_; ++i) {
++        for (int i = 0; i < p_225329_; i++) {
+             BlockState blockstate = p_225325_.groundState.getState(p_225327_, p_225328_);
+             BlockState blockstate1 = p_225324_.getBlockState(p_225328_);
+             if (!blockstate.is(blockstate1.getBlock())) {

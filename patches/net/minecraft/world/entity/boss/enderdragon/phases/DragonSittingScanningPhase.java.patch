@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/entity/boss/enderdragon/phases/DragonSittingScanningPhase.java
++++ b/net/minecraft/world/entity/boss/enderdragon/phases/DragonSittingScanningPhase.java
+@@ -17,12 +_,12 @@
+ 
+     public DragonSittingScanningPhase(EnderDragon p_31342_) {
+         super(p_31342_);
+-        this.scanTargeting = TargetingConditions.forCombat().range(20.0).selector(p_340128_ -> Math.abs(p_340128_.getY() - p_31342_.getY()) <= 10.0);
++        this.scanTargeting = TargetingConditions.forCombat().range(20.0).selector(p_337846_ -> Math.abs(p_337846_.getY() - p_31342_.getY()) <= 10.0);
+     }
+ 
+     @Override
+     public void doServerTick() {
+-        ++this.scanningTime;
++        this.scanningTime++;
+         LivingEntity livingentity = this.dragon
+             .level()
+             .getNearestPlayer(this.scanTargeting, this.dragon, this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());

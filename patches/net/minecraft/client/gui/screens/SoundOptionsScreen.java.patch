@@ -1,0 +1,10 @@
+--- a/net/minecraft/client/gui/screens/SoundOptionsScreen.java
++++ b/net/minecraft/client/gui/screens/SoundOptionsScreen.java
+@@ -42,6 +_,6 @@
+         return Arrays.stream(SoundSource.values())
+             .filter(p_247780_ -> p_247780_ != SoundSource.MASTER)
+             .map(p_247779_ -> this.options.getSoundSourceOptionInstance(p_247779_))
+-            .toArray(p_247778_ -> new OptionInstance[p_247778_]);
++            .toArray(OptionInstance[]::new);
+     }
+ }

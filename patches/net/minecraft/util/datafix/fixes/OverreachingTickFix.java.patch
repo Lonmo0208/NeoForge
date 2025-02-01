@@ -1,0 +1,26 @@
+--- a/net/minecraft/util/datafix/fixes/OverreachingTickFix.java
++++ b/net/minecraft/util/datafix/fixes/OverreachingTickFix.java
+@@ -20,15 +_,15 @@
+     protected TypeRewriteRule makeRule() {
+         Type<?> type = this.getInputSchema().getType(References.CHUNK);
+         OpticFinder<?> opticfinder = type.findField("block_ticks");
+-        return this.fixTypeEverywhereTyped("Handle ticks saved in the wrong chunk", type, p_207661_ -> {
+-            Optional<? extends Typed<?>> optional = p_207661_.getOptionalTyped(opticfinder);
++        return this.fixTypeEverywhereTyped("Handle ticks saved in the wrong chunk", type, p_337660_ -> {
++            Optional<? extends Typed<?>> optional = p_337660_.getOptionalTyped(opticfinder);
+             Optional<? extends Dynamic<?>> optional1 = optional.isPresent() ? optional.get().write().result() : Optional.empty();
+-            return p_207661_.update(DSL.remainderFinder(), p_207670_ -> {
+-                int i = p_207670_.get("xPos").asInt(0);
+-                int j = p_207670_.get("zPos").asInt(0);
+-                Optional<? extends Dynamic<?>> optional2 = p_207670_.get("fluid_ticks").get().result();
+-                p_207670_ = extractOverreachingTicks(p_207670_, i, j, optional1, "neighbor_block_ticks");
+-                return extractOverreachingTicks(p_207670_, i, j, optional2, "neighbor_fluid_ticks");
++            return p_337660_.update(DSL.remainderFinder(), p_337658_ -> {
++                int i = p_337658_.get("xPos").asInt(0);
++                int j = p_337658_.get("zPos").asInt(0);
++                Optional<? extends Dynamic<?>> optional2 = p_337658_.get("fluid_ticks").get().result();
++                p_337658_ = extractOverreachingTicks(p_337658_, i, j, optional1, "neighbor_block_ticks");
++                return extractOverreachingTicks(p_337658_, i, j, optional2, "neighbor_fluid_ticks");
+             });
+         });
+     }

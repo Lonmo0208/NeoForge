@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/block/BellBlock.java
++++ b/net/minecraft/world/level/block/BellBlock.java
+@@ -113,7 +_,7 @@
+         if (p_49741_.getAxis() != Direction.Axis.Y && !(p_49742_ > 0.8124F)) {
+             Direction direction = p_49740_.getValue(FACING);
+             BellAttachType bellattachtype = p_49740_.getValue(ATTACHMENT);
+-            switch(bellattachtype) {
++            switch (bellattachtype) {
+                 case FLOOR:
+                     return direction.getAxis() == p_49741_.getAxis();
+                 case SINGLE_WALL:
+@@ -261,7 +_,7 @@
+     }
+ 
+     private static Direction getConnectedDirection(BlockState p_49769_) {
+-        switch((BellAttachType)p_49769_.getValue(ATTACHMENT)) {
++        switch ((BellAttachType)p_49769_.getValue(ATTACHMENT)) {
+             case FLOOR:
+                 return Direction.UP;
+             case CEILING:

@@ -1,0 +1,38 @@
+--- a/net/minecraft/util/datafix/fixes/RenameEnchantmentsFix.java
++++ b/net/minecraft/util/datafix/fixes/RenameEnchantmentsFix.java
+@@ -8,7 +_,7 @@
+ import com.mojang.datafixers.schemas.Schema;
+ import com.mojang.datafixers.types.Type;
+ import com.mojang.serialization.Dynamic;
+-import com.mojang.serialization.DataResult.PartialResult;
++import com.mojang.serialization.DataResult.Error;
+ import java.util.Map;
+ import java.util.function.Function;
+ import java.util.stream.Stream;
+@@ -40,21 +_,19 @@
+     private Dynamic<?> fixEnchantmentList(Dynamic<?> p_320427_, String p_319969_) {
+         return p_320427_.update(
+             p_319969_,
+-            p_320015_ -> p_320015_.asStreamOpt()
++            p_337664_ -> p_337664_.asStreamOpt()
+                     .map(
+                         p_320850_ -> p_320850_.map(
+                                 p_320794_ -> p_320794_.update(
+                                         "id",
+-                                        p_320286_ -> p_320286_.asString()
++                                        p_337663_ -> p_337663_.asString()
+                                                 .map(p_320160_ -> p_320794_.createString(this.renames.getOrDefault(p_320160_, p_320160_)))
+-                                                .get()
+-                                                .map(Function.identity(), p_320559_ -> p_320286_)
++                                                .mapOrElse(Function.identity(), p_338509_ -> p_337663_)
+                                     )
+                             )
+                     )
+-                    .map(p_320015_::createList)
+-                    .get()
+-                    .map(Function.identity(), p_320079_ -> p_320015_)
++                    .map(p_337664_::createList)
++                    .mapOrElse(Function.identity(), p_338319_ -> p_337664_)
+         );
+     }
+ }

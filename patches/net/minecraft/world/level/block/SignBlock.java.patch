@@ -1,0 +1,42 @@
+--- a/net/minecraft/world/level/block/SignBlock.java
++++ b/net/minecraft/world/level/block/SignBlock.java
+@@ -16,7 +_,6 @@
+ import net.minecraft.world.InteractionResult;
+ import net.minecraft.world.ItemInteractionResult;
+ import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.SignApplicator;
+ import net.minecraft.world.level.BlockGetter;
+@@ -82,10 +_,8 @@
+     protected ItemInteractionResult useItemOn(
+         ItemStack p_316116_, BlockState p_316899_, Level p_316692_, BlockPos p_316578_, Player p_316244_, InteractionHand p_316196_, BlockHitResult p_316744_
+     ) {
+-        BlockEntity $$10 = p_316692_.getBlockEntity(p_316578_);
+-        if ($$10 instanceof SignBlockEntity signblockentity) {
+-            Item $$12 = p_316116_.getItem();
+-            SignApplicator signapplicator1 = $$12 instanceof SignApplicator signapplicator ? signapplicator : null;
++        if (p_316692_.getBlockEntity(p_316578_) instanceof SignBlockEntity signblockentity) {
++            SignApplicator signapplicator1 = p_316116_.getItem() instanceof SignApplicator signapplicator ? signapplicator : null;
+             boolean flag = signapplicator1 != null && p_316244_.mayBuild();
+             if (!p_316692_.isClientSide) {
+                 if (flag && !signblockentity.isWaxed() && !this.otherPlayerIsEditingSign(p_316244_, signblockentity)) {
+@@ -118,8 +_,7 @@
+ 
+     @Override
+     protected InteractionResult useWithoutItem(BlockState p_316779_, Level p_316615_, BlockPos p_316127_, Player p_316173_, BlockHitResult p_316850_) {
+-        BlockEntity $$7 = p_316615_.getBlockEntity(p_316127_);
+-        if ($$7 instanceof SignBlockEntity signblockentity) {
++        if (p_316615_.getBlockEntity(p_316127_) instanceof SignBlockEntity signblockentity) {
+             if (p_316615_.isClientSide) {
+                 Util.pauseInIde(new IllegalStateException("Expected to only call this on server"));
+             }
+@@ -147,7 +_,7 @@
+     private boolean hasEditableText(Player p_279394_, SignBlockEntity p_279187_, boolean p_279225_) {
+         SignText signtext = p_279187_.getText(p_279225_);
+         return Arrays.stream(signtext.getMessages(p_279394_.isTextFilteringEnabled()))
+-            .allMatch(p_304376_ -> p_304376_.equals(CommonComponents.EMPTY) || p_304376_.getContents() instanceof PlainTextContents);
++            .allMatch(p_339537_ -> p_339537_.equals(CommonComponents.EMPTY) || p_339537_.getContents() instanceof PlainTextContents);
+     }
+ 
+     public abstract float getYRotationDegrees(BlockState p_277705_);

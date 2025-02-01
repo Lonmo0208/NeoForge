@@ -1,0 +1,97 @@
+--- a/net/minecraft/world/level/EntityGetter.java
++++ b/net/minecraft/world/level/EntityGetter.java
+@@ -7,7 +_,6 @@
+ import java.util.UUID;
+ import java.util.function.Predicate;
+ import javax.annotation.Nullable;
+-import net.minecraft.core.BlockPos;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntitySelector;
+ import net.minecraft.world.entity.LivingEntity;
+@@ -15,7 +_,6 @@
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.level.entity.EntityTypeTest;
+ import net.minecraft.world.phys.AABB;
+-import net.minecraft.world.phys.Vec3;
+ import net.minecraft.world.phys.shapes.BooleanOp;
+ import net.minecraft.world.phys.shapes.Shapes;
+ import net.minecraft.world.phys.shapes.VoxelShape;
+@@ -39,7 +_,7 @@
+         if (p_45940_.isEmpty()) {
+             return true;
+         } else {
+-            for(Entity entity : this.getEntities(p_45939_, p_45940_.bounds())) {
++            for (Entity entity : this.getEntities(p_45939_, p_45940_.bounds())) {
+                 if (!entity.isRemoved()
+                     && entity.blocksBuilding
+                     && (p_45939_ == null || !entity.isPassengerOfSameVehicle(p_45939_))
+@@ -67,7 +_,7 @@
+             } else {
+                 Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(list.size());
+ 
+-                for(Entity entity : list) {
++                for (Entity entity : list) {
+                     builder.add(Shapes.create(entity.getBoundingBox()));
+                 }
+ 
+@@ -81,7 +_,7 @@
+         double d0 = -1.0;
+         Player player = null;
+ 
+-        for(Player player1 : this.players()) {
++        for (Player player1 : this.players()) {
+             if (p_45923_ == null || p_45923_.test(player1)) {
+                 double d1 = player1.distanceToSqr(p_45919_, p_45920_, p_45921_);
+                 if ((p_45922_ < 0.0 || d1 < p_45922_ * p_45922_) && (d0 == -1.0 || d1 < d0)) {
+@@ -105,14 +_,8 @@
+         return this.getNearestPlayer(p_45925_, p_45926_, p_45927_, p_45928_, predicate);
+     }
+ 
+-    @Nullable
+-    default Player getNearestPlayer(BlockPos p_340742_, double p_340882_, boolean p_341205_) {
+-        Vec3 vec3 = p_340742_.getCenter();
+-        return this.getNearestPlayer(vec3.x(), vec3.y(), vec3.z(), p_340882_, p_341205_);
+-    }
+-
+     default boolean hasNearbyAlivePlayer(double p_45915_, double p_45916_, double p_45917_, double p_45918_) {
+-        for(Player player : this.players()) {
++        for (Player player : this.players()) {
+             if (EntitySelector.NO_SPECTATORS.test(player) && EntitySelector.LIVING_ENTITY_STILL_ALIVE.test(player)) {
+                 double d0 = player.distanceToSqr(p_45915_, p_45916_, p_45917_);
+                 if (p_45918_ < 0.0 || d0 < p_45918_ * p_45918_) {
+@@ -159,7 +_,7 @@
+         double d0 = -1.0;
+         T t = null;
+ 
+-        for(T t1 : p_45983_) {
++        for (T t1 : p_45983_) {
+             if (p_45984_.test(p_45985_, t1)) {
+                 double d1 = t1.distanceToSqr(p_45986_, p_45987_, p_45988_);
+                 if (d0 == -1.0 || d1 < d0) {
+@@ -175,7 +_,7 @@
+     default List<Player> getNearbyPlayers(TargetingConditions p_45956_, LivingEntity p_45957_, AABB p_45958_) {
+         List<Player> list = Lists.newArrayList();
+ 
+-        for(Player player : this.players()) {
++        for (Player player : this.players()) {
+             if (p_45958_.contains(player.getX(), player.getY(), player.getZ()) && p_45956_.test(p_45957_, player)) {
+                 list.add(player);
+             }
+@@ -188,7 +_,7 @@
+         List<T> list = this.getEntitiesOfClass(p_45972_, p_45975_, p_186450_ -> true);
+         List<T> list1 = Lists.newArrayList();
+ 
+-        for(T t : list) {
++        for (T t : list) {
+             if (p_45973_.test(p_45974_, t)) {
+                 list1.add(t);
+             }
+@@ -199,7 +_,7 @@
+ 
+     @Nullable
+     default Player getPlayerByUUID(UUID p_46004_) {
+-        for(int i = 0; i < this.players().size(); ++i) {
++        for (int i = 0; i < this.players().size(); i++) {
+             Player player = this.players().get(i);
+             if (p_46004_.equals(player.getUUID())) {
+                 return player;

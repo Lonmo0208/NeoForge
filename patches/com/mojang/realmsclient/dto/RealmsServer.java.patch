@@ -1,0 +1,56 @@
+--- a/com/mojang/realmsclient/dto/RealmsServer.java
++++ b/com/mojang/realmsclient/dto/RealmsServer.java
+@@ -83,7 +_,7 @@
+         int i = 0;
+         MinecraftSessionService minecraftsessionservice = Minecraft.getInstance().getMinecraftSessionService();
+ 
+-        for(UUID uuid : p_87507_.players) {
++        for (UUID uuid : p_87507_.players) {
+             if (!Minecraft.getInstance().isLocalPlayer(uuid)) {
+                 try {
+                     ProfileResult profileresult = minecraftsessionservice.fetchProfile(uuid, false);
+@@ -91,7 +_,7 @@
+                         list.add(profileresult.profile().getName());
+                     }
+ 
+-                    ++i;
++                    i++;
+                 } catch (Exception exception) {
+                     LOGGER.error("Could not get name for {}", uuid, exception);
+                 }
+@@ -158,7 +_,7 @@
+     private static List<PlayerInfo> parseInvited(JsonArray p_87498_) {
+         List<PlayerInfo> list = Lists.newArrayList();
+ 
+-        for(JsonElement jsonelement : p_87498_) {
++        for (JsonElement jsonelement : p_87498_) {
+             try {
+                 JsonObject jsonobject = jsonelement.getAsJsonObject();
+                 PlayerInfo playerinfo = new PlayerInfo();
+@@ -178,7 +_,7 @@
+     private static Map<Integer, RealmsWorldOptions> parseSlots(JsonArray p_87514_) {
+         Map<Integer, RealmsWorldOptions> map = Maps.newHashMap();
+ 
+-        for(JsonElement jsonelement : p_87514_) {
++        for (JsonElement jsonelement : p_87514_) {
+             try {
+                 JsonObject jsonobject = jsonelement.getAsJsonObject();
+                 JsonParser jsonparser = new JsonParser();
+@@ -196,7 +_,7 @@
+             }
+         }
+ 
+-        for(int j = 1; j <= 3; ++j) {
++        for (int j = 1; j <= 3; j++) {
+             if (!map.containsKey(j)) {
+                 map.put(j, RealmsWorldOptions.createEmptyDefaults());
+             }
+@@ -317,7 +_,7 @@
+     public Map<Integer, RealmsWorldOptions> cloneSlots(Map<Integer, RealmsWorldOptions> p_87511_) {
+         Map<Integer, RealmsWorldOptions> map = Maps.newHashMap();
+ 
+-        for(Entry<Integer, RealmsWorldOptions> entry : p_87511_.entrySet()) {
++        for (Entry<Integer, RealmsWorldOptions> entry : p_87511_.entrySet()) {
+             map.put(entry.getKey(), entry.getValue().clone());
+         }
+ 

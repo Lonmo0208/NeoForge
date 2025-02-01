@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/scores/DisplaySlot.java
++++ b/net/minecraft/world/scores/DisplaySlot.java
+@@ -48,7 +_,7 @@
+ 
+     @Nullable
+     public static DisplaySlot teamColorToSlot(ChatFormatting p_296133_) {
+-        return switch(p_296133_) {
++        return switch (p_296133_) {
+             case BLACK -> TEAM_BLACK;
+             case DARK_BLUE -> TEAM_DARK_BLUE;
+             case DARK_GREEN -> TEAM_DARK_GREEN;
+@@ -66,6 +_,7 @@
+             case YELLOW -> TEAM_YELLOW;
+             case WHITE -> TEAM_WHITE;
+             case BOLD, ITALIC, UNDERLINE, RESET, OBFUSCATED, STRIKETHROUGH -> null;
++            default -> throw new MatchException(null, null);
+         };
+     }
+ }

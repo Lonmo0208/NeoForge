@@ -1,0 +1,34 @@
+--- a/net/minecraft/client/renderer/texture/HttpTexture.java
++++ b/net/minecraft/client/renderer/texture/HttpTexture.java
+@@ -188,8 +_,8 @@
+     }
+ 
+     private static void doNotchTransparencyHack(NativeImage p_118013_, int p_118014_, int p_118015_, int p_118016_, int p_118017_) {
+-        for(int i = p_118014_; i < p_118016_; ++i) {
+-            for(int j = p_118015_; j < p_118017_; ++j) {
++        for (int i = p_118014_; i < p_118016_; i++) {
++            for (int j = p_118015_; j < p_118017_; j++) {
+                 int k = p_118013_.getPixelRGBA(i, j);
+                 if ((k >> 24 & 0xFF) < 128) {
+                     return;
+@@ -197,16 +_,16 @@
+             }
+         }
+ 
+-        for(int l = p_118014_; l < p_118016_; ++l) {
+-            for(int i1 = p_118015_; i1 < p_118017_; ++i1) {
++        for (int l = p_118014_; l < p_118016_; l++) {
++            for (int i1 = p_118015_; i1 < p_118017_; i1++) {
+                 p_118013_.setPixelRGBA(l, i1, p_118013_.getPixelRGBA(l, i1) & 16777215);
+             }
+         }
+     }
+ 
+     private static void setNoAlpha(NativeImage p_118023_, int p_118024_, int p_118025_, int p_118026_, int p_118027_) {
+-        for(int i = p_118024_; i < p_118026_; ++i) {
+-            for(int j = p_118025_; j < p_118027_; ++j) {
++        for (int i = p_118024_; i < p_118026_; i++) {
++            for (int j = p_118025_; j < p_118027_; j++) {
+                 p_118023_.setPixelRGBA(i, j, p_118023_.getPixelRGBA(i, j) | 0xFF000000);
+             }
+         }

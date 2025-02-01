@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/piston/PistonMath.java
++++ b/net/minecraft/world/level/block/piston/PistonMath.java
+@@ -8,7 +_,7 @@
+         double d0 = p_60331_ * (double)p_60330_.getAxisDirection().getStep();
+         double d1 = Math.min(d0, 0.0);
+         double d2 = Math.max(d0, 0.0);
+-        switch(p_60330_) {
++        switch (p_60330_) {
+             case WEST:
+                 return new AABB(p_60329_.minX + d1, p_60329_.minY, p_60329_.minZ, p_60329_.minX + d2, p_60329_.maxY, p_60329_.maxZ);
+             case EAST:

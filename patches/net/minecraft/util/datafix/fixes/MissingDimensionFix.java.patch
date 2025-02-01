@@ -1,0 +1,23 @@
+--- a/net/minecraft/util/datafix/fixes/MissingDimensionFix.java
++++ b/net/minecraft/util/datafix/fixes/MissingDimensionFix.java
+@@ -84,15 +_,15 @@
+         } else {
+             OpticFinder<? extends List<? extends Pair<String, ?>>> opticfinder = compoundlisttype.finder();
+             return this.fixTypeEverywhereTyped(
+-                "MissingDimensionFix", type2, p_16426_ -> p_16426_.updateTyped(fieldfinder, p_145517_ -> p_145517_.updateTyped(opticfinder, p_145521_ -> {
+-                            if (!(p_145521_.getValue() instanceof List)) {
++                "MissingDimensionFix", type2, p_16426_ -> p_16426_.updateTyped(fieldfinder, p_145517_ -> p_145517_.updateTyped(opticfinder, p_337647_ -> {
++                            if (!(p_337647_.getValue() instanceof List)) {
+                                 throw new IllegalStateException("List exptected");
+-                            } else if (((List)p_145521_.getValue()).isEmpty()) {
++                            } else if (((List)p_337647_.getValue()).isEmpty()) {
+                                 Dynamic<?> dynamic = p_16426_.get(DSL.remainderFinder());
+                                 Dynamic<?> dynamic1 = this.recreateSettings(dynamic);
+-                                return DataFixUtils.orElse(compoundlisttype.readTyped(dynamic1).result().map(Pair::getFirst), p_145521_);
++                                return DataFixUtils.orElse(compoundlisttype.readTyped(dynamic1).result().map(Pair::getFirst), p_337647_);
+                             } else {
+-                                return p_145521_;
++                                return p_337647_;
+                             }
+                         }))
+             );

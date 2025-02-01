@@ -1,0 +1,46 @@
+--- a/net/minecraft/world/level/levelgen/structure/pools/ListPoolElement.java
++++ b/net/minecraft/world/level/levelgen/structure/pools/ListPoolElement.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.pools;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -18,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+ 
+ public class ListPoolElement extends StructurePoolElement {
+-    public static final Codec<ListPoolElement> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<ListPoolElement> CODEC = RecordCodecBuilder.mapCodec(
+         p_210367_ -> p_210367_.group(StructurePoolElement.CODEC.listOf().fieldOf("elements").forGetter(p_210369_ -> p_210369_.elements), projectionCodec())
+                 .apply(p_210367_, ListPoolElement::new)
+     );
+@@ -40,7 +_,7 @@
+         int j = 0;
+         int k = 0;
+ 
+-        for(StructurePoolElement structurepoolelement : this.elements) {
++        for (StructurePoolElement structurepoolelement : this.elements) {
+             Vec3i vec3i = structurepoolelement.getSize(p_227283_, p_227284_);
+             i = Math.max(i, vec3i.getX());
+             j = Math.max(j, vec3i.getY());
+@@ -80,7 +_,7 @@
+         RandomSource p_227280_,
+         boolean p_227281_
+     ) {
+-        for(StructurePoolElement structurepoolelement : this.elements) {
++        for (StructurePoolElement structurepoolelement : this.elements) {
+             if (!structurepoolelement.place(p_227272_, p_227273_, p_227274_, p_227275_, p_227276_, p_227277_, p_227278_, p_227279_, p_227280_, p_227281_)) {
+                 return false;
+             }
+@@ -103,7 +_,7 @@
+ 
+     @Override
+     public String toString() {
+-        return "List[" + (String)this.elements.stream().map(Object::toString).collect(Collectors.joining(", ")) + "]";
++        return "List[" + this.elements.stream().map(Object::toString).collect(Collectors.joining(", ")) + "]";
+     }
+ 
+     private void setProjectionOnEachElement(StructureTemplatePool.Projection p_210407_) {

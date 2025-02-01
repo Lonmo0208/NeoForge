@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/SetSpawnCommand.java
++++ b/net/minecraft/server/commands/SetSpawnCommand.java
+@@ -67,7 +_,7 @@
+     private static int setSpawn(CommandSourceStack p_138650_, Collection<ServerPlayer> p_138651_, BlockPos p_138652_, float p_138653_) {
+         ResourceKey<Level> resourcekey = p_138650_.getLevel().dimension();
+ 
+-        for(ServerPlayer serverplayer : p_138651_) {
++        for (ServerPlayer serverplayer : p_138651_) {
+             serverplayer.setRespawnPosition(resourcekey, p_138652_, p_138653_, true, false);
+         }
+ 

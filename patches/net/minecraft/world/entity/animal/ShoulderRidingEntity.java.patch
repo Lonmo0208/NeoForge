@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/animal/ShoulderRidingEntity.java
++++ b/net/minecraft/world/entity/animal/ShoulderRidingEntity.java
+@@ -28,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        ++this.rideCooldownCounter;
++        this.rideCooldownCounter++;
+         super.tick();
+     }
+ 

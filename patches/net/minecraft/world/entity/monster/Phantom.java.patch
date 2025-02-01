@@ -1,0 +1,75 @@
+--- a/net/minecraft/world/entity/monster/Phantom.java
++++ b/net/minecraft/world/entity/monster/Phantom.java
+@@ -36,7 +_,6 @@
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.ServerLevelAccessor;
+-import net.minecraft.world.level.biome.Biomes;
+ import net.minecraft.world.level.levelgen.Heightmap;
+ import net.minecraft.world.phys.Vec3;
+ 
+@@ -141,9 +_,7 @@
+ 
+     @Override
+     public void aiStep() {
+-        if (this.isAlive()
+-            && this.isSunBurnTick()
+-            && (!this.level().getBiome(this.blockPosition()).is(Biomes.CORRUPTION) || this.getTarget() instanceof Player)) {
++        if (this.isAlive() && this.isSunBurnTick()) {
+             this.igniteForSeconds(8);
+         }
+ 
+@@ -235,7 +_,7 @@
+         @Override
+         public boolean canUse() {
+             if (this.nextScanTick > 0) {
+-                --this.nextScanTick;
++                this.nextScanTick--;
+                 return false;
+             } else {
+                 this.nextScanTick = reducedTickDelay(60);
+@@ -244,7 +_,7 @@
+                 if (!list.isEmpty()) {
+                     list.sort(Comparator.<Player, Double>comparing(Entity::getY).reversed());
+ 
+-                    for(Player player : list) {
++                    for (Player player : list) {
+                         if (Phantom.this.canAttack(player, TargetingConditions.DEFAULT)) {
+                             Phantom.this.setTarget(player);
+                             return true;
+@@ -289,7 +_,7 @@
+         @Override
+         public void tick() {
+             if (Phantom.this.attackPhase == Phantom.AttackPhase.CIRCLE) {
+-                --this.nextSweepTick;
++                this.nextSweepTick--;
+                 if (this.nextSweepTick <= 0) {
+                     Phantom.this.attackPhase = Phantom.AttackPhase.SWOOP;
+                     this.setAnchorAboveTarget();
+@@ -347,7 +_,7 @@
+             }
+ 
+             if (Phantom.this.random.nextInt(this.adjustedTickDelay(250)) == 0) {
+-                ++this.distance;
++                this.distance++;
+                 if (this.distance > 15.0F) {
+                     this.distance = 5.0F;
+                     this.clockwise = -this.clockwise;
+@@ -379,7 +_,7 @@
+                 Phantom.this.anchorPoint = Phantom.this.blockPosition();
+             }
+ 
+-            this.angle += this.clockwise * 15.0F * (float) (Math.PI / 180.0);
++            this.angle = this.angle + this.clockwise * 15.0F * (float) (Math.PI / 180.0);
+             Phantom.this.moveTargetPoint = Vec3.atLowerCornerOf(Phantom.this.anchorPoint)
+                 .add((double)(this.distance * Mth.cos(this.angle)), (double)(-4.0F + this.height), (double)(this.distance * Mth.sin(this.angle)));
+         }
+@@ -483,7 +_,7 @@
+                         List<Cat> list = Phantom.this.level()
+                             .getEntitiesOfClass(Cat.class, Phantom.this.getBoundingBox().inflate(16.0), EntitySelector.ENTITY_STILL_ALIVE);
+ 
+-                        for(Cat cat : list) {
++                        for (Cat cat : list) {
+                             cat.hiss();
+                         }
+ 

@@ -1,0 +1,115 @@
+--- a/net/minecraft/server/commands/ScoreboardCommand.java
++++ b/net/minecraft/server/commands/ScoreboardCommand.java
+@@ -410,7 +_,7 @@
+     private static LiteralArgumentBuilder<CommandSourceStack> createRenderTypeModify() {
+         LiteralArgumentBuilder<CommandSourceStack> literalargumentbuilder = Commands.literal("rendertype");
+ 
+-        for(ObjectiveCriteria.RenderType objectivecriteria$rendertype : ObjectiveCriteria.RenderType.values()) {
++        for (ObjectiveCriteria.RenderType objectivecriteria$rendertype : ObjectiveCriteria.RenderType.values()) {
+             literalargumentbuilder.then(
+                 Commands.literal(objectivecriteria$rendertype.getId())
+                     .executes(
+@@ -426,11 +_,11 @@
+         List<String> list = Lists.newArrayList();
+         Scoreboard scoreboard = p_138511_.getServer().getScoreboard();
+ 
+-        for(Objective objective : scoreboard.getObjectives()) {
++        for (Objective objective : scoreboard.getObjectives()) {
+             if (objective.getCriteria() == ObjectiveCriteria.TRIGGER) {
+                 boolean flag = false;
+ 
+-                for(ScoreHolder scoreholder : p_138512_) {
++                for (ScoreHolder scoreholder : p_138512_) {
+                     ReadOnlyScoreInfo readonlyscoreinfo = scoreboard.getPlayerScoreInfo(scoreholder, objective);
+                     if (readonlyscoreinfo == null || readonlyscoreinfo.isLocked()) {
+                         flag = true;
+@@ -481,10 +_,10 @@
+         Scoreboard scoreboard = p_138524_.getServer().getScoreboard();
+         int i = 0;
+ 
+-        for(ScoreHolder scoreholder : p_138525_) {
++        for (ScoreHolder scoreholder : p_138525_) {
+             ScoreAccess scoreaccess = scoreboard.getOrCreatePlayerScore(scoreholder, p_138526_);
+ 
+-            for(ScoreHolder scoreholder1 : p_138528_) {
++            for (ScoreHolder scoreholder1 : p_138528_) {
+                 ScoreAccess scoreaccess1 = scoreboard.getOrCreatePlayerScore(scoreholder1, p_138529_);
+                 p_138527_.apply(scoreaccess, scoreaccess1);
+             }
+@@ -517,11 +_,11 @@
+             Scoreboard scoreboard = p_138515_.getServer().getScoreboard();
+             int i = 0;
+ 
+-            for(ScoreHolder scoreholder : p_138516_) {
++            for (ScoreHolder scoreholder : p_138516_) {
+                 ScoreAccess scoreaccess = scoreboard.getOrCreatePlayerScore(scoreholder, p_138517_);
+                 if (scoreaccess.locked()) {
+                     scoreaccess.unlock();
+-                    ++i;
++                    i++;
+                 }
+             }
+ 
+@@ -552,7 +_,7 @@
+     private static int resetScores(CommandSourceStack p_138508_, Collection<ScoreHolder> p_138509_) {
+         Scoreboard scoreboard = p_138508_.getServer().getScoreboard();
+ 
+-        for(ScoreHolder scoreholder : p_138509_) {
++        for (ScoreHolder scoreholder : p_138509_) {
+             scoreboard.resetAllPlayerScores(scoreholder);
+         }
+ 
+@@ -568,7 +_,7 @@
+     private static int resetScore(CommandSourceStack p_138541_, Collection<ScoreHolder> p_138542_, Objective p_138543_) {
+         Scoreboard scoreboard = p_138541_.getServer().getScoreboard();
+ 
+-        for(ScoreHolder scoreholder : p_138542_) {
++        for (ScoreHolder scoreholder : p_138542_) {
+             scoreboard.resetSinglePlayerScore(scoreholder, p_138543_);
+         }
+ 
+@@ -592,7 +_,7 @@
+     private static int setScore(CommandSourceStack p_138519_, Collection<ScoreHolder> p_138520_, Objective p_138521_, int p_138522_) {
+         Scoreboard scoreboard = p_138519_.getServer().getScoreboard();
+ 
+-        for(ScoreHolder scoreholder : p_138520_) {
++        for (ScoreHolder scoreholder : p_138520_) {
+             scoreboard.getOrCreatePlayerScore(scoreholder, p_138521_).set(p_138522_);
+         }
+ 
+@@ -618,7 +_,7 @@
+     private static int setScoreDisplay(CommandSourceStack p_313937_, Collection<ScoreHolder> p_313923_, Objective p_313702_, @Nullable Component p_313807_) {
+         Scoreboard scoreboard = p_313937_.getServer().getScoreboard();
+ 
+-        for(ScoreHolder scoreholder : p_313923_) {
++        for (ScoreHolder scoreholder : p_313923_) {
+             scoreboard.getOrCreatePlayerScore(scoreholder, p_313702_).display(p_313807_);
+         }
+ 
+@@ -665,7 +_,7 @@
+     ) {
+         Scoreboard scoreboard = p_313794_.getServer().getScoreboard();
+ 
+-        for(ScoreHolder scoreholder : p_313780_) {
++        for (ScoreHolder scoreholder : p_313780_) {
+             scoreboard.getOrCreatePlayerScore(scoreholder, p_313752_).numberFormatOverride(p_313869_);
+         }
+ 
+@@ -712,7 +_,7 @@
+         Scoreboard scoreboard = p_138545_.getServer().getScoreboard();
+         int i = 0;
+ 
+-        for(ScoreHolder scoreholder : p_138546_) {
++        for (ScoreHolder scoreholder : p_138546_) {
+             ScoreAccess scoreaccess = scoreboard.getOrCreatePlayerScore(scoreholder, p_138547_);
+             scoreaccess.set(scoreaccess.get() + p_138548_);
+             i += scoreaccess.get();
+@@ -742,7 +_,7 @@
+         Scoreboard scoreboard = p_138554_.getServer().getScoreboard();
+         int i = 0;
+ 
+-        for(ScoreHolder scoreholder : p_138555_) {
++        for (ScoreHolder scoreholder : p_138555_) {
+             ScoreAccess scoreaccess = scoreboard.getOrCreatePlayerScore(scoreholder, p_138556_);
+             scoreaccess.set(scoreaccess.get() - p_138557_);
+             i += scoreaccess.get();

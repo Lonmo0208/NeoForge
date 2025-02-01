@@ -1,0 +1,74 @@
+--- a/net/minecraft/advancements/TreeNodePosition.java
++++ b/net/minecraft/advancements/TreeNodePosition.java
+@@ -34,7 +_,7 @@
+             this.y = -1.0F;
+             TreeNodePosition treenodeposition = null;
+ 
+-            for(AdvancementNode advancementnode : p_301306_.children()) {
++            for (AdvancementNode advancementnode : p_301306_.children()) {
+                 treenodeposition = this.addChild(advancementnode, treenodeposition);
+             }
+         }
+@@ -46,7 +_,7 @@
+             p_16591_ = new TreeNodePosition(p_301122_, this, p_16591_, this.children.size() + 1, this.x + 1);
+             this.children.add(p_16591_);
+         } else {
+-            for(AdvancementNode advancementnode : p_301122_.children()) {
++            for (AdvancementNode advancementnode : p_301122_.children()) {
+                 p_16591_ = this.addChild(advancementnode, p_16591_);
+             }
+         }
+@@ -64,7 +_,7 @@
+         } else {
+             TreeNodePosition treenodeposition = null;
+ 
+-            for(TreeNodePosition treenodeposition1 : this.children) {
++            for (TreeNodePosition treenodeposition1 : this.children) {
+                 treenodeposition1.firstWalk();
+                 treenodeposition = treenodeposition1.apportion(treenodeposition == null ? treenodeposition1 : treenodeposition);
+             }
+@@ -87,7 +_,7 @@
+             p_16578_ = this.y;
+         }
+ 
+-        for(TreeNodePosition treenodeposition : this.children) {
++        for (TreeNodePosition treenodeposition : this.children) {
+             p_16578_ = treenodeposition.secondWalk(p_16576_ + this.mod, p_16577_ + 1, p_16578_);
+         }
+ 
+@@ -97,7 +_,7 @@
+     private void thirdWalk(float p_16574_) {
+         this.y += p_16574_;
+ 
+-        for(TreeNodePosition treenodeposition : this.children) {
++        for (TreeNodePosition treenodeposition : this.children) {
+             treenodeposition.thirdWalk(p_16574_);
+         }
+     }
+@@ -106,7 +_,7 @@
+         float f = 0.0F;
+         float f1 = 0.0F;
+ 
+-        for(int i = this.children.size() - 1; i >= 0; --i) {
++        for (int i = this.children.size() - 1; i >= 0; i--) {
+             TreeNodePosition treenodeposition = this.children.get(i);
+             treenodeposition.y += f;
+             treenodeposition.mod += f;
+@@ -146,7 +_,7 @@
+             float f2 = treenodeposition2.mod;
+ 
+             float f3;
+-            for(f3 = treenodeposition3.mod;
++            for (f3 = treenodeposition3.mod;
+                 treenodeposition2.nextOrThread() != null && treenodeposition.previousOrThread() != null;
+                 f1 += treenodeposition1.mod
+             ) {
+@@ -202,7 +_,7 @@
+     private void finalizePosition() {
+         this.node.advancement().display().ifPresent(p_300991_ -> p_300991_.setLocation((float)this.x, this.y));
+         if (!this.children.isEmpty()) {
+-            for(TreeNodePosition treenodeposition : this.children) {
++            for (TreeNodePosition treenodeposition : this.children) {
+                 treenodeposition.finalizePosition();
+             }
+         }

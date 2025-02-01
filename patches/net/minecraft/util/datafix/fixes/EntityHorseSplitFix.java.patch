@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/datafix/fixes/EntityHorseSplitFix.java
++++ b/net/minecraft/util/datafix/fixes/EntityHorseSplitFix.java
+@@ -20,7 +_,7 @@
+         if (Objects.equals("EntityHorse", p_15451_)) {
+             int i = dynamic.get("Type").asInt(0);
+ 
+-            String s = switch(i) {
++            String s = switch (i) {
+                 case 1 -> "Donkey";
+                 case 2 -> "Mule";
+                 case 3 -> "ZombieHorse";
+@@ -28,7 +_,7 @@
+                 default -> "Horse";
+             };
+             dynamic.remove("Type");
+-            Type<?> type = (Type)this.getOutputSchema().findChoiceType(References.ENTITY).types().get(s);
++            Type<?> type = this.getOutputSchema().findChoiceType(References.ENTITY).types().get(s);
+             return Pair.of(s, Util.writeAndReadTypedOrThrow(p_15452_, type, p_311550_ -> p_311550_));
+         } else {
+             return Pair.of(p_15451_, p_15452_);

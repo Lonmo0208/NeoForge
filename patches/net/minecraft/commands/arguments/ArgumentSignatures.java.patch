@@ -1,0 +1,20 @@
+--- a/net/minecraft/commands/arguments/ArgumentSignatures.java
++++ b/net/minecraft/commands/arguments/ArgumentSignatures.java
+@@ -17,17 +_,6 @@
+         this(p_231052_.<ArgumentSignatures.Entry, List<ArgumentSignatures.Entry>>readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 8), ArgumentSignatures.Entry::new));
+     }
+ 
+-    @Nullable
+-    public MessageSignature get(String p_241493_) {
+-        for(ArgumentSignatures.Entry argumentsignatures$entry : this.entries) {
+-            if (argumentsignatures$entry.name.equals(p_241493_)) {
+-                return argumentsignatures$entry.signature;
+-            }
+-        }
+-
+-        return null;
+-    }
+-
+     public void write(FriendlyByteBuf p_231062_) {
+         p_231062_.writeCollection(this.entries, (p_241214_, p_241215_) -> p_241215_.write(p_241214_));
+     }

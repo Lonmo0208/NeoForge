@@ -1,9 +1,29 @@
 --- a/net/minecraft/client/renderer/blockentity/SignRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/SignRenderer.java
-@@ -250,6 +_,15 @@
-         return LayerDefinition.create(meshdefinition, 64, 32);
-     }
+@@ -53,7 +_,7 @@
+         this.signModels = WoodType.values()
+             .collect(
+                 ImmutableMap.toImmutableMap(
+-                    p_173645_ -> p_173645_, p_173651_ -> new SignRenderer.SignModel(p_173636_.bakeLayer(ModelLayers.createSignModelName(p_173651_)))
++                    p_173645_ -> (WoodType)p_173645_, p_173651_ -> new SignRenderer.SignModel(p_173636_.bakeLayer(ModelLayers.createSignModelName(p_173651_)))
+                 )
+             );
+         this.font = p_173636_.getFont();
+@@ -171,7 +_,7 @@
+             l = p_279300_;
+         }
  
+-        for(int i1 = 0; i1 < 4; ++i1) {
++        for (int i1 = 0; i1 < 4; i1++) {
+             FormattedCharSequence formattedcharsequence = aformattedcharsequence[i1];
+             float f = (float)(-this.font.width(formattedcharsequence) / 2);
+             if (flag) {
+@@ -248,6 +_,15 @@
+         partdefinition.addOrReplaceChild("sign", CubeListBuilder.create().texOffs(0, 0).addBox(-12.0F, -14.0F, -1.0F, 24.0F, 12.0F, 2.0F), PartPose.ZERO);
+         partdefinition.addOrReplaceChild("stick", CubeListBuilder.create().texOffs(0, 14).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 14.0F, 2.0F), PartPose.ZERO);
+         return LayerDefinition.create(meshdefinition, 64, 32);
++    }
++
 +    @Override
 +    public net.minecraft.world.phys.AABB getRenderBoundingBox(SignBlockEntity blockEntity) {
 +        if (blockEntity.getBlockState().getBlock() instanceof StandingSignBlock) {
@@ -11,8 +31,6 @@
 +            return new net.minecraft.world.phys.AABB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0, pos.getY() + 1.125, pos.getZ() + 1.0);
 +        }
 +        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity);
-+    }
-+
+     }
+ 
      @OnlyIn(Dist.CLIENT)
-     public static final class SignModel extends Model {
-         public final ModelPart root;

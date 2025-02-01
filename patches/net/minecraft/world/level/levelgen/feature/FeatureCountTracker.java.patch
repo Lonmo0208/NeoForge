@@ -1,0 +1,35 @@
+--- a/net/minecraft/world/level/levelgen/feature/FeatureCountTracker.java
++++ b/net/minecraft/world/level/levelgen/feature/FeatureCountTracker.java
+@@ -13,6 +_,7 @@
+ import net.minecraft.core.Registry;
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.resources.ResourceKey;
++import net.minecraft.resources.ResourceLocation;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+ import org.apache.commons.lang3.mutable.MutableInt;
+@@ -65,16 +_,16 @@
+                     LOGGER.debug(s1 + " total_chunks: " + integer);
+                     p_190889_.featureData()
+                         .forEach(
+-                            (p_190897_, p_190898_) -> LOGGER.debug(
++                            (p_339550_, p_339551_) -> LOGGER.debug(
+                                     s1
+                                         + " "
+-                                        + String.format(Locale.ROOT, "%10d ", p_190898_)
+-                                        + String.format(Locale.ROOT, "%10f ", (double)p_190898_.intValue() / (double)integer.intValue())
+-                                        + p_190897_.topFeature().flatMap(registry::getResourceKey).map(ResourceKey::location)
+-                                        + " "
+-                                        + p_190897_.feature().feature()
+-                                        + " "
+-                                        + p_190897_.feature()
++                                        + String.format(Locale.ROOT, "%10d ", p_339551_)
++                                        + String.format(Locale.ROOT, "%10f ", (double)p_339551_.intValue() / (double)integer.intValue())
++                                        + p_339550_.topFeature().flatMap(registry::getResourceKey).<ResourceLocation>map(ResourceKey::location)
++                                        + " "
++                                        + p_339550_.feature().feature()
++                                        + " "
++                                        + p_339550_.feature()
+                                 )
+                         );
+                 }

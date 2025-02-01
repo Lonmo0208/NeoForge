@@ -1,0 +1,14 @@
+--- a/com/mojang/realmsclient/gui/RealmsWorldSlotButton.java
++++ b/com/mojang/realmsclient/gui/RealmsWorldSlotButton.java
+@@ -50,9 +_,9 @@
+     }
+ 
+     private void setTooltipAndNarration(RealmsWorldSlotButton.State p_307359_, @Nullable String p_307244_) {
+-        Component component = switch(p_307359_.action) {
+-            case JOIN -> SLOT_ACTIVE_TOOLTIP;
++        Component component = switch (p_307359_.action) {
+             case SWITCH_SLOT -> p_307359_.minigame ? SWITCH_TO_MINIGAME_SLOT_TOOLTIP : SWITCH_TO_WORLD_SLOT_TOOLTIP;
++            case JOIN -> SLOT_ACTIVE_TOOLTIP;
+             default -> null;
+         };
+         if (component != null) {

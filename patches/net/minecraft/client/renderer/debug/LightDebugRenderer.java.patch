@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/debug/LightDebugRenderer.java
++++ b/net/minecraft/client/renderer/debug/LightDebugRenderer.java
+@@ -28,7 +_,7 @@
+         BlockPos blockpos = BlockPos.containing(p_113589_, p_113590_, p_113591_);
+         LongSet longset = new LongOpenHashSet();
+ 
+-        for(BlockPos blockpos1 : BlockPos.betweenClosed(blockpos.offset(-10, -10, -10), blockpos.offset(10, 10, 10))) {
++        for (BlockPos blockpos1 : BlockPos.betweenClosed(blockpos.offset(-10, -10, -10), blockpos.offset(10, 10, 10))) {
+             int i = level.getBrightness(LightLayer.SKY, blockpos1);
+             float f = (float)(15 - i) / 15.0F * 0.5F + 0.16F;
+             int j = Mth.hsvToRgb(f, 0.9F, 0.9F);

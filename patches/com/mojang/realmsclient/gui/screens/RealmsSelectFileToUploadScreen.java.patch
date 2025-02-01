@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsSelectFileToUploadScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsSelectFileToUploadScreen.java
+@@ -60,7 +_,7 @@
+             .filter(LevelSummary::canUpload)
+             .collect(Collectors.toList());
+ 
+-        for(LevelSummary levelsummary : this.levelList) {
++        for (LevelSummary levelsummary : this.levelList) {
+             this.worldSelectionList.addEntry(levelsummary);
+         }
+     }

@@ -1,0 +1,45 @@
+--- a/net/minecraft/client/renderer/debug/ChunkDebugRenderer.java
++++ b/net/minecraft/client/renderer/debug/ChunkDebugRenderer.java
+@@ -52,17 +_,17 @@
+             Map<ChunkPos, String> map = this.data.serverData.getNow(null);
+             double d1 = this.minecraft.gameRenderer.getMainCamera().getPosition().y * 0.85;
+ 
+-            for(Entry<ChunkPos, String> entry : this.data.clientData.entrySet()) {
++            for (Entry<ChunkPos, String> entry : this.data.clientData.entrySet()) {
+                 ChunkPos chunkpos = entry.getKey();
+                 String s = entry.getValue();
+                 if (map != null) {
+-                    s = s + (String)map.get(chunkpos);
++                    s = s + map.get(chunkpos);
+                 }
+ 
+                 String[] astring = s.split("\n");
+                 int i = 0;
+ 
+-                for(String s1 : astring) {
++                for (String s1 : astring) {
+                     DebugRenderer.renderFloatingText(
+                         p_113370_,
+                         p_113371_,
+@@ -95,8 +_,8 @@
+             Builder<ChunkPos, String> builder = ImmutableMap.builder();
+             ClientChunkCache clientchunkcache = clientlevel.getChunkSource();
+ 
+-            for(int k = i - 12; k <= i + 12; ++k) {
+-                for(int l = j - 12; l <= j + 12; ++l) {
++            for (int k = i - 12; k <= i + 12; k++) {
++                for (int l = j - 12; l <= j + 12; l++) {
+                     ChunkPos chunkpos = new ChunkPos(k, l);
+                     String s = "";
+                     LevelChunk levelchunk = clientchunkcache.getChunk(k, l, false);
+@@ -121,8 +_,8 @@
+                     Builder<ChunkPos, String> builder1 = ImmutableMap.builder();
+                     ServerChunkCache serverchunkcache = serverlevel.getChunkSource();
+ 
+-                    for(int i1 = i - 12; i1 <= i + 12; ++i1) {
+-                        for(int j1 = j - 12; j1 <= j + 12; ++j1) {
++                    for (int i1 = i - 12; i1 <= i + 12; i1++) {
++                        for (int j1 = j - 12; j1 <= j + 12; j1++) {
+                             ChunkPos chunkpos1 = new ChunkPos(i1, j1);
+                             builder1.put(chunkpos1, "Server: " + serverchunkcache.getChunkDebugData(chunkpos1));
+                         }

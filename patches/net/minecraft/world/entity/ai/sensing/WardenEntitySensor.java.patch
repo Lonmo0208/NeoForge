@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/entity/ai/sensing/WardenEntitySensor.java
++++ b/net/minecraft/world/entity/ai/sensing/WardenEntitySensor.java
+@@ -21,8 +_,8 @@
+ 
+     protected void doTick(ServerLevel p_217833_, Warden p_217834_) {
+         super.doTick(p_217833_, p_217834_);
+-        getClosest(p_217834_, p_340077_ -> p_340077_.getType() == EntityType.PLAYER)
+-            .or(() -> getClosest(p_217834_, p_340078_ -> p_340078_.getType() != EntityType.PLAYER))
++        getClosest(p_217834_, p_337798_ -> p_337798_.getType() == EntityType.PLAYER)
++            .or(() -> getClosest(p_217834_, p_337799_ -> p_337799_.getType() != EntityType.PLAYER))
+             .ifPresentOrElse(
+                 p_217841_ -> p_217834_.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, p_217841_),
+                 () -> p_217834_.getBrain().eraseMemory(MemoryModuleType.NEAREST_ATTACKABLE)

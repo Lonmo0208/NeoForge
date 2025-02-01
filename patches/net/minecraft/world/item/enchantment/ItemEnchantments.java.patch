@@ -1,0 +1,55 @@
+--- a/net/minecraft/world/item/enchantment/ItemEnchantments.java
++++ b/net/minecraft/world/item/enchantment/ItemEnchantments.java
+@@ -17,7 +_,6 @@
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.codec.ByteBufCodecs;
+ import net.minecraft.network.codec.StreamCodec;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.TooltipFlag;
+ import net.minecraft.world.item.component.TooltipProvider;
+ 
+@@ -30,15 +_,13 @@
+         )
+         .xmap(Object2IntLinkedOpenHashMap::new, Function.identity());
+     private static final Codec<ItemEnchantments> FULL_CODEC = RecordCodecBuilder.create(
+-        p_332630_ -> p_332630_.group(
++        p_337961_ -> p_337961_.group(
+                     LEVELS_CODEC.fieldOf("levels").forGetter(p_330451_ -> p_330451_.enchantments),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(p_331891_ -> p_331891_.showInTooltip)
++                    Codec.BOOL.optionalFieldOf("show_in_tooltip", Boolean.valueOf(true)).forGetter(p_331891_ -> p_331891_.showInTooltip)
+                 )
+-                .apply(p_332630_, ItemEnchantments::new)
+-    );
+-    public static final Codec<ItemEnchantments> CODEC = ExtraCodecs.withAlternative(
+-        FULL_CODEC, LEVELS_CODEC, p_332629_ -> new ItemEnchantments(p_332629_, true)
+-    );
++                .apply(p_337961_, ItemEnchantments::new)
++    );
++    public static final Codec<ItemEnchantments> CODEC = Codec.withAlternative(FULL_CODEC, LEVELS_CODEC, p_332629_ -> new ItemEnchantments(p_332629_, true));
+     public static final StreamCodec<RegistryFriendlyByteBuf, ItemEnchantments> STREAM_CODEC = StreamCodec.composite(
+         ByteBufCodecs.map(Object2IntLinkedOpenHashMap::new, ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT), ByteBufCodecs.VAR_INT),
+         p_330761_ -> p_330761_.enchantments,
+@@ -61,7 +_,7 @@
+     @Override
+     public void addToTooltip(Consumer<Component> p_331119_, TooltipFlag p_330400_) {
+         if (this.showInTooltip) {
+-            for(Entry<Holder<Enchantment>> entry : this.enchantments.object2IntEntrySet()) {
++            for (Entry<Holder<Enchantment>> entry : this.enchantments.object2IntEntrySet()) {
+                 p_331119_.accept(entry.getKey().value().getFullname(entry.getIntValue()));
+             }
+         }
+@@ -91,11 +_,10 @@
+     public boolean equals(Object p_331697_) {
+         if (this == p_331697_) {
+             return true;
+-        } else if (!(p_331697_ instanceof ItemEnchantments)) {
+-            return false;
+         } else {
+-            ItemEnchantments itemenchantments = (ItemEnchantments)p_331697_;
+-            return this.showInTooltip == itemenchantments.showInTooltip && this.enchantments.equals(itemenchantments.enchantments);
++            return !(p_331697_ instanceof ItemEnchantments itemenchantments)
++                ? false
++                : this.showInTooltip == itemenchantments.showInTooltip && this.enchantments.equals(itemenchantments.enchantments);
+         }
+     }
+ 

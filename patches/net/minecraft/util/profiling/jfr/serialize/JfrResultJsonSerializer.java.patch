@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/profiling/jfr/serialize/JfrResultJsonSerializer.java
++++ b/net/minecraft/util/profiling/jfr/serialize/JfrResultJsonSerializer.java
+@@ -86,7 +_,7 @@
+         jsonobject.addProperty("durationNanosTotal", p_185573_.stream().mapToDouble(p_185567_ -> (double)p_185567_.getSecond().totalDuration().toNanos()).sum());
+         JsonArray jsonarray = Util.make(new JsonArray(), p_185558_ -> jsonobject.add("status", p_185558_));
+ 
+-        for(Pair<ChunkStatus, TimedStatSummary<ChunkGenStat>> pair : p_185573_) {
++        for (Pair<ChunkStatus, TimedStatSummary<ChunkGenStat>> pair : p_185573_) {
+             TimedStatSummary<ChunkGenStat> timedstatsummary = pair.getSecond();
+             JsonObject jsonobject1 = Util.make(new JsonObject(), jsonarray::add);
+             jsonobject1.addProperty("state", pair.getFirst().toString());

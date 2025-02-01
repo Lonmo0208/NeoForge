@@ -1,0 +1,15 @@
+--- a/net/minecraft/client/gui/font/GlyphRenderTypes.java
++++ b/net/minecraft/client/gui/font/GlyphRenderTypes.java
+@@ -19,10 +_,11 @@
+     }
+ 
+     public RenderType select(Font.DisplayMode p_285259_) {
+-        return switch(p_285259_) {
++        return switch (p_285259_) {
+             case NORMAL -> this.normal;
+             case SEE_THROUGH -> this.seeThrough;
+             case POLYGON_OFFSET -> this.polygonOffset;
++            default -> throw new MatchException(null, null);
+         };
+     }
+ }

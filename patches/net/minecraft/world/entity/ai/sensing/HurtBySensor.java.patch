@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/entity/ai/sensing/HurtBySensor.java
++++ b/net/minecraft/world/entity/ai/sensing/HurtBySensor.java
+@@ -29,8 +_,8 @@
+             brain.eraseMemory(MemoryModuleType.HURT_BY);
+         }
+ 
+-        brain.getMemory(MemoryModuleType.HURT_BY_ENTITY).ifPresent(p_340076_ -> {
+-            if (!p_340076_.isAlive() || p_340076_.level() != p_26670_) {
++        brain.getMemory(MemoryModuleType.HURT_BY_ENTITY).ifPresent(p_337797_ -> {
++            if (!p_337797_.isAlive() || p_337797_.level() != p_26670_) {
+                 brain.eraseMemory(MemoryModuleType.HURT_BY_ENTITY);
+             }
+         });

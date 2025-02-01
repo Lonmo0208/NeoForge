@@ -1,0 +1,39 @@
+--- a/net/minecraft/world/level/storage/loot/predicates/CompositeLootItemCondition.java
++++ b/net/minecraft/world/level/storage/loot/predicates/CompositeLootItemCondition.java
+@@ -2,6 +_,7 @@
+ 
+ import com.google.common.collect.ImmutableList;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -19,8 +_,8 @@
+         this.composedPredicate = p_286771_;
+     }
+ 
+-    protected static <T extends CompositeLootItemCondition> Codec<T> createCodec(Function<List<LootItemCondition>, T> p_298515_) {
+-        return RecordCodecBuilder.create(
++    protected static <T extends CompositeLootItemCondition> MapCodec<T> createCodec(Function<List<LootItemCondition>, T> p_298515_) {
++        return RecordCodecBuilder.mapCodec(
+             p_335365_ -> p_335365_.group(LootItemConditions.DIRECT_CODEC.listOf().fieldOf("terms").forGetter(p_298337_ -> p_298337_.terms))
+                     .apply(p_335365_, p_298515_)
+         );
+@@ -38,7 +_,7 @@
+     public void validate(ValidationContext p_286819_) {
+         LootItemCondition.super.validate(p_286819_);
+ 
+-        for(int i = 0; i < this.terms.size(); ++i) {
++        for (int i = 0; i < this.terms.size(); i++) {
+             this.terms.get(i).validate(p_286819_.forChild(".term[" + i + "]"));
+         }
+     }
+@@ -47,7 +_,7 @@
+         private final ImmutableList.Builder<LootItemCondition> terms = ImmutableList.builder();
+ 
+         protected Builder(LootItemCondition.Builder... p_286619_) {
+-            for(LootItemCondition.Builder lootitemcondition$builder : p_286619_) {
++            for (LootItemCondition.Builder lootitemcondition$builder : p_286619_) {
+                 this.terms.add(lootitemcondition$builder.build());
+             }
+         }

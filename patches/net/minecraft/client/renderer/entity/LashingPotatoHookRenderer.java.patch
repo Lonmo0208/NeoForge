@@ -1,0 +1,107 @@
+--- a/net/minecraft/client/renderer/entity/LashingPotatoHookRenderer.java
++++ /dev/null
+@@ -1,104 +_,0 @@
+-package net.minecraft.client.renderer.entity;
+-
+-import com.mojang.blaze3d.vertex.PoseStack;
+-import com.mojang.blaze3d.vertex.VertexConsumer;
+-import com.mojang.math.Axis;
+-import net.minecraft.client.renderer.MultiBufferSource;
+-import net.minecraft.client.renderer.RenderType;
+-import net.minecraft.client.renderer.texture.OverlayTexture;
+-import net.minecraft.client.renderer.texture.TextureAtlas;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.util.Mth;
+-import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.entity.projectile.LashingPotatoHook;
+-import net.minecraft.world.item.ItemDisplayContext;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.Items;
+-import net.minecraft.world.phys.Vec3;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class LashingPotatoHookRenderer extends EntityRenderer<LashingPotatoHook> {
+-    private final ItemRenderer itemRenderer;
+-
+-    public LashingPotatoHookRenderer(EntityRendererProvider.Context p_340393_) {
+-        super(p_340393_);
+-        this.itemRenderer = p_340393_.getItemRenderer();
+-    }
+-
+-    public void render(LashingPotatoHook p_340928_, float p_342391_, float p_340320_, PoseStack p_341588_, MultiBufferSource p_342080_, int p_341341_) {
+-        Player player = p_340928_.getPlayerOwner();
+-        if (player != null) {
+-            p_341588_.pushPose();
+-            this.itemRenderer
+-                .renderStatic(
+-                    new ItemStack(Items.POISONOUS_POTATO),
+-                    ItemDisplayContext.GROUND,
+-                    p_341341_,
+-                    OverlayTexture.NO_OVERLAY,
+-                    p_341588_,
+-                    p_342080_,
+-                    p_340928_.level(),
+-                    p_340928_.getId()
+-                );
+-            Vec3 vec3 = FishingHookRenderer.getPlayerHandPos(player, p_340320_, Items.LASHING_POTATO, this.entityRenderDispatcher);
+-            Vec3 vec31 = new Vec3(
+-                Mth.lerp((double)p_340320_, p_340928_.xo, p_340928_.getX()),
+-                Mth.lerp((double)p_340320_, p_340928_.yo, p_340928_.getY()) + (double)p_340928_.getEyeHeight(),
+-                Mth.lerp((double)p_340320_, p_340928_.zo, p_340928_.getZ())
+-            );
+-            float f = (float)p_340928_.tickCount + p_340320_;
+-            float f1 = f * 0.15F % 1.0F;
+-            Vec3 vec32 = vec3.subtract(vec31);
+-            float f2 = (float)(vec32.length() + 0.1);
+-            vec32 = vec32.normalize();
+-            float f3 = (float)Math.acos(vec32.y);
+-            float f4 = (float)Math.atan2(vec32.z, vec32.x);
+-            p_341588_.mulPose(Axis.YP.rotationDegrees(((float) (Math.PI / 2) - f4) * (180.0F / (float)Math.PI)));
+-            p_341588_.mulPose(Axis.XP.rotationDegrees(f3 * (180.0F / (float)Math.PI)));
+-            float f5 = f * 0.05F * -1.5F;
+-            float f6 = 0.2F;
+-            float f7 = Mth.cos(f5 + (float) Math.PI) * 0.2F;
+-            float f8 = Mth.sin(f5 + (float) Math.PI) * 0.2F;
+-            float f9 = Mth.cos(f5 + 0.0F) * 0.2F;
+-            float f10 = Mth.sin(f5 + 0.0F) * 0.2F;
+-            float f11 = Mth.cos(f5 + (float) (Math.PI / 2)) * 0.2F;
+-            float f12 = Mth.sin(f5 + (float) (Math.PI / 2)) * 0.2F;
+-            float f13 = Mth.cos(f5 + (float) (Math.PI * 3.0 / 2.0)) * 0.2F;
+-            float f14 = Mth.sin(f5 + (float) (Math.PI * 3.0 / 2.0)) * 0.2F;
+-            float f15 = 0.0F;
+-            float f16 = 0.4999F;
+-            float f17 = -1.0F + f1;
+-            float f18 = f2 * 2.5F + f17;
+-            VertexConsumer vertexconsumer = p_342080_.getBuffer(RenderType.entityCutoutNoCull(GuardianRenderer.TOXIFIN_BEAM_LOCATION));
+-            PoseStack.Pose posestack$pose = p_341588_.last();
+-            vertex(vertexconsumer, posestack$pose, f7, f2, f8, 0.4999F, f18);
+-            vertex(vertexconsumer, posestack$pose, f7, 0.0F, f8, 0.4999F, f17);
+-            vertex(vertexconsumer, posestack$pose, f9, 0.0F, f10, 0.0F, f17);
+-            vertex(vertexconsumer, posestack$pose, f9, f2, f10, 0.0F, f18);
+-            vertex(vertexconsumer, posestack$pose, f11, f2, f12, 0.4999F, f18);
+-            vertex(vertexconsumer, posestack$pose, f11, 0.0F, f12, 0.4999F, f17);
+-            vertex(vertexconsumer, posestack$pose, f13, 0.0F, f14, 0.0F, f17);
+-            vertex(vertexconsumer, posestack$pose, f13, f2, f14, 0.0F, f18);
+-            p_341588_.popPose();
+-            super.render(p_340928_, p_342391_, p_340320_, p_341588_, p_342080_, p_341341_);
+-        }
+-    }
+-
+-    private static void vertex(
+-        VertexConsumer p_342331_, PoseStack.Pose p_342327_, float p_340534_, float p_341858_, float p_341274_, float p_342428_, float p_341055_
+-    ) {
+-        p_342331_.vertex(p_342327_, p_340534_, p_341858_, p_341274_)
+-            .color(128, 255, 128, 255)
+-            .uv(p_342428_, p_341055_)
+-            .overlayCoords(OverlayTexture.NO_OVERLAY)
+-            .uv2(15728880)
+-            .normal(0.0F, 1.0F, 0.0F)
+-            .endVertex();
+-    }
+-
+-    public ResourceLocation getTextureLocation(LashingPotatoHook p_341207_) {
+-        return TextureAtlas.LOCATION_BLOCKS;
+-    }
+-}

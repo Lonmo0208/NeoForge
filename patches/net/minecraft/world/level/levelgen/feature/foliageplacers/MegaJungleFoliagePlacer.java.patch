@@ -1,0 +1,40 @@
+--- a/net/minecraft/world/level/levelgen/feature/foliageplacers/MegaJungleFoliagePlacer.java
++++ b/net/minecraft/world/level/levelgen/feature/foliageplacers/MegaJungleFoliagePlacer.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.levelgen.feature.foliageplacers;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.util.RandomSource;
+@@ -9,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+ 
+ public class MegaJungleFoliagePlacer extends FoliagePlacer {
+-    public static final Codec<MegaJungleFoliagePlacer> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<MegaJungleFoliagePlacer> CODEC = RecordCodecBuilder.mapCodec(
+         p_68630_ -> foliagePlacerParts(p_68630_)
+                 .and(Codec.intRange(0, 16).fieldOf("height").forGetter(p_161468_ -> p_161468_.height))
+                 .apply(p_68630_, MegaJungleFoliagePlacer::new)
+@@ -40,7 +_,7 @@
+     ) {
+         int i = p_225662_.doubleTrunk() ? p_225663_ : 1 + p_225659_.nextInt(2);
+ 
+-        for(int j = p_225665_; j >= p_225665_ - i; --j) {
++        for (int j = p_225665_; j >= p_225665_ - i; j--) {
+             int k = p_225664_ + p_225662_.radiusOffset() + 1 - j;
+             this.placeLeavesRow(p_225657_, p_273447_, p_225659_, p_225660_, p_225662_.pos(), k, j, p_225662_.doubleTrunk());
+         }
+@@ -53,10 +_,6 @@
+ 
+     @Override
+     protected boolean shouldSkipLocation(RandomSource p_225646_, int p_225647_, int p_225648_, int p_225649_, int p_225650_, boolean p_225651_) {
+-        if (p_225647_ + p_225649_ >= 7) {
+-            return true;
+-        } else {
+-            return p_225647_ * p_225647_ + p_225649_ * p_225649_ > p_225650_ * p_225650_;
+-        }
++        return p_225647_ + p_225649_ >= 7 ? true : p_225647_ * p_225647_ + p_225649_ * p_225649_ > p_225650_ * p_225650_;
+     }
+ }

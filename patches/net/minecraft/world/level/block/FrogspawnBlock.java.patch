@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/FrogspawnBlock.java
++++ b/net/minecraft/world/level/block/FrogspawnBlock.java
+@@ -105,7 +_,7 @@
+     private void spawnTadpoles(ServerLevel p_221221_, BlockPos p_221222_, RandomSource p_221223_) {
+         int i = p_221223_.nextInt(2, 6);
+ 
+-        for(int j = 1; j <= i; ++j) {
++        for (int j = 1; j <= i; j++) {
+             Tadpole tadpole = EntityType.TADPOLE.create(p_221221_);
+             if (tadpole != null) {
+                 double d0 = (double)p_221222_.getX() + this.getRandomTadpolePositionOffset(p_221223_);

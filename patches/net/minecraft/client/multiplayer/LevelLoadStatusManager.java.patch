@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/multiplayer/LevelLoadStatusManager.java
++++ b/net/minecraft/client/multiplayer/LevelLoadStatusManager.java
+@@ -20,7 +_,7 @@
+     }
+ 
+     public void tick() {
+-        switch(this.status) {
++        switch (this.status) {
+             case WAITING_FOR_PLAYER_CHUNK:
+                 BlockPos blockpos = this.player.blockPosition();
+                 boolean flag = this.level.isOutsideBuildHeight(blockpos.getY());

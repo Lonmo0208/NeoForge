@@ -1,0 +1,22 @@
+--- a/net/minecraft/util/datafix/fixes/FeatureFlagRemoveFix.java
++++ b/net/minecraft/util/datafix/fixes/FeatureFlagRemoveFix.java
+@@ -34,8 +_,8 @@
+     private <T> Dynamic<T> fixTag(Dynamic<T> p_277583_) {
+         List<Dynamic<T>> list = p_277583_.get("removed_features").asStream().collect(Collectors.toCollection(ArrayList::new));
+         Dynamic<T> dynamic = p_277583_.update(
+-            "enabled_features", p_278098_ -> DataFixUtils.orElse(p_278098_.asStreamOpt().result().map(p_277400_ -> p_277400_.filter(p_277338_ -> {
+-                        Optional<String> optional = p_277338_.asString().result();
++            "enabled_features", p_337630_ -> DataFixUtils.orElse(p_337630_.asStreamOpt().result().map(p_277400_ -> p_277400_.filter(p_337627_ -> {
++                        Optional<String> optional = p_337627_.asString().result();
+                         if (optional.isEmpty()) {
+                             return true;
+                         } else {
+@@ -46,7 +_,7 @@
+     
+                             return !flag;
+                         }
+-                    })).map(p_277583_::createList), p_278098_)
++                    })).map(p_277583_::createList), p_337630_)
+         );
+         if (!list.isEmpty()) {
+             dynamic = dynamic.set("removed_features", p_277583_.createList(list.stream()));

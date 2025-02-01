@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/storage/loot/functions/FunctionUserBuilder.java
++++ b/net/minecraft/world/level/storage/loot/functions/FunctionUserBuilder.java
+@@ -9,7 +_,7 @@
+     default <E> T apply(Iterable<E> p_230985_, Function<E, LootItemFunction.Builder> p_230986_) {
+         T t = this.unwrap();
+ 
+-        for(E e : p_230985_) {
++        for (E e : p_230985_) {
+             t = t.apply(p_230986_.apply(e));
+         }
+ 

@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/structure/structures/SwampHutStructure.java
++++ b/net/minecraft/world/level/levelgen/structure/structures/SwampHutStructure.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.structures;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import java.util.Optional;
+ import net.minecraft.world.level.levelgen.Heightmap;
+ import net.minecraft.world.level.levelgen.structure.Structure;
+@@ -8,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+ 
+ public class SwampHutStructure extends Structure {
+-    public static final Codec<SwampHutStructure> CODEC = simpleCodec(SwampHutStructure::new);
++    public static final MapCodec<SwampHutStructure> CODEC = simpleCodec(SwampHutStructure::new);
+ 
+     public SwampHutStructure(Structure.StructureSettings p_229974_) {
+         super(p_229974_);

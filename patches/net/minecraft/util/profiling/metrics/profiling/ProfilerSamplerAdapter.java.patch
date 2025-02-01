@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/profiling/metrics/profiling/ProfilerSamplerAdapter.java
++++ b/net/minecraft/util/profiling/metrics/profiling/ProfilerSamplerAdapter.java
+@@ -22,7 +_,7 @@
+             .map(p_146174_ -> samplerForProfilingPath(p_146164_, p_146174_.getLeft(), p_146174_.getRight()))
+             .collect(Collectors.toSet());
+ 
+-        for(MetricSampler metricsampler : set) {
++        for (MetricSampler metricsampler : set) {
+             this.previouslyFoundSamplerNames.add(metricsampler.getName());
+         }
+ 

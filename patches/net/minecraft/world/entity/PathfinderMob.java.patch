@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/PathfinderMob.java
++++ b/net/minecraft/world/entity/PathfinderMob.java
+@@ -38,7 +_,7 @@
+         if (this.brain.hasMemoryValue(MemoryModuleType.IS_PANICKING)) {
+             return this.brain.getMemory(MemoryModuleType.IS_PANICKING).isPresent();
+         } else {
+-            for(WrappedGoal wrappedgoal : this.goalSelector.getAvailableGoals()) {
++            for (WrappedGoal wrappedgoal : this.goalSelector.getAvailableGoals()) {
+                 if (wrappedgoal.isRunning() && wrappedgoal.getGoal() instanceof PanicGoal) {
+                     return true;
+                 }

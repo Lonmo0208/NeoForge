@@ -1,0 +1,26 @@
+--- a/net/minecraft/advancements/critereon/TameAnimalTrigger.java
++++ b/net/minecraft/advancements/critereon/TameAnimalTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.animal.Animal;
+ import net.minecraft.world.level.storage.loot.LootContext;
+ 
+@@ -25,11 +_,11 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> entity)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<TameAnimalTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311447_ -> p_311447_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(TameAnimalTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "entity").forGetter(TameAnimalTrigger.TriggerInstance::entity)
++            p_337399_ -> p_337399_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(TameAnimalTrigger.TriggerInstance::player),
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("entity").forGetter(TameAnimalTrigger.TriggerInstance::entity)
+                     )
+-                    .apply(p_311447_, TameAnimalTrigger.TriggerInstance::new)
++                    .apply(p_337399_, TameAnimalTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<TameAnimalTrigger.TriggerInstance> tamedAnimal() {

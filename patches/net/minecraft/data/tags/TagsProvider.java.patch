@@ -57,6 +57,24 @@
      }
  
      protected abstract void addTags(HolderLookup.Provider p_256380_);
+@@ -64,12 +_,15 @@
+     public CompletableFuture<?> run(CachedOutput p_253684_) {
+         record CombinedData<T>(HolderLookup.Provider contents, TagsProvider.TagLookup<T> parent) {
+         }
++
+         return this.createContentsProvider()
+             .thenApply(p_275895_ -> {
+                 this.contentsDone.complete(null);
+-                return p_275895_;
++                return (HolderLookup.Provider)p_275895_;
+             })
+-            .thenCombineAsync(this.parentProvider, (p_274778_, p_274779_) -> new CombinedData<>(p_274778_, p_274779_), Util.backgroundExecutor())
++            .thenCombineAsync(
++                this.parentProvider, (p_274778_, p_274779_) -> new CombinedData<>(p_274778_, (TagsProvider.TagLookup<T>)p_274779_), Util.backgroundExecutor()
++            )
+             .thenCompose(
+                 p_323140_ -> {
+                     HolderLookup.RegistryLookup<T> registrylookup = p_323140_.contents.lookupOrThrow(this.registryKey);
 @@ -85,7 +_,10 @@
                                      ResourceLocation resourcelocation = p_323138_.getKey();
                                      TagBuilder tagbuilder = p_323138_.getValue();
@@ -69,7 +87,7 @@
                                      if (!list1.isEmpty()) {
                                          throw new IllegalArgumentException(
                                              String.format(
-@@ -96,8 +_,10 @@
+@@ -96,25 +_,37 @@
                                              )
                                          );
                                      } else {
@@ -82,10 +100,15 @@
                                      }
                                  }
                              )
-@@ -109,12 +_,24 @@
- 
-     }
- 
+-                            .toArray(p_253442_ -> new CompletableFuture[p_253442_])
++                            .toArray(CompletableFuture[]::new)
+                     );
+                 }
+             );
+-
+-
++    }
++
 +    private boolean missing(TagEntry reference) {
 +        // Optional tags should not be validated
 +
@@ -93,8 +116,8 @@
 +            return existingFileHelper == null || !existingFileHelper.exists(reference.getId(), reference.isTag() ? resourceType : elementResourceType);
 +        }
 +        return false;
-+    }
-+
+     }
+ 
      protected TagsProvider.TagAppender<T> tag(TagKey<T> p_206425_) {
          TagBuilder tagbuilder = this.getOrCreateRawBuilder(p_206425_);
 -        return new TagsProvider.TagAppender<>(tagbuilder);
@@ -108,7 +131,12 @@
          return this.builders.computeIfAbsent(p_236452_.location(), p_236442_ -> TagBuilder.create());
      }
  
-@@ -130,11 +_,13 @@
+@@ -126,15 +_,17 @@
+         return this.lookupProvider.thenApply(p_274768_ -> {
+             this.builders.clear();
+             this.addTags(p_274768_);
+-            return p_274768_;
++            return (HolderLookup.Provider)p_274768_;
          });
      }
  
@@ -125,6 +153,24 @@
          }
  
          public final TagsProvider.TagAppender<T> add(ResourceKey<T> p_256138_) {
+@@ -144,7 +_,7 @@
+ 
+         @SafeVarargs
+         public final TagsProvider.TagAppender<T> add(ResourceKey<T>... p_211102_) {
+-            for(ResourceKey<T> resourcekey : p_211102_) {
++            for (ResourceKey<T> resourcekey : p_211102_) {
+                 this.builder.addElement(resourcekey.location());
+             }
+ 
+@@ -152,7 +_,7 @@
+         }
+ 
+         public final TagsProvider.TagAppender<T> addAll(List<ResourceKey<T>> p_316189_) {
+-            for(ResourceKey<T> resourcekey : p_316189_) {
++            for (ResourceKey<T> resourcekey : p_316189_) {
+                 this.builder.addElement(resourcekey.location());
+             }
+ 
 @@ -172,6 +_,19 @@
          public TagsProvider.TagAppender<T> addOptionalTag(ResourceLocation p_176842_) {
              this.builder.addOptionalTag(p_176842_);

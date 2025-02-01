@@ -1,0 +1,108 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SetNameFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/SetNameFunction.java
+@@ -3,6 +_,7 @@
+ import com.mojang.brigadier.exceptions.CommandSyntaxException;
+ import com.mojang.logging.LogUtils;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -11,11 +_,12 @@
+ import java.util.function.UnaryOperator;
+ import javax.annotation.Nullable;
+ import net.minecraft.commands.CommandSourceStack;
++import net.minecraft.core.component.DataComponentType;
+ import net.minecraft.core.component.DataComponents;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.chat.ComponentSerialization;
+ import net.minecraft.network.chat.ComponentUtils;
+-import net.minecraft.util.ExtraCodecs;
++import net.minecraft.util.StringRepresentable;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.storage.loot.LootContext;
+@@ -25,23 +_,28 @@
+ 
+ public class SetNameFunction extends LootItemConditionalFunction {
+     private static final Logger LOGGER = LogUtils.getLogger();
+-    public static final Codec<SetNameFunction> CODEC = RecordCodecBuilder.create(
+-        p_304383_ -> commonFields(p_304383_)
++    public static final MapCodec<SetNameFunction> CODEC = RecordCodecBuilder.mapCodec(
++        p_338152_ -> commonFields(p_338152_)
+                 .and(
+-                    p_304383_.group(
+-                        ExtraCodecs.strictOptionalField(ComponentSerialization.CODEC, "name").forGetter(p_298144_ -> p_298144_.name),
+-                        ExtraCodecs.strictOptionalField(LootContext.EntityTarget.CODEC, "entity").forGetter(p_298153_ -> p_298153_.resolutionContext)
++                    p_338152_.group(
++                        ComponentSerialization.CODEC.optionalFieldOf("name").forGetter(p_298144_ -> p_298144_.name),
++                        LootContext.EntityTarget.CODEC.optionalFieldOf("entity").forGetter(p_298153_ -> p_298153_.resolutionContext),
++                        SetNameFunction.Target.CODEC.optionalFieldOf("target", SetNameFunction.Target.CUSTOM_NAME).forGetter(p_338153_ -> p_338153_.target)
+                     )
+                 )
+-                .apply(p_304383_, SetNameFunction::new)
++                .apply(p_338152_, SetNameFunction::new)
+     );
+     private final Optional<Component> name;
+     private final Optional<LootContext.EntityTarget> resolutionContext;
++    private final SetNameFunction.Target target;
+ 
+-    private SetNameFunction(List<LootItemCondition> p_299241_, Optional<Component> p_298804_, Optional<LootContext.EntityTarget> p_298545_) {
++    private SetNameFunction(
++        List<LootItemCondition> p_299241_, Optional<Component> p_298804_, Optional<LootContext.EntityTarget> p_298545_, SetNameFunction.Target p_338830_
++    ) {
+         super(p_299241_);
+         this.name = p_298804_;
+         this.resolutionContext = p_298545_;
++        this.target = p_338830_;
+     }
+ 
+     @Override
+@@ -75,16 +_,39 @@
+ 
+     @Override
+     public ItemStack run(ItemStack p_81137_, LootContext p_81138_) {
+-        this.name
+-            .ifPresent(p_330193_ -> p_81137_.set(DataComponents.CUSTOM_NAME, createResolver(p_81138_, this.resolutionContext.orElse(null)).apply(p_330193_)));
++        this.name.ifPresent(p_338163_ -> p_81137_.set(this.target.component(), createResolver(p_81138_, this.resolutionContext.orElse(null)).apply(p_338163_)));
+         return p_81137_;
+     }
+ 
+-    public static LootItemConditionalFunction.Builder<?> setName(Component p_165458_) {
+-        return simpleBuilder(p_298143_ -> new SetNameFunction(p_298143_, Optional.of(p_165458_), Optional.empty()));
+-    }
+-
+-    public static LootItemConditionalFunction.Builder<?> setName(Component p_165460_, LootContext.EntityTarget p_165461_) {
+-        return simpleBuilder(p_298152_ -> new SetNameFunction(p_298152_, Optional.of(p_165460_), Optional.of(p_165461_)));
++    public static LootItemConditionalFunction.Builder<?> setName(Component p_165460_, SetNameFunction.Target p_338546_) {
++        return simpleBuilder(p_338156_ -> new SetNameFunction(p_338156_, Optional.of(p_165460_), Optional.empty(), p_338546_));
++    }
++
++    public static LootItemConditionalFunction.Builder<?> setName(Component p_165458_, SetNameFunction.Target p_338818_, LootContext.EntityTarget p_338518_) {
++        return simpleBuilder(p_338160_ -> new SetNameFunction(p_338160_, Optional.of(p_165458_), Optional.of(p_338518_), p_338818_));
++    }
++
++    public static enum Target implements StringRepresentable {
++        CUSTOM_NAME("custom_name"),
++        ITEM_NAME("item_name");
++
++        public static final Codec<SetNameFunction.Target> CODEC = StringRepresentable.fromEnum(SetNameFunction.Target::values);
++        private final String name;
++
++        private Target(String p_338794_) {
++            this.name = p_338794_;
++        }
++
++        @Override
++        public String getSerializedName() {
++            return this.name;
++        }
++
++        public DataComponentType<Component> component() {
++            return switch (this) {
++                case CUSTOM_NAME -> DataComponents.CUSTOM_NAME;
++                case ITEM_NAME -> DataComponents.ITEM_NAME;
++            };
++        }
+     }
+ }

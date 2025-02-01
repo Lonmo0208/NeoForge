@@ -1,0 +1,17 @@
+--- a/net/minecraft/client/gui/screens/inventory/CommandBlockEditScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/CommandBlockEditScreen.java
+@@ -38,11 +_,12 @@
+     protected void init() {
+         super.init();
+         this.modeButton = this.addRenderableWidget(
+-            CycleButton.<CommandBlockEntity.Mode>builder(p_287312_ -> {
+-                    return switch(p_287312_) {
++            CycleButton.<CommandBlockEntity.Mode>builder(p_339280_ -> {
++                    return switch (p_339280_) {
+                         case SEQUENCE -> Component.translatable("advMode.mode.sequence");
+                         case AUTO -> Component.translatable("advMode.mode.auto");
+                         case REDSTONE -> Component.translatable("advMode.mode.redstone");
++                        default -> throw new MatchException(null, null);
+                     };
+                 })
+                 .withValues(CommandBlockEntity.Mode.values())

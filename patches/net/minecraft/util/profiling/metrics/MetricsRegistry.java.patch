@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/profiling/metrics/MetricsRegistry.java
++++ b/net/minecraft/util/profiling/metrics/MetricsRegistry.java
+@@ -49,7 +_,7 @@
+         }
+ 
+         private static void beforeTick(List<MetricSampler> p_146093_) {
+-            for(MetricSampler metricsampler : p_146093_) {
++            for (MetricSampler metricsampler : p_146093_) {
+                 metricsampler.onStartTick();
+             }
+         }
+@@ -57,7 +_,7 @@
+         private static double averageValueFromDelegates(List<MetricSampler> p_146095_) {
+             double d0 = 0.0;
+ 
+-            for(MetricSampler metricsampler : p_146095_) {
++            for (MetricSampler metricsampler : p_146095_) {
+                 d0 += metricsampler.getSampler().getAsDouble();
+             }
+ 

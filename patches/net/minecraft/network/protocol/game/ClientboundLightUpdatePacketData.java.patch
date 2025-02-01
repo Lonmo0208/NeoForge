@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/protocol/game/ClientboundLightUpdatePacketData.java
++++ b/net/minecraft/network/protocol/game/ClientboundLightUpdatePacketData.java
+@@ -31,7 +_,7 @@
+         this.skyUpdates = Lists.newArrayList();
+         this.blockUpdates = Lists.newArrayList();
+ 
+-        for(int i = 0; i < p_285143_.getLightSectionCount(); ++i) {
++        for (int i = 0; i < p_285143_.getLightSectionCount(); i++) {
+             if (p_285253_ == null || p_285253_.get(i)) {
+                 this.prepareSectionData(p_285385_, p_285143_, LightLayer.SKY, i, this.skyYMask, this.emptySkyYMask, this.skyUpdates);
+             }

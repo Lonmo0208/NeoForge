@@ -1,0 +1,51 @@
+--- a/net/minecraft/util/Mth.java
++++ b/net/minecraft/util/Mth.java
+@@ -8,6 +_,7 @@
+ import net.minecraft.core.Vec3i;
+ import net.minecraft.world.phys.AABB;
+ import net.minecraft.world.phys.Vec3;
++import org.apache.commons.lang3.math.Fraction;
+ import org.apache.commons.lang3.math.NumberUtils;
+ import org.joml.Quaternionf;
+ import org.joml.Vector3f;
+@@ -29,7 +_,7 @@
+     public static final Vector3f X_AXIS = new Vector3f(1.0F, 0.0F, 0.0F);
+     public static final Vector3f Z_AXIS = new Vector3f(0.0F, 0.0F, 1.0F);
+     private static final float[] SIN = Util.make(new float[65536], p_14077_ -> {
+-        for(int i = 0; i < p_14077_.length; ++i) {
++        for (int i = 0; i < p_14077_.length; i++) {
+             p_14077_[i] = (float)Math.sin((double)i * Math.PI * 2.0 / 65536.0);
+         }
+     });
+@@ -427,7 +_,7 @@
+         float f4;
+         float f5;
+         float f6;
+-        switch(i) {
++        switch (i) {
+             case 0:
+                 f4 = p_14172_;
+                 f5 = f3;
+@@ -476,7 +_,7 @@
+     public static int binarySearch(int p_14050_, int p_14051_, IntPredicate p_14052_) {
+         int i = p_14051_ - p_14050_;
+ 
+-        while(i > 0) {
++        while (i > 0) {
+             int j = i / 2;
+             int k = p_14050_ + j;
+             if (p_14052_.test(k)) {
+@@ -677,8 +_,12 @@
+         return p_304773_.set(p_304469_.x * f, p_304469_.y * f, p_304469_.z * f, p_304737_.w).normalize();
+     }
+ 
++    public static int mulAndTruncate(Fraction p_339645_, int p_339636_) {
++        return p_339645_.getNumerator() * p_339636_ / p_339645_.getDenominator();
++    }
++
+     static {
+-        for(int i = 0; i < 257; ++i) {
++        for (int i = 0; i < 257; i++) {
+             double d0 = (double)i / 256.0;
+             double d1 = Math.asin(d0);
+             COS_TAB[i] = Math.cos(d1);

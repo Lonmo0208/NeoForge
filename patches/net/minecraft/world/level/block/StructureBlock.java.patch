@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/level/block/StructureBlock.java
++++ b/net/minecraft/world/level/block/StructureBlock.java
+@@ -73,9 +_,7 @@
+     @Override
+     protected void neighborChanged(BlockState p_57135_, Level p_57136_, BlockPos p_57137_, Block p_57138_, BlockPos p_57139_, boolean p_57140_) {
+         if (p_57136_ instanceof ServerLevel) {
+-            BlockEntity blockentity = p_57136_.getBlockEntity(p_57137_);
+-            if (blockentity instanceof StructureBlockEntity) {
+-                StructureBlockEntity structureblockentity = (StructureBlockEntity)blockentity;
++            if (p_57136_.getBlockEntity(p_57137_) instanceof StructureBlockEntity structureblockentity) {
+                 boolean flag = p_57136_.hasNeighborSignal(p_57137_);
+                 boolean flag1 = structureblockentity.isPowered();
+                 if (flag && !flag1) {
+@@ -89,7 +_,7 @@
+     }
+ 
+     private void trigger(ServerLevel p_57115_, StructureBlockEntity p_57116_) {
+-        switch(p_57116_.getMode()) {
++        switch (p_57116_.getMode()) {
+             case SAVE:
+                 p_57116_.saveStructure(false);
+                 break;

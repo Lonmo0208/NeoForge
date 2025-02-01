@@ -1,0 +1,19 @@
+--- a/net/minecraft/data/advancements/packs/VanillaStoryAdvancements.java
++++ b/net/minecraft/data/advancements/packs/VanillaStoryAdvancements.java
+@@ -27,7 +_,6 @@
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+-import net.minecraft.world.level.levelgen.structure.Structure;
+ 
+ public class VanillaStoryAdvancements implements AdvancementSubProvider {
+     @Override
+@@ -257,7 +_,7 @@
+             .addCriterion(
+                 "in_stronghold",
+                 PlayerTrigger.TriggerInstance.located(
+-                    LocationPredicate.Builder.inStructure(p_256574_.<Structure>lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.STRONGHOLD))
++                    LocationPredicate.Builder.inStructure(p_256574_.lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.STRONGHOLD))
+                 )
+             )
+             .save(p_248554_, "story/follow_ender_eye");

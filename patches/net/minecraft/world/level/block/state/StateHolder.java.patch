@@ -1,0 +1,40 @@
+--- a/net/minecraft/world/level/block/state/StateHolder.java
++++ b/net/minecraft/world/level/block/state/StateHolder.java
+@@ -54,7 +_,7 @@
+     protected static <T> T findNextInCollection(Collection<T> p_61131_, T p_61132_) {
+         Iterator<T> iterator = p_61131_.iterator();
+ 
+-        while(iterator.hasNext()) {
++        while (iterator.hasNext()) {
+             if (iterator.next().equals(p_61132_)) {
+                 if (iterator.hasNext()) {
+                     return iterator.next();
+@@ -140,10 +_,10 @@
+         } else {
+             Table<Property<?>, Comparable<?>, S> table = HashBasedTable.create();
+ 
+-            for(Entry<Property<?>, Comparable<?>> entry : this.values.entrySet()) {
++            for (Entry<Property<?>, Comparable<?>> entry : this.values.entrySet()) {
+                 Property<?> property = entry.getKey();
+ 
+-                for(Comparable<?> comparable : property.getPossibleValues()) {
++                for (Comparable<?> comparable : property.getPossibleValues()) {
+                     if (!comparable.equals(entry.getValue())) {
+                         table.put(property, comparable, p_61134_.get(this.makeNeighbourValues(property, comparable)));
+                     }
+@@ -168,11 +_,11 @@
+         return p_61128_.dispatch(
+             "Name",
+             p_61121_ -> p_61121_.owner,
+-            p_325889_ -> {
+-                S s = p_61129_.apply(p_325889_);
++            p_338076_ -> {
++                S s = p_61129_.apply((O)p_338076_);
+                 return s.getValues().isEmpty()
+-                    ? Codec.unit(s)
+-                    : s.propertiesCodec.codec().optionalFieldOf("Properties").xmap(p_187544_ -> p_187544_.orElse(s), Optional::of).codec();
++                    ? MapCodec.unit(s)
++                    : s.propertiesCodec.codec().lenientOptionalFieldOf("Properties").xmap(p_187544_ -> p_187544_.orElse(s), Optional::of);
+             }
+         );
+     }

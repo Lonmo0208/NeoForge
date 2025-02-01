@@ -1,0 +1,19 @@
+--- a/net/minecraft/data/advancements/packs/VanillaTheEndAdvancements.java
++++ b/net/minecraft/data/advancements/packs/VanillaTheEndAdvancements.java
+@@ -26,7 +_,6 @@
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+-import net.minecraft.world.level.levelgen.structure.Structure;
+ 
+ public class VanillaTheEndAdvancements implements AdvancementSubProvider {
+     @Override
+@@ -101,7 +_,7 @@
+             .addCriterion(
+                 "in_city",
+                 PlayerTrigger.TriggerInstance.located(
+-                    LocationPredicate.Builder.inStructure(p_256214_.<Structure>lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.END_CITY))
++                    LocationPredicate.Builder.inStructure(p_256214_.lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.END_CITY))
+                 )
+             )
+             .save(p_250851_, "end/find_end_city");

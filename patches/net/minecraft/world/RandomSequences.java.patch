@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/RandomSequences.java
++++ b/net/minecraft/world/RandomSequences.java
+@@ -65,8 +_,8 @@
+         CompoundTag compoundtag = new CompoundTag();
+         this.sequences
+             .forEach(
+-                (p_287627_, p_287578_) -> compoundtag.put(
+-                        p_287627_.toString(), RandomSequence.CODEC.encodeStart(NbtOps.INSTANCE, p_287578_).result().orElseThrow()
++                (p_337697_, p_337698_) -> compoundtag.put(
++                        p_337697_.toString(), RandomSequence.CODEC.encodeStart(NbtOps.INSTANCE, p_337698_).result().orElseThrow()
+                     )
+             );
+         p_287658_.put("sequences", compoundtag);
+@@ -86,7 +_,7 @@
+         );
+         CompoundTag compoundtag = p_287587_.getCompound("sequences");
+ 
+-        for(String s : compoundtag.getAllKeys()) {
++        for (String s : compoundtag.getAllKeys()) {
+             try {
+                 RandomSequence randomsequence = RandomSequence.CODEC.decode(NbtOps.INSTANCE, compoundtag.get(s)).result().get().getFirst();
+                 randomsequences.sequences.put(new ResourceLocation(s), randomsequence);

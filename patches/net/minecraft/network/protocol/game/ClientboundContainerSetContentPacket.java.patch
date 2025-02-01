@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/protocol/game/ClientboundContainerSetContentPacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundContainerSetContentPacket.java
+@@ -22,7 +_,7 @@
+         this.stateId = p_182705_;
+         this.items = NonNullList.withSize(p_182706_.size(), ItemStack.EMPTY);
+ 
+-        for(int i = 0; i < p_182706_.size(); ++i) {
++        for (int i = 0; i < p_182706_.size(); i++) {
+             this.items.set(i, p_182706_.get(i).copy());
+         }
+ 

@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/dto/ValueObject.java
++++ b/com/mojang/realmsclient/dto/ValueObject.java
+@@ -12,7 +_,7 @@
+     public String toString() {
+         StringBuilder stringbuilder = new StringBuilder("{");
+ 
+-        for(Field field : this.getClass().getFields()) {
++        for (Field field : this.getClass().getFields()) {
+             if (!isStatic(field)) {
+                 try {
+                     stringbuilder.append(getName(field)).append("=").append(field.get(this)).append(" ");

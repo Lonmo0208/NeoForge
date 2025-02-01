@@ -1,0 +1,103 @@
+--- a/net/minecraft/world/entity/monster/ElderGuardian.java
++++ b/net/minecraft/world/entity/monster/ElderGuardian.java
+@@ -23,22 +_,14 @@
+     private static final int EFFECT_AMPLIFIER = 2;
+     private static final int EFFECT_DISPLAY_LIMIT = 1200;
+ 
+-    public ElderGuardian(EntityType<? extends ElderGuardian> p_32460_, Level p_32461_, boolean p_342141_) {
+-        super(p_32460_, p_32461_, p_342141_);
++    public ElderGuardian(EntityType<? extends ElderGuardian> p_32460_, Level p_32461_) {
++        super(p_32460_, p_32461_);
+         this.setPersistenceRequired();
+         if (this.randomStrollGoal != null) {
+             this.randomStrollGoal.setInterval(400);
+         }
+     }
+ 
+-    public static ElderGuardian createToxicElder(EntityType<? extends ElderGuardian> p_340875_, Level p_341569_) {
+-        return new ElderGuardian(p_340875_, p_341569_, true);
+-    }
+-
+-    public static ElderGuardian createNormalElder(EntityType<? extends ElderGuardian> p_340852_, Level p_341380_) {
+-        return new ElderGuardian(p_340852_, p_341380_, false);
+-    }
+-
+     public static AttributeSupplier.Builder createAttributes() {
+         return Guardian.createAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.ATTACK_DAMAGE, 8.0).add(Attributes.MAX_HEALTH, 80.0);
+     }
+@@ -50,59 +_,38 @@
+ 
+     @Override
+     protected SoundEvent getAmbientSound() {
+-        if (this.isToxic()) {
+-            return this.isInWaterOrBubble() ? SoundEvents.PLAGUEWHALE_AMBIENT : SoundEvents.PLAGUEWHALE_AMBIENT_LAND;
+-        } else {
+-            return this.isInWaterOrBubble() ? SoundEvents.ELDER_GUARDIAN_AMBIENT : SoundEvents.ELDER_GUARDIAN_AMBIENT_LAND;
+-        }
++        return this.isInWaterOrBubble() ? SoundEvents.ELDER_GUARDIAN_AMBIENT : SoundEvents.ELDER_GUARDIAN_AMBIENT_LAND;
+     }
+ 
+     @Override
+     protected SoundEvent getHurtSound(DamageSource p_32468_) {
+-        if (this.isToxic()) {
+-            return this.isInWaterOrBubble() ? SoundEvents.PLAGUEWHALE_HURT : SoundEvents.PLAGUEWHALE_HURT_LAND;
+-        } else {
+-            return this.isInWaterOrBubble() ? SoundEvents.ELDER_GUARDIAN_HURT : SoundEvents.ELDER_GUARDIAN_HURT_LAND;
+-        }
++        return this.isInWaterOrBubble() ? SoundEvents.ELDER_GUARDIAN_HURT : SoundEvents.ELDER_GUARDIAN_HURT_LAND;
+     }
+ 
+     @Override
+     protected SoundEvent getDeathSound() {
+-        if (this.isToxic()) {
+-            return this.isInWaterOrBubble() ? SoundEvents.PLAUGEWHALE_DEATH : SoundEvents.PLAGUEWHALE_DEATH_LAND;
+-        } else {
+-            return this.isInWaterOrBubble() ? SoundEvents.ELDER_GUARDIAN_DEATH : SoundEvents.ELDER_GUARDIAN_DEATH_LAND;
+-        }
++        return this.isInWaterOrBubble() ? SoundEvents.ELDER_GUARDIAN_DEATH : SoundEvents.ELDER_GUARDIAN_DEATH_LAND;
+     }
+ 
+     @Override
+     protected SoundEvent getFlopSound() {
+-        return this.isToxic() ? SoundEvents.PLAGUEWHALE_FLOP : SoundEvents.ELDER_GUARDIAN_FLOP;
++        return SoundEvents.ELDER_GUARDIAN_FLOP;
+     }
+ 
+     @Override
+     protected void customServerAiStep() {
+         super.customServerAiStep();
+-        if (!this.isToxic()) {
+-            if ((this.tickCount + this.getId()) % 1200 == 0) {
+-                MobEffectInstance mobeffectinstance = new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 6000, 2);
+-                List<ServerPlayer> list = MobEffectUtil.addEffectToPlayersAround(
+-                    (ServerLevel)this.level(), this, this.position(), 50.0, mobeffectinstance, 1200
+-                );
+-                list.forEach(
+-                    p_340130_ -> p_340130_.connection
+-                            .send(new ClientboundGameEventPacket(ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT, this.isSilent() ? 0.0F : 1.0F))
+-                );
+-            }
+-
+-            if (!this.hasRestriction()) {
+-                this.restrictTo(this.blockPosition(), 16);
+-            }
+-        }
+-    }
+-
+-    @Override
+-    protected double guardianStackRidingOffset() {
+-        return -0.294;
++        if ((this.tickCount + this.getId()) % 1200 == 0) {
++            MobEffectInstance mobeffectinstance = new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 6000, 2);
++            List<ServerPlayer> list = MobEffectUtil.addEffectToPlayersAround((ServerLevel)this.level(), this, this.position(), 50.0, mobeffectinstance, 1200);
++            list.forEach(
++                p_337848_ -> p_337848_.connection
++                        .send(new ClientboundGameEventPacket(ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT, this.isSilent() ? 0.0F : 1.0F))
++            );
++        }
++
++        if (!this.hasRestriction()) {
++            this.restrictTo(this.blockPosition(), 16);
++        }
+     }
+ }

@@ -1,0 +1,59 @@
+--- a/net/minecraft/client/renderer/entity/layers/MegaSpudOuterLayer.java
++++ /dev/null
+@@ -1,56 +_,0 @@
+-package net.minecraft.client.renderer.entity.layers;
+-
+-import com.mojang.blaze3d.vertex.PoseStack;
+-import com.mojang.blaze3d.vertex.VertexConsumer;
+-import net.minecraft.client.Minecraft;
+-import net.minecraft.client.model.EntityModel;
+-import net.minecraft.client.model.MegaSpudModel;
+-import net.minecraft.client.model.SlimeModel;
+-import net.minecraft.client.model.geom.EntityModelSet;
+-import net.minecraft.client.model.geom.ModelLayers;
+-import net.minecraft.client.renderer.MultiBufferSource;
+-import net.minecraft.client.renderer.RenderType;
+-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+-import net.minecraft.client.renderer.entity.RenderLayerParent;
+-import net.minecraft.world.entity.LivingEntity;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class MegaSpudOuterLayer<T extends LivingEntity> extends RenderLayer<T, MegaSpudModel<T>> {
+-    private final EntityModel<T> model;
+-
+-    public MegaSpudOuterLayer(RenderLayerParent<T, MegaSpudModel<T>> p_341950_, EntityModelSet p_342267_) {
+-        super(p_341950_);
+-        this.model = new SlimeModel<>(p_342267_.bakeLayer(ModelLayers.MEGA_SPUD_OUTER));
+-    }
+-
+-    public void render(
+-        PoseStack p_341677_,
+-        MultiBufferSource p_340739_,
+-        int p_341608_,
+-        T p_342482_,
+-        float p_341988_,
+-        float p_342531_,
+-        float p_341342_,
+-        float p_342509_,
+-        float p_340873_,
+-        float p_340960_
+-    ) {
+-        Minecraft minecraft = Minecraft.getInstance();
+-        boolean flag = minecraft.shouldEntityAppearGlowing(p_342482_) && p_342482_.isInvisible();
+-        if (!p_342482_.isInvisible() || flag) {
+-            VertexConsumer vertexconsumer;
+-            if (flag) {
+-                vertexconsumer = p_340739_.getBuffer(RenderType.outline(this.getTextureLocation(p_342482_)));
+-            } else {
+-                vertexconsumer = p_340739_.getBuffer(RenderType.entityTranslucent(this.getTextureLocation(p_342482_)));
+-            }
+-
+-            this.getParentModel().copyPropertiesTo(this.model);
+-            this.model.prepareMobModel(p_342482_, p_341988_, p_342531_, p_341342_);
+-            this.model.setupAnim(p_342482_, p_341988_, p_342531_, p_342509_, p_340873_, p_340960_);
+-            this.model.renderToBuffer(p_341677_, vertexconsumer, p_341608_, LivingEntityRenderer.getOverlayCoords(p_342482_, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+-        }
+-    }
+-}

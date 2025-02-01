@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/data/BlockDataAccessor.java
++++ b/net/minecraft/server/commands/data/BlockDataAccessor.java
+@@ -51,7 +_,7 @@
+     @Override
+     public void setData(CompoundTag p_139307_) {
+         BlockState blockstate = this.entity.getLevel().getBlockState(this.pos);
+-        this.entity.load(p_139307_, this.entity.getLevel().registryAccess());
++        this.entity.loadWithComponents(p_139307_, this.entity.getLevel().registryAccess());
+         this.entity.setChanged();
+         this.entity.getLevel().sendBlockUpdated(this.pos, blockstate, blockstate, 3);
+     }

@@ -1,0 +1,13 @@
+--- a/net/minecraft/util/datafix/fixes/ItemStackUUIDFix.java
++++ b/net/minecraft/util/datafix/fixes/ItemStackUUIDFix.java
+@@ -33,7 +_,9 @@
+     private Dynamic<?> updateAttributeModifiers(Dynamic<?> p_16147_) {
+         return p_16147_.update(
+             "AttributeModifiers",
+-            p_16145_ -> p_16147_.createList(p_16145_.asStream().map(p_145437_ -> replaceUUIDLeastMost(p_145437_, "UUID", "UUID").orElse(p_145437_)))
++            p_16145_ -> p_16147_.createList(
++                    p_16145_.asStream().map(p_145437_ -> replaceUUIDLeastMost((Dynamic<?>)p_145437_, "UUID", "UUID").orElse((Dynamic<?>)p_145437_))
++                )
+         );
+     }
+ 

@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/item/armortrim/TrimPatterns.java
++++ b/net/minecraft/world/item/armortrim/TrimPatterns.java
+@@ -54,10 +_,7 @@
+     }
+ 
+     public static Optional<Holder.Reference<TrimPattern>> getFromTemplate(HolderLookup.Provider p_335972_, ItemStack p_267001_) {
+-        return p_335972_.<TrimPattern>lookupOrThrow(Registries.TRIM_PATTERN)
+-            .listElements()
+-            .filter(p_266833_ -> p_267001_.is(p_266833_.value().templateItem()))
+-            .findFirst();
++        return p_335972_.lookupOrThrow(Registries.TRIM_PATTERN).listElements().filter(p_266833_ -> p_267001_.is(p_266833_.value().templateItem())).findFirst();
+     }
+ 
+     public static void register(BootstrapContext<TrimPattern> p_321509_, Item p_267097_, ResourceKey<TrimPattern> p_267079_) {

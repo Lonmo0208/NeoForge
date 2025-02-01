@@ -1,0 +1,12 @@
+--- a/net/minecraft/client/gui/screens/inventory/HorseInventoryScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/HorseInventoryScreen.java
+@@ -31,8 +_,7 @@
+         int i = (this.width - this.imageWidth) / 2;
+         int j = (this.height - this.imageHeight) / 2;
+         p_282553_.blit(HORSE_INVENTORY_LOCATION, i, j, 0, 0, this.imageWidth, this.imageHeight);
+-        AbstractHorse abstracthorse = this.horse;
+-        if (abstracthorse instanceof AbstractChestedHorse abstractchestedhorse && abstractchestedhorse.hasChest()) {
++        if (this.horse instanceof AbstractChestedHorse abstractchestedhorse && abstractchestedhorse.hasChest()) {
+             p_282553_.blitSprite(CHEST_SLOTS_SPRITE, 90, 54, 0, 0, i + 79, j + 17, abstractchestedhorse.getInventoryColumns() * 18, 54);
+         }
+ 

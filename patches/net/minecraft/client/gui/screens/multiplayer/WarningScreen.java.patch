@@ -1,0 +1,21 @@
+--- a/net/minecraft/client/gui/screens/multiplayer/WarningScreen.java
++++ b/net/minecraft/client/gui/screens/multiplayer/WarningScreen.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.client.gui.screens.multiplayer;
+ 
+ import javax.annotation.Nullable;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Checkbox;
+ import net.minecraft.client.gui.components.FocusableTextWidget;
+ import net.minecraft.client.gui.components.StringWidget;
+@@ -55,7 +_,9 @@
+         }
+ 
+         linearlayout1.addChild(this.addFooterButtons());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_330665_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_330665_);
++        });
+         this.repositionElements();
+     }
+ 

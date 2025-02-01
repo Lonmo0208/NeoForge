@@ -27,7 +27,7 @@
      public BakedModel getModel(ModelResourceLocation p_119423_) {
          return this.bakedRegistry.getOrDefault(p_119423_, this.missingModel);
      }
-@@ -100,6 +_,7 @@
+@@ -100,26 +_,27 @@
          Executor p_249221_
      ) {
          p_250336_.startTick();
@@ -35,7 +35,64 @@
          CompletableFuture<Map<ResourceLocation, BlockModel>> completablefuture = loadBlockModels(p_251134_, p_250550_);
          CompletableFuture<Map<ResourceLocation, List<ModelBakery.LoadedJson>>> completablefuture1 = loadBlockStates(p_251134_, p_250550_);
          CompletableFuture<ModelBakery> completablefuture2 = completablefuture.thenCombineAsync(
-@@ -213,6 +_,8 @@
+-            completablefuture1, (p_251201_, p_251281_) -> new ModelBakery(this.blockColors, p_250336_, p_251201_, p_251281_), p_250550_
++            completablefuture1,
++            (p_251201_, p_251281_) -> new ModelBakery(
++                    this.blockColors, p_250336_, (Map<ResourceLocation, BlockModel>)p_251201_, (Map<ResourceLocation, List<ModelBakery.LoadedJson>>)p_251281_
++                ),
++            p_250550_
+         );
+         Map<ResourceLocation, CompletableFuture<AtlasSet.StitchResult>> map = this.atlases.scheduleLoad(p_251134_, this.maxMipmapLevels, p_250550_);
+-        return CompletableFuture.allOf(
+-                Stream.concat(map.values().stream(), Stream.of(completablefuture2)).toArray(p_250157_ -> new CompletableFuture[p_250157_])
+-            )
++        return CompletableFuture.allOf(Stream.concat(map.values().stream(), Stream.of(completablefuture2)).toArray(CompletableFuture[]::new))
+             .thenApplyAsync(
+                 p_248624_ -> this.loadModels(
+                         p_250336_,
+-                        map.entrySet()
+-                            .stream()
+-                            .collect(Collectors.toMap(Entry::getKey, p_248988_ -> (AtlasSet.StitchResult)((CompletableFuture)p_248988_.getValue()).join())),
++                        map.entrySet().stream().collect(Collectors.toMap(Entry::getKey, p_248988_ -> p_248988_.getValue().join())),
+                         completablefuture2.join()
+                     ),
+                 p_250550_
+             )
+-            .thenCompose(p_252255_ -> p_252255_.readyForUpload.thenApply(p_251581_ -> p_252255_))
++            .thenCompose(p_252255_ -> p_252255_.readyForUpload.thenApply(p_251581_ -> (ModelManager.ReloadState)p_252255_))
+             .thenCompose(p_249079_::wait)
+             .thenAcceptAsync(p_252252_ -> this.apply(p_252252_, p_252324_), p_249221_);
+     }
+@@ -130,7 +_,7 @@
+                 p_250597_ -> {
+                     List<CompletableFuture<Pair<ResourceLocation, BlockModel>>> list = new ArrayList<>(p_250597_.size());
+         
+-                    for(Entry<ResourceLocation, Resource> entry : p_250597_.entrySet()) {
++                    for (Entry<ResourceLocation, Resource> entry : p_250597_.entrySet()) {
+                         list.add(CompletableFuture.supplyAsync(() -> {
+                             try {
+                                 Pair pair;
+@@ -162,12 +_,12 @@
+                 p_250744_ -> {
+                     List<CompletableFuture<Pair<ResourceLocation, List<ModelBakery.LoadedJson>>>> list = new ArrayList<>(p_250744_.size());
+         
+-                    for(Entry<ResourceLocation, List<Resource>> entry : p_250744_.entrySet()) {
++                    for (Entry<ResourceLocation, List<Resource>> entry : p_250744_.entrySet()) {
+                         list.add(CompletableFuture.supplyAsync(() -> {
+                             List<Resource> list1 = entry.getValue();
+                             List<ModelBakery.LoadedJson> list2 = new ArrayList<>(list1.size());
+         
+-                            for(Resource resource : list1) {
++                            for (Resource resource : list1) {
+                                 try (Reader reader = resource.openAsReader()) {
+                                     JsonObject jsonobject = GsonHelper.parse(reader);
+                                     list2.add(new ModelBakery.LoadedJson(resource.sourcePackId(), jsonobject));
+@@ -209,16 +_,18 @@
+                         p_250493_,
+                         p_252017_.stream()
+                             .sorted(Material.COMPARATOR)
+-                            .map(p_248692_ -> "    " + p_248692_.atlasLocation() + ":" + p_248692_.texture())
++                            .map(p_339314_ -> "    " + p_339314_.atlasLocation() + ":" + p_339314_.texture())
                              .collect(Collectors.joining("\n"))
                      )
              );
@@ -44,6 +101,22 @@
          p_252136_.popPush("dispatch");
          Map<ResourceLocation, BakedModel> map = p_248945_.getBakedTopLevelModels();
          BakedModel bakedmodel = map.get(ModelBakery.MISSING_MODEL_LOCATION);
+         Map<BlockState, BakedModel> map1 = new IdentityHashMap<>();
+ 
+-        for(Block block : BuiltInRegistries.BLOCK) {
++        for (Block block : BuiltInRegistries.BLOCK) {
+             block.getStateDefinition().getPossibleStates().forEach(p_250633_ -> {
+                 ResourceLocation resourcelocation = p_250633_.getBlock().builtInRegistryHolder().key().location();
+                 BakedModel bakedmodel1 = map.getOrDefault(BlockModelShaper.stateToModelLocation(resourcelocation, p_250633_), bakedmodel);
+@@ -227,7 +_,7 @@
+         }
+ 
+         CompletableFuture<Void> completablefuture = CompletableFuture.allOf(
+-            p_250646_.values().stream().map(AtlasSet.StitchResult::readyForUpload).toArray(p_250044_ -> new CompletableFuture[p_250044_])
++            p_250646_.values().stream().map(AtlasSet.StitchResult::readyForUpload).toArray(CompletableFuture[]::new)
+         );
+         p_252136_.pop();
+         p_252136_.endTick();
 @@ -242,6 +_,8 @@
          this.bakedRegistry = modelbakery.getBakedTopLevelModels();
          this.modelGroups = modelbakery.getModelGroups();

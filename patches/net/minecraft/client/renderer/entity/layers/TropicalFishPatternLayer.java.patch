@@ -1,0 +1,26 @@
+--- a/net/minecraft/client/renderer/entity/layers/TropicalFishPatternLayer.java
++++ b/net/minecraft/client/renderer/entity/layers/TropicalFishPatternLayer.java
+@@ -51,12 +_,13 @@
+     ) {
+         TropicalFish.Pattern tropicalfish$pattern = p_117615_.getVariant();
+ 
+-        EntityModel<TropicalFish> entitymodel = (EntityModel<TropicalFish>)(switch(tropicalfish$pattern.base()) {
++        EntityModel<TropicalFish> entitymodel = (EntityModel<TropicalFish>)(switch (tropicalfish$pattern.base()) {
+             case SMALL -> this.modelA;
+             case LARGE -> this.modelB;
++            default -> throw new MatchException(null, null);
+         });
+ 
+-        ResourceLocation resourcelocation = switch(tropicalfish$pattern) {
++        ResourceLocation resourcelocation = switch (tropicalfish$pattern) {
+             case KOB -> KOB_TEXTURE;
+             case SUNSTREAK -> SUNSTREAK_TEXTURE;
+             case SNOOPER -> SNOOPER_TEXTURE;
+@@ -69,6 +_,7 @@
+             case BLOCKFISH -> BLOCKFISH_TEXTURE;
+             case BETTY -> BETTY_TEXTURE;
+             case CLAYFISH -> CLAYFISH_TEXTURE;
++            default -> throw new MatchException(null, null);
+         };
+         float[] afloat = p_117615_.getPatternColor().getTextureDiffuseColors();
+         coloredCutoutModelCopyLayerRender(

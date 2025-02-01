@@ -1,0 +1,29 @@
+--- a/net/minecraft/client/gui/screens/PresetFlatWorldScreen.java
++++ b/net/minecraft/client/gui/screens/PresetFlatWorldScreen.java
+@@ -110,7 +_,7 @@
+         String[] astring = p_260301_.split(",");
+         int i = 0;
+ 
+-        for(String s : astring) {
++        for (String s : astring) {
+             FlatLayerInfo flatlayerinfo = getLayerInfoFromString(p_259080_, s, i);
+             if (flatlayerinfo == null) {
+                 return Collections.emptyList();
+@@ -160,7 +_,7 @@
+     static String save(FlatLevelGeneratorSettings p_205394_) {
+         StringBuilder stringbuilder = new StringBuilder();
+ 
+-        for(int i = 0; i < p_205394_.getLayersInfo().size(); ++i) {
++        for (int i = 0; i < p_205394_.getLayersInfo().size(); i++) {
+             if (i > 0) {
+                 stringbuilder.append(",");
+             }
+@@ -250,7 +_,7 @@
+         public PresetsList(RegistryAccess p_259278_, FeatureFlagSet p_259076_) {
+             super(PresetFlatWorldScreen.this.minecraft, PresetFlatWorldScreen.this.width, PresetFlatWorldScreen.this.height - 117, 80, 24);
+ 
+-            for(Holder<FlatLevelGeneratorPreset> holder : p_259278_.registryOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET)
++            for (Holder<FlatLevelGeneratorPreset> holder : p_259278_.registryOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET)
+                 .getTagOrEmpty(FlatLevelGeneratorPresetTags.VISIBLE)) {
+                 Set<Block> set = holder.value()
+                     .settings()

@@ -1,0 +1,57 @@
+--- a/net/minecraft/advancements/critereon/MobEffectsPredicate.java
++++ b/net/minecraft/advancements/critereon/MobEffectsPredicate.java
+@@ -10,7 +_,6 @@
+ import javax.annotation.Nullable;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.registries.BuiltInRegistries;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.effect.MobEffect;
+ import net.minecraft.world.effect.MobEffectInstance;
+ import net.minecraft.world.entity.Entity;
+@@ -35,7 +_,7 @@
+     }
+ 
+     public boolean matches(Map<Holder<MobEffect>, MobEffectInstance> p_56562_) {
+-        for(Entry<Holder<MobEffect>, MobEffectsPredicate.MobEffectInstancePredicate> entry : this.effectMap.entrySet()) {
++        for (Entry<Holder<MobEffect>, MobEffectsPredicate.MobEffectInstancePredicate> entry : this.effectMap.entrySet()) {
+             MobEffectInstance mobeffectinstance = p_56562_.get(entry.getKey());
+             if (!entry.getValue().matches(mobeffectinstance)) {
+                 return false;
+@@ -71,15 +_,17 @@
+         MinMaxBounds.Ints amplifier, MinMaxBounds.Ints duration, Optional<Boolean> ambient, Optional<Boolean> visible
+     ) {
+         public static final Codec<MobEffectsPredicate.MobEffectInstancePredicate> CODEC = RecordCodecBuilder.create(
+-            p_298378_ -> p_298378_.group(
+-                        ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "amplifier", MinMaxBounds.Ints.ANY)
++            p_337384_ -> p_337384_.group(
++                        MinMaxBounds.Ints.CODEC
++                            .optionalFieldOf("amplifier", MinMaxBounds.Ints.ANY)
+                             .forGetter(MobEffectsPredicate.MobEffectInstancePredicate::amplifier),
+-                        ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "duration", MinMaxBounds.Ints.ANY)
++                        MinMaxBounds.Ints.CODEC
++                            .optionalFieldOf("duration", MinMaxBounds.Ints.ANY)
+                             .forGetter(MobEffectsPredicate.MobEffectInstancePredicate::duration),
+-                        ExtraCodecs.strictOptionalField(Codec.BOOL, "ambient").forGetter(MobEffectsPredicate.MobEffectInstancePredicate::ambient),
+-                        ExtraCodecs.strictOptionalField(Codec.BOOL, "visible").forGetter(MobEffectsPredicate.MobEffectInstancePredicate::visible)
++                        Codec.BOOL.optionalFieldOf("ambient").forGetter(MobEffectsPredicate.MobEffectInstancePredicate::ambient),
++                        Codec.BOOL.optionalFieldOf("visible").forGetter(MobEffectsPredicate.MobEffectInstancePredicate::visible)
+                     )
+-                    .apply(p_298378_, MobEffectsPredicate.MobEffectInstancePredicate::new)
++                    .apply(p_337384_, MobEffectsPredicate.MobEffectInstancePredicate::new)
+         );
+ 
+         public MobEffectInstancePredicate() {
+@@ -93,10 +_,10 @@
+                 return false;
+             } else if (!this.duration.matches(p_56578_.getDuration())) {
+                 return false;
+-            } else if (this.ambient.isPresent() && this.ambient.get() != p_56578_.isAmbient()) {
+-                return false;
+             } else {
+-                return !this.visible.isPresent() || this.visible.get() == p_56578_.isVisible();
++                return this.ambient.isPresent() && this.ambient.get() != p_56578_.isAmbient()
++                    ? false
++                    : !this.visible.isPresent() || this.visible.get() == p_56578_.isVisible();
+             }
+         }
+     }

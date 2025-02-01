@@ -1,0 +1,25 @@
+--- a/net/minecraft/util/datafix/fixes/BlockEntityBlockStateFix.java
++++ b/net/minecraft/util/datafix/fixes/BlockEntityBlockStateFix.java
+@@ -5,7 +_,6 @@
+ import com.mojang.datafixers.Typed;
+ import com.mojang.datafixers.schemas.Schema;
+ import com.mojang.datafixers.types.Type;
+-import com.mojang.datafixers.util.Pair;
+ import com.mojang.serialization.Dynamic;
+ 
+ public class BlockEntityBlockStateFix extends NamedEntityFix {
+@@ -24,12 +_,11 @@
+         int j = dynamic.get("blockData").asInt(0) & 15;
+         dynamic = dynamic.remove("blockData");
+         Dynamic<?> dynamic1 = BlockStateData.getTag(i << 4 | j);
+-        Typed<?> typed = (Typed)type.pointTyped(p_14814_.getOps()).orElseThrow(() -> new IllegalStateException("Could not create new piston block entity."));
++        Typed<?> typed = type.pointTyped(p_14814_.getOps()).orElseThrow(() -> new IllegalStateException("Could not create new piston block entity."));
+         return typed.set(DSL.remainderFinder(), dynamic)
+             .set(
+                 opticfinder,
+-                (Typed)((Pair)type1.readTyped(dynamic1).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created block state tag.")))
+-                    .getFirst()
++                type1.readTyped(dynamic1).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created block state tag.")).getFirst()
+             );
+     }
+ }

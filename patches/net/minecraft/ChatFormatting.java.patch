@@ -1,0 +1,38 @@
+--- a/net/minecraft/ChatFormatting.java
++++ b/net/minecraft/ChatFormatting.java
+@@ -39,7 +_,7 @@
+     public static final Codec<ChatFormatting> CODEC = StringRepresentable.fromEnum(ChatFormatting::values);
+     public static final char PREFIX_CODE = '\u00a7';
+     private static final Map<String, ChatFormatting> FORMATTING_BY_NAME = Arrays.stream(values())
+-        .collect(Collectors.toMap(p_126660_ -> cleanName(p_126660_.name), p_126652_ -> p_126652_));
++        .collect(Collectors.toMap(p_126660_ -> cleanName(p_126660_.name), p_126652_ -> (ChatFormatting)p_126652_));
+     private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)\u00a7[0-9A-FK-OR]");
+     private final String name;
+     private final char code;
+@@ -115,7 +_,7 @@
+         if (p_126648_ < 0) {
+             return RESET;
+         } else {
+-            for(ChatFormatting chatformatting : values()) {
++            for (ChatFormatting chatformatting : values()) {
+                 if (chatformatting.getId() == p_126648_) {
+                     return chatformatting;
+                 }
+@@ -129,7 +_,7 @@
+     public static ChatFormatting getByCode(char p_126646_) {
+         char c0 = Character.toLowerCase(p_126646_);
+ 
+-        for(ChatFormatting chatformatting : values()) {
++        for (ChatFormatting chatformatting : values()) {
+             if (chatformatting.code == c0) {
+                 return chatformatting;
+             }
+@@ -141,7 +_,7 @@
+     public static Collection<String> getNames(boolean p_126654_, boolean p_126655_) {
+         List<String> list = Lists.newArrayList();
+ 
+-        for(ChatFormatting chatformatting : values()) {
++        for (ChatFormatting chatformatting : values()) {
+             if ((!chatformatting.isColor() || p_126654_) && (!chatformatting.isFormat() || p_126655_)) {
+                 list.add(chatformatting.getName());
+             }

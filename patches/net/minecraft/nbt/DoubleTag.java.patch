@@ -1,0 +1,15 @@
+--- a/net/minecraft/nbt/DoubleTag.java
++++ b/net/minecraft/nbt/DoubleTag.java
+@@ -79,11 +_,7 @@
+ 
+     @Override
+     public boolean equals(Object p_128512_) {
+-        if (this == p_128512_) {
+-            return true;
+-        } else {
+-            return p_128512_ instanceof DoubleTag && this.data == ((DoubleTag)p_128512_).data;
+-        }
++        return this == p_128512_ ? true : p_128512_ instanceof DoubleTag && this.data == ((DoubleTag)p_128512_).data;
+     }
+ 
+     @Override

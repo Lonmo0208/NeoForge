@@ -1,0 +1,74 @@
+--- a/net/minecraft/world/level/block/entity/SculkCatalystBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/SculkCatalystBlockEntity.java
+@@ -14,7 +_,6 @@
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.damagesource.DamageSource;
+-import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.SculkCatalystBlock;
+@@ -39,8 +_,9 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_222787_, HolderLookup.Provider p_323669_) {
+-        this.catalystListener.sculkSpreader.load(p_222787_);
++    protected void loadAdditional(CompoundTag p_338264_, HolderLookup.Provider p_338447_) {
++        super.loadAdditional(p_338264_, p_338447_);
++        this.catalystListener.sculkSpreader.load(p_338264_);
+     }
+ 
+     @Override
+@@ -82,27 +_,24 @@
+ 
+         @Override
+         public boolean handleGameEvent(ServerLevel p_283470_, Holder<GameEvent> p_316661_, GameEvent.Context p_283014_, Vec3 p_282350_) {
+-            if (p_316661_.is(GameEvent.ENTITY_DIE)) {
+-                Entity $$5 = p_283014_.sourceEntity();
+-                if ($$5 instanceof LivingEntity livingentity) {
+-                    if (!livingentity.wasExperienceConsumed()) {
+-                        int i = livingentity.getExperienceReward();
+-                        if (livingentity.shouldDropExperience() && i > 0) {
+-                            this.sculkSpreader.addCursors(BlockPos.containing(p_282350_.relative(Direction.UP, 0.5)), i);
+-                            this.tryAwardItSpreadsAdvancement(p_283470_, livingentity);
+-                        }
+-
+-                        livingentity.skipDropExperience();
+-                        this.positionSource
+-                            .getPosition(p_283470_)
+-                            .ifPresent(p_340260_ -> this.bloom(p_283470_, BlockPos.containing(p_340260_), this.blockState, p_283470_.getRandom()));
++            if (p_316661_.is(GameEvent.ENTITY_DIE) && p_283014_.sourceEntity() instanceof LivingEntity livingentity) {
++                if (!livingentity.wasExperienceConsumed()) {
++                    int i = livingentity.getExperienceReward();
++                    if (livingentity.shouldDropExperience() && i > 0) {
++                        this.sculkSpreader.addCursors(BlockPos.containing(p_282350_.relative(Direction.UP, 0.5)), i);
++                        this.tryAwardItSpreadsAdvancement(p_283470_, livingentity);
+                     }
+ 
+-                    return true;
++                    livingentity.skipDropExperience();
++                    this.positionSource
++                        .getPosition(p_283470_)
++                        .ifPresent(p_325869_ -> this.bloom(p_283470_, BlockPos.containing(p_325869_), this.blockState, p_283470_.getRandom()));
+                 }
++
++                return true;
++            } else {
++                return false;
+             }
+-
+-            return false;
+         }
+ 
+         @VisibleForTesting
+@@ -128,8 +_,7 @@
+         }
+ 
+         private void tryAwardItSpreadsAdvancement(Level p_281279_, LivingEntity p_281378_) {
+-            LivingEntity livingentity = p_281378_.getLastHurtByMob();
+-            if (livingentity instanceof ServerPlayer serverplayer) {
++            if (p_281378_.getLastHurtByMob() instanceof ServerPlayer serverplayer) {
+                 DamageSource damagesource = p_281378_.getLastDamageSource() == null
+                     ? p_281279_.damageSources().playerAttack(serverplayer)
+                     : p_281378_.getLastDamageSource();

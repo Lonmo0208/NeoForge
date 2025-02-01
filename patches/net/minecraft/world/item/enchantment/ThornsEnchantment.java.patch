@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/item/enchantment/ThornsEnchantment.java
++++ b/net/minecraft/world/item/enchantment/ThornsEnchantment.java
+@@ -30,11 +_,7 @@
+     }
+ 
+     public static boolean shouldHit(int p_220317_, RandomSource p_220318_) {
+-        if (p_220317_ <= 0) {
+-            return false;
+-        } else {
+-            return p_220318_.nextFloat() < 0.15F * (float)p_220317_;
+-        }
++        return p_220317_ <= 0 ? false : p_220318_.nextFloat() < 0.15F * (float)p_220317_;
+     }
+ 
+     public static int getDamage(int p_220320_, RandomSource p_220321_) {

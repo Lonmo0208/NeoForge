@@ -1,14 +1,38 @@
 --- a/net/minecraft/world/level/block/MushroomBlock.java
 +++ b/net/minecraft/world/level/block/MushroomBlock.java
-@@ -88,7 +_,7 @@
-         if (blockstate.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
-             return true;
-         } else {
+@@ -52,7 +_,7 @@
+             int i = 5;
+             int j = 4;
+ 
+-            for(BlockPos blockpos : BlockPos.betweenClosed(p_221786_.offset(-4, -1, -4), p_221786_.offset(4, 1, 4))) {
++            for (BlockPos blockpos : BlockPos.betweenClosed(p_221786_.offset(-4, -1, -4), p_221786_.offset(4, 1, 4))) {
+                 if (p_221785_.getBlockState(blockpos).is(this)) {
+                     if (--i <= 0) {
+                         return;
+@@ -62,7 +_,7 @@
+ 
+             BlockPos blockpos1 = p_221786_.offset(p_221787_.nextInt(3) - 1, p_221787_.nextInt(2) - p_221787_.nextInt(2), p_221787_.nextInt(3) - 1);
+ 
+-            for(int k = 0; k < 4; ++k) {
++            for (int k = 0; k < 4; k++) {
+                 if (p_221785_.isEmptyBlock(blockpos1) && p_221784_.canSurvive(p_221785_, blockpos1)) {
+                     p_221786_ = blockpos1;
+                 }
+@@ -85,11 +_,9 @@
+     protected boolean canSurvive(BlockState p_54880_, LevelReader p_54881_, BlockPos p_54882_) {
+         BlockPos blockpos = p_54882_.below();
+         BlockState blockstate = p_54881_.getBlockState(blockpos);
+-        if (blockstate.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
+-            return true;
+-        } else {
 -            return p_54881_.getRawBrightness(p_54882_, 0) < 13 && this.mayPlaceOn(blockstate, p_54881_, blockpos);
-+            return p_54881_.getRawBrightness(p_54882_, 0) < 13 && blockstate.canSustainPlant(p_54881_, blockpos, net.minecraft.core.Direction.UP, this);
-         }
+-        }
++        return blockstate.is(BlockTags.MUSHROOM_GROW_BLOCK)
++            ? true
++            : p_54881_.getRawBrightness(p_54882_, 0) < 13 && blockstate.canSustainPlant(p_54881_, blockpos, net.minecraft.core.Direction.UP, this);
      }
  
+     public boolean growMushroom(ServerLevel p_221774_, BlockPos p_221775_, BlockState p_221776_, RandomSource p_221777_) {
 @@ -99,8 +_,10 @@
          if (optional.isEmpty()) {
              return false;

@@ -1,0 +1,22 @@
+--- a/net/minecraft/commands/arguments/ObjectiveCriteriaArgument.java
++++ b/net/minecraft/commands/arguments/ObjectiveCriteriaArgument.java
+@@ -40,7 +_,7 @@
+     public ObjectiveCriteria parse(StringReader p_102560_) throws CommandSyntaxException {
+         int i = p_102560_.getCursor();
+ 
+-        while(p_102560_.canRead() && p_102560_.peek() != ' ') {
++        while (p_102560_.canRead() && p_102560_.peek() != ' ') {
+             p_102560_.skip();
+         }
+ 
+@@ -55,8 +_,8 @@
+     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_102572_, SuggestionsBuilder p_102573_) {
+         List<String> list = Lists.newArrayList(ObjectiveCriteria.getCustomCriteriaNames());
+ 
+-        for(StatType<?> stattype : BuiltInRegistries.STAT_TYPE) {
+-            for(Object object : stattype.getRegistry()) {
++        for (StatType<?> stattype : BuiltInRegistries.STAT_TYPE) {
++            for (Object object : stattype.getRegistry()) {
+                 String s = this.getName(stattype, object);
+                 list.add(s);
+             }

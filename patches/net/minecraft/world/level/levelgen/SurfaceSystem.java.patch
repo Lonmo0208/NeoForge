@@ -1,0 +1,114 @@
+--- a/net/minecraft/world/level/levelgen/SurfaceSystem.java
++++ b/net/minecraft/world/level/levelgen/SurfaceSystem.java
+@@ -103,8 +_,8 @@
+         SurfaceRules.SurfaceRule surfacerules$surfacerule = p_224656_.apply(surfacerules$context);
+         BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
+ 
+-        for(int k = 0; k < 16; ++k) {
+-            for(int l = 0; l < 16; ++l) {
++        for (int k = 0; k < 16; k++) {
++            for (int l = 0; l < 16; l++) {
+                 int i1 = i + k;
+                 int j1 = j + l;
+                 int k1 = p_224654_.getHeight(Heightmap.Types.WORLD_SURFACE_WG, k, l) + 1;
+@@ -121,7 +_,7 @@
+                 int k2 = Integer.MAX_VALUE;
+                 int l2 = p_224654_.getMinBuildHeight();
+ 
+-                for(int i3 = l1; i3 >= l2; --i3) {
++                for (int i3 = l1; i3 >= l2; i3--) {
+                     BlockState blockstate = blockcolumn.getBlock(i3);
+                     if (blockstate.isAir()) {
+                         i2 = 0;
+@@ -134,7 +_,7 @@
+                         if (k2 >= i3) {
+                             k2 = DimensionType.WAY_BELOW_MIN_Y;
+ 
+-                            for(int j3 = i3 - 1; j3 >= l2 - 1; --j3) {
++                            for (int j3 = i3 - 1; j3 >= l2 - 1; j3--) {
+                                 BlockState blockstate1 = blockcolumn.getBlock(j3);
+                                 if (!this.isStone(blockstate1)) {
+                                     k2 = j3 + 1;
+@@ -143,7 +_,7 @@
+                             }
+                         }
+ 
+-                        ++i2;
++                        i2++;
+                         int k3 = i3 - k2 + 1;
+                         surfacerules$context.updateY(i2, k3, j2, i1, i3, j1);
+                         if (blockstate == this.defaultBlock) {
+@@ -211,7 +_,7 @@
+             double d5 = 64.0 + Math.min(d1 * d1 * 2.5, Math.ceil(d4 * 50.0) + 24.0);
+             int i = Mth.floor(d5);
+             if (p_189958_ <= i) {
+-                for(int j = i; j >= p_189959_.getMinBuildHeight(); --j) {
++                for (int j = i; j >= p_189959_.getMinBuildHeight(); j--) {
+                     BlockState blockstate = p_189955_.getBlock(j);
+                     if (blockstate.is(this.defaultBlock.getBlock())) {
+                         break;
+@@ -222,7 +_,7 @@
+                     }
+                 }
+ 
+-                for(int k = i; k >= p_189959_.getMinBuildHeight() && p_189955_.getBlock(k).isAir(); --k) {
++                for (int k = i; k >= p_189959_.getMinBuildHeight() && p_189955_.getBlock(k).isAir(); k--) {
+                     p_189955_.setBlock(k, this.defaultBlock);
+                 }
+             }
+@@ -261,12 +_,12 @@
+             int j = this.seaLevel + 18 + randomsource.nextInt(10);
+             int k = 0;
+ 
+-            for(int l = Math.max(p_189941_, (int)d6 + 1); l >= p_189935_; --l) {
++            for (int l = Math.max(p_189941_, (int)d6 + 1); l >= p_189935_; l--) {
+                 if (p_189937_.getBlock(l).isAir() && l < (int)d7 && randomsource.nextDouble() > 0.01
+                     || p_189937_.getBlock(l).is(Blocks.WATER) && l > (int)d2 && l < this.seaLevel && d2 != 0.0 && randomsource.nextDouble() > 0.15) {
+                     if (k <= i && l > j) {
+                         p_189937_.setBlock(l, SNOW_BLOCK);
+-                        ++k;
++                        k++;
+                     } else {
+                         p_189937_.setBlock(l, PACKED_ICE);
+                     }
+@@ -279,7 +_,7 @@
+         BlockState[] ablockstate = new BlockState[192];
+         Arrays.fill(ablockstate, TERRACOTTA);
+ 
+-        for(int k = 0; k < ablockstate.length; ++k) {
++        for (int k = 0; k < ablockstate.length; k++) {
+             k += p_224642_.nextInt(5) + 1;
+             if (k < ablockstate.length) {
+                 ablockstate[k] = ORANGE_TERRACOTTA;
+@@ -292,7 +_,7 @@
+         int l = p_224642_.nextIntBetweenInclusive(9, 15);
+         int i = 0;
+ 
+-        for(int j = 0; i < l && j < ablockstate.length; j += p_224642_.nextInt(16) + 4) {
++        for (int j = 0; i < l && j < ablockstate.length; j += p_224642_.nextInt(16) + 4) {
+             ablockstate[j] = WHITE_TERRACOTTA;
+             if (j - 1 > 0 && p_224642_.nextBoolean()) {
+                 ablockstate[j - 1] = LIGHT_GRAY_TERRACOTTA;
+@@ -302,7 +_,7 @@
+                 ablockstate[j + 1] = LIGHT_GRAY_TERRACOTTA;
+             }
+ 
+-            ++i;
++            i++;
+         }
+ 
+         return ablockstate;
+@@ -311,11 +_,11 @@
+     private static void makeBands(RandomSource p_224644_, BlockState[] p_224645_, int p_224646_, BlockState p_224647_) {
+         int i = p_224644_.nextIntBetweenInclusive(6, 15);
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             int k = p_224646_ + p_224644_.nextInt(3);
+             int l = p_224644_.nextInt(p_224645_.length);
+ 
+-            for(int i1 = 0; l + i1 < p_224645_.length && i1 < k; ++i1) {
++            for (int i1 = 0; l + i1 < p_224645_.length && i1 < k; i1++) {
+                 p_224645_[l + i1] = p_224647_;
+             }
+         }

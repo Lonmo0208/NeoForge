@@ -1,0 +1,143 @@
+--- a/com/mojang/realmsclient/RealmsMainScreen.java
++++ b/com/mojang/realmsclient/RealmsMainScreen.java
+@@ -40,7 +_,6 @@
+ import net.minecraft.Util;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.gui.GuiGraphics;
+-import net.minecraft.client.gui.components.AbstractSelectionList;
+ import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.CycleButton;
+@@ -249,7 +_,9 @@
+ 
+             this.layout = this.createLayout(p_294474_);
+             this.activeLayoutState = p_294474_;
+-            this.layout.visitWidgets(this::addRenderableWidget);
++            this.layout.visitWidgets(p_321334_ -> {
++                AbstractWidget abstractwidget = this.addRenderableWidget(p_321334_);
++            });
+             this.repositionElements();
+         }
+     }
+@@ -262,7 +_,7 @@
+         layout.arrangeElements();
+         headerandfooterlayout.setFooterHeight(layout.getHeight() + 22);
+         headerandfooterlayout.addToFooter(layout);
+-        switch(p_295052_) {
++        switch (p_295052_) {
+             case LOADING:
+                 headerandfooterlayout.addToContents(new LoadingDotsWidget(this.font, LOADING_TEXT));
+                 break;
+@@ -357,7 +_,7 @@
+     }
+ 
+     private void debugRefreshDataFetchers() {
+-        for(DataFetcher.Task<?> task : this.minecraft.realmsDataFetcher().getTasks()) {
++        for (DataFetcher.Task<?> task : this.minecraft.realmsDataFetcher().getTasks()) {
+             task.reset();
+         }
+     }
+@@ -370,7 +_,7 @@
+             this.refreshListAndLayout();
+             boolean flag = false;
+ 
+-            for(RealmsServer realmsserver : this.serverList) {
++            for (RealmsServer realmsserver : this.serverList) {
+                 if (this.isSelfOwnedNonExpiredServer(realmsserver)) {
+                     flag = true;
+                 }
+@@ -385,7 +_,7 @@
+             this.notifications.clear();
+             this.notifications.addAll(p_304053_);
+ 
+-            for(RealmsNotification realmsnotification : p_304053_) {
++            for (RealmsNotification realmsnotification : p_304053_) {
+                 if (realmsnotification instanceof RealmsNotification.InfoPopup realmsnotification$infopopup) {
+                     PopupScreen popupscreen = realmsnotification$infopopup.buildScreen(this, this::dismissNotification);
+                     if (popupscreen != null) {
+@@ -419,7 +_,7 @@
+     private void markNotificationsAsSeen(Collection<RealmsNotification> p_304698_) {
+         List<UUID> list = new ArrayList<>(p_304698_.size());
+ 
+-        for(RealmsNotification realmsnotification : p_304698_) {
++        for (RealmsNotification realmsnotification : p_304698_) {
+             if (!realmsnotification.seen() && !this.handledSeenNotifications.contains(realmsnotification.uuid())) {
+                 list.add(realmsnotification.uuid());
+             }
+@@ -451,18 +_,18 @@
+         RealmsServer realmsserver = this.getSelectedServer();
+         this.realmSelectionList.clear();
+ 
+-        for(RealmsNotification realmsnotification : this.notifications) {
++        for (RealmsNotification realmsnotification : this.notifications) {
+             if (this.addListEntriesForNotification(realmsnotification)) {
+                 this.markNotificationsAsSeen(List.of(realmsnotification));
+                 break;
+             }
+         }
+ 
+-        for(RealmsServer realmsserver1 : this.availableSnapshotServers) {
++        for (RealmsServer realmsserver1 : this.availableSnapshotServers) {
+             this.realmSelectionList.addEntry(new RealmsMainScreen.AvailableSnapshotEntry(realmsserver1));
+         }
+ 
+-        for(RealmsServer realmsserver2 : this.serverList) {
++        for (RealmsServer realmsserver2 : this.serverList) {
+             RealmsMainScreen.Entry realmsmainscreen$entry;
+             if (isSnapshot() && !realmsserver2.isSnapshotRealm()) {
+                 if (realmsserver2.state == RealmsServer.State.UNINITIALIZED) {
+@@ -485,16 +_,15 @@
+     }
+ 
+     private boolean addListEntriesForNotification(RealmsNotification p_304511_) {
+-        if (!(p_304511_ instanceof RealmsNotification.VisitUrl)) {
++        if (!(p_304511_ instanceof RealmsNotification.VisitUrl realmsnotification$visiturl)) {
+             return false;
+         } else {
+-            RealmsNotification.VisitUrl realmsnotification$visiturl = (RealmsNotification.VisitUrl)p_304511_;
+             Component component = realmsnotification$visiturl.getMessage();
+             int i = this.font.wordWrapHeight(component, 216);
+             int j = Mth.positiveCeilDiv(i + 7, 36) - 1;
+             this.realmSelectionList.addEntry(new RealmsMainScreen.NotificationMessageEntry(component, j + 2, realmsnotification$visiturl));
+ 
+-            for(int k = 0; k < j; ++k) {
++            for (int k = 0; k < j; k++) {
+                 this.realmSelectionList.addEntry(new RealmsMainScreen.EmptyEntry());
+             }
+ 
+@@ -522,7 +_,7 @@
+     private List<Long> getOwnedNonExpiredRealmIds() {
+         List<Long> list = Lists.newArrayList();
+ 
+-        for(RealmsServer realmsserver : this.serverList) {
++        for (RealmsServer realmsserver : this.serverList) {
+             if (this.isSelfOwnedNonExpiredServer(realmsserver)) {
+                 list.add(realmsserver.id);
+             }
+@@ -607,7 +_,7 @@
+ 
+     @Override
+     public Component getNarrationMessage() {
+-        return (Component)(switch(this.activeLayoutState) {
++        return (Component)(switch (this.activeLayoutState) {
+             case LOADING -> CommonComponents.joinForNarration(super.getNarrationMessage(), LOADING_TEXT);
+             case NO_REALMS -> CommonComponents.joinForNarration(super.getNarrationMessage(), NO_REALMS_TEXT);
+             case LIST -> super.getNarrationMessage();
+@@ -625,7 +_,7 @@
+             RealmsPopupScreen.renderDiamond(p_282736_, this.addRealmButton);
+         }
+ 
+-        switch(RealmsClient.ENVIRONMENT) {
++        switch (RealmsClient.ENVIRONMENT) {
+             case STAGE:
+                 this.renderEnvironment(p_282736_, "STAGE!", -256);
+                 break;
+@@ -649,7 +_,7 @@
+                 return;
+             }
+ 
+-            switch(p_305964_.compatibility) {
++            switch (p_305964_.compatibility) {
+                 case COMPATIBLE:
+                     Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(p_305959_, new GetServerDetailsTask(p_305959_, p_305964_)));
+                     break;

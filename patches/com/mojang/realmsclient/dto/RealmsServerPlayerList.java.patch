@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/dto/RealmsServerPlayerList.java
++++ b/com/mojang/realmsclient/dto/RealmsServerPlayerList.java
+@@ -46,7 +_,7 @@
+     private static List<UUID> parsePlayers(JsonArray p_87589_) {
+         List<UUID> list = new ArrayList<>(p_87589_.size());
+ 
+-        for(JsonElement jsonelement : p_87589_) {
++        for (JsonElement jsonelement : p_87589_) {
+             if (jsonelement.isJsonObject()) {
+                 UUID uuid = JsonUtils.getUuidOr("playerId", jsonelement.getAsJsonObject(), null);
+                 if (uuid != null) {

@@ -1,0 +1,22 @@
+--- a/net/minecraft/util/datafix/fixes/ChunkBiomeFix.java
++++ b/net/minecraft/util/datafix/fixes/ChunkBiomeFix.java
+@@ -33,8 +_,8 @@
+                             } else {
+                                 int[] aint1 = new int[1024];
+     
+-                                for(int i = 0; i < 4; ++i) {
+-                                    for(int j = 0; j < 4; ++j) {
++                                for (int i = 0; i < 4; i++) {
++                                    for (int j = 0; j < 4; j++) {
+                                         int k = (j << 2) + 2;
+                                         int l = (i << 2) + 2;
+                                         int i1 = l << 4 | k;
+@@ -42,7 +_,7 @@
+                                     }
+                                 }
+     
+-                                for(int j1 = 1; j1 < 64; ++j1) {
++                                for (int j1 = 1; j1 < 64; j1++) {
+                                     System.arraycopy(aint1, 0, aint1, j1 * 16, 16);
+                                 }
+     

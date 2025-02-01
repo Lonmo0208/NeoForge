@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/behavior/SetWalkTargetFromBlockMemory.java
++++ b/net/minecraft/world/entity/ai/behavior/SetWalkTargetFromBlockMemory.java
+@@ -32,7 +_,7 @@
+                                         int i = 0;
+                                         int j = 1000;
+             
+-                                        while(vec3 == null || BlockPos.containing(vec3).distManhattan(p_275057_.blockPosition()) > p_260360_) {
++                                        while (vec3 == null || BlockPos.containing(vec3).distManhattan(p_275057_.blockPosition()) > p_260360_) {
+                                             vec3 = DefaultRandomPos.getPosTowards(
+                                                 p_275057_, 15, 7, Vec3.atBottomCenterOf(globalpos.pos()), (float) (Math.PI / 2)
+                                             );

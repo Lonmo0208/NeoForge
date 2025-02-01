@@ -1,0 +1,9 @@
+--- a/net/minecraft/sounds/SoundSequenceBuilder.java
++++ /dev/null
+@@ -1,6 +_,0 @@
+-package net.minecraft.sounds;
+-
+-@FunctionalInterface
+-public interface SoundSequenceBuilder {
+-    void waitThenPlay(int p_341076_, SoundEvent p_340435_, SoundSource p_341069_, float p_340802_, float p_341282_);
+-}

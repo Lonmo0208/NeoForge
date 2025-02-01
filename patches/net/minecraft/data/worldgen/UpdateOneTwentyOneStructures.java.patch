@@ -1,0 +1,23 @@
+--- a/net/minecraft/data/worldgen/UpdateOneTwentyOneStructures.java
++++ b/net/minecraft/data/worldgen/UpdateOneTwentyOneStructures.java
+@@ -1,7 +_,6 @@
+ package net.minecraft.data.worldgen;
+ 
+ import java.util.Arrays;
+-import java.util.List;
+ import java.util.Optional;
+ import java.util.stream.Collectors;
+ import net.minecraft.core.HolderGetter;
+@@ -29,11 +_,10 @@
+             new JigsawStructure(
+                 Structures.structure(
+                     holdergetter.getOrThrow(BiomeTags.HAS_TRIAL_CHAMBERS),
+-                    List.of(),
+                     Arrays.stream(MobCategory.values())
+                         .collect(
+                             Collectors.toMap(
+-                                p_311885_ -> p_311885_,
++                                p_311885_ -> (MobCategory)p_311885_,
+                                 p_311971_ -> new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE, WeightedRandomList.create())
+                             )
+                         ),

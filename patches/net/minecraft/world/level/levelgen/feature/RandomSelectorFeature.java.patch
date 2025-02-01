@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/feature/RandomSelectorFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RandomSelectorFeature.java
+@@ -20,7 +_,7 @@
+         ChunkGenerator chunkgenerator = p_160212_.chunkGenerator();
+         BlockPos blockpos = p_160212_.origin();
+ 
+-        for(WeightedPlacedFeature weightedplacedfeature : randomfeatureconfiguration.features) {
++        for (WeightedPlacedFeature weightedplacedfeature : randomfeatureconfiguration.features) {
+             if (randomsource.nextFloat() < weightedplacedfeature.chance) {
+                 return weightedplacedfeature.place(worldgenlevel, chunkgenerator, randomsource, blockpos);
+             }

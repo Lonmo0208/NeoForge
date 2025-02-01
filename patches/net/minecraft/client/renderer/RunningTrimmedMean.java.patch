@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/renderer/RunningTrimmedMean.java
++++ b/net/minecraft/client/renderer/RunningTrimmedMean.java
+@@ -15,7 +_,7 @@
+ 
+     public long registerValueAndGetMean(long p_110713_) {
+         if (this.count < this.values.length) {
+-            ++this.count;
++            this.count++;
+         }
+ 
+         this.values[this.cursor] = p_110713_;
+@@ -24,7 +_,7 @@
+         long j = Long.MIN_VALUE;
+         long k = 0L;
+ 
+-        for(int l = 0; l < this.count; ++l) {
++        for (int l = 0; l < this.count; l++) {
+             long i1 = this.values[l];
+             k += i1;
+             i = Math.min(i, i1);

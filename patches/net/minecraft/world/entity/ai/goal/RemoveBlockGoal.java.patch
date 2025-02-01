@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/ai/goal/RemoveBlockGoal.java
 +++ b/net/minecraft/world/entity/ai/goal/RemoveBlockGoal.java
-@@ -35,7 +_,7 @@
+@@ -35,10 +_,10 @@
  
      @Override
      public boolean canUse() {
@@ -8,12 +8,52 @@
 +        if (!net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.removerMob.level(), this.removerMob)) {
              return false;
          } else if (this.nextStartTick > 0) {
-             --this.nextStartTick;
-@@ -159,6 +_,7 @@
-         if (chunkaccess == null) {
+-            --this.nextStartTick;
++            this.nextStartTick--;
              return false;
-         } else {
-+            if (!chunkaccess.getBlockState(p_25851_).canEntityDestroy(p_25850_, p_25851_, this.removerMob)) return false;
-             return chunkaccess.getBlockState(p_25851_).is(this.blockToRemove)
+         } else if (this.findNearestBlock()) {
+             this.nextStartTick = reducedTickDelay(20);
+@@ -106,7 +_,7 @@
+             if (this.ticksSinceReachedGoal > 60) {
+                 level.removeBlock(blockpos1, false);
+                 if (!level.isClientSide) {
+-                    for(int i = 0; i < 20; ++i) {
++                    for (int i = 0; i < 20; i++) {
+                         double d3 = randomsource.nextGaussian() * 0.02;
+                         double d1 = randomsource.nextGaussian() * 0.02;
+                         double d2 = randomsource.nextGaussian() * 0.02;
+@@ -128,7 +_,7 @@
+                 }
+             }
+ 
+-            ++this.ticksSinceReachedGoal;
++            this.ticksSinceReachedGoal++;
+         }
+     }
+ 
+@@ -141,7 +_,7 @@
+                 p_25853_.below(), p_25853_.west(), p_25853_.east(), p_25853_.north(), p_25853_.south(), p_25853_.below().below()
+             };
+ 
+-            for(BlockPos blockpos : ablockpos) {
++            for (BlockPos blockpos : ablockpos) {
+                 if (p_25854_.getBlockState(blockpos).is(this.blockToRemove)) {
+                     return blockpos;
+                 }
+@@ -156,12 +_,11 @@
+         ChunkAccess chunkaccess = p_25850_.getChunk(
+             SectionPos.blockToSectionCoord(p_25851_.getX()), SectionPos.blockToSectionCoord(p_25851_.getZ()), ChunkStatus.FULL, false
+         );
+-        if (chunkaccess == null) {
+-            return false;
+-        } else {
+-            return chunkaccess.getBlockState(p_25851_).is(this.blockToRemove)
++        return chunkaccess == null
++            ? false
++            : chunkaccess.getBlockState(p_25851_).canEntityDestroy(p_25850_, p_25851_, this.removerMob)
++                && chunkaccess.getBlockState(p_25851_).is(this.blockToRemove)
                  && chunkaccess.getBlockState(p_25851_.above()).isAir()
                  && chunkaccess.getBlockState(p_25851_.above(2)).isAir();
+-        }
+     }
+ }

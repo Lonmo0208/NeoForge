@@ -1,0 +1,26 @@
+--- a/net/minecraft/world/entity/animal/AbstractSchoolingFish.java
++++ b/net/minecraft/world/entity/animal/AbstractSchoolingFish.java
+@@ -56,11 +_,11 @@
+     }
+ 
+     private void addFollower() {
+-        ++this.schoolSize;
++        this.schoolSize++;
+     }
+ 
+     private void removeFollower() {
+-        --this.schoolSize;
++        this.schoolSize--;
+     }
+ 
+     public boolean canBeFollowed() {
+@@ -71,7 +_,8 @@
+     public void tick() {
+         super.tick();
+         if (this.hasFollowers() && this.level().random.nextInt(200) == 1) {
+-            List<? extends AbstractFish> list = this.level().getEntitiesOfClass(this.getClass(), this.getBoundingBox().inflate(8.0, 8.0, 8.0));
++            List<? extends AbstractFish> list = this.level()
++                .getEntitiesOfClass((Class<? extends AbstractFish>)this.getClass(), this.getBoundingBox().inflate(8.0, 8.0, 8.0));
+             if (list.size() <= 1) {
+                 this.schoolSize = 1;
+             }

@@ -1,0 +1,31 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsBackupScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsBackupScreen.java
+@@ -68,7 +_,9 @@
+         );
+         this.downloadButton.active = false;
+         linearlayout.addChild(Button.builder(CommonComponents.GUI_BACK, p_329634_ -> this.onClose()).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_329637_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_329637_);
++        });
+         this.repositionElements();
+         this.fetchRealmsBackups();
+     }
+@@ -114,7 +_,7 @@
+                         if (RealmsBackupScreen.this.backupList != null) {
+                             RealmsBackupScreen.this.backupList.children().clear();
+ 
+-                            for(Backup backup : RealmsBackupScreen.this.backups) {
++                            for (Backup backup : RealmsBackupScreen.this.backups) {
+                                 RealmsBackupScreen.this.backupList.addEntry(backup);
+                             }
+                         }
+@@ -241,7 +_,7 @@
+             if (i != RealmsBackupScreen.this.backups.size() - 1) {
+                 Backup backup = RealmsBackupScreen.this.backups.get(i + 1);
+ 
+-                for(String s : p_279365_.metadata.keySet()) {
++                for (String s : p_279365_.metadata.keySet()) {
+                     if (!s.contains("uploaded") && backup.metadata.containsKey(s)) {
+                         if (!p_279365_.metadata.get(s).equals(backup.metadata.get(s))) {
+                             this.addToChangeList(s);

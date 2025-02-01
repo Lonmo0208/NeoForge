@@ -1,0 +1,871 @@
+--- a/net/minecraft/util/ExtraCodecs.java
++++ b/net/minecraft/util/ExtraCodecs.java
+@@ -1,8 +_,8 @@
+ package net.minecraft.util;
+ 
+-import com.google.common.base.Suppliers;
+ import com.google.common.collect.ImmutableList;
+ import com.google.common.collect.ImmutableMap;
++import com.google.common.collect.ImmutableMap.Builder;
+ import com.google.common.primitives.UnsignedBytes;
+ import com.google.gson.JsonElement;
+ import com.mojang.authlib.GameProfile;
+@@ -15,29 +_,21 @@
+ import com.mojang.serialization.Decoder;
+ import com.mojang.serialization.Dynamic;
+ import com.mojang.serialization.DynamicOps;
++import com.mojang.serialization.JavaOps;
+ import com.mojang.serialization.JsonOps;
+ import com.mojang.serialization.Lifecycle;
+ import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.MapLike;
+ import com.mojang.serialization.RecordBuilder;
+ import com.mojang.serialization.Codec.ResultFunction;
+-import com.mojang.serialization.DataResult.PartialResult;
+-import com.mojang.serialization.MapCodec.MapCodecCodec;
++import com.mojang.serialization.DataResult.Error;
+ import com.mojang.serialization.codecs.BaseMapCodec;
+-import com.mojang.serialization.codecs.PrimitiveCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import it.unimi.dsi.fastutil.floats.FloatArrayList;
+ import it.unimi.dsi.fastutil.floats.FloatList;
+-import it.unimi.dsi.fastutil.ints.Int2IntMap;
+-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+-import it.unimi.dsi.fastutil.ints.IntIntImmutablePair;
+-import it.unimi.dsi.fastutil.ints.IntIntPair;
+-import it.unimi.dsi.fastutil.longs.LongArrayList;
+-import it.unimi.dsi.fastutil.longs.LongList;
+ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+ import java.time.Instant;
+ import java.time.format.DateTimeFormatter;
+@@ -52,17 +_,14 @@
+ import java.util.Objects;
+ import java.util.Optional;
+ import java.util.OptionalLong;
+-import java.util.Map.Entry;
+ import java.util.function.BiFunction;
+ import java.util.function.Function;
+ import java.util.function.IntFunction;
+-import java.util.function.Supplier;
+ import java.util.function.ToIntFunction;
+ import java.util.regex.Pattern;
+ import java.util.regex.PatternSyntaxException;
+ import java.util.stream.LongStream;
+ import java.util.stream.Stream;
+-import java.util.stream.Stream.Builder;
+ import net.minecraft.Util;
+ import net.minecraft.core.HolderSet;
+ import net.minecraft.core.UUIDUtil;
+@@ -80,13 +_,14 @@
+     public static final Codec<Vector3f> VECTOR3F = Codec.FLOAT
+         .listOf()
+         .comapFlatMap(
+-            p_253502_ -> Util.fixedSize(p_253502_, 3).map(p_253489_ -> new Vector3f(p_253489_.get(0), p_253489_.get(1), p_253489_.get(2))),
++            p_337581_ -> Util.fixedSize((List<Float>)p_337581_, 3).map(p_253489_ -> new Vector3f(p_253489_.get(0), p_253489_.get(1), p_253489_.get(2))),
+             p_269787_ -> List.of(p_269787_.x(), p_269787_.y(), p_269787_.z())
+         );
+     public static final Codec<Quaternionf> QUATERNIONF_COMPONENTS = Codec.FLOAT
+         .listOf()
+         .comapFlatMap(
+-            p_269773_ -> Util.fixedSize(p_269773_, 4).map(p_269785_ -> new Quaternionf(p_269785_.get(0), p_269785_.get(1), p_269785_.get(2), p_269785_.get(3))),
++            p_337575_ -> Util.fixedSize((List<Float>)p_337575_, 4)
++                    .map(p_269785_ -> new Quaternionf(p_269785_.get(0), p_269785_.get(1), p_269785_.get(2), p_269785_.get(3))),
+             p_269780_ -> List.of(p_269780_.x, p_269780_.y, p_269780_.z, p_269780_.w)
+         );
+     public static final Codec<AxisAngle4f> AXISANGLE4F = RecordCodecBuilder.create(
+@@ -96,11 +_,11 @@
+                 )
+                 .apply(p_269774_, AxisAngle4f::new)
+     );
+-    public static final Codec<Quaternionf> QUATERNIONF = withAlternative(QUATERNIONF_COMPONENTS, AXISANGLE4F.xmap(Quaternionf::new, AxisAngle4f::new));
+-    public static Codec<Matrix4f> MATRIX4F = Codec.FLOAT.listOf().comapFlatMap(p_269788_ -> Util.fixedSize(p_269788_, 16).map(p_269777_ -> {
++    public static final Codec<Quaternionf> QUATERNIONF = Codec.withAlternative(QUATERNIONF_COMPONENTS, AXISANGLE4F.xmap(Quaternionf::new, AxisAngle4f::new));
++    public static Codec<Matrix4f> MATRIX4F = Codec.FLOAT.listOf().comapFlatMap(p_337582_ -> Util.fixedSize((List<Float>)p_337582_, 16).map(p_269777_ -> {
+             Matrix4f matrix4f = new Matrix4f();
+ 
+-            for(int i = 0; i < p_269777_.size(); ++i) {
++            for (int i = 0; i < p_269777_.size(); i++) {
+                 matrix4f.setRowColumn(i >> 2, i & 3, p_269777_.get(i));
+             }
+ 
+@@ -108,7 +_,7 @@
+         }), p_269775_ -> {
+         FloatList floatlist = new FloatArrayList(16);
+ 
+-        for(int i = 0; i < 16; ++i) {
++        for (int i = 0; i < 16; i++) {
+             floatlist.add(p_269775_.getRowColumn(i >> 2, i & 3));
+         }
+ 
+@@ -121,10 +_,10 @@
+                     ? DataResult.error(() -> "Unsigned byte was too large: " + p_324632_ + " > 255")
+                     : DataResult.success(p_324632_.byteValue())
+         );
+-    public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, p_274847_ -> "Value must be non-negative: " + p_274847_);
+-    public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, p_324635_ -> "Value must be positive: " + p_324635_);
++    public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, p_275703_ -> "Value must be non-negative: " + p_275703_);
++    public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, p_274847_ -> "Value must be positive: " + p_274847_);
+     public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(
+-        0.0F, Float.MAX_VALUE, p_324636_ -> "Value must be positive: " + p_324636_
++        0.0F, Float.MAX_VALUE, p_339597_ -> "Value must be positive: " + p_339597_
+     );
+     public static final Codec<Pattern> PATTERN = Codec.STRING.comapFlatMap(p_274857_ -> {
+         try {
+@@ -145,9 +_,9 @@
+         .comapFlatMap(p_301741_ -> DataResult.success(StringEscapeUtils.unescapeJava(p_301741_)), StringEscapeUtils::escapeJava);
+     public static final Codec<ExtraCodecs.TagOrElementLocation> TAG_OR_ELEMENT_ID = Codec.STRING
+         .comapFlatMap(
+-            p_216169_ -> p_216169_.startsWith("#")
+-                    ? ResourceLocation.read(p_216169_.substring(1)).map(p_216182_ -> new ExtraCodecs.TagOrElementLocation(p_216182_, true))
+-                    : ResourceLocation.read(p_216169_).map(p_216165_ -> new ExtraCodecs.TagOrElementLocation(p_216165_, false)),
++            p_337578_ -> p_337578_.startsWith("#")
++                    ? ResourceLocation.read(p_337578_.substring(1)).map(p_216182_ -> new ExtraCodecs.TagOrElementLocation(p_216182_, true))
++                    : ResourceLocation.read(p_337578_).map(p_216165_ -> new ExtraCodecs.TagOrElementLocation(p_216165_, false)),
+             ExtraCodecs.TagOrElementLocation::decoratedId
+         );
+     public static final Function<Optional<Long>, OptionalLong> toOptionalLong = p_216176_ -> p_216176_.map(OptionalLong::of).orElseGet(OptionalLong::empty);
+@@ -156,49 +_,34 @@
+             : Optional.empty();
+     public static final Codec<BitSet> BIT_SET = Codec.LONG_STREAM
+         .xmap(p_253514_ -> BitSet.valueOf(p_253514_.toArray()), p_253493_ -> Arrays.stream(p_253493_.toLongArray()));
+-    public static final PrimitiveCodec<Character> CHAR = new PrimitiveCodec<Character>() {
+-        @Override
+-        public <T> DataResult<Character> read(DynamicOps<T> p_340564_, T p_342137_) {
+-            return p_340564_.getStringValue(p_342137_).map(p_339867_ -> p_339867_.charAt(0));
+-        }
+-
+-        public <T> T write(DynamicOps<T> p_341601_, Character p_340896_) {
+-            return p_341601_.createString(String.valueOf(p_340896_));
+-        }
+-
+-        @Override
+-        public String toString() {
+-            return "Short";
+-        }
+-    };
+     private static final Codec<Property> PROPERTY = RecordCodecBuilder.create(
+-        p_253491_ -> p_253491_.group(
++        p_337580_ -> p_337580_.group(
+                     Codec.STRING.fieldOf("name").forGetter(Property::name),
+                     Codec.STRING.fieldOf("value").forGetter(Property::value),
+-                    Codec.STRING.optionalFieldOf("signature").forGetter(p_293823_ -> Optional.ofNullable(p_293823_.signature()))
++                    Codec.STRING.lenientOptionalFieldOf("signature").forGetter(p_293823_ -> Optional.ofNullable(p_293823_.signature()))
+                 )
+-                .apply(p_253491_, (p_253494_, p_253495_, p_253496_) -> new Property(p_253494_, p_253495_, p_253496_.orElse(null)))
++                .apply(p_337580_, (p_253494_, p_253495_, p_253496_) -> new Property(p_253494_, p_253495_, p_253496_.orElse(null)))
+     );
+     public static final Codec<PropertyMap> PROPERTY_MAP = Codec.either(Codec.unboundedMap(Codec.STRING, Codec.STRING.listOf()), PROPERTY.listOf())
+         .xmap(p_253515_ -> {
+             PropertyMap propertymap = new PropertyMap();
+             p_253515_.ifLeft(p_253506_ -> p_253506_.forEach((p_253500_, p_253501_) -> {
+-                    for(String s : p_253501_) {
++                    for (String s : p_253501_) {
+                         propertymap.put(p_253500_, new Property(p_253500_, s));
+                     }
+                 })).ifRight(p_293821_ -> {
+-                for(Property property : p_293821_) {
++                for (Property property : p_293821_) {
+                     propertymap.put(property.name(), property);
+                 }
+             });
+             return propertymap;
+         }, p_253504_ -> Either.right(p_253504_.values().stream().toList()));
+-    public static final Codec<String> PLAYER_NAME = validate(
+-        sizeLimitedString(0, 16),
+-        p_329972_ -> StringUtil.isValidPlayerName(p_329972_)
+-                ? DataResult.success(p_329972_)
+-                : DataResult.error(() -> "Player name contained disallowed characters: '" + p_329972_ + "'")
+-    );
++    public static final Codec<String> PLAYER_NAME = Codec.string(0, 16)
++        .validate(
++            p_329972_ -> StringUtil.isValidPlayerName(p_329972_)
++                    ? DataResult.success(p_329972_)
++                    : DataResult.error(() -> "Player name contained disallowed characters: '" + p_329972_ + "'")
++        );
+     private static final MapCodec<GameProfile> GAME_PROFILE_WITHOUT_PROPERTIES = RecordCodecBuilder.mapCodec(
+         p_329970_ -> p_329970_.group(
+                     UUIDUtil.AUTHLIB_CODEC.fieldOf("id").forGetter(GameProfile::getId), PLAYER_NAME.fieldOf("name").forGetter(GameProfile::getName)
+@@ -206,59 +_,54 @@
+                 .apply(p_329970_, GameProfile::new)
+     );
+     public static final Codec<GameProfile> GAME_PROFILE = RecordCodecBuilder.create(
+-        p_293825_ -> p_293825_.group(
++        p_337579_ -> p_337579_.group(
+                     GAME_PROFILE_WITHOUT_PROPERTIES.forGetter(Function.identity()),
+-                    PROPERTY_MAP.optionalFieldOf("properties", new PropertyMap()).forGetter(GameProfile::getProperties)
++                    PROPERTY_MAP.lenientOptionalFieldOf("properties", new PropertyMap()).forGetter(GameProfile::getProperties)
+                 )
+-                .apply(p_293825_, (p_253518_, p_253519_) -> {
++                .apply(p_337579_, (p_253518_, p_253519_) -> {
+                     p_253519_.forEach((p_253511_, p_253512_) -> p_253518_.getProperties().put(p_253511_, p_253512_));
+                     return p_253518_;
+                 })
+     );
+-    public static final Codec<String> NON_EMPTY_STRING = validate(
+-        Codec.STRING, p_274858_ -> p_274858_.isEmpty() ? DataResult.error(() -> "Expected non-empty string") : DataResult.success(p_274858_)
+-    );
++    public static final Codec<String> NON_EMPTY_STRING = Codec.STRING
++        .validate(p_274858_ -> p_274858_.isEmpty() ? DataResult.error(() -> "Expected non-empty string") : DataResult.success(p_274858_));
+     public static final Codec<Integer> CODEPOINT = Codec.STRING.comapFlatMap(p_284688_ -> {
+         int[] aint = p_284688_.codePoints().toArray();
+         return aint.length != 1 ? DataResult.error(() -> "Expected one codepoint, got: " + p_284688_) : DataResult.success(aint[0]);
+     }, Character::toString);
+-    public static Codec<String> RESOURCE_PATH_CODEC = validate(
+-        Codec.STRING,
+-        p_293822_ -> !ResourceLocation.isValidPath(p_293822_)
+-                ? DataResult.error(() -> "Invalid string to use as a resource path element: " + p_293822_)
+-                : DataResult.success(p_293822_)
+-    );
++    public static Codec<String> RESOURCE_PATH_CODEC = Codec.STRING
++        .validate(
++            p_293822_ -> !ResourceLocation.isValidPath(p_293822_)
++                    ? DataResult.error(() -> "Invalid string to use as a resource path element: " + p_293822_)
++                    : DataResult.success(p_293822_)
++        );
+ 
+     public static <T> Codec<T> converter(DynamicOps<T> p_304929_) {
+-        return Codec.PASSTHROUGH.xmap(p_304323_ -> p_304323_.convert(p_304929_).getValue(), p_304327_ -> new Dynamic<>(p_304929_, p_304327_));
+-    }
+-
+-    public static <F, S> Codec<Either<F, S>> xor(Codec<F> p_144640_, Codec<S> p_144641_) {
+-        return new ExtraCodecs.XorCodec<>(p_144640_, p_144641_);
++        return Codec.PASSTHROUGH.xmap(p_304323_ -> p_304323_.convert(p_304929_).getValue(), p_304327_ -> new Dynamic<>(p_304929_, (T)p_304327_));
+     }
+ 
+     public static <P, I> Codec<I> intervalCodec(
+         Codec<P> p_184362_, String p_184363_, String p_184364_, BiFunction<P, P, DataResult<I>> p_184365_, Function<I, P> p_184366_, Function<I, P> p_184367_
+     ) {
+-        Codec<I> codec = Codec.list(p_184362_).comapFlatMap(p_184398_ -> Util.fixedSize(p_184398_, 2).flatMap(p_184445_ -> {
++        Codec<I> codec = Codec.list(p_184362_).comapFlatMap(p_337577_ -> Util.fixedSize((List<P>)p_337577_, 2).flatMap(p_184445_ -> {
+                 P p = p_184445_.get(0);
+                 P p1 = p_184445_.get(1);
+                 return p_184365_.apply(p, p1);
+-            }), p_184459_ -> ImmutableList.of(p_184366_.apply(p_184459_), p_184367_.apply(p_184459_)));
++            }), p_184459_ -> ImmutableList.of(p_184366_.apply((I)p_184459_), p_184367_.apply((I)p_184459_)));
+         Codec<I> codec1 = RecordCodecBuilder.<Pair<P, P>>create(
+                 p_184360_ -> p_184360_.group(p_184362_.fieldOf(p_184363_).forGetter(Pair::getFirst), p_184362_.fieldOf(p_184364_).forGetter(Pair::getSecond))
+                         .apply(p_184360_, Pair::of)
+             )
+             .comapFlatMap(
+                 p_184392_ -> p_184365_.apply((P)p_184392_.getFirst(), (P)p_184392_.getSecond()),
+-                p_184449_ -> Pair.of(p_184366_.apply(p_184449_), p_184367_.apply(p_184449_))
++                p_184449_ -> Pair.of(p_184366_.apply((I)p_184449_), p_184367_.apply((I)p_184449_))
+             );
+-        Codec<I> codec2 = withAlternative(codec, codec1);
++        Codec<I> codec2 = Codec.withAlternative(codec, codec1);
+         return Codec.either(p_184362_, codec2)
+-            .comapFlatMap(p_184389_ -> p_184389_.map(p_184395_ -> p_184365_.apply(p_184395_, p_184395_), DataResult::success), p_184411_ -> {
+-                P p = p_184366_.apply(p_184411_);
+-                P p1 = p_184367_.apply(p_184411_);
+-                return Objects.equals(p, p1) ? Either.left(p) : Either.right(p_184411_);
++            .comapFlatMap(p_184389_ -> p_184389_.map(p_184395_ -> p_184365_.apply((P)p_184395_, (P)p_184395_), DataResult::success), p_184411_ -> {
++                P p = p_184366_.apply((I)p_184411_);
++                P p1 = p_184367_.apply((I)p_184411_);
++                return Objects.equals(p, p1) ? Either.left(p) : Either.right((I)p_184411_);
+             });
+     }
+ 
+@@ -270,7 +_,7 @@
+                 Optional<Pair<A, T>> optional = p_184468_.resultOrPartial(mutableobject::setValue);
+                 return optional.isPresent()
+                     ? p_184468_
+-                    : DataResult.error(() -> "(" + (String)mutableobject.getValue() + " -> using default)", Pair.of(p_184382_, p_184467_));
++                    : DataResult.error(() -> "(" + mutableobject.getValue() + " -> using default)", Pair.of(p_184382_, p_184467_));
+             }
+ 
+             @Override
+@@ -292,24 +_,12 @@
+                         .map(DataResult::success)
+                         .orElseGet(() -> DataResult.error(() -> "Unknown element id: " + p_184414_)),
+                 p_274850_ -> {
+-                    int i = p_184422_.applyAsInt(p_274850_);
++                    int i = p_184422_.applyAsInt((E)p_274850_);
+                     return i == p_184424_ ? DataResult.error(() -> "Element with unknown id: " + p_274850_) : DataResult.success(i);
+                 }
+             );
+     }
+ 
+-    public static <E> Codec<E> stringResolverCodec(Function<E, String> p_184406_, Function<String, E> p_184407_) {
+-        return Codec.STRING
+-            .flatXmap(
+-                p_184404_ -> Optional.ofNullable(p_184407_.apply(p_184404_))
+-                        .map(DataResult::success)
+-                        .orElseGet(() -> DataResult.error(() -> "Unknown element name:" + p_184404_)),
+-                p_184401_ -> Optional.ofNullable(p_184406_.apply(p_184401_))
+-                        .map(DataResult::success)
+-                        .orElseGet(() -> DataResult.error(() -> "Element with unknown name: " + p_184401_))
+-            );
+-    }
+-
+     public static <E> Codec<E> orCompressed(final Codec<E> p_184426_, final Codec<E> p_184427_) {
+         return new Codec<E>() {
+             @Override
+@@ -357,7 +_,7 @@
+         return p_184369_.mapResult(new ResultFunction<E>() {
+             @Override
+             public <T> DataResult<Pair<E, T>> apply(DynamicOps<T> p_304965_, T p_304933_, DataResult<Pair<E, T>> p_304851_) {
+-                return p_304851_.result().map(p_304330_ -> p_304851_.setLifecycle(p_184370_.apply(p_304330_.getFirst()))).orElse(p_304851_);
++                return p_304851_.result().map(p_337585_ -> p_304851_.setLifecycle(p_184370_.apply(p_337585_.getFirst()))).orElse(p_304851_);
+             }
+ 
+             @Override
+@@ -376,29 +_,17 @@
+         return overrideLifecycle(p_326460_, p_326480_, p_326480_);
+     }
+ 
+-    public static <F, S> ExtraCodecs.EitherCodec<F, S> either(Codec<F> p_301063_, Codec<S> p_301034_) {
+-        return new ExtraCodecs.EitherCodec<>(p_301063_, p_301034_);
+-    }
+-
+     public static <K, V> ExtraCodecs.StrictUnboundedMapCodec<K, V> strictUnboundedMap(Codec<K> p_301201_, Codec<V> p_300984_) {
+         return new ExtraCodecs.StrictUnboundedMapCodec<>(p_301201_, p_300984_);
+     }
+ 
+-    public static <T> Codec<T> validate(Codec<T> p_265690_, Function<T, DataResult<T>> p_265223_) {
+-        return p_265690_ instanceof MapCodecCodec mapcodeccodec ? validate(mapcodeccodec.codec(), p_265223_).codec() : p_265690_.flatXmap(p_265223_, p_265223_);
+-    }
+-
+-    public static <T> MapCodec<T> validate(MapCodec<T> p_286613_, Function<T, DataResult<T>> p_286875_) {
+-        return p_286613_.flatXmap(p_286875_, p_286875_);
+-    }
+-
+     private static Codec<Integer> intRangeWithMessage(int p_144634_, int p_144635_, Function<Integer, String> p_144636_) {
+-        return validate(
+-            Codec.INT,
+-            p_274889_ -> p_274889_.compareTo(p_144634_) >= 0 && p_274889_.compareTo(p_144635_) <= 0
+-                    ? DataResult.success(p_274889_)
+-                    : DataResult.error(() -> p_144636_.apply(p_274889_))
+-        );
++        return Codec.INT
++            .validate(
++                p_274889_ -> p_274889_.compareTo(p_144634_) >= 0 && p_274889_.compareTo(p_144635_) <= 0
++                        ? DataResult.success(p_274889_)
++                        : DataResult.error(() -> p_144636_.apply(p_274889_))
++            );
+     }
+ 
+     public static Codec<Integer> intRange(int p_270883_, int p_270323_) {
+@@ -406,48 +_,26 @@
+     }
+ 
+     private static Codec<Float> floatRangeMinExclusiveWithMessage(float p_184351_, float p_184352_, Function<Float, String> p_184353_) {
+-        return validate(
+-            Codec.FLOAT,
+-            p_274865_ -> p_274865_.compareTo(p_184351_) > 0 && p_274865_.compareTo(p_184352_) <= 0
+-                    ? DataResult.success(p_274865_)
+-                    : DataResult.error(() -> p_184353_.apply(p_274865_))
+-        );
++        return Codec.FLOAT
++            .validate(
++                p_274865_ -> p_274865_.compareTo(p_184351_) > 0 && p_274865_.compareTo(p_184352_) <= 0
++                        ? DataResult.success(p_274865_)
++                        : DataResult.error(() -> p_184353_.apply(p_274865_))
++            );
+     }
+ 
+     public static <T> Codec<List<T>> nonEmptyList(Codec<List<T>> p_144638_) {
+-        return validate(p_144638_, p_274853_ -> p_274853_.isEmpty() ? DataResult.error(() -> "List must have contents") : DataResult.success(p_274853_));
++        return p_144638_.validate(p_274853_ -> p_274853_.isEmpty() ? DataResult.error(() -> "List must have contents") : DataResult.success(p_274853_));
+     }
+ 
+     public static <T> Codec<HolderSet<T>> nonEmptyHolderSet(Codec<HolderSet<T>> p_203983_) {
+-        return validate(
+-            p_203983_,
++        return p_203983_.validate(
+             p_274860_ -> p_274860_.unwrap().right().filter(List::isEmpty).isPresent()
+                     ? DataResult.error(() -> "List must have contents")
+                     : DataResult.success(p_274860_)
+         );
+     }
+ 
+-    public static <T> Codec<T> recursive(String p_312231_, Function<Codec<T>, Codec<T>> p_298854_) {
+-        return new ExtraCodecs.RecursiveCodec<>(p_312231_, p_298854_);
+-    }
+-
+-    public static <T> MapCodec<T> recursiveMap(String p_324638_, Function<Codec<T>, MapCodec<T>> p_323765_) {
+-        return new ExtraCodecs.RecursiveMapCodec<>(p_324638_, p_323765_);
+-    }
+-
+-    public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> p_184416_) {
+-        return new ExtraCodecs.RecursiveCodec<>(p_184416_.toString(), p_297963_ -> p_184416_.get());
+-    }
+-
+-    public static <A> MapCodec<Optional<A>> strictOptionalField(Codec<A> p_299084_, String p_298710_) {
+-        return new ExtraCodecs.StrictOptionalFieldCodec<>(p_298710_, p_299084_);
+-    }
+-
+-    public static <A> MapCodec<A> strictOptionalField(Codec<A> p_298828_, String p_298751_, A p_298218_) {
+-        return strictOptionalField(p_298828_, p_298751_)
+-            .xmap(p_297957_ -> p_297957_.orElse(p_298218_), p_297959_ -> Objects.equals(p_297959_, p_298218_) ? Optional.empty() : Optional.of(p_297959_));
+-    }
+-
+     public static <E> MapCodec<E> retrieveContext(final Function<DynamicOps<?>, DataResult<E>> p_203977_) {
+         class ContextRetrievalCodec extends MapCodec<E> {
+             @Override
+@@ -480,7 +_,7 @@
+             if (iterator.hasNext()) {
+                 T t = p_203985_.apply(iterator.next());
+ 
+-                while(iterator.hasNext()) {
++                while (iterator.hasNext()) {
+                     E e = iterator.next();
+                     T t1 = p_203985_.apply(e);
+                     if (t1 != t) {
+@@ -520,73 +_,18 @@
+         return p_216167_.xmap(toOptionalLong, fromOptionalLong);
+     }
+ 
+-    public static Codec<String> sizeLimitedString(int p_265773_, int p_265217_) {
+-        return validate(
+-            Codec.STRING,
+-            p_274879_ -> {
+-                int i = p_274879_.length();
+-                if (i < p_265773_) {
+-                    return DataResult.error(() -> "String \"" + p_274879_ + "\" is too short: " + i + ", expected range [" + p_265773_ + "-" + p_265217_ + "]");
+-                } else {
+-                    return i > p_265217_
+-                        ? DataResult.error(() -> "String \"" + p_274879_ + "\" is too long: " + i + ", expected range [" + p_265773_ + "-" + p_265217_ + "]")
+-                        : DataResult.success(p_274879_);
+-                }
+-            }
+-        );
+-    }
+-
+-    public static <T> Codec<List<T>> sizeLimitedList(Codec<List<T>> p_331715_, int p_331094_) {
+-        return validate(
+-            p_331715_,
+-            p_332578_ -> p_332578_.size() > p_331094_
+-                    ? DataResult.<List<T>>error(() -> "List is too long: " + p_332578_.size() + ", expected range [0-" + p_331094_ + "]")
+-                        .setPartial(() -> List.copyOf(p_332578_.subList(0, p_331094_)))
+-                    : DataResult.success(p_332578_)
+-        );
+-    }
+-
+     public static <K, V> Codec<Map<K, V>> sizeLimitedMap(Codec<Map<K, V>> p_330976_, int p_331151_) {
+-        return validate(
+-            p_330976_,
++        return p_330976_.validate(
+             p_329967_ -> p_329967_.size() > p_331151_
+                     ? DataResult.error(() -> "Map is too long: " + p_329967_.size() + ", expected range [0-" + p_331151_ + "]")
+                     : DataResult.success(p_329967_)
+         );
+     }
+ 
+-    public static <T> Codec<T> withAlternative(Codec<T> p_294946_, Codec<? extends T> p_294470_) {
+-        return Codec.either(p_294946_, p_294470_).xmap(p_184355_ -> p_184355_.map(p_184461_ -> p_184461_, p_184455_ -> p_184455_), Either::left);
+-    }
+-
+-    public static <T, U> Codec<T> withAlternative(Codec<T> p_295250_, Codec<U> p_295200_, Function<U, T> p_296283_) {
+-        return Codec.either(p_295250_, p_295200_).xmap(p_293819_ -> p_293819_.map(p_296016_ -> p_296016_, p_296283_), Either::left);
+-    }
+-
+     public static <T> Codec<Object2BooleanMap<T>> object2BooleanMap(Codec<T> p_298255_) {
+         return Codec.unboundedMap(p_298255_, Codec.BOOL).xmap(Object2BooleanOpenHashMap::new, Object2ObjectOpenHashMap::new);
+     }
+ 
+-    public static Codec<Int2IntMap> int2IntMap() {
+-        return Codec.LONG_STREAM.xmap(p_339859_ -> {
+-            Int2IntMap int2intmap = new Int2IntOpenHashMap();
+-            p_339859_.forEach(p_339862_ -> int2intmap.put((int)p_339862_, (int)(p_339862_ >> 32)));
+-            return int2intmap;
+-        }, p_339863_ -> {
+-            LongList longlist = new LongArrayList();
+-            p_339863_.forEach((p_339865_, p_339866_) -> longlist.add((long)p_339865_.intValue() | p_339866_.longValue() << 32));
+-            return LongStream.of(longlist.toArray(new long[0]));
+-        });
+-    }
+-
+-    public static Codec<IntIntPair> intIntPair() {
+-        return Codec.LONG
+-            .xmap(
+-                p_339860_ -> new IntIntImmutablePair(p_339860_.intValue(), (int)(p_339860_ >> 32)),
+-                p_339858_ -> (long)p_339858_.firstInt() | (long)p_339858_.secondInt() << 32
+-            );
+-    }
+-
+     @Deprecated
+     public static <K, V> MapCodec<V> dispatchOptionalValue(
+         final String p_312812_,
+@@ -597,98 +_,35 @@
+     ) {
+         return new MapCodec<V>() {
+             @Override
+-            public <T> Stream<T> keys(DynamicOps<T> p_342570_) {
+-                return Stream.of(p_342570_.createString(p_312812_), p_342570_.createString(p_312135_));
++            public <T> Stream<T> keys(DynamicOps<T> p_312501_) {
++                return Stream.of(p_312501_.createString(p_312812_), p_312501_.createString(p_312135_));
+             }
+ 
+             @Override
+-            public <T> DataResult<V> decode(DynamicOps<T> p_330879_, MapLike<T> p_340806_) {
+-                T t = p_340806_.get(p_312812_);
++            public <T> DataResult<V> decode(DynamicOps<T> p_312013_, MapLike<T> p_312527_) {
++                T t = p_312527_.get(p_312812_);
+                 return t == null
+-                    ? DataResult.error(() -> "Missing \"" + p_312812_ + "\" in: " + p_340806_)
+-                    : p_312848_.decode(p_330879_, t).flatMap(p_339872_ -> {
+-                        T t1 = Objects.requireNonNullElseGet(p_340806_.get(p_312135_), p_330879_::emptyMap);
+-                        return p_312836_.apply(p_339872_.getFirst()).decode(p_330879_, t1).map(Pair::getFirst);
++                    ? DataResult.error(() -> "Missing \"" + p_312812_ + "\" in: " + p_312527_)
++                    : p_312848_.decode(p_312013_, t).flatMap(p_337590_ -> {
++                        T t1 = Objects.requireNonNullElseGet(p_312527_.get(p_312135_), p_312013_::emptyMap);
++                        return p_312836_.apply(p_337590_.getFirst()).decode(p_312013_, t1).map(Pair::getFirst);
+                     });
+             }
+ 
+             @Override
+-            public <T> RecordBuilder<T> encode(V p_330872_, DynamicOps<T> p_331887_, RecordBuilder<T> p_342443_) {
+-                K k = p_312622_.apply(p_330872_);
+-                p_342443_.add(p_312812_, p_312848_.encodeStart(p_331887_, k));
+-                DataResult<T> dataresult = this.encode(p_312836_.apply(k), p_330872_, p_331887_);
+-                if (dataresult.result().isEmpty() || !Objects.equals(dataresult.result().get(), p_331887_.emptyMap())) {
+-                    p_342443_.add(p_312135_, dataresult);
+-                }
+-
+-                return p_342443_;
+-            }
+-
+-            private <T, V2 extends V> DataResult<T> encode(Codec<? extends V> p_331770_, V p_331859_, DynamicOps<T> p_331717_) {
+-                return ((Codec<V2>)p_331770_).encodeStart(p_331717_, (V2)p_331859_);
+-            }
+-        };
+-    }
+-
+-    public static <K, V> Codec<Map<K, V>> unboundedDispatchMap(final Codec<K> p_331502_, final Function<K, Codec<? extends V>> p_331142_) {
+-        return new Codec<Map<K, V>>() {
+-            public <T> DataResult<T> encode(Map<K, V> p_340403_, DynamicOps<T> p_331714_, T p_330345_) {
+-                RecordBuilder<T> recordbuilder = p_331714_.mapBuilder();
+-
+-                for(Entry<K, V> entry : p_340403_.entrySet()) {
+-                    recordbuilder.add(
+-                        p_331502_.encodeStart(p_331714_, entry.getKey()), this.encodeValue(p_331142_.apply(entry.getKey()), entry.getValue(), p_331714_)
+-                    );
+-                }
+-
+-                return recordbuilder.build(p_330345_);
+-            }
+-
+-            private <T, V2 extends V> DataResult<T> encodeValue(Codec<V2> p_342234_, V p_341931_, DynamicOps<T> p_341769_) {
+-                return p_342234_.encodeStart(p_341769_, (V2)p_341931_);
+-            }
+-
+-            @Override
+-            public <T> DataResult<Pair<Map<K, V>, T>> decode(DynamicOps<T> p_330915_, T p_331178_) {
+-                return p_330915_.getMap(p_331178_)
+-                    .flatMap(
+-                        p_339900_ -> {
+-                            Map<K, V> map = new Object2ObjectArrayMap<>();
+-                            Builder<Pair<T, T>> builder = Stream.builder();
+-                            DataResult<com.mojang.datafixers.util.Unit> dataresult = p_339900_.entries()
+-                                .reduce(
+-                                    DataResult.success(com.mojang.datafixers.util.Unit.INSTANCE, Lifecycle.stable()),
+-                                    (p_339885_, p_339886_) -> {
+-                                        DataResult<K> dataresult1 = p_331502_.parse(p_330915_, p_339886_.getFirst());
+-                                        DataResult<V> dataresult2 = dataresult1.map(p_331142_)
+-                                            .flatMap(p_339878_ -> p_339878_.parse(p_330915_, (T)p_339886_.getSecond()).map(Function.identity()));
+-                                        DataResult<Pair<K, V>> dataresult3 = dataresult1.apply2stable(Pair::of, dataresult2);
+-                                        Optional<Pair<K, V>> optional = dataresult3.resultOrPartial(p_339879_ -> {
+-                                        });
+-                                        if (optional.isPresent()) {
+-                                            V v = map.putIfAbsent(optional.get().getFirst(), optional.get().getSecond());
+-                                            if (v != null) {
+-                                                builder.add(p_339886_);
+-                                                return p_339885_.apply2stable(
+-                                                    (p_339887_, p_339888_) -> p_339887_,
+-                                                    DataResult.error(() -> "Duplicate entry for key: '" + optional.get().getFirst() + "'")
+-                                                );
+-                                            }
+-                                        } else {
+-                                            builder.add(p_339886_);
+-                                        }
+-                
+-                                        return p_339885_.apply2stable((p_339901_, p_339902_) -> p_339901_, dataresult3);
+-                                    },
+-                                    (p_339894_, p_339895_) -> p_339894_.apply2stable((p_339889_, p_339890_) -> p_339889_, p_339895_)
+-                                );
+-                            Map<K, V> map1 = Map.copyOf(map);
+-                            T t = p_330915_.createMap(builder.build());
+-                            return dataresult.<Pair<Map<K, V>, T>>map(p_339875_ -> Pair.of(map1, p_331178_))
+-                                .setPartial(Pair.of(map1, p_331178_))
+-                                .mapError(p_339892_ -> p_339892_ + " missed input: " + t);
+-                        }
+-                    );
++            public <T> RecordBuilder<T> encode(V p_312741_, DynamicOps<T> p_312649_, RecordBuilder<T> p_312297_) {
++                K k = (K)p_312622_.apply(p_312741_);
++                p_312297_.add(p_312812_, p_312848_.encodeStart(p_312649_, k));
++                DataResult<T> dataresult = this.encode((Codec<? extends V>)p_312836_.apply(k), p_312741_, p_312649_);
++                if (dataresult.result().isEmpty() || !Objects.equals(dataresult.result().get(), p_312649_.emptyMap())) {
++                    p_312297_.add(p_312135_, dataresult);
++                }
++
++                return p_312297_;
++            }
++
++            private <T, V2 extends V> DataResult<T> encode(Codec<V2> p_312014_, V p_312190_, DynamicOps<T> p_312075_) {
++                return p_312014_.encodeStart(p_312075_, (V2)p_312190_);
+             }
+         };
+     }
+@@ -696,195 +_,36 @@
+     public static <A> Codec<Optional<A>> optionalEmptyMap(final Codec<A> p_330630_) {
+         return new Codec<Optional<A>>() {
+             @Override
+-            public <T> DataResult<Pair<Optional<A>, T>> decode(DynamicOps<T> p_341280_, T p_341975_) {
+-                return isEmptyMap(p_341280_, p_341975_)
+-                    ? DataResult.success(Pair.of(Optional.empty(), p_341975_))
+-                    : p_330630_.decode(p_341280_, p_341975_).map(p_341078_ -> p_341078_.mapFirst(Optional::of));
++            public <T> DataResult<Pair<Optional<A>, T>> decode(DynamicOps<T> p_330879_, T p_330924_) {
++                return isEmptyMap(p_330879_, p_330924_)
++                    ? DataResult.success(Pair.of(Optional.empty(), p_330924_))
++                    : p_330630_.decode(p_330879_, p_330924_).map(p_337591_ -> p_337591_.mapFirst(Optional::of));
+             }
+ 
+-            private static <T> boolean isEmptyMap(DynamicOps<T> p_342060_, T p_342336_) {
+-                Optional<MapLike<T>> optional = p_342060_.getMap(p_342336_).result();
++            private static <T> boolean isEmptyMap(DynamicOps<T> p_338754_, T p_338581_) {
++                Optional<MapLike<T>> optional = p_338754_.getMap(p_338581_).result();
+                 return optional.isPresent() && optional.get().entries().findAny().isEmpty();
+             }
+ 
+-            public <T> DataResult<T> encode(Optional<A> p_340620_, DynamicOps<T> p_341431_, T p_341749_) {
+-                return p_340620_.isEmpty() ? DataResult.success(p_341431_.emptyMap()) : p_330630_.encode(p_340620_.get(), p_341431_, p_341749_);
++            public <T> DataResult<T> encode(Optional<A> p_338508_, DynamicOps<T> p_331521_, T p_331876_) {
++                return p_338508_.isEmpty() ? DataResult.success(p_331521_.emptyMap()) : p_330630_.encode(p_338508_.get(), p_331521_, p_331876_);
+             }
+         };
+-    }
+-
+-    public static final class EitherCodec<F, S> implements Codec<Either<F, S>> {
+-        private final Codec<F> first;
+-        private final Codec<S> second;
+-
+-        public EitherCodec(Codec<F> p_184508_, Codec<S> p_184509_) {
+-            this.first = p_184508_;
+-            this.second = p_184509_;
+-        }
+-
+-        @Override
+-        public <T> DataResult<Pair<Either<F, S>, T>> decode(DynamicOps<T> p_184530_, T p_184531_) {
+-            DataResult<Pair<Either<F, S>, T>> dataresult = this.first.decode(p_184530_, p_184531_).map(p_184524_ -> p_184524_.mapFirst(Either::left));
+-            if (dataresult.error().isEmpty()) {
+-                return dataresult;
+-            } else {
+-                DataResult<Pair<Either<F, S>, T>> dataresult1 = this.second.decode(p_184530_, p_184531_).map(p_184515_ -> p_184515_.mapFirst(Either::right));
+-                return dataresult1.error().isEmpty() ? dataresult1 : dataresult.apply2((p_184517_, p_184518_) -> p_184518_, dataresult1);
+-            }
+-        }
+-
+-        public <T> DataResult<T> encode(Either<F, S> p_184511_, DynamicOps<T> p_184512_, T p_184513_) {
+-            return p_184511_.map(
+-                p_184528_ -> this.first.encode(p_184528_, p_184512_, p_184513_), p_184522_ -> this.second.encode(p_184522_, p_184512_, p_184513_)
+-            );
+-        }
+-
+-        @Override
+-        public boolean equals(Object p_184537_) {
+-            if (this == p_184537_) {
+-                return true;
+-            } else if (p_184537_ != null && this.getClass() == p_184537_.getClass()) {
+-                ExtraCodecs.EitherCodec<?, ?> eithercodec = (ExtraCodecs.EitherCodec)p_184537_;
+-                return Objects.equals(this.first, eithercodec.first) && Objects.equals(this.second, eithercodec.second);
+-            } else {
+-                return false;
+-            }
+-        }
+-
+-        @Override
+-        public int hashCode() {
+-            return Objects.hash(this.first, this.second);
+-        }
+-
+-        @Override
+-        public String toString() {
+-            return "EitherCodec[" + this.first + ", " + this.second + "]";
+-        }
+-    }
+-
+-    static class RecursiveCodec<T> implements Codec<T> {
+-        private final String name;
+-        private final Supplier<Codec<T>> wrapped;
+-
+-        RecursiveCodec(String p_312859_, Function<Codec<T>, Codec<T>> p_298813_) {
+-            this.name = p_312859_;
+-            this.wrapped = Suppliers.memoize(() -> p_298813_.apply(this));
+-        }
+-
+-        @Override
+-        public <S> DataResult<Pair<T, S>> decode(DynamicOps<S> p_298957_, S p_298353_) {
+-            return this.wrapped.get().decode(p_298957_, p_298353_);
+-        }
+-
+-        @Override
+-        public <S> DataResult<S> encode(T p_299151_, DynamicOps<S> p_299238_, S p_298526_) {
+-            return this.wrapped.get().encode(p_299151_, p_299238_, p_298526_);
+-        }
+-
+-        @Override
+-        public String toString() {
+-            return "RecursiveCodec[" + this.name + "]";
+-        }
+-    }
+-
+-    static class RecursiveMapCodec<T> extends MapCodec<T> {
+-        private final String name;
+-        private final Supplier<MapCodec<T>> wrapped;
+-
+-        RecursiveMapCodec(String p_324637_, Function<Codec<T>, MapCodec<T>> p_324452_) {
+-            this.name = p_324637_;
+-            this.wrapped = Suppliers.memoize(() -> p_324452_.apply(this.codec()));
+-        }
+-
+-        @Override
+-        public <S> RecordBuilder<S> encode(T p_324496_, DynamicOps<S> p_323848_, RecordBuilder<S> p_324208_) {
+-            return this.wrapped.get().encode(p_324496_, p_323848_, p_324208_);
+-        }
+-
+-        @Override
+-        public <S> DataResult<T> decode(DynamicOps<S> p_324086_, MapLike<S> p_324387_) {
+-            return this.wrapped.get().decode(p_324086_, p_324387_);
+-        }
+-
+-        @Override
+-        public <S> Stream<S> keys(DynamicOps<S> p_324408_) {
+-            return this.wrapped.get().keys(p_324408_);
+-        }
+-
+-        @Override
+-        public String toString() {
+-            return "RecursiveMapCodec[" + this.name + "]";
+-        }
+-    }
+-
+-    static final class StrictOptionalFieldCodec<A> extends MapCodec<Optional<A>> {
+-        private final String name;
+-        private final Codec<A> elementCodec;
+-
+-        public StrictOptionalFieldCodec(String p_298270_, Codec<A> p_299308_) {
+-            this.name = p_298270_;
+-            this.elementCodec = p_299308_;
+-        }
+-
+-        @Override
+-        public <T> DataResult<Optional<A>> decode(DynamicOps<T> p_298794_, MapLike<T> p_298815_) {
+-            T t = p_298815_.get(this.name);
+-            return t == null ? DataResult.success(Optional.empty()) : this.elementCodec.parse(p_298794_, t).map(Optional::of);
+-        }
+-
+-        public <T> RecordBuilder<T> encode(Optional<A> p_298834_, DynamicOps<T> p_298455_, RecordBuilder<T> p_298535_) {
+-            return p_298834_.isPresent() ? p_298535_.add(this.name, this.elementCodec.encodeStart(p_298455_, p_298834_.get())) : p_298535_;
+-        }
+-
+-        @Override
+-        public <T> Stream<T> keys(DynamicOps<T> p_298727_) {
+-            return Stream.of(p_298727_.createString(this.name));
+-        }
+-
+-        @Override
+-        public boolean equals(Object p_298669_) {
+-            if (this == p_298669_) {
+-                return true;
+-            } else if (!(p_298669_ instanceof ExtraCodecs.StrictOptionalFieldCodec)) {
+-                return false;
+-            } else {
+-                ExtraCodecs.StrictOptionalFieldCodec<?> strictoptionalfieldcodec = (ExtraCodecs.StrictOptionalFieldCodec)p_298669_;
+-                return Objects.equals(this.name, strictoptionalfieldcodec.name) && Objects.equals(this.elementCodec, strictoptionalfieldcodec.elementCodec);
+-            }
+-        }
+-
+-        @Override
+-        public int hashCode() {
+-            return Objects.hash(this.name, this.elementCodec);
+-        }
+-
+-        @Override
+-        public String toString() {
+-            return "StrictOptionalFieldCodec[" + this.name + ": " + this.elementCodec + "]";
+-        }
+     }
+ 
+     public static record StrictUnboundedMapCodec<K, V>(Codec<K> keyCodec, Codec<V> elementCodec) implements Codec<Map<K, V>>, BaseMapCodec<K, V> {
+         @Override
+         public <T> DataResult<Map<K, V>> decode(DynamicOps<T> p_301018_, MapLike<T> p_301263_) {
+-            com.google.common.collect.ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
++            Builder<K, V> builder = ImmutableMap.builder();
+ 
+-            for(Pair<T, T> pair : p_301263_.entries().toList()) {
++            for (Pair<T, T> pair : p_301263_.entries().toList()) {
+                 DataResult<K> dataresult = this.keyCodec().parse(p_301018_, pair.getFirst());
+                 DataResult<V> dataresult1 = this.elementCodec().parse(p_301018_, pair.getSecond());
+                 DataResult<Pair<K, V>> dataresult2 = dataresult.apply2stable(Pair::of, dataresult1);
+-                if (dataresult2.error().isPresent()) {
+-                    return DataResult.error(() -> {
+-                        PartialResult<Pair<K, V>> partialresult = dataresult2.error().get();
+-                        String s;
+-                        if (dataresult.result().isPresent()) {
+-                            s = "Map entry '" + dataresult.result().get() + "' : " + partialresult.message();
+-                        } else {
+-                            s = partialresult.message();
+-                        }
+-
+-                        return s;
+-                    });
++                Optional<Error<Pair<K, V>>> optional = dataresult2.error();
++                if (optional.isPresent()) {
++                    String s = optional.get().message();
++                    return DataResult.error(() -> dataresult.result().isPresent() ? "Map entry '" + dataresult.result().get() + "' : " + s : s);
+                 }
+ 
+                 if (!dataresult2.result().isPresent()) {
+@@ -903,8 +_,8 @@
+         public <T> DataResult<Pair<Map<K, V>, T>> decode(DynamicOps<T> p_301258_, T p_301052_) {
+             return p_301258_.getMap(p_301052_)
+                 .setLifecycle(Lifecycle.stable())
+-                .flatMap(p_301208_ -> this.decode(p_301258_, p_301208_))
+-                .map(p_300941_ -> Pair.of(p_300941_, p_301052_));
++                .flatMap(p_301208_ -> this.decode(p_301258_, (MapLike<T>)p_301208_))
++                .map(p_300941_ -> Pair.of((Map<K, V>)p_300941_, p_301052_));
+         }
+ 
+         public <T> DataResult<T> encode(Map<K, V> p_301101_, DynamicOps<T> p_301252_, T p_301326_) {
+@@ -925,37 +_,6 @@
+ 
+         private String decoratedId() {
+             return this.tag ? "#" + this.id : this.id.toString();
+-        }
+-    }
+-
+-    static record XorCodec<F, S>(Codec<F> first, Codec<S> second) implements Codec<Either<F, S>> {
+-        @Override
+-        public <T> DataResult<Pair<Either<F, S>, T>> decode(DynamicOps<T> p_144679_, T p_144680_) {
+-            DataResult<Pair<Either<F, S>, T>> dataresult = this.first.decode(p_144679_, p_144680_).map(p_144673_ -> p_144673_.mapFirst(Either::left));
+-            DataResult<Pair<Either<F, S>, T>> dataresult1 = this.second.decode(p_144679_, p_144680_).map(p_144667_ -> p_144667_.mapFirst(Either::right));
+-            Optional<Pair<Either<F, S>, T>> optional = dataresult.result();
+-            Optional<Pair<Either<F, S>, T>> optional1 = dataresult1.result();
+-            if (optional.isPresent() && optional1.isPresent()) {
+-                return DataResult.error(
+-                    () -> "Both alternatives read successfully, can not pick the correct one; first: " + optional.get() + " second: " + optional1.get(),
+-                    optional.get()
+-                );
+-            } else if (optional.isPresent()) {
+-                return dataresult;
+-            } else {
+-                return optional1.isPresent() ? dataresult1 : dataresult.apply2((p_300790_, p_300791_) -> p_300791_, dataresult1);
+-            }
+-        }
+-
+-        public <T> DataResult<T> encode(Either<F, S> p_144663_, DynamicOps<T> p_144664_, T p_144665_) {
+-            return p_144663_.map(
+-                p_144677_ -> this.first.encode(p_144677_, p_144664_, p_144665_), p_144671_ -> this.second.encode(p_144671_, p_144664_, p_144665_)
+-            );
+-        }
+-
+-        @Override
+-        public String toString() {
+-            return "XorCodec[" + this.first + ", " + this.second + "]";
+         }
+     }
+ }

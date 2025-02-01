@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/inventory/TransientCraftingContainer.java
++++ b/net/minecraft/world/inventory/TransientCraftingContainer.java
+@@ -31,7 +_,7 @@
+ 
+     @Override
+     public boolean isEmpty() {
+-        for(ItemStack itemstack : this.items) {
++        for (ItemStack itemstack : this.items) {
+             if (!itemstack.isEmpty()) {
+                 return false;
+             }
+@@ -97,7 +_,7 @@
+ 
+     @Override
+     public void fillStackedContents(StackedContents p_287653_) {
+-        for(ItemStack itemstack : this.items) {
++        for (ItemStack itemstack : this.items) {
+             p_287653_.accountSimpleStack(itemstack);
+         }
+     }

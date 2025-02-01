@@ -27,7 +27,8 @@
          boolean flag = false;
          BlockPos.MutableBlockPos blockpos$mutableblockpos = p_52066_.mutable();
  
-         for(Direction direction : Direction.values()) {
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
              BlockState blockstate = p_52065_.getBlockState(blockpos$mutableblockpos);
 -            if (direction != Direction.DOWN || canSolidify(blockstate)) {
 +            if (direction != Direction.DOWN || state.canBeHydrated(p_52065_, p_52066_, blockstate.getFluidState(), blockpos$mutableblockpos)) {

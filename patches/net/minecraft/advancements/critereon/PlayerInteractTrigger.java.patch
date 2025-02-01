@@ -1,0 +1,41 @@
+--- a/net/minecraft/advancements/critereon/PlayerInteractTrigger.java
++++ b/net/minecraft/advancements/critereon/PlayerInteractTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.storage.loot.LootContext;
+@@ -26,12 +_,12 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, Optional<ContextAwarePredicate> entity)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<PlayerInteractTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311434_ -> p_311434_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(PlayerInteractTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(PlayerInteractTrigger.TriggerInstance::item),
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "entity").forGetter(PlayerInteractTrigger.TriggerInstance::entity)
++            p_337387_ -> p_337387_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(PlayerInteractTrigger.TriggerInstance::player),
++                        ItemPredicate.CODEC.optionalFieldOf("item").forGetter(PlayerInteractTrigger.TriggerInstance::item),
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("entity").forGetter(PlayerInteractTrigger.TriggerInstance::entity)
+                     )
+-                    .apply(p_311434_, PlayerInteractTrigger.TriggerInstance::new)
++                    .apply(p_337387_, PlayerInteractTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<PlayerInteractTrigger.TriggerInstance> itemUsedOnEntity(
+@@ -48,11 +_,7 @@
+         }
+ 
+         public boolean matches(ItemStack p_61522_, LootContext p_61523_) {
+-            if (this.item.isPresent() && !this.item.get().matches(p_61522_)) {
+-                return false;
+-            } else {
+-                return this.entity.isEmpty() || this.entity.get().matches(p_61523_);
+-            }
++            return this.item.isPresent() && !this.item.get().matches(p_61522_) ? false : this.entity.isEmpty() || this.entity.get().matches(p_61523_);
+         }
+ 
+         @Override

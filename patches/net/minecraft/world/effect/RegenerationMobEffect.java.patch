@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/effect/RegenerationMobEffect.java
++++ b/net/minecraft/world/effect/RegenerationMobEffect.java
+@@ -19,10 +_,6 @@
+     @Override
+     public boolean shouldApplyEffectTickThisTick(int p_295946_, int p_295536_) {
+         int i = 50 >> p_295536_;
+-        if (i > 0) {
+-            return p_295946_ % i == 0;
+-        } else {
+-            return true;
+-        }
++        return i > 0 ? p_295946_ % i == 0 : true;
+     }
+ }

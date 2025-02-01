@@ -1,11 +1,30 @@
 --- a/net/minecraft/world/level/pathfinder/PathfindingContext.java
 +++ b/net/minecraft/world/level/pathfinder/PathfindingContext.java
-@@ -43,4 +_,8 @@
+@@ -5,7 +_,6 @@
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.entity.Mob;
+ import net.minecraft.world.level.CollisionGetter;
+-import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.state.BlockState;
+ 
+ public class PathfindingContext {
+@@ -17,8 +_,7 @@
+ 
+     public PathfindingContext(CollisionGetter p_331783_, Mob p_331698_) {
+         this.level = p_331783_;
+-        Level levelx = p_331698_.level();
+-        if (levelx instanceof ServerLevel serverlevel) {
++        if (p_331698_.level() instanceof ServerLevel serverlevel) {
+             this.cache = serverlevel.getPathTypeCache();
+         } else {
+             this.cache = null;
+@@ -42,5 +_,9 @@
+ 
      public BlockPos mobPosition() {
          return this.mobPosition;
-     }
++    }
 +
 +    BlockPos currentEvalPos() {
 +        return this.mutablePos;
-+    }
+     }
  }

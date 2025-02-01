@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/protocol/handshake/ClientIntent.java
++++ b/net/minecraft/network/protocol/handshake/ClientIntent.java
+@@ -10,7 +_,7 @@
+     private static final int TRANSFER_ID = 3;
+ 
+     public static ClientIntent byId(int p_295065_) {
+-        return switch(p_295065_) {
++        return switch (p_295065_) {
+             case 1 -> STATUS;
+             case 2 -> LOGIN;
+             case 3 -> TRANSFER;
+@@ -19,7 +_,7 @@
+     }
+ 
+     public int id() {
+-        return switch(this) {
++        return switch (this) {
+             case STATUS -> 1;
+             case LOGIN -> 2;
+             case TRANSFER -> 3;

@@ -1,6 +1,19 @@
 --- a/net/minecraft/world/level/block/ComposterBlock.java
 +++ b/net/minecraft/world/level/block/ComposterBlock.java
-@@ -48,6 +_,8 @@
+@@ -5,12 +_,10 @@
+ import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
+ import javax.annotation.Nullable;
+ import net.minecraft.Util;
+-import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.core.particles.ParticleTypes;
+ import net.minecraft.server.level.ServerLevel;
+-import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.stats.Stats;
+@@ -50,11 +_,13 @@
      public static final int MIN_LEVEL = 0;
      public static final int MAX_LEVEL = 7;
      public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_COMPOSTER;
@@ -9,7 +22,50 @@
      public static final Object2FloatMap<ItemLike> COMPOSTABLES = new Object2FloatOpenHashMap<>();
      private static final int AABB_SIDE_THICKNESS = 2;
      private static final VoxelShape OUTER_SHAPE = Shapes.block();
-@@ -227,6 +_,15 @@
+     private static final VoxelShape[] SHAPES = Util.make(new VoxelShape[9], p_51967_ -> {
+-        for(int i = 0; i < 8; ++i) {
++        for (int i = 0; i < 8; i++) {
+             p_51967_[i] = Shapes.join(OUTER_SHAPE, Block.box(2.0, (double)Math.max(2, 1 + i * 2), 2.0, 14.0, 16.0, 14.0), BooleanOp.ONLY_FIRST);
+         }
+ 
+@@ -78,12 +_,6 @@
+         add(0.3F, Items.SPRUCE_LEAVES);
+         add(0.3F, Items.DARK_OAK_LEAVES);
+         add(0.3F, Items.ACACIA_LEAVES);
+-        add(0.3F, Items.POTATO_LEAVES);
+-        add(0.3F, Items.POTATO_STEM);
+-        add(0.3F, Items.POTATO_BUD);
+-        add(0.3F, Items.POTATO_SPROUTS);
+-        add(0.3F, Items.POTATO_FRUIT);
+-        add(0.3F, Items.POTATO_PEDICULE);
+         add(0.3F, Items.CHERRY_LEAVES);
+         add(0.3F, Items.BIRCH_LEAVES);
+         add(0.3F, Items.AZALEA_LEAVES);
+@@ -175,14 +_,11 @@
+         add(0.85F, Items.FLOWERING_AZALEA);
+         add(0.85F, Items.BREAD);
+         add(0.85F, Items.BAKED_POTATO);
+-        add(0.85F, Items.HOT_POTATO);
+-        add(0.85F, Items.POTATO_FLOWER);
+         add(0.85F, Items.COOKIE);
+         add(0.85F, Items.TORCHFLOWER);
+         add(0.85F, Items.PITCHER_PLANT);
+         add(1.0F, Items.CAKE);
+         add(1.0F, Items.PUMPKIN_PIE);
+-        add(1.0F, Items.POTATO_STAFF);
+     }
+ 
+     private static void add(float p_51921_, ItemLike p_51922_) {
+@@ -202,7 +_,7 @@
+         double d2 = 0.7375F;
+         RandomSource randomsource = p_51924_.getRandom();
+ 
+-        for(int i = 0; i < 10; ++i) {
++        for (int i = 0; i < 10; i++) {
+             double d3 = randomsource.nextGaussian() * 0.02;
+             double d4 = randomsource.nextGaussian() * 0.02;
+             double d5 = randomsource.nextGaussian() * 0.02;
+@@ -238,6 +_,15 @@
          if (p_51978_.getValue(LEVEL) == 7) {
              p_51979_.scheduleTick(p_51980_, p_51978_.getBlock(), 20);
          }
@@ -25,7 +81,7 @@
      }
  
      @Override
-@@ -234,7 +_,7 @@
+@@ -245,7 +_,7 @@
          ItemStack p_316332_, BlockState p_316118_, Level p_316624_, BlockPos p_316660_, Player p_316715_, InteractionHand p_316472_, BlockHitResult p_316606_
      ) {
          int i = p_316118_.getValue(LEVEL);
@@ -34,7 +90,7 @@
              if (i < 7 && !p_316624_.isClientSide) {
                  BlockState blockstate = addItem(p_316715_, p_316118_, p_316624_, p_316660_, p_316332_);
                  p_316624_.levelEvent(1500, p_316660_, p_316118_ != blockstate ? 1 : 0);
-@@ -261,7 +_,7 @@
+@@ -272,7 +_,7 @@
  
      public static BlockState insertItem(Entity p_270919_, BlockState p_270087_, ServerLevel p_270284_, ItemStack p_270253_, BlockPos p_270678_) {
          int i = p_270087_.getValue(LEVEL);
@@ -43,16 +99,37 @@
              BlockState blockstate = addItem(p_270919_, p_270087_, p_270284_, p_270678_, p_270253_);
              p_270253_.shrink(1);
              return blockstate;
-@@ -292,7 +_,7 @@
+@@ -302,23 +_,16 @@
+     }
  
      static BlockState addItem(@Nullable Entity p_270464_, BlockState p_270603_, LevelAccessor p_270151_, BlockPos p_270547_, ItemStack p_270354_) {
-         int i = p_270603_.getValue(LEVEL);
+-        if (p_270354_.is(Items.POTATO_STAFF) && p_270464_ instanceof ServerPlayer serverplayer) {
+-            CriteriaTriggers.COMPOST_STAFF.trigger(serverplayer);
+-            if (!serverplayer.chapterIsPast("composted_staff")) {
+-                serverplayer.setPotatoQuestChapter("composted_staff");
+-            }
+-        }
+-
+-        int j = p_270603_.getValue(LEVEL);
 -        float f = COMPOSTABLES.getFloat(p_270354_.getItem());
+-        if ((j != 0 || !(f > 0.0F)) && !(p_270151_.getRandom().nextDouble() < (double)f)) {
++        int i = p_270603_.getValue(LEVEL);
 +        float f = getValue(p_270354_);
-         if ((i != 0 || !(f > 0.0F)) && !(p_270151_.getRandom().nextDouble() < (double)f)) {
++        if ((i != 0 || !(f > 0.0F)) && !(p_270151_.getRandom().nextDouble() < (double)f)) {
              return p_270603_;
          } else {
-@@ -392,7 +_,7 @@
+-            int i = j + 1;
+-            BlockState blockstate = p_270603_.setValue(LEVEL, Integer.valueOf(i));
++            int j = i + 1;
++            BlockState blockstate = p_270603_.setValue(LEVEL, Integer.valueOf(j));
+             p_270151_.setBlock(p_270547_, blockstate, 3);
+             p_270151_.gameEvent(GameEvent.BLOCK_CHANGE, p_270547_, GameEvent.Context.of(p_270464_, blockstate));
+-            if (i == 7) {
++            if (j == 7) {
+                 p_270151_.scheduleTick(p_270547_, p_270603_.getBlock(), 20);
+             }
+ 
+@@ -410,7 +_,7 @@
  
          @Override
          public boolean canPlaceItemThroughFace(int p_52028_, ItemStack p_52029_, @Nullable Direction p_52030_) {
@@ -61,7 +138,7 @@
          }
  
          @Override
-@@ -450,5 +_,11 @@
+@@ -468,5 +_,11 @@
              ComposterBlock.empty(null, this.state, this.level, this.pos);
              this.changed = true;
          }

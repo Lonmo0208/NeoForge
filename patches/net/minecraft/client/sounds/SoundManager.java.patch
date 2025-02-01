@@ -1,0 +1,65 @@
+--- a/net/minecraft/client/sounds/SoundManager.java
++++ b/net/minecraft/client/sounds/SoundManager.java
+@@ -72,11 +_,11 @@
+         soundmanager$preparations.listResources(p_120356_);
+         p_120357_.pop();
+ 
+-        for(String s : p_120356_.getNamespaces()) {
++        for (String s : p_120356_.getNamespaces()) {
+             p_120357_.push(s);
+ 
+             try {
+-                for(Resource resource : p_120356_.getResourceStack(new ResourceLocation(s, "sounds.json"))) {
++                for (Resource resource : p_120356_.getResourceStack(new ResourceLocation(s, "sounds.json"))) {
+                     p_120357_.push(resource.sourcePackId());
+ 
+                     try (Reader reader = resource.openAsReader()) {
+@@ -84,7 +_,7 @@
+                         Map<String, SoundEventRegistration> map = GsonHelper.fromJson(GSON, reader, SOUND_EVENT_REGISTRATION_TYPE);
+                         p_120357_.popPush("register");
+ 
+-                        for(Entry<String, SoundEventRegistration> entry : map.entrySet()) {
++                        for (Entry<String, SoundEventRegistration> entry : map.entrySet()) {
+                             soundmanager$preparations.handleRegistration(new ResourceLocation(s, entry.getKey()), entry.getValue());
+                         }
+ 
+@@ -108,7 +_,7 @@
+     protected void apply(SoundManager.Preparations p_120377_, ResourceManager p_120378_, ProfilerFiller p_120379_) {
+         p_120377_.apply(this.registry, this.soundCache, this.soundEngine);
+         if (SharedConstants.IS_RUNNING_IN_IDE) {
+-            for(ResourceLocation resourcelocation : this.registry.keySet()) {
++            for (ResourceLocation resourcelocation : this.registry.keySet()) {
+                 WeighedSoundEvents weighedsoundevents = this.registry.get(resourcelocation);
+                 if (!ComponentUtils.isTranslationResolvable(weighedsoundevents.getSubtitle()) && BuiltInRegistries.SOUND_EVENT.containsKey(resourcelocation)) {
+                     LOGGER.error("Missing subtitle {} for sound event: {}", weighedsoundevents.getSubtitle(), resourcelocation);
+@@ -117,7 +_,7 @@
+         }
+ 
+         if (LOGGER.isDebugEnabled()) {
+-            for(ResourceLocation resourcelocation1 : this.registry.keySet()) {
++            for (ResourceLocation resourcelocation1 : this.registry.keySet()) {
+                 if (!BuiltInRegistries.SOUND_EVENT.containsKey(resourcelocation1)) {
+                     LOGGER.debug("Not having sound event for: {}", resourcelocation1);
+                 }
+@@ -253,10 +_,10 @@
+ 
+             ResourceProvider resourceprovider = ResourceProvider.fromMap(this.soundCache);
+ 
+-            for(final Sound sound : p_249632_.getSounds()) {
++            for (final Sound sound : p_249632_.getSounds()) {
+                 final ResourceLocation resourcelocation = sound.getLocation();
+                 Weighted<Sound> weighted;
+-                switch(sound.getType()) {
++                switch (sound.getType()) {
+                     case FILE:
+                         if (!SoundManager.validateSoundResource(sound, p_250806_, resourceprovider)) {
+                             continue;
+@@ -313,7 +_,7 @@
+             p_251045_.clear();
+             p_251045_.putAll(this.soundCache);
+ 
+-            for(Entry<ResourceLocation, WeighedSoundEvents> entry : this.registry.entrySet()) {
++            for (Entry<ResourceLocation, WeighedSoundEvents> entry : this.registry.entrySet()) {
+                 p_251229_.put(entry.getKey(), entry.getValue());
+                 entry.getValue().preloadIfRequired(p_250302_);
+             }

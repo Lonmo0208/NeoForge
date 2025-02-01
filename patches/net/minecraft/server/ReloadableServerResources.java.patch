@@ -1,5 +1,21 @@
 --- a/net/minecraft/server/ReloadableServerResources.java
 +++ b/net/minecraft/server/ReloadableServerResources.java
+@@ -1,7 +_,6 @@
+ package net.minecraft.server;
+ 
+ import com.mojang.logging.LogUtils;
+-import java.util.Collection;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Optional;
+@@ -18,7 +_,6 @@
+ import net.minecraft.core.Registry;
+ import net.minecraft.core.RegistryAccess;
+ import net.minecraft.resources.ResourceKey;
+-import net.minecraft.resources.ResourceLocation;
+ import net.minecraft.server.packs.resources.PreparableReloadListener;
+ import net.minecraft.server.packs.resources.ResourceManager;
+ import net.minecraft.server.packs.resources.SimpleReloadInstance;
 @@ -51,6 +_,8 @@
          this.commands = new Commands(p_206858_, CommandBuildContext.simple(this.registryLookup, p_250695_));
          this.advancements = new ServerAdvancementManager(this.registryLookup);
@@ -34,7 +50,7 @@
      public static CompletableFuture<ReloadableServerResources> loadResources(
          ResourceManager p_248588_,
          LayeredRegistryAccess<RegistryLayer> p_335667_,
-@@ -92,14 +_,27 @@
+@@ -92,23 +_,37 @@
                      ReloadableServerResources reloadableserverresources = new ReloadableServerResources(
                          p_335211_.compositeAccess(), p_250212_, p_249301_, p_251126_
                      );
@@ -63,11 +79,39 @@
                          .thenApply(p_214306_ -> reloadableserverresources);
                  }
              );
-@@ -109,6 +_,7 @@
-         this.tagManager.getResult().forEach(p_335204_ -> updateRegistryTags(this.fullRegistryHolder.get(), p_335204_));
+     }
+ 
+     public void updateRegistryTags() {
+-        this.tagManager.getResult().forEach(p_335204_ -> updateRegistryTags(this.fullRegistryHolder.get(), p_335204_));
++        this.tagManager.getResult().forEach(p_335204_ -> updateRegistryTags(this.fullRegistryHolder.get(), (TagManager.LoadResult<?>)p_335204_));
          AbstractFurnaceBlockEntity.invalidateCache();
          Blocks.rebuildCache();
 +        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.TagsUpdatedEvent(this.fullRegistryHolder.get(), false, false));
      }
  
      private static <T> void updateRegistryTags(RegistryAccess p_206871_, TagManager.LoadResult<T> p_206872_) {
+@@ -116,11 +_,7 @@
+         Map<TagKey<T>, List<Holder<T>>> map = p_206872_.tags()
+             .entrySet()
+             .stream()
+-            .collect(
+-                Collectors.toUnmodifiableMap(
+-                    p_214303_ -> TagKey.create(resourcekey, (ResourceLocation)p_214303_.getKey()), p_214312_ -> List.copyOf((Collection)p_214312_.getValue())
+-                )
+-            );
++            .collect(Collectors.toUnmodifiableMap(p_214303_ -> TagKey.create(resourcekey, p_214303_.getKey()), p_214312_ -> List.copyOf(p_214312_.getValue())));
+         p_206871_.registryOrThrow(resourcekey).bindTags(map);
+     }
+ 
+@@ -152,9 +_,9 @@
+             return new HolderLookup.RegistryLookup.Delegate<T>() {
+                 @Override
+                 public HolderLookup.RegistryLookup<T> parent() {
+-                    return switch(ConfigurableRegistryLookup.this.missingTagAccessPolicy) {
+-                        case FAIL -> p_324196_;
++                    return switch (ConfigurableRegistryLookup.this.missingTagAccessPolicy) {
+                         case CREATE_NEW -> p_323710_;
++                        case FAIL -> p_324196_;
+                     };
+                 }
+             };

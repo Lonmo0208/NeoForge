@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/dto/PendingInvitesList.java
++++ b/com/mojang/realmsclient/dto/PendingInvitesList.java
+@@ -25,7 +_,7 @@
+             if (jsonobject.get("invites").isJsonArray()) {
+                 Iterator<JsonElement> iterator = jsonobject.get("invites").getAsJsonArray().iterator();
+ 
+-                while(iterator.hasNext()) {
++                while (iterator.hasNext()) {
+                     pendinginviteslist.pendingInvites.add(PendingInvite.parse(iterator.next().getAsJsonObject()));
+                 }
+             }

@@ -1,0 +1,19 @@
+--- a/net/minecraft/client/renderer/blockentity/BedRenderer.java
++++ b/net/minecraft/client/renderer/blockentity/BedRenderer.java
+@@ -3,7 +_,6 @@
+ import com.mojang.blaze3d.vertex.PoseStack;
+ import com.mojang.blaze3d.vertex.VertexConsumer;
+ import com.mojang.math.Axis;
+-import it.unimi.dsi.fastutil.ints.Int2IntFunction;
+ import net.minecraft.client.model.geom.ModelLayers;
+ import net.minecraft.client.model.geom.ModelPart;
+ import net.minecraft.client.model.geom.PartPose;
+@@ -88,7 +_,7 @@
+                 p_112205_.getBlockPos(),
+                 (p_112202_, p_112203_) -> false
+             );
+-            int i = neighborcombineresult.<Int2IntFunction>apply(new BrightnessCombiner<>()).get(p_112209_);
++            int i = neighborcombineresult.apply(new BrightnessCombiner<>()).get(p_112209_);
+             this.renderPiece(
+                 p_112207_,
+                 p_112208_,

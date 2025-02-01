@@ -1,0 +1,43 @@
+--- a/net/minecraft/commands/synchronization/ArgumentUtils.java
++++ b/net/minecraft/commands/synchronization/ArgumentUtils.java
+@@ -68,7 +_,7 @@
+             jsonobject.addProperty("type", "root");
+         } else if (p_235416_ instanceof LiteralCommandNode) {
+             jsonobject.addProperty("type", "literal");
+-        } else if (p_235416_ instanceof ArgumentCommandNode argumentcommandnode) {
++        } else if (p_235416_ instanceof ArgumentCommandNode<?, ?> argumentcommandnode) {
+             serializeArgumentToJson(jsonobject, argumentcommandnode.getType());
+         } else {
+             LOGGER.error("Could not serialize node {} ({})!", p_235416_, p_235416_.getClass());
+@@ -77,7 +_,7 @@
+ 
+         JsonObject jsonobject1 = new JsonObject();
+ 
+-        for(CommandNode<S> commandnode : p_235416_.getChildren()) {
++        for (CommandNode<S> commandnode : p_235416_.getChildren()) {
+             jsonobject1.add(commandnode.getName(), serializeNodeToJson(p_235415_, commandnode));
+         }
+ 
+@@ -94,7 +_,7 @@
+             if (!collection.isEmpty()) {
+                 JsonArray jsonarray = new JsonArray();
+ 
+-                for(String s : collection) {
++                for (String s : collection) {
+                     jsonarray.add(s);
+                 }
+ 
+@@ -114,11 +_,11 @@
+ 
+     private static <T> void findUsedArgumentTypes(CommandNode<T> p_235420_, Set<ArgumentType<?>> p_235421_, Set<CommandNode<T>> p_235422_) {
+         if (p_235422_.add(p_235420_)) {
+-            if (p_235420_ instanceof ArgumentCommandNode argumentcommandnode) {
++            if (p_235420_ instanceof ArgumentCommandNode<?, ?> argumentcommandnode) {
+                 p_235421_.add(argumentcommandnode.getType());
+             }
+ 
+-            p_235420_.getChildren().forEach(p_235426_ -> findUsedArgumentTypes(p_235426_, p_235421_, p_235422_));
++            p_235420_.getChildren().forEach(p_235426_ -> findUsedArgumentTypes((CommandNode<T>)p_235426_, p_235421_, p_235422_));
+             CommandNode<T> commandnode = p_235420_.getRedirect();
+             if (commandnode != null) {
+                 findUsedArgumentTypes(commandnode, p_235421_, p_235422_);

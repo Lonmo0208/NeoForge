@@ -1,0 +1,47 @@
+--- a/net/minecraft/server/commands/PlaceCommand.java
++++ b/net/minecraft/server/commands/PlaceCommand.java
+@@ -9,7 +_,6 @@
+ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+ import com.mojang.brigadier.suggestion.SuggestionProvider;
+ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+-import java.util.List;
+ import java.util.Optional;
+ import net.minecraft.ResourceLocationException;
+ import net.minecraft.commands.CommandSourceStack;
+@@ -276,8 +_,7 @@
+             new ChunkPos(p_214590_),
+             0,
+             serverlevel,
+-            p_214580_ -> true,
+-            List.of()
++            p_214580_ -> true
+         );
+         if (!structurestart.isValid()) {
+             throw ERROR_STRUCTURE_FAILED.create();
+@@ -288,20 +_,20 @@
+             checkLoaded(serverlevel, chunkpos, chunkpos1);
+             ChunkPos.rangeClosed(chunkpos, chunkpos1)
+                 .forEach(
+-                    p_339806_ -> structurestart.placeInChunk(
++                    p_329891_ -> structurestart.placeInChunk(
+                             serverlevel,
+                             serverlevel.structureManager(),
+                             chunkgenerator,
+                             serverlevel.getRandom(),
+                             new BoundingBox(
+-                                p_339806_.getMinBlockX(),
++                                p_329891_.getMinBlockX(),
+                                 serverlevel.getMinBuildHeight(),
+-                                p_339806_.getMinBlockZ(),
+-                                p_339806_.getMaxBlockX(),
++                                p_329891_.getMinBlockZ(),
++                                p_329891_.getMaxBlockX(),
+                                 serverlevel.getMaxBuildHeight(),
+-                                p_339806_.getMaxBlockZ()
++                                p_329891_.getMaxBlockZ()
+                             ),
+-                            p_339806_
++                            p_329891_
+                         )
+                 );
+             String s = p_251799_.key().location().toString();

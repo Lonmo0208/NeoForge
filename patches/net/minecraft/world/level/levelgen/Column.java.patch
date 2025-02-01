@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/Column.java
++++ b/net/minecraft/world/level/levelgen/Column.java
+@@ -86,7 +_,7 @@
+     ) {
+         p_158172_.setY(p_158173_);
+ 
+-        for(int i = 1; i < p_158169_ && p_158168_.isStateAtPosition(p_158172_, p_158170_); ++i) {
++        for (int i = 1; i < p_158169_ && p_158168_.isStateAtPosition(p_158172_, p_158170_); i++) {
+             p_158172_.move(p_158174_);
+         }
+ 

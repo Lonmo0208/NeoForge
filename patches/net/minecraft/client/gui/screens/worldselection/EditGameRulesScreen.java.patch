@@ -1,0 +1,13 @@
+--- a/net/minecraft/client/gui/screens/worldselection/EditGameRulesScreen.java
++++ b/net/minecraft/client/gui/screens/worldselection/EditGameRulesScreen.java
+@@ -63,7 +_,9 @@
+             Button.builder(CommonComponents.GUI_DONE, p_101059_ -> this.exitCallback.accept(Optional.of(this.gameRules))).build()
+         );
+         linearlayout.addChild(Button.builder(CommonComponents.GUI_CANCEL, p_329749_ -> this.onClose()).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_321377_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321377_);
++        });
+         this.repositionElements();
+     }
+ 

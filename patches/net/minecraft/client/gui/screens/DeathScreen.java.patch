@@ -1,0 +1,44 @@
+--- a/net/minecraft/client/gui/screens/DeathScreen.java
++++ b/net/minecraft/client/gui/screens/DeathScreen.java
+@@ -119,7 +_,11 @@
+ 
+     @Override
+     public void renderBackground(GuiGraphics p_296411_, int p_295765_, int p_295221_, float p_295625_) {
+-        p_296411_.fillGradient(0, 0, this.width, this.height, 1615855616, -1602211792);
++        renderDeathBackground(p_296411_, this.width, this.height);
++    }
++
++    static void renderDeathBackground(GuiGraphics p_339647_, int p_339641_, int p_339673_) {
++        p_339647_.fillGradient(0, 0, p_339641_, p_339673_, 1615855616, -1602211792);
+     }
+ 
+     @Nullable
+@@ -155,14 +_,14 @@
+     @Override
+     public void tick() {
+         super.tick();
+-        ++this.delayTicker;
++        this.delayTicker++;
+         if (this.delayTicker == 20) {
+             this.setButtonsActive(true);
+         }
+     }
+ 
+     private void setButtonsActive(boolean p_273413_) {
+-        for(Button button : this.exitButtons) {
++        for (Button button : this.exitButtons) {
+             button.active = p_273413_;
+         }
+     }
+@@ -171,6 +_,11 @@
+     public static class TitleConfirmScreen extends ConfirmScreen {
+         public TitleConfirmScreen(BooleanConsumer p_273707_, Component p_273255_, Component p_273747_, Component p_273434_, Component p_273416_) {
+             super(p_273707_, p_273255_, p_273747_, p_273434_, p_273416_);
++        }
++
++        @Override
++        public void renderBackground(GuiGraphics p_339588_, int p_339615_, int p_339620_, float p_339674_) {
++            DeathScreen.renderDeathBackground(p_339588_, this.width, this.height);
+         }
+     }
+ }

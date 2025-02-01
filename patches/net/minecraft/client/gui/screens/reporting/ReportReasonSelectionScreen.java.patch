@@ -1,0 +1,30 @@
+--- a/net/minecraft/client/gui/screens/reporting/ReportReasonSelectionScreen.java
++++ b/net/minecraft/client/gui/screens/reporting/ReportReasonSelectionScreen.java
+@@ -5,6 +_,7 @@
+ import net.minecraft.Optionull;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.gui.GuiGraphics;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.ObjectSelectionList;
+ import net.minecraft.client.gui.components.events.GuiEventListener;
+@@ -70,7 +_,9 @@
+                 )
+                 .build()
+         );
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_329740_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_329740_);
++        });
+         this.repositionElements();
+     }
+ 
+@@ -145,7 +_,7 @@
+                 18
+             );
+ 
+-            for(ReportReason reportreason : ReportReason.values()) {
++            for (ReportReason reportreason : ReportReason.values()) {
+                 this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportreason));
+             }
+         }

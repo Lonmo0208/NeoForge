@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/components/toasts/AdvancementToast.java
++++ b/net/minecraft/client/gui/components/toasts/AdvancementToast.java
+@@ -44,7 +_,7 @@
+                     int i1 = Mth.floor(Mth.clamp((float)(p_282604_ - 1500L) / 300.0F, 0.0F, 1.0F) * 252.0F) << 24 | 67108864;
+                     int l = this.height() / 2 - list.size() * 9 / 2;
+ 
+-                    for(FormattedCharSequence formattedcharsequence : list) {
++                    for (FormattedCharSequence formattedcharsequence : list) {
+                         p_281813_.drawString(p_282243_.getMinecraft().font, formattedcharsequence, 30, l, 16777215 | i1, false);
+                         l += 9;
+                     }

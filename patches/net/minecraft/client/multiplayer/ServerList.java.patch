@@ -1,0 +1,70 @@
+--- a/net/minecraft/client/multiplayer/ServerList.java
++++ b/net/minecraft/client/multiplayer/ServerList.java
+@@ -40,7 +_,7 @@
+ 
+             ListTag listtag = compoundtag.getList("servers", 10);
+ 
+-            for(int i = 0; i < listtag.size(); ++i) {
++            for (int i = 0; i < listtag.size(); i++) {
+                 CompoundTag compoundtag1 = listtag.getCompound(i);
+                 ServerData serverdata = ServerData.read(compoundtag1);
+                 if (compoundtag1.getBoolean("hidden")) {
+@@ -58,13 +_,13 @@
+         try {
+             ListTag listtag = new ListTag();
+ 
+-            for(ServerData serverdata : this.serverList) {
++            for (ServerData serverdata : this.serverList) {
+                 CompoundTag compoundtag = serverdata.write();
+                 compoundtag.putBoolean("hidden", false);
+                 listtag.add(compoundtag);
+             }
+ 
+-            for(ServerData serverdata1 : this.hiddenServerList) {
++            for (ServerData serverdata1 : this.hiddenServerList) {
+                 CompoundTag compoundtag2 = serverdata1.write();
+                 compoundtag2.putBoolean("hidden", true);
+                 listtag.add(compoundtag2);
+@@ -89,13 +_,13 @@
+ 
+     @Nullable
+     public ServerData get(String p_233846_) {
+-        for(ServerData serverdata : this.serverList) {
++        for (ServerData serverdata : this.serverList) {
+             if (serverdata.ip.equals(p_233846_)) {
+                 return serverdata;
+             }
+         }
+ 
+-        for(ServerData serverdata1 : this.hiddenServerList) {
++        for (ServerData serverdata1 : this.hiddenServerList) {
+             if (serverdata1.ip.equals(p_233846_)) {
+                 return serverdata1;
+             }
+@@ -106,7 +_,7 @@
+ 
+     @Nullable
+     public ServerData unhide(String p_233848_) {
+-        for(int i = 0; i < this.hiddenServerList.size(); ++i) {
++        for (int i = 0; i < this.hiddenServerList.size(); i++) {
+             ServerData serverdata = this.hiddenServerList.get(i);
+             if (serverdata.ip.equals(p_233848_)) {
+                 this.hiddenServerList.remove(i);
+@@ -128,7 +_,7 @@
+         if (p_233844_) {
+             this.hiddenServerList.add(0, p_233843_);
+ 
+-            while(this.hiddenServerList.size() > 16) {
++            while (this.hiddenServerList.size() > 16) {
+                 this.hiddenServerList.remove(this.hiddenServerList.size() - 1);
+             }
+         } else {
+@@ -152,7 +_,7 @@
+     }
+ 
+     private static boolean set(ServerData p_233840_, List<ServerData> p_233841_) {
+-        for(int i = 0; i < p_233841_.size(); ++i) {
++        for (int i = 0; i < p_233841_.size(); i++) {
+             ServerData serverdata = p_233841_.get(i);
+             if (serverdata.name.equals(p_233840_.name) && serverdata.ip.equals(p_233840_.ip)) {
+                 p_233841_.set(i, p_233840_);

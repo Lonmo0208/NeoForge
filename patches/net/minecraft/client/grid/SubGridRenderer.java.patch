@@ -1,0 +1,122 @@
+--- a/net/minecraft/client/grid/SubGridRenderer.java
++++ /dev/null
+@@ -1,119 +_,0 @@
+-package net.minecraft.client.grid;
+-
+-import com.mojang.blaze3d.platform.Window;
+-import com.mojang.blaze3d.systems.RenderSystem;
+-import com.mojang.blaze3d.vertex.VertexBuffer;
+-import com.mojang.blaze3d.vertex.VertexFormat;
+-import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+-import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+-import java.util.concurrent.CompletableFuture;
+-import javax.annotation.Nullable;
+-import net.minecraft.Util;
+-import net.minecraft.client.Minecraft;
+-import net.minecraft.client.renderer.RenderType;
+-import net.minecraft.client.renderer.ShaderInstance;
+-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+-import net.minecraft.client.renderer.culling.Frustum;
+-import net.minecraft.util.Mth;
+-import net.minecraft.world.grid.GridCarrier;
+-import net.minecraft.world.grid.SubGridBlocks;
+-import net.minecraft.world.phys.Vec3;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-import org.joml.Matrix4f;
+-import org.joml.Vector3f;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class SubGridRenderer implements AutoCloseable {
+-    private static final double CULL_BUFFER_SIZE = 3.0;
+-    private final Minecraft minecraft = Minecraft.getInstance();
+-    private final BlockRenderDispatcher blockRenderer;
+-    private final ClientSubGrid grid;
+-    private final Reference2ObjectMap<RenderType, VertexBuffer> vertexBuffers = new Reference2ObjectArrayMap<>();
+-    @Nullable
+-    private CompletableFuture<SubGridMeshBuilder.Results> meshFuture;
+-    private boolean needsRebuild = true;
+-
+-    public SubGridRenderer(ClientSubGrid p_341190_) {
+-        this.grid = p_341190_;
+-        this.blockRenderer = this.minecraft.getBlockRenderer();
+-    }
+-
+-    private void prepareMesh() {
+-        if (this.meshFuture != null) {
+-            if (this.meshFuture.isDone()) {
+-                try (SubGridMeshBuilder.Results subgridmeshbuilder$results = this.meshFuture.join()) {
+-                    subgridmeshbuilder$results.uploadTo(this.vertexBuffers);
+-                    VertexBuffer.unbind();
+-                }
+-
+-                this.meshFuture = null;
+-            }
+-        } else if (this.needsRebuild) {
+-            this.needsRebuild = false;
+-            SubGridMeshBuilder.BlockView subgridmeshbuilder$blockview = SubGridMeshBuilder.BlockView.copyOf(this.grid);
+-            SubGridMeshBuilder subgridmeshbuilder = new SubGridMeshBuilder(this.blockRenderer, subgridmeshbuilder$blockview);
+-            this.meshFuture = CompletableFuture.supplyAsync(subgridmeshbuilder::build, Util.backgroundExecutor());
+-        }
+-    }
+-
+-    public void draw(
+-        float p_341694_, double p_342601_, double p_340804_, double p_340779_, Frustum p_342559_, Matrix4f p_341118_, Matrix4f p_342142_, boolean p_341330_
+-    ) {
+-        GridCarrier gridcarrier = this.grid.carrier();
+-        Vec3 vec3 = new Vec3(
+-            Mth.lerp((double)p_341694_, gridcarrier.xOld, gridcarrier.getX()),
+-            Mth.lerp((double)p_341694_, gridcarrier.yOld, gridcarrier.getY()),
+-            Mth.lerp((double)p_341694_, gridcarrier.zOld, gridcarrier.getZ())
+-        );
+-        SubGridBlocks subgridblocks = this.grid.getBlocks();
+-        if (p_342559_.isVisible(
+-            vec3.x - 3.0,
+-            vec3.y - 3.0,
+-            vec3.z - 3.0,
+-            vec3.x + (double)subgridblocks.sizeX() + 1.0 + 3.0,
+-            vec3.y + (double)subgridblocks.sizeY() + 1.0 + 3.0,
+-            vec3.z + (double)subgridblocks.sizeZ() + 1.0 + 3.0
+-        )) {
+-            this.prepareMesh();
+-            if (!this.vertexBuffers.isEmpty()) {
+-                Window window = this.minecraft.getWindow();
+-                Vector3f vector3f = new Vector3f((float)(vec3.x - p_342601_), (float)(vec3.y - p_340804_), (float)(vec3.z - p_340779_));
+-                if (p_341330_) {
+-                    this.drawLayer(RenderType.translucent(), vector3f, p_341118_, p_342142_, window);
+-                    this.drawLayer(RenderType.tripwire(), vector3f, p_341118_, p_342142_, window);
+-                } else {
+-                    this.drawLayer(RenderType.solid(), vector3f, p_341118_, p_342142_, window);
+-                    this.drawLayer(RenderType.cutoutMipped(), vector3f, p_341118_, p_342142_, window);
+-                    this.drawLayer(RenderType.cutout(), vector3f, p_341118_, p_342142_, window);
+-                }
+-            }
+-        }
+-    }
+-
+-    private void drawLayer(RenderType p_341289_, Vector3f p_341026_, Matrix4f p_340357_, Matrix4f p_342431_, Window p_341114_) {
+-        VertexBuffer vertexbuffer = this.vertexBuffers.get(p_341289_);
+-        if (vertexbuffer != null) {
+-            p_341289_.setupRenderState();
+-            ShaderInstance shaderinstance = RenderSystem.getShader();
+-            shaderinstance.setDefaultUniforms(VertexFormat.Mode.QUADS, p_340357_, p_342431_, p_341114_);
+-            shaderinstance.CHUNK_OFFSET.set(p_341026_.x, p_341026_.y, p_341026_.z);
+-            shaderinstance.apply();
+-            vertexbuffer.bind();
+-            vertexbuffer.draw();
+-            VertexBuffer.unbind();
+-            shaderinstance.clear();
+-            p_341289_.clearRenderState();
+-        }
+-    }
+-
+-    @Override
+-    public void close() {
+-        this.vertexBuffers.values().forEach(VertexBuffer::close);
+-        this.vertexBuffers.clear();
+-        if (this.meshFuture != null) {
+-            this.meshFuture.thenAcceptAsync(SubGridMeshBuilder.Results::close, p_341599_ -> RenderSystem.recordRenderCall(p_341599_::run));
+-            this.meshFuture = null;
+-        }
+-    }
+-}

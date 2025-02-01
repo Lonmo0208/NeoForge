@@ -1,0 +1,55 @@
+--- a/net/minecraft/world/entity/monster/Blaze.java
++++ b/net/minecraft/world/entity/monster/Blaze.java
+@@ -101,7 +_,7 @@
+                     );
+             }
+ 
+-            for(int i = 0; i < 2; ++i) {
++            for (int i = 0; i < 2; i++) {
+                 this.level().addParticle(ParticleTypes.LARGE_SMOKE, this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), 0.0, 0.0, 0.0);
+             }
+         }
+@@ -116,7 +_,7 @@
+ 
+     @Override
+     protected void customServerAiStep() {
+-        --this.nextHeightOffsetChangeTick;
++        this.nextHeightOffsetChangeTick--;
+         if (this.nextHeightOffsetChangeTick <= 0) {
+             this.nextHeightOffsetChangeTick = 100;
+             this.allowedHeightOffset = (float)this.random.triangle(0.5, 6.891);
+@@ -187,14 +_,14 @@
+ 
+         @Override
+         public void tick() {
+-            --this.attackTime;
++            this.attackTime--;
+             LivingEntity livingentity = this.blaze.getTarget();
+             if (livingentity != null) {
+                 boolean flag = this.blaze.getSensing().hasLineOfSight(livingentity);
+                 if (flag) {
+                     this.lastSeen = 0;
+                 } else {
+-                    ++this.lastSeen;
++                    this.lastSeen++;
+                 }
+ 
+                 double d0 = this.blaze.distanceToSqr(livingentity);
+@@ -214,7 +_,7 @@
+                     double d2 = livingentity.getY(0.5) - this.blaze.getY(0.5);
+                     double d3 = livingentity.getZ() - this.blaze.getZ();
+                     if (this.attackTime <= 0) {
+-                        ++this.attackStep;
++                        this.attackStep++;
+                         if (this.attackStep == 1) {
+                             this.attackTime = 60;
+                             this.blaze.setCharged(true);
+@@ -232,7 +_,7 @@
+                                 this.blaze.level().levelEvent(null, 1018, this.blaze.blockPosition(), 0);
+                             }
+ 
+-                            for(int i = 0; i < 1; ++i) {
++                            for (int i = 0; i < 1; i++) {
+                                 SmallFireball smallfireball = new SmallFireball(
+                                     this.blaze.level(),
+                                     this.blaze,

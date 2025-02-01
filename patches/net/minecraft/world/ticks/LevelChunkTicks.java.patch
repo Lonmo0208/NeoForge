@@ -1,0 +1,44 @@
+--- a/net/minecraft/world/ticks/LevelChunkTicks.java
++++ b/net/minecraft/world/ticks/LevelChunkTicks.java
+@@ -32,7 +_,7 @@
+     public LevelChunkTicks(List<SavedTick<T>> p_193169_) {
+         this.pendingTicks = p_193169_;
+ 
+-        for(SavedTick<T> savedtick : p_193169_) {
++        for (SavedTick<T> savedtick : p_193169_) {
+             this.ticksPerPosition.add(ScheduledTick.probe(savedtick.type(), savedtick.pos()));
+         }
+     }
+@@ -78,7 +_,7 @@
+     public void removeIf(Predicate<ScheduledTick<T>> p_193184_) {
+         Iterator<ScheduledTick<T>> iterator = this.tickQueue.iterator();
+ 
+-        while(iterator.hasNext()) {
++        while (iterator.hasNext()) {
+             ScheduledTick<T> scheduledtick = iterator.next();
+             if (p_193184_.test(scheduledtick)) {
+                 iterator.remove();
+@@ -99,12 +_,12 @@
+     public ListTag save(long p_193174_, Function<T, String> p_193175_) {
+         ListTag listtag = new ListTag();
+         if (this.pendingTicks != null) {
+-            for(SavedTick<T> savedtick : this.pendingTicks) {
++            for (SavedTick<T> savedtick : this.pendingTicks) {
+                 listtag.add(savedtick.save(p_193175_));
+             }
+         }
+ 
+-        for(ScheduledTick<T> scheduledtick : this.tickQueue) {
++        for (ScheduledTick<T> scheduledtick : this.tickQueue) {
+             listtag.add(SavedTick.saveTick(scheduledtick, p_193175_, p_193174_));
+         }
+ 
+@@ -115,7 +_,7 @@
+         if (this.pendingTicks != null) {
+             int i = -this.pendingTicks.size();
+ 
+-            for(SavedTick<T> savedtick : this.pendingTicks) {
++            for (SavedTick<T> savedtick : this.pendingTicks) {
+                 this.scheduleUnchecked(savedtick.unpack(p_193172_, (long)(i++)));
+             }
+         }

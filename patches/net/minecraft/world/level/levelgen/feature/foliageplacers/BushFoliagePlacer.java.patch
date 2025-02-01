@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/level/levelgen/feature/foliageplacers/BushFoliagePlacer.java
++++ b/net/minecraft/world/level/levelgen/feature/foliageplacers/BushFoliagePlacer.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.feature.foliageplacers;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.util.RandomSource;
+@@ -9,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+ 
+ public class BushFoliagePlacer extends BlobFoliagePlacer {
+-    public static final Codec<BushFoliagePlacer> CODEC = RecordCodecBuilder.create(p_68454_ -> blobParts(p_68454_).apply(p_68454_, BushFoliagePlacer::new));
++    public static final MapCodec<BushFoliagePlacer> CODEC = RecordCodecBuilder.mapCodec(p_68454_ -> blobParts(p_68454_).apply(p_68454_, BushFoliagePlacer::new));
+ 
+     public BushFoliagePlacer(IntProvider p_161370_, IntProvider p_161371_, int p_161372_) {
+         super(p_161370_, p_161371_, p_161372_);
+@@ -32,7 +_,7 @@
+         int p_272989_,
+         int p_273166_
+     ) {
+-        for(int i = p_273166_; i >= p_273166_ - p_273161_; --i) {
++        for (int i = p_273166_; i >= p_273166_ - p_273161_; i--) {
+             int j = p_272989_ + p_273459_.radiusOffset() - 1 - i;
+             this.placeLeavesRow(p_273251_, p_273782_, p_273626_, p_272956_, p_273459_.pos(), j, i, p_273459_.doubleTrunk());
+         }

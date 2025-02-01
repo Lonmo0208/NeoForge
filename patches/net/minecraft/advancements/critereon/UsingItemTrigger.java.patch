@@ -1,0 +1,26 @@
+--- a/net/minecraft/advancements/critereon/UsingItemTrigger.java
++++ b/net/minecraft/advancements/critereon/UsingItemTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ 
+ public class UsingItemTrigger extends SimpleCriterionTrigger<UsingItemTrigger.TriggerInstance> {
+@@ -22,11 +_,11 @@
+ 
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item) implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<UsingItemTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311451_ -> p_311451_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(UsingItemTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(UsingItemTrigger.TriggerInstance::item)
++            p_337404_ -> p_337404_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(UsingItemTrigger.TriggerInstance::player),
++                        ItemPredicate.CODEC.optionalFieldOf("item").forGetter(UsingItemTrigger.TriggerInstance::item)
+                     )
+-                    .apply(p_311451_, UsingItemTrigger.TriggerInstance::new)
++                    .apply(p_337404_, UsingItemTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<UsingItemTrigger.TriggerInstance> lookingAt(EntityPredicate.Builder p_163884_, ItemPredicate.Builder p_163885_) {

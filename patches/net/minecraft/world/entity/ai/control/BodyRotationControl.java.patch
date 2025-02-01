@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/control/BodyRotationControl.java
++++ b/net/minecraft/world/entity/ai/control/BodyRotationControl.java
+@@ -28,7 +_,7 @@
+                     this.lastStableYHeadRot = this.mob.yHeadRot;
+                     this.rotateBodyIfNecessary();
+                 } else {
+-                    ++this.headStableTime;
++                    this.headStableTime++;
+                     if (this.headStableTime > 10) {
+                         this.rotateHeadTowardsFront();
+                     }

@@ -1,0 +1,12 @@
+--- a/net/minecraft/world/entity/monster/WitherSkeleton.java
++++ b/net/minecraft/world/entity/monster/WitherSkeleton.java
+@@ -59,8 +_,7 @@
+     @Override
+     protected void dropCustomDeathLoot(DamageSource p_34174_, int p_34175_, boolean p_34176_) {
+         super.dropCustomDeathLoot(p_34174_, p_34175_, p_34176_);
+-        Entity entity = p_34174_.getEntity();
+-        if (entity instanceof Creeper creeper && creeper.canDropMobsSkull()) {
++        if (p_34174_.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
+             creeper.increaseDroppedSkulls();
+             this.spawnAtLocation(Items.WITHER_SKELETON_SKULL);
+         }

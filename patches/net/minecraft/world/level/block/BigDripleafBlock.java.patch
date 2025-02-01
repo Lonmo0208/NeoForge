@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/level/block/BigDripleafBlock.java
++++ b/net/minecraft/world/level/block/BigDripleafBlock.java
+@@ -100,15 +_,15 @@
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = p_220795_.mutable();
+         int j = 0;
+ 
+-        while(j < i && canPlaceAt(p_220793_, blockpos$mutableblockpos, p_220793_.getBlockState(blockpos$mutableblockpos))) {
+-            ++j;
++        while (j < i && canPlaceAt(p_220793_, blockpos$mutableblockpos, p_220793_.getBlockState(blockpos$mutableblockpos))) {
++            j++;
+             blockpos$mutableblockpos.move(Direction.UP);
+         }
+ 
+         int k = p_220795_.getY() + j - 1;
+         blockpos$mutableblockpos.setY(p_220795_.getY());
+ 
+-        while(blockpos$mutableblockpos.getY() < k) {
++        while (blockpos$mutableblockpos.getY() < k) {
+             BigDripleafStemBlock.place(p_220793_, blockpos$mutableblockpos, p_220793_.getFluidState(blockpos$mutableblockpos), p_220796_);
+             blockpos$mutableblockpos.move(Direction.UP);
+         }

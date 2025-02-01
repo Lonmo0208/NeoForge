@@ -1,0 +1,53 @@
+--- a/net/minecraft/world/entity/boss/enderdragon/phases/DragonSittingFlamingPhase.java
++++ b/net/minecraft/world/entity/boss/enderdragon/phases/DragonSittingFlamingPhase.java
+@@ -25,7 +_,7 @@
+ 
+     @Override
+     public void doClientTick() {
+-        ++this.flameTicks;
++        this.flameTicks++;
+         if (this.flameTicks % 2 == 0 && this.flameTicks < 10) {
+             Vec3 vec3 = this.dragon.getHeadLookVector(1.0F).normalize();
+             vec3.yRot((float) (-Math.PI / 4));
+@@ -33,12 +_,12 @@
+             double d1 = this.dragon.head.getY(0.5);
+             double d2 = this.dragon.head.getZ();
+ 
+-            for(int i = 0; i < 8; ++i) {
++            for (int i = 0; i < 8; i++) {
+                 double d3 = d0 + this.dragon.getRandom().nextGaussian() / 2.0;
+                 double d4 = d1 + this.dragon.getRandom().nextGaussian() / 2.0;
+                 double d5 = d2 + this.dragon.getRandom().nextGaussian() / 2.0;
+ 
+-                for(int j = 0; j < 6; ++j) {
++                for (int j = 0; j < 6; j++) {
+                     this.dragon
+                         .level()
+                         .addParticle(ParticleTypes.DRAGON_BREATH, d3, d4, d5, -vec3.x * 0.08F * (double)j, -vec3.y * 0.6F, -vec3.z * 0.08F * (double)j);
+@@ -51,7 +_,7 @@
+ 
+     @Override
+     public void doServerTick() {
+-        ++this.flameTicks;
++        this.flameTicks++;
+         if (this.flameTicks >= 200) {
+             if (this.flameCount >= 4) {
+                 this.dragon.getPhaseManager().setPhase(EnderDragonPhase.TAKEOFF);
+@@ -67,7 +_,7 @@
+             double d3 = d2;
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(d0, d2, d1);
+ 
+-            while(this.dragon.level().isEmptyBlock(blockpos$mutableblockpos)) {
++            while (this.dragon.level().isEmptyBlock(blockpos$mutableblockpos)) {
+                 if (--d3 < 0.0) {
+                     d3 = d2;
+                     break;
+@@ -90,7 +_,7 @@
+     @Override
+     public void begin() {
+         this.flameTicks = 0;
+-        ++this.flameCount;
++        this.flameCount++;
+     }
+ 
+     @Override

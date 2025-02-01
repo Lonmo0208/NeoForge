@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/InfestedBlock.java
++++ b/net/minecraft/world/level/block/InfestedBlock.java
+@@ -78,7 +_,7 @@
+         return p_153424_.computeIfAbsent(p_153425_, p_153429_ -> {
+             BlockState blockstate = p_153426_.get();
+ 
+-            for(Property property : p_153429_.getProperties()) {
++            for (Property property : p_153429_.getProperties()) {
+                 blockstate = blockstate.hasProperty(property) ? blockstate.setValue(property, p_153429_.getValue(property)) : blockstate;
+             }
+ 

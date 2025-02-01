@@ -1,0 +1,41 @@
+--- a/net/minecraft/network/protocol/game/CommonPlayerSpawnInfo.java
++++ b/net/minecraft/network/protocol/game/CommonPlayerSpawnInfo.java
+@@ -1,11 +_,9 @@
+ package net.minecraft.network.protocol.game;
+ 
+ import java.util.Optional;
+-import java.util.UUID;
+ import javax.annotation.Nullable;
+ import net.minecraft.core.GlobalPos;
+ import net.minecraft.core.Holder;
+-import net.minecraft.core.UUIDUtil;
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.network.FriendlyByteBuf;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+@@ -25,8 +_,7 @@
+     boolean isDebug,
+     boolean isFlat,
+     Optional<GlobalPos> lastDeathLocation,
+-    int portalCooldown,
+-    @Nullable UUID waitForGrid
++    int portalCooldown
+ ) {
+     private static final StreamCodec<RegistryFriendlyByteBuf, Holder<DimensionType>> DIMENSION_TYPE_ID_STREAM_CODEC = ByteBufCodecs.holderRegistry(
+         Registries.DIMENSION_TYPE
+@@ -42,8 +_,7 @@
+             p_321843_.readBoolean(),
+             p_321843_.readBoolean(),
+             p_321843_.readOptional(FriendlyByteBuf::readGlobalPos),
+-            p_321843_.readVarInt(),
+-            p_321843_.readNullable(UUIDUtil.STREAM_CODEC)
++            p_321843_.readVarInt()
+         );
+     }
+ 
+@@ -57,6 +_,5 @@
+         p_321515_.writeBoolean(this.isFlat);
+         p_321515_.writeOptional(this.lastDeathLocation, FriendlyByteBuf::writeGlobalPos);
+         p_321515_.writeVarInt(this.portalCooldown);
+-        p_321515_.writeNullable(this.waitForGrid, UUIDUtil.STREAM_CODEC);
+     }
+ }

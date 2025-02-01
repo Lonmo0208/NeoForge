@@ -1,0 +1,44 @@
+--- a/net/minecraft/world/level/block/entity/JukeboxBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/JukeboxBlockEntity.java
+@@ -35,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155616_, HolderLookup.Provider p_324026_) {
+-        super.load(p_155616_, p_324026_);
++    protected void loadAdditional(CompoundTag p_155616_, HolderLookup.Provider p_324026_) {
++        super.loadAdditional(p_155616_, p_324026_);
+         if (p_155616_.contains("RecordItem", 10)) {
+             this.item = ItemStack.parse(p_324026_, p_155616_.getCompound("RecordItem")).orElse(ItemStack.EMPTY);
+         } else {
+@@ -89,21 +_,18 @@
+     }
+ 
+     private void tick(Level p_273615_, BlockPos p_273143_, BlockState p_273372_) {
+-        ++this.ticksSinceLastEvent;
+-        if (this.isRecordPlaying()) {
+-            Item itemx = this.getTheItem().getItem();
+-            if (itemx instanceof RecordItem recorditem) {
+-                if (this.shouldRecordStopPlaying(recorditem)) {
+-                    this.stopPlaying();
+-                } else if (this.shouldSendJukeboxPlayingEvent()) {
+-                    this.ticksSinceLastEvent = 0;
+-                    p_273615_.gameEvent(GameEvent.JUKEBOX_PLAY, p_273143_, GameEvent.Context.of(p_273372_));
+-                    this.spawnMusicParticles(p_273615_, p_273143_);
+-                }
++        this.ticksSinceLastEvent++;
++        if (this.isRecordPlaying() && this.getTheItem().getItem() instanceof RecordItem recorditem) {
++            if (this.shouldRecordStopPlaying(recorditem)) {
++                this.stopPlaying();
++            } else if (this.shouldSendJukeboxPlayingEvent()) {
++                this.ticksSinceLastEvent = 0;
++                p_273615_.gameEvent(GameEvent.JUKEBOX_PLAY, p_273143_, GameEvent.Context.of(p_273372_));
++                this.spawnMusicParticles(p_273615_, p_273143_);
+             }
+         }
+ 
+-        ++this.tickCount;
++        this.tickCount++;
+     }
+ 
+     private boolean shouldRecordStopPlaying(RecordItem p_273267_) {

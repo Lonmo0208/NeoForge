@@ -1,0 +1,112 @@
+--- a/net/minecraft/commands/arguments/selector/options/EntitySelectorOptions.java
++++ b/net/minecraft/commands/arguments/selector/options/EntitySelectorOptions.java
+@@ -193,7 +_,7 @@
+                         (p_175153_, p_175154_) -> SharedSuggestionProvider.suggest(Arrays.asList("nearest", "furthest", "random", "arbitrary"), p_175153_)
+                     );
+                     BiConsumer biconsumer;
+-                    switch(s) {
++                    switch (s) {
+                         case "nearest":
+                             biconsumer = EntitySelectorParser.ORDER_NEAREST;
+                             break;
+@@ -231,7 +_,7 @@
+                         }
+                     }
+ 
+-                    for(GameType gametype1 : GameType.values()) {
++                    for (GameType gametype1 : GameType.values()) {
+                         if (gametype1.getName().toLowerCase(Locale.ROOT).startsWith(s1)) {
+                             if (flag2) {
+                                 p_175193_.suggest("!" + gametype1.getName());
+@@ -345,13 +_,7 @@
+             register("tag", p_121530_ -> {
+                 boolean flag = p_121530_.shouldInvertValue();
+                 String s = p_121530_.getReader().readUnquotedString();
+-                p_121530_.addPredicate(p_175166_ -> {
+-                    if ("".equals(s)) {
+-                        return p_175166_.getTags().isEmpty() != flag;
+-                    } else {
+-                        return p_175166_.getTags().contains(s) != flag;
+-                    }
+-                });
++                p_121530_.addPredicate(p_175166_ -> "".equals(s) ? p_175166_.getTags().isEmpty() != flag : p_175166_.getTags().contains(s) != flag);
+             }, p_121528_ -> true, Component.translatable("argument.entity.options.tag.description"));
+             register("nbt", p_121526_ -> {
+                 boolean flag = p_121526_.shouldInvertValue();
+@@ -374,7 +_,7 @@
+                 stringreader.expect('{');
+                 stringreader.skipWhitespace();
+ 
+-                while(stringreader.canRead() && stringreader.peek() != '}') {
++                while (stringreader.canRead() && stringreader.peek() != '}') {
+                     stringreader.skipWhitespace();
+                     String s = stringreader.readUnquotedString();
+                     stringreader.skipWhitespace();
+@@ -393,7 +_,7 @@
+                     p_121522_.addPredicate(p_313453_ -> {
+                         Scoreboard scoreboard = p_313453_.getServer().getScoreboard();
+ 
+-                        for(Entry<String, MinMaxBounds.Ints> entry : map.entrySet()) {
++                        for (Entry<String, MinMaxBounds.Ints> entry : map.entrySet()) {
+                             Objective objective = scoreboard.getObjective(entry.getKey());
+                             if (objective == null) {
+                                 return false;
+@@ -421,7 +_,7 @@
+                 stringreader.expect('{');
+                 stringreader.skipWhitespace();
+ 
+-                while(stringreader.canRead() && stringreader.peek() != '}') {
++                while (stringreader.canRead() && stringreader.peek() != '}') {
+                     stringreader.skipWhitespace();
+                     ResourceLocation resourcelocation = ResourceLocation.read(stringreader);
+                     stringreader.skipWhitespace();
+@@ -433,7 +_,7 @@
+                         stringreader.expect('{');
+                         stringreader.skipWhitespace();
+ 
+-                        while(stringreader.canRead() && stringreader.peek() != '}') {
++                        while (stringreader.canRead() && stringreader.peek() != '}') {
+                             stringreader.skipWhitespace();
+                             String s = stringreader.readUnquotedString();
+                             stringreader.skipWhitespace();
+@@ -451,7 +_,7 @@
+                         stringreader.expect('}');
+                         stringreader.skipWhitespace();
+                         map.put(resourcelocation, p_175169_ -> {
+-                            for(Entry<String, Predicate<CriterionProgress>> entry : map1.entrySet()) {
++                            for (Entry<String, Predicate<CriterionProgress>> entry : map1.entrySet()) {
+                                 CriterionProgress criterionprogress = p_175169_.getCriterion(entry.getKey());
+                                 if (criterionprogress == null || !entry.getValue().test(criterionprogress)) {
+                                     return false;
+@@ -474,15 +_,14 @@
+                 stringreader.expect('}');
+                 if (!map.isEmpty()) {
+                     p_121514_.addPredicate(p_300690_ -> {
+-                        if (!(p_300690_ instanceof ServerPlayer)) {
++                        if (!(p_300690_ instanceof ServerPlayer serverplayer)) {
+                             return false;
+                         } else {
+-                            ServerPlayer serverplayer = (ServerPlayer)p_300690_;
+                             PlayerAdvancements $$4 = serverplayer.getAdvancements();
+-                            ServerAdvancementManager $$5xx = serverplayer.getServer().getAdvancements();
++                            ServerAdvancementManager $$5x = serverplayer.getServer().getAdvancements();
+ 
+-                            for(Entry<ResourceLocation, Predicate<AdvancementProgress>> entry : map.entrySet()) {
+-                                AdvancementHolder advancementholder = $$5xx.get(entry.getKey());
++                            for (Entry<ResourceLocation, Predicate<AdvancementProgress>> entry : map.entrySet()) {
++                                AdvancementHolder advancementholder = $$5x.get(entry.getKey());
+                                 if (advancementholder == null || !entry.getValue().test($$4.getOrStartProgress(advancementholder))) {
+                                     return false;
+                                 }
+@@ -550,9 +_,9 @@
+     public static void suggestNames(EntitySelectorParser p_121441_, SuggestionsBuilder p_121442_) {
+         String s = p_121442_.getRemaining().toLowerCase(Locale.ROOT);
+ 
+-        for(Entry<String, EntitySelectorOptions.Option> entry : OPTIONS.entrySet()) {
++        for (Entry<String, EntitySelectorOptions.Option> entry : OPTIONS.entrySet()) {
+             if (entry.getValue().canUse.test(p_121441_) && entry.getKey().toLowerCase(Locale.ROOT).startsWith(s)) {
+-                p_121442_.suggest((String)entry.getKey() + "=", entry.getValue().description);
++                p_121442_.suggest(entry.getKey() + "=", entry.getValue().description);
+             }
+         }
+     }

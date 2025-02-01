@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/level/levelgen/structure/pieces/PiecesContainer.java
++++ b/net/minecraft/world/level/levelgen/structure/pieces/PiecesContainer.java
+@@ -35,7 +_,7 @@
+     }
+ 
+     public boolean isInsidePiece(BlockPos p_192752_) {
+-        for(StructurePiece structurepiece : this.pieces) {
++        for (StructurePiece structurepiece : this.pieces) {
+             if (structurepiece.getBoundingBox().isInside(p_192752_)) {
+                 return true;
+             }
+@@ -47,7 +_,7 @@
+     public Tag save(StructurePieceSerializationContext p_192750_) {
+         ListTag listtag = new ListTag();
+ 
+-        for(StructurePiece structurepiece : this.pieces) {
++        for (StructurePiece structurepiece : this.pieces) {
+             listtag.add(structurepiece.createTag(p_192750_));
+         }
+ 
+@@ -57,7 +_,7 @@
+     public static PiecesContainer load(ListTag p_192754_, StructurePieceSerializationContext p_192755_) {
+         List<StructurePiece> list = Lists.newArrayList();
+ 
+-        for(int i = 0; i < p_192754_.size(); ++i) {
++        for (int i = 0; i < p_192754_.size(); i++) {
+             CompoundTag compoundtag = p_192754_.getCompound(i);
+             String s = compoundtag.getString("id").toLowerCase(Locale.ROOT);
+             ResourceLocation resourcelocation = new ResourceLocation(s);

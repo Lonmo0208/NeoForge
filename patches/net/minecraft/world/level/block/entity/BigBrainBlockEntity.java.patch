@@ -1,0 +1,72 @@
+--- a/net/minecraft/world/level/block/entity/BigBrainBlockEntity.java
++++ /dev/null
+@@ -1,69 +_,0 @@
+-package net.minecraft.world.level.block.entity;
+-
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.core.HolderLookup;
+-import net.minecraft.core.component.DataComponentMap;
+-import net.minecraft.core.component.DataComponents;
+-import net.minecraft.nbt.CompoundTag;
+-import net.minecraft.world.entity.ExperienceOrb;
+-import net.minecraft.world.item.component.XpComponent;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.entity.EntityTypeTest;
+-import net.minecraft.world.phys.AABB;
+-import net.minecraft.world.phys.Vec3;
+-
+-public class BigBrainBlockEntity extends BlockEntity {
+-    public static final String TAG_AMOUNT = "amount";
+-    private static final double ORB_TARGET_DISTANCE = 10.0;
+-    private static final int TICK_RATE = 5;
+-    private static final String TAG_TICK_DELAY = "delay";
+-    private int tickDelay = 5;
+-    private int xpAmount;
+-
+-    public BigBrainBlockEntity(BlockPos p_342272_, BlockState p_341802_) {
+-        super(BlockEntityType.BIG_BRAIN, p_342272_, p_341802_);
+-    }
+-
+-    @Override
+-    public void load(CompoundTag p_342070_, HolderLookup.Provider p_340345_) {
+-        this.xpAmount = p_342070_.getInt("amount");
+-        this.tickDelay = p_342070_.getInt("delay");
+-    }
+-
+-    @Override
+-    protected void saveAdditional(CompoundTag p_340586_, HolderLookup.Provider p_342181_) {
+-        p_340586_.putInt("amount", this.xpAmount);
+-        p_340586_.putInt("delay", this.tickDelay);
+-    }
+-
+-    public int getXp() {
+-        return this.xpAmount;
+-    }
+-
+-    public void setXp(int p_342293_) {
+-        this.xpAmount = p_342293_;
+-    }
+-
+-    @Override
+-    public void collectComponents(DataComponentMap.Builder p_342587_) {
+-        super.collectComponents(p_342587_);
+-        p_342587_.set(DataComponents.XP, new XpComponent(this.xpAmount));
+-    }
+-
+-    @Override
+-    public void removeComponentsFromTag(CompoundTag p_341824_) {
+-        p_341824_.remove("amount");
+-    }
+-
+-    public static void tick(Level p_342220_, BlockPos p_341725_, BlockState p_342527_, BigBrainBlockEntity p_341518_) {
+-        if (--p_341518_.tickDelay <= 0) {
+-            p_341518_.tickDelay = 5;
+-            AABB aabb = AABB.ofSize(Vec3.atCenterOf(p_341725_), 10.0, 10.0, 10.0);
+-
+-            for(ExperienceOrb experienceorb : p_342220_.getEntities(EntityTypeTest.forClass(ExperienceOrb.class), aabb, p_342361_ -> true)) {
+-                experienceorb.targetBlock(p_341725_);
+-            }
+-        }
+-    }
+-}

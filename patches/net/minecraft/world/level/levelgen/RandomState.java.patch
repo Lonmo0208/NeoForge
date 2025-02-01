@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/level/levelgen/RandomState.java
++++ b/net/minecraft/world/level/levelgen/RandomState.java
+@@ -25,11 +_,7 @@
+     private final Map<ResourceLocation, PositionalRandomFactory> positionalRandoms;
+ 
+     public static RandomState create(HolderGetter.Provider p_255935_, ResourceKey<NoiseGeneratorSettings> p_256314_, long p_256595_) {
+-        return create(
+-            p_255935_.<NoiseGeneratorSettings>lookupOrThrow(Registries.NOISE_SETTINGS).getOrThrow(p_256314_).value(),
+-            p_255935_.lookupOrThrow(Registries.NOISE),
+-            p_256595_
+-        );
++        return create(p_255935_.lookupOrThrow(Registries.NOISE_SETTINGS).getOrThrow(p_256314_).value(), p_255935_.lookupOrThrow(Registries.NOISE), p_256595_);
+     }
+ 
+     public static RandomState create(NoiseGeneratorSettings p_255761_, HolderGetter<NormalNoise.NoiseParameters> p_256649_, long p_255965_) {

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/recipebook/AbstractFurnaceRecipeBookComponent.java
++++ b/net/minecraft/client/gui/screens/recipebook/AbstractFurnaceRecipeBookComponent.java
+@@ -58,7 +_,7 @@
+ 
+         Iterator<Ingredient> iterator = nonnulllist.iterator();
+ 
+-        for(int i = 0; i < 2; ++i) {
++        for (int i = 0; i < 2; i++) {
+             if (!iterator.hasNext()) {
+                 return;
+             }

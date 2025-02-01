@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/goal/RangedAttackGoal.java
++++ b/net/minecraft/world/entity/ai/goal/RangedAttackGoal.java
+@@ -72,7 +_,7 @@
+         double d0 = this.mob.distanceToSqr(this.target.getX(), this.target.getY(), this.target.getZ());
+         boolean flag = this.mob.getSensing().hasLineOfSight(this.target);
+         if (flag) {
+-            ++this.seeTime;
++            this.seeTime++;
+         } else {
+             this.seeTime = 0;
+         }

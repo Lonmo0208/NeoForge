@@ -1,0 +1,47 @@
+--- a/net/minecraft/world/level/levelgen/feature/RootSystemFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RootSystemFeature.java
+@@ -38,7 +_,7 @@
+     private static boolean spaceForTree(WorldGenLevel p_160236_, RootSystemConfiguration p_160237_, BlockPos p_160238_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = p_160238_.mutable();
+ 
+-        for(int i = 1; i <= p_160237_.requiredVerticalSpaceForTree; ++i) {
++        for (int i = 1; i <= p_160237_.requiredVerticalSpaceForTree; i++) {
+             blockpos$mutableblockpos.move(Direction.UP);
+             BlockState blockstate = p_160236_.getBlockState(blockpos$mutableblockpos);
+             if (!isAllowedTreeSpace(blockstate, i, p_160237_.allowedVerticalWaterForTree)) {
+@@ -66,7 +_,7 @@
+         BlockPos.MutableBlockPos p_225207_,
+         BlockPos p_225208_
+     ) {
+-        for(int i = 0; i < p_225205_.rootColumnMaxHeight; ++i) {
++        for (int i = 0; i < p_225205_.rootColumnMaxHeight; i++) {
+             p_225207_.move(Direction.UP);
+             if (p_225205_.allowedTreePosition.test(p_225203_, p_225207_) && spaceForTree(p_225203_, p_225205_, p_225207_)) {
+                 BlockPos blockpos = p_225207_.below();
+@@ -89,7 +_,7 @@
+         int j = p_225223_.getZ();
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = p_225223_.mutable();
+ 
+-        for(int k = p_225223_.getY(); k < p_225224_; ++k) {
++        for (int k = p_225223_.getY(); k < p_225224_; k++) {
+             placeRootedDirt(p_225225_, p_225226_, p_225227_, i, j, blockpos$mutableblockpos.set(i, k, j));
+         }
+     }
+@@ -100,7 +_,7 @@
+         int i = p_225211_.rootRadius;
+         Predicate<BlockState> predicate = p_204762_ -> p_204762_.is(p_225211_.rootReplaceable);
+ 
+-        for(int j = 0; j < p_225211_.rootPlacementAttempts; ++j) {
++        for (int j = 0; j < p_225211_.rootPlacementAttempts; j++) {
+             p_225215_.setWithOffset(p_225215_, p_225212_.nextInt(i) - p_225212_.nextInt(i), 0, p_225212_.nextInt(i) - p_225212_.nextInt(i));
+             if (predicate.test(p_225210_.getBlockState(p_225215_))) {
+                 p_225210_.setBlock(p_225215_, p_225211_.rootStateProvider.getState(p_225212_, p_225215_), 2);
+@@ -117,7 +_,7 @@
+         int i = p_225218_.hangingRootRadius;
+         int j = p_225218_.hangingRootsVerticalSpan;
+ 
+-        for(int k = 0; k < p_225218_.hangingRootPlacementAttempts; ++k) {
++        for (int k = 0; k < p_225218_.hangingRootPlacementAttempts; k++) {
+             p_225221_.setWithOffset(
+                 p_225220_,
+                 p_225219_.nextInt(i) - p_225219_.nextInt(i),

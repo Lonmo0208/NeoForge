@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/placement/PlacedFeature.java
++++ b/net/minecraft/world/level/levelgen/placement/PlacedFeature.java
+@@ -44,7 +_,7 @@
+     private boolean placeWithContext(PlacementContext p_226369_, RandomSource p_226370_, BlockPos p_226371_) {
+         Stream<BlockPos> stream = Stream.of(p_226371_);
+ 
+-        for(PlacementModifier placementmodifier : this.placement) {
++        for (PlacementModifier placementmodifier : this.placement) {
+             stream = stream.flatMap(p_226376_ -> placementmodifier.getPositions(p_226369_, p_226370_, p_226376_));
+         }
+ 

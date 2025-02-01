@@ -1,5 +1,148 @@
 --- a/net/minecraft/core/component/DataComponentPatch.java
 +++ b/net/minecraft/core/component/DataComponentPatch.java
+@@ -1,5 +_,6 @@
+ package net.minecraft.core.component;
+ 
++import com.google.common.collect.Sets;
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.DataResult;
+ import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+@@ -9,26 +_,24 @@
+ import java.util.Optional;
+ import java.util.Set;
+ import java.util.Map.Entry;
++import java.util.function.Predicate;
+ import javax.annotation.Nullable;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+ import net.minecraft.network.codec.StreamCodec;
+ import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.util.Unit;
+ 
+ public final class DataComponentPatch {
+     public static final DataComponentPatch EMPTY = new DataComponentPatch(Reference2ObjectMaps.emptyMap());
+-    public static final Codec<DataComponentPatch> CODEC = ExtraCodecs.<DataComponentPatch.PatchKey, Object>unboundedDispatchMap(
+-            DataComponentPatch.PatchKey.CODEC, DataComponentPatch.PatchKey::valueCodec
+-        )
++    public static final Codec<DataComponentPatch> CODEC = Codec.<DataComponentPatch.PatchKey, Object>dispatchedMap(DataComponentPatch.PatchKey.CODEC, DataComponentPatch.PatchKey::valueCodec)
+         .xmap(p_330885_ -> {
+             if (p_330885_.isEmpty()) {
+                 return EMPTY;
+             } else {
+                 Reference2ObjectMap<DataComponentType<?>, Optional<?>> reference2objectmap = new Reference2ObjectArrayMap<>(p_330885_.size());
+     
+-                for(Entry<DataComponentPatch.PatchKey, ?> entry : p_330885_.entrySet()) {
++                for (Entry<DataComponentPatch.PatchKey, ?> entry : p_330885_.entrySet()) {
+                     DataComponentPatch.PatchKey datacomponentpatch$patchkey = entry.getKey();
+                     if (datacomponentpatch$patchkey.removed()) {
+                         reference2objectmap.put(datacomponentpatch$patchkey.type(), Optional.empty());
+@@ -42,7 +_,7 @@
+         }, p_332132_ -> {
+             Reference2ObjectMap<DataComponentPatch.PatchKey, Object> reference2objectmap = new Reference2ObjectArrayMap<>(p_332132_.map.size());
+     
+-            for(Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(p_332132_.map)) {
++            for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(p_332132_.map)) {
+                 DataComponentType<?> datacomponenttype = entry.getKey();
+                 if (!datacomponenttype.isTransient()) {
+                     Optional<?> optional = entry.getValue();
+@@ -65,13 +_,13 @@
+             } else {
+                 Reference2ObjectMap<DataComponentType<?>, Optional<?>> reference2objectmap = new Reference2ObjectArrayMap<>(i + j);
+ 
+-                for(int k = 0; k < i; ++k) {
++                for (int k = 0; k < i; k++) {
+                     DataComponentType<?> datacomponenttype = DataComponentType.STREAM_CODEC.decode(p_331850_);
+                     Object object = datacomponenttype.streamCodec().decode(p_331850_);
+                     reference2objectmap.put(datacomponenttype, Optional.of(object));
+                 }
+ 
+-                for(int l = 0; l < j; ++l) {
++                for (int l = 0; l < j; l++) {
+                     DataComponentType<?> datacomponenttype1 = DataComponentType.STREAM_CODEC.decode(p_331850_);
+                     reference2objectmap.put(datacomponenttype1, Optional.empty());
+                 }
+@@ -88,20 +_,20 @@
+                 int i = 0;
+                 int j = 0;
+ 
+-                for(it.unimi.dsi.fastutil.objects.Reference2ObjectMap.Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(
++                for (it.unimi.dsi.fastutil.objects.Reference2ObjectMap.Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(
+                     p_330346_.map
+                 )) {
+                     if (entry.getValue().isPresent()) {
+-                        ++i;
++                        i++;
+                     } else {
+-                        ++j;
++                        j++;
+                     }
+                 }
+ 
+                 p_330636_.writeVarInt(i);
+                 p_330636_.writeVarInt(j);
+ 
+-                for(it.unimi.dsi.fastutil.objects.Reference2ObjectMap.Entry<DataComponentType<?>, Optional<?>> entry1 : Reference2ObjectMaps.fastIterable(
++                for (it.unimi.dsi.fastutil.objects.Reference2ObjectMap.Entry<DataComponentType<?>, Optional<?>> entry1 : Reference2ObjectMaps.fastIterable(
+                     p_330346_.map
+                 )) {
+                     Optional<?> optional = entry1.getValue();
+@@ -112,7 +_,7 @@
+                     }
+                 }
+ 
+-                for(it.unimi.dsi.fastutil.objects.Reference2ObjectMap.Entry<DataComponentType<?>, Optional<?>> entry2 : Reference2ObjectMaps.fastIterable(
++                for (it.unimi.dsi.fastutil.objects.Reference2ObjectMap.Entry<DataComponentType<?>, Optional<?>> entry2 : Reference2ObjectMaps.fastIterable(
+                     p_330346_.map
+                 )) {
+                     if (entry2.getValue().isEmpty()) {
+@@ -151,10 +_,37 @@
+         return this.map.size();
+     }
+ 
++    public DataComponentPatch forget(Predicate<DataComponentType<?>> p_338629_) {
++        if (this.isEmpty()) {
++            return EMPTY;
++        } else {
++            Reference2ObjectMap<DataComponentType<?>, Optional<?>> reference2objectmap = new Reference2ObjectArrayMap<>(this.map);
++            reference2objectmap.keySet().removeIf(p_338629_);
++            return reference2objectmap.isEmpty() ? EMPTY : new DataComponentPatch(reference2objectmap);
++        }
++    }
++
+     public boolean isEmpty() {
+         return this.map.isEmpty();
+     }
+ 
++    public DataComponentPatch.SplitResult split() {
++        if (this.isEmpty()) {
++            return DataComponentPatch.SplitResult.EMPTY;
++        } else {
++            DataComponentMap.Builder datacomponentmap$builder = DataComponentMap.builder();
++            Set<DataComponentType<?>> set = Sets.newIdentityHashSet();
++            this.map.forEach((p_337451_, p_337452_) -> {
++                if (p_337452_.isPresent()) {
++                    datacomponentmap$builder.setUnchecked((DataComponentType<?>)p_337451_, p_337452_.get());
++                } else {
++                    set.add((DataComponentType<?>)p_337451_);
++                }
++            });
++            return new DataComponentPatch.SplitResult(datacomponentmap$builder.build(), set);
++        }
++    }
++
+     @Override
+     public boolean equals(Object p_331686_) {
+         if (this == p_331686_) {
+@@ -183,7 +_,7 @@
+         stringbuilder.append('{');
+         boolean flag = true;
+ 
+-        for(Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(p_330935_)) {
++        for (Entry<DataComponentType<?>, Optional<?>> entry : Reference2ObjectMaps.fastIterable(p_330935_)) {
+             if (flag) {
+                 flag = false;
+             } else {
 @@ -212,6 +_,7 @@
          }
  
@@ -8,3 +151,37 @@
              this.map.put(p_332004_, Optional.of(p_331566_));
              return this;
          }
+@@ -226,7 +_,7 @@
+         }
+ 
+         public DataComponentPatch build() {
+-            return new DataComponentPatch(this.map);
++            return this.map.isEmpty() ? DataComponentPatch.EMPTY : new DataComponentPatch(this.map);
+         }
+     }
+ 
+@@ -249,17 +_,21 @@
+                             : DataResult.success(new DataComponentPatch.PatchKey(datacomponenttype, flag));
+                     }
+                 },
+-                p_330542_ -> {
+-                    DataComponentType<?> datacomponenttype = p_330542_.type();
++                p_339345_ -> {
++                    DataComponentType<?> datacomponenttype = p_339345_.type();
+                     ResourceLocation resourcelocation = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(datacomponenttype);
+                     return resourcelocation == null
+                         ? DataResult.error(() -> "Unregistered component: " + datacomponenttype)
+-                        : DataResult.success(p_330542_.removed() ? "!" + resourcelocation : resourcelocation.toString());
++                        : DataResult.success(p_339345_.removed() ? "!" + resourcelocation : resourcelocation.toString());
+                 }
+             );
+ 
+         public Codec<?> valueCodec() {
+             return this.removed ? Codec.unit(Unit.INSTANCE) : this.type.codecOrThrow();
+         }
++    }
++
++    public static record SplitResult(DataComponentMap added, Set<DataComponentType<?>> removed) {
++        public static final DataComponentPatch.SplitResult EMPTY = new DataComponentPatch.SplitResult(DataComponentMap.EMPTY, Set.of());
+     }
+ }

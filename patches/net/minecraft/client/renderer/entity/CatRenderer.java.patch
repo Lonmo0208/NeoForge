@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/entity/CatRenderer.java
++++ b/net/minecraft/client/renderer/entity/CatRenderer.java
+@@ -38,7 +_,7 @@
+             p_113957_.mulPose(Axis.ZP.rotationDegrees(Mth.rotLerp(f, 0.0F, 90.0F)));
+             BlockPos blockpos = p_113956_.blockPosition();
+ 
+-            for(Player player : p_113956_.level().getEntitiesOfClass(Player.class, new AABB(blockpos).inflate(2.0, 2.0, 2.0))) {
++            for (Player player : p_113956_.level().getEntitiesOfClass(Player.class, new AABB(blockpos).inflate(2.0, 2.0, 2.0))) {
+                 if (player.isSleeping()) {
+                     p_113957_.translate(0.15F * f, 0.0F, 0.0F);
+                     break;

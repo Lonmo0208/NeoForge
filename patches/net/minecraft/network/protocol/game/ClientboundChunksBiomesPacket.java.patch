@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/protocol/game/ClientboundChunksBiomesPacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundChunksBiomesPacket.java
+@@ -51,7 +_,7 @@
+         private static int calculateChunkSize(LevelChunk p_275324_) {
+             int i = 0;
+ 
+-            for(LevelChunkSection levelchunksection : p_275324_.getSections()) {
++            for (LevelChunkSection levelchunksection : p_275324_.getSections()) {
+                 i += levelchunksection.getBiomes().getSerializedSize();
+             }
+ 
+@@ -69,7 +_,7 @@
+         }
+ 
+         public static void extractChunkData(FriendlyByteBuf p_275626_, LevelChunk p_275570_) {
+-            for(LevelChunkSection levelchunksection : p_275570_.getSections()) {
++            for (LevelChunkSection levelchunksection : p_275570_.getSections()) {
+                 levelchunksection.getBiomes().write(p_275626_);
+             }
+         }

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/biome/BiomeManager.java
++++ b/net/minecraft/world/level/biome/BiomeManager.java
+@@ -41,7 +_,7 @@
+         int k1 = 0;
+         double d3 = Double.POSITIVE_INFINITY;
+ 
+-        for(int l1 = 0; l1 < 8; ++l1) {
++        for (int l1 = 0; l1 < 8; l1++) {
+             boolean flag = (l1 & 4) == 0;
+             boolean flag1 = (l1 & 2) == 0;
+             boolean flag2 = (l1 & 1) == 0;

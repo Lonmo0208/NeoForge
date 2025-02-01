@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/datafix/fixes/StatsRenameFix.java
++++ b/net/minecraft/util/datafix/fixes/StatsRenameFix.java
+@@ -33,7 +_,7 @@
+         TaggedChoiceType<?> taggedchoicetype = opticfinder.type()
+             .findChoiceType("type", -1)
+             .orElseThrow(() -> new IllegalStateException("Can't find choice type for criteria"));
+-        Type<?> type2 = (Type)taggedchoicetype.types().get("minecraft:custom");
++        Type<?> type2 = taggedchoicetype.types().get("minecraft:custom");
+         if (type2 == null) {
+             throw new IllegalStateException("Failed to find custom criterion type variant");
+         } else {

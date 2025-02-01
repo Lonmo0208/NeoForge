@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/datafix/fixes/BlockRenameFix.java
++++ b/net/minecraft/util/datafix/fixes/BlockRenameFix.java
+@@ -43,7 +_,7 @@
+                 this.getInputSchema().getType(References.FLAT_BLOCK_STATE),
+                 p_315924_ -> p_315924_.update(
+                         DSL.remainderFinder(),
+-                        p_315923_ -> DataFixUtils.orElse(p_315923_.asString().result().map(this::fixFlatBlockState).map(p_315923_::createString), p_315923_)
++                        p_337603_ -> DataFixUtils.orElse(p_337603_.asString().result().map(this::fixFlatBlockState).map(p_337603_::createString), p_337603_)
+                     )
+             );
+             return TypeRewriteRule.seq(typerewriterule, typerewriterule1, typerewriterule2);

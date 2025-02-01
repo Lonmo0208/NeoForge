@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket.java
+@@ -58,7 +_,7 @@
+                     p_323148_.readUUID()
+                 );
+     
+-                for(ClientboundPlayerInfoUpdatePacket.Action clientboundplayerinfoupdatepacket$action : this.actions) {
++                for (ClientboundPlayerInfoUpdatePacket.Action clientboundplayerinfoupdatepacket$action : this.actions) {
+                     clientboundplayerinfoupdatepacket$action.reader.read(clientboundplayerinfoupdatepacket$entrybuilder, (RegistryFriendlyByteBuf)p_323148_);
+                 }
+     
+@@ -72,7 +_,7 @@
+         p_323752_.writeCollection(this.entries, (p_323146_, p_323147_) -> {
+             p_323146_.writeUUID(p_323147_.profileId());
+ 
+-            for(ClientboundPlayerInfoUpdatePacket.Action clientboundplayerinfoupdatepacket$action : this.actions) {
++            for (ClientboundPlayerInfoUpdatePacket.Action clientboundplayerinfoupdatepacket$action : this.actions) {
+                 clientboundplayerinfoupdatepacket$action.writer.write((RegistryFriendlyByteBuf)p_323146_, p_323147_);
+             }
+         });

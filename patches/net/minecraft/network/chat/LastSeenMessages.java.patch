@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/chat/LastSeenMessages.java
++++ b/net/minecraft/network/chat/LastSeenMessages.java
+@@ -18,7 +_,7 @@
+     public void updateSignature(SignatureUpdater.Output p_251665_) throws SignatureException {
+         p_251665_.update(Ints.toByteArray(this.entries.size()));
+ 
+-        for(MessageSignature messagesignature : this.entries) {
++        for (MessageSignature messagesignature : this.entries) {
+             p_251665_.update(messagesignature.bytes());
+         }
+     }
+@@ -41,7 +_,7 @@
+         public Optional<LastSeenMessages> unpack(MessageSignatureCache p_253745_) {
+             List<MessageSignature> list = new ArrayList<>(this.entries.size());
+ 
+-            for(MessageSignature.Packed messagesignature$packed : this.entries) {
++            for (MessageSignature.Packed messagesignature$packed : this.entries) {
+                 Optional<MessageSignature> optional = messagesignature$packed.unpack(p_253745_);
+                 if (optional.isEmpty()) {
+                     return Optional.empty();

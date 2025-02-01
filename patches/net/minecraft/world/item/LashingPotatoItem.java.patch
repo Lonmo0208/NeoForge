@@ -1,0 +1,76 @@
+--- a/net/minecraft/world/item/LashingPotatoItem.java
++++ /dev/null
+@@ -1,73 +_,0 @@
+-package net.minecraft.world.item;
+-
+-import net.minecraft.sounds.SoundEvents;
+-import net.minecraft.sounds.SoundSource;
+-import net.minecraft.stats.Stats;
+-import net.minecraft.world.InteractionHand;
+-import net.minecraft.world.InteractionResultHolder;
+-import net.minecraft.world.entity.LivingEntity;
+-import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.entity.projectile.LashingPotatoHook;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.gameevent.GameEvent;
+-
+-public class LashingPotatoItem extends Item {
+-    public LashingPotatoItem(Item.Properties p_341869_) {
+-        super(p_341869_);
+-    }
+-
+-    @Override
+-    public InteractionResultHolder<ItemStack> use(Level p_342589_, Player p_342050_, InteractionHand p_340531_) {
+-        ItemStack itemstack = p_342050_.getItemInHand(p_340531_);
+-        LashingPotatoHook lashingpotatohook = p_342050_.grappling;
+-        if (lashingpotatohook != null) {
+-            retrieve(p_342589_, p_342050_, lashingpotatohook);
+-        } else {
+-            if (!p_342589_.isClientSide) {
+-                itemstack.hurtAndBreak(1, p_342050_, LivingEntity.getSlotForHand(p_340531_));
+-            }
+-
+-            this.shoot(p_342589_, p_342050_);
+-        }
+-
+-        return InteractionResultHolder.sidedSuccess(itemstack, p_342589_.isClientSide);
+-    }
+-
+-    private void shoot(Level p_340583_, Player p_341983_) {
+-        if (!p_340583_.isClientSide) {
+-            p_340583_.addFreshEntity(new LashingPotatoHook(p_340583_, p_341983_));
+-        }
+-
+-        p_341983_.awardStat(Stats.ITEM_USED.get(this));
+-        p_340583_.playSound(
+-            null,
+-            p_341983_.getX(),
+-            p_341983_.getY(),
+-            p_341983_.getZ(),
+-            SoundEvents.FISHING_BOBBER_THROW,
+-            SoundSource.NEUTRAL,
+-            0.5F,
+-            0.4F / (p_340583_.getRandom().nextFloat() * 0.4F + 0.8F)
+-        );
+-        p_341983_.gameEvent(GameEvent.ITEM_INTERACT_START);
+-    }
+-
+-    private static void retrieve(Level p_342100_, Player p_342422_, LashingPotatoHook p_341953_) {
+-        if (!p_342100_.isClientSide()) {
+-            p_341953_.discard();
+-            p_342422_.grappling = null;
+-        }
+-
+-        p_342100_.playSound(
+-            null,
+-            p_342422_.getX(),
+-            p_342422_.getY(),
+-            p_342422_.getZ(),
+-            SoundEvents.FISHING_BOBBER_RETRIEVE,
+-            SoundSource.NEUTRAL,
+-            1.0F,
+-            0.4F / (p_342100_.getRandom().nextFloat() * 0.4F + 0.8F)
+-        );
+-        p_342422_.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+-    }
+-}

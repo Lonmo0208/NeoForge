@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsNotificationsScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsNotificationsScreen.java
+@@ -166,7 +_,7 @@
+         p_275628_.subscribe(p_275619_.notificationsTask, p_274637_ -> {
+             hasUnseenNotifications = false;
+ 
+-            for(RealmsNotification realmsnotification : p_274637_) {
++            for (RealmsNotification realmsnotification : p_274637_) {
+                 if (!realmsnotification.seen()) {
+                     hasUnseenNotifications = true;
+                     break;

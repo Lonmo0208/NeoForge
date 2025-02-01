@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/vehicle/MinecartHopper.java
++++ b/net/minecraft/world/entity/vehicle/MinecartHopper.java
+@@ -94,7 +_,7 @@
+         if (HopperBlockEntity.suckInItems(this.level(), this)) {
+             return true;
+         } else {
+-            for(ItemEntity itementity : this.level()
++            for (ItemEntity itementity : this.level()
+                 .getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(0.25, 0.0, 0.25), EntitySelector.ENTITY_STILL_ALIVE)) {
+                 if (HopperBlockEntity.addItem(this, itementity)) {
+                     return true;

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
++++ b/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
+@@ -55,7 +_,7 @@
+         List<Player> list = this.getPlayersWithContainerOpen(p_155477_, p_155478_);
+         this.maxInteractionRange = 0.0;
+ 
+-        for(Player player : list) {
++        for (Player player : list) {
+             this.maxInteractionRange = Math.max(player.blockInteractionRange(), this.maxInteractionRange);
+         }
+ 

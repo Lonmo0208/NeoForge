@@ -1,0 +1,16 @@
+--- a/net/minecraft/server/players/UserWhiteList.java
++++ b/net/minecraft/server/players/UserWhiteList.java
+@@ -21,12 +_,7 @@
+ 
+     @Override
+     public String[] getUserList() {
+-        return this.getEntries()
+-            .stream()
+-            .map(StoredUserEntry::getUser)
+-            .filter(Objects::nonNull)
+-            .map(GameProfile::getName)
+-            .toArray(p_144015_ -> new String[p_144015_]);
++        return this.getEntries().stream().map(StoredUserEntry::getUser).filter(Objects::nonNull).map(GameProfile::getName).toArray(String[]::new);
+     }
+ 
+     protected String getKeyForUser(GameProfile p_11458_) {

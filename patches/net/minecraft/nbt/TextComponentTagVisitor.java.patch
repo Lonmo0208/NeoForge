@@ -1,0 +1,71 @@
+--- a/net/minecraft/nbt/TextComponentTagVisitor.java
++++ b/net/minecraft/nbt/TextComponentTagVisitor.java
+@@ -98,7 +_,7 @@
+         MutableComponent mutablecomponent = Component.literal("[").append(component).append(";");
+         byte[] abyte = p_178256_.getAsByteArray();
+ 
+-        for(int i = 0; i < abyte.length; ++i) {
++        for (int i = 0; i < abyte.length; i++) {
+             MutableComponent mutablecomponent1 = Component.literal(String.valueOf(abyte[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+             mutablecomponent.append(" ").append(mutablecomponent1).append(component);
+             if (i != abyte.length - 1) {
+@@ -116,7 +_,7 @@
+         MutableComponent mutablecomponent = Component.literal("[").append(component).append(";");
+         int[] aint = p_178268_.getAsIntArray();
+ 
+-        for(int i = 0; i < aint.length; ++i) {
++        for (int i = 0; i < aint.length; i++) {
+             mutablecomponent.append(" ").append(Component.literal(String.valueOf(aint[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
+             if (i != aint.length - 1) {
+                 mutablecomponent.append(ELEMENT_SEPARATOR);
+@@ -133,7 +_,7 @@
+         MutableComponent mutablecomponent = Component.literal("[").append(component).append(";");
+         long[] along = p_178274_.getAsLongArray();
+ 
+-        for(int i = 0; i < along.length; ++i) {
++        for (int i = 0; i < along.length; i++) {
+             Component component1 = Component.literal(String.valueOf(along[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+             mutablecomponent.append(" ").append(component1).append(component);
+             if (i != along.length - 1) {
+@@ -153,7 +_,7 @@
+             String s = ELEMENT_SEPARATOR + " ";
+             MutableComponent mutablecomponent2 = Component.literal("[");
+ 
+-            for(int j = 0; j < p_178272_.size(); ++j) {
++            for (int j = 0; j < p_178272_.size(); j++) {
+                 if (j != 0) {
+                     mutablecomponent2.append(s);
+                 }
+@@ -169,7 +_,7 @@
+                 mutablecomponent.append("\n");
+             }
+ 
+-            for(int i = 0; i < p_178272_.size(); ++i) {
++            for (int i = 0; i < p_178272_.size(); i++) {
+                 MutableComponent mutablecomponent1 = Component.literal(Strings.repeat(this.indentation, this.depth + 1));
+                 mutablecomponent1.append(new TextComponentTagVisitor(this.indentation, this.depth + 1).visit(p_178272_.get(i)));
+                 if (i != p_178272_.size() - 1) {
+@@ -205,10 +_,11 @@
+                 mutablecomponent.append("\n");
+             }
+ 
+-            MutableComponent mutablecomponent1;
+-            for(Iterator<String> iterator = collection.iterator(); iterator.hasNext(); mutablecomponent.append(mutablecomponent1)) {
++            Iterator<String> iterator = collection.iterator();
++
++            while (iterator.hasNext()) {
+                 String s = iterator.next();
+-                mutablecomponent1 = Component.literal(Strings.repeat(this.indentation, this.depth + 1))
++                MutableComponent mutablecomponent1 = Component.literal(Strings.repeat(this.indentation, this.depth + 1))
+                     .append(handleEscapePretty(s))
+                     .append(NAME_VALUE_SEPARATOR)
+                     .append(" ")
+@@ -216,6 +_,8 @@
+                 if (iterator.hasNext()) {
+                     mutablecomponent1.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? " " : "\n");
+                 }
++
++                mutablecomponent.append(mutablecomponent1);
+             }
+ 
+             if (!this.indentation.isEmpty()) {

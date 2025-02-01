@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/ai/behavior/MoveToTargetSink.java
++++ b/net/minecraft/world/entity/ai/behavior/MoveToTargetSink.java
+@@ -46,7 +_,7 @@
+ 
+     protected boolean checkExtraStartConditions(ServerLevel p_23583_, Mob p_23584_) {
+         if (this.remainingCooldown > 0) {
+-            --this.remainingCooldown;
++            this.remainingCooldown--;
+             return false;
+         } else {
+             Brain<?> brain = p_23584_.getBrain();
+@@ -147,7 +_,6 @@
+     }
+ 
+     private static boolean isWalkTargetSpectator(WalkTarget p_277420_) {
+-        PositionTracker positiontracker = p_277420_.getTarget();
+-        return positiontracker instanceof EntityTracker entitytracker ? entitytracker.getEntity().isSpectator() : false;
++        return p_277420_.getTarget() instanceof EntityTracker entitytracker ? entitytracker.getEntity().isSpectator() : false;
+     }
+ }

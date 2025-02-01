@@ -1,0 +1,11 @@
+--- a/net/minecraft/data/models/blockstates/Condition.java
++++ b/net/minecraft/data/models/blockstates/Condition.java
+@@ -66,7 +_,7 @@
+         private final Map<Property<?>, String> terms = Maps.newHashMap();
+ 
+         private static <T extends Comparable<T>> String joinValues(Property<T> p_125187_, Stream<T> p_125188_) {
+-            return p_125188_.<String>map(p_125187_::getName).collect(Collectors.joining("|"));
++            return p_125188_.<CharSequence>map(p_125187_::getName).collect(Collectors.joining("|"));
+         }
+ 
+         private static <T extends Comparable<T>> String getTerm(Property<T> p_125195_, T p_125196_, T[] p_125197_) {

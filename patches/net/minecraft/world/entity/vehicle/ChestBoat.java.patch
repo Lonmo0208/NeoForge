@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/vehicle/ChestBoat.java
++++ b/net/minecraft/world/entity/vehicle/ChestBoat.java
+@@ -106,7 +_,7 @@
+ 
+     @Override
+     public Item getDropItem() {
+-        return switch(this.getVariant()) {
++        return switch (this.getVariant()) {
+             case SPRUCE -> Items.SPRUCE_CHEST_BOAT;
+             case BIRCH -> Items.BIRCH_CHEST_BOAT;
+             case JUNGLE -> Items.JUNGLE_CHEST_BOAT;

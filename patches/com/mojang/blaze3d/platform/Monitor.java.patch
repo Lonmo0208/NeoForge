@@ -1,0 +1,20 @@
+--- a/com/mojang/blaze3d/platform/Monitor.java
++++ b/com/mojang/blaze3d/platform/Monitor.java
+@@ -30,7 +_,7 @@
+         this.videoModes.clear();
+         Buffer buffer = GLFW.glfwGetVideoModes(this.monitor);
+ 
+-        for(int i = buffer.limit() - 1; i >= 0; --i) {
++        for (int i = buffer.limit() - 1; i >= 0; i--) {
+             buffer.position(i);
+             VideoMode videomode = new VideoMode(buffer);
+             if (videomode.getRedBits() >= 8 && videomode.getGreenBits() >= 8 && videomode.getBlueBits() >= 8) {
+@@ -52,7 +_,7 @@
+         if (p_84949_.isPresent()) {
+             VideoMode videomode = p_84949_.get();
+ 
+-            for(VideoMode videomode1 : this.videoModes) {
++            for (VideoMode videomode1 : this.videoModes) {
+                 if (videomode1.equals(videomode)) {
+                     return videomode1;
+                 }

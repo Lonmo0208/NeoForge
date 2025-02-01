@@ -1,0 +1,23 @@
+--- a/net/minecraft/util/profiling/metrics/MetricSampler.java
++++ b/net/minecraft/util/profiling/metrics/MetricSampler.java
+@@ -93,16 +_,16 @@
+     public MetricSampler.SamplerResult result() {
+         Int2DoubleMap int2doublemap = new Int2DoubleOpenHashMap();
+         int i = Integer.MIN_VALUE;
++        int j = Integer.MIN_VALUE;
+ 
+-        int j;
+-        int k;
+-        for(j = Integer.MIN_VALUE; this.values.isReadable(8); j = k) {
+-            k = this.ticks.readInt();
++        while (this.values.isReadable(8)) {
++            int k = this.ticks.readInt();
+             if (i == Integer.MIN_VALUE) {
+                 i = k;
+             }
+ 
+             int2doublemap.put(k, this.values.readDouble());
++            j = k;
+         }
+ 
+         return new MetricSampler.SamplerResult(i, j, int2doublemap);

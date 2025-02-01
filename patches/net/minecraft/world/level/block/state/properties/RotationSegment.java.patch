@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/state/properties/RotationSegment.java
++++ b/net/minecraft/world/level/block/state/properties/RotationSegment.java
+@@ -25,7 +_,7 @@
+     }
+ 
+     public static Optional<Direction> convertToDirection(int p_250978_) {
+-        Direction direction = switch(p_250978_) {
++        Direction direction = switch (p_250978_) {
+             case 0 -> Direction.NORTH;
+             case 4 -> Direction.EAST;
+             case 8 -> Direction.SOUTH;

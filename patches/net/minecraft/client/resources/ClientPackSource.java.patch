@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/resources/ClientPackSource.java
++++ b/net/minecraft/client/resources/ClientPackSource.java
+@@ -75,7 +_,7 @@
+     public static VanillaPackResources createVanillaPackSource(Path p_250749_) {
+         VanillaPackResourcesBuilder vanillapackresourcesbuilder = new VanillaPackResourcesBuilder()
+             .setMetadata(BUILT_IN_METADATA)
+-            .exposeNamespace("minecraft", "realms", "nothingtoseeheremovealong");
++            .exposeNamespace("minecraft", "realms");
+         return vanillapackresourcesbuilder.applyDevelopmentConfig()
+             .pushJarResources()
+             .pushAssetPath(PackType.CLIENT_RESOURCES, p_250749_)

@@ -1,0 +1,36 @@
+--- a/net/minecraft/util/datafix/fixes/EntityEquipmentToArmorAndHandFix.java
++++ b/net/minecraft/util/datafix/fixes/EntityEquipmentToArmorAndHandFix.java
+@@ -49,9 +_,9 @@
+                 Optional<List<IS>> optional = p_326763_.getOptional(opticfinder1);
+                 if (optional.isPresent()) {
+                     List<IS> list = optional.get();
+-                    IS is = (IS)((Pair)p_15427_.read(dynamic.emptyMap())
+-                            .result()
+-                            .orElseThrow(() -> new IllegalStateException("Could not parse newly created empty itemstack.")))
++                    IS is = p_15427_.read(dynamic.emptyMap())
++                        .result()
++                        .orElseThrow(() -> new IllegalStateException("Could not parse newly created empty itemstack."))
+                         .getFirst();
+                     if (!list.isEmpty()) {
+                         either = Either.left(Lists.newArrayList(list.get(0), is));
+@@ -60,7 +_,7 @@
+                     if (list.size() > 1) {
+                         List<IS> list1 = Lists.newArrayList(is, is, is, is);
+     
+-                        for(int i = 1; i < Math.min(list.size(), 5); ++i) {
++                        for (int i = 1; i < Math.min(list.size(), 5); i++) {
+                             list1.set(i - 1, list.get(i));
+                         }
+     
+@@ -71,7 +_,10 @@
+                 Dynamic<?> dynamic2 = dynamic;
+                 Optional<? extends Stream<? extends Dynamic<?>>> optional1 = dynamic.get("DropChances").asStreamOpt().result();
+                 if (optional1.isPresent()) {
+-                    Iterator<? extends Dynamic<?>> iterator = Stream.concat(optional1.get(), Stream.generate(() -> dynamic2.createInt(0))).iterator();
++                    Iterator<? extends Dynamic<?>> iterator = Stream.concat(
++                            (Stream<? extends Dynamic<?>>)optional1.get(), Stream.generate(() -> dynamic2.createInt(0))
++                        )
++                        .iterator();
+                     float f = iterator.next().asFloat(0.0F);
+                     if (dynamic.get("HandDropChances").result().isEmpty()) {
+                         Dynamic<?> dynamic1 = dynamic.createList(Stream.of(f, 0.0F).map(dynamic::createFloat));

@@ -1,0 +1,40 @@
+--- a/net/minecraft/server/commands/EffectCommands.java
++++ b/net/minecraft/server/commands/EffectCommands.java
+@@ -178,11 +_,11 @@
+             j = 600;
+         }
+ 
+-        for(Entity entity : p_250411_) {
++        for (Entity entity : p_250411_) {
+             if (entity instanceof LivingEntity) {
+                 MobEffectInstance mobeffectinstance = new MobEffectInstance(p_249495_, j, p_251498_, false, p_249944_);
+                 if (((LivingEntity)entity).addEffect(mobeffectinstance, p_250553_.getEntity())) {
+-                    ++i;
++                    i++;
+                 }
+             }
+         }
+@@ -210,9 +_,9 @@
+     private static int clearEffects(CommandSourceStack p_136960_, Collection<? extends Entity> p_136961_) throws CommandSyntaxException {
+         int i = 0;
+ 
+-        for(Entity entity : p_136961_) {
++        for (Entity entity : p_136961_) {
+             if (entity instanceof LivingEntity && ((LivingEntity)entity).removeAllEffects()) {
+-                ++i;
++                i++;
+             }
+         }
+ 
+@@ -235,9 +_,9 @@
+         MobEffect mobeffect = p_249198_.value();
+         int i = 0;
+ 
+-        for(Entity entity : p_248561_) {
++        for (Entity entity : p_248561_) {
+             if (entity instanceof LivingEntity && ((LivingEntity)entity).removeEffect(p_249198_)) {
+-                ++i;
++                i++;
+             }
+         }
+ 

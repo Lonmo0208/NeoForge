@@ -1,0 +1,63 @@
+--- a/net/minecraft/world/level/block/PipeBlock.java
++++ b/net/minecraft/world/level/block/PipeBlock.java
+@@ -1,7 +_,11 @@
+ package net.minecraft.world.level.block;
+ 
++import com.google.common.collect.ImmutableMap;
++import com.google.common.collect.Maps;
+ import com.mojang.serialization.MapCodec;
++import java.util.EnumMap;
+ import java.util.Map;
++import net.minecraft.Util;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.world.level.BlockGetter;
+@@ -21,9 +_,14 @@
+     public static final BooleanProperty WEST = BlockStateProperties.WEST;
+     public static final BooleanProperty UP = BlockStateProperties.UP;
+     public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
+-    public static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = Map.of(
+-        Direction.NORTH, NORTH, Direction.EAST, EAST, Direction.SOUTH, SOUTH, Direction.WEST, WEST, Direction.UP, UP, Direction.DOWN, DOWN
+-    );
++    public static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = ImmutableMap.copyOf(Util.make(Maps.newEnumMap(Direction.class), p_55164_ -> {
++        p_55164_.put(Direction.NORTH, NORTH);
++        p_55164_.put(Direction.EAST, EAST);
++        p_55164_.put(Direction.SOUTH, SOUTH);
++        p_55164_.put(Direction.WEST, WEST);
++        p_55164_.put(Direction.UP, UP);
++        p_55164_.put(Direction.DOWN, DOWN);
++    }));
+     protected final VoxelShape[] shapeByIndex;
+ 
+     public PipeBlock(float p_55159_, BlockBehaviour.Properties p_55160_) {
+@@ -42,7 +_,7 @@
+         );
+         VoxelShape[] avoxelshape = new VoxelShape[DIRECTIONS.length];
+ 
+-        for(int i = 0; i < DIRECTIONS.length; ++i) {
++        for (int i = 0; i < DIRECTIONS.length; i++) {
+             Direction direction = DIRECTIONS[i];
+             avoxelshape[i] = Shapes.box(
+                 0.5 + Math.min((double)(-p_55162_), (double)direction.getStepX() * 0.5),
+@@ -56,10 +_,10 @@
+ 
+         VoxelShape[] avoxelshape1 = new VoxelShape[64];
+ 
+-        for(int k = 0; k < 64; ++k) {
++        for (int k = 0; k < 64; k++) {
+             VoxelShape voxelshape1 = voxelshape;
+ 
+-            for(int j = 0; j < DIRECTIONS.length; ++j) {
++            for (int j = 0; j < DIRECTIONS.length; j++) {
+                 if ((k & 1 << j) != 0) {
+                     voxelshape1 = Shapes.or(voxelshape1, avoxelshape[j]);
+                 }
+@@ -84,7 +_,7 @@
+     protected int getAABBIndex(BlockState p_55175_) {
+         int i = 0;
+ 
+-        for(int j = 0; j < DIRECTIONS.length; ++j) {
++        for (int j = 0; j < DIRECTIONS.length; j++) {
+             if (p_55175_.getValue(PROPERTY_BY_DIRECTION.get(DIRECTIONS[j]))) {
+                 i |= 1 << j;
+             }

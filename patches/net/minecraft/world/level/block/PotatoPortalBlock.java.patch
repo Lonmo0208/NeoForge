@@ -1,0 +1,93 @@
+--- a/net/minecraft/world/level/block/PotatoPortalBlock.java
++++ /dev/null
+@@ -1,90 +_,0 @@
+-package net.minecraft.world.level.block;
+-
+-import com.mojang.serialization.MapCodec;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.core.particles.ParticleTypes;
+-import net.minecraft.sounds.SoundEvents;
+-import net.minecraft.sounds.SoundSource;
+-import net.minecraft.util.RandomSource;
+-import net.minecraft.world.entity.Entity;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.level.BlockGetter;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.LevelReader;
+-import net.minecraft.world.level.block.state.BlockBehaviour;
+-import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.material.Fluid;
+-import net.minecraft.world.phys.shapes.CollisionContext;
+-import net.minecraft.world.phys.shapes.VoxelShape;
+-
+-public class PotatoPortalBlock extends Block {
+-    public static final MapCodec<PotatoPortalBlock> CODEC = simpleCodec(PotatoPortalBlock::new);
+-    protected static final VoxelShape FULL_AXIS_AABB = Block.box(3.0, 0.0, 3.0, 13.0, 24.0, 13.0);
+-
+-    @Override
+-    public MapCodec<PotatoPortalBlock> codec() {
+-        return CODEC;
+-    }
+-
+-    public PotatoPortalBlock(BlockBehaviour.Properties p_342567_) {
+-        super(p_342567_);
+-    }
+-
+-    @Override
+-    protected VoxelShape getShape(BlockState p_341981_, BlockGetter p_341497_, BlockPos p_341507_, CollisionContext p_340760_) {
+-        return FULL_AXIS_AABB;
+-    }
+-
+-    @Override
+-    protected boolean canBeReplaced(BlockState p_342274_, Fluid p_341390_) {
+-        return false;
+-    }
+-
+-    @Override
+-    protected void entityInside(BlockState p_341959_, Level p_341291_, BlockPos p_342071_, Entity p_342247_) {
+-        if (p_342247_.canChangeDimensions()) {
+-            p_342247_.handleInsidePortal(p_342071_);
+-        }
+-    }
+-
+-    @Override
+-    public void animateTick(BlockState p_340893_, Level p_340603_, BlockPos p_340321_, RandomSource p_341976_) {
+-        if (p_341976_.nextInt(100) == 0) {
+-            p_340603_.playLocalSound(
+-                (double)p_340321_.getX() + 0.5,
+-                (double)p_340321_.getY() + 0.5,
+-                (double)p_340321_.getZ() + 0.5,
+-                SoundEvents.PLAGUEWHALE_AMBIENT,
+-                SoundSource.BLOCKS,
+-                0.5F,
+-                p_341976_.nextFloat() * 0.4F + 0.8F,
+-                false
+-            );
+-        }
+-
+-        for(int i = 0; i < 4; ++i) {
+-            double d0 = (double)p_340321_.getX() + p_341976_.nextDouble();
+-            double d1 = (double)p_340321_.getY() + p_341976_.nextDouble();
+-            double d2 = (double)p_340321_.getZ() + p_341976_.nextDouble();
+-            double d3 = ((double)p_341976_.nextFloat() - 0.5) * 0.5;
+-            double d4 = ((double)p_341976_.nextFloat() - 0.5) * 0.5;
+-            double d5 = ((double)p_341976_.nextFloat() - 0.5) * 0.5;
+-            int j = p_341976_.nextInt(2) * 2 - 1;
+-            if (!p_340603_.getBlockState(p_340321_.west()).is(this) && !p_340603_.getBlockState(p_340321_.east()).is(this)) {
+-                d0 = (double)p_340321_.getX() + 0.5 + 0.25 * (double)j;
+-                d3 = (double)(p_341976_.nextFloat() * 2.0F * (float)j);
+-            } else {
+-                d2 = (double)p_340321_.getZ() + 0.5 + 0.25 * (double)j;
+-                d5 = (double)(p_341976_.nextFloat() * 2.0F * (float)j);
+-            }
+-
+-            p_340603_.addParticle(ParticleTypes.POTATO_LIGHTNING, d0, d1, d2, d3, d4, d5);
+-            p_340603_.addParticle(ParticleTypes.REVERSE_POTATO_LIGHTNING, d0, d1, d2, d3, d4, d5);
+-        }
+-    }
+-
+-    @Override
+-    public ItemStack getCloneItemStack(LevelReader p_340352_, BlockPos p_342500_, BlockState p_341743_) {
+-        return ItemStack.EMPTY;
+-    }
+-}

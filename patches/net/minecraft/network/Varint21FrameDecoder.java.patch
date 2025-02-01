@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/Varint21FrameDecoder.java
++++ b/net/minecraft/network/Varint21FrameDecoder.java
+@@ -24,7 +_,7 @@
+     }
+ 
+     private static boolean copyVarint(ByteBuf p_294780_, ByteBuf p_294299_) {
+-        for(int i = 0; i < 3; ++i) {
++        for (int i = 0; i < 3; i++) {
+             if (!p_294780_.isReadable()) {
+                 return false;
+             }

@@ -1,0 +1,21 @@
+--- a/net/minecraft/server/level/TickingTracker.java
++++ b/net/minecraft/server/level/TickingTracker.java
+@@ -60,15 +_,15 @@
+     public void replacePlayerTicketsLevel(int p_184147_) {
+         List<Pair<Ticket<ChunkPos>, Long>> list = new ArrayList<>();
+ 
+-        for(Entry<SortedArraySet<Ticket<?>>> entry : this.tickets.long2ObjectEntrySet()) {
+-            for(Ticket<?> ticket : entry.getValue()) {
++        for (Entry<SortedArraySet<Ticket<?>>> entry : this.tickets.long2ObjectEntrySet()) {
++            for (Ticket<?> ticket : entry.getValue()) {
+                 if (ticket.getType() == TicketType.PLAYER) {
+                     list.add(Pair.of((Ticket<ChunkPos>)ticket, entry.getLongKey()));
+                 }
+             }
+         }
+ 
+-        for(Pair<Ticket<ChunkPos>, Long> pair : list) {
++        for (Pair<Ticket<ChunkPos>, Long> pair : list) {
+             Long olong = pair.getSecond();
+             Ticket<ChunkPos> ticket1 = pair.getFirst();
+             this.removeTicket(olong, ticket1);

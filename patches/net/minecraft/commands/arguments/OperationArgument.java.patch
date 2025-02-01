@@ -1,0 +1,20 @@
+--- a/net/minecraft/commands/arguments/OperationArgument.java
++++ b/net/minecraft/commands/arguments/OperationArgument.java
+@@ -37,7 +_,7 @@
+         } else {
+             int i = p_103274_.getCursor();
+ 
+-            while(p_103274_.canRead() && p_103274_.peek() != ' ') {
++            while (p_103274_.canRead() && p_103274_.peek() != ' ') {
+                 p_103274_.skip();
+             }
+ 
+@@ -64,7 +_,7 @@
+     }
+ 
+     private static OperationArgument.SimpleOperation getSimpleOperation(String p_103287_) throws CommandSyntaxException {
+-        return switch(p_103287_) {
++        return switch (p_103287_) {
+             case "=" -> (p_103298_, p_103299_) -> p_103299_;
+             case "+=" -> Integer::sum;
+             case "-=" -> (p_103292_, p_103293_) -> p_103292_ - p_103293_;

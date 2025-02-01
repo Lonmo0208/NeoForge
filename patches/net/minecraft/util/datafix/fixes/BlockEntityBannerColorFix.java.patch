@@ -1,0 +1,19 @@
+--- a/net/minecraft/util/datafix/fixes/BlockEntityBannerColorFix.java
++++ b/net/minecraft/util/datafix/fixes/BlockEntityBannerColorFix.java
+@@ -16,12 +_,12 @@
+         p_14798_ = p_14798_.update("Base", p_14808_ -> p_14808_.createInt(15 - p_14808_.asInt(0)));
+         return p_14798_.update(
+             "Patterns",
+-            p_14802_ -> DataFixUtils.orElse(
+-                    p_14802_.asStreamOpt()
++            p_337597_ -> DataFixUtils.orElse(
++                    p_337597_.asStreamOpt()
+                         .map(p_145125_ -> p_145125_.map(p_145127_ -> p_145127_.update("Color", p_145129_ -> p_145129_.createInt(15 - p_145129_.asInt(0)))))
+-                        .map(p_14802_::createList)
++                        .map(p_337597_::createList)
+                         .result(),
+-                    p_14802_
++                    p_337597_
+                 )
+         );
+     }

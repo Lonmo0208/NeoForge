@@ -1,0 +1,21 @@
+--- a/net/minecraft/util/RandomSource.java
++++ b/net/minecraft/util/RandomSource.java
+@@ -57,7 +_,7 @@
+     }
+ 
+     default void consumeCount(int p_216338_) {
+-        for(int i = 0; i < p_216338_; ++i) {
++        for (int i = 0; i < p_216338_; i++) {
+             this.nextInt();
+         }
+     }
+@@ -68,9 +_,5 @@
+         } else {
+             return p_216340_ + this.nextInt(p_216341_ - p_216340_);
+         }
+-    }
+-
+-    default float nextFloat(float p_341908_, float p_341513_) {
+-        return p_341908_ + this.nextFloat() * (p_341513_ - p_341908_);
+     }
+ }

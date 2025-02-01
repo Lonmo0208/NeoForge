@@ -1,0 +1,69 @@
+--- a/net/minecraft/server/commands/data/DataCommands.java
++++ b/net/minecraft/server/commands/data/DataCommands.java
+@@ -63,7 +_,7 @@
+     public static void register(CommandDispatcher<CommandSourceStack> p_139366_) {
+         LiteralArgumentBuilder<CommandSourceStack> literalargumentbuilder = Commands.literal("data").requires(p_139381_ -> p_139381_.hasPermission(2));
+ 
+-        for(DataCommands.DataProvider datacommands$dataprovider : TARGET_PROVIDERS) {
++        for (DataCommands.DataProvider datacommands$dataprovider : TARGET_PROVIDERS) {
+             literalargumentbuilder.then(
+                     datacommands$dataprovider.wrap(
+                         Commands.literal("merge"),
+@@ -153,28 +_,26 @@
+                                 .then(Commands.literal("merge").then(p_139369_.create((p_142822_, p_142823_, p_142824_, p_142825_) -> {
+                                     CompoundTag compoundtag = new CompoundTag();
+                 
+-                                    for(Tag tag : p_142825_) {
++                                    for (Tag tag : p_142825_) {
+                                         if (NbtPathArgument.NbtPath.isTooDeep(tag, 0)) {
+                                             throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
+                                         }
+                 
+-                                        if (!(tag instanceof CompoundTag)) {
++                                        if (!(tag instanceof CompoundTag compoundtag1)) {
+                                             throw ERROR_EXPECTED_OBJECT.create(tag);
+                                         }
+                 
+-                                        CompoundTag compoundtag1 = (CompoundTag)tag;
+                                         compoundtag.merge(compoundtag1);
+                                     }
+                 
+                                     Collection<Tag> collection = p_142824_.getOrCreate(p_142823_, CompoundTag::new);
+                                     int i = 0;
+                 
+-                                    for(Tag tag1 : collection) {
+-                                        if (!(tag1 instanceof CompoundTag)) {
++                                    for (Tag tag1 : collection) {
++                                        if (!(tag1 instanceof CompoundTag compoundtag2)) {
+                                             throw ERROR_EXPECTED_OBJECT.create(tag1);
+                                         }
+                 
+-                                        CompoundTag compoundtag2 = (CompoundTag)tag1;
+                                         CompoundTag $$12 = compoundtag2.copy();
+                                         compoundtag2.merge(compoundtag);
+                                         i += $$12.equals(compoundtag2) ? 0 : 1;
+@@ -200,7 +_,7 @@
+     private static List<Tag> stringifyTagList(List<Tag> p_288980_, DataCommands.StringProcessor p_289012_) throws CommandSyntaxException {
+         List<Tag> list = new ArrayList<>(p_288980_.size());
+ 
+-        for(Tag tag : p_288980_) {
++        for (Tag tag : p_288980_) {
+             String s = getAsText(tag);
+             list.add(StringTag.valueOf(p_289012_.process(s)));
+         }
+@@ -213,13 +_,13 @@
+     ) {
+         LiteralArgumentBuilder<CommandSourceStack> literalargumentbuilder = Commands.literal("modify");
+ 
+-        for(DataCommands.DataProvider datacommands$dataprovider : TARGET_PROVIDERS) {
++        for (DataCommands.DataProvider datacommands$dataprovider : TARGET_PROVIDERS) {
+             datacommands$dataprovider.wrap(
+                 literalargumentbuilder,
+                 p_264816_ -> {
+                     ArgumentBuilder<CommandSourceStack, ?> argumentbuilder = Commands.argument("targetPath", NbtPathArgument.nbtPath());
+     
+-                    for(DataCommands.DataProvider datacommands$dataprovider1 : SOURCE_PROVIDERS) {
++                    for (DataCommands.DataProvider datacommands$dataprovider1 : SOURCE_PROVIDERS) {
+                         p_139404_.accept(
+                             argumentbuilder,
+                             p_142807_ -> datacommands$dataprovider1.wrap(

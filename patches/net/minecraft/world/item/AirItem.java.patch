@@ -1,0 +1,24 @@
+--- a/net/minecraft/world/item/AirItem.java
++++ b/net/minecraft/world/item/AirItem.java
+@@ -1,9 +_,7 @@
+ package net.minecraft.world.item;
+ 
+ import java.util.List;
+-import javax.annotation.Nullable;
+ import net.minecraft.network.chat.Component;
+-import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.Block;
+ 
+ public class AirItem extends Item {
+@@ -20,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void appendHoverText(ItemStack p_40372_, @Nullable Level p_40373_, List<Component> p_40374_, TooltipFlag p_40375_) {
+-        super.appendHoverText(p_40372_, p_40373_, p_40374_, p_40375_);
+-        this.block.appendHoverText(p_40372_, p_40373_, p_40374_, p_40375_, p_40373_ != null ? p_40373_.registryAccess() : null);
++    public void appendHoverText(ItemStack p_40372_, Item.TooltipContext p_339659_, List<Component> p_40374_, TooltipFlag p_40375_) {
++        super.appendHoverText(p_40372_, p_339659_, p_40374_, p_40375_);
++        this.block.appendHoverText(p_40372_, p_339659_, p_40374_, p_40375_);
+     }
+ }

@@ -1,0 +1,69 @@
+--- a/net/minecraft/util/datafix/fixes/LeavesFix.java
++++ b/net/minecraft/util/datafix/fixes/LeavesFix.java
+@@ -102,21 +_,21 @@
+                                     Int2ObjectMap<LeavesFix.LeavesSection> int2objectmap = new Int2ObjectOpenHashMap<>(
+                                         p_145465_.getAllTyped(opticfinder2)
+                                             .stream()
+-                                            .map(p_145467_ -> new LeavesFix.LeavesSection(p_145467_, this.getInputSchema()))
+-                                            .collect(Collectors.toMap(LeavesFix.Section::getIndex, p_145457_ -> p_145457_))
++                                            .map(p_145467_ -> new LeavesFix.LeavesSection((Typed<?>)p_145467_, this.getInputSchema()))
++                                            .collect(Collectors.toMap(LeavesFix.Section::getIndex, p_145457_ -> (LeavesFix.LeavesSection)p_145457_))
+                                     );
+                                     if (int2objectmap.values().stream().allMatch(LeavesFix.Section::isSkippable)) {
+                                         return p_145465_;
+                                     } else {
+                                         List<IntSet> list = Lists.newArrayList();
+             
+-                                        for(int i = 0; i < 7; ++i) {
++                                        for (int i = 0; i < 7; i++) {
+                                             list.add(new IntOpenHashSet());
+                                         }
+             
+-                                        for(LeavesFix.LeavesSection leavesfix$leavessection : int2objectmap.values()) {
++                                        for (LeavesFix.LeavesSection leavesfix$leavessection : int2objectmap.values()) {
+                                             if (!leavesfix$leavessection.isSkippable()) {
+-                                                for(int j = 0; j < 4096; ++j) {
++                                                for (int j = 0; j < 4096; j++) {
+                                                     int k = leavesfix$leavessection.getBlock(j);
+                                                     if (leavesfix$leavessection.isLog(k)) {
+                                                         list.get(0).add(leavesfix$leavessection.getIndex() << 12 | j);
+@@ -129,18 +_,18 @@
+                                             }
+                                         }
+             
+-                                        for(int j3 = 1; j3 < 7; ++j3) {
++                                        for (int j3 = 1; j3 < 7; j3++) {
+                                             IntSet intset = list.get(j3 - 1);
+                                             IntSet intset1 = list.get(j3);
+                                             IntIterator intiterator = intset.iterator();
+             
+-                                            while(intiterator.hasNext()) {
++                                            while (intiterator.hasNext()) {
+                                                 int k3 = intiterator.nextInt();
+                                                 int l3 = this.getX(k3);
+                                                 int j1 = this.getY(k3);
+                                                 int k1 = this.getZ(k3);
+             
+-                                                for(int[] aint1 : DIRECTIONS) {
++                                                for (int[] aint1 : DIRECTIONS) {
+                                                     int l1 = l3 + aint1[0];
+                                                     int i2 = j1 + aint1[1];
+                                                     int j2 = k1 + aint1[2];
+@@ -252,7 +_,7 @@
+             this.logIds = new IntOpenHashSet();
+             this.stateToIdMap = new Int2IntOpenHashMap();
+ 
+-            for(int i = 0; i < this.palette.size(); ++i) {
++            for (int i = 0; i < this.palette.size(); i++) {
+                 Dynamic<?> dynamic = this.palette.get(i);
+                 String s = dynamic.get("Name").asString("");
+                 if (LeavesFix.LEAVES.containsKey(s)) {
+@@ -307,7 +_,7 @@
+             if (1 << this.storage.getBits() <= l) {
+                 PackedBitStorage packedbitstorage = new PackedBitStorage(this.storage.getBits() + 1, 4096);
+ 
+-                for(int k = 0; k < 4096; ++k) {
++                for (int k = 0; k < 4096; k++) {
+                     packedbitstorage.set(k, this.storage.get(k));
+                 }
+ 

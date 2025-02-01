@@ -1,0 +1,120 @@
+--- a/net/minecraft/world/level/biome/Climate.java
++++ b/net/minecraft/world/level/biome/Climate.java
+@@ -179,7 +_,7 @@
+             long i = pair.getFirst().fitness(p_204255_);
+             T t = pair.getSecond();
+ 
+-            while(iterator.hasNext()) {
++            while (iterator.hasNext()) {
+                 Pair<Climate.ParameterPoint, T> pair1 = iterator.next();
+                 long j = pair1.getFirst().fitness(p_204255_);
+                 if (j < i) {
+@@ -277,12 +_,12 @@
+             if (p_186922_.isEmpty()) {
+                 throw new IllegalStateException("Need at least one child to build a node");
+             } else if (p_186922_.size() == 1) {
+-                return p_186922_.get(0);
++                return (Climate.RTree.Node<T>)p_186922_.get(0);
+             } else if (p_186922_.size() <= 6) {
+                 p_186922_.sort(Comparator.comparingLong(p_186916_ -> {
+                     long i1 = 0L;
+ 
+-                    for(int j1 = 0; j1 < p_186921_; ++j1) {
++                    for (int j1 = 0; j1 < p_186921_; j1++) {
+                         Climate.Parameter climate$parameter = p_186916_.parameterSpace[j1];
+                         i1 += Math.abs((climate$parameter.min() + climate$parameter.max()) / 2L);
+                     }
+@@ -295,12 +_,12 @@
+                 int j = -1;
+                 List<Climate.RTree.SubTree<T>> list = null;
+ 
+-                for(int k = 0; k < p_186921_; ++k) {
++                for (int k = 0; k < p_186921_; k++) {
+                     sort(p_186922_, p_186921_, k, false);
+                     List<Climate.RTree.SubTree<T>> list1 = bucketize(p_186922_);
+                     long l = 0L;
+ 
+-                    for(Climate.RTree.SubTree<T> subtree : list1) {
++                    for (Climate.RTree.SubTree<T> subtree : list1) {
+                         l += cost(subtree.parameterSpace);
+                     }
+ 
+@@ -321,7 +_,7 @@
+         private static <T> void sort(List<? extends Climate.RTree.Node<T>> p_186938_, int p_186939_, int p_186940_, boolean p_186941_) {
+             Comparator<Climate.RTree.Node<T>> comparator = comparator(p_186940_, p_186941_);
+ 
+-            for(int i = 1; i < p_186939_; ++i) {
++            for (int i = 1; i < p_186939_; i++) {
+                 comparator = comparator.thenComparing(comparator((p_186940_ + i) % p_186939_, p_186941_));
+             }
+ 
+@@ -341,7 +_,7 @@
+             List<Climate.RTree.Node<T>> list1 = Lists.newArrayList();
+             int i = (int)Math.pow(6.0, Math.floor(Math.log((double)p_186945_.size() - 0.01) / Math.log(6.0)));
+ 
+-            for(Climate.RTree.Node<T> node : p_186945_) {
++            for (Climate.RTree.Node<T> node : p_186945_) {
+                 list1.add(node);
+                 if (list1.size() >= i) {
+                     list.add(new Climate.RTree.SubTree<>(list1));
+@@ -359,7 +_,7 @@
+         private static long cost(Climate.Parameter[] p_186943_) {
+             long i = 0L;
+ 
+-            for(Climate.Parameter climate$parameter : p_186943_) {
++            for (Climate.Parameter climate$parameter : p_186943_) {
+                 i += Math.abs(climate$parameter.max() - climate$parameter.min());
+             }
+ 
+@@ -373,12 +_,12 @@
+                 int i = 7;
+                 List<Climate.Parameter> list = Lists.newArrayList();
+ 
+-                for(int j = 0; j < 7; ++j) {
++                for (int j = 0; j < 7; j++) {
+                     list.add(null);
+                 }
+ 
+-                for(Climate.RTree.Node<T> node : p_186947_) {
+-                    for(int k = 0; k < 7; ++k) {
++                for (Climate.RTree.Node<T> node : p_186947_) {
++                    for (int k = 0; k < 7; k++) {
+                         list.set(k, node.parameterSpace[k].span(list.get(k)));
+                     }
+                 }
+@@ -420,7 +_,7 @@
+             protected long distance(long[] p_186960_) {
+                 long i = 0L;
+ 
+-                for(int j = 0; j < 7; ++j) {
++                for (int j = 0; j < 7; j++) {
+                     i += Mth.square(this.parameterSpace[j].distance(p_186960_[j]));
+                 }
+ 
+@@ -450,7 +_,7 @@
+                 long i = p_186973_ == null ? Long.MAX_VALUE : p_186974_.distance(p_186973_, p_186972_);
+                 Climate.RTree.Leaf<T> leaf = p_186973_;
+ 
+-                for(Climate.RTree.Node<T> node : this.children) {
++                for (Climate.RTree.Node<T> node : this.children) {
+                     long j = p_186974_.distance(node, p_186972_);
+                     if (i > j) {
+                         Climate.RTree.Leaf<T> leaf1 = node.search(p_186972_, leaf, p_186974_);
+@@ -510,7 +_,7 @@
+             float f1 = p_207878_;
+             BlockPos blockpos = this.result.location();
+ 
+-            while(f1 <= p_207877_) {
++            while (f1 <= p_207877_) {
+                 int i = blockpos.getX() + (int)(Math.sin((double)f) * (double)f1);
+                 int j = blockpos.getZ() + (int)(Math.cos((double)f) * (double)f1);
+                 Climate.SpawnFinder.Result climate$spawnfinder$result = getSpawnPositionAndFitness(p_207875_, p_207876_, i, j);
+@@ -543,7 +_,7 @@
+             );
+             long k = Long.MAX_VALUE;
+ 
+-            for(Climate.ParameterPoint climate$parameterpoint : p_207880_) {
++            for (Climate.ParameterPoint climate$parameterpoint : p_207880_) {
+                 k = Math.min(k, climate$parameterpoint.fitness(climate$targetpoint1));
+             }
+ 

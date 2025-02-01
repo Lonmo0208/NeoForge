@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/sensing/AdultSensor.java
++++ b/net/minecraft/world/entity/ai/sensing/AdultSensor.java
+@@ -22,7 +_,7 @@
+     }
+ 
+     private void setNearestVisibleAdult(AgeableMob p_186141_, NearestVisibleLivingEntities p_186142_) {
+-        Optional<AgeableMob> optional = p_186142_.findClosest(p_340072_ -> p_340072_.getType() == p_186141_.getType() && !p_340072_.isBaby())
++        Optional<AgeableMob> optional = p_186142_.findClosest(p_337793_ -> p_337793_.getType() == p_186141_.getType() && !p_337793_.isBaby())
+             .map(AgeableMob.class::cast);
+         p_186141_.getBrain().setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT, optional);
+     }

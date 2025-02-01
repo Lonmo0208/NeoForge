@@ -1,0 +1,24 @@
+--- a/net/minecraft/client/resources/model/AtlasSet.java
++++ b/net/minecraft/client/resources/model/AtlasSet.java
+@@ -21,9 +_,9 @@
+ 
+     public AtlasSet(Map<ResourceLocation, ResourceLocation> p_249969_, TextureManager p_252059_) {
+         this.atlases = p_249969_.entrySet().stream().collect(Collectors.toMap(Entry::getKey, p_261403_ -> {
+-            TextureAtlas textureatlas = new TextureAtlas((ResourceLocation)p_261403_.getKey());
+-            p_252059_.register((ResourceLocation)p_261403_.getKey(), textureatlas);
+-            return new AtlasSet.AtlasEntry(textureatlas, (ResourceLocation)p_261403_.getValue());
++            TextureAtlas textureatlas = new TextureAtlas(p_261403_.getKey());
++            p_252059_.register(p_261403_.getKey(), textureatlas);
++            return new AtlasSet.AtlasEntry(textureatlas, p_261403_.getValue());
+         }));
+     }
+ 
+@@ -45,7 +_,7 @@
+                 Collectors.toMap(
+                     Entry::getKey,
+                     p_261401_ -> {
+-                        AtlasSet.AtlasEntry atlasset$atlasentry = (AtlasSet.AtlasEntry)p_261401_.getValue();
++                        AtlasSet.AtlasEntry atlasset$atlasentry = p_261401_.getValue();
+                         return SpriteLoader.create(atlasset$atlasentry.atlas)
+                             .loadAndStitch(p_249256_, atlasset$atlasentry.atlasInfoLocation, p_251059_, p_250751_)
+                             .thenApply(p_250418_ -> new AtlasSet.StitchResult(atlasset$atlasentry.atlas, p_250418_));

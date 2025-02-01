@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/level/levelgen/feature/featuresize/ThreeLayersFeatureSize.java
++++ b/net/minecraft/world/level/levelgen/feature/featuresize/ThreeLayersFeatureSize.java
+@@ -1,12 +_,13 @@
+ package net.minecraft.world.level.levelgen.feature.featuresize;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.OptionalInt;
+ 
+ public class ThreeLayersFeatureSize extends FeatureSize {
+-    public static final Codec<ThreeLayersFeatureSize> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<ThreeLayersFeatureSize> CODEC = RecordCodecBuilder.mapCodec(
+         p_68326_ -> p_68326_.group(
+                     Codec.intRange(0, 80).fieldOf("limit").orElse(1).forGetter(p_161335_ -> p_161335_.limit),
+                     Codec.intRange(0, 80).fieldOf("upper_limit").orElse(1).forGetter(p_161333_ -> p_161333_.upperLimit),

@@ -1,0 +1,15 @@
+--- a/net/minecraft/client/renderer/GpuWarnlistManager.java
++++ b/net/minecraft/client/renderer/GpuWarnlistManager.java
+@@ -146,10 +_,10 @@
+         private static String matchAny(List<Pattern> p_109273_, String p_109274_) {
+             List<String> list = Lists.newArrayList();
+ 
+-            for(Pattern pattern : p_109273_) {
++            for (Pattern pattern : p_109273_) {
+                 Matcher matcher = pattern.matcher(p_109274_);
+ 
+-                while(matcher.find()) {
++                while (matcher.find()) {
+                     list.add(matcher.group());
+                 }
+             }

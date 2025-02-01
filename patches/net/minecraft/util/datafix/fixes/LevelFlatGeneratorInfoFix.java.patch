@@ -1,0 +1,21 @@
+--- a/net/minecraft/util/datafix/fixes/LevelFlatGeneratorInfoFix.java
++++ b/net/minecraft/util/datafix/fixes/LevelFlatGeneratorInfoFix.java
+@@ -39,7 +_,8 @@
+     private Dynamic<?> fix(Dynamic<?> p_16353_) {
+         return p_16353_.get("generatorName").asString("").equalsIgnoreCase("flat")
+             ? p_16353_.update(
+-                "generatorOptions", p_16357_ -> DataFixUtils.orElse(p_16357_.asString().map(this::fixString).map(p_16357_::createString).result(), p_16357_)
++                "generatorOptions",
++                p_337644_ -> DataFixUtils.orElse(p_337644_.asString().map(this::fixString).map(p_337644_::createString).result(), p_337644_)
+             )
+             : p_16353_;
+     }
+@@ -85,7 +_,7 @@
+                     return (j == 1 ? "" : j + "*") + BlockStateData.getTag(l << 4 | j1).get("Name").asString("");
+                 }).collect(Collectors.joining(",")));
+ 
+-                while(iterator.hasNext()) {
++                while (iterator.hasNext()) {
+                     stringbuilder.append(';').append(iterator.next());
+                 }
+ 

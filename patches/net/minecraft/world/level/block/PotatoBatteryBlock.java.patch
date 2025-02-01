@@ -1,0 +1,114 @@
+--- a/net/minecraft/world/level/block/PotatoBatteryBlock.java
++++ /dev/null
+@@ -1,111 +_,0 @@
+-package net.minecraft.world.level.block;
+-
+-import com.mojang.serialization.MapCodec;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.core.Direction;
+-import net.minecraft.core.particles.ParticleTypes;
+-import net.minecraft.server.level.ServerLevel;
+-import net.minecraft.sounds.SoundEvents;
+-import net.minecraft.sounds.SoundSource;
+-import net.minecraft.world.InteractionResult;
+-import net.minecraft.world.entity.Entity;
+-import net.minecraft.world.entity.LivingEntity;
+-import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.level.BlockGetter;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.state.BlockBehaviour;
+-import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.block.state.StateDefinition;
+-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+-import net.minecraft.world.level.gameevent.GameEvent;
+-import net.minecraft.world.phys.BlockHitResult;
+-import net.minecraft.world.phys.shapes.CollisionContext;
+-import net.minecraft.world.phys.shapes.VoxelShape;
+-
+-public class PotatoBatteryBlock extends Block {
+-    public static final MapCodec<PotatoBatteryBlock> CODEC = simpleCodec(PotatoBatteryBlock::new);
+-    public static final BooleanProperty INVERTED = BlockStateProperties.INVERTED;
+-    protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0);
+-
+-    @Override
+-    public MapCodec<PotatoBatteryBlock> codec() {
+-        return CODEC;
+-    }
+-
+-    public PotatoBatteryBlock(BlockBehaviour.Properties p_341656_) {
+-        super(p_341656_);
+-        this.registerDefaultState(this.stateDefinition.any().setValue(INVERTED, Boolean.valueOf(false)));
+-    }
+-
+-    @Override
+-    protected VoxelShape getShape(BlockState p_341173_, BlockGetter p_342454_, BlockPos p_341527_, CollisionContext p_342406_) {
+-        return SHAPE;
+-    }
+-
+-    @Override
+-    protected boolean useShapeForLightOcclusion(BlockState p_341628_) {
+-        return true;
+-    }
+-
+-    @Override
+-    protected int getSignal(BlockState p_341298_, BlockGetter p_341307_, BlockPos p_340461_, Direction p_340456_) {
+-        return p_341298_.getValue(INVERTED) ? 15 : 0;
+-    }
+-
+-    @Override
+-    protected InteractionResult useWithoutItem(BlockState p_340594_, Level p_341683_, BlockPos p_340780_, Player p_341299_, BlockHitResult p_341563_) {
+-        if (p_341299_.mayBuild()) {
+-            if (p_341683_.isClientSide) {
+-                return InteractionResult.SUCCESS;
+-            } else {
+-                BlockState blockstate = p_340594_.cycle(INVERTED);
+-                p_341683_.setBlock(p_340780_, blockstate, 3);
+-                p_341683_.gameEvent(GameEvent.BLOCK_CHANGE, p_340780_, GameEvent.Context.of(p_341299_, blockstate));
+-                return InteractionResult.CONSUME;
+-            }
+-        } else {
+-            return super.useWithoutItem(p_340594_, p_341683_, p_340780_, p_341299_, p_341563_);
+-        }
+-    }
+-
+-    @Override
+-    protected void entityInside(BlockState p_341591_, Level p_341712_, BlockPos p_341639_, Entity p_341859_) {
+-        if (p_341859_ instanceof LivingEntity livingentity && p_341591_.getValue(INVERTED) && p_341712_ instanceof ServerLevel serverlevel) {
+-            livingentity.hurt(p_341712_.damageSources().potatoMagic(), 0.5F);
+-
+-            for(float f = 0.2F; f < 0.8F; f += 0.1F) {
+-                serverlevel.sendParticles(
+-                    ParticleTypes.ELECTRIC_SPARK,
+-                    (double)((float)p_341639_.getX() + f),
+-                    (double)p_341639_.getY() + 0.35,
+-                    (double)((float)p_341639_.getZ() + f),
+-                    1,
+-                    0.05,
+-                    0.05,
+-                    0.05,
+-                    0.1
+-                );
+-            }
+-
+-            serverlevel.playSound(null, p_341639_, SoundEvents.BATTERY_ZAP, SoundSource.BLOCKS, 0.5F, 2.0F);
+-        }
+-
+-        super.entityInside(p_341591_, p_341712_, p_341639_, p_341859_);
+-    }
+-
+-    @Override
+-    protected RenderShape getRenderShape(BlockState p_341736_) {
+-        return RenderShape.MODEL;
+-    }
+-
+-    @Override
+-    protected boolean isSignalSource(BlockState p_340449_) {
+-        return true;
+-    }
+-
+-    @Override
+-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_341780_) {
+-        p_341780_.add(INVERTED);
+-    }
+-}

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/entity/layers/StuckInBodyLayer.java
++++ b/net/minecraft/client/renderer/entity/layers/StuckInBodyLayer.java
+@@ -39,7 +_,7 @@
+         int i = this.numStuck(p_117589_);
+         RandomSource randomsource = RandomSource.create((long)p_117589_.getId());
+         if (i > 0) {
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 p_117586_.pushPose();
+                 ModelPart modelpart = this.getParentModel().getRandomModelPart(randomsource);
+                 ModelPart.Cube modelpart$cube = modelpart.getRandomCube(randomsource);

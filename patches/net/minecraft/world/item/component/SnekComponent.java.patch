@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/item/component/SnekComponent.java
++++ /dev/null
+@@ -1,18 +_,0 @@
+-package net.minecraft.world.item.component;
+-
+-import com.mojang.serialization.Codec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import net.minecraft.network.RegistryFriendlyByteBuf;
+-import net.minecraft.network.codec.ByteBufCodecs;
+-import net.minecraft.network.codec.StreamCodec;
+-
+-public record SnekComponent(boolean revealed) {
+-    public static SnekComponent HIDDEN_SNEK = new SnekComponent(false);
+-    public static final Codec<SnekComponent> CODEC = RecordCodecBuilder.create(
+-        p_340763_ -> p_340763_.group(Codec.BOOL.fieldOf("revealed").forGetter(SnekComponent::revealed)).apply(p_340763_, SnekComponent::new)
+-    );
+-    public static final StreamCodec<? super RegistryFriendlyByteBuf, SnekComponent> STREAM_CODEC = StreamCodec.composite(
+-        ByteBufCodecs.BOOL, SnekComponent::revealed, SnekComponent::new
+-    );
+-}

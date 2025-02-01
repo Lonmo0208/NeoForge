@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/BaseCoralWallFanBlock.java
++++ b/net/minecraft/world/level/block/BaseCoralWallFanBlock.java
+@@ -90,7 +_,7 @@
+         BlockPos blockpos = p_49198_.getClickedPos();
+         Direction[] adirection = p_49198_.getNearestLookingDirections();
+ 
+-        for(Direction direction : adirection) {
++        for (Direction direction : adirection) {
+             if (direction.getAxis().isHorizontal()) {
+                 blockstate = blockstate.setValue(FACING, direction.getOpposite());
+                 if (blockstate.canSurvive(levelreader, blockpos)) {

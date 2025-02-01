@@ -1,0 +1,29 @@
+--- a/com/mojang/blaze3d/shaders/Uniform.java
++++ b/com/mojang/blaze3d/shaders/Uniform.java
+@@ -480,7 +_,7 @@
+ 
+     private void uploadAsInteger() {
+         this.intValues.rewind();
+-        switch(this.type) {
++        switch (this.type) {
+             case 0:
+                 RenderSystem.glUniform1(this.location, this.intValues);
+                 break;
+@@ -500,7 +_,7 @@
+ 
+     private void uploadAsFloat() {
+         this.floatValues.rewind();
+-        switch(this.type) {
++        switch (this.type) {
+             case 4:
+                 RenderSystem.glUniform1(this.location, this.floatValues);
+                 break;
+@@ -520,7 +_,7 @@
+ 
+     private void uploadAsMatrix() {
+         this.floatValues.clear();
+-        switch(this.type) {
++        switch (this.type) {
+             case 8:
+                 RenderSystem.glUniformMatrix2(this.location, false, this.floatValues);
+                 break;

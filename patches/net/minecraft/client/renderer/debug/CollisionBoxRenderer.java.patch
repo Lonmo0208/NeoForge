@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/debug/CollisionBoxRenderer.java
++++ b/net/minecraft/client/renderer/debug/CollisionBoxRenderer.java
+@@ -36,7 +_,7 @@
+ 
+         VertexConsumer vertexconsumer = p_113409_.getBuffer(RenderType.lines());
+ 
+-        for(VoxelShape voxelshape : this.shapes) {
++        for (VoxelShape voxelshape : this.shapes) {
+             LevelRenderer.renderVoxelShape(p_113408_, vertexconsumer, voxelshape, -p_113410_, -p_113411_, -p_113412_, 1.0F, 1.0F, 1.0F, 1.0F, true);
+         }
+     }

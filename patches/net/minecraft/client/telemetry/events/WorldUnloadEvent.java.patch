@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/telemetry/events/WorldUnloadEvent.java
++++ b/net/minecraft/client/telemetry/events/WorldUnloadEvent.java
+@@ -26,7 +_,7 @@
+ 
+     public void setTime(long p_261780_) {
+         if (this.lastGameTime != -1L) {
+-            this.totalTicks += Math.max(0L, p_261780_ - this.lastGameTime);
++            this.totalTicks = this.totalTicks + Math.max(0L, p_261780_ - this.lastGameTime);
+         }
+ 
+         this.lastGameTime = p_261780_;

@@ -1,0 +1,88 @@
+--- a/net/minecraft/world/level/block/entity/BannerBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/BannerBlockEntity.java
+@@ -2,7 +_,6 @@
+ 
+ import com.mojang.logging.LogUtils;
+ import javax.annotation.Nullable;
+-import net.minecraft.Util;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.component.DataComponentMap;
+@@ -40,7 +_,7 @@
+ 
+     public void fromItem(ItemStack p_58490_, DyeColor p_58491_) {
+         this.baseColor = p_58491_;
+-        this.applyComponents(p_58490_.getComponents());
++        this.applyComponentsFromItemStack(p_58490_);
+     }
+ 
+     @Override
+@@ -58,12 +_,7 @@
+     protected void saveAdditional(CompoundTag p_187456_, HolderLookup.Provider p_324143_) {
+         super.saveAdditional(p_187456_, p_324143_);
+         if (!this.patterns.equals(BannerPatternLayers.EMPTY)) {
+-            p_187456_.put(
+-                "patterns",
+-                Util.getOrThrow(
+-                    BannerPatternLayers.CODEC.encodeStart(p_324143_.createSerializationContext(NbtOps.INSTANCE), this.patterns), IllegalStateException::new
+-                )
+-            );
++            p_187456_.put("patterns", BannerPatternLayers.CODEC.encodeStart(p_324143_.createSerializationContext(NbtOps.INSTANCE), this.patterns).getOrThrow());
+         }
+ 
+         if (this.name != null) {
+@@ -72,15 +_,15 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155042_, HolderLookup.Provider p_324169_) {
+-        super.load(p_155042_, p_324169_);
+-        if (p_155042_.contains("CustomName", 8)) {
+-            this.name = Component.Serializer.fromJson(p_155042_.getString("CustomName"), p_324169_);
++    protected void loadAdditional(CompoundTag p_338645_, HolderLookup.Provider p_338247_) {
++        super.loadAdditional(p_338645_, p_338247_);
++        if (p_338645_.contains("CustomName", 8)) {
++            this.name = Component.Serializer.fromJson(p_338645_.getString("CustomName"), p_338247_);
+         }
+ 
+-        if (p_155042_.contains("patterns")) {
++        if (p_338645_.contains("patterns")) {
+             BannerPatternLayers.CODEC
+-                .parse(p_324169_.createSerializationContext(NbtOps.INSTANCE), p_155042_.get("patterns"))
++                .parse(p_338247_.createSerializationContext(NbtOps.INSTANCE), p_338645_.get("patterns"))
+                 .resultOrPartial(p_331289_ -> LOGGER.error("Failed to parse banner patterns: '{}'", p_331289_))
+                 .ifPresent(p_332632_ -> this.patterns = p_332632_);
+         }
+@@ -92,7 +_,7 @@
+ 
+     @Override
+     public CompoundTag getUpdateTag(HolderLookup.Provider p_324478_) {
+-        return this.saveWithoutMetadata(p_324478_);
++        return this.saveCustomOnly(p_324478_);
+     }
+ 
+     public BannerPatternLayers getPatterns() {
+@@ -110,15 +_,17 @@
+     }
+ 
+     @Override
+-    public void applyComponents(DataComponentMap p_330963_) {
+-        this.patterns = p_330963_.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+-        this.name = p_330963_.get(DataComponents.CUSTOM_NAME);
++    protected void applyImplicitComponents(BlockEntity.DataComponentInput p_338244_) {
++        super.applyImplicitComponents(p_338244_);
++        this.patterns = p_338244_.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
++        this.name = p_338244_.get(DataComponents.CUSTOM_NAME);
+     }
+ 
+     @Override
+-    public void collectComponents(DataComponentMap.Builder p_331235_) {
+-        p_331235_.set(DataComponents.BANNER_PATTERNS, this.patterns);
+-        p_331235_.set(DataComponents.CUSTOM_NAME, this.name);
++    protected void collectImplicitComponents(DataComponentMap.Builder p_338762_) {
++        super.collectImplicitComponents(p_338762_);
++        p_338762_.set(DataComponents.BANNER_PATTERNS, this.patterns);
++        p_338762_.set(DataComponents.CUSTOM_NAME, this.name);
+     }
+ 
+     @Override

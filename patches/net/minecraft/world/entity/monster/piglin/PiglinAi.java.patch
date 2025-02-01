@@ -9,6 +9,28 @@
              if (p_34869_ && flag) {
                  throwItems(p_34868_, getBarterResponseItems(p_34868_));
              } else if (!flag) {
+@@ -434,7 +_,7 @@
+         if (!p_34865_.isEmpty()) {
+             p_34864_.swing(InteractionHand.OFF_HAND);
+ 
+-            for(ItemStack itemstack : p_34865_) {
++            for (ItemStack itemstack : p_34865_) {
+                 BehaviorUtils.throwItem(p_34864_, itemstack, p_34866_.add(0.0, 1.0, 0.0));
+             }
+         }
+@@ -451,11 +_,7 @@
+     }
+ 
+     private static boolean wantsToDance(LivingEntity p_34811_, LivingEntity p_34812_) {
+-        if (p_34812_.getType() != EntityType.HOGLIN) {
+-            return false;
+-        } else {
+-            return RandomSource.create(p_34811_.level().getGameTime()).nextFloat() < 0.1F;
+-        }
++        return p_34812_.getType() != EntityType.HOGLIN ? false : RandomSource.create(p_34811_.level().getGameTime()).nextFloat() < 0.1F;
+     }
+ 
+     protected static boolean wantsToPickup(Piglin p_34858_, ItemStack p_34859_) {
 @@ -465,7 +_,7 @@
              return false;
          } else if (isAdmiringDisabled(p_34858_) && p_34858_.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
@@ -18,6 +40,50 @@
              return isNotHoldingLovedItemInOffHand(p_34858_);
          } else {
              boolean flag = p_34858_.canAddToInventory(p_34859_);
+@@ -473,10 +_,8 @@
+                 return flag;
+             } else if (isFood(p_34859_)) {
+                 return !hasEatenRecently(p_34858_) && flag;
+-            } else if (!isLovedItem(p_34859_)) {
+-                return p_34858_.canReplaceCurrentItem(p_34859_);
+             } else {
+-                return isNotHoldingLovedItemInOffHand(p_34858_) && flag;
++                return !isLovedItem(p_34859_) ? p_34858_.canReplaceCurrentItem(p_34859_) : isNotHoldingLovedItemInOffHand(p_34858_) && flag;
+             }
+         }
+     }
+@@ -486,12 +_,9 @@
+     }
+ 
+     private static boolean wantsToStopRiding(Piglin p_34835_, Entity p_34836_) {
+-        if (!(p_34836_ instanceof Mob)) {
+-            return false;
+-        } else {
+-            Mob mob = (Mob)p_34836_;
+-            return !mob.isBaby() || !mob.isAlive() || wasHurtRecently(p_34835_) || wasHurtRecently(mob) || mob instanceof Piglin && mob.getVehicle() == null;
+-        }
++        return !(p_34836_ instanceof Mob mob)
++            ? false
++            : !mob.isBaby() || !mob.isAlive() || wasHurtRecently(p_34835_) || wasHurtRecently(mob) || mob instanceof Piglin && mob.getVehicle() == null;
+     }
+ 
+     private static boolean isNearestValidAttackTarget(Piglin p_34901_, LivingEntity p_34902_) {
+@@ -537,11 +_,11 @@
+ 
+     public static void angerNearbyPiglins(Player p_34874_, boolean p_34875_) {
+         List<Piglin> list = p_34874_.level().getEntitiesOfClass(Piglin.class, p_34874_.getBoundingBox().inflate(16.0));
+-        list.stream().filter(PiglinAi::isIdle).filter(p_34881_ -> !p_34875_ || BehaviorUtils.canSee(p_34881_, p_34874_)).forEach(p_340137_ -> {
+-            if (p_340137_.level().getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
+-                setAngerTargetToNearestTargetablePlayerIfFound(p_340137_, p_34874_);
++        list.stream().filter(PiglinAi::isIdle).filter(p_34881_ -> !p_34875_ || BehaviorUtils.canSee(p_34881_, p_34874_)).forEach(p_337859_ -> {
++            if (p_337859_.level().getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
++                setAngerTargetToNearestTargetablePlayerIfFound(p_337859_, p_34874_);
+             } else {
+-                setAngerTarget(p_340137_, p_34874_);
++                setAngerTarget(p_337859_, p_34874_);
+             }
+         });
+     }
 @@ -560,7 +_,7 @@
      }
  
@@ -27,15 +93,63 @@
      }
  
      protected static void wasHurtBy(Piglin p_34838_, LivingEntity p_34839_) {
-@@ -650,7 +_,7 @@
+@@ -577,8 +_,8 @@
+                 brain.setMemoryWithExpiry(MemoryModuleType.ADMIRING_DISABLED, true, 400L);
+             }
+ 
+-            getAvoidTarget(p_34838_).ifPresent(p_340144_ -> {
+-                if (p_340144_.getType() != p_34839_.getType()) {
++            getAvoidTarget(p_34838_).ifPresent(p_337862_ -> {
++                if (p_337862_.getType() != p_34839_.getType()) {
+                     brain.eraseMemory(MemoryModuleType.AVOID_TARGET);
+                 }
+             });
+@@ -648,9 +_,9 @@
+     }
+ 
      public static boolean isWearingGold(LivingEntity p_34809_) {
-         for(ItemStack itemstack : p_34809_.getArmorAndBodyArmorSlots()) {
+-        for(ItemStack itemstack : p_34809_.getArmorAndBodyArmorSlots()) {
++        for (ItemStack itemstack : p_34809_.getArmorAndBodyArmorSlots()) {
              Item item = itemstack.getItem();
 -            if (item instanceof ArmorItem && ((ArmorItem)item).getMaterial().is(ArmorMaterials.GOLD)) {
 +            if (itemstack.makesPiglinsNeutral(p_34809_)) {
                  return true;
              }
          }
+@@ -666,7 +_,7 @@
+     private static BehaviorControl<LivingEntity> babySometimesRideBabyHoglin() {
+         SetEntityLookTargetSometimes.Ticker setentitylooktargetsometimes$ticker = new SetEntityLookTargetSometimes.Ticker(RIDE_START_INTERVAL);
+         return CopyMemoryWithExpiry.create(
+-            p_340139_ -> p_340139_.isBaby() && setentitylooktargetsometimes$ticker.tickDownAndCheck(p_340139_.level().random),
++            p_337855_ -> p_337855_.isBaby() && setentitylooktargetsometimes$ticker.tickDownAndCheck(p_337855_.level().random),
+             MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN,
+             MemoryModuleType.RIDE_TARGET,
+             RIDE_DURATION
+@@ -674,9 +_,9 @@
+     }
+ 
+     protected static void broadcastAngerTarget(AbstractPiglin p_34896_, LivingEntity p_34897_) {
+-        getAdultPiglins(p_34896_).forEach(p_340141_ -> {
+-            if (p_34897_.getType() != EntityType.HOGLIN || p_340141_.canHunt() && ((Hoglin)p_34897_).canBeHunted()) {
+-                setAngerTargetIfCloserThanCurrent(p_340141_, p_34897_);
++        getAdultPiglins(p_34896_).forEach(p_337857_ -> {
++            if (p_34897_.getType() != EntityType.HOGLIN || p_337857_.canHunt() && ((Hoglin)p_34897_).canBeHunted()) {
++                setAngerTargetIfCloserThanCurrent(p_337857_, p_34897_);
+             }
+         });
+     }
+@@ -755,10 +_,8 @@
+             EntityType<?> entitytype = livingentity.getType();
+             if (entitytype == EntityType.HOGLIN) {
+                 return piglinsEqualOrOutnumberHoglins(p_35009_);
+-            } else if (isZombified(entitytype)) {
+-                return !brain.isMemoryValue(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED, livingentity);
+             } else {
+-                return false;
++                return isZombified(entitytype) ? !brain.isMemoryValue(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED, livingentity) : false;
+             }
+         }
+     }
 @@ -803,7 +_,7 @@
      }
  

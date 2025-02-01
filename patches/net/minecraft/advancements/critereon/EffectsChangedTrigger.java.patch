@@ -1,0 +1,43 @@
+--- a/net/minecraft/advancements/critereon/EffectsChangedTrigger.java
++++ b/net/minecraft/advancements/critereon/EffectsChangedTrigger.java
+@@ -8,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.level.storage.loot.LootContext;
+@@ -27,12 +_,12 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<MobEffectsPredicate> effects, Optional<ContextAwarePredicate> source)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<EffectsChangedTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311409_ -> p_311409_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EffectsChangedTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(MobEffectsPredicate.CODEC, "effects").forGetter(EffectsChangedTrigger.TriggerInstance::effects),
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "source").forGetter(EffectsChangedTrigger.TriggerInstance::source)
++            p_337355_ -> p_337355_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(EffectsChangedTrigger.TriggerInstance::player),
++                        MobEffectsPredicate.CODEC.optionalFieldOf("effects").forGetter(EffectsChangedTrigger.TriggerInstance::effects),
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("source").forGetter(EffectsChangedTrigger.TriggerInstance::source)
+                     )
+-                    .apply(p_311409_, EffectsChangedTrigger.TriggerInstance::new)
++                    .apply(p_337355_, EffectsChangedTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<EffectsChangedTrigger.TriggerInstance> hasEffects(MobEffectsPredicate.Builder p_299317_) {
+@@ -48,11 +_,9 @@
+         }
+ 
+         public boolean matches(ServerPlayer p_149275_, @Nullable LootContext p_149276_) {
+-            if (this.effects.isPresent() && !this.effects.get().matches((LivingEntity)p_149275_)) {
+-                return false;
+-            } else {
+-                return !this.source.isPresent() || p_149276_ != null && this.source.get().matches(p_149276_);
+-            }
++            return this.effects.isPresent() && !this.effects.get().matches((LivingEntity)p_149275_)
++                ? false
++                : !this.source.isPresent() || p_149276_ != null && this.source.get().matches(p_149276_);
+         }
+ 
+         @Override

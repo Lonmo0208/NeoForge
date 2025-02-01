@@ -1,7 +1,10 @@
 --- a/net/minecraft/world/level/portal/PortalForcer.java
 +++ b/net/minecraft/world/level/portal/PortalForcer.java
-@@ -20,7 +_,7 @@
+@@ -18,10 +_,9 @@
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
  import net.minecraft.world.level.border.WorldBorder;
+-import net.minecraft.world.level.chunk.status.ChunkStatus;
  import net.minecraft.world.level.levelgen.Heightmap;
  
 -public class PortalForcer {
@@ -9,3 +12,82 @@
      public static final int TICKET_RADIUS = 3;
      private static final int SEARCH_RADIUS = 128;
      private static final int CREATE_RADIUS = 16;
+@@ -44,7 +_,7 @@
+     public Optional<BlockUtil.FoundRectangle> findPortalAround(BlockPos p_192986_, boolean p_192987_, WorldBorder p_192988_) {
+         PoiManager poimanager = this.level.getPoiManager();
+         int i = p_192987_ ? 16 : 128;
+-        poimanager.ensureLoadedAndValid(this.level, p_192986_, i, ChunkStatus.EMPTY);
++        poimanager.ensureLoadedAndValid(this.level, p_192986_, i);
+         Optional<PoiRecord> optional = poimanager.getInSquare(p_230634_ -> p_230634_.is(PoiTypes.NETHER_PORTAL), p_192986_, i, PoiManager.Occupancy.ANY)
+             .filter(p_192981_ -> p_192988_.isWithinBounds(p_192981_.getPos()))
+             .sorted(
+@@ -80,19 +_,19 @@
+         int i = Math.min(this.level.getMaxBuildHeight(), this.level.getMinBuildHeight() + this.level.getLogicalHeight()) - 1;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = p_77667_.mutable();
+ 
+-        for(BlockPos.MutableBlockPos blockpos$mutableblockpos1 : BlockPos.spiralAround(p_77667_, 16, Direction.EAST, Direction.SOUTH)) {
++        for (BlockPos.MutableBlockPos blockpos$mutableblockpos1 : BlockPos.spiralAround(p_77667_, 16, Direction.EAST, Direction.SOUTH)) {
+             int j = Math.min(i, this.level.getHeight(Heightmap.Types.MOTION_BLOCKING, blockpos$mutableblockpos1.getX(), blockpos$mutableblockpos1.getZ()));
+             int k = 1;
+             if (worldborder.isWithinBounds(blockpos$mutableblockpos1) && worldborder.isWithinBounds(blockpos$mutableblockpos1.move(direction, 1))) {
+                 blockpos$mutableblockpos1.move(direction.getOpposite(), 1);
+ 
+-                for(int l = j; l >= this.level.getMinBuildHeight(); --l) {
++                for (int l = j; l >= this.level.getMinBuildHeight(); l--) {
+                     blockpos$mutableblockpos1.setY(l);
+                     if (this.canPortalReplaceBlock(blockpos$mutableblockpos1)) {
+                         int i1 = l;
+ 
+-                        while(l > this.level.getMinBuildHeight() && this.canPortalReplaceBlock(blockpos$mutableblockpos1.move(Direction.DOWN))) {
+-                            --l;
++                        while (l > this.level.getMinBuildHeight() && this.canPortalReplaceBlock(blockpos$mutableblockpos1.move(Direction.DOWN))) {
++                            l--;
+                         }
+ 
+                         if (l + 4 <= i) {
+@@ -138,9 +_,9 @@
+                 return Optional.empty();
+             }
+ 
+-            for(int i3 = -1; i3 < 2; ++i3) {
+-                for(int j3 = 0; j3 < 2; ++j3) {
+-                    for(int k3 = -1; k3 < 3; ++k3) {
++            for (int i3 = -1; i3 < 2; i3++) {
++                for (int j3 = 0; j3 < 2; j3++) {
++                    for (int k3 = -1; k3 < 3; k3++) {
+                         BlockState blockstate1 = k3 < 0 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.AIR.defaultBlockState();
+                         blockpos$mutableblockpos.setWithOffset(
+                             blockpos, j3 * direction.getStepX() + i3 * direction1.getStepX(), k3, j3 * direction.getStepZ() + i3 * direction1.getStepZ()
+@@ -151,8 +_,8 @@
+             }
+         }
+ 
+-        for(int l1 = -1; l1 < 3; ++l1) {
+-            for(int j2 = -1; j2 < 4; ++j2) {
++        for (int l1 = -1; l1 < 3; l1++) {
++            for (int j2 = -1; j2 < 4; j2++) {
+                 if (l1 == -1 || l1 == 2 || j2 == -1 || j2 == 3) {
+                     blockpos$mutableblockpos.setWithOffset(blockpos, l1 * direction.getStepX(), j2, l1 * direction.getStepZ());
+                     this.level.setBlock(blockpos$mutableblockpos, Blocks.OBSIDIAN.defaultBlockState(), 3);
+@@ -162,8 +_,8 @@
+ 
+         BlockState blockstate = Blocks.NETHER_PORTAL.defaultBlockState().setValue(NetherPortalBlock.AXIS, p_77668_);
+ 
+-        for(int k2 = 0; k2 < 2; ++k2) {
+-            for(int l2 = 0; l2 < 3; ++l2) {
++        for (int k2 = 0; k2 < 2; k2++) {
++            for (int l2 = 0; l2 < 3; l2++) {
+                 blockpos$mutableblockpos.setWithOffset(blockpos, k2 * direction.getStepX(), l2, k2 * direction.getStepZ());
+                 this.level.setBlock(blockpos$mutableblockpos, blockstate, 18);
+             }
+@@ -180,8 +_,8 @@
+     private boolean canHostFrame(BlockPos p_77662_, BlockPos.MutableBlockPos p_77663_, Direction p_77664_, int p_77665_) {
+         Direction direction = p_77664_.getClockWise();
+ 
+-        for(int i = -1; i < 3; ++i) {
+-            for(int j = -1; j < 4; ++j) {
++        for (int i = -1; i < 3; i++) {
++            for (int j = -1; j < 4; j++) {
+                 p_77663_.setWithOffset(
+                     p_77662_, p_77664_.getStepX() * i + direction.getStepX() * p_77665_, j, p_77664_.getStepZ() * i + direction.getStepZ() * p_77665_
+                 );

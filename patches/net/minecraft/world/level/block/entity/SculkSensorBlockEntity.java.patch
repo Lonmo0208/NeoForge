@@ -1,0 +1,38 @@
+--- a/net/minecraft/world/level/block/entity/SculkSensorBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/SculkSensorBlockEntity.java
+@@ -11,7 +_,6 @@
+ import net.minecraft.nbt.Tag;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.entity.Entity;
+-import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.SculkSensorBlock;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.gameevent.BlockPositionSource;
+@@ -43,12 +_,12 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155649_, HolderLookup.Provider p_323498_) {
+-        super.load(p_155649_, p_323498_);
+-        this.lastVibrationFrequency = p_155649_.getInt("last_vibration_frequency");
+-        if (p_155649_.contains("listener", 10)) {
++    protected void loadAdditional(CompoundTag p_338719_, HolderLookup.Provider p_338792_) {
++        super.loadAdditional(p_338719_, p_338792_);
++        this.lastVibrationFrequency = p_338719_.getInt("last_vibration_frequency");
++        if (p_338719_.contains("listener", 10)) {
+             VibrationSystem.Data.CODEC
+-                .parse(new Dynamic<>(NbtOps.INSTANCE, p_155649_.getCompound("listener")))
++                .parse(new Dynamic<>(NbtOps.INSTANCE, p_338719_.getCompound("listener")))
+                 .resultOrPartial(LOGGER::error)
+                 .ifPresent(p_281146_ -> this.vibrationData = p_281146_);
+         }
+@@ -126,8 +_,7 @@
+             if (SculkSensorBlock.canActivate(blockstate)) {
+                 SculkSensorBlockEntity.this.setLastVibrationFrequency(VibrationSystem.getGameEventFrequency(p_316423_));
+                 int i = VibrationSystem.getRedstoneStrengthForDistance(p_283130_, this.getListenerRadius());
+-                Block block = blockstate.getBlock();
+-                if (block instanceof SculkSensorBlock sculksensorblock) {
++                if (blockstate.getBlock() instanceof SculkSensorBlock sculksensorblock) {
+                     sculksensorblock.activate(p_282123_, p_282851_, this.blockPos, blockstate, i, SculkSensorBlockEntity.this.getLastVibrationFrequency());
+                 }
+             }

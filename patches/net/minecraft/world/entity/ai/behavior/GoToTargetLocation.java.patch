@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/entity/ai/behavior/GoToTargetLocation.java
++++ b/net/minecraft/world/entity/ai/behavior/GoToTargetLocation.java
+@@ -26,11 +_,11 @@
+                         p_259997_.absent(MemoryModuleType.WALK_TARGET),
+                         p_259997_.registered(MemoryModuleType.LOOK_TARGET)
+                     )
+-                    .apply(p_259997_, (p_259831_, p_259115_, p_259521_, p_259223_) -> (p_339962_, p_339963_, p_339964_) -> {
++                    .apply(p_259997_, (p_259831_, p_259115_, p_259521_, p_259223_) -> (p_337716_, p_337717_, p_337718_) -> {
+                             BlockPos blockpos = p_259997_.get(p_259831_);
+-                            boolean flag = blockpos.closerThan(p_339963_.blockPosition(), (double)p_259740_);
++                            boolean flag = blockpos.closerThan(p_337717_.blockPosition(), (double)p_259740_);
+                             if (!flag) {
+-                                BehaviorUtils.setWalkAndLookTargetMemories(p_339963_, getNearbyPos(p_339963_, blockpos), p_259957_, p_259740_);
++                                BehaviorUtils.setWalkAndLookTargetMemories(p_337717_, getNearbyPos(p_337717_, blockpos), p_259957_, p_259740_);
+                             }
+         
+                             return true;

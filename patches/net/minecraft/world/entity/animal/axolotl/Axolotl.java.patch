@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/entity/animal/axolotl/Axolotl.java
++++ b/net/minecraft/world/entity/animal/axolotl/Axolotl.java
+@@ -586,9 +_,7 @@
+         }
+ 
+         private static Axolotl.Variant getSpawnVariant(RandomSource p_218451_, boolean p_218452_) {
+-            Axolotl.Variant[] aaxolotl$variant = Arrays.stream(values())
+-                .filter(p_149252_ -> p_149252_.common == p_218452_)
+-                .toArray(p_149244_ -> new Axolotl.Variant[p_149244_]);
++            Axolotl.Variant[] aaxolotl$variant = Arrays.stream(values()).filter(p_149252_ -> p_149252_.common == p_218452_).toArray(Axolotl.Variant[]::new);
+             return Util.getRandom(aaxolotl$variant, p_218451_);
+         }
+     }

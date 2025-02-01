@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/datafix/fixes/VillagerRebuildLevelAndXpFix.java
++++ b/net/minecraft/util/datafix/fixes/VillagerRebuildLevelAndXpFix.java
+@@ -31,7 +_,7 @@
+         OpticFinder<?> opticfinder1 = type.findField("Offers");
+         Type<?> type1 = opticfinder1.type();
+         OpticFinder<?> opticfinder2 = type1.findField("Recipes");
+-        ListType<?> listtype = (ListType)opticfinder2.type();
++        ListType<?> listtype = (ListType<?>)opticfinder2.type();
+         OpticFinder<?> opticfinder3 = listtype.getElement().finder();
+         return this.fixTypeEverywhereTyped(
+             "Villager level and xp rebuild",

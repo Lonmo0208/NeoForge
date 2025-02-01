@@ -1,0 +1,111 @@
+--- a/net/minecraft/advancements/critereon/InventoryChangeTrigger.java
++++ b/net/minecraft/advancements/critereon/InventoryChangeTrigger.java
+@@ -13,7 +_,6 @@
+ import net.minecraft.core.HolderSet;
+ import net.minecraft.core.component.DataComponentPredicate;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.player.Inventory;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.ItemLike;
+@@ -29,14 +_,14 @@
+         int j = 0;
+         int k = 0;
+ 
+-        for(int l = 0; l < p_43151_.getContainerSize(); ++l) {
++        for (int l = 0; l < p_43151_.getContainerSize(); l++) {
+             ItemStack itemstack = p_43151_.getItem(l);
+             if (itemstack.isEmpty()) {
+-                ++j;
++                j++;
+             } else {
+-                ++k;
++                k++;
+                 if (itemstack.getCount() >= itemstack.getMaxStackSize()) {
+-                    ++i;
++                    i++;
+                 }
+             }
+         }
+@@ -51,20 +_,18 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, InventoryChangeTrigger.TriggerInstance.Slots slots, List<ItemPredicate> items)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<InventoryChangeTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311424_ -> p_311424_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(InventoryChangeTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(
+-                                InventoryChangeTrigger.TriggerInstance.Slots.CODEC, "slots", InventoryChangeTrigger.TriggerInstance.Slots.ANY
+-                            )
++            p_337367_ -> p_337367_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(InventoryChangeTrigger.TriggerInstance::player),
++                        InventoryChangeTrigger.TriggerInstance.Slots.CODEC
++                            .optionalFieldOf("slots", InventoryChangeTrigger.TriggerInstance.Slots.ANY)
+                             .forGetter(InventoryChangeTrigger.TriggerInstance::slots),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC.listOf(), "items", List.of())
+-                            .forGetter(InventoryChangeTrigger.TriggerInstance::items)
++                        ItemPredicate.CODEC.listOf().optionalFieldOf("items", List.of()).forGetter(InventoryChangeTrigger.TriggerInstance::items)
+                     )
+-                    .apply(p_311424_, InventoryChangeTrigger.TriggerInstance::new)
++                    .apply(p_337367_, InventoryChangeTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemPredicate.Builder... p_298231_) {
+-            return hasItems(Stream.of(p_298231_).map(ItemPredicate.Builder::build).<ItemPredicate>toArray(p_297901_ -> new ItemPredicate[p_297901_]));
++            return hasItems(Stream.of(p_298231_).map(ItemPredicate.Builder::build).toArray(ItemPredicate[]::new));
+         }
+ 
+         public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemPredicate... p_43198_) {
+@@ -77,7 +_,7 @@
+         public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemLike... p_43200_) {
+             ItemPredicate[] aitempredicate = new ItemPredicate[p_43200_.length];
+ 
+-            for(int i = 0; i < p_43200_.length; ++i) {
++            for (int i = 0; i < p_43200_.length; i++) {
+                 aitempredicate[i] = new ItemPredicate(
+                     Optional.of(HolderSet.direct(p_43200_[i].asItem().builtInRegistryHolder())), MinMaxBounds.Ints.ANY, DataComponentPredicate.EMPTY, Map.of()
+                 );
+@@ -95,7 +_,7 @@
+                 List<ItemPredicate> list = new ObjectArrayList<>(this.items);
+                 int i = p_43187_.getContainerSize();
+ 
+-                for(int j = 0; j < i; ++j) {
++                for (int j = 0; j < i; j++) {
+                     if (list.isEmpty()) {
+                         return true;
+                     }
+@@ -114,15 +_,18 @@
+ 
+         public static record Slots(MinMaxBounds.Ints occupied, MinMaxBounds.Ints full, MinMaxBounds.Ints empty) {
+             public static final Codec<InventoryChangeTrigger.TriggerInstance.Slots> CODEC = RecordCodecBuilder.create(
+-                p_312770_ -> p_312770_.group(
+-                            ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "occupied", MinMaxBounds.Ints.ANY)
++                p_337368_ -> p_337368_.group(
++                            MinMaxBounds.Ints.CODEC
++                                .optionalFieldOf("occupied", MinMaxBounds.Ints.ANY)
+                                 .forGetter(InventoryChangeTrigger.TriggerInstance.Slots::occupied),
+-                            ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "full", MinMaxBounds.Ints.ANY)
++                            MinMaxBounds.Ints.CODEC
++                                .optionalFieldOf("full", MinMaxBounds.Ints.ANY)
+                                 .forGetter(InventoryChangeTrigger.TriggerInstance.Slots::full),
+-                            ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "empty", MinMaxBounds.Ints.ANY)
++                            MinMaxBounds.Ints.CODEC
++                                .optionalFieldOf("empty", MinMaxBounds.Ints.ANY)
+                                 .forGetter(InventoryChangeTrigger.TriggerInstance.Slots::empty)
+                         )
+-                        .apply(p_312770_, InventoryChangeTrigger.TriggerInstance.Slots::new)
++                        .apply(p_337368_, InventoryChangeTrigger.TriggerInstance.Slots::new)
+             );
+             public static final InventoryChangeTrigger.TriggerInstance.Slots ANY = new InventoryChangeTrigger.TriggerInstance.Slots(
+                 MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY
+@@ -131,10 +_,8 @@
+             public boolean matches(int p_312470_, int p_312809_, int p_311989_) {
+                 if (!this.full.matches(p_312470_)) {
+                     return false;
+-                } else if (!this.empty.matches(p_312809_)) {
+-                    return false;
+                 } else {
+-                    return this.occupied.matches(p_311989_);
++                    return !this.empty.matches(p_312809_) ? false : this.occupied.matches(p_311989_);
+                 }
+             }
+         }

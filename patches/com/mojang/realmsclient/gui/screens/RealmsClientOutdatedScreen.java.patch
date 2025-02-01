@@ -1,0 +1,21 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsClientOutdatedScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsClientOutdatedScreen.java
+@@ -1,6 +_,7 @@
+ package com.mojang.realmsclient.gui.screens;
+ 
+ import net.minecraft.SharedConstants;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.MultiLineTextWidget;
+ import net.minecraft.client.gui.components.events.GuiEventListener;
+@@ -31,7 +_,9 @@
+         this.layout.addTitleHeader(INCOMPATIBLE_TITLE, this.font);
+         this.layout.addToContents(new MultiLineTextWidget(this.getErrorMessage(), this.font).setCentered(true));
+         this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, p_329646_ -> this.onClose()).width(200).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_329648_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_329648_);
++        });
+         this.repositionElements();
+     }
+ 

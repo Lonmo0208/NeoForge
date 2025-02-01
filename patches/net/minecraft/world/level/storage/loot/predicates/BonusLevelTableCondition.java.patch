@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/level/storage/loot/predicates/BonusLevelTableCondition.java
++++ b/net/minecraft/world/level/storage/loot/predicates/BonusLevelTableCondition.java
+@@ -2,6 +_,7 @@
+ 
+ import com.google.common.collect.ImmutableSet;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.ArrayList;
+@@ -17,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+ 
+ public record BonusLevelTableCondition(Holder<Enchantment> enchantment, List<Float> values) implements LootItemCondition {
+-    public static final Codec<BonusLevelTableCondition> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<BonusLevelTableCondition> CODEC = RecordCodecBuilder.mapCodec(
+         p_298172_ -> p_298172_.group(
+                     BuiltInRegistries.ENCHANTMENT.holderByNameCodec().fieldOf("enchantment").forGetter(BonusLevelTableCondition::enchantment),
+                     Codec.FLOAT.listOf().fieldOf("chances").forGetter(BonusLevelTableCondition::values)
+@@ -45,7 +_,7 @@
+     public static LootItemCondition.Builder bonusLevelFlatChance(Enchantment p_81518_, float... p_81519_) {
+         List<Float> list = new ArrayList<>(p_81519_.length);
+ 
+-        for(float f : p_81519_) {
++        for (float f : p_81519_) {
+             list.add(f);
+         }
+ 

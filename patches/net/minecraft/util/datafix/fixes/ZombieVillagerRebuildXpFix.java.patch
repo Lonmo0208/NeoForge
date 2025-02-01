@@ -1,0 +1,21 @@
+--- a/net/minecraft/util/datafix/fixes/ZombieVillagerRebuildXpFix.java
++++ b/net/minecraft/util/datafix/fixes/ZombieVillagerRebuildXpFix.java
+@@ -13,13 +_,13 @@
+ 
+     @Override
+     protected Typed<?> fix(Typed<?> p_17301_) {
+-        return p_17301_.update(DSL.remainderFinder(), p_297970_ -> {
+-            Optional<Number> optional = p_297970_.get("Xp").asNumber().result();
++        return p_17301_.update(DSL.remainderFinder(), p_337684_ -> {
++            Optional<Number> optional = p_337684_.get("Xp").asNumber().result();
+             if (optional.isEmpty()) {
+-                int i = p_297970_.get("VillagerData").get("level").asInt(1);
+-                return p_297970_.set("Xp", p_297970_.createInt(VillagerRebuildLevelAndXpFix.getMinXpPerLevel(i)));
++                int i = p_337684_.get("VillagerData").get("level").asInt(1);
++                return p_337684_.set("Xp", p_337684_.createInt(VillagerRebuildLevelAndXpFix.getMinXpPerLevel(i)));
+             } else {
+-                return p_297970_;
++                return p_337684_;
+             }
+         });
+     }

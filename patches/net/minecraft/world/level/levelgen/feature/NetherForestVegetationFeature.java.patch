@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/level/levelgen/feature/NetherForestVegetationFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/NetherForestVegetationFeature.java
+@@ -27,7 +_,7 @@
+             if (i >= worldgenlevel.getMinBuildHeight() + 1 && i + 1 < worldgenlevel.getMaxBuildHeight()) {
+                 int j = 0;
+ 
+-                for(int k = 0; k < netherforestvegetationconfig.spreadWidth * netherforestvegetationconfig.spreadWidth; ++k) {
++                for (int k = 0; k < netherforestvegetationconfig.spreadWidth * netherforestvegetationconfig.spreadWidth; k++) {
+                     BlockPos blockpos1 = blockpos.offset(
+                         randomsource.nextInt(netherforestvegetationconfig.spreadWidth) - randomsource.nextInt(netherforestvegetationconfig.spreadWidth),
+                         randomsource.nextInt(netherforestvegetationconfig.spreadHeight) - randomsource.nextInt(netherforestvegetationconfig.spreadHeight),
+@@ -37,8 +_,8 @@
+                     if (worldgenlevel.isEmptyBlock(blockpos1)
+                         && blockpos1.getY() > worldgenlevel.getMinBuildHeight()
+                         && blockstate1.canSurvive(worldgenlevel, blockpos1)) {
+-                        SimpleBlockFeature.place(blockstate1, worldgenlevel, blockpos1);
+-                        ++j;
++                        worldgenlevel.setBlock(blockpos1, blockstate1, 2);
++                        j++;
+                     }
+                 }
+ 

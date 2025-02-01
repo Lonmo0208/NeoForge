@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/NetherVines.java
++++ b/net/minecraft/world/level/block/NetherVines.java
+@@ -15,7 +_,7 @@
+         double d0 = 1.0;
+ 
+         int i;
+-        for(i = 0; p_221804_.nextDouble() < d0; ++i) {
++        for (i = 0; p_221804_.nextDouble() < d0; i++) {
+             d0 *= 0.826;
+         }
+ 

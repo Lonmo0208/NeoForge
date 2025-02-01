@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/state/properties/IntegerProperty.java
++++ b/net/minecraft/world/level/block/state/properties/IntegerProperty.java
+@@ -22,7 +_,7 @@
+             this.max = p_61625_;
+             Set<Integer> set = Sets.newHashSet();
+ 
+-            for(int i = p_61624_; i <= p_61625_; ++i) {
++            for (int i = p_61624_; i <= p_61625_; i++) {
+                 set.add(i);
+             }
+ 

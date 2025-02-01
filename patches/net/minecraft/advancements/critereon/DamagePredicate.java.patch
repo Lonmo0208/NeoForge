@@ -1,0 +1,44 @@
+--- a/net/minecraft/advancements/critereon/DamagePredicate.java
++++ b/net/minecraft/advancements/critereon/DamagePredicate.java
+@@ -5,7 +_,6 @@
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Optional;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.damagesource.DamageSource;
+ 
+ public record DamagePredicate(
+@@ -16,14 +_,14 @@
+     Optional<DamageSourcePredicate> type
+ ) {
+     public static final Codec<DamagePredicate> CODEC = RecordCodecBuilder.create(
+-        p_311407_ -> p_311407_.group(
+-                    ExtraCodecs.strictOptionalField(MinMaxBounds.Doubles.CODEC, "dealt", MinMaxBounds.Doubles.ANY).forGetter(DamagePredicate::dealtDamage),
+-                    ExtraCodecs.strictOptionalField(MinMaxBounds.Doubles.CODEC, "taken", MinMaxBounds.Doubles.ANY).forGetter(DamagePredicate::takenDamage),
+-                    ExtraCodecs.strictOptionalField(EntityPredicate.CODEC, "source_entity").forGetter(DamagePredicate::sourceEntity),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "blocked").forGetter(DamagePredicate::blocked),
+-                    ExtraCodecs.strictOptionalField(DamageSourcePredicate.CODEC, "type").forGetter(DamagePredicate::type)
++        p_337350_ -> p_337350_.group(
++                    MinMaxBounds.Doubles.CODEC.optionalFieldOf("dealt", MinMaxBounds.Doubles.ANY).forGetter(DamagePredicate::dealtDamage),
++                    MinMaxBounds.Doubles.CODEC.optionalFieldOf("taken", MinMaxBounds.Doubles.ANY).forGetter(DamagePredicate::takenDamage),
++                    EntityPredicate.CODEC.optionalFieldOf("source_entity").forGetter(DamagePredicate::sourceEntity),
++                    Codec.BOOL.optionalFieldOf("blocked").forGetter(DamagePredicate::blocked),
++                    DamageSourcePredicate.CODEC.optionalFieldOf("type").forGetter(DamagePredicate::type)
+                 )
+-                .apply(p_311407_, DamagePredicate::new)
++                .apply(p_337350_, DamagePredicate::new)
+     );
+ 
+     public boolean matches(ServerPlayer p_24918_, DamageSource p_24919_, float p_24920_, float p_24921_, boolean p_24922_) {
+@@ -33,10 +_,8 @@
+             return false;
+         } else if (this.sourceEntity.isPresent() && !this.sourceEntity.get().matches(p_24918_, p_24919_.getEntity())) {
+             return false;
+-        } else if (this.blocked.isPresent() && this.blocked.get() != p_24922_) {
+-            return false;
+         } else {
+-            return !this.type.isPresent() || this.type.get().matches(p_24918_, p_24919_);
++            return this.blocked.isPresent() && this.blocked.get() != p_24922_ ? false : !this.type.isPresent() || this.type.get().matches(p_24918_, p_24919_);
+         }
+     }
+ 

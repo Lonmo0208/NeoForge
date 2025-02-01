@@ -1,0 +1,28 @@
+--- a/net/minecraft/advancements/critereon/LightPredicate.java
++++ b/net/minecraft/advancements/critereon/LightPredicate.java
+@@ -5,22 +_,15 @@
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.server.level.ServerLevel;
+-import net.minecraft.util.ExtraCodecs;
+ 
+ public record LightPredicate(MinMaxBounds.Ints composite) {
+     public static final Codec<LightPredicate> CODEC = RecordCodecBuilder.create(
+-        p_298348_ -> p_298348_.group(
+-                    ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "light", MinMaxBounds.Ints.ANY).forGetter(LightPredicate::composite)
+-                )
+-                .apply(p_298348_, LightPredicate::new)
++        p_337376_ -> p_337376_.group(MinMaxBounds.Ints.CODEC.optionalFieldOf("light", MinMaxBounds.Ints.ANY).forGetter(LightPredicate::composite))
++                .apply(p_337376_, LightPredicate::new)
+     );
+ 
+     public boolean matches(ServerLevel p_51342_, BlockPos p_51343_) {
+-        if (!p_51342_.isLoaded(p_51343_)) {
+-            return false;
+-        } else {
+-            return this.composite.matches(p_51342_.getMaxLocalRawBrightness(p_51343_));
+-        }
++        return !p_51342_.isLoaded(p_51343_) ? false : this.composite.matches(p_51342_.getMaxLocalRawBrightness(p_51343_));
+     }
+ 
+     public static class Builder {

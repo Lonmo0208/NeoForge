@@ -1,0 +1,25 @@
+--- a/net/minecraft/world/inventory/PlayerEnderChestContainer.java
++++ b/net/minecraft/world/inventory/PlayerEnderChestContainer.java
+@@ -27,11 +_,11 @@
+ 
+     @Override
+     public void fromTag(ListTag p_40108_, HolderLookup.Provider p_330977_) {
+-        for(int i = 0; i < this.getContainerSize(); ++i) {
++        for (int i = 0; i < this.getContainerSize(); i++) {
+             this.setItem(i, ItemStack.EMPTY);
+         }
+ 
+-        for(int k = 0; k < p_40108_.size(); ++k) {
++        for (int k = 0; k < p_40108_.size(); k++) {
+             CompoundTag compoundtag = p_40108_.getCompound(k);
+             int j = compoundtag.getByte("Slot") & 255;
+             if (j >= 0 && j < this.getContainerSize()) {
+@@ -44,7 +_,7 @@
+     public ListTag createTag(HolderLookup.Provider p_330801_) {
+         ListTag listtag = new ListTag();
+ 
+-        for(int i = 0; i < this.getContainerSize(); ++i) {
++        for (int i = 0; i < this.getContainerSize(); i++) {
+             ItemStack itemstack = this.getItem(i);
+             if (!itemstack.isEmpty()) {
+                 CompoundTag compoundtag = new CompoundTag();

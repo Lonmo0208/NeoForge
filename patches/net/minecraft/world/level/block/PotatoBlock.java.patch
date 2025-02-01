@@ -1,0 +1,101 @@
+--- a/net/minecraft/world/level/block/PotatoBlock.java
++++ b/net/minecraft/world/level/block/PotatoBlock.java
+@@ -2,25 +_,16 @@
+ 
+ import com.mojang.serialization.MapCodec;
+ import net.minecraft.core.BlockPos;
+-import net.minecraft.core.Direction;
+-import net.minecraft.tags.BlockTags;
+ import net.minecraft.world.item.Items;
+-import net.minecraft.world.item.context.BlockPlaceContext;
+ import net.minecraft.world.level.BlockGetter;
+ import net.minecraft.world.level.ItemLike;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.LevelReader;
+ import net.minecraft.world.level.block.state.BlockBehaviour;
+ import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.block.state.StateDefinition;
+-import net.minecraft.world.level.block.state.properties.IntegerProperty;
+ import net.minecraft.world.phys.shapes.CollisionContext;
+ import net.minecraft.world.phys.shapes.VoxelShape;
+-import org.jetbrains.annotations.Nullable;
+ 
+ public class PotatoBlock extends CropBlock {
+     public static final MapCodec<PotatoBlock> CODEC = simpleCodec(PotatoBlock::new);
+-    public static final IntegerProperty TATER_BOOST = IntegerProperty.create("tater_boost", 0, 2);
+     private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{
+         Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0),
+         Block.box(0.0, 0.0, 0.0, 16.0, 3.0, 16.0),
+@@ -42,22 +_,6 @@
+     }
+ 
+     @Override
+-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_340318_) {
+-        super.createBlockStateDefinition(p_340318_);
+-        p_340318_.add(TATER_BOOST);
+-    }
+-
+-    @Nullable
+-    @Override
+-    public BlockState getStateForPlacement(BlockPlaceContext p_340550_) {
+-        Level level = p_340550_.getLevel();
+-        BlockPos blockpos = p_340550_.getClickedPos().step(Direction.DOWN);
+-        BlockState blockstate = level.getBlockState(blockpos);
+-        BlockState blockstate1 = super.getStateForPlacement(p_340550_);
+-        return blockstate1 == null ? null : withCorrectTaterBoost(blockstate1, blockstate);
+-    }
+-
+-    @Override
+     protected ItemLike getBaseSeedId() {
+         return Items.POTATO;
+     }
+@@ -65,49 +_,5 @@
+     @Override
+     protected VoxelShape getShape(BlockState p_55200_, BlockGetter p_55201_, BlockPos p_55202_, CollisionContext p_55203_) {
+         return SHAPE_BY_AGE[this.getAge(p_55200_)];
+-    }
+-
+-    @Override
+-    protected boolean mayPlaceOn(BlockState p_340446_, BlockGetter p_340907_, BlockPos p_342127_) {
+-        return p_340446_.is(BlockTags.GROWS_POTATOES);
+-    }
+-
+-    @Override
+-    protected void neighborChanged(BlockState p_340589_, Level p_342295_, BlockPos p_341469_, Block p_341278_, BlockPos p_341655_, boolean p_341775_) {
+-        super.neighborChanged(p_340589_, p_342295_, p_341469_, p_341278_, p_341655_, p_341775_);
+-        if (p_341469_.step(Direction.DOWN).equals(p_341655_)) {
+-            BlockState blockstate = p_342295_.getBlockState(p_341655_);
+-            BlockState blockstate1 = p_342295_.getBlockState(p_341469_);
+-            if (blockstate1.getBlock() instanceof PotatoBlock) {
+-                p_342295_.setBlock(p_341469_, withCorrectTaterBoost(blockstate1, blockstate), 3);
+-            }
+-        }
+-    }
+-
+-    @Override
+-    public BlockState getStateForAge(int p_342192_, BlockState p_341268_) {
+-        return p_341268_.setValue(this.getAgeProperty(), Integer.valueOf(p_342192_));
+-    }
+-
+-    public static BlockState withCorrectTaterBoost(BlockState p_342449_, BlockState p_341015_) {
+-        return p_342449_.setValue(TATER_BOOST, Integer.valueOf(calculateTaterBoost(p_341015_)));
+-    }
+-
+-    @Override
+-    protected boolean canSurvive(BlockState p_340866_, LevelReader p_342085_, BlockPos p_340553_) {
+-        if (p_342085_.isPotato()) {
+-            BlockPos blockpos = p_340553_.below();
+-            return this.mayPlaceOn(p_342085_.getBlockState(blockpos), p_342085_, blockpos);
+-        } else {
+-            return super.canSurvive(p_340866_, p_342085_, p_340553_);
+-        }
+-    }
+-
+-    private static int calculateTaterBoost(BlockState p_342387_) {
+-        if (p_342387_.is(Blocks.PEELGRASS_BLOCK)) {
+-            return 1;
+-        } else {
+-            return p_342387_.is(Blocks.CORRUPTED_PEELGRASS_BLOCK) ? 2 : 0;
+-        }
+     }
+ }

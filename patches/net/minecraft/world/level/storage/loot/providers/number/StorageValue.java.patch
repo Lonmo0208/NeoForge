@@ -1,0 +1,34 @@
+--- a/net/minecraft/world/level/storage/loot/providers/number/StorageValue.java
++++ b/net/minecraft/world/level/storage/loot/providers/number/StorageValue.java
+@@ -1,7 +_,7 @@
+ package net.minecraft.world.level.storage.loot.providers.number;
+ 
+ import com.mojang.brigadier.exceptions.CommandSyntaxException;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -14,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.LootContext;
+ 
+ public record StorageValue(ResourceLocation storage, NbtPathArgument.NbtPath path) implements NumberProvider {
+-    public static final Codec<StorageValue> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<StorageValue> CODEC = RecordCodecBuilder.mapCodec(
+         p_335586_ -> p_335586_.group(
+                     ResourceLocation.CODEC.fieldOf("storage").forGetter(StorageValue::storage),
+                     NbtPathArgument.NbtPath.CODEC.fieldOf("path").forGetter(StorageValue::path)
+@@ -32,11 +_,8 @@
+ 
+         try {
+             List<Tag> list = this.path.get(compoundtag);
+-            if (list.size() == 1) {
+-                Object object = list.get(0);
+-                if (object instanceof NumericTag numerictag) {
+-                    return Optional.of(numerictag);
+-                }
++            if (list.size() == 1 && list.get(0) instanceof NumericTag numerictag) {
++                return Optional.of(numerictag);
+             }
+         } catch (CommandSyntaxException commandsyntaxexception) {
+         }

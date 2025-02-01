@@ -10,3 +10,26 @@
          this.gravity = 1.0F;
          this.quadSize /= 2.0F;
          this.uo = this.random.nextFloat() * 3.0F;
+@@ -58,6 +_,22 @@
+     @Override
+     protected float getV1() {
+         return this.sprite.getV((this.vo + 1.0F) / 4.0F);
++    }
++
++    @OnlyIn(Dist.CLIENT)
++    public static class CobwebProvider implements ParticleProvider<SimpleParticleType> {
++        public Particle createParticle(
++            SimpleParticleType p_338579_,
++            ClientLevel p_338749_,
++            double p_338877_,
++            double p_338362_,
++            double p_338343_,
++            double p_338303_,
++            double p_338217_,
++            double p_338683_
++        ) {
++            return new BreakingItemParticle(p_338749_, p_338877_, p_338362_, p_338343_, new ItemStack(Items.COBWEB));
++        }
+     }
+ 
+     @OnlyIn(Dist.CLIENT)

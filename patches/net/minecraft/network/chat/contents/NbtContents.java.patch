@@ -1,0 +1,35 @@
+--- a/net/minecraft/network/chat/contents/NbtContents.java
++++ b/net/minecraft/network/chat/contents/NbtContents.java
+@@ -27,13 +_,13 @@
+ public class NbtContents implements ComponentContents {
+     private static final Logger LOGGER = LogUtils.getLogger();
+     public static final MapCodec<NbtContents> CODEC = RecordCodecBuilder.mapCodec(
+-        p_304169_ -> p_304169_.group(
++        p_337510_ -> p_337510_.group(
+                     Codec.STRING.fieldOf("nbt").forGetter(NbtContents::getNbtPath),
+-                    Codec.BOOL.optionalFieldOf("interpret", Boolean.valueOf(false)).forGetter(NbtContents::isInterpreting),
+-                    ComponentSerialization.CODEC.optionalFieldOf("separator").forGetter(NbtContents::getSeparator),
++                    Codec.BOOL.lenientOptionalFieldOf("interpret", Boolean.valueOf(false)).forGetter(NbtContents::isInterpreting),
++                    ComponentSerialization.CODEC.lenientOptionalFieldOf("separator").forGetter(NbtContents::getSeparator),
+                     DataSource.CODEC.forGetter(NbtContents::getDataSource)
+                 )
+-                .apply(p_304169_, NbtContents::new)
++                .apply(p_337510_, NbtContents::new)
+     );
+     public static final ComponentContents.Type<NbtContents> TYPE = new ComponentContents.Type<>(CODEC, "nbt");
+     private final boolean interpreting;
+@@ -132,12 +_,12 @@
+                         LOGGER.warn("Failed to parse component: {}", p_329869_, exception);
+                         return Stream.of();
+                     }
+-                }).reduce((p_339750_, p_339751_) -> p_339750_.append(component).append(p_339751_)).orElseGet(Component::empty);
++                }).reduce((p_237420_, p_237421_) -> p_237420_.append(component).append(p_237421_)).orElseGet(Component::empty);
+             } else {
+                 return ComponentUtils.updateForEntity(p_237401_, this.separator, p_237402_, p_237403_)
+                     .map(
+                         p_237415_ -> stream.map(Component::literal)
+-                                .reduce((p_339753_, p_339754_) -> p_339753_.append(p_237415_).append(p_339754_))
++                                .reduce((p_237424_, p_237425_) -> p_237424_.append(p_237415_).append(p_237425_))
+                                 .orElseGet(Component::empty)
+                     )
+                     .orElseGet(() -> Component.literal(stream.collect(Collectors.joining(", "))));

@@ -1,0 +1,13 @@
+--- a/net/minecraft/util/datafix/fixes/ItemLoreFix.java
++++ b/net/minecraft/util/datafix/fixes/ItemLoreFix.java
+@@ -32,8 +_,8 @@
+                                     "display",
+                                     p_145396_ -> p_145396_.update(
+                                             "Lore",
+-                                            p_145398_ -> DataFixUtils.orElse(
+-                                                    p_145398_.asStreamOpt().map(ItemLoreFix::fixLoreList).map(p_145398_::createList).result(), p_145398_
++                                            p_337636_ -> DataFixUtils.orElse(
++                                                    p_337636_.asStreamOpt().map(ItemLoreFix::fixLoreList).map(p_337636_::createList).result(), p_337636_
+                                                 )
+                                         )
+                                 )

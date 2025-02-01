@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SequenceFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/SequenceFunction.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.storage.loot.functions;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -10,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.ValidationContext;
+ 
+ public class SequenceFunction implements LootItemFunction {
+-    public static final Codec<SequenceFunction> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<SequenceFunction> CODEC = RecordCodecBuilder.mapCodec(
+         p_335342_ -> p_335342_.group(LootItemFunctions.TYPED_CODEC.listOf().fieldOf("functions").forGetter(p_298431_ -> p_298431_.functions))
+                 .apply(p_335342_, SequenceFunction::new)
+     );
+@@ -37,7 +_,7 @@
+     public void validate(ValidationContext p_298605_) {
+         LootItemFunction.super.validate(p_298605_);
+ 
+-        for(int i = 0; i < this.functions.size(); ++i) {
++        for (int i = 0; i < this.functions.size(); i++) {
+             this.functions.get(i).validate(p_298605_.forChild(".function[" + i + "]"));
+         }
+     }

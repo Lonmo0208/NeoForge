@@ -1,0 +1,30 @@
+--- a/net/minecraft/client/model/StriderModel.java
++++ b/net/minecraft/client/model/StriderModel.java
+@@ -101,7 +_,7 @@
+         float f = 1.5F;
+         this.body.zRot = 0.1F * Mth.sin(p_103904_ * 1.5F) * 4.0F * p_103905_;
+         this.body.y = 2.0F;
+-        this.body.y -= 2.0F * Mth.cos(p_103904_ * 1.5F) * 2.0F * p_103905_;
++        this.body.y = this.body.y - 2.0F * Mth.cos(p_103904_ * 1.5F) * 2.0F * p_103905_;
+         this.leftLeg.xRot = Mth.sin(p_103904_ * 1.5F * 0.5F) * 2.0F * p_103905_;
+         this.rightLeg.xRot = Mth.sin(p_103904_ * 1.5F * 0.5F + (float) Math.PI) * 2.0F * p_103905_;
+         this.leftLeg.zRot = (float) (Math.PI / 18) * Mth.cos(p_103904_ * 1.5F * 0.5F) * p_103905_;
+@@ -123,12 +_,12 @@
+         this.leftBottomBristle.zRot += f1 * 1.3F;
+         float f2 = 1.0F;
+         float f3 = 1.0F;
+-        this.rightBottomBristle.zRot += 0.05F * Mth.sin(p_103906_ * 1.0F * -0.4F);
+-        this.rightMiddleBristle.zRot += 0.1F * Mth.sin(p_103906_ * 1.0F * 0.2F);
+-        this.rightTopBristle.zRot += 0.1F * Mth.sin(p_103906_ * 1.0F * 0.4F);
+-        this.leftTopBristle.zRot += 0.1F * Mth.sin(p_103906_ * 1.0F * 0.4F);
+-        this.leftMiddleBristle.zRot += 0.1F * Mth.sin(p_103906_ * 1.0F * 0.2F);
+-        this.leftBottomBristle.zRot += 0.05F * Mth.sin(p_103906_ * 1.0F * -0.4F);
++        this.rightBottomBristle.zRot = this.rightBottomBristle.zRot + 0.05F * Mth.sin(p_103906_ * 1.0F * -0.4F);
++        this.rightMiddleBristle.zRot = this.rightMiddleBristle.zRot + 0.1F * Mth.sin(p_103906_ * 1.0F * 0.2F);
++        this.rightTopBristle.zRot = this.rightTopBristle.zRot + 0.1F * Mth.sin(p_103906_ * 1.0F * 0.4F);
++        this.leftTopBristle.zRot = this.leftTopBristle.zRot + 0.1F * Mth.sin(p_103906_ * 1.0F * 0.4F);
++        this.leftMiddleBristle.zRot = this.leftMiddleBristle.zRot + 0.1F * Mth.sin(p_103906_ * 1.0F * 0.2F);
++        this.leftBottomBristle.zRot = this.leftBottomBristle.zRot + 0.05F * Mth.sin(p_103906_ * 1.0F * -0.4F);
+     }
+ 
+     @Override

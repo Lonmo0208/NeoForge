@@ -1,0 +1,18 @@
+--- a/net/minecraft/client/resources/PlayerSkin.java
++++ b/net/minecraft/client/resources/PlayerSkin.java
+@@ -30,13 +_,13 @@
+                 return WIDE;
+             } else {
+                 byte b0 = -1;
+-                switch(p_295156_.hashCode()) {
++                switch (p_295156_.hashCode()) {
+                     case 3533117:
+                         if (p_295156_.equals("slim")) {
+                             b0 = 0;
+                         }
+                     default:
+-                        return switch(b0) {
++                        return switch (b0) {
+                             case 0 -> SLIM;
+                             default -> WIDE;
+                         };

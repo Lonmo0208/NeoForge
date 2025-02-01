@@ -1,0 +1,48 @@
+--- a/net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations.java
++++ b/net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations.java
+@@ -4,6 +_,7 @@
+ import com.mojang.blaze3d.platform.NativeImage;
+ import com.mojang.logging.LogUtils;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import it.unimi.dsi.fastutil.ints.Int2IntMap;
+@@ -36,7 +_,7 @@
+ @OnlyIn(Dist.CLIENT)
+ public class PalettedPermutations implements SpriteSource {
+     static final Logger LOGGER = LogUtils.getLogger();
+-    public static final Codec<PalettedPermutations> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<PalettedPermutations> CODEC = RecordCodecBuilder.mapCodec(
+         p_266838_ -> p_266838_.group(
+                     Codec.list(ResourceLocation.CODEC).fieldOf("textures").forGetter(p_267300_ -> p_267300_.textures),
+                     ResourceLocation.CODEC.fieldOf("palette_key").forGetter(p_266732_ -> p_266732_.paletteKey),
+@@ -65,7 +_,7 @@
+                     )
+             );
+ 
+-        for(ResourceLocation resourcelocation : this.textures) {
++        for (ResourceLocation resourcelocation : this.textures) {
+             ResourceLocation resourcelocation1 = TEXTURE_ID_CONVERTER.idToFile(resourcelocation);
+             Optional<Resource> optional = p_267219_.getResource(resourcelocation1);
+             if (optional.isEmpty()) {
+@@ -73,8 +_,8 @@
+             } else {
+                 LazyLoadedImage lazyloadedimage = new LazyLoadedImage(resourcelocation1, optional.get(), map.size());
+ 
+-                for(Entry<String, Supplier<IntUnaryOperator>> entry : map.entrySet()) {
+-                    ResourceLocation resourcelocation2 = resourcelocation.withSuffix("_" + (String)entry.getKey());
++                for (Entry<String, Supplier<IntUnaryOperator>> entry : map.entrySet()) {
++                    ResourceLocation resourcelocation2 = resourcelocation.withSuffix("_" + entry.getKey());
+                     p_267250_.add(resourcelocation2, new PalettedPermutations.PalettedSpriteSupplier(lazyloadedimage, entry.getValue(), resourcelocation2));
+                 }
+             }
+@@ -88,7 +_,7 @@
+         } else {
+             Int2IntMap int2intmap = new Int2IntOpenHashMap(p_266776_.length);
+ 
+-            for(int i = 0; i < p_266839_.length; ++i) {
++            for (int i = 0; i < p_266839_.length; i++) {
+                 int j = p_266839_[i];
+                 if (FastColor.ABGR32.alpha(j) != 0) {
+                     int2intmap.put(FastColor.ABGR32.transparent(j), p_266776_[i]);

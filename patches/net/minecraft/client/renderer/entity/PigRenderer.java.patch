@@ -1,0 +1,18 @@
+--- a/net/minecraft/client/renderer/entity/PigRenderer.java
++++ b/net/minecraft/client/renderer/entity/PigRenderer.java
+@@ -11,7 +_,6 @@
+ @OnlyIn(Dist.CLIENT)
+ public class PigRenderer extends MobRenderer<Pig, PigModel<Pig>> {
+     private static final ResourceLocation PIG_LOCATION = new ResourceLocation("textures/entity/pig/pig.png");
+-    private static final ResourceLocation PIG_LOCATION_HWAT = new ResourceLocation("textures/entity/pig/pig_hwat.png");
+ 
+     public PigRenderer(EntityRendererProvider.Context p_174340_) {
+         super(p_174340_, new PigModel<>(p_174340_.bakeLayer(ModelLayers.PIG)), 0.7F);
+@@ -21,6 +_,6 @@
+     }
+ 
+     public ResourceLocation getTextureLocation(Pig p_115697_) {
+-        return p_115697_.isPotato() && p_115697_.isCurious() ? PIG_LOCATION_HWAT : PIG_LOCATION;
++        return PIG_LOCATION;
+     }
+ }

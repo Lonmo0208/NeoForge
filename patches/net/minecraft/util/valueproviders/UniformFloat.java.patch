@@ -1,0 +1,34 @@
+--- a/net/minecraft/util/valueproviders/UniformFloat.java
++++ b/net/minecraft/util/valueproviders/UniformFloat.java
+@@ -2,27 +_,26 @@
+ 
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.DataResult;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import java.util.function.Function;
+ import net.minecraft.util.Mth;
+ import net.minecraft.util.RandomSource;
+ 
+ public class UniformFloat extends FloatProvider {
+-    public static final Codec<UniformFloat> CODEC = RecordCodecBuilder.<UniformFloat>create(
++    public static final MapCodec<UniformFloat> CODEC = RecordCodecBuilder.<UniformFloat>mapCodec(
+             p_146601_ -> p_146601_.group(
+                         Codec.FLOAT.fieldOf("min_inclusive").forGetter(p_146612_ -> p_146612_.minInclusive),
+                         Codec.FLOAT.fieldOf("max_exclusive").forGetter(p_146609_ -> p_146609_.maxExclusive)
+                     )
+                     .apply(p_146601_, UniformFloat::new)
+         )
+-        .comapFlatMap(
++        .validate(
+             p_274956_ -> p_274956_.maxExclusive <= p_274956_.minInclusive
+                     ? DataResult.error(
+                         () -> "Max must be larger than min, min_inclusive: " + p_274956_.minInclusive + ", max_exclusive: " + p_274956_.maxExclusive
+                     )
+-                    : DataResult.success(p_274956_),
+-            Function.identity()
++                    : DataResult.success(p_274956_)
+         );
+     private final float minInclusive;
+     private final float maxExclusive;

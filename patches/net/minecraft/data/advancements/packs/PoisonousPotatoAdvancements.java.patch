@@ -1,0 +1,230 @@
+--- a/net/minecraft/data/advancements/packs/PoisonousPotatoAdvancements.java
++++ /dev/null
+@@ -1,227 +_,0 @@
+-package net.minecraft.data.advancements.packs;
+-
+-import java.util.Optional;
+-import java.util.function.Consumer;
+-import net.minecraft.advancements.Advancement;
+-import net.minecraft.advancements.AdvancementHolder;
+-import net.minecraft.advancements.AdvancementRequirements;
+-import net.minecraft.advancements.AdvancementRewards;
+-import net.minecraft.advancements.AdvancementType;
+-import net.minecraft.advancements.CriteriaTriggers;
+-import net.minecraft.advancements.Criterion;
+-import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
+-import net.minecraft.advancements.critereon.ConsumeItemTrigger;
+-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+-import net.minecraft.advancements.critereon.ItemPredicate;
+-import net.minecraft.advancements.critereon.PlayerTrigger;
+-import net.minecraft.advancements.critereon.PotatoRefinementTrigger;
+-import net.minecraft.advancements.critereon.RecipeCraftedTrigger;
+-import net.minecraft.advancements.critereon.ThrowLubricatedTrigger;
+-import net.minecraft.core.HolderLookup;
+-import net.minecraft.data.advancements.AdvancementSubProvider;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.tags.ItemTags;
+-import net.minecraft.world.item.DyeColor;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.Items;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
+-
+-public class PoisonousPotatoAdvancements implements AdvancementSubProvider {
+-    @Override
+-    public void generate(HolderLookup.Provider p_341738_, Consumer<AdvancementHolder> p_342609_) {
+-        AdvancementHolder advancementholder = potatoAdvancement("root")
+-            .display(Items.POISONOUS_POTATO.getDefaultInstance(), AdvancementType.TASK, false, false, false)
+-            .addCriterion("joined_world", PlayerTrigger.TriggerInstance.located(Optional.empty()))
+-            .save(p_342609_);
+-        potatoAdvancement("get_peeled")
+-            .parent(advancementholder)
+-            .display(Items.POTATO_PEELS_MAP.get(DyeColor.WHITE).getDefaultInstance(), AdvancementType.TASK, true, true, false)
+-            .addCriterion("get_peeled", PlayerTrigger.TriggerInstance.getPeeled())
+-            .save(p_342609_);
+-        AdvancementHolder advancementholder1 = potatoAdvancement("enter_the_potato")
+-            .parent(advancementholder)
+-            .display(Items.POTATO_OF_KNOWLEDGE.getDefaultInstance(), AdvancementType.TASK, true, true, true)
+-            .addCriterion("entered_potato", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.POTATO))
+-            .save(p_342609_);
+-        VanillaAdventureAdvancements.addBiomes(
+-                potatoAdvancement("all_potatoed"), p_341738_, MultiNoiseBiomeSourceParameterList.Preset.POTATO.usedBiomes().toList()
+-            )
+-            .parent(advancementholder1)
+-            .display(Items.GRAVTATER.getDefaultInstance(), AdvancementType.CHALLENGE, true, true, false)
+-            .save(p_342609_);
+-        potatoAdvancement("eat_armor")
+-            .parent(advancementholder)
+-            .display(Items.POISONOUS_POTATO_CHESTPLATE.getDefaultInstance(), AdvancementType.TASK, true, true, true)
+-            .addCriterion("eat_armor", PlayerTrigger.TriggerInstance.eatArmor())
+-            .save(p_342609_);
+-        AdvancementHolder advancementholder2 = potatoAdvancement("rumbled")
+-            .parent(advancementholder)
+-            .display(Items.POISONOUS_POTATO_PLANT.getDefaultInstance(), AdvancementType.TASK, false, true, false)
+-            .addCriterion("rumble_plant", PlayerTrigger.TriggerInstance.rumbleThePlant())
+-            .save(p_342609_);
+-        potatoAdvancement("good_plant")
+-            .parent(advancementholder2)
+-            .display(Items.POTATO_STAFF.getDefaultInstance(), AdvancementType.TASK, true, true, false)
+-            .addCriterion("compost_staff", PlayerTrigger.TriggerInstance.compostedStaff())
+-            .save(p_342609_);
+-        AdvancementHolder advancementholder3 = potatoAdvancement("get_oily")
+-            .parent(advancementholder)
+-            .display(Items.POTATO_OIL.getDefaultInstance(), AdvancementType.TASK, true, false, false)
+-            .addCriterion("refine_potato_oil", PotatoRefinementTrigger.TriggerInstance.refined(Items.POTATO_OIL))
+-            .save(p_342609_);
+-        AdvancementHolder advancementholder4 = potatoAdvancement("lubricate")
+-            .parent(advancementholder3)
+-            .display(Items.POTATO_OIL.getDefaultInstance(), AdvancementType.TASK, true, false, false)
+-            .addCriterion("lubricate_item", PotatoRefinementTrigger.TriggerInstance.lubricatedAtLeast(1))
+-            .save(p_342609_);
+-        potatoAdvancement("mega_lubricate")
+-            .parent(advancementholder3)
+-            .display(Items.POTATO_OIL.getDefaultInstance().makeFoil(), AdvancementType.TASK, true, false, true)
+-            .addCriterion("mega_lubricate_item", PotatoRefinementTrigger.TriggerInstance.lubricatedAtLeast(10))
+-            .save(p_342609_);
+-        AdvancementHolder advancementholder5 = potatoAdvancement("lubricate_whee")
+-            .parent(advancementholder4)
+-            .display(Items.ICE.getDefaultInstance(), AdvancementType.TASK, true, true, true)
+-            .addCriterion("throw_lubricated_item", ThrowLubricatedTrigger.TriggerInstance.thrownWithAtLeast(1))
+-            .save(p_342609_);
+-        potatoAdvancement("mega_lubricate_whee")
+-            .parent(advancementholder5)
+-            .display(Items.ICE.getDefaultInstance().makeFoil(), AdvancementType.TASK, true, true, true)
+-            .addCriterion("throw_mega_lubricated_item", ThrowLubricatedTrigger.TriggerInstance.thrownWithAtLeast(10))
+-            .save(p_342609_);
+-        potatoAdvancement("lubricate_boots")
+-            .parent(advancementholder4)
+-            .display(Items.POISONOUS_POTA_TOES.getDefaultInstance(), AdvancementType.TASK, true, true, true)
+-            .addCriterion(
+-                "lubricate_boots", PotatoRefinementTrigger.TriggerInstance.lubricatedAtLeast(ItemPredicate.Builder.item().of(ItemTags.FOOT_ARMOR).build(), 1)
+-            )
+-            .save(p_342609_);
+-        potatoAdvancement("sweet_potato_talker")
+-            .parent(advancementholder)
+-            .display(Items.POTATO_FLOWER.getDefaultInstance(), AdvancementType.TASK, true, true, false)
+-            .addCriterion("said_potato", PlayerTrigger.TriggerInstance.saidPotato(99))
+-            .save(p_342609_);
+-        potatoAdvancement("craft_poisonous_potato_sticks")
+-            .parent(advancementholder)
+-            .display(Items.POISONOUS_POTATO_STICKS.getDefaultInstance(), AdvancementType.TASK, true, false, false)
+-            .addCriterion("poisonous_potato_sticks", InventoryChangeTrigger.TriggerInstance.hasItems(Items.POISONOUS_POTATO_STICKS))
+-            .save(p_342609_);
+-        potatoAdvancement("craft_poisonous_potato_slices")
+-            .parent(advancementholder)
+-            .display(Items.POISONOUS_POTATO_SLICES.getDefaultInstance(), AdvancementType.TASK, true, false, false)
+-            .addCriterion("poisonous_potato_slices", InventoryChangeTrigger.TriggerInstance.hasItems(Items.POISONOUS_POTATO_SLICES))
+-            .save(p_342609_);
+-        potatoAdvancement("craft_poisonous_potato_fries")
+-            .parent(advancementholder)
+-            .display(Items.POISONOUS_POTATO_FRIES.getDefaultInstance(), AdvancementType.TASK, true, false, false)
+-            .addCriterion("poisonous_potato_fries", InventoryChangeTrigger.TriggerInstance.hasItems(Items.POISONOUS_POTATO_FRIES))
+-            .save(p_342609_);
+-        potatoAdvancement("craft_poisonous_potato_chips")
+-            .parent(advancementholder)
+-            .display(Items.POISONOUS_POTATO_CHIPS.getDefaultInstance(), AdvancementType.TASK, true, false, false)
+-            .addCriterion("poisonous_potato_chips", InventoryChangeTrigger.TriggerInstance.hasItems(Items.POISONOUS_POTATO_CHIPS))
+-            .save(p_342609_);
+-        AdvancementHolder advancementholder6 = potatoAdvancement("poisonous_potato_taster")
+-            .parent(advancementholder)
+-            .display(Items.POISONOUS_POTATO_STICKS.getDefaultInstance(), AdvancementType.TASK, true, true, false)
+-            .addCriterion("ate_poisonous_potato_sticks", ConsumeItemTrigger.TriggerInstance.usedItem(Items.POISONOUS_POTATO_STICKS))
+-            .addCriterion("ate_poisonous_potato_slices", ConsumeItemTrigger.TriggerInstance.usedItem(Items.POISONOUS_POTATO_SLICES))
+-            .save(p_342609_);
+-        potatoAdvancement("poisonous_potato_gourmet")
+-            .parent(advancementholder6)
+-            .display(Items.POISONOUS_POTATO_CHIPS.getDefaultInstance(), AdvancementType.TASK, true, true, false)
+-            .addCriterion("ate_poisonous_potato_sticks", ConsumeItemTrigger.TriggerInstance.usedItem(Items.POISONOUS_POTATO_STICKS))
+-            .addCriterion("ate_poisonous_potato_slices", ConsumeItemTrigger.TriggerInstance.usedItem(Items.POISONOUS_POTATO_SLICES))
+-            .addCriterion("ate_poisonous_potato_fries", ConsumeItemTrigger.TriggerInstance.usedItem(Items.POISONOUS_POTATO_FRIES))
+-            .addCriterion("ate_poisonous_potato_chips", ConsumeItemTrigger.TriggerInstance.usedItem(Items.POISONOUS_POTATO_CHIPS))
+-            .save(p_342609_);
+-        potatoAdvancement("bring_home_the_corruption")
+-            .parent(advancementholder1)
+-            .display(Items.CORRUPTED_PEELGRASS_BLOCK.getDefaultInstance(), AdvancementType.TASK, true, true, true)
+-            .addCriterion("bring_home_the_corruption", PlayerTrigger.TriggerInstance.bringHomeCorruption())
+-            .save(p_342609_);
+-        AdvancementHolder advancementholder7 = potatoAdvancement("potato_peeler")
+-            .parent(advancementholder)
+-            .display(Items.POTATO_PEELER.getDefaultInstance(), AdvancementType.TASK, true, false, false)
+-            .addCriterion("potato_peeler", InventoryChangeTrigger.TriggerInstance.hasItems(Items.POTATO_PEELER))
+-            .save(p_342609_);
+-        potatoAdvancement("peel_all_the_things")
+-            .parent(advancementholder7)
+-            .display(Items.POTATO_PEELER.getDefaultInstance(), AdvancementType.CHALLENGE, true, true, true)
+-            .addCriterion("peel_block", playerTrigger(CriteriaTriggers.PEEL_BLOCK))
+-            .addCriterion("peel_sheep", playerTrigger(CriteriaTriggers.PEEL_POTATO_SHEEP))
+-            .addCriterion("peel_armor", playerTrigger(CriteriaTriggers.PEEL_POTATO_ARMOR))
+-            .save(p_342609_);
+-        potatoAdvancement("well_done")
+-            .parent(advancementholder)
+-            .display(Items.CHARCOAL.getDefaultInstance(), AdvancementType.TASK, true, true, false)
+-            .addCriterion("well_done", RecipeCraftedTrigger.TriggerInstance.craftedItem(new ResourceLocation("overcooked_potatoes")))
+-            .save(p_342609_);
+-    }
+-
+-    private static PoisonousPotatoAdvancements.ExtendedBuilder potatoAdvancement(String p_340584_) {
+-        return new PoisonousPotatoAdvancements.ExtendedBuilder(p_340584_).sendsTelemetryEvent();
+-    }
+-
+-    private static Criterion<PlayerTrigger.TriggerInstance> playerTrigger(PlayerTrigger p_341301_) {
+-        return p_341301_.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+-    }
+-
+-    static class ExtendedBuilder extends Advancement.Builder {
+-        private static final ResourceLocation BACKGROUND = new ResourceLocation("textures/gui/advancements/backgrounds/potato.png");
+-        private final String name;
+-
+-        ExtendedBuilder(String p_341803_) {
+-            this.name = p_341803_;
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder sendsTelemetryEvent() {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)super.sendsTelemetryEvent();
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder display(
+-            ItemStack p_342083_, AdvancementType p_341819_, boolean p_342028_, boolean p_341212_, boolean p_342198_
+-        ) {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)this.display(
+-                p_342083_,
+-                Component.translatable("advancements.potato." + this.name + ".title"),
+-                Component.translatable("advancements.potato." + this.name + ".description"),
+-                BACKGROUND,
+-                p_341819_,
+-                p_342028_,
+-                p_341212_,
+-                p_342198_
+-            );
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder parent(AdvancementHolder p_342025_) {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)super.parent(p_342025_);
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder rewards(AdvancementRewards.Builder p_342477_) {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)super.rewards(p_342477_);
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder rewards(AdvancementRewards p_342367_) {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)super.rewards(p_342367_);
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder addCriterion(String p_341318_, Criterion<?> p_341617_) {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)super.addCriterion(p_341318_, p_341617_);
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder requirements(AdvancementRequirements.Strategy p_340558_) {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)super.requirements(p_340558_);
+-        }
+-
+-        public PoisonousPotatoAdvancements.ExtendedBuilder requirements(AdvancementRequirements p_340793_) {
+-            return (PoisonousPotatoAdvancements.ExtendedBuilder)super.requirements(p_340793_);
+-        }
+-
+-        public AdvancementHolder save(Consumer<AdvancementHolder> p_341961_) {
+-            return this.save(p_341961_, "potato/" + this.name);
+-        }
+-    }
+-}

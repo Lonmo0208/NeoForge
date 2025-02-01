@@ -1,0 +1,23 @@
+--- a/net/minecraft/server/commands/DebugPathCommand.java
++++ b/net/minecraft/server/commands/DebugPathCommand.java
+@@ -10,7 +_,6 @@
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.protocol.game.DebugPackets;
+-import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.Mob;
+ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+ import net.minecraft.world.entity.ai.navigation.PathNavigation;
+@@ -33,11 +_,9 @@
+     }
+ 
+     private static int fillBlocks(CommandSourceStack p_180130_, BlockPos p_180131_) throws CommandSyntaxException {
+-        Entity entity = p_180130_.getEntity();
+-        if (!(entity instanceof Mob)) {
++        if (!(p_180130_.getEntity() instanceof Mob mob)) {
+             throw ERROR_NOT_MOB.create();
+         } else {
+-            Mob mob = (Mob)entity;
+             PathNavigation pathnavigation = new GroundPathNavigation(mob, p_180130_.getLevel());
+             Path path = pathnavigation.createPath(p_180131_, 0);
+             DebugPackets.sendPathFindingPacket(p_180130_.getLevel(), mob, path, pathnavigation.getMaxDistanceToWaypoint());

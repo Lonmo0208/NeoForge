@@ -1,0 +1,102 @@
+--- a/net/minecraft/world/level/chunk/ChunkGeneratorStructureState.java
++++ b/net/minecraft/world/level/chunk/ChunkGeneratorStructureState.java
+@@ -11,7 +_,6 @@
+ import java.util.Set;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.concurrent.TimeUnit;
+-import java.util.function.Function;
+ import java.util.stream.Collectors;
+ import java.util.stream.Stream;
+ import javax.annotation.Nullable;
+@@ -81,25 +_,29 @@
+ 
+     private void generatePositions() {
+         Set<Holder<Biome>> set = this.biomeSource.possibleBiomes();
+-        this.possibleStructureSets().forEach(p_255638_ -> {
+-            StructureSet structureset = p_255638_.value();
+-            boolean flag = false;
+-
+-            for(StructureSet.StructureSelectionEntry structureset$structureselectionentry : structureset.structures()) {
+-                Structure structure = structureset$structureselectionentry.structure().value();
+-                if (structure.biomes().stream().anyMatch(set::contains)) {
+-                    this.placementsForStructure.computeIfAbsent(structure, p_256235_ -> new ArrayList()).add(structureset.placement());
+-                    flag = true;
+-                }
+-            }
+-
+-            if (flag) {
+-                StructurePlacement structureplacement = structureset.placement();
+-                if (structureplacement instanceof ConcentricRingsStructurePlacement concentricringsstructureplacement) {
+-                    this.ringPositions.put(concentricringsstructureplacement, this.generateRingPositions(p_255638_, concentricringsstructureplacement));
+-                }
+-            }
+-        });
++        this.possibleStructureSets()
++            .forEach(
++                p_255638_ -> {
++                    StructureSet structureset = p_255638_.value();
++                    boolean flag = false;
++
++                    for (StructureSet.StructureSelectionEntry structureset$structureselectionentry : structureset.structures()) {
++                        Structure structure = structureset$structureselectionentry.structure().value();
++                        if (structure.biomes().stream().anyMatch(set::contains)) {
++                            this.placementsForStructure.computeIfAbsent(structure, p_256235_ -> new ArrayList<>()).add(structureset.placement());
++                            flag = true;
++                        }
++                    }
++
++                    if (flag && structureset.placement() instanceof ConcentricRingsStructurePlacement concentricringsstructureplacement) {
++                        this.ringPositions
++                            .put(
++                                concentricringsstructureplacement,
++                                this.generateRingPositions((Holder<StructureSet>)p_255638_, concentricringsstructureplacement)
++                            );
++                    }
++                }
++            );
+     }
+ 
+     private CompletableFuture<List<ChunkPos>> generateRingPositions(Holder<StructureSet> p_255966_, ConcentricRingsStructurePlacement p_255744_) {
+@@ -118,7 +_,7 @@
+             int l = 0;
+             int i1 = 0;
+ 
+-            for(int j1 = 0; j1 < j; ++j1) {
++            for (int j1 = 0; j1 < j; j1++) {
+                 double d1 = (double)(4 * i + i * i1 * 6) + (randomsource.nextDouble() - 0.5) * (double)i * 2.5;
+                 int k1 = (int)Math.round(Math.cos(d0) * d1);
+                 int l1 = (int)Math.round(Math.sin(d0) * d1);
+@@ -148,7 +_,7 @@
+                 );
+                 d0 += (Math.PI * 2) / (double)k;
+                 if (++l == k) {
+-                    ++i1;
++                    i1++;
+                     l = 0;
+                     k += 2 * k / (i1 + 1);
+                     k = Math.min(k, j - j1);
+@@ -156,11 +_,11 @@
+                 }
+             }
+ 
+-            return Util.sequence(list).thenApply((Function<? super List<ChunkPos>, ? extends List<ChunkPos>>)(p_256372_ -> {
++            return Util.sequence(list).thenApply(p_256372_ -> {
+                 double d2 = (double)stopwatch.stop().elapsed(TimeUnit.MILLISECONDS) / 1000.0;
+                 LOGGER.debug("Calculation for {} took {}s", p_255966_, d2);
+                 return p_256372_;
+-            }));
++            });
+         }
+     }
+ 
+@@ -190,8 +_,8 @@
+     public boolean hasStructureChunkInRange(Holder<StructureSet> p_256489_, int p_256593_, int p_256115_, int p_256619_) {
+         StructurePlacement structureplacement = p_256489_.value().placement();
+ 
+-        for(int i = p_256593_ - p_256619_; i <= p_256593_ + p_256619_; ++i) {
+-            for(int j = p_256115_ - p_256619_; j <= p_256115_ + p_256619_; ++j) {
++        for (int i = p_256593_ - p_256619_; i <= p_256593_ + p_256619_; i++) {
++            for (int j = p_256115_ - p_256619_; j <= p_256115_ + p_256619_; j++) {
+                 if (structureplacement.isStructureChunk(this, i, j)) {
+                     return true;
+                 }

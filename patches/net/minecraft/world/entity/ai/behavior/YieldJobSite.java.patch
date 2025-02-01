@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/ai/behavior/YieldJobSite.java
++++ b/net/minecraft/world/entity/ai/behavior/YieldJobSite.java
+@@ -47,13 +_,13 @@
+                                             .filter(LivingEntity::isAlive)
+                                             .filter(p_258919_ -> nearbyWantsJobsite(optional.get(), p_258919_, blockpos))
+                                             .findFirst()
+-                                            .ifPresent(p_340058_ -> {
++                                            .ifPresent(p_330055_ -> {
+                                                 p_258904_.erase();
+                                                 p_258905_.erase();
+                                                 p_258901_.erase();
+-                                                if (p_340058_.getBrain().getMemory(MemoryModuleType.JOB_SITE).isEmpty()) {
+-                                                    BehaviorUtils.setWalkAndLookTargetMemories(p_340058_, blockpos, p_259768_, 1);
+-                                                    p_340058_.getBrain()
++                                                if (p_330055_.getBrain().getMemory(MemoryModuleType.JOB_SITE).isEmpty()) {
++                                                    BehaviorUtils.setWalkAndLookTargetMemories(p_330055_, blockpos, p_259768_, 1);
++                                                    p_330055_.getBrain()
+                                                         .setMemory(MemoryModuleType.POTENTIAL_JOB_SITE, GlobalPos.of(p_258912_.dimension(), blockpos));
+                                                     DebugPackets.sendPoiTicketCountPacket(p_258912_, blockpos);
+                                                 }

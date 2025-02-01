@@ -1,0 +1,40 @@
+--- a/net/minecraft/advancements/critereon/ItemPredicate.java
++++ b/net/minecraft/advancements/critereon/ItemPredicate.java
+@@ -13,7 +_,6 @@
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.tags.TagKey;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.ItemLike;
+@@ -22,14 +_,13 @@
+     Optional<HolderSet<Item>> items, MinMaxBounds.Ints count, DataComponentPredicate components, Map<ItemSubPredicate.Type<?>, ItemSubPredicate> subPredicates
+ ) {
+     public static final Codec<ItemPredicate> CODEC = RecordCodecBuilder.create(
+-        p_333465_ -> p_333465_.group(
+-                    ExtraCodecs.strictOptionalField(RegistryCodecs.homogeneousList(Registries.ITEM), "items").forGetter(ItemPredicate::items),
+-                    ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "count", MinMaxBounds.Ints.ANY).forGetter(ItemPredicate::count),
+-                    ExtraCodecs.strictOptionalField(DataComponentPredicate.CODEC, "components", DataComponentPredicate.EMPTY)
+-                        .forGetter(ItemPredicate::components),
+-                    ExtraCodecs.strictOptionalField(ItemSubPredicate.CODEC, "predicates", Map.of()).forGetter(ItemPredicate::subPredicates)
++        p_337371_ -> p_337371_.group(
++                    RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("items").forGetter(ItemPredicate::items),
++                    MinMaxBounds.Ints.CODEC.optionalFieldOf("count", MinMaxBounds.Ints.ANY).forGetter(ItemPredicate::count),
++                    DataComponentPredicate.CODEC.optionalFieldOf("components", DataComponentPredicate.EMPTY).forGetter(ItemPredicate::components),
++                    ItemSubPredicate.CODEC.optionalFieldOf("predicates", Map.of()).forGetter(ItemPredicate::subPredicates)
+                 )
+-                .apply(p_333465_, ItemPredicate::new)
++                .apply(p_337371_, ItemPredicate::new)
+     );
+ 
+     public boolean matches(ItemStack p_45050_) {
+@@ -40,7 +_,7 @@
+         } else if (!this.components.test((DataComponentHolder)p_45050_)) {
+             return false;
+         } else {
+-            for(ItemSubPredicate itemsubpredicate : this.subPredicates.values()) {
++            for (ItemSubPredicate itemsubpredicate : this.subPredicates.values()) {
+                 if (!itemsubpredicate.matches(p_45050_)) {
+                     return false;
+                 }

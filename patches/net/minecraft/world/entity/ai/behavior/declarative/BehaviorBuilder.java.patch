@@ -1,0 +1,38 @@
+--- a/net/minecraft/world/entity/ai/behavior/declarative/BehaviorBuilder.java
++++ b/net/minecraft/world/entity/ai/behavior/declarative/BehaviorBuilder.java
+@@ -34,7 +_,7 @@
+     }
+ 
+     public static <E extends LivingEntity> OneShot<E> create(Function<BehaviorBuilder.Instance<E>, ? extends App<BehaviorBuilder.Mu<E>, Trigger<E>>> p_259386_) {
+-        final BehaviorBuilder.TriggerWithResult<E, Trigger<E>> triggerwithresult = get(p_259386_.apply(instance()));
++        final BehaviorBuilder.TriggerWithResult<E, Trigger<E>> triggerwithresult = get((App<BehaviorBuilder.Mu<E>, Trigger<E>>)p_259386_.apply(instance()));
+         return new OneShot<E>() {
+             @Override
+             public boolean trigger(ServerLevel p_259385_, E p_260003_, long p_259194_) {
+@@ -55,7 +_,7 @@
+     }
+ 
+     public static <E extends LivingEntity> OneShot<E> sequence(Trigger<? super E> p_260174_, Trigger<? super E> p_259134_) {
+-        return create(p_259495_ -> p_259495_.<Unit>group(p_259495_.ifTriggered(p_260174_)).apply(p_259495_, p_260322_ -> p_259134_::trigger));
++        return create(p_259495_ -> p_259495_.group(p_259495_.ifTriggered(p_260174_)).apply(p_259495_, p_260322_ -> p_259134_::trigger));
+     }
+ 
+     public static <E extends LivingEntity> OneShot<E> triggerIf(Predicate<E> p_260059_, OneShot<? super E> p_259640_) {
+@@ -152,7 +_,7 @@
+                         if (a == null) {
+                             return null;
+                         } else {
+-                            Function<A, R> function = (Function)triggerwithresult1.tryTrigger(p_259603_, p_260233_, p_259654_);
++                            Function<A, R> function = (Function<A, R>)triggerwithresult1.tryTrigger(p_259603_, p_260233_, p_259654_);
+                             return (R)(function == null ? null : function.apply(a));
+                         }
+                     }
+@@ -176,7 +_,7 @@
+                 @Override
+                 public R tryTrigger(ServerLevel p_259755_, E p_259656_, long p_259300_) {
+                     T t = triggerwithresult.tryTrigger(p_259755_, p_259656_, p_259300_);
+-                    return t == null ? null : p_259963_.apply(t);
++                    return (R)(t == null ? null : p_259963_.apply(t));
+                 }
+ 
+                 @Override

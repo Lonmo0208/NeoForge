@@ -1,0 +1,20 @@
+--- a/net/minecraft/core/DefaultedMappedRegistry.java
++++ b/net/minecraft/core/DefaultedMappedRegistry.java
+@@ -44,7 +_,7 @@
+     @Override
+     public T get(@Nullable ResourceLocation p_260004_) {
+         T t = super.get(p_260004_);
+-        return (T)(t == null ? this.defaultValue.value() : t);
++        return t == null ? this.defaultValue.value() : t;
+     }
+ 
+     @Override
+@@ -56,7 +_,7 @@
+     @Override
+     public T byId(int p_259534_) {
+         T t = super.byId(p_259534_);
+-        return (T)(t == null ? this.defaultValue.value() : t);
++        return t == null ? this.defaultValue.value() : t;
+     }
+ 
+     @Override

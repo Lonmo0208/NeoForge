@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/phys/shapes/VoxelShape.java
++++ b/net/minecraft/world/phys/shapes/VoxelShape.java
+@@ -252,9 +_,9 @@
+             int j1 = Math.min(this.shape.getSize(direction$axis2), this.findIndex(direction$axis2, p_83247_.max(direction$axis2) - 1.0E-7) + 1);
+             int k1 = this.shape.getSize(direction$axis);
+             if (p_83248_ > 0.0) {
+-                for(int l1 = j + 1; l1 < k1; ++l1) {
+-                    for(int i2 = k; i2 < l; ++i2) {
+-                        for(int j2 = i1; j2 < j1; ++j2) {
++                for (int l1 = j + 1; l1 < k1; l1++) {
++                    for (int i2 = k; i2 < l; i2++) {
++                        for (int j2 = i1; j2 < j1; j2++) {
+                             if (this.shape.isFullWide(axiscycle, l1, i2, j2)) {
+                                 double d2 = this.get(direction$axis, l1) - d0;
+                                 if (d2 >= -1.0E-7) {
+@@ -267,9 +_,9 @@
+                     }
+                 }
+             } else if (p_83248_ < 0.0) {
+-                for(int k2 = i - 1; k2 >= 0; --k2) {
+-                    for(int l2 = k; l2 < l; ++l2) {
+-                        for(int i3 = i1; i3 < j1; ++i3) {
++                for (int k2 = i - 1; k2 >= 0; k2--) {
++                    for (int l2 = k; l2 < l; l2++) {
++                        for (int i3 = i1; i3 < j1; i3++) {
+                             if (this.shape.isFullWide(axiscycle, k2, l2, i3)) {
+                                 double d3 = this.get(direction$axis, k2 + 1) - d1;
+                                 if (d3 <= 1.0E-7) {

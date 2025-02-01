@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/animal/goat/Goat.java
++++ b/net/minecraft/world/entity/animal/goat/Goat.java
+@@ -286,7 +_,7 @@
+     @Override
+     public void aiStep() {
+         if (this.isLoweringHead) {
+-            ++this.lowerHeadTick;
++            this.lowerHeadTick++;
+         } else {
+             this.lowerHeadTick -= 2;
+         }

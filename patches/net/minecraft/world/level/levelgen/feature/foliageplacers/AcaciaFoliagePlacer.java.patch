@@ -1,0 +1,33 @@
+--- a/net/minecraft/world/level/levelgen/feature/foliageplacers/AcaciaFoliagePlacer.java
++++ b/net/minecraft/world/level/levelgen/feature/foliageplacers/AcaciaFoliagePlacer.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.feature.foliageplacers;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.core.BlockPos;
+@@ -10,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+ 
+ public class AcaciaFoliagePlacer extends FoliagePlacer {
+-    public static final Codec<AcaciaFoliagePlacer> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<AcaciaFoliagePlacer> CODEC = RecordCodecBuilder.mapCodec(
+         p_68380_ -> foliagePlacerParts(p_68380_).apply(p_68380_, AcaciaFoliagePlacer::new)
+     );
+ 
+@@ -49,10 +_,8 @@
+ 
+     @Override
+     protected boolean shouldSkipLocation(RandomSource p_225488_, int p_225489_, int p_225490_, int p_225491_, int p_225492_, boolean p_225493_) {
+-        if (p_225490_ == 0) {
+-            return (p_225489_ > 1 || p_225491_ > 1) && p_225489_ != 0 && p_225491_ != 0;
+-        } else {
+-            return p_225489_ == p_225492_ && p_225491_ == p_225492_ && p_225492_ > 0;
+-        }
++        return p_225490_ == 0
++            ? (p_225489_ > 1 || p_225491_ > 1) && p_225489_ != 0 && p_225491_ != 0
++            : p_225489_ == p_225492_ && p_225491_ == p_225492_ && p_225492_ > 0;
+     }
+ }

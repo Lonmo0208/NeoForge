@@ -1,5 +1,14 @@
 --- a/net/minecraft/server/dedicated/ServerWatchdog.java
 +++ b/net/minecraft/server/dedicated/ServerWatchdog.java
+@@ -33,7 +_,7 @@
+ 
+     @Override
+     public void run() {
+-        while(this.server.isRunning()) {
++        while (this.server.isRunning()) {
+             long i = this.server.getNextTickTime();
+             long j = Util.getNanos();
+             long k = j - i;
 @@ -48,14 +_,14 @@
                  ThreadMXBean threadmxbean = ManagementFactory.getThreadMXBean();
                  ThreadInfo[] athreadinfo = threadmxbean.dumpAllThreads(true, true);
@@ -7,7 +16,8 @@
 -                Error error = new Error("Watchdog");
 +                Error error = new Error(String.format(java.util.Locale.ENGLISH, "ServerHangWatchdog detected that a single server tick took %.2f seconds (should be max 0.05)", k / 1000F)); // Forge: don't just make a crash report with a seemingly-inexplicable Error
  
-                 for(ThreadInfo threadinfo : athreadinfo) {
+-                for(ThreadInfo threadinfo : athreadinfo) {
++                for (ThreadInfo threadinfo : athreadinfo) {
                      if (threadinfo.getThreadId() == this.server.getRunningThread().getId()) {
                          error.setStackTrace(threadinfo.getStackTrace());
                      }
@@ -17,3 +27,12 @@
                      stringbuilder.append("\n");
                  }
  
+@@ -70,7 +_,7 @@
+                 crashreportcategory1.setDetail(
+                     "Level stats",
+                     () -> Streams.stream(this.server.getAllLevels())
+-                            .map(p_339832_ -> p_339832_.dimension() + ": " + p_339832_.getWatchdogStats())
++                            .map(p_339442_ -> p_339442_.dimension() + ": " + p_339442_.getWatchdogStats())
+                             .collect(Collectors.joining(",\n"))
+                 );
+                 Bootstrap.realStdoutPrintln("Crash report:\n" + crashreport.getFriendlyReport());

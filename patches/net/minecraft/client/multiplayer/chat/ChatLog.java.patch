@@ -1,0 +1,28 @@
+--- a/net/minecraft/client/multiplayer/chat/ChatLog.java
++++ b/net/minecraft/client/multiplayer/chat/ChatLog.java
+@@ -22,7 +_,7 @@
+                         ? DataResult.error(
+                             () -> "Expected: a buffer of size less than or equal to " + p_253922_ + " but: " + i + " is greater than " + p_253922_
+                         )
+-                        : DataResult.success(new ChatLog(p_253922_, p_274704_));
++                        : DataResult.success(new ChatLog(p_253922_, (List<LoggedChatEvent>)p_274704_));
+                 },
+                 ChatLog::loggedChatEvents
+             );
+@@ -33,14 +_,14 @@
+     }
+ 
+     private ChatLog(int p_254212_, List<LoggedChatEvent> p_253624_) {
+-        this.buffer = p_253624_.toArray(p_253908_ -> new LoggedChatEvent[p_254212_]);
++        this.buffer = p_253624_.toArray(LoggedChatEvent[]::new);
+         this.nextId = p_253624_.size();
+     }
+ 
+     private List<LoggedChatEvent> loggedChatEvents() {
+         List<LoggedChatEvent> list = new ArrayList<>(this.size());
+ 
+-        for(int i = this.start(); i <= this.end(); ++i) {
++        for (int i = this.start(); i <= this.end(); i++) {
+             list.add(this.lookup(i));
+         }
+ 

@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/item/crafting/MapExtendingRecipe.java
++++ b/net/minecraft/world/item/crafting/MapExtendingRecipe.java
+@@ -33,10 +_,8 @@
+                 MapItemSavedData mapitemsaveddata = MapItem.getSavedData(itemstack, p_43994_);
+                 if (mapitemsaveddata == null) {
+                     return false;
+-                } else if (mapitemsaveddata.isExplorationMap()) {
+-                    return false;
+                 } else {
+-                    return mapitemsaveddata.scale < 4;
++                    return mapitemsaveddata.isExplorationMap() ? false : mapitemsaveddata.scale < 4;
+                 }
+             }
+         }
+@@ -50,7 +_,7 @@
+     }
+ 
+     private static ItemStack findFilledMap(CraftingContainer p_279436_) {
+-        for(int i = 0; i < p_279436_.getContainerSize(); ++i) {
++        for (int i = 0; i < p_279436_.getContainerSize(); i++) {
+             ItemStack itemstack = p_279436_.getItem(i);
+             if (itemstack.is(Items.FILLED_MAP)) {
+                 return itemstack;

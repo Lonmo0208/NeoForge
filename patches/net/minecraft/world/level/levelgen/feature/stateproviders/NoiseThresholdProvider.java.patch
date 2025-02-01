@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/feature/stateproviders/NoiseThresholdProvider.java
++++ b/net/minecraft/world/level/levelgen/feature/stateproviders/NoiseThresholdProvider.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.levelgen.feature.stateproviders;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -11,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.synth.NormalNoise;
+ 
+ public class NoiseThresholdProvider extends NoiseBasedStateProvider {
+-    public static final Codec<NoiseThresholdProvider> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<NoiseThresholdProvider> CODEC = RecordCodecBuilder.mapCodec(
+         p_191486_ -> noiseCodec(p_191486_)
+                 .and(
+                     p_191486_.group(

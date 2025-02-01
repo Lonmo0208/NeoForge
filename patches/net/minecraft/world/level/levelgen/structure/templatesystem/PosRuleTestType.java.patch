@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/level/levelgen/structure/templatesystem/PosRuleTestType.java
++++ b/net/minecraft/world/level/levelgen/structure/templatesystem/PosRuleTestType.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.templatesystem;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import net.minecraft.core.Registry;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ 
+@@ -9,9 +_,9 @@
+     PosRuleTestType<LinearPosTest> LINEAR_POS_TEST = register("linear_pos", LinearPosTest.CODEC);
+     PosRuleTestType<AxisAlignedLinearPosTest> AXIS_ALIGNED_LINEAR_POS_TEST = register("axis_aligned_linear_pos", AxisAlignedLinearPosTest.CODEC);
+ 
+-    Codec<P> codec();
++    MapCodec<P> codec();
+ 
+-    static <P extends PosRuleTest> PosRuleTestType<P> register(String p_74212_, Codec<P> p_74213_) {
+-        return Registry.register(BuiltInRegistries.POS_RULE_TEST, p_74212_, () -> p_74213_);
++    static <P extends PosRuleTest> PosRuleTestType<P> register(String p_74212_, MapCodec<P> p_338676_) {
++        return Registry.register(BuiltInRegistries.POS_RULE_TEST, p_74212_, () -> p_338676_);
+     }
+ }

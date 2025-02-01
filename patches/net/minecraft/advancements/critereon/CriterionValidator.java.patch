@@ -1,0 +1,11 @@
+--- a/net/minecraft/advancements/critereon/CriterionValidator.java
++++ b/net/minecraft/advancements/critereon/CriterionValidator.java
+@@ -34,7 +_,7 @@
+     }
+ 
+     public void validate(List<ContextAwarePredicate> p_312108_, LootContextParamSet p_312752_, String p_312670_) {
+-        for(int i = 0; i < p_312108_.size(); ++i) {
++        for (int i = 0; i < p_312108_.size(); i++) {
+             ContextAwarePredicate contextawarepredicate = p_312108_.get(i);
+             contextawarepredicate.validate(new ValidationContext(this.reporter.forChild(p_312670_ + "[" + i + "]"), p_312752_, this.lootData));
+         }

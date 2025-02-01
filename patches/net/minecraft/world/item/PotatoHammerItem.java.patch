@@ -1,0 +1,66 @@
+--- a/net/minecraft/world/item/PotatoHammerItem.java
++++ /dev/null
+@@ -1,63 +_,0 @@
+-package net.minecraft.world.item;
+-
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.world.entity.EquipmentSlot;
+-import net.minecraft.world.entity.EquipmentSlotGroup;
+-import net.minecraft.world.entity.LivingEntity;
+-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+-import net.minecraft.world.entity.ai.attributes.Attributes;
+-import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.entity.projectile.ThrownPotion;
+-import net.minecraft.world.item.alchemy.PotionContents;
+-import net.minecraft.world.item.alchemy.Potions;
+-import net.minecraft.world.item.component.ItemAttributeModifiers;
+-import net.minecraft.world.item.enchantment.Enchantments;
+-import net.minecraft.world.item.enchantment.ItemEnchantments;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.state.BlockState;
+-
+-public class PotatoHammerItem extends Item {
+-    public PotatoHammerItem(Item.Properties p_340723_) {
+-        super(p_340723_);
+-    }
+-
+-    public static ItemAttributeModifiers createAttributes() {
+-        return ItemAttributeModifiers.builder()
+-            .add(
+-                Attributes.ATTACK_DAMAGE,
+-                new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 10.0, AttributeModifier.Operation.ADD_VALUE),
+-                EquipmentSlotGroup.MAINHAND
+-            )
+-            .add(
+-                Attributes.ATTACK_SPEED,
+-                new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", 2.0, AttributeModifier.Operation.ADD_VALUE),
+-                EquipmentSlotGroup.MAINHAND
+-            )
+-            .build();
+-    }
+-
+-    public static ItemEnchantments createDefaultEnchantments() {
+-        ItemEnchantments.Mutable itemenchantments$mutable = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
+-        itemenchantments$mutable.set(Enchantments.KNOCKBACK, 10);
+-        return itemenchantments$mutable.toImmutable();
+-    }
+-
+-    @Override
+-    public boolean canAttackBlock(BlockState p_341113_, Level p_342298_, BlockPos p_340509_, Player p_341195_) {
+-        return !p_341195_.isCreative();
+-    }
+-
+-    @Override
+-    public boolean hurtEnemy(ItemStack p_341235_, LivingEntity p_340950_, LivingEntity p_340659_) {
+-        Level level = p_340659_.level();
+-        p_341235_.hurtAndBreak(1, p_340659_, EquipmentSlot.MAINHAND);
+-        if (level.getRandom().nextFloat() < 0.3F) {
+-            ThrownPotion thrownpotion = new ThrownPotion(level, p_340659_);
+-            thrownpotion.setItem(PotionContents.createItemStack(Items.LINGERING_POTION, Potions.LONG_POISON));
+-            thrownpotion.shootFromRotation(p_340950_, p_340950_.getXRot(), p_340950_.getYRot(), -1.0F, 0.0F, 0.0F);
+-            level.addFreshEntity(thrownpotion);
+-        }
+-
+-        return true;
+-    }
+-}

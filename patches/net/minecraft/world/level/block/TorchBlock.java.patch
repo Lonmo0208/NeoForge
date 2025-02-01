@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/block/TorchBlock.java
++++ b/net/minecraft/world/level/block/TorchBlock.java
+@@ -4,7 +_,6 @@
+ import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import java.util.function.Function;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.particles.ParticleType;
+ import net.minecraft.core.particles.ParticleTypes;
+@@ -22,7 +_,7 @@
+             p_304958_ -> p_304958_ instanceof SimpleParticleType simpleparticletype
+                     ? DataResult.success(simpleparticletype)
+                     : DataResult.error(() -> "Not a SimpleParticleType: " + p_304958_),
+-            (Function<? super SimpleParticleType, ? extends SimpleParticleType>)(p_304720_ -> p_304720_)
++            p_304720_ -> (ParticleType<?>)p_304720_
+         )
+         .fieldOf("particle_options");
+     public static final MapCodec<TorchBlock> CODEC = RecordCodecBuilder.mapCodec(

@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/ai/behavior/warden/Sniffing.java
++++ b/net/minecraft/world/entity/ai/behavior/warden/Sniffing.java
+@@ -51,13 +_,13 @@
+         }
+ 
+         p_217673_.getBrain().eraseMemory(MemoryModuleType.IS_SNIFFING);
+-        p_217673_.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE).filter(p_217673_::canTargetEntity).ifPresent(p_340060_ -> {
+-            if (p_217673_.closerThan(p_340060_, 6.0, 20.0)) {
+-                p_217673_.increaseAngerAt(p_340060_);
++        p_217673_.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE).filter(p_217673_::canTargetEntity).ifPresent(p_337785_ -> {
++            if (p_217673_.closerThan(p_337785_, 6.0, 20.0)) {
++                p_217673_.increaseAngerAt(p_337785_);
+             }
+ 
+             if (!p_217673_.getBrain().hasMemoryValue(MemoryModuleType.DISTURBANCE_LOCATION)) {
+-                WardenAi.setDisturbanceLocation(p_217673_, p_340060_.blockPosition());
++                WardenAi.setDisturbanceLocation(p_217673_, p_337785_.blockPosition());
+             }
+         });
+     }

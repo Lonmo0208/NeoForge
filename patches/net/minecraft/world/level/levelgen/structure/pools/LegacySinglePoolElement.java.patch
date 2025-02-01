@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/levelgen/structure/pools/LegacySinglePoolElement.java
++++ b/net/minecraft/world/level/levelgen/structure/pools/LegacySinglePoolElement.java
+@@ -1,7 +_,7 @@
+ package net.minecraft.world.level.levelgen.structure.pools;
+ 
+ import com.mojang.datafixers.util.Either;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.core.Holder;
+@@ -14,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+ 
+ public class LegacySinglePoolElement extends SinglePoolElement {
+-    public static final Codec<LegacySinglePoolElement> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<LegacySinglePoolElement> CODEC = RecordCodecBuilder.mapCodec(
+         p_210357_ -> p_210357_.group(templateCodec(), processorsCodec(), projectionCodec()).apply(p_210357_, LegacySinglePoolElement::new)
+     );
+ 

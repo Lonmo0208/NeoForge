@@ -1,0 +1,38 @@
+--- a/net/minecraft/world/level/storage/loot/predicates/LocationCheck.java
++++ b/net/minecraft/world/level/storage/loot/predicates/LocationCheck.java
+@@ -8,26 +_,24 @@
+ import net.minecraft.advancements.critereon.LocationPredicate;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Vec3i;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.level.storage.loot.LootContext;
+ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+ import net.minecraft.world.phys.Vec3;
+ 
+ public record LocationCheck(Optional<LocationPredicate> predicate, BlockPos offset) implements LootItemCondition {
+     private static final MapCodec<BlockPos> OFFSET_CODEC = RecordCodecBuilder.mapCodec(
+-        p_298180_ -> p_298180_.group(
+-                    ExtraCodecs.strictOptionalField(Codec.INT, "offsetX", 0).forGetter(Vec3i::getX),
+-                    ExtraCodecs.strictOptionalField(Codec.INT, "offsetY", 0).forGetter(Vec3i::getY),
+-                    ExtraCodecs.strictOptionalField(Codec.INT, "offsetZ", 0).forGetter(Vec3i::getZ)
++        p_338168_ -> p_338168_.group(
++                    Codec.INT.optionalFieldOf("offsetX", Integer.valueOf(0)).forGetter(Vec3i::getX),
++                    Codec.INT.optionalFieldOf("offsetY", Integer.valueOf(0)).forGetter(Vec3i::getY),
++                    Codec.INT.optionalFieldOf("offsetZ", Integer.valueOf(0)).forGetter(Vec3i::getZ)
+                 )
+-                .apply(p_298180_, BlockPos::new)
++                .apply(p_338168_, BlockPos::new)
+     );
+-    public static final Codec<LocationCheck> CODEC = RecordCodecBuilder.create(
+-        p_298182_ -> p_298182_.group(
+-                    ExtraCodecs.strictOptionalField(LocationPredicate.CODEC, "predicate").forGetter(LocationCheck::predicate),
+-                    OFFSET_CODEC.forGetter(LocationCheck::offset)
++    public static final MapCodec<LocationCheck> CODEC = RecordCodecBuilder.mapCodec(
++        p_338169_ -> p_338169_.group(
++                    LocationPredicate.CODEC.optionalFieldOf("predicate").forGetter(LocationCheck::predicate), OFFSET_CODEC.forGetter(LocationCheck::offset)
+                 )
+-                .apply(p_298182_, LocationCheck::new)
++                .apply(p_338169_, LocationCheck::new)
+     );
+ 
+     @Override

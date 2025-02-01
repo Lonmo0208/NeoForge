@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/vehicle/MinecartTNT.java
++++ b/net/minecraft/world/entity/vehicle/MinecartTNT.java
+@@ -9,7 +_,6 @@
+ import net.minecraft.tags.BlockTags;
+ import net.minecraft.tags.DamageTypeTags;
+ import net.minecraft.world.damagesource.DamageSource;
+-import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntityType;
+ import net.minecraft.world.entity.projectile.AbstractArrow;
+ import net.minecraft.world.item.Item;
+@@ -47,7 +_,7 @@
+     public void tick() {
+         super.tick();
+         if (this.fuse > 0) {
+-            --this.fuse;
++            this.fuse--;
+             this.level().addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
+         } else if (this.fuse == 0) {
+             this.explode(this.getDeltaMovement().horizontalDistanceSqr());
+@@ -63,8 +_,7 @@
+ 
+     @Override
+     public boolean hurt(DamageSource p_38666_, float p_38667_) {
+-        Entity entity = p_38666_.getDirectEntity();
+-        if (entity instanceof AbstractArrow abstractarrow && abstractarrow.isOnFire()) {
++        if (p_38666_.getDirectEntity() instanceof AbstractArrow abstractarrow && abstractarrow.isOnFire()) {
+             DamageSource damagesource = this.damageSources().explosion(this, p_38666_.getEntity());
+             this.explode(damagesource, abstractarrow.getDeltaMovement().lengthSqr());
+         }

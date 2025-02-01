@@ -1,0 +1,29 @@
+--- a/net/minecraft/core/particles/SimpleParticleType.java
++++ b/net/minecraft/core/particles/SimpleParticleType.java
+@@ -1,7 +_,7 @@
+ package net.minecraft.core.particles;
+ 
+ import com.mojang.brigadier.StringReader;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+@@ -13,7 +_,7 @@
+             return (SimpleParticleType)p_123846_;
+         }
+     };
+-    private final Codec<SimpleParticleType> codec = Codec.unit(this::getType);
++    private final MapCodec<SimpleParticleType> codec = MapCodec.unit(this::getType);
+     private final StreamCodec<RegistryFriendlyByteBuf, SimpleParticleType> streamCodec = StreamCodec.unit(this);
+ 
+     public SimpleParticleType(boolean p_123837_) {
+@@ -25,7 +_,7 @@
+     }
+ 
+     @Override
+-    public Codec<SimpleParticleType> codec() {
++    public MapCodec<SimpleParticleType> codec() {
+         return this.codec;
+     }
+ 

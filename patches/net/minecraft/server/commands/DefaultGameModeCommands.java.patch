@@ -1,0 +1,14 @@
+--- a/net/minecraft/server/commands/DefaultGameModeCommands.java
++++ b/net/minecraft/server/commands/DefaultGameModeCommands.java
+@@ -28,9 +_,9 @@
+         minecraftserver.setDefaultGameType(p_136932_);
+         GameType gametype = minecraftserver.getForcedGameType();
+         if (gametype != null) {
+-            for(ServerPlayer serverplayer : minecraftserver.getPlayerList().getPlayers()) {
++            for (ServerPlayer serverplayer : minecraftserver.getPlayerList().getPlayers()) {
+                 if (serverplayer.setGameMode(gametype)) {
+-                    ++i;
++                    i++;
+                 }
+             }
+         }

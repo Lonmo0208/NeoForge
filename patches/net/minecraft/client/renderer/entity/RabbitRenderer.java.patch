@@ -1,0 +1,19 @@
+--- a/net/minecraft/client/renderer/entity/RabbitRenderer.java
++++ b/net/minecraft/client/renderer/entity/RabbitRenderer.java
+@@ -28,7 +_,7 @@
+         if ("Toast".equals(s)) {
+             return RABBIT_TOAST_LOCATION;
+         } else {
+-            return switch(p_115803_.getVariant()) {
++            return switch (p_115803_.getVariant()) {
+                 case BROWN -> RABBIT_BROWN_LOCATION;
+                 case WHITE -> RABBIT_WHITE_LOCATION;
+                 case BLACK -> RABBIT_BLACK_LOCATION;
+@@ -36,6 +_,7 @@
+                 case SALT -> RABBIT_SALT_LOCATION;
+                 case WHITE_SPLOTCHED -> RABBIT_WHITE_SPLOTCHED_LOCATION;
+                 case EVIL -> RABBIT_EVIL_LOCATION;
++                default -> throw new MatchException(null, null);
+             };
+         }
+     }

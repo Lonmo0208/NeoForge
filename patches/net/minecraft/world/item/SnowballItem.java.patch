@@ -1,0 +1,35 @@
+--- a/net/minecraft/world/item/SnowballItem.java
++++ b/net/minecraft/world/item/SnowballItem.java
+@@ -1,15 +_,18 @@
+ package net.minecraft.world.item;
+ 
++import net.minecraft.core.Direction;
++import net.minecraft.core.Position;
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.stats.Stats;
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.InteractionResultHolder;
+ import net.minecraft.world.entity.player.Player;
++import net.minecraft.world.entity.projectile.Projectile;
+ import net.minecraft.world.entity.projectile.Snowball;
+ import net.minecraft.world.level.Level;
+ 
+-public class SnowballItem extends Item {
++public class SnowballItem extends Item implements ProjectileItem {
+     public SnowballItem(Item.Properties p_43140_) {
+         super(p_43140_);
+     }
+@@ -37,5 +_,12 @@
+         p_43143_.awardStat(Stats.ITEM_USED.get(this));
+         itemstack.consume(1, p_43143_);
+         return InteractionResultHolder.sidedSuccess(itemstack, p_43142_.isClientSide());
++    }
++
++    @Override
++    public Projectile asProjectile(Level p_338685_, Position p_338637_, ItemStack p_338820_, Direction p_338856_) {
++        Snowball snowball = new Snowball(p_338685_, p_338637_.x(), p_338637_.y(), p_338637_.z());
++        snowball.setItem(p_338820_);
++        return snowball;
+     }
+ }

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/EndPortalBlock.java
++++ b/net/minecraft/world/level/block/EndPortalBlock.java
+@@ -59,7 +_,7 @@
+                 return;
+             }
+ 
+-            p_53028_.changeDimension(serverlevel, false);
++            p_53028_.changeDimension(serverlevel);
+         }
+     }
+ 

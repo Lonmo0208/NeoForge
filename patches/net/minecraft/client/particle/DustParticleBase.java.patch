@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/particle/DustParticleBase.java
++++ b/net/minecraft/client/particle/DustParticleBase.java
+@@ -32,7 +_,7 @@
+         this.rCol = this.randomizeColor(p_172101_.getColor().x(), f);
+         this.gCol = this.randomizeColor(p_172101_.getColor().y(), f);
+         this.bCol = this.randomizeColor(p_172101_.getColor().z(), f);
+-        this.quadSize *= 0.75F * p_172101_.getScale();
++        this.quadSize = this.quadSize * 0.75F * p_172101_.getScale();
+         int i = (int)(8.0 / (this.random.nextDouble() * 0.8 + 0.2));
+         this.lifetime = (int)Math.max((float)i * p_172101_.getScale(), 1.0F);
+         this.setSpriteFromAge(p_172102_);

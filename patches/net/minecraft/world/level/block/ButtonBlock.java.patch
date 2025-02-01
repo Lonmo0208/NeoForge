@@ -1,0 +1,25 @@
+--- a/net/minecraft/world/level/block/ButtonBlock.java
++++ b/net/minecraft/world/level/block/ButtonBlock.java
+@@ -84,7 +_,7 @@
+     protected VoxelShape getShape(BlockState p_51104_, BlockGetter p_51105_, BlockPos p_51106_, CollisionContext p_51107_) {
+         Direction direction = p_51104_.getValue(FACING);
+         boolean flag = p_51104_.getValue(POWERED);
+-        switch((AttachFace)p_51104_.getValue(FACE)) {
++        switch ((AttachFace)p_51104_.getValue(FACE)) {
+             case FLOOR:
+                 if (direction.getAxis() == Direction.Axis.X) {
+                     return flag ? PRESSED_FLOOR_AABB_X : FLOOR_AABB_X;
+@@ -92,11 +_,12 @@
+ 
+                 return flag ? PRESSED_FLOOR_AABB_Z : FLOOR_AABB_Z;
+             case WALL:
+-                return switch(direction) {
++                return switch (direction) {
+                     case EAST -> flag ? PRESSED_EAST_AABB : EAST_AABB;
+                     case WEST -> flag ? PRESSED_WEST_AABB : WEST_AABB;
+                     case SOUTH -> flag ? PRESSED_SOUTH_AABB : SOUTH_AABB;
+                     case NORTH, UP, DOWN -> flag ? PRESSED_NORTH_AABB : NORTH_AABB;
++                    default -> throw new MatchException(null, null);
+                 };
+             case CEILING:
+             default:

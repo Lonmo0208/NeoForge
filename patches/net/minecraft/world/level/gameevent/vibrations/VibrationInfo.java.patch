@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/level/gameevent/vibrations/VibrationInfo.java
++++ b/net/minecraft/world/level/gameevent/vibrations/VibrationInfo.java
+@@ -19,15 +_,15 @@
+     Holder<GameEvent> gameEvent, float distance, Vec3 pos, @Nullable UUID uuid, @Nullable UUID projectileOwnerUuid, @Nullable Entity entity
+ ) {
+     public static final Codec<VibrationInfo> CODEC = RecordCodecBuilder.create(
+-        p_316098_ -> p_316098_.group(
++        p_338088_ -> p_338088_.group(
+                     BuiltInRegistries.GAME_EVENT.holderByNameCodec().fieldOf("game_event").forGetter(VibrationInfo::gameEvent),
+                     Codec.floatRange(0.0F, Float.MAX_VALUE).fieldOf("distance").forGetter(VibrationInfo::distance),
+                     Vec3.CODEC.fieldOf("pos").forGetter(VibrationInfo::pos),
+-                    UUIDUtil.CODEC.optionalFieldOf("source").forGetter(p_250608_ -> Optional.ofNullable(p_250608_.uuid())),
+-                    UUIDUtil.CODEC.optionalFieldOf("projectile_owner").forGetter(p_250607_ -> Optional.ofNullable(p_250607_.projectileOwnerUuid()))
++                    UUIDUtil.CODEC.lenientOptionalFieldOf("source").forGetter(p_250608_ -> Optional.ofNullable(p_250608_.uuid())),
++                    UUIDUtil.CODEC.lenientOptionalFieldOf("projectile_owner").forGetter(p_250607_ -> Optional.ofNullable(p_250607_.projectileOwnerUuid()))
+                 )
+                 .apply(
+-                    p_316098_,
++                    p_338088_,
+                     (p_316093_, p_316094_, p_316095_, p_316096_, p_316097_) -> new VibrationInfo(
+                             p_316093_, p_316094_, p_316095_, p_316096_.orElse(null), p_316097_.orElse(null)
+                         )

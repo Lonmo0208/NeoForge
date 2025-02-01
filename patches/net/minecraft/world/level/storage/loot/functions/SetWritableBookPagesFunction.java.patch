@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SetWritableBookPagesFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/SetWritableBookPagesFunction.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.storage.loot.functions;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -12,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+ 
+ public class SetWritableBookPagesFunction extends LootItemConditionalFunction {
+-    public static final Codec<SetWritableBookPagesFunction> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<SetWritableBookPagesFunction> CODEC = RecordCodecBuilder.mapCodec(
+         p_335359_ -> commonFields(p_335359_)
+                 .and(
+                     p_335359_.group(

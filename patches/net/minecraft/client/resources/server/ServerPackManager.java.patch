@@ -1,0 +1,157 @@
+--- a/net/minecraft/client/resources/server/ServerPackManager.java
++++ b/net/minecraft/client/resources/server/ServerPackManager.java
+@@ -39,7 +_,7 @@
+     }
+ 
+     private void markExistingPacksAsRemoved(UUID p_314529_) {
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+             if (serverpackmanager$serverpackdata.id.equals(p_314529_)) {
+                 serverpackmanager$serverpackdata.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.SERVER_REPLACED);
+             }
+@@ -89,7 +_,7 @@
+ 
+     @Nullable
+     private ServerPackManager.ServerPackData findPackInfo(UUID p_314517_) {
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+             if (!serverpackmanager$serverpackdata.isRemoved() && serverpackmanager$serverpackdata.id.equals(p_314517_)) {
+                 return serverpackmanager$serverpackdata;
+             }
+@@ -107,7 +_,7 @@
+     }
+ 
+     public void popAll() {
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+             serverpackmanager$serverpackdata.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.SERVER_REMOVED);
+         }
+ 
+@@ -117,7 +_,7 @@
+     public void allowServerPacks() {
+         this.packPromptStatus = ServerPackManager.PackPromptStatus.ALLOWED;
+ 
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+             if (!serverpackmanager$serverpackdata.promptAccepted && !serverpackmanager$serverpackdata.isRemoved()) {
+                 this.acceptPack(serverpackmanager$serverpackdata);
+             }
+@@ -129,7 +_,7 @@
+     public void rejectServerPacks() {
+         this.packPromptStatus = ServerPackManager.PackPromptStatus.DECLINED;
+ 
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+             if (!serverpackmanager$serverpackdata.promptAccepted) {
+                 serverpackmanager$serverpackdata.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.DECLINED);
+             }
+@@ -170,7 +_,7 @@
+ 
+     private void onDownload(Collection<ServerPackManager.ServerPackData> p_314562_, DownloadQueue.BatchResult p_314549_) {
+         if (!p_314549_.failed().isEmpty()) {
+-            for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++            for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+                 if (serverpackmanager$serverpackdata.activationStatus != ServerPackManager.ActivationStatus.ACTIVE) {
+                     if (p_314549_.failed().contains(serverpackmanager$serverpackdata.id)) {
+                         serverpackmanager$serverpackdata.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.DOWNLOAD_FAILED);
+@@ -181,7 +_,7 @@
+             }
+         }
+ 
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata1 : p_314562_) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata1 : p_314562_) {
+             Path path = p_314549_.downloaded().get(serverpackmanager$serverpackdata1.id);
+             if (path != null) {
+                 serverpackmanager$serverpackdata1.downloadStatus = ServerPackManager.PackDownloadStatus.DONE;
+@@ -199,7 +_,7 @@
+         List<ServerPackManager.ServerPackData> list = new ArrayList<>();
+         boolean flag = false;
+ 
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+             if (!serverpackmanager$serverpackdata.isRemoved() && serverpackmanager$serverpackdata.promptAccepted) {
+                 if (serverpackmanager$serverpackdata.downloadStatus != ServerPackManager.PackDownloadStatus.DONE) {
+                     flag = true;
+@@ -215,7 +_,7 @@
+         if (!list.isEmpty()) {
+             Map<UUID, DownloadQueue.DownloadRequest> map = new HashMap<>();
+ 
+-            for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata1 : list) {
++            for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata1 : list) {
+                 map.put(
+                     serverpackmanager$serverpackdata1.id,
+                     new DownloadQueue.DownloadRequest(serverpackmanager$serverpackdata1.url, serverpackmanager$serverpackdata1.hash)
+@@ -233,7 +_,7 @@
+         final List<ServerPackManager.ServerPackData> list = new ArrayList<>();
+         final List<ServerPackManager.ServerPackData> list1 = new ArrayList<>();
+ 
+-        for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
++        for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata : this.packs) {
+             if (serverpackmanager$serverpackdata.activationStatus == ServerPackManager.ActivationStatus.PENDING) {
+                 return;
+             }
+@@ -257,13 +_,13 @@
+         }
+ 
+         if (flag) {
+-            for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata1 : list) {
++            for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata1 : list) {
+                 if (serverpackmanager$serverpackdata1.activationStatus != ServerPackManager.ActivationStatus.ACTIVE) {
+                     serverpackmanager$serverpackdata1.activationStatus = ServerPackManager.ActivationStatus.PENDING;
+                 }
+             }
+ 
+-            for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata2 : list1) {
++            for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata2 : list1) {
+                 serverpackmanager$serverpackdata2.activationStatus = ServerPackManager.ActivationStatus.PENDING;
+             }
+ 
+@@ -272,7 +_,7 @@
+                     new PackReloadConfig.Callbacks() {
+                         @Override
+                         public void onSuccess() {
+-                            for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata3 : list) {
++                            for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata3 : list) {
+                                 serverpackmanager$serverpackdata3.activationStatus = ServerPackManager.ActivationStatus.ACTIVE;
+                                 if (serverpackmanager$serverpackdata3.removalReason == null) {
+                                     ServerPackManager.this.packLoadFeedback
+@@ -280,7 +_,7 @@
+                                 }
+                             }
+         
+-                            for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata4 : list1) {
++                            for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata4 : list1) {
+                                 serverpackmanager$serverpackdata4.activationStatus = ServerPackManager.ActivationStatus.INACTIVE;
+                             }
+         
+@@ -292,23 +_,23 @@
+                             if (!p_314558_) {
+                                 list.clear();
+         
+-                                for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata3 : ServerPackManager.this.packs) {
+-                                    switch(serverpackmanager$serverpackdata3.activationStatus) {
+-                                        case ACTIVE:
+-                                            list.add(serverpackmanager$serverpackdata3);
++                                for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata3 : ServerPackManager.this.packs) {
++                                    switch (serverpackmanager$serverpackdata3.activationStatus) {
++                                        case INACTIVE:
++                                            serverpackmanager$serverpackdata3.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.DISCARDED);
+                                             break;
+                                         case PENDING:
+                                             serverpackmanager$serverpackdata3.activationStatus = ServerPackManager.ActivationStatus.INACTIVE;
+                                             serverpackmanager$serverpackdata3.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.ACTIVATION_FAILED);
+                                             break;
+-                                        case INACTIVE:
+-                                            serverpackmanager$serverpackdata3.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.DISCARDED);
++                                        case ACTIVE:
++                                            list.add(serverpackmanager$serverpackdata3);
+                                     }
+                                 }
+         
+                                 ServerPackManager.this.registerForUpdate();
+                             } else {
+-                                for(ServerPackManager.ServerPackData serverpackmanager$serverpackdata4 : ServerPackManager.this.packs) {
++                                for (ServerPackManager.ServerPackData serverpackmanager$serverpackdata4 : ServerPackManager.this.packs) {
+                                     if (serverpackmanager$serverpackdata4.activationStatus == ServerPackManager.ActivationStatus.PENDING) {
+                                         serverpackmanager$serverpackdata4.activationStatus = ServerPackManager.ActivationStatus.INACTIVE;
+                                     }

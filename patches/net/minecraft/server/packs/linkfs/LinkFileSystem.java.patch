@@ -1,0 +1,29 @@
+--- a/net/minecraft/server/packs/linkfs/LinkFileSystem.java
++++ b/net/minecraft/server/packs/linkfs/LinkFileSystem.java
+@@ -96,7 +_,7 @@
+         } else if (s.startsWith("/")) {
+             LinkFSPath linkfspath1 = this.root;
+ 
+-            for(String s2 : PATH_SPLITTER.split(s.substring(1))) {
++            for (String s2 : PATH_SPLITTER.split(s.substring(1))) {
+                 if (s2.isEmpty()) {
+                     throw new IllegalArgumentException("Empty paths not allowed");
+                 }
+@@ -108,7 +_,7 @@
+         } else {
+             LinkFSPath linkfspath = null;
+ 
+-            for(String s1 : PATH_SPLITTER.split(s)) {
++            for (String s1 : PATH_SPLITTER.split(s)) {
+                 if (s1.isEmpty()) {
+                     throw new IllegalArgumentException("Empty paths not allowed");
+                 }
+@@ -157,7 +_,7 @@
+         public LinkFileSystem.Builder put(List<String> p_249758_, String p_251234_, Path p_248766_) {
+             LinkFileSystem.DirectoryEntry linkfilesystem$directoryentry = this.root;
+ 
+-            for(String s : p_249758_) {
++            for (String s : p_249758_) {
+                 linkfilesystem$directoryentry = linkfilesystem$directoryentry.children.computeIfAbsent(s, p_249671_ -> new LinkFileSystem.DirectoryEntry());
+             }
+ 

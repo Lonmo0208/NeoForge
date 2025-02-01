@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/level/block/FarmBlock.java
 +++ b/net/minecraft/world/level/block/FarmBlock.java
+@@ -62,7 +_,7 @@
+     @Override
+     public BlockState getStateForPlacement(BlockPlaceContext p_53249_) {
+         return !this.defaultBlockState().canSurvive(p_53249_.getLevel(), p_53249_.getClickedPos())
+-            ? (p_53249_.getLevel().isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState()
++            ? Blocks.DIRT.defaultBlockState()
+             : super.getStateForPlacement(p_53249_);
+     }
+ 
 @@ -100,10 +_,7 @@
      @Override
      public void fallOn(Level p_153227_, BlockState p_153228_, BlockPos p_153229_, Entity p_153230_, float p_153231_) {
@@ -12,20 +21,28 @@
              turnToDirt(p_153230_, p_153228_, p_153227_, p_153229_);
          }
  
-@@ -117,17 +_,20 @@
+@@ -111,23 +_,26 @@
+     }
+ 
+     public static void turnToDirt(@Nullable Entity p_270981_, BlockState p_270402_, Level p_270568_, BlockPos p_270551_) {
+-        BlockState blockstate = pushEntitiesUp(p_270402_, (p_270568_.isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState(), p_270568_, p_270551_);
++        BlockState blockstate = pushEntitiesUp(p_270402_, Blocks.DIRT.defaultBlockState(), p_270568_, p_270551_);
+         p_270568_.setBlockAndUpdate(p_270551_, blockstate);
+         p_270568_.gameEvent(GameEvent.BLOCK_CHANGE, p_270551_, GameEvent.Context.of(p_270981_, blockstate));
      }
  
      private static boolean shouldMaintainFarmland(BlockGetter p_279219_, BlockPos p_279209_) {
--        return p_279219_.getBlockState(p_279209_.above()).is(BlockTags.MAINTAINS_FARMLAND);
+-        return p_279219_.isPotato() ? true : p_279219_.getBlockState(p_279209_.above()).is(BlockTags.MAINTAINS_FARMLAND);
 +        BlockState plant = p_279219_.getBlockState(p_279209_.above());
 +        BlockState state = p_279219_.getBlockState(p_279209_);
 +        return plant.getBlock() instanceof net.neoforged.neoforge.common.IPlantable && state.canSustainPlant(p_279219_, p_279209_, Direction.UP, (net.neoforged.neoforge.common.IPlantable)plant.getBlock());
      }
  
      private static boolean isNearWater(LevelReader p_53259_, BlockPos p_53260_) {
-+        BlockState state = p_53259_.getBlockState(p_53260_);
-         for(BlockPos blockpos : BlockPos.betweenClosed(p_53260_.offset(-4, 0, -4), p_53260_.offset(4, 1, 4))) {
+-        for(BlockPos blockpos : BlockPos.betweenClosed(p_53260_.offset(-4, 0, -4), p_53260_.offset(4, 1, 4))) {
 -            if (p_53259_.getFluidState(blockpos).is(FluidTags.WATER)) {
++        BlockState state = p_53259_.getBlockState(p_53260_);
++        for (BlockPos blockpos : BlockPos.betweenClosed(p_53260_.offset(-4, 0, -4), p_53260_.offset(4, 1, 4))) {
 +            if (state.canBeHydrated(p_53259_, p_53260_, p_53259_.getFluidState(blockpos), blockpos)) {
                  return true;
              }

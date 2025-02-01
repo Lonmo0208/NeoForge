@@ -1,0 +1,98 @@
+--- a/net/minecraft/world/level/block/entity/EnchantmentTableBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/EnchantmentTableBlockEntity.java
+@@ -42,10 +_,10 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155509_, HolderLookup.Provider p_323497_) {
+-        super.load(p_155509_, p_323497_);
+-        if (p_155509_.contains("CustomName", 8)) {
+-            this.name = Component.Serializer.fromJson(p_155509_.getString("CustomName"), p_323497_);
++    protected void loadAdditional(CompoundTag p_338835_, HolderLookup.Provider p_338808_) {
++        super.loadAdditional(p_338835_, p_338808_);
++        if (p_338835_.contains("CustomName", 8)) {
++            this.name = Component.Serializer.fromJson(p_338835_.getString("CustomName"), p_338808_);
+         }
+     }
+ 
+@@ -62,49 +_,49 @@
+                 float f1 = p_155507_.flipT;
+ 
+                 do {
+-                    p_155507_.flipT += (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
+-                } while(f1 == p_155507_.flipT);
++                    p_155507_.flipT = p_155507_.flipT + (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
++                } while (f1 == p_155507_.flipT);
+             }
+         } else {
+             p_155507_.tRot += 0.02F;
+             p_155507_.open -= 0.1F;
+         }
+ 
+-        while(p_155507_.rot >= (float) Math.PI) {
++        while (p_155507_.rot >= (float) Math.PI) {
+             p_155507_.rot -= (float) (Math.PI * 2);
+         }
+ 
+-        while(p_155507_.rot < (float) -Math.PI) {
++        while (p_155507_.rot < (float) -Math.PI) {
+             p_155507_.rot += (float) (Math.PI * 2);
+         }
+ 
+-        while(p_155507_.tRot >= (float) Math.PI) {
++        while (p_155507_.tRot >= (float) Math.PI) {
+             p_155507_.tRot -= (float) (Math.PI * 2);
+         }
+ 
+-        while(p_155507_.tRot < (float) -Math.PI) {
++        while (p_155507_.tRot < (float) -Math.PI) {
+             p_155507_.tRot += (float) (Math.PI * 2);
+         }
+ 
+         float f2 = p_155507_.tRot - p_155507_.rot;
+ 
+-        while(f2 >= (float) Math.PI) {
++        while (f2 >= (float) Math.PI) {
+             f2 -= (float) (Math.PI * 2);
+         }
+ 
+-        while(f2 < (float) -Math.PI) {
++        while (f2 < (float) -Math.PI) {
+             f2 += (float) (Math.PI * 2);
+         }
+ 
+         p_155507_.rot += f2 * 0.4F;
+         p_155507_.open = Mth.clamp(p_155507_.open, 0.0F, 1.0F);
+-        ++p_155507_.time;
++        p_155507_.time++;
+         p_155507_.oFlip = p_155507_.flip;
+         float f = (p_155507_.flipT - p_155507_.flip) * 0.4F;
+         float f3 = 0.2F;
+         f = Mth.clamp(f, -0.2F, 0.2F);
+-        p_155507_.flipA += (f - p_155507_.flipA) * 0.9F;
+-        p_155507_.flip += p_155507_.flipA;
++        p_155507_.flipA = p_155507_.flipA + (f - p_155507_.flipA) * 0.9F;
++        p_155507_.flip = p_155507_.flip + p_155507_.flipA;
+     }
+ 
+     @Override
+@@ -123,13 +_,15 @@
+     }
+ 
+     @Override
+-    public void applyComponents(DataComponentMap p_331072_) {
+-        this.name = p_331072_.get(DataComponents.CUSTOM_NAME);
++    protected void applyImplicitComponents(BlockEntity.DataComponentInput p_338246_) {
++        super.applyImplicitComponents(p_338246_);
++        this.name = p_338246_.get(DataComponents.CUSTOM_NAME);
+     }
+ 
+     @Override
+-    public void collectComponents(DataComponentMap.Builder p_330264_) {
+-        p_330264_.set(DataComponents.CUSTOM_NAME, this.name);
++    protected void collectImplicitComponents(DataComponentMap.Builder p_338612_) {
++        super.collectImplicitComponents(p_338612_);
++        p_338612_.set(DataComponents.CUSTOM_NAME, this.name);
+     }
+ 
+     @Override

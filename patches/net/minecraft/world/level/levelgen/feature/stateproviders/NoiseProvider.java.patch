@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/level/levelgen/feature/stateproviders/NoiseProvider.java
++++ b/net/minecraft/world/level/levelgen/feature/stateproviders/NoiseProvider.java
+@@ -2,6 +_,7 @@
+ 
+ import com.mojang.datafixers.Products.P4;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
+@@ -13,7 +_,9 @@
+ import net.minecraft.world.level.levelgen.synth.NormalNoise;
+ 
+ public class NoiseProvider extends NoiseBasedStateProvider {
+-    public static final Codec<NoiseProvider> CODEC = RecordCodecBuilder.create(p_191462_ -> noiseProviderCodec(p_191462_).apply(p_191462_, NoiseProvider::new));
++    public static final MapCodec<NoiseProvider> CODEC = RecordCodecBuilder.mapCodec(
++        p_191462_ -> noiseProviderCodec(p_191462_).apply(p_191462_, NoiseProvider::new)
++    );
+     protected final List<BlockState> states;
+ 
+     protected static <P extends NoiseProvider> P4<Mu<P>, Long, NormalNoise.NoiseParameters, Float, List<BlockState>> noiseProviderCodec(Instance<P> p_191460_) {

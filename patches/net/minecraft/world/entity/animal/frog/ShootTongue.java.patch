@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/animal/frog/ShootTongue.java
++++ b/net/minecraft/world/entity/animal/frog/ShootTongue.java
+@@ -101,7 +_,7 @@
+     protected void tick(ServerLevel p_218660_, Frog p_218661_, long p_218662_) {
+         LivingEntity livingentity = p_218661_.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
+         p_218661_.setTongueTarget(livingentity);
+-        switch(this.state) {
++        switch (this.state) {
+             case MOVE_TO_TARGET:
+                 if (livingentity.distanceTo(p_218661_) < 1.75F) {
+                     p_218660_.playSound(null, p_218661_, this.tongueSound, SoundSource.NEUTRAL, 2.0F, 1.0F);
+@@ -114,7 +_,7 @@
+                     p_218661_.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(livingentity.position(), 2.0F, 0));
+                     this.calculatePathCounter = 10;
+                 } else {
+-                    --this.calculatePathCounter;
++                    this.calculatePathCounter--;
+                 }
+                 break;
+             case CATCH_ANIMATION:
+@@ -127,7 +_,7 @@
+                 if (this.eatAnimationTimer >= 10) {
+                     this.state = ShootTongue.State.DONE;
+                 } else {
+-                    ++this.eatAnimationTimer;
++                    this.eatAnimationTimer++;
+                 }
+             case DONE:
+         }

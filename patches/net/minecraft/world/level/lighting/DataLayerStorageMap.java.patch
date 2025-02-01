@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/level/lighting/DataLayerStorageMap.java
++++ b/net/minecraft/world/level/lighting/DataLayerStorageMap.java
+@@ -33,7 +_,7 @@
+     @Nullable
+     public DataLayer getLayer(long p_75533_) {
+         if (this.cacheEnabled) {
+-            for(int i = 0; i < 2; ++i) {
++            for (int i = 0; i < 2; i++) {
+                 if (p_75533_ == this.lastSectionKeys[i]) {
+                     return this.lastSections[i];
+                 }
+@@ -45,7 +_,7 @@
+             return null;
+         } else {
+             if (this.cacheEnabled) {
+-                for(int j = 1; j > 0; --j) {
++                for (int j = 1; j > 0; j--) {
+                     this.lastSectionKeys[j] = this.lastSectionKeys[j - 1];
+                     this.lastSections[j] = this.lastSections[j - 1];
+                 }
+@@ -68,7 +_,7 @@
+     }
+ 
+     public void clearCache() {
+-        for(int i = 0; i < 2; ++i) {
++        for (int i = 0; i < 2; i++) {
+             this.lastSectionKeys[i] = Long.MAX_VALUE;
+             this.lastSections[i] = null;
+         }

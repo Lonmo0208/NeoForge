@@ -1,0 +1,47 @@
+--- a/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java
++++ b/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java
+@@ -31,7 +_,7 @@
+     public ClientboundLevelChunkPacketData(LevelChunk p_195651_) {
+         this.heightmaps = new CompoundTag();
+ 
+-        for(Entry<Heightmap.Types, Heightmap> entry : p_195651_.getHeightmaps()) {
++        for (Entry<Heightmap.Types, Heightmap> entry : p_195651_.getHeightmaps()) {
+             if (entry.getKey().sendToClient()) {
+                 this.heightmaps.put(entry.getKey().getSerializationKey(), new LongArrayTag(entry.getValue().getRawData()));
+             }
+@@ -41,7 +_,7 @@
+         extractChunkData(new FriendlyByteBuf(this.getWriteBuffer()), p_195651_);
+         this.blockEntitiesData = Lists.newArrayList();
+ 
+-        for(Entry<BlockPos, BlockEntity> entry1 : p_195651_.getBlockEntities().entrySet()) {
++        for (Entry<BlockPos, BlockEntity> entry1 : p_195651_.getBlockEntities().entrySet()) {
+             this.blockEntitiesData.add(ClientboundLevelChunkPacketData.BlockEntityInfo.create(entry1.getValue()));
+         }
+     }
+@@ -72,7 +_,7 @@
+     private static int calculateChunkSize(LevelChunk p_195665_) {
+         int i = 0;
+ 
+-        for(LevelChunkSection levelchunksection : p_195665_.getSections()) {
++        for (LevelChunkSection levelchunksection : p_195665_.getSections()) {
+             i += levelchunksection.getSerializedSize();
+         }
+ 
+@@ -86,7 +_,7 @@
+     }
+ 
+     public static void extractChunkData(FriendlyByteBuf p_195669_, LevelChunk p_195670_) {
+-        for(LevelChunkSection levelchunksection : p_195670_.getSections()) {
++        for (LevelChunkSection levelchunksection : p_195670_.getSections()) {
+             levelchunksection.write(p_195669_);
+         }
+     }
+@@ -100,7 +_,7 @@
+         int j = 16 * p_195677_;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(ClientboundLevelChunkPacketData.BlockEntityInfo clientboundlevelchunkpacketdata$blockentityinfo : this.blockEntitiesData) {
++        for (ClientboundLevelChunkPacketData.BlockEntityInfo clientboundlevelchunkpacketdata$blockentityinfo : this.blockEntitiesData) {
+             int k = i + SectionPos.sectionRelative(clientboundlevelchunkpacketdata$blockentityinfo.packedXZ >> 4);
+             int l = j + SectionPos.sectionRelative(clientboundlevelchunkpacketdata$blockentityinfo.packedXZ);
+             blockpos$mutableblockpos.set(k, clientboundlevelchunkpacketdata$blockentityinfo.y, l);

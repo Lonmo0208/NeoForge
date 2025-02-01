@@ -1,0 +1,50 @@
+--- a/net/minecraft/advancements/critereon/EnterBlockTrigger.java
++++ b/net/minecraft/advancements/critereon/EnterBlockTrigger.java
+@@ -10,7 +_,6 @@
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.state.BlockState;
+ 
+@@ -26,18 +_,15 @@
+ 
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<Holder<Block>> block, Optional<StatePropertiesPredicate> state)
+         implements SimpleCriterionTrigger.SimpleInstance {
+-        public static final Codec<EnterBlockTrigger.TriggerInstance> CODEC = ExtraCodecs.validate(
+-            RecordCodecBuilder.create(
+-                p_311416_ -> p_311416_.group(
+-                            ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EnterBlockTrigger.TriggerInstance::player),
+-                            ExtraCodecs.strictOptionalField(BuiltInRegistries.BLOCK.holderByNameCodec(), "block")
+-                                .forGetter(EnterBlockTrigger.TriggerInstance::block),
+-                            ExtraCodecs.strictOptionalField(StatePropertiesPredicate.CODEC, "state").forGetter(EnterBlockTrigger.TriggerInstance::state)
++        public static final Codec<EnterBlockTrigger.TriggerInstance> CODEC = RecordCodecBuilder.<EnterBlockTrigger.TriggerInstance>create(
++                p_337358_ -> p_337358_.group(
++                            EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(EnterBlockTrigger.TriggerInstance::player),
++                            BuiltInRegistries.BLOCK.holderByNameCodec().optionalFieldOf("block").forGetter(EnterBlockTrigger.TriggerInstance::block),
++                            StatePropertiesPredicate.CODEC.optionalFieldOf("state").forGetter(EnterBlockTrigger.TriggerInstance::state)
+                         )
+-                        .apply(p_311416_, EnterBlockTrigger.TriggerInstance::new)
+-            ),
+-            EnterBlockTrigger.TriggerInstance::validate
+-        );
++                        .apply(p_337358_, EnterBlockTrigger.TriggerInstance::new)
++            )
++            .validate(EnterBlockTrigger.TriggerInstance::validate);
+ 
+         private static DataResult<EnterBlockTrigger.TriggerInstance> validate(EnterBlockTrigger.TriggerInstance p_311841_) {
+             return p_311841_.block
+@@ -55,11 +_,7 @@
+         }
+ 
+         public boolean matches(BlockState p_31300_) {
+-            if (this.block.isPresent() && !p_31300_.is(this.block.get())) {
+-                return false;
+-            } else {
+-                return !this.state.isPresent() || this.state.get().matches(p_31300_);
+-            }
++            return this.block.isPresent() && !p_31300_.is(this.block.get()) ? false : !this.state.isPresent() || this.state.get().matches(p_31300_);
+         }
+     }
+ }

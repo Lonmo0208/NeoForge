@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/animal/camel/Camel.java
++++ b/net/minecraft/world/entity/animal/camel/Camel.java
+@@ -161,7 +_,7 @@
+         }
+ 
+         if (this.dashCooldown > 0) {
+-            --this.dashCooldown;
++            this.dashCooldown--;
+             if (this.dashCooldown == 0) {
+                 this.level().playSound(null, this.blockPosition(), SoundEvents.CAMEL_DASH_READY, SoundSource.NEUTRAL, 1.0F, 1.0F);
+             }
+@@ -185,7 +_,7 @@
+             this.idleAnimationTimeout = this.random.nextInt(40) + 80;
+             this.idleAnimationState.start(this.tickCount);
+         } else {
+-            --this.idleAnimationTimeout;
++            this.idleAnimationTimeout--;
+         }
+ 
+         if (this.isCamelVisuallySitting()) {

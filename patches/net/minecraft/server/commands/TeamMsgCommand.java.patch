@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/commands/TeamMsgCommand.java
++++ b/net/minecraft/server/commands/TeamMsgCommand.java
+@@ -43,7 +_,7 @@
+                                         .getPlayerList()
+                                         .getPlayers()
+                                         .stream()
+-                                        .filter(p_339816_ -> p_339816_ == entity || p_339816_.getTeam() == playerteam)
++                                        .filter(p_337541_ -> p_337541_ == entity || p_337541_.getTeam() == playerteam)
+                                         .toList();
+                                     if (!list.isEmpty()) {
+                                         MessageArgument.resolveChatMessage(
+@@ -69,7 +_,7 @@
+         OutgoingChatMessage outgoingchatmessage = OutgoingChatMessage.create(p_249707_);
+         boolean flag = false;
+ 
+-        for(ServerPlayer serverplayer : p_249706_) {
++        for (ServerPlayer serverplayer : p_249706_) {
+             ChatType.Bound chattype$bound2 = serverplayer == p_248891_ ? chattype$bound1 : chattype$bound;
+             boolean flag1 = p_248778_.shouldFilterMessageTo(serverplayer);
+             serverplayer.sendChatMessage(outgoingchatmessage, flag1, chattype$bound2);

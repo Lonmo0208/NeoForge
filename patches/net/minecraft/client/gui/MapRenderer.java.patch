@@ -1,0 +1,47 @@
+--- a/net/minecraft/client/gui/MapRenderer.java
++++ b/net/minecraft/client/gui/MapRenderer.java
+@@ -50,13 +_,13 @@
+                 return new MapRenderer.MapInstance(p_182563_, p_168780_);
+             } else {
+                 p_182564_.replaceMapData(p_168780_);
+-                return p_182564_;
++                return (MapRenderer.MapInstance)p_182564_;
+             }
+         });
+     }
+ 
+     public void resetData() {
+-        for(MapRenderer.MapInstance maprenderer$mapinstance : this.maps.values()) {
++        for (MapRenderer.MapInstance maprenderer$mapinstance : this.maps.values()) {
+             maprenderer$mapinstance.close();
+         }
+ 
+@@ -93,8 +_,8 @@
+         }
+ 
+         private void updateTexture() {
+-            for(int i = 0; i < 128; ++i) {
+-                for(int j = 0; j < 128; ++j) {
++            for (int i = 0; i < 128; i++) {
++                for (int j = 0; j < 128; j++) {
+                     int k = j + i * 128;
+                     this.texture.getPixels().setPixelRGBA(j, i, MapColor.getColorFromPackedId(this.data.colors[k]));
+                 }
+@@ -120,7 +_,7 @@
+             vertexconsumer.vertex(matrix4f, 0.0F, 0.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(p_93295_).endVertex();
+             int k = 0;
+ 
+-            for(MapDecoration mapdecoration : this.data.getDecorations()) {
++            for (MapDecoration mapdecoration : this.data.getDecorations()) {
+                 if (!p_93294_ || mapdecoration.renderOnFrame()) {
+                     p_93292_.pushPose();
+                     p_93292_.translate(0.0F + (float)mapdecoration.x() / 2.0F + 64.0F, 0.0F + (float)mapdecoration.y() / 2.0F + 64.0F, -0.02F);
+@@ -157,7 +_,7 @@
+                         p_93292_.popPose();
+                     }
+ 
+-                    ++k;
++                    k++;
+                 }
+             }
+         }

@@ -1,0 +1,29 @@
+--- a/net/minecraft/nbt/TagParser.java
++++ b/net/minecraft/nbt/TagParser.java
+@@ -161,7 +_,7 @@
+         CompoundTag compoundtag = new CompoundTag();
+         this.reader.skipWhitespace();
+ 
+-        while(this.reader.canRead() && this.reader.peek() != '}') {
++        while (this.reader.canRead() && this.reader.peek() != '}') {
+             int i = this.reader.getCursor();
+             String s = this.readKey();
+             if (s.isEmpty()) {
+@@ -193,7 +_,7 @@
+             ListTag listtag = new ListTag();
+             TagType<?> tagtype = null;
+ 
+-            while(this.reader.peek() != ']') {
++            while (this.reader.peek() != ']') {
+                 int i = this.reader.getCursor();
+                 Tag tag = this.readValue();
+                 TagType<?> tagtype1 = tag.getType();
+@@ -242,7 +_,7 @@
+     private <T extends Number> List<T> readArray(TagType<?> p_129362_, TagType<?> p_129363_) throws CommandSyntaxException {
+         List<T> list = Lists.newArrayList();
+ 
+-        while(this.reader.peek() != ']') {
++        while (this.reader.peek() != ']') {
+             int i = this.reader.getCursor();
+             Tag tag = this.readValue();
+             TagType<?> tagtype = tag.getType();

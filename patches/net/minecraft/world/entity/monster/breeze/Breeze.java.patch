@@ -1,0 +1,49 @@
+--- a/net/minecraft/world/entity/monster/breeze/Breeze.java
++++ b/net/minecraft/world/entity/monster/breeze/Breeze.java
+@@ -90,7 +_,7 @@
+         if (this.level().isClientSide() && DATA_POSE.equals(p_312373_)) {
+             this.resetAnimations();
+             Pose pose = this.getPose();
+-            switch(pose) {
++            switch (pose) {
+                 case SHOOTING:
+                     this.shoot.startIfStopped(this.tickCount);
+                     break;
+@@ -115,7 +_,7 @@
+     @Override
+     public void tick() {
+         Pose pose = this.getPose();
+-        switch(pose) {
++        switch (pose) {
+             case SHOOTING:
+             case INHALING:
+             case STANDING:
+@@ -152,7 +_,7 @@
+             Vec3 vec3 = this.getDeltaMovement();
+             Vec3 vec31 = this.position().add(vec3).add(0.0, 0.1F, 0.0);
+ 
+-            for(int i = 0; i < 3; ++i) {
++            for (int i = 0; i < 3; i++) {
+                 this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate), vec31.x, vec31.y, vec31.z, 0.0, 0.0, 0.0);
+             }
+         }
+@@ -164,7 +_,7 @@
+             Vec3 vec31 = new Vec3(vec3.x, this.position().y, vec3.z);
+             BlockState blockstate = !this.getInBlockState().isAir() ? this.getInBlockState() : this.getBlockStateOn();
+             if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
+-                for(int i = 0; i < p_312637_; ++i) {
++                for (int i = 0; i < p_312637_; i++) {
+                     this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockstate), vec31.x, vec31.y, vec31.z, 0.0, 0.0, 0.0);
+                 }
+             }
+@@ -186,7 +_,9 @@
+ 
+     @Override
+     public ProjectileDeflection deflection(Projectile p_320843_) {
+-        return p_320843_.getType() == EntityType.BREEZE_WIND_CHARGE ? ProjectileDeflection.NONE : PROJECTILE_DEFLECTION;
++        return p_320843_.getType() != EntityType.BREEZE_WIND_CHARGE && p_320843_.getType() != EntityType.WIND_CHARGE
++            ? PROJECTILE_DEFLECTION
++            : ProjectileDeflection.NONE;
+     }
+ 
+     @Override

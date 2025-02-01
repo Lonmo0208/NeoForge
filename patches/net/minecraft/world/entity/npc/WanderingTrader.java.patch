@@ -1,0 +1,42 @@
+--- a/net/minecraft/world/entity/npc/WanderingTrader.java
++++ b/net/minecraft/world/entity/npc/WanderingTrader.java
+@@ -66,7 +_,7 @@
+                     this,
+                     PotionContents.createItemStack(Items.POTION, Potions.INVISIBILITY),
+                     SoundEvents.WANDERING_TRADER_DISAPPEARED,
+-                    p_340158_ -> this.level().isNight() && !p_340158_.isInvisible()
++                    p_337874_ -> this.level().isNight() && !p_337874_.isInvisible()
+                 )
+             );
+         this.goalSelector
+@@ -76,7 +_,7 @@
+                     this,
+                     new ItemStack(Items.MILK_BUCKET),
+                     SoundEvents.WANDERING_TRADER_REAPPEARED,
+-                    p_340159_ -> this.level().isDay() && p_340159_.isInvisible()
++                    p_337875_ -> this.level().isDay() && p_337875_.isInvisible()
+                 )
+             );
+         this.goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
+@@ -135,8 +_,8 @@
+         if (this.level().enabledFeatures().contains(FeatureFlags.TRADE_REBALANCE)) {
+             this.experimentalUpdateTrades();
+         } else {
+-            VillagerTrades.ItemListing[] avillagertrades$itemlisting = (VillagerTrades.ItemListing[])VillagerTrades.WANDERING_TRADER_TRADES.get(1);
+-            VillagerTrades.ItemListing[] avillagertrades$itemlisting1 = (VillagerTrades.ItemListing[])VillagerTrades.WANDERING_TRADER_TRADES.get(2);
++            VillagerTrades.ItemListing[] avillagertrades$itemlisting = VillagerTrades.WANDERING_TRADER_TRADES.get(1);
++            VillagerTrades.ItemListing[] avillagertrades$itemlisting1 = VillagerTrades.WANDERING_TRADER_TRADES.get(2);
+             if (avillagertrades$itemlisting != null && avillagertrades$itemlisting1 != null) {
+                 MerchantOffers merchantoffers = this.getOffers();
+                 this.addOffersFromItemListings(merchantoffers, avillagertrades$itemlisting, 5);
+@@ -153,8 +_,8 @@
+     private void experimentalUpdateTrades() {
+         MerchantOffers merchantoffers = this.getOffers();
+ 
+-        for(Pair<VillagerTrades.ItemListing[], Integer> pair : VillagerTrades.EXPERIMENTAL_WANDERING_TRADER_TRADES) {
+-            VillagerTrades.ItemListing[] avillagertrades$itemlisting = (VillagerTrades.ItemListing[])pair.getLeft();
++        for (Pair<VillagerTrades.ItemListing[], Integer> pair : VillagerTrades.EXPERIMENTAL_WANDERING_TRADER_TRADES) {
++            VillagerTrades.ItemListing[] avillagertrades$itemlisting = pair.getLeft();
+             this.addOffersFromItemListings(merchantoffers, avillagertrades$itemlisting, pair.getRight());
+         }
+     }

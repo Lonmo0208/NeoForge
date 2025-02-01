@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java
+@@ -19,7 +_,7 @@
+     }
+ 
+     private static void pack(List<SynchedEntityData.DataValue<?>> p_253940_, RegistryFriendlyByteBuf p_320247_) {
+-        for(SynchedEntityData.DataValue<?> datavalue : p_253940_) {
++        for (SynchedEntityData.DataValue<?> datavalue : p_253940_) {
+             datavalue.write(p_320247_);
+         }
+ 
+@@ -30,7 +_,7 @@
+         List<SynchedEntityData.DataValue<?>> list = new ArrayList<>();
+ 
+         int i;
+-        while((i = p_320523_.readUnsignedByte()) != 255) {
++        while ((i = p_320523_.readUnsignedByte()) != 255) {
+             list.add(SynchedEntityData.DataValue.read(p_320523_, i));
+         }
+ 

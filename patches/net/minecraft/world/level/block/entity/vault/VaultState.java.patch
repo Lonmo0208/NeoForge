@@ -1,0 +1,75 @@
+--- a/net/minecraft/world/level/block/entity/vault/VaultState.java
++++ b/net/minecraft/world/level/block/entity/vault/VaultState.java
+@@ -13,30 +_,30 @@
+ public enum VaultState implements StringRepresentable {
+     INACTIVE("inactive", VaultState.LightLevel.HALF_LIT) {
+         @Override
+-        protected void onEnter(ServerLevel p_324512_, BlockPos p_324300_, VaultConfig p_323552_, VaultSharedData p_324096_) {
++        protected void onEnter(ServerLevel p_324512_, BlockPos p_324300_, VaultConfig p_323552_, VaultSharedData p_324096_, boolean p_338586_) {
+             p_324096_.setDisplayItem(ItemStack.EMPTY);
+-            p_324512_.levelEvent(3016, p_324300_, 0);
++            p_324512_.levelEvent(3016, p_324300_, p_338586_ ? 1 : 0);
+         }
+     },
+     ACTIVE("active", VaultState.LightLevel.LIT) {
+         @Override
+-        protected void onEnter(ServerLevel p_324513_, BlockPos p_324445_, VaultConfig p_323855_, VaultSharedData p_323750_) {
++        protected void onEnter(ServerLevel p_324513_, BlockPos p_324445_, VaultConfig p_323855_, VaultSharedData p_323750_, boolean p_338489_) {
+             if (!p_323750_.hasDisplayItem()) {
+                 VaultBlockEntity.Server.cycleDisplayItemFromLootTable(p_324513_, this, p_323855_, p_323750_, p_324445_);
+             }
+ 
+-            p_324513_.levelEvent(3015, p_324445_, 0);
++            p_324513_.levelEvent(3015, p_324445_, p_338489_ ? 1 : 0);
+         }
+     },
+     UNLOCKING("unlocking", VaultState.LightLevel.LIT) {
+         @Override
+-        protected void onEnter(ServerLevel p_324077_, BlockPos p_323729_, VaultConfig p_323520_, VaultSharedData p_323550_) {
++        protected void onEnter(ServerLevel p_324077_, BlockPos p_323729_, VaultConfig p_323520_, VaultSharedData p_323550_, boolean p_338182_) {
+             p_324077_.playSound(null, p_323729_, SoundEvents.VAULT_INSERT_ITEM, SoundSource.BLOCKS);
+         }
+     },
+     EJECTING("ejecting", VaultState.LightLevel.LIT) {
+         @Override
+-        protected void onEnter(ServerLevel p_324167_, BlockPos p_324285_, VaultConfig p_324106_, VaultSharedData p_324596_) {
++        protected void onEnter(ServerLevel p_324167_, BlockPos p_324285_, VaultConfig p_324106_, VaultSharedData p_324596_, boolean p_338590_) {
+             p_324167_.playSound(null, p_324285_, SoundEvents.VAULT_OPEN_SHUTTER, SoundSource.BLOCKS);
+         }
+ 
+@@ -69,7 +_,7 @@
+ 
+     public VaultState tickAndGetNext(ServerLevel p_324582_, BlockPos p_323837_, VaultConfig p_323770_, VaultServerData p_324291_, VaultSharedData p_324388_) {
+         VaultState vaultstate;
+-        switch(this) {
++        switch (this) {
+             case INACTIVE:
+                 vaultstate = updateStateForConnectedPlayers(p_324582_, p_323837_, p_323770_, p_324291_, p_324388_, p_323770_.activationRange());
+                 break;
+@@ -95,7 +_,7 @@
+                 }
+                 break;
+             default:
+-                throw new IncompatibleClassChangeError();
++                throw new MatchException(null, null);
+         }
+ 
+         return vaultstate;
+@@ -109,12 +_,14 @@
+         return p_323954_.hasConnectedPlayers() ? ACTIVE : INACTIVE;
+     }
+ 
+-    public void onTransition(ServerLevel p_323698_, BlockPos p_324545_, VaultState p_324339_, VaultConfig p_324218_, VaultSharedData p_323812_) {
++    public void onTransition(
++        ServerLevel p_323698_, BlockPos p_324545_, VaultState p_324339_, VaultConfig p_324218_, VaultSharedData p_323812_, boolean p_338417_
++    ) {
+         this.onExit(p_323698_, p_324545_, p_324218_, p_323812_);
+-        p_324339_.onEnter(p_323698_, p_324545_, p_324218_, p_323812_);
++        p_324339_.onEnter(p_323698_, p_324545_, p_324218_, p_323812_, p_338417_);
+     }
+ 
+-    protected void onEnter(ServerLevel p_323591_, BlockPos p_324053_, VaultConfig p_324561_, VaultSharedData p_323516_) {
++    protected void onEnter(ServerLevel p_323591_, BlockPos p_324053_, VaultConfig p_324561_, VaultSharedData p_323516_, boolean p_338369_) {
+     }
+ 
+     protected void onExit(ServerLevel p_324093_, BlockPos p_324256_, VaultConfig p_324614_, VaultSharedData p_324591_) {

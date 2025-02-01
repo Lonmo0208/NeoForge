@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/boss/enderdragon/phases/DragonTakeoffPhase.java
++++ b/net/minecraft/world/entity/boss/enderdragon/phases/DragonTakeoffPhase.java
+@@ -71,7 +_,7 @@
+                 double d0;
+                 do {
+                     d0 = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+-                } while(d0 < (double)vec3i.getY());
++                } while (d0 < (double)vec3i.getY());
+ 
+                 this.targetLocation = new Vec3((double)vec3i.getX(), d0, (double)vec3i.getZ());
+             }

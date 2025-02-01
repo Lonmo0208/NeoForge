@@ -1,0 +1,54 @@
+--- a/net/minecraft/stats/ServerStatsCounter.java
++++ b/net/minecraft/stats/ServerStatsCounter.java
+@@ -87,14 +_,14 @@
+ 
+                     CompoundTag compoundtag1 = compoundtag.getCompound("stats");
+ 
+-                    for(String s : compoundtag1.getAllKeys()) {
++                    for (String s : compoundtag1.getAllKeys()) {
+                         if (compoundtag1.contains(s, 10)) {
+                             Util.ifElse(
+                                 BuiltInRegistries.STAT_TYPE.getOptional(new ResourceLocation(s)),
+                                 p_12844_ -> {
+                                     CompoundTag compoundtag2 = compoundtag1.getCompound(s);
+     
+-                                    for(String s1 : compoundtag2.getAllKeys()) {
++                                    for (String s1 : compoundtag2.getAllKeys()) {
+                                         if (compoundtag2.contains(s1, 99)) {
+                                             Util.ifElse(
+                                                 this.getStat(p_12844_, s1),
+@@ -128,7 +_,7 @@
+     private static CompoundTag fromJson(JsonObject p_12831_) {
+         CompoundTag compoundtag = new CompoundTag();
+ 
+-        for(Entry<String, JsonElement> entry : p_12831_.entrySet()) {
++        for (Entry<String, JsonElement> entry : p_12831_.entrySet()) {
+             JsonElement jsonelement = entry.getValue();
+             if (jsonelement.isJsonObject()) {
+                 compoundtag.put(entry.getKey(), fromJson(jsonelement.getAsJsonObject()));
+@@ -146,14 +_,14 @@
+     protected String toJson() {
+         Map<StatType<?>, JsonObject> map = Maps.newHashMap();
+ 
+-        for(it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Stat<?>> entry : this.stats.object2IntEntrySet()) {
++        for (it.unimi.dsi.fastutil.objects.Object2IntMap.Entry<Stat<?>> entry : this.stats.object2IntEntrySet()) {
+             Stat<?> stat = entry.getKey();
+             map.computeIfAbsent(stat.getType(), p_12822_ -> new JsonObject()).addProperty(getKey(stat).toString(), entry.getIntValue());
+         }
+ 
+         JsonObject jsonobject = new JsonObject();
+ 
+-        for(Entry<StatType<?>, JsonObject> entry1 : map.entrySet()) {
++        for (Entry<StatType<?>, JsonObject> entry1 : map.entrySet()) {
+             jsonobject.add(BuiltInRegistries.STAT_TYPE.getKey(entry1.getKey()).toString(), entry1.getValue());
+         }
+ 
+@@ -174,7 +_,7 @@
+     public void sendStats(ServerPlayer p_12820_) {
+         Object2IntMap<Stat<?>> object2intmap = new Object2IntOpenHashMap<>();
+ 
+-        for(Stat<?> stat : this.getDirty()) {
++        for (Stat<?> stat : this.getDirty()) {
+             object2intmap.put(stat, this.getValue(stat));
+         }
+ 

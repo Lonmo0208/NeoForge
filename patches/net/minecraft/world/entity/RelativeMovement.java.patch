@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/RelativeMovement.java
++++ b/net/minecraft/world/entity/RelativeMovement.java
+@@ -29,7 +_,7 @@
+     public static Set<RelativeMovement> unpack(int p_265683_) {
+         Set<RelativeMovement> set = EnumSet.noneOf(RelativeMovement.class);
+ 
+-        for(RelativeMovement relativemovement : values()) {
++        for (RelativeMovement relativemovement : values()) {
+             if (relativemovement.isSet(p_265683_)) {
+                 set.add(relativemovement);
+             }
+@@ -41,7 +_,7 @@
+     public static int pack(Set<RelativeMovement> p_265525_) {
+         int i = 0;
+ 
+-        for(RelativeMovement relativemovement : p_265525_) {
++        for (RelativeMovement relativemovement : p_265525_) {
+             i |= relativemovement.getMask();
+         }
+ 

@@ -1,0 +1,113 @@
+--- a/net/minecraft/server/commands/CloneCommands.java
++++ b/net/minecraft/server/commands/CloneCommands.java
+@@ -18,6 +_,7 @@
+ import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
+ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+ import net.minecraft.core.BlockPos;
++import net.minecraft.core.component.DataComponentMap;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.server.level.ServerLevel;
+@@ -247,9 +_,9 @@
+                     boundingbox1.minX() - boundingbox.minX(), boundingbox1.minY() - boundingbox.minY(), boundingbox1.minZ() - boundingbox.minZ()
+                 );
+ 
+-                for(int k = boundingbox.minZ(); k <= boundingbox.maxZ(); ++k) {
+-                    for(int l = boundingbox.minY(); l <= boundingbox.maxY(); ++l) {
+-                        for(int i1 = boundingbox.minX(); i1 <= boundingbox.maxX(); ++i1) {
++                for (int k = boundingbox.minZ(); k <= boundingbox.maxZ(); k++) {
++                    for (int l = boundingbox.minY(); l <= boundingbox.maxY(); l++) {
++                        for (int i1 = boundingbox.minX(); i1 <= boundingbox.maxX(); i1++) {
+                             BlockPos blockpos5 = new BlockPos(i1, l, k);
+                             BlockPos blockpos6 = blockpos5.offset(blockpos4);
+                             BlockInWorld blockinworld = new BlockInWorld(serverlevel, blockpos5, false);
+@@ -257,8 +_,10 @@
+                             if (p_265585_.test(blockinworld)) {
+                                 BlockEntity blockentity = serverlevel.getBlockEntity(blockpos5);
+                                 if (blockentity != null) {
+-                                    CompoundTag compoundtag = blockentity.saveWithoutMetadata(p_265047_.registryAccess());
+-                                    list1.add(new CloneCommands.CloneBlockInfo(blockpos6, blockstate, compoundtag));
++                                    CloneCommands.CloneBlockEntityInfo clonecommands$cloneblockentityinfo = new CloneCommands.CloneBlockEntityInfo(
++                                        blockentity.saveCustomOnly(p_265047_.registryAccess()), blockentity.components()
++                                    );
++                                    list1.add(new CloneCommands.CloneBlockInfo(blockpos6, blockstate, clonecommands$cloneblockentityinfo));
+                                     deque.addLast(blockpos5);
+                                 } else if (!blockstate.isSolidRender(serverlevel, blockpos5) && !blockstate.isCollisionShapeFullBlock(serverlevel, blockpos5)) {
+                                     list2.add(new CloneCommands.CloneBlockInfo(blockpos6, blockstate, null));
+@@ -273,13 +_,13 @@
+                 }
+ 
+                 if (p_265530_ == CloneCommands.Mode.MOVE) {
+-                    for(BlockPos blockpos7 : deque) {
++                    for (BlockPos blockpos7 : deque) {
+                         BlockEntity blockentity1 = serverlevel.getBlockEntity(blockpos7);
+                         Clearable.tryClear(blockentity1);
+                         serverlevel.setBlock(blockpos7, Blocks.BARRIER.defaultBlockState(), 2);
+                     }
+ 
+-                    for(BlockPos blockpos8 : deque) {
++                    for (BlockPos blockpos8 : deque) {
+                         serverlevel.setBlock(blockpos8, Blocks.AIR.defaultBlockState(), 3);
+                     }
+                 }
+@@ -290,7 +_,7 @@
+                 list3.addAll(list2);
+                 List<CloneCommands.CloneBlockInfo> list4 = Lists.reverse(list3);
+ 
+-                for(CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo : list4) {
++                for (CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo : list4) {
+                     BlockEntity blockentity2 = serverlevel1.getBlockEntity(clonecommands$cloneblockinfo.pos);
+                     Clearable.tryClear(blockentity2);
+                     serverlevel1.setBlock(clonecommands$cloneblockinfo.pos, Blocks.BARRIER.defaultBlockState(), 2);
+@@ -298,23 +_,24 @@
+ 
+                 int j1 = 0;
+ 
+-                for(CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo1 : list3) {
++                for (CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo1 : list3) {
+                     if (serverlevel1.setBlock(clonecommands$cloneblockinfo1.pos, clonecommands$cloneblockinfo1.state, 2)) {
+-                        ++j1;
++                        j1++;
+                     }
+                 }
+ 
+-                for(CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo2 : list1) {
++                for (CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo2 : list1) {
+                     BlockEntity blockentity3 = serverlevel1.getBlockEntity(clonecommands$cloneblockinfo2.pos);
+-                    if (clonecommands$cloneblockinfo2.tag != null && blockentity3 != null) {
+-                        blockentity3.load(clonecommands$cloneblockinfo2.tag, serverlevel1.registryAccess());
++                    if (clonecommands$cloneblockinfo2.blockEntityInfo != null && blockentity3 != null) {
++                        blockentity3.loadCustomOnly(clonecommands$cloneblockinfo2.blockEntityInfo.tag, serverlevel1.registryAccess());
++                        blockentity3.setComponents(clonecommands$cloneblockinfo2.blockEntityInfo.components);
+                         blockentity3.setChanged();
+                     }
+ 
+                     serverlevel1.setBlock(clonecommands$cloneblockinfo2.pos, clonecommands$cloneblockinfo2.state, 2);
+                 }
+ 
+-                for(CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo3 : list4) {
++                for (CloneCommands.CloneBlockInfo clonecommands$cloneblockinfo3 : list4) {
+                     serverlevel1.blockUpdated(clonecommands$cloneblockinfo3.pos, clonecommands$cloneblockinfo3.state.getBlock());
+                 }
+ 
+@@ -332,17 +_,10 @@
+         }
+     }
+ 
+-    static class CloneBlockInfo {
+-        public final BlockPos pos;
+-        public final BlockState state;
+-        @Nullable
+-        public final CompoundTag tag;
++    static record CloneBlockEntityInfo(CompoundTag tag, DataComponentMap components) {
++    }
+ 
+-        public CloneBlockInfo(BlockPos p_136783_, BlockState p_136784_, @Nullable CompoundTag p_136785_) {
+-            this.pos = p_136783_;
+-            this.state = p_136784_;
+-            this.tag = p_136785_;
+-        }
++    static record CloneBlockInfo(BlockPos pos, BlockState state, @Nullable CloneCommands.CloneBlockEntityInfo blockEntityInfo) {
+     }
+ 
+     @FunctionalInterface

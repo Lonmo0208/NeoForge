@@ -1,5 +1,14 @@
 --- a/net/minecraft/client/gui/screens/controls/KeyBindsList.java
 +++ b/net/minecraft/client/gui/screens/controls/KeyBindsList.java
+@@ -38,7 +_,7 @@
+         Arrays.sort((Object[])akeymapping);
+         String s = null;
+ 
+-        for(KeyMapping keymapping : akeymapping) {
++        for (KeyMapping keymapping : akeymapping) {
+             String s1 = keymapping.getCategory();
+             if (!s1.equals(s)) {
+                 s = s1;
 @@ -158,6 +_,7 @@
                  )
                  .build();
@@ -17,11 +26,13 @@
              if (this.hasCollision) {
                  int l = 3;
                  int i1 = this.changeButton.getX() - 6;
-@@ -210,7 +_,7 @@
+@@ -209,8 +_,8 @@
+             this.hasCollision = false;
              MutableComponent mutablecomponent = Component.empty();
              if (!this.key.isUnbound()) {
-                 for(KeyMapping keymapping : KeyBindsList.this.minecraft.options.keyMappings) {
+-                for(KeyMapping keymapping : KeyBindsList.this.minecraft.options.keyMappings) {
 -                    if (keymapping != this.key && this.key.same(keymapping)) {
++                for (KeyMapping keymapping : KeyBindsList.this.minecraft.options.keyMappings) {
 +                    if ((keymapping != this.key && this.key.same(keymapping)) || keymapping.hasKeyModifierConflict(this.key)) { // Neo: gracefully handle conflicts like SHIFT vs SHIFT+G
                          if (this.hasCollision) {
                              mutablecomponent.append(", ");

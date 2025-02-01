@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/searchtree/SearchRegistry.java
++++ b/net/minecraft/client/searchtree/SearchRegistry.java
+@@ -20,7 +_,7 @@
+ 
+     @Override
+     public void onResourceManagerReload(ResourceManager p_119948_) {
+-        for(SearchRegistry.TreeEntry<?> treeentry : this.searchTrees.values()) {
++        for (SearchRegistry.TreeEntry<?> treeentry : this.searchTrees.values()) {
+             treeentry.refresh();
+         }
+     }
+@@ -30,7 +_,7 @@
+     }
+ 
+     private <T> SearchRegistry.TreeEntry<T> getSupplier(SearchRegistry.Key<T> p_235239_) {
+-        SearchRegistry.TreeEntry<T> treeentry = (SearchRegistry.TreeEntry)this.searchTrees.get(p_235239_);
++        SearchRegistry.TreeEntry<T> treeentry = (SearchRegistry.TreeEntry<T>)this.searchTrees.get(p_235239_);
+         if (treeentry == null) {
+             throw new IllegalStateException("Tree builder not registered");
+         } else {

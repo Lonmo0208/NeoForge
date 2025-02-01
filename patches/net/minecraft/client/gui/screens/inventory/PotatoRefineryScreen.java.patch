@@ -1,0 +1,98 @@
+--- a/net/minecraft/client/gui/screens/inventory/PotatoRefineryScreen.java
++++ /dev/null
+@@ -1,95 +_,0 @@
+-package net.minecraft.client.gui.screens.inventory;
+-
+-import net.minecraft.client.gui.GuiGraphics;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.util.Mth;
+-import net.minecraft.world.entity.player.Inventory;
+-import net.minecraft.world.inventory.ClickType;
+-import net.minecraft.world.inventory.PotatoRefineryMenu;
+-import net.minecraft.world.inventory.Slot;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class PotatoRefineryScreen extends AbstractContainerScreen<PotatoRefineryMenu> {
+-    private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/container/potato_refinery.png");
+-    private static final ResourceLocation LIT_PROGRESS_SPRITE = new ResourceLocation("container/potato_refinery/lit_progress");
+-    private static final ResourceLocation BURN_PROGRESS_SPRITE = new ResourceLocation("container/potato_refinery/burn_progress");
+-    private boolean widthTooNarrow;
+-    private final ResourceLocation texture;
+-    private final ResourceLocation litProgressSprite;
+-    private final ResourceLocation burnProgressSprite;
+-
+-    public PotatoRefineryScreen(PotatoRefineryMenu p_340753_, Inventory p_341624_, Component p_340506_) {
+-        super(p_340753_, p_341624_, p_340506_);
+-        this.imageHeight += 20;
+-        this.inventoryLabelY += 20;
+-        this.texture = TEXTURE;
+-        this.litProgressSprite = LIT_PROGRESS_SPRITE;
+-        this.burnProgressSprite = BURN_PROGRESS_SPRITE;
+-    }
+-
+-    @Override
+-    public void init() {
+-        super.init();
+-        this.widthTooNarrow = this.width < 379;
+-        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
+-    }
+-
+-    @Override
+-    public void containerTick() {
+-        super.containerTick();
+-    }
+-
+-    @Override
+-    public void render(GuiGraphics p_341584_, int p_340816_, int p_340316_, float p_340830_) {
+-        super.render(p_341584_, p_340816_, p_340316_, p_340830_);
+-        this.renderTooltip(p_341584_, p_340816_, p_340316_);
+-    }
+-
+-    @Override
+-    protected void renderBg(GuiGraphics p_340597_, float p_340955_, int p_342556_, int p_342201_) {
+-        int i = this.leftPos;
+-        int j = this.topPos;
+-        p_340597_.blit(this.texture, i, j, 0, 0, this.imageWidth, this.imageHeight);
+-        if (this.menu.isLit()) {
+-            int k = 17;
+-            int l = 12;
+-            int i1 = Mth.ceil(this.menu.getLitProgress() * 11.0F) + 1;
+-            p_340597_.blitSprite(this.litProgressSprite, 17, 12, 0, 12 - i1, i + 51, j + 54 + 12 - i1, 17, i1);
+-        }
+-
+-        int j1 = 46;
+-        int k1 = Mth.ceil(this.menu.getBurnProgress() * 46.0F);
+-        p_340597_.blitSprite(this.burnProgressSprite, 46, 16, 0, 0, i + 69, j + 18, k1, 16);
+-    }
+-
+-    @Override
+-    public boolean mouseClicked(double p_340353_, double p_342332_, int p_340386_) {
+-        return super.mouseClicked(p_340353_, p_342332_, p_340386_);
+-    }
+-
+-    @Override
+-    protected void slotClicked(Slot p_340890_, int p_342424_, int p_342440_, ClickType p_341418_) {
+-        super.slotClicked(p_340890_, p_342424_, p_342440_, p_341418_);
+-    }
+-
+-    @Override
+-    public boolean keyPressed(int p_341666_, int p_342074_, int p_340693_) {
+-        return super.keyPressed(p_341666_, p_342074_, p_340693_);
+-    }
+-
+-    @Override
+-    protected boolean hasClickedOutside(double p_341306_, double p_341153_, int p_340568_, int p_340557_, int p_340695_) {
+-        return p_341306_ < (double)p_340568_
+-            || p_341153_ < (double)p_340557_
+-            || p_341306_ >= (double)(p_340568_ + this.imageWidth)
+-            || p_341153_ >= (double)(p_340557_ + this.imageHeight);
+-    }
+-
+-    @Override
+-    public boolean charTyped(char p_341326_, int p_341636_) {
+-        return super.charTyped(p_341326_, p_341636_);
+-    }
+-}

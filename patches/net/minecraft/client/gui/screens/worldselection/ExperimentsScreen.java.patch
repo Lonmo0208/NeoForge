@@ -1,0 +1,30 @@
+--- a/net/minecraft/client/gui/screens/worldselection/ExperimentsScreen.java
++++ b/net/minecraft/client/gui/screens/worldselection/ExperimentsScreen.java
+@@ -7,6 +_,7 @@
+ import java.util.List;
+ import java.util.function.Consumer;
+ import net.minecraft.ChatFormatting;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.MultiLineTextWidget;
+ import net.minecraft.client.gui.components.events.GuiEventListener;
+@@ -40,7 +_,7 @@
+         this.packRepository = p_270308_;
+         this.output = p_270392_;
+ 
+-        for(Pack pack : p_270308_.getAvailablePacks()) {
++        for (Pack pack : p_270308_.getAvailablePacks()) {
+             if (pack.getPackSource() == PackSource.FEATURE) {
+                 this.packs.put(pack, p_270308_.getSelectedPacks().contains(pack));
+             }
+@@ -66,7 +_,9 @@
+         LinearLayout linearlayout1 = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+         linearlayout1.addChild(Button.builder(CommonComponents.GUI_DONE, p_270336_ -> this.onDone()).build());
+         linearlayout1.addChild(Button.builder(CommonComponents.GUI_CANCEL, p_274702_ -> this.onClose()).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_321381_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321381_);
++        });
+         this.repositionElements();
+     }
+ 

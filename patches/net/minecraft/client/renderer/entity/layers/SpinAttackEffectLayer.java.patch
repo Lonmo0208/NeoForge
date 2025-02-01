@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/entity/layers/SpinAttackEffectLayer.java
++++ b/net/minecraft/client/renderer/entity/layers/SpinAttackEffectLayer.java
+@@ -55,7 +_,7 @@
+         if (p_117529_.isAutoSpinAttack()) {
+             VertexConsumer vertexconsumer = p_117527_.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
+ 
+-            for(int i = 0; i < 3; ++i) {
++            for (int i = 0; i < 3; i++) {
+                 p_117526_.pushPose();
+                 float f = p_117533_ * (float)(-(45 + i * 5));
+                 p_117526_.mulPose(Axis.YP.rotationDegrees(f));

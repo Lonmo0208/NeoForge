@@ -1,0 +1,131 @@
+--- a/net/minecraft/world/level/block/entity/CampfireBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/CampfireBlockEntity.java
+@@ -20,14 +_,12 @@
+ import net.minecraft.world.SimpleContainer;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.Items;
+ import net.minecraft.world.item.component.ItemContainerContents;
+ import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+ import net.minecraft.world.item.crafting.RecipeHolder;
+ import net.minecraft.world.item.crafting.RecipeManager;
+ import net.minecraft.world.item.crafting.RecipeType;
+ import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.block.CampfireBlock;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.gameevent.GameEvent;
+@@ -38,18 +_,16 @@
+     private final NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
+     private final int[] cookingProgress = new int[4];
+     private final int[] cookingTime = new int[4];
+-    public final boolean isFryingTable;
+     private final RecipeManager.CachedCheck<Container, CampfireCookingRecipe> quickCheck = RecipeManager.createCheck(RecipeType.CAMPFIRE_COOKING);
+ 
+     public CampfireBlockEntity(BlockPos p_155301_, BlockState p_155302_) {
+         super(BlockEntityType.CAMPFIRE, p_155301_, p_155302_);
+-        this.isFryingTable = p_155302_.is(Blocks.FRYING_TABLE);
+     }
+ 
+     public static void cookTick(Level p_155307_, BlockPos p_155308_, BlockState p_155309_, CampfireBlockEntity p_155310_) {
+         boolean flag = false;
+ 
+-        for(int i = 0; i < p_155310_.items.size(); ++i) {
++        for (int i = 0; i < p_155310_.items.size(); i++) {
+             ItemStack itemstack = p_155310_.items.get(i);
+             if (!itemstack.isEmpty()) {
+                 flag = true;
+@@ -78,7 +_,7 @@
+     public static void cooldownTick(Level p_155314_, BlockPos p_155315_, BlockState p_155316_, CampfireBlockEntity p_155317_) {
+         boolean flag = false;
+ 
+-        for(int i = 0; i < p_155317_.items.size(); ++i) {
++        for (int i = 0; i < p_155317_.items.size(); i++) {
+             if (p_155317_.cookingProgress[i] > 0) {
+                 flag = true;
+                 p_155317_.cookingProgress[i] = Mth.clamp(p_155317_.cookingProgress[i] - 2, 0, p_155317_.cookingTime[i]);
+@@ -93,14 +_,14 @@
+     public static void particleTick(Level p_155319_, BlockPos p_155320_, BlockState p_155321_, CampfireBlockEntity p_155322_) {
+         RandomSource randomsource = p_155319_.random;
+         if (randomsource.nextFloat() < 0.11F) {
+-            for(int i = 0; i < randomsource.nextInt(2) + 2; ++i) {
++            for (int i = 0; i < randomsource.nextInt(2) + 2; i++) {
+                 CampfireBlock.makeParticles(p_155319_, p_155320_, p_155321_.getValue(CampfireBlock.SIGNAL_FIRE), false);
+             }
+         }
+ 
+         int l = p_155321_.getValue(CampfireBlock.FACING).get2DDataValue();
+ 
+-        for(int j = 0; j < p_155322_.items.size(); ++j) {
++        for (int j = 0; j < p_155322_.items.size(); j++) {
+             if (!p_155322_.items.get(j).isEmpty() && randomsource.nextFloat() < 0.2F) {
+                 Direction direction = Direction.from2DDataValue(Math.floorMod(j + l, 4));
+                 float f = 0.3125F;
+@@ -114,7 +_,7 @@
+                     - (double)((float)direction.getStepZ() * 0.3125F)
+                     + (double)((float)direction.getClockWise().getStepZ() * 0.3125F);
+ 
+-                for(int k = 0; k < 4; ++k) {
++                for (int k = 0; k < 4; k++) {
+                     p_155319_.addParticle(ParticleTypes.SMOKE, d0, d1, d2, 0.0, 5.0E-4, 0.0);
+                 }
+             }
+@@ -126,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155312_, HolderLookup.Provider p_323804_) {
+-        super.load(p_155312_, p_323804_);
++    protected void loadAdditional(CompoundTag p_155312_, HolderLookup.Provider p_323804_) {
++        super.loadAdditional(p_155312_, p_323804_);
+         this.items.clear();
+         ContainerHelper.loadAllItems(p_155312_, this.items, p_323804_);
+         if (p_155312_.contains("CookingTimes", 11)) {
+@@ -161,25 +_,11 @@
+     }
+ 
+     public Optional<RecipeHolder<CampfireCookingRecipe>> getCookableRecipe(ItemStack p_59052_) {
+-        if (this.isFryingTable && !this.isValidFryingTable(p_59052_)) {
+-            return Optional.empty();
+-        } else {
+-            return this.items.stream().noneMatch(ItemStack::isEmpty)
+-                ? Optional.empty()
+-                : this.quickCheck.getRecipeFor(new SimpleContainer(p_59052_), this.level);
+-        }
+-    }
+-
+-    private boolean isValidFryingTable(ItemStack p_340391_) {
+-        if (p_340391_.is(Items.POTATO)) {
+-            return true;
+-        } else {
+-            return Items.POTATO_PEELS_INGREDIENT.test(p_340391_);
+-        }
++        return this.items.stream().noneMatch(ItemStack::isEmpty) ? Optional.empty() : this.quickCheck.getRecipeFor(new SimpleContainer(p_59052_), this.level);
+     }
+ 
+     public boolean placeFood(@Nullable Entity p_238285_, ItemStack p_238286_, int p_238287_) {
+-        for(int i = 0; i < this.items.size(); ++i) {
++        for (int i = 0; i < this.items.size(); i++) {
+             ItemStack itemstack = this.items.get(i);
+             if (itemstack.isEmpty()) {
+                 this.cookingTime[i] = p_238287_;
+@@ -211,13 +_,15 @@
+     }
+ 
+     @Override
+-    public void applyComponents(DataComponentMap p_332696_) {
+-        p_332696_.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
++    protected void applyImplicitComponents(BlockEntity.DataComponentInput p_338534_) {
++        super.applyImplicitComponents(p_338534_);
++        p_338534_.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
+     }
+ 
+     @Override
+-    public void collectComponents(DataComponentMap.Builder p_332751_) {
+-        p_332751_.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.getItems()));
++    protected void collectImplicitComponents(DataComponentMap.Builder p_338620_) {
++        super.collectImplicitComponents(p_338620_);
++        p_338620_.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.getItems()));
+     }
+ 
+     @Override

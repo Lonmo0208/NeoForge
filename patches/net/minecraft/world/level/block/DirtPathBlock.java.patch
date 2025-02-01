@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/level/block/DirtPathBlock.java
++++ b/net/minecraft/world/level/block/DirtPathBlock.java
+@@ -36,12 +_,7 @@
+     @Override
+     public BlockState getStateForPlacement(BlockPlaceContext p_153131_) {
+         return !this.defaultBlockState().canSurvive(p_153131_.getLevel(), p_153131_.getClickedPos())
+-            ? Block.pushEntitiesUp(
+-                this.defaultBlockState(),
+-                (p_153131_.getLevel().isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState(),
+-                p_153131_.getLevel(),
+-                p_153131_.getClickedPos()
+-            )
++            ? Block.pushEntitiesUp(this.defaultBlockState(), Blocks.DIRT.defaultBlockState(), p_153131_.getLevel(), p_153131_.getClickedPos())
+             : super.getStateForPlacement(p_153131_);
+     }
+ 

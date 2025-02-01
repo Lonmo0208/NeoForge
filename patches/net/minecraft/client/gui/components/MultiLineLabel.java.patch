@@ -1,0 +1,29 @@
+--- a/net/minecraft/client/gui/components/MultiLineLabel.java
++++ b/net/minecraft/client/gui/components/MultiLineLabel.java
+@@ -105,7 +_,7 @@
+                 public int renderCentered(GuiGraphics p_281603_, int p_281267_, int p_281819_, int p_281545_, int p_282780_) {
+                     int i = p_281819_;
+     
+-                    for(MultiLineLabel.TextWithWidth multilinelabel$textwithwidth : p_94363_) {
++                    for (MultiLineLabel.TextWithWidth multilinelabel$textwithwidth : p_94363_) {
+                         p_281603_.drawString(p_94362_, multilinelabel$textwithwidth.text, p_281267_ - multilinelabel$textwithwidth.width / 2, i, p_282780_);
+                         i += p_281545_;
+                     }
+@@ -117,7 +_,7 @@
+                 public int renderLeftAligned(GuiGraphics p_282318_, int p_283665_, int p_283416_, int p_281919_, int p_281686_) {
+                     int i = p_283416_;
+     
+-                    for(MultiLineLabel.TextWithWidth multilinelabel$textwithwidth : p_94363_) {
++                    for (MultiLineLabel.TextWithWidth multilinelabel$textwithwidth : p_94363_) {
+                         p_282318_.drawString(p_94362_, multilinelabel$textwithwidth.text, p_283665_, i, p_281686_);
+                         i += p_281919_;
+                     }
+@@ -129,7 +_,7 @@
+                 public int renderLeftAlignedNoShadow(GuiGraphics p_281782_, int p_282841_, int p_283554_, int p_282768_, int p_283499_) {
+                     int i = p_283554_;
+     
+-                    for(MultiLineLabel.TextWithWidth multilinelabel$textwithwidth : p_94363_) {
++                    for (MultiLineLabel.TextWithWidth multilinelabel$textwithwidth : p_94363_) {
+                         p_281782_.drawString(p_94362_, multilinelabel$textwithwidth.text, p_282841_, i, p_283499_, false);
+                         i += p_282768_;
+                     }

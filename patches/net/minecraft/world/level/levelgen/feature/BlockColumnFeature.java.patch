@@ -1,0 +1,44 @@
+--- a/net/minecraft/world/level/levelgen/feature/BlockColumnFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/BlockColumnFeature.java
+@@ -20,7 +_,7 @@
+         int[] aint = new int[i];
+         int j = 0;
+ 
+-        for(int k = 0; k < i; ++k) {
++        for (int k = 0; k < i; k++) {
+             aint[k] = blockcolumnconfiguration.layers().get(k).height().sample(randomsource);
+             j += aint[k];
+         }
+@@ -31,7 +_,7 @@
+             BlockPos.MutableBlockPos blockpos$mutableblockpos1 = p_190791_.origin().mutable();
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = blockpos$mutableblockpos1.mutable().move(blockcolumnconfiguration.direction());
+ 
+-            for(int l = 0; l < j; ++l) {
++            for (int l = 0; l < j; l++) {
+                 if (!blockcolumnconfiguration.allowedPlacement().test(worldgenlevel, blockpos$mutableblockpos)) {
+                     truncate(aint, j, l, blockcolumnconfiguration.prioritizeTip());
+                     break;
+@@ -40,12 +_,12 @@
+                 blockpos$mutableblockpos.move(blockcolumnconfiguration.direction());
+             }
+ 
+-            for(int k1 = 0; k1 < i; ++k1) {
++            for (int k1 = 0; k1 < i; k1++) {
+                 int i1 = aint[k1];
+                 if (i1 != 0) {
+                     BlockColumnConfiguration.Layer blockcolumnconfiguration$layer = blockcolumnconfiguration.layers().get(k1);
+ 
+-                    for(int j1 = 0; j1 < i1; ++j1) {
++                    for (int j1 = 0; j1 < i1; j1++) {
+                         worldgenlevel.setBlock(
+                             blockpos$mutableblockpos1, blockcolumnconfiguration$layer.state().getState(randomsource, blockpos$mutableblockpos1), 2
+                         );
+@@ -64,7 +_,7 @@
+         int k = p_190796_ ? 0 : p_190793_.length - 1;
+         int l = p_190796_ ? p_190793_.length : -1;
+ 
+-        for(int i1 = k; i1 != l && i > 0; i1 += j) {
++        for (int i1 = k; i1 != l && i > 0; i1 += j) {
+             int j1 = p_190793_[i1];
+             int k1 = Math.min(j1, i);
+             i -= k1;

@@ -1,0 +1,20 @@
+--- a/com/mojang/realmsclient/client/RealmsClient.java
++++ b/com/mojang/realmsclient/client/RealmsClient.java
+@@ -147,7 +_,7 @@
+     private static JsonArray uuidListToJsonArray(List<UUID> p_275393_) {
+         JsonArray jsonarray = new JsonArray();
+ 
+-        for(UUID uuid : p_275393_) {
++        for (UUID uuid : p_275393_) {
+             if (uuid != null) {
+                 jsonarray.add(uuid.toString());
+             }
+@@ -456,7 +_,7 @@
+         public static Optional<RealmsClient.Environment> byName(String p_289688_) {
+             String s = p_289688_.toLowerCase(Locale.ROOT);
+ 
+-            return switch(s) {
++            return switch (s) {
+                 case "production" -> Optional.of(PRODUCTION);
+                 case "local" -> Optional.of(LOCAL);
+                 case "stage", "staging" -> Optional.of(STAGE);

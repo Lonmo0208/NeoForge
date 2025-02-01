@@ -1,0 +1,191 @@
+--- a/net/minecraft/client/gui/screens/inventory/PoisonousPotatoCutterScreen.java
++++ /dev/null
+@@ -1,188 +_,0 @@
+-package net.minecraft.client.gui.screens.inventory;
+-
+-import java.util.List;
+-import net.minecraft.client.Minecraft;
+-import net.minecraft.client.gui.GuiGraphics;
+-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.sounds.SoundEvents;
+-import net.minecraft.util.Mth;
+-import net.minecraft.world.entity.player.Inventory;
+-import net.minecraft.world.inventory.PoisonousPotatoCutterMenu;
+-import net.minecraft.world.item.crafting.PoisonousPotatoCutterRecipe;
+-import net.minecraft.world.item.crafting.RecipeHolder;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class PoisonousPotatoCutterScreen extends AbstractContainerScreen<PoisonousPotatoCutterMenu> {
+-    private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("container/stonecutter/scroller");
+-    private static final ResourceLocation SCROLLER_DISABLED_SPRITE = new ResourceLocation("container/stonecutter/scroller_disabled");
+-    private static final ResourceLocation RECIPE_SELECTED_SPRITE = new ResourceLocation("container/stonecutter/recipe_selected");
+-    private static final ResourceLocation RECIPE_HIGHLIGHTED_SPRITE = new ResourceLocation("container/stonecutter/recipe_highlighted");
+-    private static final ResourceLocation RECIPE_SPRITE = new ResourceLocation("container/stonecutter/recipe");
+-    private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/stonecutter.png");
+-    private static final int SCROLLER_WIDTH = 12;
+-    private static final int SCROLLER_HEIGHT = 15;
+-    private static final int RECIPES_COLUMNS = 4;
+-    private static final int RECIPES_ROWS = 3;
+-    private static final int RECIPES_IMAGE_SIZE_WIDTH = 16;
+-    private static final int RECIPES_IMAGE_SIZE_HEIGHT = 18;
+-    private static final int SCROLLER_FULL_HEIGHT = 54;
+-    private static final int RECIPES_X = 52;
+-    private static final int RECIPES_Y = 14;
+-    private float scrollOffs;
+-    private boolean scrolling;
+-    private int startIndex;
+-    private boolean displayRecipes;
+-
+-    public PoisonousPotatoCutterScreen(PoisonousPotatoCutterMenu p_342603_, Inventory p_342107_, Component p_341253_) {
+-        super(p_342603_, p_342107_, p_341253_);
+-        p_342603_.registerUpdateListener(this::containerChanged);
+-        --this.titleLabelY;
+-    }
+-
+-    @Override
+-    public void render(GuiGraphics p_341906_, int p_341882_, int p_342015_, float p_340744_) {
+-        super.render(p_341906_, p_341882_, p_342015_, p_340744_);
+-        this.renderTooltip(p_341906_, p_341882_, p_342015_);
+-    }
+-
+-    @Override
+-    protected void renderBg(GuiGraphics p_340423_, float p_341652_, int p_342281_, int p_342212_) {
+-        int i = this.leftPos;
+-        int j = this.topPos;
+-        p_340423_.blit(BG_LOCATION, i, j, 0, 0, this.imageWidth, this.imageHeight);
+-        int k = (int)(41.0F * this.scrollOffs);
+-        ResourceLocation resourcelocation = this.isScrollBarActive() ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
+-        p_340423_.blitSprite(resourcelocation, i + 119, j + 15 + k, 12, 15);
+-        int l = this.leftPos + 52;
+-        int i1 = this.topPos + 14;
+-        int j1 = this.startIndex + 12;
+-        this.renderButtons(p_340423_, p_342281_, p_342212_, l, i1, j1);
+-        this.renderRecipes(p_340423_, l, i1, j1);
+-    }
+-
+-    @Override
+-    protected void renderTooltip(GuiGraphics p_340361_, int p_342579_, int p_340625_) {
+-        super.renderTooltip(p_340361_, p_342579_, p_340625_);
+-        if (this.displayRecipes) {
+-            int i = this.leftPos + 52;
+-            int j = this.topPos + 14;
+-            int k = this.startIndex + 12;
+-            List<RecipeHolder<PoisonousPotatoCutterRecipe>> list = this.menu.getRecipes();
+-
+-            for(int l = this.startIndex; l < k && l < this.menu.getNumRecipes(); ++l) {
+-                int i1 = l - this.startIndex;
+-                int j1 = i + i1 % 4 * 16;
+-                int k1 = j + i1 / 4 * 18 + 2;
+-                if (p_342579_ >= j1 && p_342579_ < j1 + 16 && p_340625_ >= k1 && p_340625_ < k1 + 18) {
+-                    p_340361_.renderTooltip(this.font, list.get(l).value().getResultItem(this.minecraft.level.registryAccess()), p_342579_, p_340625_);
+-                }
+-            }
+-        }
+-    }
+-
+-    private void renderButtons(GuiGraphics p_341397_, int p_341752_, int p_341459_, int p_340920_, int p_340510_, int p_341445_) {
+-        for(int i = this.startIndex; i < p_341445_ && i < this.menu.getNumRecipes(); ++i) {
+-            int j = i - this.startIndex;
+-            int k = p_340920_ + j % 4 * 16;
+-            int l = j / 4;
+-            int i1 = p_340510_ + l * 18 + 2;
+-            ResourceLocation resourcelocation;
+-            if (i == this.menu.getSelectedRecipeIndex()) {
+-                resourcelocation = RECIPE_SELECTED_SPRITE;
+-            } else if (p_341752_ >= k && p_341459_ >= i1 && p_341752_ < k + 16 && p_341459_ < i1 + 18) {
+-                resourcelocation = RECIPE_HIGHLIGHTED_SPRITE;
+-            } else {
+-                resourcelocation = RECIPE_SPRITE;
+-            }
+-
+-            p_341397_.blitSprite(resourcelocation, k, i1 - 1, 16, 18);
+-        }
+-    }
+-
+-    private void renderRecipes(GuiGraphics p_341125_, int p_341081_, int p_340792_, int p_341437_) {
+-        List<RecipeHolder<PoisonousPotatoCutterRecipe>> list = this.menu.getRecipes();
+-
+-        for(int i = this.startIndex; i < p_341437_ && i < this.menu.getNumRecipes(); ++i) {
+-            int j = i - this.startIndex;
+-            int k = p_341081_ + j % 4 * 16;
+-            int l = j / 4;
+-            int i1 = p_340792_ + l * 18 + 2;
+-            p_341125_.renderItem(list.get(i).value().getResultItem(this.minecraft.level.registryAccess()), k, i1);
+-        }
+-    }
+-
+-    @Override
+-    public boolean mouseClicked(double p_341375_, double p_341729_, int p_342490_) {
+-        this.scrolling = false;
+-        if (this.displayRecipes) {
+-            int i = this.leftPos + 52;
+-            int j = this.topPos + 14;
+-            int k = this.startIndex + 12;
+-
+-            for(int l = this.startIndex; l < k; ++l) {
+-                int i1 = l - this.startIndex;
+-                double d0 = p_341375_ - (double)(i + i1 % 4 * 16);
+-                double d1 = p_341729_ - (double)(j + i1 / 4 * 18);
+-                if (d0 >= 0.0 && d1 >= 0.0 && d0 < 16.0 && d1 < 18.0 && this.menu.clickMenuButton(this.minecraft.player, l)) {
+-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+-                    this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, l);
+-                    return true;
+-                }
+-            }
+-
+-            i = this.leftPos + 119;
+-            j = this.topPos + 9;
+-            if (p_341375_ >= (double)i && p_341375_ < (double)(i + 12) && p_341729_ >= (double)j && p_341729_ < (double)(j + 54)) {
+-                this.scrolling = true;
+-            }
+-        }
+-
+-        return super.mouseClicked(p_341375_, p_341729_, p_342490_);
+-    }
+-
+-    @Override
+-    public boolean mouseDragged(double p_341706_, double p_340798_, int p_340892_, double p_341963_, double p_341337_) {
+-        if (this.scrolling && this.isScrollBarActive()) {
+-            int i = this.topPos + 14;
+-            int j = i + 54;
+-            this.scrollOffs = ((float)p_340798_ - (float)i - 7.5F) / ((float)(j - i) - 15.0F);
+-            this.scrollOffs = Mth.clamp(this.scrollOffs, 0.0F, 1.0F);
+-            this.startIndex = (int)((double)(this.scrollOffs * (float)this.getOffscreenRows()) + 0.5) * 4;
+-            return true;
+-        } else {
+-            return super.mouseDragged(p_341706_, p_340798_, p_340892_, p_341963_, p_341337_);
+-        }
+-    }
+-
+-    @Override
+-    public boolean mouseScrolled(double p_340604_, double p_340567_, double p_342448_, double p_341376_) {
+-        if (this.isScrollBarActive()) {
+-            int i = this.getOffscreenRows();
+-            float f = (float)p_341376_ / (float)i;
+-            this.scrollOffs = Mth.clamp(this.scrollOffs - f, 0.0F, 1.0F);
+-            this.startIndex = (int)((double)(this.scrollOffs * (float)i) + 0.5) * 4;
+-        }
+-
+-        return true;
+-    }
+-
+-    private boolean isScrollBarActive() {
+-        return this.displayRecipes && this.menu.getNumRecipes() > 12;
+-    }
+-
+-    protected int getOffscreenRows() {
+-        return (this.menu.getNumRecipes() + 4 - 1) / 4 - 3;
+-    }
+-
+-    private void containerChanged() {
+-        this.displayRecipes = this.menu.hasInputItem();
+-        if (!this.displayRecipes) {
+-            this.scrollOffs = 0.0F;
+-            this.startIndex = 0;
+-        }
+-    }
+-}

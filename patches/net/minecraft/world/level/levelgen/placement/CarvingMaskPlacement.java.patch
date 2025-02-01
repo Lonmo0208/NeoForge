@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/level/levelgen/placement/CarvingMaskPlacement.java
++++ b/net/minecraft/world/level/levelgen/placement/CarvingMaskPlacement.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.placement;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import java.util.stream.Stream;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.util.RandomSource;
+@@ -8,10 +_,9 @@
+ import net.minecraft.world.level.levelgen.GenerationStep;
+ 
+ public class CarvingMaskPlacement extends PlacementModifier {
+-    public static final Codec<CarvingMaskPlacement> CODEC = GenerationStep.Carving.CODEC
++    public static final MapCodec<CarvingMaskPlacement> CODEC = GenerationStep.Carving.CODEC
+         .fieldOf("step")
+-        .xmap(CarvingMaskPlacement::new, p_191593_ -> p_191593_.step)
+-        .codec();
++        .xmap(CarvingMaskPlacement::new, p_191593_ -> p_191593_.step);
+     private final GenerationStep.Carving step;
+ 
+     private CarvingMaskPlacement(GenerationStep.Carving p_191589_) {

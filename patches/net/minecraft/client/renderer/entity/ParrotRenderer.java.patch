@@ -1,0 +1,17 @@
+--- a/net/minecraft/client/renderer/entity/ParrotRenderer.java
++++ b/net/minecraft/client/renderer/entity/ParrotRenderer.java
+@@ -25,12 +_,13 @@
+     }
+ 
+     public static ResourceLocation getVariantTexture(Parrot.Variant p_262577_) {
+-        return switch(p_262577_) {
++        return switch (p_262577_) {
+             case RED_BLUE -> RED_BLUE;
+             case BLUE -> BLUE;
+             case GREEN -> GREEN;
+             case YELLOW_BLUE -> YELLOW_BLUE;
+             case GRAY -> GREY;
++            default -> throw new MatchException(null, null);
+         };
+     }
+ 

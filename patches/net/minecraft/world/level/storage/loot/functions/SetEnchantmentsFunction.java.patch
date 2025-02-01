@@ -1,0 +1,43 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SetEnchantmentsFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/SetEnchantmentsFunction.java
+@@ -3,6 +_,7 @@
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.ImmutableSet;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import it.unimi.dsi.fastutil.objects.Object2IntMap;
+@@ -13,7 +_,6 @@
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.component.DataComponents;
+ import net.minecraft.core.registries.BuiltInRegistries;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.util.Mth;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.Items;
+@@ -27,18 +_,17 @@
+ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
+ 
+ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
+-    public static final Codec<SetEnchantmentsFunction> CODEC = RecordCodecBuilder.create(
+-        p_298119_ -> commonFields(p_298119_)
++    public static final MapCodec<SetEnchantmentsFunction> CODEC = RecordCodecBuilder.mapCodec(
++        p_338148_ -> commonFields(p_338148_)
+                 .and(
+-                    p_298119_.group(
+-                        ExtraCodecs.strictOptionalField(
+-                                Codec.unboundedMap(BuiltInRegistries.ENCHANTMENT.holderByNameCodec(), NumberProviders.CODEC), "enchantments", Map.of()
+-                            )
++                    p_338148_.group(
++                        Codec.unboundedMap(BuiltInRegistries.ENCHANTMENT.holderByNameCodec(), NumberProviders.CODEC)
++                            .optionalFieldOf("enchantments", Map.of())
+                             .forGetter(p_298120_ -> p_298120_.enchantments),
+                         Codec.BOOL.fieldOf("add").orElse(false).forGetter(p_298121_ -> p_298121_.add)
+                     )
+                 )
+-                .apply(p_298119_, SetEnchantmentsFunction::new)
++                .apply(p_338148_, SetEnchantmentsFunction::new)
+     );
+     private final Map<Holder<Enchantment>, NumberProvider> enchantments;
+     private final boolean add;

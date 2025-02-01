@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/item/LingeringPotionItem.java
++++ b/net/minecraft/world/item/LingeringPotionItem.java
+@@ -1,7 +_,6 @@
+ package net.minecraft.world.item;
+ 
+ import java.util.List;
+-import javax.annotation.Nullable;
+ import net.minecraft.core.component.DataComponents;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.sounds.SoundEvents;
+@@ -18,9 +_,9 @@
+     }
+ 
+     @Override
+-    public void appendHoverText(ItemStack p_42838_, @Nullable Level p_42839_, List<Component> p_42840_, TooltipFlag p_42841_) {
++    public void appendHoverText(ItemStack p_42838_, Item.TooltipContext p_339607_, List<Component> p_42840_, TooltipFlag p_42841_) {
+         PotionContents potioncontents = p_42838_.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+-        potioncontents.addPotionTooltip(p_42840_::add, 0.25F, p_42839_ == null ? 20.0F : p_42839_.tickRateManager().tickrate());
++        potioncontents.addPotionTooltip(p_42840_::add, 0.25F, p_339607_.tickRate());
+     }
+ 
+     @Override

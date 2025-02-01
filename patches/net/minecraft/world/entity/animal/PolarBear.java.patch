@@ -1,0 +1,35 @@
+--- a/net/minecraft/world/entity/animal/PolarBear.java
++++ b/net/minecraft/world/entity/animal/PolarBear.java
+@@ -104,11 +_,9 @@
+         EntityType<PolarBear> p_218250_, LevelAccessor p_218251_, MobSpawnType p_218252_, BlockPos p_218253_, RandomSource p_218254_
+     ) {
+         Holder<Biome> holder = p_218251_.getBiome(p_218253_);
+-        if (!holder.is(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS)) {
+-            return checkAnimalSpawnRules(p_218250_, p_218251_, p_218252_, p_218253_, p_218254_);
+-        } else {
+-            return isBrightEnoughToSpawn(p_218251_, p_218253_) && p_218251_.getBlockState(p_218253_.below()).is(BlockTags.POLAR_BEARS_SPAWNABLE_ON_ALTERNATE);
+-        }
++        return !holder.is(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS)
++            ? checkAnimalSpawnRules(p_218250_, p_218251_, p_218252_, p_218253_, p_218254_)
++            : isBrightEnoughToSpawn(p_218251_, p_218253_) && p_218251_.getBlockState(p_218253_.below()).is(BlockTags.POLAR_BEARS_SPAWNABLE_ON_ALTERNATE);
+     }
+ 
+     @Override
+@@ -199,7 +_,7 @@
+         }
+ 
+         if (this.warningSoundTicks > 0) {
+-            --this.warningSoundTicks;
++            this.warningSoundTicks--;
+         }
+ 
+         if (!this.level().isClientSide) {
+@@ -265,7 +_,7 @@
+                 return false;
+             } else {
+                 if (super.canUse()) {
+-                    for(PolarBear polarbear : PolarBear.this.level()
++                    for (PolarBear polarbear : PolarBear.this.level()
+                         .getEntitiesOfClass(PolarBear.class, PolarBear.this.getBoundingBox().inflate(8.0, 4.0, 8.0))) {
+                         if (polarbear.isBaby()) {
+                             return true;

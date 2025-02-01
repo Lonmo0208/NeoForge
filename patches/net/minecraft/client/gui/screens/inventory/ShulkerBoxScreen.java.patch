@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/inventory/ShulkerBoxScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/ShulkerBoxScreen.java
+@@ -14,7 +_,7 @@
+ 
+     public ShulkerBoxScreen(ShulkerBoxMenu p_99240_, Inventory p_99241_, Component p_99242_) {
+         super(p_99240_, p_99241_, p_99242_);
+-        ++this.imageHeight;
++        this.imageHeight++;
+     }
+ 
+     @Override

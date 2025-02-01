@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/flat/FlatLevelGeneratorPresets.java
++++ b/net/minecraft/world/level/levelgen/flat/FlatLevelGeneratorPresets.java
+@@ -69,7 +_,7 @@
+                 flatlevelgeneratorsettings.setAddLakes();
+             }
+ 
+-            for(int i = p_255913_.length - 1; i >= 0; --i) {
++            for (int i = p_255913_.length - 1; i >= 0; i--) {
+                 flatlevelgeneratorsettings.getLayersInfo().add(p_255913_[i]);
+             }
+ 
+@@ -123,7 +_,6 @@
+                     BuiltinStructureSets.MINESHAFTS,
+                     BuiltinStructureSets.PILLAGER_OUTPOSTS,
+                     BuiltinStructureSets.RUINED_PORTALS,
+-                    BuiltinStructureSets.RUINED_PORTATOLS,
+                     BuiltinStructureSets.STRONGHOLDS
+                 ),
+                 true,

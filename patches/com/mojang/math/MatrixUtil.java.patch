@@ -1,0 +1,11 @@
+--- a/com/mojang/math/MatrixUtil.java
++++ b/com/mojang/math/MatrixUtil.java
+@@ -91,7 +_,7 @@
+         Matrix3f matrix3f = new Matrix3f();
+         Quaternionf quaternionf1 = new Quaternionf();
+ 
+-        for(int i = 0; i < p_276269_; ++i) {
++        for (int i = 0; i < p_276269_; i++) {
+             stepJacobi(p_276278_, matrix3f, quaternionf1, quaternionf);
+         }
+ 

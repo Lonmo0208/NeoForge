@@ -1,0 +1,37 @@
+--- a/net/minecraft/data/models/ModelProvider.java
++++ b/net/minecraft/data/models/ModelProvider.java
+@@ -36,19 +_,19 @@
+     @Override
+     public CompletableFuture<?> run(CachedOutput p_253790_) {
+         Map<Block, BlockStateGenerator> map = Maps.newHashMap();
+-        Consumer<BlockStateGenerator> consumer = p_125120_ -> {
+-            Block block = p_125120_.getBlock();
+-            BlockStateGenerator blockstategenerator = map.put(block, p_125120_);
++        Consumer<BlockStateGenerator> consumer = p_339377_ -> {
++            Block block = p_339377_.getBlock();
++            BlockStateGenerator blockstategenerator = map.put(block, p_339377_);
+             if (blockstategenerator != null) {
+                 throw new IllegalStateException("Duplicate blockstate definition for " + block);
+             }
+         };
+         Map<ResourceLocation, Supplier<JsonElement>> map1 = Maps.newHashMap();
+         Set<Item> set = Sets.newHashSet();
+-        BiConsumer<ResourceLocation, Supplier<JsonElement>> biconsumer = (p_125123_, p_125124_) -> {
+-            Supplier<JsonElement> supplier = map1.put(p_125123_, p_125124_);
++        BiConsumer<ResourceLocation, Supplier<JsonElement>> biconsumer = (p_339374_, p_339375_) -> {
++            Supplier<JsonElement> supplier = map1.put(p_339374_, p_339375_);
+             if (supplier != null) {
+-                throw new IllegalStateException("Duplicate model definition for " + p_125123_);
++                throw new IllegalStateException("Duplicate model definition for " + p_339374_);
+             }
+         };
+         Consumer<Item> consumer1 = set::add;
+@@ -89,7 +_,7 @@
+             Path path = p_254013_.apply(p_253408_.getKey());
+             JsonElement jsonelement = p_253408_.getValue().get();
+             return DataProvider.saveStable(p_254549_, jsonelement, path);
+-        }).toArray(p_253409_ -> new CompletableFuture[p_253409_]));
++        }).toArray(CompletableFuture[]::new));
+     }
+ 
+     @Override

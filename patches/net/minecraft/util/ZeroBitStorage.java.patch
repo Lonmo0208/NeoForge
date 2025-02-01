@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/ZeroBitStorage.java
++++ b/net/minecraft/util/ZeroBitStorage.java
+@@ -48,7 +_,7 @@
+ 
+     @Override
+     public void getAll(IntConsumer p_184799_) {
+-        for(int i = 0; i < this.size; ++i) {
++        for (int i = 0; i < this.size; i++) {
+             p_184799_.accept(0);
+         }
+     }

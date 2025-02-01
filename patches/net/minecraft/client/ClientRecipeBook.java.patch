@@ -1,6 +1,23 @@
 --- a/net/minecraft/client/ClientRecipeBook.java
 +++ b/net/minecraft/client/ClientRecipeBook.java
-@@ -62,7 +_,7 @@
+@@ -38,7 +_,10 @@
+         map.forEach(
+             (p_266602_, p_266603_) -> map1.put(
+                     p_266602_,
+-                    p_266603_.stream().map(p_266605_ -> new RecipeCollection(p_266878_, p_266605_)).peek(builder::add).collect(ImmutableList.toImmutableList())
++                    p_266603_.stream()
++                        .map(p_266605_ -> new RecipeCollection(p_266878_, (List<RecipeHolder<?>>)p_266605_))
++                        .peek(builder::add)
++                        .collect(ImmutableList.toImmutableList())
+                 )
+         );
+         RecipeBookCategories.AGGREGATE_CATEGORIES
+@@ -58,11 +_,11 @@
+         Map<RecipeBookCategories, List<List<RecipeHolder<?>>>> map = Maps.newHashMap();
+         Table<RecipeBookCategories, String, List<RecipeHolder<?>>> table = HashBasedTable.create();
+ 
+-        for(RecipeHolder<?> recipeholder : p_90643_) {
++        for (RecipeHolder<?> recipeholder : p_90643_) {
              Recipe<?> recipe = recipeholder.value();
              if (!recipe.isSpecial() && !recipe.isIncomplete()) {
                  RecipeBookCategories recipebookcategories = getCategory(recipeholder);
@@ -9,6 +26,32 @@
                  if (s.isEmpty()) {
                      map.computeIfAbsent(recipebookcategories, p_90645_ -> Lists.newArrayList()).add(ImmutableList.of(recipeholder));
                  } else {
+@@ -84,21 +_,23 @@
+     private static RecipeBookCategories getCategory(RecipeHolder<?> p_301136_) {
+         Recipe<?> recipe = p_301136_.value();
+         if (recipe instanceof CraftingRecipe craftingrecipe) {
+-            return switch(craftingrecipe.category()) {
++            return switch (craftingrecipe.category()) {
+                 case BUILDING -> RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
+                 case EQUIPMENT -> RecipeBookCategories.CRAFTING_EQUIPMENT;
+                 case REDSTONE -> RecipeBookCategories.CRAFTING_REDSTONE;
+                 case MISC -> RecipeBookCategories.CRAFTING_MISC;
++                default -> throw new MatchException(null, null);
+             };
+         } else {
+             RecipeType<?> recipetype = recipe.getType();
+             if (recipe instanceof AbstractCookingRecipe abstractcookingrecipe) {
+                 CookingBookCategory cookingbookcategory = abstractcookingrecipe.category();
+                 if (recipetype == RecipeType.SMELTING) {
+-                    return switch(cookingbookcategory) {
++                    return switch (cookingbookcategory) {
+                         case BLOCKS -> RecipeBookCategories.FURNACE_BLOCKS;
+                         case FOOD -> RecipeBookCategories.FURNACE_FOOD;
+                         case MISC -> RecipeBookCategories.FURNACE_MISC;
++                        default -> throw new MatchException(null, null);
+                     };
+                 }
+ 
 @@ -122,6 +_,8 @@
              } else if (recipetype == RecipeType.SMITHING) {
                  return RecipeBookCategories.SMITHING;

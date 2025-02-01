@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/projectile/DragonFireball.java
++++ b/net/minecraft/world/entity/projectile/DragonFireball.java
+@@ -43,7 +_,7 @@
+                 areaeffectcloud.setRadiusPerTick((7.0F - areaeffectcloud.getRadius()) / (float)areaeffectcloud.getDuration());
+                 areaeffectcloud.addEffect(new MobEffectInstance(MobEffects.HARM, 1, 1));
+                 if (!list.isEmpty()) {
+-                    for(LivingEntity livingentity : list) {
++                    for (LivingEntity livingentity : list) {
+                         double d0 = this.distanceToSqr(livingentity);
+                         if (d0 < 16.0) {
+                             areaeffectcloud.setPos(livingentity.getX(), livingentity.getY(), livingentity.getZ());

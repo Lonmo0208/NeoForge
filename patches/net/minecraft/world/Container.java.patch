@@ -1,0 +1,50 @@
+--- a/net/minecraft/world/Container.java
++++ b/net/minecraft/world/Container.java
+@@ -1,9 +_,6 @@
+ package net.minecraft.world;
+ 
+-import com.google.common.collect.Lists;
+-import java.util.List;
+ import java.util.Set;
+-import java.util.function.Consumer;
+ import java.util.function.Predicate;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.world.entity.player.Player;
+@@ -56,7 +_,7 @@
+     default int countItem(Item p_18948_) {
+         int i = 0;
+ 
+-        for(int j = 0; j < this.getContainerSize(); ++j) {
++        for (int j = 0; j < this.getContainerSize(); j++) {
+             ItemStack itemstack = this.getItem(j);
+             if (itemstack.getItem().equals(p_18948_)) {
+                 i += itemstack.getCount();
+@@ -70,27 +_,8 @@
+         return this.hasAnyMatching(p_216873_ -> !p_216873_.isEmpty() && p_18950_.contains(p_216873_.getItem()));
+     }
+ 
+-    default List<ItemStack> getMatching(Predicate<ItemStack> p_341199_) {
+-        List<ItemStack> list = Lists.newArrayList();
+-        this.forEach(p_339906_ -> {
+-            if (p_341199_.test(p_339906_)) {
+-                list.add(p_339906_);
+-            }
+-        });
+-        return list;
+-    }
+-
+-    default void forEach(Consumer<ItemStack> p_342088_) {
+-        for(int i = 0; i < this.getContainerSize(); ++i) {
+-            ItemStack itemstack = this.getItem(i);
+-            if (!itemstack.isEmpty()) {
+-                p_342088_.accept(itemstack);
+-            }
+-        }
+-    }
+-
+     default boolean hasAnyMatching(Predicate<ItemStack> p_216875_) {
+-        for(int i = 0; i < this.getContainerSize(); ++i) {
++        for (int i = 0; i < this.getContainerSize(); i++) {
+             ItemStack itemstack = this.getItem(i);
+             if (p_216875_.test(itemstack)) {
+                 return true;

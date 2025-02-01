@@ -1,0 +1,19 @@
+--- a/net/minecraft/advancements/critereon/EntitySubPredicate.java
++++ b/net/minecraft/advancements/critereon/EntitySubPredicate.java
+@@ -2,6 +_,7 @@
+ 
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.MapCodec;
++import java.util.function.Function;
+ import javax.annotation.Nullable;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.server.level.ServerLevel;
+@@ -9,7 +_,7 @@
+ import net.minecraft.world.phys.Vec3;
+ 
+ public interface EntitySubPredicate {
+-    Codec<EntitySubPredicate> CODEC = BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE.byNameCodec().dispatch(EntitySubPredicate::codec, MapCodec::codec);
++    Codec<EntitySubPredicate> CODEC = BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE.byNameCodec().dispatch(EntitySubPredicate::codec, Function.identity());
+ 
+     MapCodec<? extends EntitySubPredicate> codec();
+ 

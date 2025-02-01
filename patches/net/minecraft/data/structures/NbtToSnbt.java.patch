@@ -1,0 +1,29 @@
+--- a/net/minecraft/data/structures/NbtToSnbt.java
++++ b/net/minecraft/data/structures/NbtToSnbt.java
+@@ -40,7 +_,7 @@
+         Path path = this.output.getOutputFolder();
+         List<CompletableFuture<?>> list = new ArrayList<>();
+ 
+-        for(Path path1 : this.inputFolders) {
++        for (Path path1 : this.inputFolders) {
+             list.add(
+                 CompletableFuture.<CompletableFuture>supplyAsync(
+                         () -> {
+@@ -54,7 +_,7 @@
+                                                         () -> convertStructure(p_254274_, p_253418_, getName(path1, p_253418_), path), Util.ioPool()
+                                                     )
+                                             )
+-                                            .toArray(p_253419_ -> new CompletableFuture[p_253419_])
++                                            .toArray(CompletableFuture[]::new)
+                                     );
+                                 }
+             
+@@ -70,7 +_,7 @@
+             );
+         }
+ 
+-        return CompletableFuture.allOf(list.toArray(p_253421_ -> new CompletableFuture[p_253421_]));
++        return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new));
+     }
+ 
+     @Override

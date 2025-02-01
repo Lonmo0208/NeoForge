@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/storage/WorldData.java
++++ b/net/minecraft/world/level/storage/WorldData.java
+@@ -43,7 +_,7 @@
+     }
+ 
+     default String getStorageVersionName(int p_78647_) {
+-        switch(p_78647_) {
++        switch (p_78647_) {
+             case 19132:
+                 return "McRegion";
+             case 19133:

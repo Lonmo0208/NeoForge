@@ -1,0 +1,50 @@
+--- a/net/minecraft/world/level/block/WallBlock.java
++++ b/net/minecraft/world/level/block/WallBlock.java
+@@ -94,11 +_,11 @@
+         VoxelShape voxelshape8 = Block.box((double)f2, (double)p_57969_, (double)f2, 16.0, (double)p_57971_, (double)f3);
+         Builder<BlockState, VoxelShape> builder = ImmutableMap.builder();
+ 
+-        for(Boolean obool : UP.getPossibleValues()) {
+-            for(WallSide wallside : EAST_WALL.getPossibleValues()) {
+-                for(WallSide wallside1 : NORTH_WALL.getPossibleValues()) {
+-                    for(WallSide wallside2 : WEST_WALL.getPossibleValues()) {
+-                        for(WallSide wallside3 : SOUTH_WALL.getPossibleValues()) {
++        for (Boolean obool : UP.getPossibleValues()) {
++            for (WallSide wallside : EAST_WALL.getPossibleValues()) {
++                for (WallSide wallside1 : NORTH_WALL.getPossibleValues()) {
++                    for (WallSide wallside2 : WEST_WALL.getPossibleValues()) {
++                        for (WallSide wallside3 : SOUTH_WALL.getPossibleValues()) {
+                             VoxelShape voxelshape9 = Shapes.empty();
+                             voxelshape9 = applyWallShape(voxelshape9, wallside, voxelshape4, voxelshape8);
+                             voxelshape9 = applyWallShape(voxelshape9, wallside2, voxelshape3, voxelshape7);
+@@ -252,11 +_,7 @@
+                 return true;
+             } else {
+                 boolean flag6 = wallside == WallSide.TALL && wallside1 == WallSide.TALL || wallside2 == WallSide.TALL && wallside3 == WallSide.TALL;
+-                if (flag6) {
+-                    return false;
+-                } else {
+-                    return p_58008_.is(BlockTags.WALL_POST_OVERRIDE) || isCovered(p_58009_, POST_TEST);
+-                }
++                return flag6 ? false : p_58008_.is(BlockTags.WALL_POST_OVERRIDE) || isCovered(p_58009_, POST_TEST);
+             }
+         }
+     }
+@@ -293,7 +_,7 @@
+ 
+     @Override
+     protected BlockState rotate(BlockState p_58004_, Rotation p_58005_) {
+-        switch(p_58005_) {
++        switch (p_58005_) {
+             case CLOCKWISE_180:
+                 return p_58004_.setValue(NORTH_WALL, p_58004_.getValue(SOUTH_WALL))
+                     .setValue(EAST_WALL, p_58004_.getValue(WEST_WALL))
+@@ -316,7 +_,7 @@
+ 
+     @Override
+     protected BlockState mirror(BlockState p_58001_, Mirror p_58002_) {
+-        switch(p_58002_) {
++        switch (p_58002_) {
+             case LEFT_RIGHT:
+                 return p_58001_.setValue(NORTH_WALL, p_58001_.getValue(SOUTH_WALL)).setValue(SOUTH_WALL, p_58001_.getValue(NORTH_WALL));
+             case FRONT_BACK:

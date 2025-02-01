@@ -1,0 +1,41 @@
+--- a/net/minecraft/client/HotbarManager.java
++++ b/net/minecraft/client/HotbarManager.java
+@@ -4,7 +_,6 @@
+ import com.mojang.logging.LogUtils;
+ import com.mojang.serialization.DataResult;
+ import java.nio.file.Path;
+-import net.minecraft.Util;
+ import net.minecraft.client.player.inventory.Hotbar;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.nbt.NbtIo;
+@@ -29,7 +_,7 @@
+         this.optionsFile = p_309673_.resolve("hotbar.nbt");
+         this.fixerUpper = p_90804_;
+ 
+-        for(int i = 0; i < 9; ++i) {
++        for (int i = 0; i < 9; i++) {
+             this.hotbars[i] = new Hotbar();
+         }
+     }
+@@ -44,7 +_,7 @@
+             int i = NbtUtils.getDataVersion(compoundtag, 1343);
+             compoundtag = DataFixTypes.HOTBAR.updateToCurrentVersion(this.fixerUpper, compoundtag, i);
+ 
+-            for(int j = 0; j < 9; ++j) {
++            for (int j = 0; j < 9; j++) {
+                 this.hotbars[j] = Hotbar.CODEC
+                     .parse(NbtOps.INSTANCE, compoundtag.get(String.valueOf(j)))
+                     .resultOrPartial(p_323544_ -> LOGGER.warn("Failed to parse hotbar: {}", p_323544_))
+@@ -59,10 +_,10 @@
+         try {
+             CompoundTag compoundtag = NbtUtils.addCurrentDataVersion(new CompoundTag());
+ 
+-            for(int i = 0; i < 9; ++i) {
++            for (int i = 0; i < 9; i++) {
+                 Hotbar hotbar = this.get(i);
+                 DataResult<Tag> dataresult = Hotbar.CODEC.encodeStart(NbtOps.INSTANCE, hotbar);
+-                compoundtag.put(String.valueOf(i), Util.getOrThrow(dataresult, IllegalStateException::new));
++                compoundtag.put(String.valueOf(i), dataresult.getOrThrow());
+             }
+ 
+             NbtIo.write(compoundtag, this.optionsFile);

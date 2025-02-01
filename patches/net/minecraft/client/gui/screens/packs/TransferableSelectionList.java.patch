@@ -1,0 +1,19 @@
+--- a/net/minecraft/client/gui/screens/packs/TransferableSelectionList.java
++++ b/net/minecraft/client/gui/screens/packs/TransferableSelectionList.java
+@@ -80,14 +_,14 @@
+     @Override
+     public boolean keyPressed(int p_265499_, int p_265510_, int p_265548_) {
+         if (this.getSelected() != null) {
+-            switch(p_265499_) {
++            switch (p_265499_) {
+                 case 32:
+                 case 257:
+                     this.getSelected().keyboardSelection();
+                     return true;
+                 default:
+                     if (Screen.hasShiftDown()) {
+-                        switch(p_265499_) {
++                        switch (p_265499_) {
+                             case 264:
+                                 this.getSelected().keyboardMoveDown();
+                                 return true;

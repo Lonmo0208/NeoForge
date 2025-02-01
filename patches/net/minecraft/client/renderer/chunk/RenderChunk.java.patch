@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/chunk/RenderChunk.java
++++ b/net/minecraft/client/renderer/chunk/RenderChunk.java
+@@ -38,7 +_,7 @@
+             LevelChunkSection[] alevelchunksection = p_200446_.getSections();
+             this.sections = new ArrayList<>(alevelchunksection.length);
+ 
+-            for(LevelChunkSection levelchunksection : alevelchunksection) {
++            for (LevelChunkSection levelchunksection : alevelchunksection) {
+                 this.sections.add(levelchunksection.hasOnlyAir() ? null : levelchunksection.getStates().copy());
+             }
+         }

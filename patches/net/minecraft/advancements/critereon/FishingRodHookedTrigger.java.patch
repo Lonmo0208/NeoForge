@@ -1,0 +1,39 @@
+--- a/net/minecraft/advancements/critereon/FishingRodHookedTrigger.java
++++ b/net/minecraft/advancements/critereon/FishingRodHookedTrigger.java
+@@ -8,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.projectile.FishingHook;
+@@ -31,13 +_,13 @@
+         Optional<ContextAwarePredicate> player, Optional<ItemPredicate> rod, Optional<ContextAwarePredicate> entity, Optional<ItemPredicate> item
+     ) implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<FishingRodHookedTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311423_ -> p_311423_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(FishingRodHookedTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "rod").forGetter(FishingRodHookedTrigger.TriggerInstance::rod),
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "entity").forGetter(FishingRodHookedTrigger.TriggerInstance::entity),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(FishingRodHookedTrigger.TriggerInstance::item)
++            p_337365_ -> p_337365_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(FishingRodHookedTrigger.TriggerInstance::player),
++                        ItemPredicate.CODEC.optionalFieldOf("rod").forGetter(FishingRodHookedTrigger.TriggerInstance::rod),
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("entity").forGetter(FishingRodHookedTrigger.TriggerInstance::entity),
++                        ItemPredicate.CODEC.optionalFieldOf("item").forGetter(FishingRodHookedTrigger.TriggerInstance::item)
+                     )
+-                    .apply(p_311423_, FishingRodHookedTrigger.TriggerInstance::new)
++                    .apply(p_337365_, FishingRodHookedTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<FishingRodHookedTrigger.TriggerInstance> fishedItem(
+@@ -60,7 +_,7 @@
+                         flag = true;
+                     }
+ 
+-                    for(ItemStack itemstack : p_40446_) {
++                    for (ItemStack itemstack : p_40446_) {
+                         if (this.item.get().matches(itemstack)) {
+                             flag = true;
+                             break;

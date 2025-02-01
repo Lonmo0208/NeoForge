@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/level/levelgen/structure/pools/JigsawJunction.java
++++ b/net/minecraft/world/level/levelgen/structure/pools/JigsawJunction.java
+@@ -70,10 +_,8 @@
+                 return false;
+             } else if (this.sourceZ != jigsawjunction.sourceZ) {
+                 return false;
+-            } else if (this.deltaY != jigsawjunction.deltaY) {
+-                return false;
+             } else {
+-                return this.destProjection == jigsawjunction.destProjection;
++                return this.deltaY != jigsawjunction.deltaY ? false : this.destProjection == jigsawjunction.destProjection;
+             }
+         } else {
+             return false;

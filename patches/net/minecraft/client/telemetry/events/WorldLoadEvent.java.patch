@@ -1,0 +1,16 @@
+--- a/net/minecraft/client/telemetry/events/WorldLoadEvent.java
++++ b/net/minecraft/client/telemetry/events/WorldLoadEvent.java
+@@ -58,11 +_,12 @@
+     }
+ 
+     public void setGameMode(GameType p_261852_, boolean p_261831_) {
+-        this.gameMode = switch(p_261852_) {
++        this.gameMode = switch (p_261852_) {
+             case SURVIVAL -> p_261831_ ? TelemetryProperty.GameMode.HARDCORE : TelemetryProperty.GameMode.SURVIVAL;
+             case CREATIVE -> TelemetryProperty.GameMode.CREATIVE;
+             case ADVENTURE -> TelemetryProperty.GameMode.ADVENTURE;
+             case SPECTATOR -> TelemetryProperty.GameMode.SPECTATOR;
++            default -> throw new MatchException(null, null);
+         };
+     }
+ 

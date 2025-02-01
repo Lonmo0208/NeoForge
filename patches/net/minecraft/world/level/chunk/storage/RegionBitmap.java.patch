@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/chunk/storage/RegionBitmap.java
++++ b/net/minecraft/world/level/chunk/storage/RegionBitmap.java
+@@ -20,7 +_,7 @@
+     public int allocate(int p_63611_) {
+         int i = 0;
+ 
+-        while(true) {
++        while (true) {
+             int j = this.used.nextClearBit(i);
+             int k = this.used.nextSetBit(j);
+             if (k == -1 || k - j >= p_63611_) {

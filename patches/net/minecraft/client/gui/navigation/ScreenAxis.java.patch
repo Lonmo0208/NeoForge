@@ -1,0 +1,27 @@
+--- a/net/minecraft/client/gui/navigation/ScreenAxis.java
++++ b/net/minecraft/client/gui/navigation/ScreenAxis.java
+@@ -9,21 +_,21 @@
+     VERTICAL;
+ 
+     public ScreenAxis orthogonal() {
+-        return switch(this) {
++        return switch (this) {
+             case HORIZONTAL -> VERTICAL;
+             case VERTICAL -> HORIZONTAL;
+         };
+     }
+ 
+     public ScreenDirection getPositive() {
+-        return switch(this) {
++        return switch (this) {
+             case HORIZONTAL -> ScreenDirection.RIGHT;
+             case VERTICAL -> ScreenDirection.DOWN;
+         };
+     }
+ 
+     public ScreenDirection getNegative() {
+-        return switch(this) {
++        return switch (this) {
+             case HORIZONTAL -> ScreenDirection.LEFT;
+             case VERTICAL -> ScreenDirection.UP;
+         };

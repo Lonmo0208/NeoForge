@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/GraphicsStatus.java
++++ b/net/minecraft/client/GraphicsStatus.java
+@@ -33,7 +_,7 @@
+ 
+     @Override
+     public String toString() {
+-        return switch(this) {
++        return switch (this) {
+             case FAST -> "fast";
+             case FANCY -> "fancy";
+             case FABULOUS -> "fabulous";

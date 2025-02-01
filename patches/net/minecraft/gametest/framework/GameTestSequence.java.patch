@@ -1,0 +1,11 @@
+--- a/net/minecraft/gametest/framework/GameTestSequence.java
++++ b/net/minecraft/gametest/framework/GameTestSequence.java
+@@ -96,7 +_,7 @@
+     private void tick(long p_127782_) {
+         Iterator<GameTestEvent> iterator = this.events.iterator();
+ 
+-        while(iterator.hasNext()) {
++        while (iterator.hasNext()) {
+             GameTestEvent gametestevent = iterator.next();
+             gametestevent.assertion.run();
+             iterator.remove();

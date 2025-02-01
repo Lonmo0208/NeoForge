@@ -1,0 +1,438 @@
+--- a/net/minecraft/world/level/block/entity/PotatoRefineryBlockEntity.java
++++ /dev/null
+@@ -1,435 +_,0 @@
+-package net.minecraft.world.level.block.entity;
+-
+-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+-import java.util.List;
+-import java.util.Map;
+-import javax.annotation.Nullable;
+-import net.minecraft.Util;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.core.Direction;
+-import net.minecraft.core.HolderLookup;
+-import net.minecraft.core.NonNullList;
+-import net.minecraft.core.RegistryAccess;
+-import net.minecraft.nbt.CompoundTag;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.util.Mth;
+-import net.minecraft.util.SingleKeyCache;
+-import net.minecraft.world.Container;
+-import net.minecraft.world.ContainerHelper;
+-import net.minecraft.world.WorldlyContainer;
+-import net.minecraft.world.entity.player.Inventory;
+-import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.entity.player.StackedContents;
+-import net.minecraft.world.inventory.AbstractContainerMenu;
+-import net.minecraft.world.inventory.ContainerData;
+-import net.minecraft.world.inventory.PotatoRefineryMenu;
+-import net.minecraft.world.inventory.RecipeCraftingHolder;
+-import net.minecraft.world.inventory.StackedContentsCompatible;
+-import net.minecraft.world.item.Item;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.Items;
+-import net.minecraft.world.item.crafting.PotatoRefinementRecipe;
+-import net.minecraft.world.item.crafting.RecipeHolder;
+-import net.minecraft.world.item.crafting.RecipeManager;
+-import net.minecraft.world.item.crafting.RecipeType;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.PotatoRefineryBlock;
+-import net.minecraft.world.level.block.state.BlockState;
+-
+-public class PotatoRefineryBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeCraftingHolder, StackedContentsCompatible {
+-    protected static final int SLOT_INPUT = 0;
+-    protected static final int SLOT_BOTTLE_INPUT = 2;
+-    protected static final int SLOT_FUEL = 1;
+-    protected static final int SLOT_RESULT = 3;
+-    public static final int DATA_LIT_TIME = 0;
+-    private static final int[] SLOTS_FOR_UP = new int[]{0};
+-    private static final int[] SLOTS_FOR_DOWN = new int[]{3, 1};
+-    private static final int[] SLOTS_FOR_SIDES = new int[]{1, 2};
+-    public static final int DATA_LIT_DURATION = 1;
+-    public static final int DATA_COOKING_PROGRESS = 2;
+-    public static final int DATA_COOKING_TOTAL_TIME = 3;
+-    public static final int NUM_DATA_VALUES = 4;
+-    public static final int BURN_TIME_STANDARD = 200;
+-    public static final int BURN_COOL_SPEED = 2;
+-    protected NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
+-    int litTime;
+-    int litDuration;
+-    int cookingProgress;
+-    int cookingTotalTime;
+-    protected final ContainerData dataAccess = new ContainerData() {
+-        @Override
+-        public int get(int p_340481_) {
+-            switch(p_340481_) {
+-                case 0:
+-                    return PotatoRefineryBlockEntity.this.litTime;
+-                case 1:
+-                    return PotatoRefineryBlockEntity.this.litDuration;
+-                case 2:
+-                    return PotatoRefineryBlockEntity.this.cookingProgress;
+-                case 3:
+-                    return PotatoRefineryBlockEntity.this.cookingTotalTime;
+-                default:
+-                    return 0;
+-            }
+-        }
+-
+-        @Override
+-        public void set(int p_341036_, int p_342468_) {
+-            switch(p_341036_) {
+-                case 0:
+-                    PotatoRefineryBlockEntity.this.litTime = p_342468_;
+-                    break;
+-                case 1:
+-                    PotatoRefineryBlockEntity.this.litDuration = p_342468_;
+-                    break;
+-                case 2:
+-                    PotatoRefineryBlockEntity.this.cookingProgress = p_342468_;
+-                    break;
+-                case 3:
+-                    PotatoRefineryBlockEntity.this.cookingTotalTime = p_342468_;
+-            }
+-        }
+-
+-        @Override
+-        public int getCount() {
+-            return 4;
+-        }
+-    };
+-    private final Object2IntOpenHashMap<ResourceLocation> recipesUsed = new Object2IntOpenHashMap<>();
+-    private float storedExperience;
+-    private final SingleKeyCache<PotatoRefineryBlockEntity.RecipeKey, PotatoRefineryBlockEntity.SomeKindOfRecipe> newQuickCheck;
+-
+-    @Override
+-    protected Component getDefaultName() {
+-        return Component.translatable("container.potato_refinery");
+-    }
+-
+-    @Override
+-    protected AbstractContainerMenu createMenu(int p_341987_, Inventory p_342451_) {
+-        return new PotatoRefineryMenu(p_341987_, p_342451_, this, this.dataAccess);
+-    }
+-
+-    public PotatoRefineryBlockEntity(BlockPos p_341640_, BlockState p_342508_) {
+-        super(BlockEntityType.POTATO_REFINERY, p_341640_, p_342508_);
+-        RecipeManager.CachedCheck<Container, PotatoRefinementRecipe> cachedcheck = RecipeManager.createCheck(RecipeType.POTATO_REFINEMENT);
+-        this.newQuickCheck = Util.singleKeyCache(p_340605_ -> {
+-            boolean flag = !p_340605_.inputStack.isEmpty() && !p_340605_.bottleInputStack.isEmpty();
+-            if (flag) {
+-                ItemStack itemstack = p_340605_.bottleInputStack;
+-                if (p_340605_.inputStack.is(Items.POTATO_OIL) && !itemstack.isEmpty()) {
+-                    ItemStack itemstack1 = itemstack.copyWithCount(1);
+-                    LubricationComponent.lubricate(itemstack1);
+-                    return new PotatoRefineryBlockEntity.LubricationRecipe(itemstack.copyWithCount(1), itemstack1);
+-                }
+-
+-                RecipeHolder<PotatoRefinementRecipe> recipeholder = cachedcheck.getRecipeFor(this, p_340605_.level).orElse(null);
+-                if (recipeholder != null) {
+-                    return new PotatoRefineryBlockEntity.NormalRecipe(recipeholder);
+-                }
+-            }
+-
+-            return null;
+-        });
+-    }
+-
+-    private PotatoRefineryBlockEntity.SomeKindOfRecipe quickCheckRecipe(Level p_341009_) {
+-        return this.newQuickCheck.getValue(new PotatoRefineryBlockEntity.RecipeKey(p_341009_, this.items.get(0), this.items.get(2)));
+-    }
+-
+-    public static Map<Item, Integer> getFuel() {
+-        return FurnaceBlockEntity.getFuel();
+-    }
+-
+-    public float harvestExperience() {
+-        float f = this.storedExperience;
+-        this.storedExperience = 0.0F;
+-        return f;
+-    }
+-
+-    private boolean isLit() {
+-        return this.litTime > 0;
+-    }
+-
+-    @Override
+-    public void load(CompoundTag p_340665_, HolderLookup.Provider p_341665_) {
+-        super.load(p_340665_, p_341665_);
+-        this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+-        ContainerHelper.loadAllItems(p_340665_, this.items, p_341665_);
+-        this.litTime = p_340665_.getShort("BurnTime");
+-        this.cookingProgress = p_340665_.getShort("CookTime");
+-        this.cookingTotalTime = p_340665_.getShort("CookTimeTotal");
+-        this.litDuration = this.getBurnDuration(this.items.get(1));
+-        CompoundTag compoundtag = p_340665_.getCompound("RecipesUsed");
+-
+-        for(String s : compoundtag.getAllKeys()) {
+-            this.recipesUsed.put(new ResourceLocation(s), compoundtag.getInt(s));
+-        }
+-
+-        this.storedExperience = p_340665_.contains("StoredExperience") ? p_340665_.getFloat("StoredExperience") : 0.0F;
+-    }
+-
+-    @Override
+-    protected void saveAdditional(CompoundTag p_340997_, HolderLookup.Provider p_341266_) {
+-        super.saveAdditional(p_340997_, p_341266_);
+-        p_340997_.putShort("BurnTime", (short)this.litTime);
+-        p_340997_.putShort("CookTime", (short)this.cookingProgress);
+-        p_340997_.putShort("CookTimeTotal", (short)this.cookingTotalTime);
+-        ContainerHelper.saveAllItems(p_340997_, this.items, p_341266_);
+-        CompoundTag compoundtag = new CompoundTag();
+-        this.recipesUsed.forEach((p_341420_, p_341446_) -> compoundtag.putInt(p_341420_.toString(), p_341446_));
+-        p_340997_.put("RecipesUsed", compoundtag);
+-        p_340997_.putFloat("StoredExperience", this.storedExperience);
+-    }
+-
+-    public static void serverTick(Level p_341827_, BlockPos p_340518_, BlockState p_341992_, PotatoRefineryBlockEntity p_342260_) {
+-        boolean flag = p_342260_.isLit();
+-        boolean flag1 = false;
+-        if (p_342260_.isLit()) {
+-            --p_342260_.litTime;
+-        }
+-
+-        ItemStack itemstack = p_342260_.items.get(1);
+-        boolean flag2 = p_342260_.hasIngredients();
+-        boolean flag3 = !itemstack.isEmpty();
+-        if (p_342260_.isLit() || flag3 && flag2) {
+-            PotatoRefineryBlockEntity.SomeKindOfRecipe potatorefineryblockentity$somekindofrecipe = p_342260_.quickCheckRecipe(p_341827_);
+-            int i = p_342260_.getMaxStackSize();
+-            if (!p_342260_.isLit() && canRefine(p_341827_.registryAccess(), potatorefineryblockentity$somekindofrecipe, p_342260_.items, i)) {
+-                p_342260_.litTime = p_342260_.getBurnDuration(itemstack);
+-                p_342260_.litDuration = p_342260_.litTime;
+-                if (p_342260_.isLit()) {
+-                    flag1 = true;
+-                    if (flag3) {
+-                        Item item = itemstack.getItem();
+-                        itemstack.shrink(1);
+-                        if (itemstack.isEmpty()) {
+-                            Item item1 = item.getCraftingRemainingItem();
+-                            p_342260_.items.set(1, item1 == null ? ItemStack.EMPTY : new ItemStack(item1));
+-                        }
+-                    }
+-                }
+-            }
+-
+-            if (p_342260_.isLit() && canRefine(p_341827_.registryAccess(), potatorefineryblockentity$somekindofrecipe, p_342260_.items, i)) {
+-                ++p_342260_.cookingProgress;
+-                if (p_342260_.cookingProgress == p_342260_.cookingTotalTime) {
+-                    p_342260_.cookingProgress = 0;
+-                    p_342260_.cookingTotalTime = getTotalRefinementTime(p_341827_, p_342260_);
+-                    if (refine(p_341827_.registryAccess(), potatorefineryblockentity$somekindofrecipe, p_342260_.items, i)
+-                        && potatorefineryblockentity$somekindofrecipe instanceof PotatoRefineryBlockEntity.NormalRecipe potatorefineryblockentity$normalrecipe) {
+-                        p_342260_.setRecipeUsed(potatorefineryblockentity$normalrecipe.recipeHolder);
+-                    }
+-
+-                    flag1 = true;
+-                }
+-            } else {
+-                p_342260_.cookingProgress = 0;
+-            }
+-        } else if (!p_342260_.isLit() && p_342260_.cookingProgress > 0) {
+-            p_342260_.cookingProgress = Mth.clamp(p_342260_.cookingProgress - 2, 0, p_342260_.cookingTotalTime);
+-        }
+-
+-        if (flag != p_342260_.isLit()) {
+-            flag1 = true;
+-            p_341992_ = p_341992_.setValue(PotatoRefineryBlock.LIT, Boolean.valueOf(p_342260_.isLit()));
+-            p_341827_.setBlock(p_340518_, p_341992_, 3);
+-        }
+-
+-        if (flag1) {
+-            setChanged(p_341827_, p_340518_, p_341992_);
+-        }
+-    }
+-
+-    private boolean hasIngredients() {
+-        return !this.items.get(0).isEmpty() && !this.items.get(2).isEmpty();
+-    }
+-
+-    private static boolean canRefine(
+-        RegistryAccess p_340702_, @Nullable PotatoRefineryBlockEntity.SomeKindOfRecipe p_341011_, NonNullList<ItemStack> p_342236_, int p_342211_
+-    ) {
+-        if (!p_342236_.get(0).isEmpty() && !p_342236_.get(2).isEmpty() && p_341011_ != null) {
+-            ItemStack itemstack = p_341011_.getResultItem(p_340702_);
+-            if (itemstack.isEmpty()) {
+-                return false;
+-            } else {
+-                ItemStack itemstack1 = p_342236_.get(3);
+-                if (itemstack1.isEmpty()) {
+-                    return true;
+-                } else if (!ItemStack.isSameItemSameComponents(itemstack1, itemstack)) {
+-                    return false;
+-                } else if (itemstack1.getCount() < p_342211_ && itemstack1.getCount() < itemstack1.getMaxStackSize()) {
+-                    return true;
+-                } else {
+-                    return itemstack1.getCount() < itemstack.getMaxStackSize();
+-                }
+-            }
+-        } else {
+-            return false;
+-        }
+-    }
+-
+-    private static boolean refine(
+-        RegistryAccess p_341917_, @Nullable PotatoRefineryBlockEntity.SomeKindOfRecipe p_341907_, NonNullList<ItemStack> p_341702_, int p_342518_
+-    ) {
+-        if (p_341907_ != null && canRefine(p_341917_, p_341907_, p_341702_, p_342518_)) {
+-            ItemStack itemstack = p_341702_.get(0);
+-            ItemStack itemstack1 = p_341702_.get(2);
+-            ItemStack itemstack2 = p_341907_.getResultItem(p_341917_);
+-            ItemStack itemstack3 = p_341702_.get(3);
+-            if (itemstack3.isEmpty()) {
+-                p_341702_.set(3, itemstack2.copy());
+-            } else if (ItemStack.isSameItemSameComponents(itemstack3, itemstack2)) {
+-                itemstack3.grow(1);
+-            }
+-
+-            itemstack.shrink(1);
+-            itemstack1.shrink(1);
+-            return true;
+-        } else {
+-            return false;
+-        }
+-    }
+-
+-    protected int getBurnDuration(ItemStack p_341117_) {
+-        if (p_341117_.isEmpty()) {
+-            return 0;
+-        } else {
+-            Item item = p_341117_.getItem();
+-            return getFuel().getOrDefault(item, 0);
+-        }
+-    }
+-
+-    private static int getTotalRefinementTime(Level p_340498_, PotatoRefineryBlockEntity p_340916_) {
+-        PotatoRefineryBlockEntity.SomeKindOfRecipe potatorefineryblockentity$somekindofrecipe = p_340916_.quickCheckRecipe(p_340498_);
+-        return potatorefineryblockentity$somekindofrecipe != null ? potatorefineryblockentity$somekindofrecipe.getTotalRefinementTime() : 20;
+-    }
+-
+-    public static boolean isFuel(ItemStack p_340685_) {
+-        return getFuel().containsKey(p_340685_.getItem());
+-    }
+-
+-    @Override
+-    public int[] getSlotsForFace(Direction p_340493_) {
+-        if (p_340493_ == Direction.DOWN) {
+-            return SLOTS_FOR_DOWN;
+-        } else {
+-            return p_340493_ == Direction.UP ? SLOTS_FOR_UP : SLOTS_FOR_SIDES;
+-        }
+-    }
+-
+-    @Override
+-    public boolean canPlaceItemThroughFace(int p_340876_, ItemStack p_340934_, @Nullable Direction p_340749_) {
+-        return this.canPlaceItem(p_340876_, p_340934_);
+-    }
+-
+-    @Override
+-    public boolean canTakeItemThroughFace(int p_340336_, ItemStack p_340908_, Direction p_341770_) {
+-        if (p_341770_ == Direction.DOWN && p_340336_ == 1) {
+-            return p_340908_.is(Items.WATER_BUCKET) || p_340908_.is(Items.BUCKET);
+-        } else {
+-            return true;
+-        }
+-    }
+-
+-    @Override
+-    public int getContainerSize() {
+-        return this.items.size();
+-    }
+-
+-    @Override
+-    protected NonNullList<ItemStack> getItems() {
+-        return this.items;
+-    }
+-
+-    @Override
+-    protected void setItems(NonNullList<ItemStack> p_341262_) {
+-        this.items = p_341262_;
+-    }
+-
+-    @Override
+-    public void setItem(int p_342423_, ItemStack p_340574_) {
+-        ItemStack itemstack = this.items.get(p_342423_);
+-        boolean flag = p_340574_.isEmpty() || !ItemStack.isSameItemSameComponents(itemstack, p_340574_);
+-        this.items.set(p_342423_, p_340574_);
+-        if (p_340574_.getCount() > this.getMaxStackSize()) {
+-            p_340574_.setCount(this.getMaxStackSize());
+-        }
+-
+-        if ((p_342423_ == 0 || p_342423_ == 2) && flag) {
+-            this.cookingTotalTime = getTotalRefinementTime(this.level, this);
+-            this.cookingProgress = 0;
+-            this.setChanged();
+-        }
+-    }
+-
+-    @Override
+-    public boolean canPlaceItem(int p_342521_, ItemStack p_340523_) {
+-        if (p_342521_ == 3) {
+-            return false;
+-        } else if (p_342521_ != 1) {
+-            return true;
+-        } else {
+-            ItemStack itemstack = this.items.get(1);
+-            return isFuel(p_340523_) || p_340523_.is(Items.BUCKET) && !itemstack.is(Items.BUCKET);
+-        }
+-    }
+-
+-    @Override
+-    public void setRecipeUsed(@Nullable RecipeHolder<?> p_341764_) {
+-        if (p_341764_ != null) {
+-            ResourceLocation resourcelocation = p_341764_.id();
+-            this.recipesUsed.addTo(resourcelocation, 1);
+-        }
+-    }
+-
+-    @Nullable
+-    @Override
+-    public RecipeHolder<?> getRecipeUsed() {
+-        return null;
+-    }
+-
+-    @Override
+-    public void awardUsedRecipes(Player p_340724_, List<ItemStack> p_342116_) {
+-    }
+-
+-    @Override
+-    public void fillStackedContents(StackedContents p_340691_) {
+-        for(ItemStack itemstack : this.items) {
+-            p_340691_.accountStack(itemstack);
+-        }
+-    }
+-
+-    static record LubricationRecipe(ItemStack itemStack, ItemStack result) implements PotatoRefineryBlockEntity.SomeKindOfRecipe {
+-        @Override
+-        public ItemStack getResultItem(RegistryAccess p_340684_) {
+-            return this.result;
+-        }
+-
+-        @Override
+-        public int getTotalRefinementTime() {
+-            return 20;
+-        }
+-    }
+-
+-    static record NormalRecipe(RecipeHolder<PotatoRefinementRecipe> recipeHolder) implements PotatoRefineryBlockEntity.SomeKindOfRecipe {
+-        @Override
+-        public ItemStack getResultItem(RegistryAccess p_341155_) {
+-            return this.recipeHolder.value().getResultItem(p_341155_);
+-        }
+-
+-        @Override
+-        public int getTotalRefinementTime() {
+-            return this.recipeHolder.value().getRefinementTime();
+-        }
+-    }
+-
+-    static record RecipeKey(Level level, ItemStack inputStack, ItemStack bottleInputStack) {
+-    }
+-
+-    interface SomeKindOfRecipe {
+-        ItemStack getResultItem(RegistryAccess p_341265_);
+-
+-        int getTotalRefinementTime();
+-    }
+-}

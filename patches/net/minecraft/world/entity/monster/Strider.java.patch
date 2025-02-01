@@ -1,0 +1,66 @@
+--- a/net/minecraft/world/entity/monster/Strider.java
++++ b/net/minecraft/world/entity/monster/Strider.java
+@@ -101,7 +_,7 @@
+ 
+         do {
+             blockpos$mutableblockpos.move(Direction.UP);
+-        } while(p_219130_.getFluidState(blockpos$mutableblockpos).is(FluidTags.LAVA));
++        } while (p_219130_.getFluidState(blockpos$mutableblockpos).is(FluidTags.LAVA));
+ 
+         return p_219130_.getBlockState(blockpos$mutableblockpos).isAir();
+     }
+@@ -204,14 +_,9 @@
+     @Nullable
+     @Override
+     public LivingEntity getControllingPassenger() {
+-        if (this.isSaddled()) {
+-            Entity entity = this.getFirstPassenger();
+-            if (entity instanceof Player player && player.isHolding(Items.WARPED_FUNGUS_ON_A_STICK)) {
+-                return player;
+-            }
+-        }
+-
+-        return super.getControllingPassenger();
++        return (LivingEntity)(this.isSaddled() && this.getFirstPassenger() instanceof Player player && player.isHolding(Items.WARPED_FUNGUS_ON_A_STICK)
++            ? player
++            : super.getControllingPassenger());
+     }
+ 
+     @Override
+@@ -228,22 +_,22 @@
+         double d1 = this.getBoundingBox().minY - 0.5;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(Vec3 vec3 : avec3) {
++        for (Vec3 vec3 : avec3) {
+             blockpos$mutableblockpos.set(this.getX() + vec3.x, d0, this.getZ() + vec3.z);
+ 
+-            for(double d2 = d0; d2 > d1; --d2) {
++            for (double d2 = d0; d2 > d1; d2--) {
+                 set.add(blockpos$mutableblockpos.immutable());
+                 blockpos$mutableblockpos.move(Direction.DOWN);
+             }
+         }
+ 
+-        for(BlockPos blockpos : set) {
++        for (BlockPos blockpos : set) {
+             if (!this.level().getFluidState(blockpos).is(FluidTags.LAVA)) {
+                 double d3 = this.level().getBlockFloorHeight(blockpos);
+                 if (DismountHelper.isBlockFloorValid(d3)) {
+                     Vec3 vec31 = Vec3.upFromBottomCenterOf(blockpos, d3);
+ 
+-                    for(Pose pose : p_33908_.getDismountPoses()) {
++                    for (Pose pose : p_33908_.getDismountPoses()) {
+                         AABB aabb = p_33908_.getLocalBoundsForPose(pose);
+                         if (DismountHelper.canDismountTo(this.level(), p_33908_, aabb.move(vec31))) {
+                             p_33908_.setPose(pose);
+@@ -317,8 +_,7 @@
+                 flag = blockstate.is(BlockTags.STRIDER_WARM_BLOCKS)
+                     || blockstate1.is(BlockTags.STRIDER_WARM_BLOCKS)
+                     || this.getFluidHeight(FluidTags.LAVA) > 0.0;
+-                Entity entity = this.getVehicle();
+-                if (entity instanceof Strider strider && strider.isSuffocating()) {
++                if (this.getVehicle() instanceof Strider strider && strider.isSuffocating()) {
+                     flag2 = true;
+                     break label36;
+                 }

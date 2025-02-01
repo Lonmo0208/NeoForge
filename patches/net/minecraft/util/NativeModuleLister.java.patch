@@ -1,0 +1,38 @@
+--- a/net/minecraft/util/NativeModuleLister.java
++++ b/net/minecraft/util/NativeModuleLister.java
+@@ -38,7 +_,7 @@
+             int i = Kernel32.INSTANCE.GetCurrentProcessId();
+             Builder<NativeModuleLister.NativeModuleInfo> builder = ImmutableList.builder();
+ 
+-            for(MODULEENTRY32W moduleentry32w : Kernel32Util.getModules(i)) {
++            for (MODULEENTRY32W moduleentry32w : Kernel32Util.getModules(i)) {
+                 String s = moduleentry32w.szModule();
+                 Optional<NativeModuleLister.NativeModuleVersion> optional = tryGetVersion(moduleentry32w.szExePath());
+                 builder.add(new NativeModuleLister.NativeModuleInfo(s, optional));
+@@ -94,7 +_,7 @@
+     private static OptionalInt findLangAndCodepage(int[] p_184682_) {
+         OptionalInt optionalint = OptionalInt.empty();
+ 
+-        for(int i : p_184682_) {
++        for (int i : p_184682_) {
+             if ((i & -65536) == 78643200 && (i & 65535) == 1033) {
+                 return OptionalInt.of(i);
+             }
+@@ -130,7 +_,7 @@
+             () -> listModules()
+                     .stream()
+                     .sorted(Comparator.comparing(p_184685_ -> p_184685_.name))
+-                    .map(p_184668_ -> "\n\t\t" + p_184668_)
++                    .map(p_339486_ -> "\n\t\t" + p_339486_)
+                     .collect(Collectors.joining())
+         );
+     }
+@@ -146,7 +_,7 @@
+ 
+         @Override
+         public String toString() {
+-            return this.version.<String>map(p_184696_ -> this.name + ":" + p_184696_).orElse(this.name);
++            return this.version.<String>map(p_339487_ -> this.name + ":" + p_339487_).orElse(this.name);
+         }
+     }
+ 

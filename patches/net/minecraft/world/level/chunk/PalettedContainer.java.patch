@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/level/chunk/PalettedContainer.java
 +++ b/net/minecraft/world/level/chunk/PalettedContainer.java
+@@ -12,7 +_,6 @@
+ import java.util.List;
+ import java.util.Optional;
+ import java.util.function.Consumer;
+-import java.util.function.Function;
+ import java.util.function.IntUnaryOperator;
+ import java.util.function.Predicate;
+ import java.util.stream.LongStream;
 @@ -28,6 +_,7 @@
  import net.minecraft.util.ZeroBitStorage;
  
@@ -8,3 +16,74 @@
      private static final int MIN_PALETTE_BITS = 0;
      private final PaletteResize<T> dummyPaletteResize = (p_238275_, p_238276_) -> 0;
      private final IdMap<T> registry;
+@@ -49,8 +_,8 @@
+     }
+ 
+     public static <T> Codec<PalettedContainerRO<T>> codecRO(IdMap<T> p_238419_, Codec<T> p_238420_, PalettedContainer.Strategy p_238421_, T p_238422_) {
+-        PalettedContainerRO.Unpacker<T, PalettedContainerRO<T>> unpacker = (p_238265_, p_238266_, p_238267_) -> unpack(p_238265_, p_238266_, p_238267_)
+-                .map((Function<? super PalettedContainer<T>, ? extends PalettedContainer<T>>)(p_238264_ -> p_238264_));
++        PalettedContainerRO.Unpacker<T, PalettedContainerRO<T>> unpacker = (p_338083_, p_338084_, p_338085_) -> unpack(p_338083_, p_338084_, p_338085_)
++                .map(p_238264_ -> (PalettedContainerRO<T>)p_238264_);
+         return codec(p_238419_, p_238420_, p_238421_, p_238422_, unpacker);
+     }
+ 
+@@ -58,16 +_,19 @@
+         IdMap<T> p_238428_, Codec<T> p_238429_, PalettedContainer.Strategy p_238430_, T p_238431_, PalettedContainerRO.Unpacker<T, C> p_238432_
+     ) {
+         return RecordCodecBuilder.<PalettedContainerRO.PackedData<T>>create(
+-                p_188047_ -> p_188047_.group(
++                p_338082_ -> p_338082_.group(
+                             p_238429_.mapResult(ExtraCodecs.orElsePartial(p_238431_))
+                                 .listOf()
+                                 .fieldOf("palette")
+                                 .forGetter(PalettedContainerRO.PackedData::paletteEntries),
+-                            Codec.LONG_STREAM.optionalFieldOf("data").forGetter(PalettedContainerRO.PackedData::storage)
++                            Codec.LONG_STREAM.lenientOptionalFieldOf("data").forGetter(PalettedContainerRO.PackedData::storage)
+                         )
+-                        .apply(p_188047_, PalettedContainerRO.PackedData::new)
++                        .apply(p_338082_, PalettedContainerRO.PackedData::new)
+             )
+-            .comapFlatMap(p_238262_ -> p_238432_.read(p_238428_, p_238430_, p_238262_), p_238263_ -> p_238263_.pack(p_238428_, p_238430_));
++            .comapFlatMap(
++                p_238262_ -> p_238432_.read(p_238428_, p_238430_, (PalettedContainerRO.PackedData<T>)p_238262_),
++                p_238263_ -> p_238263_.pack(p_238428_, p_238430_)
++            );
+     }
+ 
+     public PalettedContainer(
+@@ -257,7 +_,7 @@
+         int i = -1;
+         int j = -1;
+ 
+-        for(int k = 0; k < p_198190_.length; ++k) {
++        for (int k = 0; k < p_198190_.length; k++) {
+             int l = p_198190_[k];
+             if (l != i) {
+                 i = l;
+@@ -314,7 +_,7 @@
+ 
+     static record Data<T>(PalettedContainer.Configuration<T> configuration, BitStorage storage, Palette<T> palette) {
+         public void copyFrom(Palette<T> p_188112_, BitStorage p_188113_) {
+-            for(int i = 0; i < p_188113_.getSize(); ++i) {
++            for (int i = 0; i < p_188113_.getSize(); i++) {
+                 T t = p_188112_.valueFor(p_188113_.get(i));
+                 this.storage.set(i, this.palette.idFor(t));
+             }
+@@ -343,7 +_,7 @@
+         public static final PalettedContainer.Strategy SECTION_STATES = new PalettedContainer.Strategy(4) {
+             @Override
+             public <A> PalettedContainer.Configuration<A> getConfiguration(IdMap<A> p_188157_, int p_188158_) {
+-                return switch(p_188158_) {
++                return switch (p_188158_) {
+                     case 0 -> new PalettedContainer.Configuration(SINGLE_VALUE_PALETTE_FACTORY, p_188158_);
+                     case 1, 2, 3, 4 -> new PalettedContainer.Configuration(LINEAR_PALETTE_FACTORY, 4);
+                     case 5, 6, 7, 8 -> new PalettedContainer.Configuration(HASHMAP_PALETTE_FACTORY, p_188158_);
+@@ -354,7 +_,7 @@
+         public static final PalettedContainer.Strategy SECTION_BIOMES = new PalettedContainer.Strategy(2) {
+             @Override
+             public <A> PalettedContainer.Configuration<A> getConfiguration(IdMap<A> p_188162_, int p_188163_) {
+-                return switch(p_188163_) {
++                return switch (p_188163_) {
+                     case 0 -> new PalettedContainer.Configuration(SINGLE_VALUE_PALETTE_FACTORY, p_188163_);
+                     case 1, 2, 3 -> new PalettedContainer.Configuration(LINEAR_PALETTE_FACTORY, p_188163_);
+                     default -> new PalettedContainer.Configuration(PalettedContainer.Strategy.GLOBAL_PALETTE_FACTORY, Mth.ceillog2(p_188162_.size()));

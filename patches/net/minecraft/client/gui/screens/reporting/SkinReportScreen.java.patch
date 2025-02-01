@@ -1,0 +1,23 @@
+--- a/net/minecraft/client/gui/screens/reporting/SkinReportScreen.java
++++ b/net/minecraft/client/gui/screens/reporting/SkinReportScreen.java
+@@ -3,6 +_,7 @@
+ import java.util.UUID;
+ import java.util.function.Supplier;
+ import net.minecraft.Optionull;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.MultiLineEditBox;
+ import net.minecraft.client.gui.components.PlayerSkinWidget;
+@@ -70,8 +_,10 @@
+         linearlayout1.addChild(CommonLayouts.labeledElement(this.font, this.commentBox, MORE_COMMENTS_LABEL, p_300017_ -> p_300017_.paddingBottom(12)));
+         LinearLayout linearlayout2 = this.layout.addChild(LinearLayout.horizontal().spacing(8));
+         linearlayout2.addChild(Button.builder(CommonComponents.GUI_BACK, p_315829_ -> this.onClose()).width(120).build());
+-        this.sendButton = linearlayout2.addChild(Button.builder(SEND_REPORT, p_339483_ -> this.sendReport()).width(120).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.sendButton = linearlayout2.addChild(Button.builder(SEND_REPORT, p_329742_ -> this.sendReport()).width(120).build());
++        this.layout.visitWidgets(p_321364_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321364_);
++        });
+         this.repositionElements();
+         this.onReportChanged();
+     }

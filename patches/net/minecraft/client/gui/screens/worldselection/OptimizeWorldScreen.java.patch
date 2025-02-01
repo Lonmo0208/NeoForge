@@ -1,0 +1,29 @@
+--- a/net/minecraft/client/gui/screens/worldselection/OptimizeWorldScreen.java
++++ b/net/minecraft/client/gui/screens/worldselection/OptimizeWorldScreen.java
+@@ -31,12 +_,11 @@
+ @OnlyIn(Dist.CLIENT)
+ public class OptimizeWorldScreen extends Screen {
+     private static final Logger LOGGER = LogUtils.getLogger();
+-    private static final ToIntFunction<ResourceKey<Level>> DIMENSION_COLORS = Util.make(new Reference2IntOpenHashMap<>(), p_339484_ -> {
+-        p_339484_.put(Level.OVERWORLD, -13408734);
+-        p_339484_.put(Level.NETHER, -10075085);
+-        p_339484_.put(Level.END, -8943531);
+-        p_339484_.put(Level.POTATO, -559038737);
+-        p_339484_.defaultReturnValue(-2236963);
++    private static final ToIntFunction<ResourceKey<Level>> DIMENSION_COLORS = Util.make(new Reference2IntOpenHashMap<>(), p_304055_ -> {
++        p_304055_.put(Level.OVERWORLD, -13408734);
++        p_304055_.put(Level.NETHER, -10075085);
++        p_304055_.put(Level.END, -8943531);
++        p_304055_.defaultReturnValue(-2236963);
+     });
+     private final BooleanConsumer callback;
+     private final WorldUpgrader upgrader;
+@@ -119,7 +_,7 @@
+             p_281829_.drawString(this.font, Component.translatable("optimizeWorld.info.total", this.upgrader.getTotalChunks()), i, 40 + (9 + 3) * 2, 10526880);
+             int i1 = 0;
+ 
+-            for(ResourceKey<Level> resourcekey : this.upgrader.levels()) {
++            for (ResourceKey<Level> resourcekey : this.upgrader.levels()) {
+                 int j1 = Mth.floor(this.upgrader.dimensionProgress(resourcekey) * (float)(j - i));
+                 p_281829_.fill(i + i1, k, i + i1 + j1, l, DIMENSION_COLORS.applyAsInt(resourcekey));
+                 i1 += j1;

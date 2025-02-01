@@ -56,7 +56,15 @@
                  });
              }
  
-@@ -203,6 +_,7 @@
+@@ -196,13 +_,14 @@
+     public boolean continueDestroyBlock(BlockPos p_105284_, Direction p_105285_) {
+         this.ensureHasSentCarriedItem();
+         if (this.destroyDelay > 0) {
+-            --this.destroyDelay;
++            this.destroyDelay--;
+             return true;
+         } else if (this.localPlayerMode.isCreative() && this.minecraft.level.getWorldBorder().isWithinBounds(p_105284_)) {
+             this.destroyDelay = 5;
              BlockState blockstate1 = this.minecraft.level.getBlockState(p_105284_);
              this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, p_105284_, blockstate1, 1.0F);
              this.startPrediction(this.minecraft.level, p_233753_ -> {
@@ -64,18 +72,24 @@
                  this.destroyBlock(p_105284_);
                  return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, p_105284_, p_105285_, p_233753_);
              });
-@@ -215,7 +_,7 @@
+@@ -213,9 +_,9 @@
+                 this.isDestroying = false;
+                 return false;
              } else {
-                 this.destroyProgress += blockstate.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), p_105284_);
+-                this.destroyProgress += blockstate.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), p_105284_);
++                this.destroyProgress = this.destroyProgress + blockstate.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), p_105284_);
                  if (this.destroyTicks % 4.0F == 0.0F) {
 -                    SoundType soundtype = blockstate.getSoundType();
 +                    SoundType soundtype = blockstate.getSoundType(this.minecraft.level, p_105284_, this.minecraft.player);
                      this.minecraft
                          .getSoundManager()
                          .play(
-@@ -232,6 +_,7 @@
+@@ -230,8 +_,9 @@
+                         );
+                 }
  
-                 ++this.destroyTicks;
+-                ++this.destroyTicks;
++                this.destroyTicks++;
                  this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, p_105284_, blockstate, Mth.clamp(this.destroyProgress, 0.0F, 1.0F));
 +                if (net.neoforged.neoforge.common.CommonHooks.onClientMineHold(this.minecraft.player, p_105284_, p_105285_).getUseItem() == net.neoforged.bus.api.Event.Result.DENY) return true;
                  if (this.destroyProgress >= 1.0F) {
@@ -157,3 +171,20 @@
          return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : p_105232_.interactAt(p_105231_, vec3, p_105234_);
      }
  
+@@ -414,14 +_,14 @@
+             int i = nonnulllist.size();
+             List<ItemStack> list = Lists.newArrayListWithCapacity(i);
+ 
+-            for(Slot slot : nonnulllist) {
++            for (Slot slot : nonnulllist) {
+                 list.add(slot.getItem().copy());
+             }
+ 
+             abstractcontainermenu.clicked(p_171801_, p_171802_, p_171803_, p_171804_);
+             Int2ObjectMap<ItemStack> int2objectmap = new Int2ObjectOpenHashMap<>();
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 ItemStack itemstack = list.get(j);
+                 ItemStack itemstack1 = nonnulllist.get(j).getItem();
+                 if (!ItemStack.matches(itemstack, itemstack1)) {

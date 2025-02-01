@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/entity/animal/horse/Donkey.java
++++ b/net/minecraft/world/entity/animal/horse/Donkey.java
+@@ -45,10 +_,8 @@
+     public boolean canMate(Animal p_30679_) {
+         if (p_30679_ == this) {
+             return false;
+-        } else if (!(p_30679_ instanceof Donkey) && !(p_30679_ instanceof Horse)) {
+-            return false;
+         } else {
+-            return this.canParent() && ((AbstractHorse)p_30679_).canParent();
++            return !(p_30679_ instanceof Donkey) && !(p_30679_ instanceof Horse) ? false : this.canParent() && ((AbstractHorse)p_30679_).canParent();
+         }
+     }
+ 

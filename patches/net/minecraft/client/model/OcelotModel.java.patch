@@ -1,0 +1,14 @@
+--- a/net/minecraft/client/model/OcelotModel.java
++++ b/net/minecraft/client/model/OcelotModel.java
+@@ -148,9 +_,9 @@
+         this.rightHindLeg.z = 5.0F;
+         this.tail1.xRot = 0.9F;
+         if (p_103142_.isCrouching()) {
+-            ++this.body.y;
++            this.body.y++;
+             this.head.y += 2.0F;
+-            ++this.tail1.y;
++            this.tail1.y++;
+             this.tail2.y += -4.0F;
+             this.tail2.z += 2.0F;
+             this.tail1.xRot = (float) (Math.PI / 2);

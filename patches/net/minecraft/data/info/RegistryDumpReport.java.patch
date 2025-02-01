@@ -1,0 +1,13 @@
+--- a/net/minecraft/data/info/RegistryDumpReport.java
++++ b/net/minecraft/data/info/RegistryDumpReport.java
+@@ -23,7 +_,9 @@
+     @Override
+     public CompletableFuture<?> run(CachedOutput p_253743_) {
+         JsonObject jsonobject = new JsonObject();
+-        BuiltInRegistries.REGISTRY.holders().forEach(p_211088_ -> jsonobject.add(p_211088_.key().location().toString(), dumpRegistry(p_211088_.value())));
++        BuiltInRegistries.REGISTRY
++            .holders()
++            .forEach(p_211088_ -> jsonobject.add(p_211088_.key().location().toString(), dumpRegistry((Registry<?>)p_211088_.value())));
+         Path path = this.output.getOutputFolder(PackOutput.Target.REPORTS).resolve("registries.json");
+         return DataProvider.saveStable(p_253743_, jsonobject, path);
+     }

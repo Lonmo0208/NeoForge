@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/level/levelgen/feature/HugeBrownMushroomFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/HugeBrownMushroomFeature.java
+@@ -24,8 +_,8 @@
+     ) {
+         int i = p_225048_.foliageRadius;
+ 
+-        for(int j = -i; j <= i; ++j) {
+-            for(int k = -i; k <= i; ++k) {
++        for (int j = -i; j <= i; j++) {
++            for (int k = -i; k <= i; k++) {
+                 boolean flag = j == -i;
+                 boolean flag1 = j == i;
+                 boolean flag2 = k == -i;

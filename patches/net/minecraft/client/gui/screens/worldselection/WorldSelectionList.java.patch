@@ -8,6 +8,15 @@
      static final Logger LOGGER = LogUtils.getLogger();
      static final Component FROM_NEWER_TOOLTIP_1 = Component.translatable("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED);
      static final Component FROM_NEWER_TOOLTIP_2 = Component.translatable("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED);
+@@ -202,7 +_,7 @@
+         this.clearEntries();
+         p_233199_ = p_233199_.toLowerCase(Locale.ROOT);
+ 
+-        for(LevelSummary levelsummary : p_233200_) {
++        for (LevelSummary levelsummary : p_233200_) {
+             if (this.filterAccepts(p_233199_, levelsummary)) {
+                 this.addEntry(new WorldSelectionList.WorldListEntry(this, levelsummary));
+             }
 @@ -405,6 +_,7 @@
              RenderSystem.enableBlend();
              p_281612_.blit(this.icon.textureLocation(), p_282820_, p_283181_, 0.0F, 0.0F, 32, 32, 32, 32);

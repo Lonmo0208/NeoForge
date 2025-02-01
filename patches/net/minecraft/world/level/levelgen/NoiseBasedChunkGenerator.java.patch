@@ -1,0 +1,136 @@
+--- a/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
++++ b/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
+@@ -3,7 +_,7 @@
+ import com.google.common.annotations.VisibleForTesting;
+ import com.google.common.base.Suppliers;
+ import com.google.common.collect.Sets;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.text.DecimalFormat;
+@@ -49,7 +_,7 @@
+ import org.apache.commons.lang3.mutable.MutableObject;
+ 
+ public class NoiseBasedChunkGenerator extends ChunkGenerator {
+-    public static final Codec<NoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<NoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
+         p_255585_ -> p_255585_.group(
+                     BiomeSource.CODEC.fieldOf("biome_source").forGetter(p_255584_ -> p_255584_.biomeSource),
+                     NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter(p_224278_ -> p_224278_.settings)
+@@ -102,7 +_,7 @@
+     }
+ 
+     @Override
+-    protected Codec<? extends ChunkGenerator> codec() {
++    protected MapCodec<? extends ChunkGenerator> codec() {
+         return CODEC;
+     }
+ 
+@@ -116,8 +_,7 @@
+ 
+     @Override
+     public int getBaseHeight(int p_224216_, int p_224217_, Heightmap.Types p_224218_, LevelHeightAccessor p_224219_, RandomState p_224220_) {
+-        return this.iterateNoiseColumn(p_224219_, p_224220_, p_224216_, p_224217_, null, p_224218_.isOpaque())
+-            .orElse(p_224219_.getMinBuildHeight() + this.settings.value().bottomGenerationPadding());
++        return this.iterateNoiseColumn(p_224219_, p_224220_, p_224216_, p_224217_, null, p_224218_.isOpaque()).orElse(p_224219_.getMinBuildHeight());
+     }
+ 
+     @Override
+@@ -204,10 +_,10 @@
+             noisechunk.initializeForFirstCellX();
+             noisechunk.advanceCellX(0);
+ 
+-            for(int l2 = l - 1; l2 >= 0; --l2) {
++            for (int l2 = l - 1; l2 >= 0; l2--) {
+                 noisechunk.selectCellYZ(l2, 0);
+ 
+-                for(int i3 = i - 1; i3 >= 0; --i3) {
++                for (int i3 = i - 1; i3 >= 0; i3--) {
+                     int j3 = (k + l2) * i + i3;
+                     double d2 = (double)i3 / (double)i;
+                     noisechunk.updateForY(j3, d2);
+@@ -296,8 +_,8 @@
+         );
+         CarvingMask carvingmask = ((ProtoChunk)p_224229_).getOrCreateCarvingMask(p_224230_);
+ 
+-        for(int j = -8; j <= 8; ++j) {
+-            for(int k = -8; k <= 8; ++k) {
++        for (int j = -8; j <= 8; j++) {
++            for (int k = -8; k <= 8; k++) {
+                 ChunkPos chunkpos1 = new ChunkPos(chunkpos.x + j, chunkpos.z + k);
+                 ChunkAccess chunkaccess = p_224224_.getChunk(chunkpos1.x, chunkpos1.z);
+                 BiomeGenerationSettings biomegenerationsettings = chunkaccess.carverBiome(
+@@ -311,14 +_,14 @@
+                 Iterable<Holder<ConfiguredWorldCarver<?>>> iterable = biomegenerationsettings.getCarvers(p_224230_);
+                 int l = 0;
+ 
+-                for(Holder<ConfiguredWorldCarver<?>> holder : iterable) {
++                for (Holder<ConfiguredWorldCarver<?>> holder : iterable) {
+                     ConfiguredWorldCarver<?> configuredworldcarver = holder.value();
+                     worldgenrandom.setLargeFeatureSeed(p_224225_ + (long)l, chunkpos1.x, chunkpos1.z);
+                     if (configuredworldcarver.isStartChunk(worldgenrandom)) {
+                         configuredworldcarver.carve(carvingcontext, p_224229_, biomemanager::getBiome, worldgenrandom, aquifer, chunkpos1, carvingmask);
+                     }
+ 
+-                    ++l;
++                    l++;
+                 }
+             }
+         }
+@@ -339,7 +_,7 @@
+             int i1 = p_224316_.getSectionIndex(i);
+             Set<LevelChunkSection> set = Sets.newHashSet();
+ 
+-            for(int j1 = l; j1 >= i1; --j1) {
++            for (int j1 = l; j1 >= i1; j1--) {
+                 LevelChunkSection levelchunksection = p_224316_.getSection(j1);
+                 levelchunksection.acquire();
+                 set.add(levelchunksection);
+@@ -350,7 +_,7 @@
+                     Util.backgroundExecutor()
+                 )
+                 .whenCompleteAsync((p_224309_, p_224310_) -> {
+-                    for(LevelChunkSection levelchunksection1 : set) {
++                    for (LevelChunkSection levelchunksection1 : set) {
+                         levelchunksection1.release();
+                     }
+                 }, p_224312_);
+@@ -372,17 +_,17 @@
+         int i1 = 16 / k;
+         int j1 = 16 / k;
+ 
+-        for(int k1 = 0; k1 < i1; ++k1) {
++        for (int k1 = 0; k1 < i1; k1++) {
+             noisechunk.advanceCellX(k1);
+ 
+-            for(int l1 = 0; l1 < j1; ++l1) {
++            for (int l1 = 0; l1 < j1; l1++) {
+                 int i2 = p_224288_.getSectionsCount() - 1;
+                 LevelChunkSection levelchunksection = p_224288_.getSection(i2);
+ 
+-                for(int j2 = p_224290_ - 1; j2 >= 0; --j2) {
++                for (int j2 = p_224290_ - 1; j2 >= 0; j2--) {
+                     noisechunk.selectCellYZ(j2, l1);
+ 
+-                    for(int k2 = l - 1; k2 >= 0; --k2) {
++                    for (int k2 = l - 1; k2 >= 0; k2--) {
+                         int l2 = (p_224289_ + j2) * l + k2;
+                         int i3 = l2 & 15;
+                         int j3 = p_224288_.getSectionIndex(l2);
+@@ -394,13 +_,13 @@
+                         double d0 = (double)k2 / (double)l;
+                         noisechunk.updateForY(l2, d0);
+ 
+-                        for(int k3 = 0; k3 < k; ++k3) {
++                        for (int k3 = 0; k3 < k; k3++) {
+                             int l3 = i + k1 * k + k3;
+                             int i4 = l3 & 15;
+                             double d1 = (double)k3 / (double)k;
+                             noisechunk.updateForX(l3, d1);
+ 
+-                            for(int j4 = 0; j4 < k; ++j4) {
++                            for (int j4 = 0; j4 < k; j4++) {
+                                 int k4 = j + l1 * k + j4;
+                                 int l4 = k4 & 15;
+                                 double d2 = (double)j4 / (double)k;

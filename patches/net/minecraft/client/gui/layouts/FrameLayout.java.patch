@@ -1,0 +1,17 @@
+--- a/net/minecraft/client/gui/layouts/FrameLayout.java
++++ b/net/minecraft/client/gui/layouts/FrameLayout.java
+@@ -57,12 +_,12 @@
+         int i = this.minWidth;
+         int j = this.minHeight;
+ 
+-        for(FrameLayout.ChildContainer framelayout$childcontainer : this.children) {
++        for (FrameLayout.ChildContainer framelayout$childcontainer : this.children) {
+             i = Math.max(i, framelayout$childcontainer.getWidth());
+             j = Math.max(j, framelayout$childcontainer.getHeight());
+         }
+ 
+-        for(FrameLayout.ChildContainer framelayout$childcontainer1 : this.children) {
++        for (FrameLayout.ChildContainer framelayout$childcontainer1 : this.children) {
+             framelayout$childcontainer1.setX(this.getX(), i);
+             framelayout$childcontainer1.setY(this.getY(), j);
+         }

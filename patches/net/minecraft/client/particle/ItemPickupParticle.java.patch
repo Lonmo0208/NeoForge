@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/particle/ItemPickupParticle.java
++++ b/net/minecraft/client/particle/ItemPickupParticle.java
+@@ -83,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        ++this.life;
++        this.life++;
+         if (this.life == 3) {
+             this.remove();
+         }

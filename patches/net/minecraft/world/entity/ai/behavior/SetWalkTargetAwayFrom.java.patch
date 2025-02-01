@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/behavior/SetWalkTargetAwayFrom.java
++++ b/net/minecraft/world/entity/ai/behavior/SetWalkTargetAwayFrom.java
+@@ -45,7 +_,7 @@
+                                         }
+                                     }
+         
+-                                    for(int i = 0; i < 10; ++i) {
++                                    for (int i = 0; i < 10; i++) {
+                                         Vec3 vec34 = LandRandomPos.getPosAway(p_259323_, 16, 7, vec31);
+                                         if (vec34 != null) {
+                                             p_260063_.set(new WalkTarget(vec34, p_259672_, 0));

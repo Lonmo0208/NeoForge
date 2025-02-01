@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/level/storage/loot/predicates/AnyOfCondition.java
++++ b/net/minecraft/world/level/storage/loot/predicates/AnyOfCondition.java
+@@ -1,11 +_,11 @@
+ package net.minecraft.world.level.storage.loot.predicates;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import java.util.List;
+ import net.minecraft.Util;
+ 
+ public class AnyOfCondition extends CompositeLootItemCondition {
+-    public static final Codec<AnyOfCondition> CODEC = createCodec(AnyOfCondition::new);
++    public static final MapCodec<AnyOfCondition> CODEC = createCodec(AnyOfCondition::new);
+ 
+     AnyOfCondition(List<LootItemCondition> p_299191_) {
+         super(p_299191_, Util.anyOf(p_299191_));

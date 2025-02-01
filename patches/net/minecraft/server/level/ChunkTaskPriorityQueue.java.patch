@@ -1,0 +1,44 @@
+--- a/net/minecraft/server/level/ChunkTaskPriorityQueue.java
++++ b/net/minecraft/server/level/ChunkTaskPriorityQueue.java
+@@ -34,8 +_,8 @@
+             Long2ObjectLinkedOpenHashMap<List<Optional<T>>> long2objectlinkedopenhashmap = this.taskQueue.get(p_140522_);
+             List<Optional<T>> list = long2objectlinkedopenhashmap.remove(p_140523_.toLong());
+             if (p_140522_ == this.firstQueue) {
+-                while(this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
+-                    ++this.firstQueue;
++                while (this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
++                    this.firstQueue++;
+                 }
+             }
+ 
+@@ -52,7 +_,7 @@
+     }
+ 
+     protected void release(long p_140531_, boolean p_140532_) {
+-        for(Long2ObjectLinkedOpenHashMap<List<Optional<T>>> long2objectlinkedopenhashmap : this.taskQueue) {
++        for (Long2ObjectLinkedOpenHashMap<List<Optional<T>>> long2objectlinkedopenhashmap : this.taskQueue) {
+             List<Optional<T>> list = long2objectlinkedopenhashmap.get(p_140531_);
+             if (list != null) {
+                 if (p_140532_) {
+@@ -67,8 +_,8 @@
+             }
+         }
+ 
+-        while(this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
+-            ++this.firstQueue;
++        while (this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
++            this.firstQueue++;
+         }
+ 
+         this.acquired.remove(p_140531_);
+@@ -90,8 +_,8 @@
+             long j = long2objectlinkedopenhashmap.firstLongKey();
+             List<Optional<T>> list = long2objectlinkedopenhashmap.removeFirst();
+ 
+-            while(this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
+-                ++this.firstQueue;
++            while (this.hasWork() && this.taskQueue.get(this.firstQueue).isEmpty()) {
++                this.firstQueue++;
+             }
+ 
+             return list.stream().map(p_140529_ -> p_140529_.<Either<T,Runnable>>map(Either::left).orElseGet(() -> Either.right(this.acquire(j))));

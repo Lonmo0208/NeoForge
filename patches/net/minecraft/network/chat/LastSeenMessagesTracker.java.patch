@@ -1,0 +1,26 @@
+--- a/net/minecraft/network/chat/LastSeenMessagesTracker.java
++++ b/net/minecraft/network/chat/LastSeenMessagesTracker.java
+@@ -30,12 +_,12 @@
+     private void addEntry(@Nullable LastSeenTrackedEntry p_250255_) {
+         int i = this.tail;
+         this.tail = (i + 1) % this.trackedMessages.length;
+-        ++this.offset;
++        this.offset++;
+         this.trackedMessages[i] = p_250255_;
+     }
+ 
+     public void ignorePending(MessageSignature p_251020_) {
+-        for(int i = 0; i < this.trackedMessages.length; ++i) {
++        for (int i = 0; i < this.trackedMessages.length; i++) {
+             LastSeenTrackedEntry lastseentrackedentry = this.trackedMessages[i];
+             if (lastseentrackedentry != null && lastseentrackedentry.pending() && p_251020_.equals(lastseentrackedentry.signature())) {
+                 this.trackedMessages[i] = null;
+@@ -55,7 +_,7 @@
+         BitSet bitset = new BitSet(this.trackedMessages.length);
+         ObjectList<MessageSignature> objectlist = new ObjectArrayList<>(this.trackedMessages.length);
+ 
+-        for(int j = 0; j < this.trackedMessages.length; ++j) {
++        for (int j = 0; j < this.trackedMessages.length; j++) {
+             int k = (this.tail + j) % this.trackedMessages.length;
+             LastSeenTrackedEntry lastseentrackedentry = this.trackedMessages[k];
+             if (lastseentrackedentry != null) {

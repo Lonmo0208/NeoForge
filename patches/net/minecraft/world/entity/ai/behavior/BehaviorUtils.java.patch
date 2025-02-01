@@ -1,0 +1,49 @@
+--- a/net/minecraft/world/entity/ai/behavior/BehaviorUtils.java
++++ b/net/minecraft/world/entity/ai/behavior/BehaviorUtils.java
+@@ -19,7 +_,6 @@
+ import net.minecraft.world.entity.ai.memory.WalkTarget;
+ import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+ import net.minecraft.world.entity.item.ItemEntity;
+-import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.ProjectileWeaponItem;
+ import net.minecraft.world.level.pathfinder.PathComputationType;
+@@ -40,7 +_,7 @@
+     }
+ 
+     public static boolean targetIsValid(Brain<?> p_22640_, MemoryModuleType<? extends LivingEntity> p_22641_, EntityType<?> p_22642_) {
+-        return targetIsValid(p_22640_, p_22641_, p_339957_ -> p_339957_.getType() == p_22642_);
++        return targetIsValid(p_22640_, p_22641_, p_337709_ -> p_337709_.getType() == p_22642_);
+     }
+ 
+     private static boolean targetIsValid(Brain<?> p_22644_, MemoryModuleType<? extends LivingEntity> p_22645_, Predicate<LivingEntity> p_22646_) {
+@@ -104,8 +_,9 @@
+     }
+ 
+     public static boolean isWithinAttackRange(Mob p_22633_, LivingEntity p_22634_, int p_22635_) {
+-        Item $$4 = p_22633_.getMainHandItem().getItem();
+-        if ($$4 instanceof ProjectileWeaponItem projectileweaponitem && p_22633_.canFireProjectileWeapon(projectileweaponitem)) {
++        if (p_22633_.getMainHandItem().getItem() instanceof ProjectileWeaponItem projectileweaponitem && p_22633_.canFireProjectileWeapon(projectileweaponitem)
++            )
++         {
+             int i = projectileweaponitem.getDefaultProjectileRange() - p_22635_;
+             return p_22633_.closerThan(p_22634_, (double)i);
+         }
+@@ -143,7 +_,7 @@
+ 
+     public static Optional<LivingEntity> getLivingEntityFromUUIDMemory(LivingEntity p_22611_, MemoryModuleType<UUID> p_22612_) {
+         Optional<UUID> optional = p_22611_.getBrain().getMemory(p_22612_);
+-        return optional.<Entity>map(p_339955_ -> ((ServerLevel)p_22611_.level()).getEntity(p_339955_))
++        return optional.<Entity>map(p_337711_ -> ((ServerLevel)p_22611_.level()).getEntity(p_337711_))
+             .map(p_186019_ -> p_186019_ instanceof LivingEntity livingentity ? livingentity : null);
+     }
+ 
+@@ -152,7 +_,7 @@
+         Vec3 vec3 = DefaultRandomPos.getPos(p_147445_, p_147446_, p_147447_);
+         int i = 0;
+ 
+-        while(vec3 != null && !p_147445_.level().getBlockState(BlockPos.containing(vec3)).isPathfindable(PathComputationType.WATER) && i++ < 10) {
++        while (vec3 != null && !p_147445_.level().getBlockState(BlockPos.containing(vec3)).isPathfindable(PathComputationType.WATER) && i++ < 10) {
+             vec3 = DefaultRandomPos.getPos(p_147445_, p_147446_, p_147447_);
+         }
+ 

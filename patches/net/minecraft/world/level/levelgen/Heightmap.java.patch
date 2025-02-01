@@ -1,0 +1,34 @@
+--- a/net/minecraft/world/level/levelgen/Heightmap.java
++++ b/net/minecraft/world/level/levelgen/Heightmap.java
+@@ -42,17 +_,17 @@
+         int j = p_64257_.getHighestSectionPosition() + 16;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(int k = 0; k < 16; ++k) {
+-            for(int l = 0; l < 16; ++l) {
+-                for(Heightmap.Types heightmap$types : p_64258_) {
++        for (int k = 0; k < 16; k++) {
++            for (int l = 0; l < 16; l++) {
++                for (Heightmap.Types heightmap$types : p_64258_) {
+                     objectlist.add(p_64257_.getOrCreateHeightmapUnprimed(heightmap$types));
+                 }
+ 
+-                for(int i1 = j - 1; i1 >= p_64257_.getMinBuildHeight(); --i1) {
++                for (int i1 = j - 1; i1 >= p_64257_.getMinBuildHeight(); i1--) {
+                     blockpos$mutableblockpos.set(k, i1, l);
+                     BlockState blockstate = p_64257_.getBlockState(blockpos$mutableblockpos);
+                     if (!blockstate.is(Blocks.AIR)) {
+-                        while(objectlistiterator.hasNext()) {
++                        while (objectlistiterator.hasNext()) {
+                             Heightmap heightmap = objectlistiterator.next();
+                             if (heightmap.isOpaque.test(blockstate)) {
+                                 heightmap.setHeight(k, l, i1 + 1);
+@@ -84,7 +_,7 @@
+             } else if (i - 1 == p_64251_) {
+                 BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-                for(int j = p_64251_ - 1; j >= this.chunk.getMinBuildHeight(); --j) {
++                for (int j = p_64251_ - 1; j >= this.chunk.getMinBuildHeight(); j--) {
+                     blockpos$mutableblockpos.set(p_64250_, j, p_64252_);
+                     if (this.isOpaque.test(this.chunk.getBlockState(blockpos$mutableblockpos))) {
+                         this.setHeight(p_64250_, p_64252_, j + 1);

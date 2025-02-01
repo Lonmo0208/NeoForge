@@ -1,0 +1,35 @@
+--- a/net/minecraft/util/valueproviders/ClampedInt.java
++++ b/net/minecraft/util/valueproviders/ClampedInt.java
+@@ -2,14 +_,14 @@
+ 
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.DataResult;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import java.util.function.Function;
+ import net.minecraft.util.Mth;
+ import net.minecraft.util.RandomSource;
+ 
+ public class ClampedInt extends IntProvider {
+-    public static final Codec<ClampedInt> CODEC = RecordCodecBuilder.<ClampedInt>create(
++    public static final MapCodec<ClampedInt> CODEC = RecordCodecBuilder.<ClampedInt>mapCodec(
+             p_146400_ -> p_146400_.group(
+                         IntProvider.CODEC.fieldOf("source").forGetter(p_146410_ -> p_146410_.source),
+                         Codec.INT.fieldOf("min_inclusive").forGetter(p_146408_ -> p_146408_.minInclusive),
+@@ -17,13 +_,12 @@
+                     )
+                     .apply(p_146400_, ClampedInt::new)
+         )
+-        .comapFlatMap(
++        .validate(
+             p_274932_ -> p_274932_.maxInclusive < p_274932_.minInclusive
+                     ? DataResult.error(
+                         () -> "Max must be at least min, min_inclusive: " + p_274932_.minInclusive + ", max_inclusive: " + p_274932_.maxInclusive
+                     )
+-                    : DataResult.success(p_274932_),
+-            Function.identity()
++                    : DataResult.success(p_274932_)
+         );
+     private final IntProvider source;
+     private final int minInclusive;

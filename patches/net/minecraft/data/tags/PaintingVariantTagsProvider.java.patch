@@ -1,6 +1,6 @@
 --- a/net/minecraft/data/tags/PaintingVariantTagsProvider.java
 +++ b/net/minecraft/data/tags/PaintingVariantTagsProvider.java
-@@ -9,8 +_,13 @@
+@@ -9,22 +_,17 @@
  import net.minecraft.world.entity.decoration.PaintingVariants;
  
  public class PaintingVariantTagsProvider extends TagsProvider<PaintingVariant> {
@@ -8,9 +8,32 @@
 +    @Deprecated
      public PaintingVariantTagsProvider(PackOutput p_255750_, CompletableFuture<HolderLookup.Provider> p_256184_) {
          super(p_255750_, Registries.PAINTING_VARIANT, p_256184_);
-+    }
+     }
 +    public PaintingVariantTagsProvider(PackOutput p_255750_, CompletableFuture<HolderLookup.Provider> p_256184_, String modId, @org.jetbrains.annotations.Nullable net.neoforged.neoforge.common.data.ExistingFileHelper existingFileHelper) {
 +        super(p_255750_, Registries.PAINTING_VARIANT, p_256184_, modId, existingFileHelper);
-     }
++    }
  
      @Override
+     protected void addTags(HolderLookup.Provider p_256017_) {
+-        this.tag(PaintingVariantTags.POTATO)
+-            .add(
+-                PaintingVariants.POISONOUS_POTATO,
+-                PaintingVariants.MR_POTATO,
+-                PaintingVariants.BURNING_POTATO,
+-                PaintingVariants.UBIQUITATO,
+-                PaintingVariants.ABSTRACTATO,
+-                PaintingVariants.CECI,
+-                PaintingVariants.POTATOE
+-            );
+         this.tag(PaintingVariantTags.PLACEABLE)
+             .add(
+                 PaintingVariants.KEBAB,
+@@ -53,7 +_,6 @@
+                 PaintingVariants.BURNING_SKULL,
+                 PaintingVariants.SKELETON,
+                 PaintingVariants.DONKEY_KONG
+-            )
+-            .addTag(PaintingVariantTags.POTATO);
++            );
+     }
+ }

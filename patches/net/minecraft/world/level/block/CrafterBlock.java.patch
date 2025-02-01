@@ -1,0 +1,71 @@
+--- a/net/minecraft/world/level/block/CrafterBlock.java
++++ b/net/minecraft/world/level/block/CrafterBlock.java
+@@ -71,8 +_,7 @@
+ 
+     @Override
+     protected int getAnalogOutputSignal(BlockState p_307633_, Level p_307264_, BlockPos p_307557_) {
+-        BlockEntity blockentity = p_307264_.getBlockEntity(p_307557_);
+-        return blockentity instanceof CrafterBlockEntity crafterblockentity ? crafterblockentity.getRedstoneSignal() : 0;
++        return p_307264_.getBlockEntity(p_307557_) instanceof CrafterBlockEntity crafterblockentity ? crafterblockentity.getRedstoneSignal() : 0;
+     }
+ 
+     @Override
+@@ -118,10 +_,11 @@
+     public BlockState getStateForPlacement(BlockPlaceContext p_307251_) {
+         Direction direction = p_307251_.getNearestLookingDirection().getOpposite();
+ 
+-        Direction direction1 = switch(direction) {
++        Direction direction1 = switch (direction) {
+             case DOWN -> p_307251_.getHorizontalDirection().getOpposite();
+             case UP -> p_307251_.getHorizontalDirection();
+             case NORTH, SOUTH, WEST, EAST -> Direction.UP;
++            default -> throw new MatchException(null, null);
+         };
+         return this.defaultBlockState()
+             .setValue(ORIENTATION, FrontAndTop.fromFrontAndTop(direction, direction1))
+@@ -156,8 +_,7 @@
+     }
+ 
+     protected void dispenseFrom(BlockState p_307495_, ServerLevel p_307310_, BlockPos p_307672_) {
+-        BlockEntity $$5 = p_307310_.getBlockEntity(p_307672_);
+-        if ($$5 instanceof CrafterBlockEntity crafterblockentity) {
++        if (p_307310_.getBlockEntity(p_307672_) instanceof CrafterBlockEntity crafterblockentity) {
+             Optional<RecipeHolder<CraftingRecipe>> optional = getPotentialResults(p_307310_, crafterblockentity);
+             if (optional.isEmpty()) {
+                 p_307310_.levelEvent(1050, p_307672_, 0);
+@@ -172,7 +_,7 @@
+                     itemstack.onCraftedBySystem(p_307310_);
+                     this.dispenseItem(p_307310_, p_307672_, crafterblockentity, itemstack, p_307495_, recipeholder);
+ 
+-                    for(ItemStack itemstack1 : recipeholder.value().getRemainingItems(crafterblockentity)) {
++                    for (ItemStack itemstack1 : recipeholder.value().getRemainingItems(crafterblockentity)) {
+                         if (!itemstack1.isEmpty()) {
+                             this.dispenseItem(p_307310_, p_307672_, crafterblockentity, itemstack1, p_307495_, recipeholder);
+                         }
+@@ -205,7 +_,7 @@
+         Container container = HopperBlockEntity.getContainerAt(p_335887_, p_307620_.relative(direction));
+         ItemStack itemstack = p_307296_.copy();
+         if (container != null && (container instanceof CrafterBlockEntity || p_307296_.getCount() > container.getMaxStackSize(p_307296_))) {
+-            while(!itemstack.isEmpty()) {
++            while (!itemstack.isEmpty()) {
+                 ItemStack itemstack2 = itemstack.copyWithCount(1);
+                 ItemStack itemstack1 = HopperBlockEntity.addItem(p_307387_, container, itemstack2, direction.getOpposite());
+                 if (!itemstack1.isEmpty()) {
+@@ -215,7 +_,7 @@
+                 itemstack.shrink(1);
+             }
+         } else if (container != null) {
+-            while(!itemstack.isEmpty()) {
++            while (!itemstack.isEmpty()) {
+                 int i = itemstack.getCount();
+                 itemstack = HopperBlockEntity.addItem(p_307387_, container, itemstack, direction.getOpposite());
+                 if (i == itemstack.getCount()) {
+@@ -229,7 +_,7 @@
+             Vec3 vec31 = vec3.relative(direction, 0.7);
+             DefaultDispenseItemBehavior.spawnItem(p_335887_, itemstack, 6, direction, vec31);
+ 
+-            for(ServerPlayer serverplayer : p_335887_.getEntitiesOfClass(ServerPlayer.class, AABB.ofSize(vec3, 17.0, 17.0, 17.0))) {
++            for (ServerPlayer serverplayer : p_335887_.getEntitiesOfClass(ServerPlayer.class, AABB.ofSize(vec3, 17.0, 17.0, 17.0))) {
+                 CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.trigger(serverplayer, p_335494_.id(), p_307387_.getItems());
+             }
+ 

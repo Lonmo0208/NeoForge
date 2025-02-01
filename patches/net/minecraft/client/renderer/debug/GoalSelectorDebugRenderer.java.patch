@@ -1,0 +1,15 @@
+--- a/net/minecraft/client/renderer/debug/GoalSelectorDebugRenderer.java
++++ b/net/minecraft/client/renderer/debug/GoalSelectorDebugRenderer.java
+@@ -40,10 +_,10 @@
+         Camera camera = this.minecraft.gameRenderer.getMainCamera();
+         BlockPos blockpos = BlockPos.containing(camera.getPosition().x, 0.0, camera.getPosition().z);
+ 
+-        for(GoalSelectorDebugRenderer.EntityGoalInfo goalselectordebugrenderer$entitygoalinfo : this.goalSelectors.values()) {
++        for (GoalSelectorDebugRenderer.EntityGoalInfo goalselectordebugrenderer$entitygoalinfo : this.goalSelectors.values()) {
+             BlockPos blockpos1 = goalselectordebugrenderer$entitygoalinfo.entityPos;
+             if (blockpos.closerThan(blockpos1, 160.0)) {
+-                for(int i = 0; i < goalselectordebugrenderer$entitygoalinfo.goals.size(); ++i) {
++                for (int i = 0; i < goalselectordebugrenderer$entitygoalinfo.goals.size(); i++) {
+                     GoalDebugPayload.DebugGoal goaldebugpayload$debuggoal = goalselectordebugrenderer$entitygoalinfo.goals.get(i);
+                     double d0 = (double)blockpos1.getX() + 0.5;
+                     double d1 = (double)blockpos1.getY() + 2.0 + (double)i * 0.25;

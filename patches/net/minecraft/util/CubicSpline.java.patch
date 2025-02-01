@@ -1,0 +1,89 @@
+--- a/net/minecraft/util/CubicSpline.java
++++ b/net/minecraft/util/CubicSpline.java
+@@ -28,12 +_,12 @@
+         }
+ 
+         Codec<Point<C, I>> codec = RecordCodecBuilder.create(
+-            p_184270_ -> p_184270_.group(
++            p_337574_ -> p_337574_.group(
+                         Codec.FLOAT.fieldOf("location").forGetter(Point::location),
+-                        ExtraCodecs.lazyInitializedCodec(mutableobject::getValue).fieldOf("value").forGetter(Point::value),
++                        Codec.lazyInitialized(mutableobject::getValue).fieldOf("value").forGetter(Point::value),
+                         Codec.FLOAT.fieldOf("derivative").forGetter(Point::derivative)
+                     )
+-                    .apply(p_184270_, (p_184242_, p_184243_, p_184244_) -> new Point<>(p_184242_, p_184243_, p_184244_))
++                    .apply(p_337574_, (p_184242_, p_184243_, p_184244_) -> new Point<>(p_184242_, p_184243_, p_184244_))
+         );
+         Codec<CubicSpline.Multipoint<C, I>> codec1 = RecordCodecBuilder.create(
+             p_184267_ -> p_184267_.group(
+@@ -44,9 +_,7 @@
+                                 p_184272_ -> IntStream.range(0, p_184272_.locations.length)
+                                         .mapToObj(
+                                             p_184249_ -> new Point<>(
+-                                                    p_184272_.locations()[p_184249_],
+-                                                    (CubicSpline<C, I>)p_184272_.values().get(p_184249_),
+-                                                    p_184272_.derivatives()[p_184249_]
++                                                    p_184272_.locations()[p_184249_], p_184272_.values().get(p_184249_), p_184272_.derivatives()[p_184249_]
+                                                 )
+                                         )
+                                         .toList()
+@@ -57,7 +_,7 @@
+                         ImmutableList.Builder<CubicSpline<C, I>> builder = ImmutableList.builder();
+                         float[] afloat1 = new float[p_184259_.size()];
+         
+-                        for(int i = 0; i < p_184259_.size(); ++i) {
++                        for (int i = 0; i < p_184259_.size(); i++) {
+                             Point<C, I> point = p_184259_.get(i);
+                             afloat[i] = point.location();
+                             builder.add(point.value());
+@@ -71,7 +_,7 @@
+             Codec.either(Codec.FLOAT, codec1)
+                 .xmap(
+                     p_184261_ -> p_184261_.map(CubicSpline.Constant::new, p_184246_ -> p_184246_),
+-                    p_184251_ -> p_184251_ instanceof CubicSpline.Constant constant
++                    p_184251_ -> p_184251_ instanceof CubicSpline.Constant<C, I> constant
+                             ? Either.left(constant.value())
+                             : Either.right((CubicSpline.Multipoint<C, I>)p_184251_)
+                 )
+@@ -210,12 +_,12 @@
+                 f1 = Math.max(f1, Math.max(f24, f25));
+             }
+ 
+-            for(CubicSpline<C, I> cubicspline2 : p_216146_) {
++            for (CubicSpline<C, I> cubicspline2 : p_216146_) {
+                 f = Math.min(f, cubicspline2.minValue());
+                 f1 = Math.max(f1, cubicspline2.maxValue());
+             }
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 float f26 = p_216145_[j];
+                 float f6 = p_216145_[j + 1];
+                 float f7 = f6 - f26;
+@@ -272,8 +_,8 @@
+                 float f1 = this.locations[i];
+                 float f2 = this.locations[i + 1];
+                 float f3 = (f - f1) / (f2 - f1);
+-                ToFloatFunction<C> tofloatfunction = (ToFloatFunction)this.values.get(i);
+-                ToFloatFunction<C> tofloatfunction1 = (ToFloatFunction)this.values.get(i + 1);
++                ToFloatFunction<C> tofloatfunction = (ToFloatFunction<C>)this.values.get(i);
++                ToFloatFunction<C> tofloatfunction1 = (ToFloatFunction<C>)this.values.get(i + 1);
+                 float f4 = this.derivatives[i];
+                 float f5 = this.derivatives[i + 1];
+                 float f6 = tofloatfunction.apply(p_184340_);
+@@ -298,13 +_,13 @@
+                 + ", derivatives="
+                 + this.toString(this.derivatives)
+                 + ", values="
+-                + (String)this.values.stream().map(CubicSpline::parityString).collect(Collectors.joining(", ", "[", "]"))
++                + this.values.stream().map(CubicSpline::parityString).collect(Collectors.joining(", ", "[", "]"))
+                 + "}";
+         }
+ 
+         private String toString(float[] p_184335_) {
+             return "["
+-                + (String)IntStream.range(0, p_184335_.length)
++                + IntStream.range(0, p_184335_.length)
+                     .mapToDouble(p_184338_ -> (double)p_184335_[p_184338_])
+                     .mapToObj(p_184330_ -> String.format(Locale.ROOT, "%.3f", p_184330_))
+                     .collect(Collectors.joining(", "))

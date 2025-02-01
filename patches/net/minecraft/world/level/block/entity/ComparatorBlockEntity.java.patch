@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/level/block/entity/ComparatorBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/ComparatorBlockEntity.java
+@@ -19,9 +_,9 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155389_, HolderLookup.Provider p_323944_) {
+-        super.load(p_155389_, p_323944_);
+-        this.output = p_155389_.getInt("OutputSignal");
++    protected void loadAdditional(CompoundTag p_338778_, HolderLookup.Provider p_338355_) {
++        super.loadAdditional(p_338778_, p_338355_);
++        this.output = p_338778_.getInt("OutputSignal");
+     }
+ 
+     public int getOutputSignal() {

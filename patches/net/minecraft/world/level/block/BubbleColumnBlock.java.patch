@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/block/BubbleColumnBlock.java
++++ b/net/minecraft/world/level/block/BubbleColumnBlock.java
+@@ -53,7 +_,7 @@
+             if (!p_50977_.isClientSide) {
+                 ServerLevel serverlevel = (ServerLevel)p_50977_;
+ 
+-                for(int i = 0; i < 2; ++i) {
++                for (int i = 0; i < 2; i++) {
+                     serverlevel.sendParticles(
+                         ParticleTypes.SPLASH,
+                         (double)p_50978_.getX() + p_50977_.random.nextDouble(),
+@@ -103,7 +_,7 @@
+             p_152703_.setBlock(p_152704_, blockstate, 2);
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = p_152704_.mutable().move(Direction.UP);
+ 
+-            while(canExistIn(p_152703_.getBlockState(blockpos$mutableblockpos))) {
++            while (canExistIn(p_152703_.getBlockState(blockpos$mutableblockpos))) {
+                 if (!p_152703_.setBlock(blockpos$mutableblockpos, blockstate, 2)) {
+                     return;
+                 }

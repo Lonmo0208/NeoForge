@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/RandomizableContainer.java
++++ b/net/minecraft/world/RandomizableContainer.java
+@@ -13,7 +_,6 @@
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.level.BlockGetter;
+ import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.entity.BlockEntity;
+ import net.minecraft.world.level.storage.loot.LootParams;
+ import net.minecraft.world.level.storage.loot.LootTable;
+ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+@@ -44,8 +_,7 @@
+     Level getLevel();
+ 
+     static void setBlockEntityLootTable(BlockGetter p_309623_, RandomSource p_309643_, BlockPos p_309644_, ResourceKey<LootTable> p_335924_) {
+-        BlockEntity blockentity = p_309623_.getBlockEntity(p_309644_);
+-        if (blockentity instanceof RandomizableContainer randomizablecontainer) {
++        if (p_309623_.getBlockEntity(p_309644_) instanceof RandomizableContainer randomizablecontainer) {
+             randomizablecontainer.setLootTable(p_335924_, p_309643_.nextLong());
+         }
+     }

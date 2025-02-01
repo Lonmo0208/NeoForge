@@ -1,0 +1,27 @@
+--- a/net/minecraft/server/commands/FillCommand.java
++++ b/net/minecraft/server/commands/FillCommand.java
+@@ -165,7 +_,7 @@
+             ServerLevel serverlevel = p_137386_.getLevel();
+             int k = 0;
+ 
+-            for(BlockPos blockpos : BlockPos.betweenClosed(
++            for (BlockPos blockpos : BlockPos.betweenClosed(
+                 p_137387_.minX(), p_137387_.minY(), p_137387_.minZ(), p_137387_.maxX(), p_137387_.maxY(), p_137387_.maxZ()
+             )) {
+                 if (p_137390_ == null || p_137390_.test(new BlockInWorld(serverlevel, blockpos, true))) {
+@@ -175,13 +_,13 @@
+                         Clearable.tryClear(blockentity);
+                         if (blockinput.place(serverlevel, blockpos, 2)) {
+                             list.add(blockpos.immutable());
+-                            ++k;
++                            k++;
+                         }
+                     }
+                 }
+             }
+ 
+-            for(BlockPos blockpos1 : list) {
++            for (BlockPos blockpos1 : list) {
+                 Block block = serverlevel.getBlockState(blockpos1).getBlock();
+                 serverlevel.blockUpdated(blockpos1, block);
+             }

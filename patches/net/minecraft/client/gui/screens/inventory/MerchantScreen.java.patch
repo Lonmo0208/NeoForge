@@ -1,5 +1,44 @@
 --- a/net/minecraft/client/gui/screens/inventory/MerchantScreen.java
 +++ b/net/minecraft/client/gui/screens/inventory/MerchantScreen.java
+@@ -73,7 +_,7 @@
+         int j = (this.height - this.imageHeight) / 2;
+         int k = j + 16 + 2;
+ 
+-        for(int l = 0; l < 7; ++l) {
++        for (int l = 0; l < 7; l++) {
+             this.tradeOfferButtons[l] = this.addRenderableWidget(new MerchantScreen.TradeOfferButton(i + 5, k, l, p_99174_ -> {
+                 if (p_99174_ instanceof MerchantScreen.TradeOfferButton) {
+                     this.shopItem = ((MerchantScreen.TradeOfferButton)p_99174_).getIndex() + this.scrollOff;
+@@ -169,7 +_,7 @@
+             this.renderScroller(p_283487_, i, j, merchantoffers);
+             int i1 = 0;
+ 
+-            for(MerchantOffer merchantoffer : merchantoffers) {
++            for (MerchantOffer merchantoffer : merchantoffers) {
+                 if (!this.canScroll(merchantoffers.size()) || i1 >= this.scrollOff && i1 < 7 + this.scrollOff) {
+                     ItemStack itemstack = merchantoffer.getBaseCostA();
+                     ItemStack itemstack1 = merchantoffer.getCostA();
+@@ -189,9 +_,9 @@
+                     p_283487_.renderItemDecorations(this.font, itemstack3, i + 5 + 68, j1);
+                     p_283487_.pose().popPose();
+                     k += 20;
+-                    ++i1;
++                    i1++;
+                 } else {
+-                    ++i1;
++                    i1++;
+                 }
+             }
+ 
+@@ -205,7 +_,7 @@
+                 p_283487_.renderTooltip(this.font, DEPRECATED_TOOLTIP, p_281994_, p_282099_);
+             }
+ 
+-            for(MerchantScreen.TradeOfferButton merchantscreen$tradeofferbutton : this.tradeOfferButtons) {
++            for (MerchantScreen.TradeOfferButton merchantscreen$tradeofferbutton : this.tradeOfferButtons) {
+                 if (merchantscreen$tradeofferbutton.isHoveredOrFocused()) {
+                     merchantscreen$tradeofferbutton.renderToolTip(p_283487_, p_281994_, p_282099_);
+                 }
 @@ -234,7 +_,12 @@
              p_281357_.renderItemDecorations(this.font, p_283466_, p_282403_, p_283601_);
          } else {

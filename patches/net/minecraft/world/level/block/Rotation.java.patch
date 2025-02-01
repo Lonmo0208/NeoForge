@@ -1,0 +1,50 @@
+--- a/net/minecraft/world/level/block/Rotation.java
++++ b/net/minecraft/world/level/block/Rotation.java
+@@ -24,9 +_,9 @@
+     }
+ 
+     public Rotation getRotated(Rotation p_55953_) {
+-        switch(p_55953_) {
++        switch (p_55953_) {
+             case CLOCKWISE_180:
+-                switch(this) {
++                switch (this) {
+                     case NONE:
+                         return CLOCKWISE_180;
+                     case CLOCKWISE_90:
+@@ -37,7 +_,7 @@
+                         return CLOCKWISE_90;
+                 }
+             case COUNTERCLOCKWISE_90:
+-                switch(this) {
++                switch (this) {
+                     case NONE:
+                         return COUNTERCLOCKWISE_90;
+                     case CLOCKWISE_90:
+@@ -48,7 +_,7 @@
+                         return CLOCKWISE_180;
+                 }
+             case CLOCKWISE_90:
+-                switch(this) {
++                switch (this) {
+                     case NONE:
+                         return CLOCKWISE_90;
+                     case CLOCKWISE_90:
+@@ -71,7 +_,7 @@
+         if (p_55955_.getAxis() == Direction.Axis.Y) {
+             return p_55955_;
+         } else {
+-            switch(this) {
++            switch (this) {
+                 case CLOCKWISE_90:
+                     return p_55955_.getClockWise();
+                 case CLOCKWISE_180:
+@@ -85,7 +_,7 @@
+     }
+ 
+     public int rotate(int p_55950_, int p_55951_) {
+-        switch(this) {
++        switch (this) {
+             case CLOCKWISE_90:
+                 return (p_55950_ + p_55951_ / 4) % p_55951_;
+             case CLOCKWISE_180:

@@ -27,3 +27,12 @@
              this.crossbowState = CrossbowAttack.CrossbowState.CHARGING;
              p_22787_.setChargingCrossbow(true);
          } else if (this.crossbowState == CrossbowAttack.CrossbowState.CHARGING) {
+@@ -70,7 +_,7 @@
+                 p_22787_.setChargingCrossbow(false);
+             }
+         } else if (this.crossbowState == CrossbowAttack.CrossbowState.CHARGED) {
+-            --this.attackDelay;
++            this.attackDelay--;
+             if (this.attackDelay == 0) {
+                 this.crossbowState = CrossbowAttack.CrossbowState.READY_TO_ATTACK;
+             }

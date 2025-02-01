@@ -1,0 +1,32 @@
+--- a/net/minecraft/world/entity/monster/Bogged.java
++++ b/net/minecraft/world/entity/monster/Bogged.java
+@@ -46,11 +_,6 @@
+     }
+ 
+     @Override
+-    public boolean hasPotatoVariant() {
+-        return true;
+-    }
+-
+-    @Override
+     protected void defineSynchedData(SynchedEntityData.Builder p_331269_) {
+         super.defineSynchedData(p_331269_);
+         p_331269_.define(DATA_SHEARED, false);
+@@ -140,15 +_,14 @@
+     }
+ 
+     private void spawnShearedMushrooms() {
+-        Level $$1 = this.level();
+-        if ($$1 instanceof ServerLevel serverlevel && serverlevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
++        if (this.level() instanceof ServerLevel serverlevel && serverlevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+             LootTable loottable = serverlevel.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.BOGGED_SHEAR);
+             LootParams lootparams = new LootParams.Builder(serverlevel)
+                 .withParameter(LootContextParams.ORIGIN, this.position())
+                 .withParameter(LootContextParams.THIS_ENTITY, this)
+                 .create(LootContextParamSets.SHEARING);
+ 
+-            for(ItemStack itemstack : loottable.getRandomItems(lootparams)) {
++            for (ItemStack itemstack : loottable.getRandomItems(lootparams)) {
+                 this.spawnAtLocation(itemstack);
+             }
+         }

@@ -1,0 +1,21 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsResetWorldScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsResetWorldScreen.java
+@@ -17,6 +_,7 @@
+ import javax.annotation.Nullable;
+ import net.minecraft.client.gui.Font;
+ import net.minecraft.client.gui.GuiGraphics;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.StringWidget;
+ import net.minecraft.client.gui.components.events.GuiEventListener;
+@@ -224,7 +_,9 @@
+             )
+         );
+         this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, p_300644_ -> this.onClose()).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_321346_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321346_);
++        });
+         this.repositionElements();
+     }
+ 

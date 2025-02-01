@@ -9,7 +9,16 @@
              this.socket.setSoTimeout(5000);
              this.socket.joinGroup(this.pingGroup);
          }
-@@ -88,7 +_,11 @@
+@@ -42,7 +_,7 @@
+         public void run() {
+             byte[] abyte = new byte[1024];
+ 
+-            while(!this.isInterrupted()) {
++            while (!this.isInterrupted()) {
+                 DatagramPacket datagrampacket = new DatagramPacket(abyte, abyte.length);
+ 
+                 try {
+@@ -88,10 +_,14 @@
              String s = LanServerPinger.parseMotd(p_120097_);
              String s1 = LanServerPinger.parseAddress(p_120097_);
              if (s1 != null) {
@@ -21,4 +30,8 @@
 +                }
                  boolean flag = false;
  
-                 for(LanServer lanserver : this.servers) {
+-                for(LanServer lanserver : this.servers) {
++                for (LanServer lanserver : this.servers) {
+                     if (lanserver.getAddress().equals(s1)) {
+                         lanserver.updatePingTime();
+                         flag = true;

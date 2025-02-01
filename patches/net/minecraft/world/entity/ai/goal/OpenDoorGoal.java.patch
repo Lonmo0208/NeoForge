@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/goal/OpenDoorGoal.java
++++ b/net/minecraft/world/entity/ai/goal/OpenDoorGoal.java
+@@ -30,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        --this.forgetTime;
++        this.forgetTime--;
+         super.tick();
+     }
+ }

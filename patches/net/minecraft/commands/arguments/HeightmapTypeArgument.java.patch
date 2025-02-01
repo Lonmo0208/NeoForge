@@ -1,0 +1,11 @@
+--- a/net/minecraft/commands/arguments/HeightmapTypeArgument.java
++++ b/net/minecraft/commands/arguments/HeightmapTypeArgument.java
+@@ -14,7 +_,7 @@
+     );
+ 
+     private static Heightmap.Types[] keptTypes() {
+-        return Arrays.stream(Heightmap.Types.values()).filter(Heightmap.Types::keepAfterWorldgen).toArray(p_275295_ -> new Heightmap.Types[p_275295_]);
++        return Arrays.stream(Heightmap.Types.values()).filter(Heightmap.Types::keepAfterWorldgen).toArray(Heightmap.Types[]::new);
+     }
+ 
+     private HeightmapTypeArgument() {

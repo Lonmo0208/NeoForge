@@ -1,0 +1,39 @@
+--- a/net/minecraft/client/gui/screens/VideoSettingsScreen.java
++++ b/net/minecraft/client/gui/screens/VideoSettingsScreen.java
+@@ -146,12 +_,7 @@
+ 
+     @Override
+     public boolean mouseClicked(double p_96809_, double p_96810_, int p_96811_) {
+-        int i = this.options.guiScale().get();
+         if (super.mouseClicked(p_96809_, p_96810_, p_96811_)) {
+-            if (this.options.guiScale().get() != i) {
+-                this.minecraft.resizeDisplay();
+-            }
+-
+             if (this.gpuWarnlistManager.isShowingWarning()) {
+                 List<Component> list = Lists.newArrayList(WARNING_MESSAGE, CommonComponents.NEW_LINE);
+                 String s = this.gpuWarnlistManager.getRendererWarnings();
+@@ -199,16 +_,14 @@
+         if (Screen.hasControlDown()) {
+             OptionInstance<Integer> optioninstance = this.options.guiScale();
+             if (optioninstance.values() instanceof OptionInstance.ClampingLazyMaxIntRange optioninstance$clampinglazymaxintrange) {
+-                int i = optioninstance.get() + (int)Math.signum(p_296453_);
+-                if (i != 0 && i <= optioninstance$clampinglazymaxintrange.maxInclusive()) {
+-                    CycleButton<Integer> cyclebutton = (CycleButton)this.list.findOption(optioninstance);
++                int k = optioninstance.get();
++                int i = k == 0 ? optioninstance$clampinglazymaxintrange.maxInclusive() + 1 : k;
++                int j = i + (int)Math.signum(p_296453_);
++                if (j != 0 && j <= optioninstance$clampinglazymaxintrange.maxInclusive() && j >= optioninstance$clampinglazymaxintrange.minInclusive()) {
++                    CycleButton<Integer> cyclebutton = (CycleButton<Integer>)this.list.findOption(optioninstance);
+                     if (cyclebutton != null) {
+-                        optioninstance.set(i);
+-                        cyclebutton.setValue(i);
+-                    }
+-
+-                    if (optioninstance.get() == i) {
+-                        this.minecraft.resizeDisplay();
++                        optioninstance.set(j);
++                        cyclebutton.setValue(j);
+                         this.list.setScrollAmount(0.0);
+                         return true;
+                     }

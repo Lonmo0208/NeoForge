@@ -1,0 +1,89 @@
+--- a/net/minecraft/client/gui/screens/advancements/AdvancementWidget.java
++++ b/net/minecraft/client/gui/screens/advancements/AdvancementWidget.java
+@@ -10,7 +_,6 @@
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.StringSplitter;
+ import net.minecraft.client.gui.GuiGraphics;
+-import net.minecraft.core.component.DataComponents;
+ import net.minecraft.locale.Language;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.chat.ComponentUtils;
+@@ -19,7 +_,6 @@
+ import net.minecraft.resources.ResourceLocation;
+ import net.minecraft.util.FormattedCharSequence;
+ import net.minecraft.util.Mth;
+-import net.minecraft.world.item.Items;
+ import net.neoforged.api.distmarker.Dist;
+ import net.neoforged.api.distmarker.OnlyIn;
+ 
+@@ -71,7 +_,7 @@
+                 this.findOptimalLines(ComponentUtils.mergeStyles(p_97258_.getDescription().copy(), Style.EMPTY.withColor(p_97258_.getType().getChatColor())), l)
+             );
+ 
+-        for(FormattedCharSequence formattedcharsequence : this.description) {
++        for (FormattedCharSequence formattedcharsequence : this.description) {
+             l = Math.max(l, p_97256_.font.width(formattedcharsequence));
+         }
+ 
+@@ -87,7 +_,7 @@
+         List<FormattedText> list = null;
+         float f = Float.MAX_VALUE;
+ 
+-        for(int i : TEST_SPLIT_OFFSETS) {
++        for (int i : TEST_SPLIT_OFFSETS) {
+             List<FormattedText> list1 = stringsplitter.splitLines(p_97309_, p_97310_ - i, Style.EMPTY);
+             float f1 = Math.abs(getMaxWidth(stringsplitter, list1) - (float)p_97310_);
+             if (f1 <= 10.0F) {
+@@ -107,7 +_,7 @@
+     private AdvancementWidget getFirstVisibleParent(AdvancementNode p_301093_) {
+         do {
+             p_301093_ = p_301093_.parent();
+-        } while(p_301093_ != null && p_301093_.advancement().display().isEmpty());
++        } while (p_301093_ != null && p_301093_.advancement().display().isEmpty());
+ 
+         return p_301093_ != null && !p_301093_.advancement().display().isEmpty() ? this.tab.getWidget(p_301093_.holder()) : null;
+     }
+@@ -136,7 +_,7 @@
+             }
+         }
+ 
+-        for(AdvancementWidget advancementwidget : this.children) {
++        for (AdvancementWidget advancementwidget : this.children) {
+             advancementwidget.drawConnectivity(p_281947_, p_97300_, p_97301_, p_97302_);
+         }
+     }
+@@ -155,7 +_,7 @@
+             p_281958_.renderFakeItem(this.display.getIcon(), p_281323_ + this.x + 8, p_283679_ + this.y + 5);
+         }
+ 
+-        for(AdvancementWidget advancementwidget : this.children) {
++        for (AdvancementWidget advancementwidget : this.children) {
+             advancementwidget.draw(p_281958_, p_281323_, p_283679_);
+         }
+     }
+@@ -238,23 +_,16 @@
+         }
+ 
+         if (flag1) {
+-            for(int k1 = 0; k1 < this.description.size(); ++k1) {
++            for (int k1 = 0; k1 < this.description.size(); k1++) {
+                 p_283068_.drawString(this.minecraft.font, this.description.get(k1), i1 + 5, l + 26 - j1 + 7 + k1 * 9, -5592406, false);
+             }
+         } else {
+-            for(int l1 = 0; l1 < this.description.size(); ++l1) {
++            for (int l1 = 0; l1 < this.description.size(); l1++) {
+                 p_283068_.drawString(this.minecraft.font, this.description.get(l1), i1 + 5, p_281253_ + this.y + 9 + 17 + l1 * 9, -5592406, false);
+             }
+         }
+ 
+-        if (this.display.getIcon().is(Items.POISONOUS_POTATO_PLANT)) {
+-            this.display.getIcon().set(DataComponents.HOVERED, true);
+-        }
+-
+         p_283068_.renderFakeItem(this.display.getIcon(), p_281304_ + this.x + 8, p_281253_ + this.y + 5);
+-        if (this.display.getIcon().is(Items.POISONOUS_POTATO_PLANT)) {
+-            this.display.getIcon().set(DataComponents.HOVERED, false);
+-        }
+     }
+ 
+     public boolean isMouseOver(int p_97260_, int p_97261_, int p_97262_, int p_97263_) {

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/resources/metadata/animation/AnimationMetadataSection.java
++++ b/net/minecraft/client/resources/metadata/animation/AnimationMetadataSection.java
+@@ -51,7 +_,7 @@
+     }
+ 
+     public void forEachFrame(AnimationMetadataSection.FrameOutput p_174862_) {
+-        for(AnimationFrame animationframe : this.frames) {
++        for (AnimationFrame animationframe : this.frames) {
+             p_174862_.accept(animationframe.getIndex(), animationframe.getTime(this.defaultFrameTime));
+         }
+     }

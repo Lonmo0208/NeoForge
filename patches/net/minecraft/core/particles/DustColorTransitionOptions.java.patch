@@ -1,0 +1,19 @@
+--- a/net/minecraft/core/particles/DustColorTransitionOptions.java
++++ b/net/minecraft/core/particles/DustColorTransitionOptions.java
+@@ -3,6 +_,7 @@
+ import com.mojang.brigadier.StringReader;
+ import com.mojang.brigadier.exceptions.CommandSyntaxException;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Locale;
+@@ -20,7 +_,7 @@
+     public static final DustColorTransitionOptions SCULK_TO_REDSTONE = new DustColorTransitionOptions(
+         SCULK_PARTICLE_COLOR, DustParticleOptions.REDSTONE_PARTICLE_COLOR, 1.0F
+     );
+-    public static final Codec<DustColorTransitionOptions> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<DustColorTransitionOptions> CODEC = RecordCodecBuilder.mapCodec(
+         p_253369_ -> p_253369_.group(
+                     ExtraCodecs.VECTOR3F.fieldOf("fromColor").forGetter(p_253368_ -> p_253368_.color),
+                     ExtraCodecs.VECTOR3F.fieldOf("toColor").forGetter(p_253367_ -> p_253367_.toColor),

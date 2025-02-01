@@ -1,0 +1,58 @@
+--- a/net/minecraft/util/datafix/fixes/ChunkProtoTickListFix.java
++++ b/net/minecraft/util/datafix/fixes/ChunkProtoTickListFix.java
+@@ -54,7 +_,9 @@
+                         p_185010_ = p_185010_.update(
+                             DSL.remainderFinder(),
+                             p_185078_ -> DataFixUtils.orElse(
+-                                    p_185078_.get("LiquidTicks").result().map(p_185072_ -> p_185078_.set("fluid_ticks", p_185072_).remove("LiquidTicks")),
++                                    p_185078_.get("LiquidTicks")
++                                        .result()
++                                        .map(p_185072_ -> p_185078_.set("fluid_ticks", (Dynamic<?>)p_185072_).remove("LiquidTicks")),
+                                     p_185078_
+                                 )
+                         );
+@@ -81,7 +_,7 @@
+                                                                         () -> {
+                                                                             List<? extends Dynamic<?>> list = p_185064_.getOptionalTyped(opticfinder5)
+                                                                                 .map(
+-                                                                                    p_185027_ -> p_185027_.write()
++                                                                                    p_337612_ -> p_337612_.write()
+                                                                                             .result()
+                                                                                             .map(p_185076_ -> p_185076_.asList(Function.identity()))
+                                                                                             .orElse(Collections.emptyList())
+@@ -109,7 +_,7 @@
+                             Dynamic<?> dynamic2 = this.makeTickList(dynamic, int2objectmap, b0, i, j, "ToBeTicked", ChunkProtoTickListFix::getBlock);
+                             Optional<? extends Pair<? extends Typed<?>, ?>> optional = opticfinder6.type().readTyped(dynamic2).result();
+                             if (optional.isPresent()) {
+-                                p_185010_ = p_185010_.set(opticfinder6, (Typed)(optional.get()).getFirst());
++                                p_185010_ = p_185010_.set(opticfinder6, (Typed<?>)optional.get().getFirst());
+                             }
+         
+                             return p_185010_.update(
+@@ -135,7 +_,7 @@
+         Stream<Dynamic<?>> stream = Stream.empty();
+         List<? extends Dynamic<?>> list = p_185037_.get(p_185042_).asList(Function.identity());
+ 
+-        for(int i = 0; i < list.size(); ++i) {
++        for (int i = 0; i < list.size(); i++) {
+             int j = i + p_185039_;
+             Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer> supplier = p_185038_.get(j);
+             Stream<? extends Dynamic<?>> stream1 = list.get(i)
+@@ -217,7 +_,7 @@
+             if (i < 1) {
+                 return null;
+             } else if (i == 1) {
+-                return this.palette.get(0);
++                return (Dynamic<?>)this.palette.get(0);
+             } else {
+                 int j = this.getIndex(p_185091_, p_185092_, p_185093_);
+                 int k = j / this.valuesPerLong;
+@@ -225,7 +_,7 @@
+                     long l = this.data[k];
+                     int i1 = (j - k * this.valuesPerLong) * this.bits;
+                     int j1 = (int)(l >> i1 & this.mask);
+-                    return j1 >= 0 && j1 < i ? this.palette.get(j1) : null;
++                    return (Dynamic<?>)(j1 >= 0 && j1 < i ? this.palette.get(j1) : null);
+                 } else {
+                     return null;
+                 }

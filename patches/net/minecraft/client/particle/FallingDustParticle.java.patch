@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/particle/FallingDustParticle.java
++++ b/net/minecraft/client/particle/FallingDustParticle.java
+@@ -54,7 +_,7 @@
+         } else {
+             this.setSpriteFromAge(this.sprites);
+             this.oRoll = this.roll;
+-            this.roll += (float) Math.PI * this.rotSpeed * 2.0F;
++            this.roll = this.roll + (float) Math.PI * this.rotSpeed * 2.0F;
+             if (this.onGround) {
+                 this.oRoll = this.roll = 0.0F;
+             }

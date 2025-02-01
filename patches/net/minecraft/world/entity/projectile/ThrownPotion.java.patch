@@ -1,0 +1,66 @@
+--- a/net/minecraft/world/entity/projectile/ThrownPotion.java
++++ b/net/minecraft/world/entity/projectile/ThrownPotion.java
+@@ -32,7 +_,7 @@
+ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplier {
+     public static final double SPLASH_RANGE = 4.0;
+     private static final double SPLASH_RANGE_SQ = 16.0;
+-    public static final Predicate<LivingEntity> WATER_SENSITIVE_OR_ON_FIRE = p_340168_ -> p_340168_.isSensitiveToWater() || p_340168_.isOnFire();
++    public static final Predicate<LivingEntity> WATER_SENSITIVE_OR_ON_FIRE = p_337885_ -> p_337885_.isSensitiveToWater() || p_337885_.isOnFire();
+ 
+     public ThrownPotion(EntityType<? extends ThrownPotion> p_37527_, Level p_37528_) {
+         super(p_37527_, p_37528_);
+@@ -69,7 +_,7 @@
+                 this.dowseFire(blockpos1);
+                 this.dowseFire(blockpos1.relative(direction.getOpposite()));
+ 
+-                for(Direction direction1 : Direction.Plane.HORIZONTAL) {
++                for (Direction direction1 : Direction.Plane.HORIZONTAL) {
+                     this.dowseFire(blockpos1.relative(direction1));
+                 }
+             }
+@@ -103,7 +_,7 @@
+     private void applyWater() {
+         AABB aabb = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
+ 
+-        for(LivingEntity livingentity : this.level().getEntitiesOfClass(LivingEntity.class, aabb, WATER_SENSITIVE_OR_ON_FIRE)) {
++        for (LivingEntity livingentity : this.level().getEntitiesOfClass(LivingEntity.class, aabb, WATER_SENSITIVE_OR_ON_FIRE)) {
+             double d0 = this.distanceToSqr(livingentity);
+             if (d0 < 16.0) {
+                 if (livingentity.isSensitiveToWater()) {
+@@ -116,7 +_,7 @@
+             }
+         }
+ 
+-        for(Axolotl axolotl : this.level().getEntitiesOfClass(Axolotl.class, aabb)) {
++        for (Axolotl axolotl : this.level().getEntitiesOfClass(Axolotl.class, aabb)) {
+             axolotl.rehydrate();
+         }
+     }
+@@ -127,7 +_,7 @@
+         if (!list.isEmpty()) {
+             Entity entity = this.getEffectSource();
+ 
+-            for(LivingEntity livingentity : list) {
++            for (LivingEntity livingentity : list) {
+                 if (livingentity.isAffectedByPotions()) {
+                     double d0 = this.distanceToSqr(livingentity);
+                     if (d0 < 16.0) {
+@@ -138,7 +_,7 @@
+                             d1 = 1.0 - Math.sqrt(d0) / 4.0;
+                         }
+ 
+-                        for(MobEffectInstance mobeffectinstance : p_330815_) {
++                        for (MobEffectInstance mobeffectinstance : p_330815_) {
+                             Holder<MobEffect> holder = mobeffectinstance.getEffect();
+                             if (holder.value().isInstantenous()) {
+                                 holder.value().applyInstantenousEffect(this, this.getOwner(), livingentity, mobeffectinstance.getAmplifier(), d1);
+@@ -160,8 +_,7 @@
+ 
+     private void makeAreaOfEffectCloud(PotionContents p_332124_) {
+         AreaEffectCloud areaeffectcloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
+-        Entity entity = this.getOwner();
+-        if (entity instanceof LivingEntity livingentity) {
++        if (this.getOwner() instanceof LivingEntity livingentity) {
+             areaeffectcloud.setOwner(livingentity);
+         }
+ 

@@ -1,0 +1,36 @@
+--- a/net/minecraft/world/level/levelgen/structure/structures/StrongholdStructure.java
++++ b/net/minecraft/world/level/levelgen/structure/structures/StrongholdStructure.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.structures;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import java.util.List;
+ import java.util.Optional;
+ import net.minecraft.world.level.levelgen.structure.Structure;
+@@ -9,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+ 
+ public class StrongholdStructure extends Structure {
+-    public static final Codec<StrongholdStructure> CODEC = simpleCodec(StrongholdStructure::new);
++    public static final MapCodec<StrongholdStructure> CODEC = simpleCodec(StrongholdStructure::new);
+ 
+     public StrongholdStructure(Structure.StructureSettings p_229939_) {
+         super(p_229939_);
+@@ -35,14 +_,14 @@
+             strongholdpieces$startpiece.addChildren(strongholdpieces$startpiece, p_229946_, p_229947_.random());
+             List<StructurePiece> list = strongholdpieces$startpiece.pendingChildren;
+ 
+-            while(!list.isEmpty()) {
++            while (!list.isEmpty()) {
+                 int j = p_229947_.random().nextInt(list.size());
+                 StructurePiece structurepiece = list.remove(j);
+                 structurepiece.addChildren(strongholdpieces$startpiece, p_229946_, p_229947_.random());
+             }
+ 
+             p_229946_.moveBelowSeaLevel(p_229947_.chunkGenerator().getSeaLevel(), p_229947_.chunkGenerator().getMinY(), p_229947_.random(), 10);
+-        } while(p_229946_.isEmpty() || strongholdpieces$startpiece.portalRoomPiece == null);
++        } while (p_229946_.isEmpty() || strongholdpieces$startpiece.portalRoomPiece == null);
+     }
+ 
+     @Override

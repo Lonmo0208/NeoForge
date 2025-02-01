@@ -1,0 +1,42 @@
+--- a/net/minecraft/advancements/critereon/EnchantedItemTrigger.java
++++ b/net/minecraft/advancements/critereon/EnchantedItemTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ 
+ public class EnchantedItemTrigger extends SimpleCriterionTrigger<EnchantedItemTrigger.TriggerInstance> {
+@@ -23,13 +_,12 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, MinMaxBounds.Ints levels)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<EnchantedItemTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311410_ -> p_311410_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EnchantedItemTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(EnchantedItemTrigger.TriggerInstance::item),
+-                        ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "levels", MinMaxBounds.Ints.ANY)
+-                            .forGetter(EnchantedItemTrigger.TriggerInstance::levels)
++            p_337356_ -> p_337356_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(EnchantedItemTrigger.TriggerInstance::player),
++                        ItemPredicate.CODEC.optionalFieldOf("item").forGetter(EnchantedItemTrigger.TriggerInstance::item),
++                        MinMaxBounds.Ints.CODEC.optionalFieldOf("levels", MinMaxBounds.Ints.ANY).forGetter(EnchantedItemTrigger.TriggerInstance::levels)
+                     )
+-                    .apply(p_311410_, EnchantedItemTrigger.TriggerInstance::new)
++                    .apply(p_337356_, EnchantedItemTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<EnchantedItemTrigger.TriggerInstance> enchantedItem() {
+@@ -38,11 +_,7 @@
+         }
+ 
+         public boolean matches(ItemStack p_27692_, int p_27693_) {
+-            if (this.item.isPresent() && !this.item.get().matches(p_27692_)) {
+-                return false;
+-            } else {
+-                return this.levels.matches(p_27693_);
+-            }
++            return this.item.isPresent() && !this.item.get().matches(p_27692_) ? false : this.levels.matches(p_27693_);
+         }
+     }
+ }

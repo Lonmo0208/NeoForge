@@ -1,0 +1,65 @@
+--- a/net/minecraft/world/entity/Display.java
++++ b/net/minecraft/world/entity/Display.java
+@@ -172,7 +_,7 @@
+                     this.posRotInterpolationTarget = null;
+                 } else {
+                     this.posRotInterpolationTarget.applyLerpStep(this);
+-                    --this.posRotInterpolationTarget.steps;
++                    this.posRotInterpolationTarget.steps--;
+                     if (this.posRotInterpolationTarget.steps == 0) {
+                         this.posRotInterpolationTarget = null;
+                     }
+@@ -278,12 +_,10 @@
+     protected void addAdditionalSaveData(CompoundTag p_270779_) {
+         Transformation.EXTENDED_CODEC
+             .encodeStart(NbtOps.INSTANCE, createTransformation(this.entityData))
+-            .result()
+-            .ifPresent(p_270528_ -> p_270779_.put("transformation", p_270528_));
++            .ifSuccess(p_270528_ -> p_270779_.put("transformation", p_270528_));
+         Display.BillboardConstraints.CODEC
+             .encodeStart(NbtOps.INSTANCE, this.getBillboardConstraints())
+-            .result()
+-            .ifPresent(p_270227_ -> p_270779_.put("billboard", p_270227_));
++            .ifSuccess(p_270227_ -> p_270779_.put("billboard", p_270227_));
+         p_270779_.putInt("interpolation_duration", this.getTransformationInterpolationDuration());
+         p_270779_.putInt("teleport_duration", this.getPosRotInterpolationDuration());
+         p_270779_.putFloat("view_range", this.getViewRange());
+@@ -294,7 +_,7 @@
+         p_270779_.putInt("glow_color_override", this.getGlowColorOverride());
+         Brightness brightness = this.getBrightnessOverride();
+         if (brightness != null) {
+-            Brightness.CODEC.encodeStart(NbtOps.INSTANCE, brightness).result().ifPresent(p_270121_ -> p_270779_.put("brightness", p_270121_));
++            Brightness.CODEC.encodeStart(NbtOps.INSTANCE, brightness).ifSuccess(p_270121_ -> p_270779_.put("brightness", p_270121_));
+         }
+     }
+ 
+@@ -716,10 +_,7 @@
+                 p_270669_.put("item", this.getItemStack().save(this.registryAccess()));
+             }
+ 
+-            ItemDisplayContext.CODEC
+-                .encodeStart(NbtOps.INSTANCE, this.getItemTransform())
+-                .result()
+-                .ifPresent(p_270615_ -> p_270669_.put("item_display", p_270615_));
++            ItemDisplayContext.CODEC.encodeStart(NbtOps.INSTANCE, this.getItemTransform()).ifSuccess(p_270615_ -> p_270669_.put("item_display", p_270615_));
+         }
+ 
+         @Override
+@@ -914,7 +_,7 @@
+                 .resultOrPartial(Util.prefix("Display entity", Display.LOGGER::error))
+                 .map(Pair::getFirst);
+             if (optional.isPresent()) {
+-                b0 = switch((Display.TextDisplay.Align)optional.get()) {
++                b0 = switch ((Display.TextDisplay.Align)optional.get()) {
+                     case CENTER -> b0;
+                     case LEFT -> (byte)(b0 | 8);
+                     case RIGHT -> (byte)(b0 | 16);
+@@ -955,7 +_,7 @@
+             storeFlag(b0, p_270268_, "shadow", (byte)1);
+             storeFlag(b0, p_270268_, "see_through", (byte)2);
+             storeFlag(b0, p_270268_, "default_background", (byte)4);
+-            Display.TextDisplay.Align.CODEC.encodeStart(NbtOps.INSTANCE, getAlign(b0)).result().ifPresent(p_271001_ -> p_270268_.put("alignment", p_271001_));
++            Display.TextDisplay.Align.CODEC.encodeStart(NbtOps.INSTANCE, getAlign(b0)).ifSuccess(p_271001_ -> p_270268_.put("alignment", p_271001_));
+         }
+ 
+         @Override

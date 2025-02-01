@@ -1,0 +1,39 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsPlayerScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsPlayerScreen.java
+@@ -15,6 +_,7 @@
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.gui.GuiGraphics;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+ import net.minecraft.client.gui.components.SpriteIconButton;
+@@ -63,7 +_,9 @@
+                 .build()
+         );
+         linearlayout.addChild(Button.builder(CommonComponents.GUI_BACK, p_329657_ -> this.onClose()).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_329656_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_329656_);
++        });
+         this.repositionElements();
+     }
+ 
+@@ -79,7 +_,7 @@
+         if (this.invitedList != null) {
+             this.invitedList.children().clear();
+ 
+-            for(PlayerInfo playerinfo : this.serverData.players) {
++            for (PlayerInfo playerinfo : this.serverData.players) {
+                 this.invitedList.children().add(new RealmsPlayerScreen.Entry(playerinfo));
+             }
+         }
+@@ -199,7 +_,7 @@
+         }
+ 
+         private void updateOps(Ops p_330984_) {
+-            for(PlayerInfo playerinfo : RealmsPlayerScreen.this.serverData.players) {
++            for (PlayerInfo playerinfo : RealmsPlayerScreen.this.serverData.players) {
+                 playerinfo.setOperator(p_330984_.ops.contains(playerinfo.getName()));
+             }
+         }

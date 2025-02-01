@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/synth/NormalNoise.java
++++ b/net/minecraft/world/level/levelgen/synth/NormalNoise.java
+@@ -52,7 +_,7 @@
+         int k = Integer.MIN_VALUE;
+         DoubleListIterator doublelistiterator = doublelist.iterator();
+ 
+-        while(doublelistiterator.hasNext()) {
++        while (doublelistiterator.hasNext()) {
+             int l = doublelistiterator.nextIndex();
+             double d0 = doublelistiterator.nextDouble();
+             if (d0 != 0.0) {

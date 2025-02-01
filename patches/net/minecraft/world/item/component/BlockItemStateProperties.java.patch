@@ -1,0 +1,18 @@
+--- a/net/minecraft/world/item/component/BlockItemStateProperties.java
++++ b/net/minecraft/world/item/component/BlockItemStateProperties.java
+@@ -36,13 +_,13 @@
+     @Nullable
+     public <T extends Comparable<T>> T get(Property<T> p_332023_) {
+         String s = this.properties.get(p_332023_.getName());
+-        return s == null ? null : p_332023_.getValue(s).orElse((T)null);
++        return s == null ? null : p_332023_.getValue(s).orElse(null);
+     }
+ 
+     public BlockState apply(BlockState p_330225_) {
+         StateDefinition<Block, BlockState> statedefinition = p_330225_.getBlock().getStateDefinition();
+ 
+-        for(Entry<String, String> entry : this.properties.entrySet()) {
++        for (Entry<String, String> entry : this.properties.entrySet()) {
+             Property<?> property = statedefinition.getProperty(entry.getKey());
+             if (property != null) {
+                 p_330225_ = updateState(p_330225_, property, entry.getValue());

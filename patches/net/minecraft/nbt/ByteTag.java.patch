@@ -1,0 +1,24 @@
+--- a/net/minecraft/nbt/ByteTag.java
++++ b/net/minecraft/nbt/ByteTag.java
+@@ -83,11 +_,7 @@
+ 
+     @Override
+     public boolean equals(Object p_128280_) {
+-        if (this == p_128280_) {
+-            return true;
+-        } else {
+-            return p_128280_ instanceof ByteTag && this.data == ((ByteTag)p_128280_).data;
+-        }
++        return this == p_128280_ ? true : p_128280_ instanceof ByteTag && this.data == ((ByteTag)p_128280_).data;
+     }
+ 
+     @Override
+@@ -147,7 +_,7 @@
+         }
+ 
+         static {
+-            for(int i = 0; i < cache.length; ++i) {
++            for (int i = 0; i < cache.length; i++) {
+                 cache[i] = new ByteTag((byte)(i - 128));
+             }
+         }

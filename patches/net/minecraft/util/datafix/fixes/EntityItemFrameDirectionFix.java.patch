@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/datafix/fixes/EntityItemFrameDirectionFix.java
++++ b/net/minecraft/util/datafix/fixes/EntityItemFrameDirectionFix.java
+@@ -20,7 +_,7 @@
+     }
+ 
+     private static byte direction2dTo3d(byte p_15471_) {
+-        switch(p_15471_) {
++        switch (p_15471_) {
+             case 0:
+                 return 3;
+             case 1:

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/entity/BreezeRenderer.java
++++ b/net/minecraft/client/renderer/entity/BreezeRenderer.java
+@@ -38,7 +_,7 @@
+         p_316245_.rods().visible = false;
+         p_316245_.wind().visible = false;
+ 
+-        for(ModelPart modelpart : p_316382_) {
++        for (ModelPart modelpart : p_316382_) {
+             modelpart.visible = true;
+         }
+ 

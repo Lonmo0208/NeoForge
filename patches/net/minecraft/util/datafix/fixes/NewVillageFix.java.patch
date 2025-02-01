@@ -1,0 +1,12 @@
+--- a/net/minecraft/util/datafix/fixes/NewVillageFix.java
++++ b/net/minecraft/util/datafix/fixes/NewVillageFix.java
+@@ -65,7 +_,8 @@
+                                                     p_145552_ -> {
+                                                         Optional<? extends Dynamic<?>> optional = p_145552_.get("New_Village").result();
+                                                         return DataFixUtils.orElse(
+-                                                                optional.map(p_145540_ -> p_145552_.remove("New_Village").set("Village", p_145540_)), p_145552_
++                                                                optional.map(p_145540_ -> p_145552_.remove("New_Village").set("Village", (Dynamic<?>)p_145540_)),
++                                                                p_145552_
+                                                             )
+                                                             .remove("Village");
+                                                     }

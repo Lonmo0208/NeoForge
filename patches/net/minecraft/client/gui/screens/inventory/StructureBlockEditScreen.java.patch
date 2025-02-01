@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/gui/screens/inventory/StructureBlockEditScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/StructureBlockEditScreen.java
+@@ -259,7 +_,7 @@
+         this.rot90Button.active = true;
+         this.rot180Button.active = true;
+         this.rot270Button.active = true;
+-        switch(this.structure.getRotation()) {
++        switch (this.structure.getRotation()) {
+             case NONE:
+                 this.rot0Button.active = false;
+                 break;
+@@ -296,7 +_,7 @@
+         this.rot270Button.visible = false;
+         this.toggleAirButton.visible = false;
+         this.toggleBoundingBox.visible = false;
+-        switch(p_169839_) {
++        switch (p_169839_) {
+             case SAVE:
+                 this.nameEdit.setVisible(true);
+                 this.posXEdit.setVisible(true);

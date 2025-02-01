@@ -1,0 +1,79 @@
+--- a/net/minecraft/world/level/levelgen/feature/LakeFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/LakeFeature.java
+@@ -34,7 +_,7 @@
+             boolean[] aboolean = new boolean[2048];
+             int i = randomsource.nextInt(4) + 4;
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 double d0 = randomsource.nextDouble() * 6.0 + 3.0;
+                 double d1 = randomsource.nextDouble() * 4.0 + 2.0;
+                 double d2 = randomsource.nextDouble() * 6.0 + 3.0;
+@@ -42,9 +_,9 @@
+                 double d4 = randomsource.nextDouble() * (8.0 - d1 - 4.0) + 2.0 + d1 / 2.0;
+                 double d5 = randomsource.nextDouble() * (16.0 - d2 - 2.0) + 1.0 + d2 / 2.0;
+ 
+-                for(int l = 1; l < 15; ++l) {
+-                    for(int i1 = 1; i1 < 15; ++i1) {
+-                        for(int j1 = 1; j1 < 7; ++j1) {
++                for (int l = 1; l < 15; l++) {
++                    for (int i1 = 1; i1 < 15; i1++) {
++                        for (int j1 = 1; j1 < 7; j1++) {
+                             double d6 = ((double)l - d3) / (d0 / 2.0);
+                             double d7 = ((double)j1 - d4) / (d1 / 2.0);
+                             double d8 = ((double)i1 - d5) / (d2 / 2.0);
+@@ -59,9 +_,9 @@
+ 
+             BlockState blockstate1 = lakefeature$configuration.fluid().getState(randomsource, blockpos);
+ 
+-            for(int k1 = 0; k1 < 16; ++k1) {
+-                for(int k = 0; k < 16; ++k) {
+-                    for(int l2 = 0; l2 < 8; ++l2) {
++            for (int k1 = 0; k1 < 16; k1++) {
++                for (int k = 0; k < 16; k++) {
++                    for (int l2 = 0; l2 < 8; l2++) {
+                         boolean flag = !aboolean[(k1 * 16 + k) * 8 + l2]
+                             && (
+                                 k1 < 15 && aboolean[((k1 + 1) * 16 + k) * 8 + l2]
+@@ -85,9 +_,9 @@
+                 }
+             }
+ 
+-            for(int l1 = 0; l1 < 16; ++l1) {
+-                for(int i2 = 0; i2 < 16; ++i2) {
+-                    for(int i3 = 0; i3 < 8; ++i3) {
++            for (int l1 = 0; l1 < 16; l1++) {
++                for (int i2 = 0; i2 < 16; i2++) {
++                    for (int i3 = 0; i3 < 8; i3++) {
+                         if (aboolean[(l1 * 16 + i2) * 8 + i3]) {
+                             BlockPos blockpos1 = blockpos.offset(l1, i3, i2);
+                             if (this.canReplaceBlock(worldgenlevel.getBlockState(blockpos1))) {
+@@ -104,14 +_,10 @@
+             }
+ 
+             BlockState blockstate2 = lakefeature$configuration.barrier().getState(randomsource, blockpos);
+-            if (blockstate2.is(Blocks.STONE) && worldgenlevel.isPotato()) {
+-                blockstate2 = Blocks.TATERSTONE.defaultBlockState();
+-            }
+-
+             if (!blockstate2.isAir()) {
+-                for(int j2 = 0; j2 < 16; ++j2) {
+-                    for(int j3 = 0; j3 < 16; ++j3) {
+-                        for(int l3 = 0; l3 < 8; ++l3) {
++                for (int j2 = 0; j2 < 16; j2++) {
++                    for (int j3 = 0; j3 < 16; j3++) {
++                        for (int l3 = 0; l3 < 8; l3++) {
+                             boolean flag2 = !aboolean[(j2 * 16 + j3) * 8 + l3]
+                                 && (
+                                     j2 < 15 && aboolean[((j2 + 1) * 16 + j3) * 8 + l3]
+@@ -135,8 +_,8 @@
+             }
+ 
+             if (blockstate1.getFluidState().is(FluidTags.WATER)) {
+-                for(int k2 = 0; k2 < 16; ++k2) {
+-                    for(int k3 = 0; k3 < 16; ++k3) {
++                for (int k2 = 0; k2 < 16; k2++) {
++                    for (int k3 = 0; k3 < 16; k3++) {
+                         int i4 = 4;
+                         BlockPos blockpos2 = blockpos.offset(k2, 4, k3);
+                         if (worldgenlevel.getBiome(blockpos2).value().shouldFreeze(worldgenlevel, blockpos2, false)

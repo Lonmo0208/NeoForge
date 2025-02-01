@@ -1,0 +1,74 @@
+--- a/net/minecraft/world/level/block/CommandBlock.java
++++ b/net/minecraft/world/level/block/CommandBlock.java
+@@ -61,9 +_,7 @@
+     @Override
+     protected void neighborChanged(BlockState p_51838_, Level p_51839_, BlockPos p_51840_, Block p_51841_, BlockPos p_51842_, boolean p_51843_) {
+         if (!p_51839_.isClientSide) {
+-            BlockEntity blockentity = p_51839_.getBlockEntity(p_51840_);
+-            if (blockentity instanceof CommandBlockEntity) {
+-                CommandBlockEntity commandblockentity = (CommandBlockEntity)blockentity;
++            if (p_51839_.getBlockEntity(p_51840_) instanceof CommandBlockEntity commandblockentity) {
+                 boolean flag = p_51839_.hasNeighborSignal(p_51840_);
+                 boolean flag1 = commandblockentity.isPowered();
+                 commandblockentity.setPowered(flag);
+@@ -79,8 +_,7 @@
+ 
+     @Override
+     protected void tick(BlockState p_221005_, ServerLevel p_221006_, BlockPos p_221007_, RandomSource p_221008_) {
+-        BlockEntity blockentity = p_221006_.getBlockEntity(p_221007_);
+-        if (blockentity instanceof CommandBlockEntity commandblockentity) {
++        if (p_221006_.getBlockEntity(p_221007_) instanceof CommandBlockEntity commandblockentity) {
+             BaseCommandBlock basecommandblock = commandblockentity.getCommandBlock();
+             boolean flag = !StringUtil.isNullOrEmpty(basecommandblock.getCommand());
+             CommandBlockEntity.Mode commandblockentity$mode = commandblockentity.getMode();
+@@ -142,9 +_,7 @@
+ 
+     @Override
+     public void setPlacedBy(Level p_51804_, BlockPos p_51805_, BlockState p_51806_, LivingEntity p_51807_, ItemStack p_51808_) {
+-        BlockEntity blockentity = p_51804_.getBlockEntity(p_51805_);
+-        if (blockentity instanceof CommandBlockEntity) {
+-            CommandBlockEntity commandblockentity = (CommandBlockEntity)blockentity;
++        if (p_51804_.getBlockEntity(p_51805_) instanceof CommandBlockEntity commandblockentity) {
+             BaseCommandBlock basecommandblock = commandblockentity.getCommandBlock();
+             if (!p_51804_.isClientSide) {
+                 if (!p_51808_.has(DataComponents.BLOCK_ENTITY_DATA)) {
+@@ -188,24 +_,15 @@
+     private static void executeChain(Level p_51810_, BlockPos p_51811_, Direction p_51812_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = p_51811_.mutable();
+         GameRules gamerules = p_51810_.getGameRules();
++        int i = gamerules.getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH);
+ 
+-        int i;
+-        BlockState blockstate;
+-        for(i = gamerules.getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH); i-- > 0; p_51812_ = blockstate.getValue(FACING)) {
++        while (i-- > 0) {
+             blockpos$mutableblockpos.move(p_51812_);
+-            blockstate = p_51810_.getBlockState(blockpos$mutableblockpos);
++            BlockState blockstate = p_51810_.getBlockState(blockpos$mutableblockpos);
+             Block block = blockstate.getBlock();
+-            if (!blockstate.is(Blocks.CHAIN_COMMAND_BLOCK)) {
+-                break;
+-            }
+-
+-            BlockEntity blockentity = p_51810_.getBlockEntity(blockpos$mutableblockpos);
+-            if (!(blockentity instanceof CommandBlockEntity)) {
+-                break;
+-            }
+-
+-            CommandBlockEntity commandblockentity = (CommandBlockEntity)blockentity;
+-            if (commandblockentity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
++            if (!blockstate.is(Blocks.CHAIN_COMMAND_BLOCK)
++                || !(p_51810_.getBlockEntity(blockpos$mutableblockpos) instanceof CommandBlockEntity commandblockentity)
++                || commandblockentity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
+                 break;
+             }
+ 
+@@ -221,6 +_,8 @@
+                     basecommandblock.setSuccessCount(0);
+                 }
+             }
++
++            p_51812_ = blockstate.getValue(FACING);
+         }
+ 
+         if (i <= 0) {

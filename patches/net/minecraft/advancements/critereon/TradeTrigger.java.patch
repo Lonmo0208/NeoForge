@@ -1,0 +1,41 @@
+--- a/net/minecraft/advancements/critereon/TradeTrigger.java
++++ b/net/minecraft/advancements/critereon/TradeTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.npc.AbstractVillager;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.storage.loot.LootContext;
+@@ -26,12 +_,12 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> villager, Optional<ItemPredicate> item)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<TradeTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311449_ -> p_311449_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(TradeTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "villager").forGetter(TradeTrigger.TriggerInstance::villager),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(TradeTrigger.TriggerInstance::item)
++            p_337401_ -> p_337401_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(TradeTrigger.TriggerInstance::player),
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("villager").forGetter(TradeTrigger.TriggerInstance::villager),
++                        ItemPredicate.CODEC.optionalFieldOf("item").forGetter(TradeTrigger.TriggerInstance::item)
+                     )
+-                    .apply(p_311449_, TradeTrigger.TriggerInstance::new)
++                    .apply(p_337401_, TradeTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<TradeTrigger.TriggerInstance> tradedWithVillager() {
+@@ -44,11 +_,7 @@
+         }
+ 
+         public boolean matches(LootContext p_70985_, ItemStack p_70986_) {
+-            if (this.villager.isPresent() && !this.villager.get().matches(p_70985_)) {
+-                return false;
+-            } else {
+-                return !this.item.isPresent() || this.item.get().matches(p_70986_);
+-            }
++            return this.villager.isPresent() && !this.villager.get().matches(p_70985_) ? false : !this.item.isPresent() || this.item.get().matches(p_70986_);
+         }
+ 
+         @Override

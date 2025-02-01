@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/boss/enderdragon/phases/DragonLandingPhase.java
++++ b/net/minecraft/world/entity/boss/enderdragon/phases/DragonLandingPhase.java
+@@ -24,7 +_,7 @@
+         double d1 = this.dragon.head.getY(0.5);
+         double d2 = this.dragon.head.getZ();
+ 
+-        for(int i = 0; i < 8; ++i) {
++        for (int i = 0; i < 8; i++) {
+             RandomSource randomsource = this.dragon.getRandom();
+             double d3 = d0 + randomsource.nextGaussian() / 2.0;
+             double d4 = d1 + randomsource.nextGaussian() / 2.0;

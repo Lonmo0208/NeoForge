@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/gui/StatsComponent.java
++++ b/net/minecraft/server/gui/StatsComponent.java
+@@ -48,7 +_,7 @@
+         p_139973_.setColor(new Color(16777215));
+         p_139973_.fillRect(0, 0, 456, 246);
+ 
+-        for(int i = 0; i < 256; ++i) {
++        for (int i = 0; i < 256; i++) {
+             int j = this.values[i + this.vp & 0xFF];
+             p_139973_.setColor(new Color(j + 28 << 16));
+             p_139973_.fillRect(i, 100 - j, 1, j);
+@@ -56,7 +_,7 @@
+ 
+         p_139973_.setColor(Color.BLACK);
+ 
+-        for(int k = 0; k < this.msgs.length; ++k) {
++        for (int k = 0; k < this.msgs.length; k++) {
+             String s = this.msgs[k];
+             if (s != null) {
+                 p_139973_.drawString(s, 32, 116 + k * 16);

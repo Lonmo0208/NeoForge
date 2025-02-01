@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/feature/CoralFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/CoralFeature.java
+@@ -49,7 +_,7 @@
+                 );
+             }
+ 
+-            for(Direction direction : Direction.Plane.HORIZONTAL) {
++            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                 if (p_224975_.nextFloat() < 0.2F) {
+                     BlockPos blockpos1 = p_224976_.relative(direction);
+                     if (p_224974_.getBlockState(blockpos1).is(Blocks.WATER)) {

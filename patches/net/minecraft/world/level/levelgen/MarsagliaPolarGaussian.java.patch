@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/MarsagliaPolarGaussian.java
++++ b/net/minecraft/world/level/levelgen/MarsagliaPolarGaussian.java
+@@ -28,7 +_,7 @@
+                 d0 = 2.0 * this.randomSource.nextDouble() - 1.0;
+                 d1 = 2.0 * this.randomSource.nextDouble() - 1.0;
+                 d2 = Mth.square(d0) + Mth.square(d1);
+-            } while(d2 >= 1.0 || d2 == 0.0);
++            } while (d2 >= 1.0 || d2 == 0.0);
+ 
+             double d3 = Math.sqrt(-2.0 * Math.log(d2) / d2);
+             this.nextNextGaussian = d1 * d3;

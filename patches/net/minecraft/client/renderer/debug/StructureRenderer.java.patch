@@ -1,0 +1,34 @@
+--- a/net/minecraft/client/renderer/debug/StructureRenderer.java
++++ b/net/minecraft/client/renderer/debug/StructureRenderer.java
+@@ -37,7 +_,7 @@
+         BlockPos blockpos = BlockPos.containing(camera.getPosition().x, 0.0, camera.getPosition().z);
+         VertexConsumer vertexconsumer = p_113689_.getBuffer(RenderType.lines());
+         if (this.postMainBoxes.containsKey(resourcekey)) {
+-            for(BoundingBox boundingbox : this.postMainBoxes.get(resourcekey).values()) {
++            for (BoundingBox boundingbox : this.postMainBoxes.get(resourcekey).values()) {
+                 if (blockpos.closerThan(boundingbox.getCenter(), 500.0)) {
+                     LevelRenderer.renderLineBox(
+                         p_113688_,
+@@ -62,7 +_,7 @@
+ 
+         Map<String, StructuresDebugPayload.PieceInfo> map = this.postPieces.get(resourcekey);
+         if (map != null) {
+-            for(StructuresDebugPayload.PieceInfo structuresdebugpayload$pieceinfo : map.values()) {
++            for (StructuresDebugPayload.PieceInfo structuresdebugpayload$pieceinfo : map.values()) {
+                 BoundingBox boundingbox1 = structuresdebugpayload$pieceinfo.boundingBox();
+                 if (blockpos.closerThan(boundingbox1.getCenter(), 500.0)) {
+                     if (structuresdebugpayload$pieceinfo.isStart()) {
+@@ -108,10 +_,10 @@
+     }
+ 
+     public void addBoundingBox(BoundingBox p_113683_, List<StructuresDebugPayload.PieceInfo> p_113684_, ResourceKey<Level> p_295656_) {
+-        this.postMainBoxes.computeIfAbsent(p_295656_, p_294379_ -> new HashMap()).put(p_113683_.toString(), p_113683_);
+-        Map<String, StructuresDebugPayload.PieceInfo> map = this.postPieces.computeIfAbsent(p_295656_, p_294187_ -> new HashMap());
++        this.postMainBoxes.computeIfAbsent(p_295656_, p_294379_ -> new HashMap<>()).put(p_113683_.toString(), p_113683_);
++        Map<String, StructuresDebugPayload.PieceInfo> map = this.postPieces.computeIfAbsent(p_295656_, p_294187_ -> new HashMap<>());
+ 
+-        for(StructuresDebugPayload.PieceInfo structuresdebugpayload$pieceinfo : p_113684_) {
++        for (StructuresDebugPayload.PieceInfo structuresdebugpayload$pieceinfo : p_113684_) {
+             map.put(structuresdebugpayload$pieceinfo.boundingBox().toString(), structuresdebugpayload$pieceinfo);
+         }
+     }

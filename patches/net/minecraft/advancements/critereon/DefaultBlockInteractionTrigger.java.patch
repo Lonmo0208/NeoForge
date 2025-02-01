@@ -1,0 +1,28 @@
+--- a/net/minecraft/advancements/critereon/DefaultBlockInteractionTrigger.java
++++ b/net/minecraft/advancements/critereon/DefaultBlockInteractionTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.storage.loot.LootContext;
+ import net.minecraft.world.level.storage.loot.LootParams;
+@@ -35,13 +_,11 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> location)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<DefaultBlockInteractionTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_320801_ -> p_320801_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player")
+-                            .forGetter(DefaultBlockInteractionTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ContextAwarePredicate.CODEC, "location")
+-                            .forGetter(DefaultBlockInteractionTrigger.TriggerInstance::location)
++            p_337352_ -> p_337352_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(DefaultBlockInteractionTrigger.TriggerInstance::player),
++                        ContextAwarePredicate.CODEC.optionalFieldOf("location").forGetter(DefaultBlockInteractionTrigger.TriggerInstance::location)
+                     )
+-                    .apply(p_320801_, DefaultBlockInteractionTrigger.TriggerInstance::new)
++                    .apply(p_337352_, DefaultBlockInteractionTrigger.TriggerInstance::new)
+         );
+ 
+         public boolean matches(LootContext p_320120_) {

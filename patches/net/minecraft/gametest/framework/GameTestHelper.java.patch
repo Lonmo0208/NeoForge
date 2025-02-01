@@ -1,0 +1,121 @@
+--- a/net/minecraft/gametest/framework/GameTestHelper.java
++++ b/net/minecraft/gametest/framework/GameTestHelper.java
+@@ -183,7 +_,7 @@
+     }
+ 
+     public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> p_177330_, BlockPos p_177331_) {
+-        E e = this.spawn(p_177330_, p_177331_);
++        E e = (E)this.spawn(p_177330_, p_177331_);
+         e.removeFreeWill();
+         return e;
+     }
+@@ -193,7 +_,7 @@
+     }
+ 
+     public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> p_177327_, Vec3 p_177328_) {
+-        E e = this.spawn(p_177327_, p_177328_);
++        E e = (E)this.spawn(p_177327_, p_177328_);
+         e.removeFreeWill();
+         return e;
+     }
+@@ -462,7 +_,7 @@
+ 
+     public void assertEntitiesPresent(EntityType<?> p_239372_, BlockPos p_239373_, int p_239374_, double p_239375_) {
+         BlockPos blockpos = this.absolutePos(p_239373_);
+-        List<? extends Entity> list = this.getEntities(p_239372_, p_239373_, p_239375_);
++        List<? extends Entity> list = this.getEntities((EntityType<? extends Entity>)p_239372_, p_239373_, p_239375_);
+         if (list.size() != p_239374_) {
+             throw new GameTestAssertPosException(
+                 "Expected " + p_239374_ + " entities of type " + p_239372_.toShortString() + ", actual number of entities found=" + list.size(),
+@@ -474,7 +_,7 @@
+     }
+ 
+     public void assertEntityPresent(EntityType<?> p_177180_, BlockPos p_177181_, double p_177182_) {
+-        List<? extends Entity> list = this.getEntities(p_177180_, p_177181_, p_177182_);
++        List<? extends Entity> list = this.getEntities((EntityType<? extends Entity>)p_177180_, p_177181_, p_177182_);
+         if (list.isEmpty()) {
+             BlockPos blockpos = this.absolutePos(p_177181_);
+             throw new GameTestAssertPosException("Expected " + p_177180_.toShortString(), blockpos, p_177181_, this.testInfo.getTick());
+@@ -508,7 +_,7 @@
+         List<ItemEntity> list = this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_177201_), Entity::isAlive);
+         int i = 0;
+ 
+-        for(ItemEntity itementity : list) {
++        for (ItemEntity itementity : list) {
+             ItemStack itemstack = itementity.getItem();
+             if (itemstack.is(p_177199_)) {
+                 i += itemstack.getCount();
+@@ -528,7 +_,7 @@
+     public void assertItemEntityPresent(Item p_177195_, BlockPos p_177196_, double p_177197_) {
+         BlockPos blockpos = this.absolutePos(p_177196_);
+ 
+-        for(Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_177197_), Entity::isAlive)) {
++        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_177197_), Entity::isAlive)) {
+             ItemEntity itementity = (ItemEntity)entity;
+             if (itementity.getItem().getItem().equals(p_177195_)) {
+                 return;
+@@ -541,7 +_,7 @@
+     public void assertItemEntityNotPresent(Item p_236779_, BlockPos p_236780_, double p_236781_) {
+         BlockPos blockpos = this.absolutePos(p_236780_);
+ 
+-        for(Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_236781_), Entity::isAlive)) {
++        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(p_236781_), Entity::isAlive)) {
+             ItemEntity itementity = (ItemEntity)entity;
+             if (itementity.getItem().getItem().equals(p_236779_)) {
+                 throw new GameTestAssertPosException(
+@@ -552,7 +_,7 @@
+     }
+ 
+     public void assertItemEntityPresent(Item p_304857_) {
+-        for(Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
++        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
+             ItemEntity itementity = (ItemEntity)entity;
+             if (itementity.getItem().getItem().equals(p_304857_)) {
+                 return;
+@@ -563,7 +_,7 @@
+     }
+ 
+     public void assertItemEntityNotPresent(Item p_304474_) {
+-        for(Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
++        for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
+             ItemEntity itementity = (ItemEntity)entity;
+             if (itementity.getItem().getItem().equals(p_304474_)) {
+                 throw new GameTestAssertException("Did not expect " + p_304474_.getDescription().getString() + " item");
+@@ -616,7 +_,7 @@
+         if (list.isEmpty()) {
+             throw new GameTestAssertPosException("Expected " + p_177239_.toShortString(), blockpos, p_177238_, this.testInfo.getTick());
+         } else {
+-            for(E e : list) {
++            for (E e : list) {
+                 T t = p_177240_.apply(e);
+                 if (t == null) {
+                     if (p_177241_ != null) {
+@@ -635,7 +_,7 @@
+         if (list.isEmpty()) {
+             throw new GameTestAssertPosException("Expected entity of type: " + p_263510_, blockpos, p_263501_, this.getTick());
+         } else {
+-            for(E e : list) {
++            for (E e : list) {
+                 if (e.isHolding(p_263517_)) {
+                     return;
+                 }
+@@ -651,7 +_,7 @@
+         if (list.isEmpty()) {
+             throw new GameTestAssertPosException("Expected " + p_263521_.toShortString() + " to exist", blockpos, p_263495_, this.getTick());
+         } else {
+-            for(E e : list) {
++            for (E e : list) {
+                 if (e.getInventory().hasAnyMatching(p_263481_ -> p_263481_.is(p_263502_))) {
+                     return;
+                 }
+@@ -798,8 +_,8 @@
+         int j = (int)Math.floor(aabb.maxZ);
+         int k = (int)Math.floor(aabb.maxY);
+ 
+-        for(int l = (int)Math.floor(aabb.minX); l < i; ++l) {
+-            for(int i1 = (int)Math.floor(aabb.minZ); i1 < j; ++i1) {
++        for (int l = (int)Math.floor(aabb.minX); l < i; l++) {
++            for (int i1 = (int)Math.floor(aabb.minZ); i1 < j; i1++) {
+                 this.tickPrecipitation(new BlockPos(l, k, i1));
+             }
+         }

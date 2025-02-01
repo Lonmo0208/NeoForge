@@ -1,0 +1,258 @@
+--- a/net/minecraft/world/grid/SubGridBlocks.java
++++ /dev/null
+@@ -1,255 +_,0 @@
+-package net.minecraft.world.grid;
+-
+-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.List;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.core.Direction;
+-import net.minecraft.core.HolderGetter;
+-import net.minecraft.nbt.CompoundTag;
+-import net.minecraft.nbt.IntArrayTag;
+-import net.minecraft.nbt.ListTag;
+-import net.minecraft.nbt.NbtUtils;
+-import net.minecraft.nbt.Tag;
+-import net.minecraft.network.FriendlyByteBuf;
+-import net.minecraft.network.RegistryFriendlyByteBuf;
+-import net.minecraft.network.codec.StreamCodec;
+-import net.minecraft.util.BitStorage;
+-import net.minecraft.util.Mth;
+-import net.minecraft.util.SimpleBitStorage;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Block;
+-import net.minecraft.world.level.block.Blocks;
+-import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+-import net.minecraft.world.level.material.FluidState;
+-import net.minecraft.world.level.material.Fluids;
+-import net.minecraft.world.phys.Vec3;
+-
+-public class SubGridBlocks {
+-    public static final StreamCodec<RegistryFriendlyByteBuf, SubGridBlocks> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, SubGridBlocks>() {
+-        public SubGridBlocks decode(RegistryFriendlyByteBuf p_340676_) {
+-            int i = p_340676_.readVarInt();
+-            int j = p_340676_.readVarInt();
+-            int k = p_340676_.readVarInt();
+-            List<BlockState> list = p_340676_.readList(p_341258_ -> Block.stateById(p_341258_.readVarInt()));
+-            int l = Mth.ceillog2(list.size());
+-            BlockState[] ablockstate = new BlockState[i * j * k];
+-            SimpleBitStorage simplebitstorage = new SimpleBitStorage(l, ablockstate.length, p_340676_.readLongArray());
+-
+-            for(int i1 = 0; i1 < ablockstate.length; ++i1) {
+-                ablockstate[i1] = list.get(simplebitstorage.get(i1));
+-            }
+-
+-            ArrayList<BlockPos> arraylist = p_340676_.readCollection(ArrayList::new, BlockPos.STREAM_CODEC);
+-            return new SubGridBlocks(ablockstate, arraylist, i, j, k);
+-        }
+-
+-        public void encode(RegistryFriendlyByteBuf p_340637_, SubGridBlocks p_341188_) {
+-            p_340637_.writeVarInt(p_341188_.sizeX);
+-            p_340637_.writeVarInt(p_341188_.sizeY);
+-            p_340637_.writeVarInt(p_341188_.sizeZ);
+-            Reference2IntMap<BlockState> reference2intmap = new Reference2IntOpenHashMap<>();
+-            List<BlockState> list = new ArrayList<>();
+-            reference2intmap.defaultReturnValue(-1);
+-
+-            for(BlockState blockstate : p_341188_.blockStates) {
+-                int i = list.size();
+-                int j = reference2intmap.putIfAbsent(blockstate, i);
+-                if (j == -1) {
+-                    list.add(blockstate);
+-                }
+-            }
+-
+-            p_340637_.writeCollection(list, (p_342165_, p_341369_) -> p_342165_.writeVarInt(Block.getId(p_341369_)));
+-            int k = Mth.ceillog2(list.size());
+-            BitStorage bitstorage = new SimpleBitStorage(k, p_341188_.sizeX * p_341188_.sizeY * p_341188_.sizeZ);
+-            int l = 0;
+-
+-            for(BlockState blockstate1 : p_341188_.blockStates) {
+-                bitstorage.set(l++, reference2intmap.getInt(blockstate1));
+-            }
+-
+-            p_340637_.writeLongArray(bitstorage.getRaw());
+-            p_340637_.writeCollection(p_341188_.tickables, BlockPos.STREAM_CODEC);
+-        }
+-    };
+-    private static final int NO_INDEX = -1;
+-    private static final BlockState EMPTY_BLOCK_STATE = Blocks.AIR.defaultBlockState();
+-    final BlockState[] blockStates;
+-    final List<BlockPos> tickables;
+-    final int sizeX;
+-    final int sizeY;
+-    final int sizeZ;
+-
+-    SubGridBlocks(BlockState[] p_341781_, List<BlockPos> p_340573_, int p_341434_, int p_340969_, int p_341505_) {
+-        this.blockStates = p_341781_;
+-        this.tickables = p_340573_;
+-        this.sizeX = p_341434_;
+-        this.sizeY = p_340969_;
+-        this.sizeZ = p_341505_;
+-    }
+-
+-    public SubGridBlocks(int p_340579_, int p_342550_, int p_342290_) {
+-        this.blockStates = new BlockState[p_340579_ * p_342550_ * p_342290_];
+-        Arrays.fill(this.blockStates, EMPTY_BLOCK_STATE);
+-        this.tickables = new ArrayList<>();
+-        this.sizeX = p_340579_;
+-        this.sizeY = p_342550_;
+-        this.sizeZ = p_342290_;
+-    }
+-
+-    public void setBlockState(int p_342077_, int p_340494_, int p_342270_, BlockState p_341271_) {
+-        int i = this.index(p_342077_, p_340494_, p_342270_);
+-        if (i == -1) {
+-            throw new IllegalStateException("Block was out of bounds");
+-        } else {
+-            this.blockStates[i] = p_341271_;
+-        }
+-    }
+-
+-    public void markTickable(BlockPos p_341130_) {
+-        this.tickables.add(p_341130_);
+-    }
+-
+-    public void tick(Level p_341893_, Vec3 p_341842_, Direction p_340956_) {
+-        this.tickables
+-            .forEach(
+-                p_340425_ -> {
+-                    BlockState blockstate = this.getBlockState(p_340425_.getX(), p_340425_.getY(), p_340425_.getZ());
+-                    Block block = blockstate.getBlock();
+-                    if (block instanceof FlyingTickable flyingtickable) {
+-                        flyingtickable.flyingTick(
+-                            p_341893_,
+-                            this,
+-                            blockstate,
+-                            p_340425_,
+-                            p_341842_.add((double)p_340425_.getX(), (double)p_340425_.getY(), (double)p_340425_.getZ()),
+-                            p_340956_
+-                        );
+-                    }
+-                }
+-            );
+-    }
+-
+-    public BlockState getBlockState(int p_341681_, int p_340490_, int p_341202_) {
+-        int i = this.index(p_341681_, p_340490_, p_341202_);
+-        return i == -1 ? EMPTY_BLOCK_STATE : this.blockStates[i];
+-    }
+-
+-    public BlockState getBlockState(BlockPos p_340447_) {
+-        return this.getBlockState(p_340447_.getX(), p_340447_.getY(), p_340447_.getZ());
+-    }
+-
+-    private int index(int p_340476_, int p_342425_, int p_342305_) {
+-        return p_340476_ >= 0 && p_342425_ >= 0 && p_342305_ >= 0 && p_340476_ < this.sizeX && p_342425_ < this.sizeY && p_342305_ < this.sizeZ
+-            ? (p_340476_ + p_342305_ * this.sizeX) * this.sizeY + p_342425_
+-            : -1;
+-    }
+-
+-    public int sizeX() {
+-        return this.sizeX;
+-    }
+-
+-    public int sizeY() {
+-        return this.sizeY;
+-    }
+-
+-    public int sizeZ() {
+-        return this.sizeZ;
+-    }
+-
+-    public SubGridBlocks copy() {
+-        return new SubGridBlocks(Arrays.copyOf(this.blockStates, this.blockStates.length), new ArrayList<>(this.tickables), this.sizeX, this.sizeY, this.sizeZ);
+-    }
+-
+-    public void place(BlockPos p_341952_, Level p_340752_) {
+-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+-
+-        for(int i = 0; i < this.sizeZ; ++i) {
+-            for(int j = 0; j < this.sizeX; ++j) {
+-                for(int k = 0; k < this.sizeY; ++k) {
+-                    blockpos$mutableblockpos.setWithOffset(p_341952_, j, k, i);
+-                    BlockState blockstate = this.getBlockState(j, k, i);
+-                    if (!blockstate.isAir()) {
+-                        FluidState fluidstate = p_340752_.getFluidState(blockpos$mutableblockpos);
+-                        if (fluidstate.is(Fluids.WATER)) {
+-                            blockstate = blockstate.trySetValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
+-                        }
+-
+-                        p_340752_.setBlock(blockpos$mutableblockpos, blockstate, 18);
+-                    }
+-                }
+-            }
+-        }
+-
+-        for(int l = 0; l < this.sizeZ; ++l) {
+-            for(int i1 = 0; i1 < this.sizeX; ++i1) {
+-                for(int j1 = 0; j1 < this.sizeY; ++j1) {
+-                    blockpos$mutableblockpos.setWithOffset(p_341952_, i1, j1, l);
+-                    p_340752_.blockUpdated(blockpos$mutableblockpos, this.getBlockState(i1, j1, l).getBlock());
+-                }
+-            }
+-        }
+-    }
+-
+-    public static SubGridBlocks decode(HolderGetter<Block> p_340326_, CompoundTag p_340952_) {
+-        int i = p_340952_.getInt("size_x");
+-        int j = p_340952_.getInt("size_y");
+-        int k = p_340952_.getInt("size_z");
+-        BlockState[] ablockstate = new BlockState[i * j * k];
+-        ListTag listtag = p_340952_.getList("palette", 10);
+-        List<BlockState> list = new ArrayList<>();
+-
+-        for(int l = 0; l < listtag.size(); ++l) {
+-            list.add(NbtUtils.readBlockState(p_340326_, listtag.getCompound(l)));
+-        }
+-
+-        int[] aint = p_340952_.getIntArray("blocks");
+-        if (aint.length != ablockstate.length) {
+-            return new SubGridBlocks(i, j, k);
+-        } else {
+-            for(int i1 = 0; i1 < aint.length; ++i1) {
+-                int j1 = aint[i1];
+-                ablockstate[i1] = j1 < list.size() ? list.get(j1) : Blocks.AIR.defaultBlockState();
+-            }
+-
+-            List<BlockPos> list1 = new ArrayList<>();
+-            if (p_340952_.contains("tickables", 12)) {
+-                Arrays.stream(p_340952_.getLongArray("tickables")).mapToObj(BlockPos::of).forEach(list1::add);
+-            }
+-
+-            return new SubGridBlocks(ablockstate, list1, i, j, k);
+-        }
+-    }
+-
+-    public Tag encode() {
+-        CompoundTag compoundtag = new CompoundTag();
+-        compoundtag.putInt("size_x", this.sizeX);
+-        compoundtag.putInt("size_y", this.sizeY);
+-        compoundtag.putInt("size_z", this.sizeZ);
+-        Reference2IntMap<BlockState> reference2intmap = new Reference2IntOpenHashMap<>();
+-        reference2intmap.defaultReturnValue(-1);
+-        ListTag listtag = new ListTag();
+-        int[] aint = new int[this.blockStates.length];
+-
+-        for(int i = 0; i < this.blockStates.length; ++i) {
+-            BlockState blockstate = this.blockStates[i];
+-            int j = listtag.size();
+-            int k = reference2intmap.putIfAbsent(blockstate, j);
+-            if (k == -1) {
+-                listtag.add(NbtUtils.writeBlockState(blockstate));
+-                aint[i] = j;
+-            } else {
+-                aint[i] = k;
+-            }
+-        }
+-
+-        compoundtag.put("palette", listtag);
+-        compoundtag.put("blocks", new IntArrayTag(aint));
+-        compoundtag.putLongArray("tickables", this.tickables.stream().mapToLong(BlockPos::asLong).toArray());
+-        return compoundtag;
+-    }
+-}

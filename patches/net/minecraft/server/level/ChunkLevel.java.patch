@@ -1,0 +1,16 @@
+--- a/net/minecraft/server/level/ChunkLevel.java
++++ b/net/minecraft/server/level/ChunkLevel.java
+@@ -27,11 +_,12 @@
+     }
+ 
+     public static int byStatus(FullChunkStatus p_287601_) {
+-        return switch(p_287601_) {
++        return switch (p_287601_) {
+             case INACCESSIBLE -> MAX_LEVEL;
+             case FULL -> 33;
+             case BLOCK_TICKING -> 32;
+             case ENTITY_TICKING -> 31;
++            default -> throw new MatchException(null, null);
+         };
+     }
+ 

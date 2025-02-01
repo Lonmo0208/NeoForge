@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/item/crafting/RecipeHolder.java
++++ b/net/minecraft/world/item/crafting/RecipeHolder.java
+@@ -14,7 +_,7 @@
+         if (this == p_301091_) {
+             return true;
+         } else {
+-            if (p_301091_ instanceof RecipeHolder recipeholder && this.id.equals(recipeholder.id)) {
++            if (p_301091_ instanceof RecipeHolder<?> recipeholder && this.id.equals(recipeholder.id)) {
+                 return true;
+             }
+ 

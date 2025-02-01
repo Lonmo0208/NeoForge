@@ -1,0 +1,19 @@
+--- a/net/minecraft/util/datafix/fixes/OptionsAddTextBackgroundFix.java
++++ b/net/minecraft/util/datafix/fixes/OptionsAddTextBackgroundFix.java
+@@ -20,12 +_,12 @@
+             this.getInputSchema().getType(References.OPTIONS),
+             p_16610_ -> p_16610_.update(
+                     DSL.remainderFinder(),
+-                    p_145567_ -> DataFixUtils.orElse(
+-                            p_145567_.get("chatOpacity")
++                    p_337652_ -> DataFixUtils.orElse(
++                            p_337652_.get("chatOpacity")
+                                 .asString()
+-                                .map(p_145570_ -> p_145567_.set("textBackgroundOpacity", p_145567_.createDouble(this.calculateBackground(p_145570_))))
++                                .map(p_145570_ -> p_337652_.set("textBackgroundOpacity", p_337652_.createDouble(this.calculateBackground(p_145570_))))
+                                 .result(),
+-                            p_145567_
++                            p_337652_
+                         )
+                 )
+         );

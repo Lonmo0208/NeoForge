@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/model/WardenModel.java
++++ b/net/minecraft/client/model/WardenModel.java
+@@ -132,7 +_,7 @@
+         float f3 = Mth.sin(f1);
+         float f4 = Math.min(0.35F, f);
+         this.head.zRot += 0.3F * f3 * f;
+-        this.head.xRot += 1.2F * Mth.cos(f1 + (float) (Math.PI / 2)) * f4;
++        this.head.xRot = this.head.xRot + 1.2F * Mth.cos(f1 + (float) (Math.PI / 2)) * f4;
+         this.body.zRot = 0.1F * f3 * f;
+         this.body.xRot = 1.0F * f2 * f4;
+         this.leftLeg.xRot = 1.0F * f2 * f;

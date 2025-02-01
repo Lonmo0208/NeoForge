@@ -1,0 +1,29 @@
+--- a/net/minecraft/advancements/critereon/PotatoPredicate.java
++++ /dev/null
+@@ -1,26 +_,0 @@
+-package net.minecraft.advancements.critereon;
+-
+-import com.mojang.serialization.Codec;
+-import com.mojang.serialization.MapCodec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import javax.annotation.Nullable;
+-import net.minecraft.server.level.ServerLevel;
+-import net.minecraft.world.entity.Entity;
+-import net.minecraft.world.phys.Vec3;
+-
+-public record PotatoPredicate(boolean isPotato) implements EntitySubPredicate {
+-    public static final MapCodec<PotatoPredicate> CODEC = RecordCodecBuilder.mapCodec(
+-        p_340835_ -> p_340835_.group(Codec.BOOL.fieldOf("is_potato").forGetter(PotatoPredicate::isPotato)).apply(p_340835_, PotatoPredicate::new)
+-    );
+-
+-    @Override
+-    public MapCodec<PotatoPredicate> codec() {
+-        return CODEC;
+-    }
+-
+-    @Override
+-    public boolean matches(Entity p_341240_, ServerLevel p_341292_, @Nullable Vec3 p_340919_) {
+-        return p_341240_.isPotato() == this.isPotato;
+-    }
+-}

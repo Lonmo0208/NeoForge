@@ -1,0 +1,67 @@
+--- a/net/minecraft/world/entity/animal/armadillo/Armadillo.java
++++ b/net/minecraft/world/entity/animal/armadillo/Armadillo.java
+@@ -67,11 +_,6 @@
+         this.scuteTime = this.pickNextScuteDropTime();
+     }
+ 
+-    @Override
+-    public boolean hasPotatoVariant() {
+-        return true;
+-    }
+-
+     @Nullable
+     @Override
+     public AgeableMob getBreedOffspring(ServerLevel p_316757_, AgeableMob p_316523_) {
+@@ -166,7 +_,7 @@
+             this.clampHeadRotationToBody();
+         }
+ 
+-        ++this.inStateTicks;
++        this.inStateTicks++;
+     }
+ 
+     @Override
+@@ -175,17 +_,12 @@
+     }
+ 
+     private void setupAnimationStates() {
+-        switch(this.getState()) {
++        switch (this.getState()) {
+             case IDLE:
+                 this.rollOutAnimationState.stop();
+                 this.rollUpAnimationState.stop();
+                 this.peekAnimationState.stop();
+                 break;
+-            case UNROLLING:
+-                this.rollOutAnimationState.startIfStopped(this.tickCount);
+-                this.rollUpAnimationState.stop();
+-                this.peekAnimationState.stop();
+-                break;
+             case ROLLING:
+                 this.rollOutAnimationState.stop();
+                 this.rollUpAnimationState.startIfStopped(this.tickCount);
+@@ -205,6 +_,11 @@
+                 } else {
+                     this.peekAnimationState.startIfStopped(this.tickCount);
+                 }
++                break;
++            case UNROLLING:
++                this.rollOutAnimationState.startIfStopped(this.tickCount);
++                this.rollUpAnimationState.stop();
++                this.peekAnimationState.stop();
+         }
+     }
+ 
+@@ -237,11 +_,7 @@
+         } else if (this.getLastHurtByMob() == p_316281_) {
+             return true;
+         } else if (p_316281_ instanceof Player player) {
+-            if (player.isSpectator()) {
+-                return false;
+-            } else {
+-                return player.isSprinting() || player.isPassenger();
+-            }
++            return player.isSpectator() ? false : player.isSprinting() || player.isPassenger();
+         } else {
+             return false;
+         }

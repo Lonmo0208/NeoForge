@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/level/levelgen/structure/StructureType.java
++++ b/net/minecraft/world/level/levelgen/structure/StructureType.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import net.minecraft.core.Registry;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.world.level.levelgen.structure.structures.BuriedTreasureStructure;
+@@ -38,9 +_,9 @@
+     StructureType<SwampHutStructure> SWAMP_HUT = register("swamp_hut", SwampHutStructure.CODEC);
+     StructureType<WoodlandMansionStructure> WOODLAND_MANSION = register("woodland_mansion", WoodlandMansionStructure.CODEC);
+ 
+-    Codec<S> codec();
++    MapCodec<S> codec();
+ 
+-    private static <S extends Structure> StructureType<S> register(String p_226882_, Codec<S> p_226883_) {
+-        return Registry.register(BuiltInRegistries.STRUCTURE_TYPE, p_226882_, () -> p_226883_);
++    private static <S extends Structure> StructureType<S> register(String p_226882_, MapCodec<S> p_338639_) {
++        return Registry.register(BuiltInRegistries.STRUCTURE_TYPE, p_226882_, () -> p_338639_);
+     }
+ }

@@ -1,0 +1,170 @@
+--- a/net/minecraft/data/worldgen/placement/NetherPlacements.java
++++ b/net/minecraft/data/worldgen/placement/NetherPlacements.java
+@@ -16,15 +_,11 @@
+ import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
+ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+ import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+-import net.minecraft.world.level.levelgen.placement.RarityFilter;
+ 
+ public class NetherPlacements {
+     public static final ResourceKey<PlacedFeature> DELTA = PlacementUtils.createKey("delta");
+-    public static final ResourceKey<PlacedFeature> POISON_POOL = PlacementUtils.createKey("poison_pool");
+     public static final ResourceKey<PlacedFeature> SMALL_BASALT_COLUMNS = PlacementUtils.createKey("small_basalt_columns");
+-    public static final ResourceKey<PlacedFeature> SMALL_DEBRIS_COLUMNS = PlacementUtils.createKey("small_debris_columns");
+     public static final ResourceKey<PlacedFeature> LARGE_BASALT_COLUMNS = PlacementUtils.createKey("large_basalt_columns");
+-    public static final ResourceKey<PlacedFeature> LARGE_POTATO_COLUMNS = PlacementUtils.createKey("large_potato_columns");
+     public static final ResourceKey<PlacedFeature> BASALT_BLOBS = PlacementUtils.createKey("basalt_blobs");
+     public static final ResourceKey<PlacedFeature> BLACKSTONE_BLOBS = PlacementUtils.createKey("blackstone_blobs");
+     public static final ResourceKey<PlacedFeature> GLOWSTONE_EXTRA = PlacementUtils.createKey("glowstone_extra");
+@@ -33,8 +_,6 @@
+     public static final ResourceKey<PlacedFeature> WARPED_FOREST_VEGETATION = PlacementUtils.createKey("warped_forest_vegetation");
+     public static final ResourceKey<PlacedFeature> NETHER_SPROUTS = PlacementUtils.createKey("nether_sprouts");
+     public static final ResourceKey<PlacedFeature> TWISTING_VINES = PlacementUtils.createKey("twisting_vines");
+-    public static final ResourceKey<PlacedFeature> CORRUPTED_BUDS = PlacementUtils.createKey("corrupted_buds");
+-    public static final ResourceKey<PlacedFeature> POTATO_SPROUTS = PlacementUtils.createKey("potato_sprouts");
+     public static final ResourceKey<PlacedFeature> WEEPING_VINES = PlacementUtils.createKey("weeping_vines");
+     public static final ResourceKey<PlacedFeature> PATCH_CRIMSON_ROOTS = PlacementUtils.createKey("patch_crimson_roots");
+     public static final ResourceKey<PlacedFeature> BASALT_PILLAR = PlacementUtils.createKey("basalt_pillar");
+@@ -48,89 +_,73 @@
+     public static void bootstrap(BootstrapContext<PlacedFeature> p_321634_) {
+         HolderGetter<ConfiguredFeature<?, ?>> holdergetter = p_321634_.lookup(Registries.CONFIGURED_FEATURE);
+         Holder<ConfiguredFeature<?, ?>> holder = holdergetter.getOrThrow(NetherFeatures.DELTA);
+-        Holder<ConfiguredFeature<?, ?>> holder1 = holdergetter.getOrThrow(NetherFeatures.POISON);
+-        Holder<ConfiguredFeature<?, ?>> holder2 = holdergetter.getOrThrow(NetherFeatures.SMALL_BASALT_COLUMNS);
+-        Holder<ConfiguredFeature<?, ?>> holder3 = holdergetter.getOrThrow(NetherFeatures.SMALL_DEBRIS_COLUMNS);
+-        Holder<ConfiguredFeature<?, ?>> holder4 = holdergetter.getOrThrow(NetherFeatures.LARGE_BASALT_COLUMNS);
+-        Holder<ConfiguredFeature<?, ?>> holder5 = holdergetter.getOrThrow(NetherFeatures.LARGE_POTATO_COLUMNS);
+-        Holder<ConfiguredFeature<?, ?>> holder6 = holdergetter.getOrThrow(NetherFeatures.BASALT_BLOBS);
+-        Holder<ConfiguredFeature<?, ?>> holder7 = holdergetter.getOrThrow(NetherFeatures.BLACKSTONE_BLOBS);
+-        Holder<ConfiguredFeature<?, ?>> holder8 = holdergetter.getOrThrow(NetherFeatures.GLOWSTONE_EXTRA);
+-        Holder<ConfiguredFeature<?, ?>> holder9 = holdergetter.getOrThrow(NetherFeatures.CRIMSON_FOREST_VEGETATION);
+-        Holder<ConfiguredFeature<?, ?>> holder10 = holdergetter.getOrThrow(NetherFeatures.WARPED_FOREST_VEGETION);
+-        Holder<ConfiguredFeature<?, ?>> holder11 = holdergetter.getOrThrow(NetherFeatures.NETHER_SPROUTS);
+-        Holder<ConfiguredFeature<?, ?>> holder12 = holdergetter.getOrThrow(NetherFeatures.TWISTING_VINES);
+-        Holder<ConfiguredFeature<?, ?>> holder13 = holdergetter.getOrThrow(NetherFeatures.CORRUPTED_BUDS);
+-        Holder<ConfiguredFeature<?, ?>> holder14 = holdergetter.getOrThrow(NetherFeatures.POTATO_SPROUTS);
+-        Holder<ConfiguredFeature<?, ?>> holder15 = holdergetter.getOrThrow(NetherFeatures.WEEPING_VINES);
+-        Holder<ConfiguredFeature<?, ?>> holder16 = holdergetter.getOrThrow(NetherFeatures.PATCH_CRIMSON_ROOTS);
+-        Holder<ConfiguredFeature<?, ?>> holder17 = holdergetter.getOrThrow(NetherFeatures.BASALT_PILLAR);
+-        Holder<ConfiguredFeature<?, ?>> holder18 = holdergetter.getOrThrow(NetherFeatures.SPRING_LAVA_NETHER);
+-        Holder<ConfiguredFeature<?, ?>> holder19 = holdergetter.getOrThrow(NetherFeatures.SPRING_NETHER_CLOSED);
+-        Holder<ConfiguredFeature<?, ?>> holder20 = holdergetter.getOrThrow(NetherFeatures.SPRING_NETHER_OPEN);
+-        Holder<ConfiguredFeature<?, ?>> holder21 = holdergetter.getOrThrow(NetherFeatures.PATCH_SOUL_FIRE);
+-        Holder<ConfiguredFeature<?, ?>> holder22 = holdergetter.getOrThrow(NetherFeatures.PATCH_FIRE);
++        Holder<ConfiguredFeature<?, ?>> holder1 = holdergetter.getOrThrow(NetherFeatures.SMALL_BASALT_COLUMNS);
++        Holder<ConfiguredFeature<?, ?>> holder2 = holdergetter.getOrThrow(NetherFeatures.LARGE_BASALT_COLUMNS);
++        Holder<ConfiguredFeature<?, ?>> holder3 = holdergetter.getOrThrow(NetherFeatures.BASALT_BLOBS);
++        Holder<ConfiguredFeature<?, ?>> holder4 = holdergetter.getOrThrow(NetherFeatures.BLACKSTONE_BLOBS);
++        Holder<ConfiguredFeature<?, ?>> holder5 = holdergetter.getOrThrow(NetherFeatures.GLOWSTONE_EXTRA);
++        Holder<ConfiguredFeature<?, ?>> holder6 = holdergetter.getOrThrow(NetherFeatures.CRIMSON_FOREST_VEGETATION);
++        Holder<ConfiguredFeature<?, ?>> holder7 = holdergetter.getOrThrow(NetherFeatures.WARPED_FOREST_VEGETION);
++        Holder<ConfiguredFeature<?, ?>> holder8 = holdergetter.getOrThrow(NetherFeatures.NETHER_SPROUTS);
++        Holder<ConfiguredFeature<?, ?>> holder9 = holdergetter.getOrThrow(NetherFeatures.TWISTING_VINES);
++        Holder<ConfiguredFeature<?, ?>> holder10 = holdergetter.getOrThrow(NetherFeatures.WEEPING_VINES);
++        Holder<ConfiguredFeature<?, ?>> holder11 = holdergetter.getOrThrow(NetherFeatures.PATCH_CRIMSON_ROOTS);
++        Holder<ConfiguredFeature<?, ?>> holder12 = holdergetter.getOrThrow(NetherFeatures.BASALT_PILLAR);
++        Holder<ConfiguredFeature<?, ?>> holder13 = holdergetter.getOrThrow(NetherFeatures.SPRING_LAVA_NETHER);
++        Holder<ConfiguredFeature<?, ?>> holder14 = holdergetter.getOrThrow(NetherFeatures.SPRING_NETHER_CLOSED);
++        Holder<ConfiguredFeature<?, ?>> holder15 = holdergetter.getOrThrow(NetherFeatures.SPRING_NETHER_OPEN);
++        Holder<ConfiguredFeature<?, ?>> holder16 = holdergetter.getOrThrow(NetherFeatures.PATCH_SOUL_FIRE);
++        Holder<ConfiguredFeature<?, ?>> holder17 = holdergetter.getOrThrow(NetherFeatures.PATCH_FIRE);
+         PlacementUtils.register(p_321634_, DELTA, holder, CountOnEveryLayerPlacement.of(40), BiomeFilter.biome());
+-        PlacementUtils.register(p_321634_, POISON_POOL, holder1, CountOnEveryLayerPlacement.of(40), BiomeFilter.biome());
+-        PlacementUtils.register(p_321634_, SMALL_BASALT_COLUMNS, holder2, CountOnEveryLayerPlacement.of(4), BiomeFilter.biome());
+-        PlacementUtils.register(
+-            p_321634_, SMALL_DEBRIS_COLUMNS, holder3, CountOnEveryLayerPlacement.of(1), RarityFilter.onAverageOnceEvery(3), BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(p_321634_, LARGE_BASALT_COLUMNS, holder4, CountOnEveryLayerPlacement.of(2), BiomeFilter.biome());
+-        PlacementUtils.register(
+-            p_321634_, LARGE_POTATO_COLUMNS, holder5, CountOnEveryLayerPlacement.of(1), RarityFilter.onAverageOnceEvery(3), BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, BASALT_BLOBS, holder6, CountPlacement.of(75), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, BLACKSTONE_BLOBS, holder7, CountPlacement.of(25), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
++        PlacementUtils.register(p_321634_, SMALL_BASALT_COLUMNS, holder1, CountOnEveryLayerPlacement.of(4), BiomeFilter.biome());
++        PlacementUtils.register(p_321634_, LARGE_BASALT_COLUMNS, holder2, CountOnEveryLayerPlacement.of(2), BiomeFilter.biome());
++        PlacementUtils.register(
++            p_321634_, BASALT_BLOBS, holder3, CountPlacement.of(75), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
++        );
++        PlacementUtils.register(
++            p_321634_, BLACKSTONE_BLOBS, holder4, CountPlacement.of(25), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
+         );
+         PlacementUtils.register(
+             p_321634_,
+             GLOWSTONE_EXTRA,
+-            holder8,
++            holder5,
+             CountPlacement.of(BiasedToBottomInt.of(0, 9)),
+             InSquarePlacement.spread(),
+             PlacementUtils.RANGE_4_4,
+             BiomeFilter.biome()
+         );
+         PlacementUtils.register(
+-            p_321634_, GLOWSTONE, holder8, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(p_321634_, CRIMSON_FOREST_VEGETATION, holder9, CountOnEveryLayerPlacement.of(6), BiomeFilter.biome());
+-        PlacementUtils.register(p_321634_, WARPED_FOREST_VEGETATION, holder10, CountOnEveryLayerPlacement.of(5), BiomeFilter.biome());
+-        PlacementUtils.register(p_321634_, NETHER_SPROUTS, holder11, CountOnEveryLayerPlacement.of(4), BiomeFilter.biome());
+-        PlacementUtils.register(p_321634_, POTATO_SPROUTS, holder14, CountOnEveryLayerPlacement.of(8), BiomeFilter.biome());
+-        PlacementUtils.register(
+-            p_321634_, TWISTING_VINES, holder12, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, CORRUPTED_BUDS, holder13, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, WEEPING_VINES, holder15, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(p_321634_, PATCH_CRIMSON_ROOTS, holder16, PlacementUtils.FULL_RANGE, BiomeFilter.biome());
+-        PlacementUtils.register(
+-            p_321634_, BASALT_PILLAR, holder17, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, SPRING_DELTA, holder18, CountPlacement.of(16), InSquarePlacement.spread(), PlacementUtils.RANGE_4_4, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, SPRING_CLOSED, holder19, CountPlacement.of(16), InSquarePlacement.spread(), PlacementUtils.RANGE_10_10, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, SPRING_CLOSED_DOUBLE, holder19, CountPlacement.of(32), InSquarePlacement.spread(), PlacementUtils.RANGE_10_10, BiomeFilter.biome()
+-        );
+-        PlacementUtils.register(
+-            p_321634_, SPRING_OPEN, holder20, CountPlacement.of(8), InSquarePlacement.spread(), PlacementUtils.RANGE_4_4, BiomeFilter.biome()
++            p_321634_, GLOWSTONE, holder5, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
++        );
++        PlacementUtils.register(p_321634_, CRIMSON_FOREST_VEGETATION, holder6, CountOnEveryLayerPlacement.of(6), BiomeFilter.biome());
++        PlacementUtils.register(p_321634_, WARPED_FOREST_VEGETATION, holder7, CountOnEveryLayerPlacement.of(5), BiomeFilter.biome());
++        PlacementUtils.register(p_321634_, NETHER_SPROUTS, holder8, CountOnEveryLayerPlacement.of(4), BiomeFilter.biome());
++        PlacementUtils.register(
++            p_321634_, TWISTING_VINES, holder9, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
++        );
++        PlacementUtils.register(
++            p_321634_, WEEPING_VINES, holder10, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
++        );
++        PlacementUtils.register(p_321634_, PATCH_CRIMSON_ROOTS, holder11, PlacementUtils.FULL_RANGE, BiomeFilter.biome());
++        PlacementUtils.register(
++            p_321634_, BASALT_PILLAR, holder12, CountPlacement.of(10), InSquarePlacement.spread(), PlacementUtils.FULL_RANGE, BiomeFilter.biome()
++        );
++        PlacementUtils.register(
++            p_321634_, SPRING_DELTA, holder13, CountPlacement.of(16), InSquarePlacement.spread(), PlacementUtils.RANGE_4_4, BiomeFilter.biome()
++        );
++        PlacementUtils.register(
++            p_321634_, SPRING_CLOSED, holder14, CountPlacement.of(16), InSquarePlacement.spread(), PlacementUtils.RANGE_10_10, BiomeFilter.biome()
++        );
++        PlacementUtils.register(
++            p_321634_, SPRING_CLOSED_DOUBLE, holder14, CountPlacement.of(32), InSquarePlacement.spread(), PlacementUtils.RANGE_10_10, BiomeFilter.biome()
++        );
++        PlacementUtils.register(
++            p_321634_, SPRING_OPEN, holder15, CountPlacement.of(8), InSquarePlacement.spread(), PlacementUtils.RANGE_4_4, BiomeFilter.biome()
+         );
+         List<PlacementModifier> list = List.of(
+             CountPlacement.of(UniformInt.of(0, 5)), InSquarePlacement.spread(), PlacementUtils.RANGE_4_4, BiomeFilter.biome()
+         );
+-        PlacementUtils.register(p_321634_, PATCH_SOUL_FIRE, holder21, list);
+-        PlacementUtils.register(p_321634_, PATCH_FIRE, holder22, list);
++        PlacementUtils.register(p_321634_, PATCH_SOUL_FIRE, holder16, list);
++        PlacementUtils.register(p_321634_, PATCH_FIRE, holder17, list);
+     }
+ }

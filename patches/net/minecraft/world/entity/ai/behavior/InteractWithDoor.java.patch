@@ -1,0 +1,52 @@
+--- a/net/minecraft/world/entity/ai/behavior/InteractWithDoor.java
++++ b/net/minecraft/world/entity/ai/behavior/InteractWithDoor.java
+@@ -7,7 +_,6 @@
+ import java.util.Objects;
+ import java.util.Optional;
+ import java.util.Set;
+-import java.util.function.Function;
+ import javax.annotation.Nullable;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.GlobalPos;
+@@ -78,7 +_,7 @@
+             
+                                     optional.ifPresent(
+                                         p_258452_ -> closeDoorsThatIHaveOpenedOrPassedThrough(
+-                                                p_258469_, p_258470_, node, node1, p_258452_, p_258474_.tryGet(p_258462_)
++                                                p_258469_, p_258470_, node, node1, (Set<GlobalPos>)p_258452_, p_258474_.tryGet(p_258462_)
+                                             )
+                                     );
+                                     return true;
+@@ -100,7 +_,7 @@
+     ) {
+         Iterator<GlobalPos> iterator = p_259401_.iterator();
+ 
+-        while(iterator.hasNext()) {
++        while (iterator.hasNext()) {
+             GlobalPos globalpos = iterator.next();
+             BlockPos blockpos = globalpos.pos();
+             if ((p_259408_ == null || !p_259408_.asBlockPos().equals(blockpos)) && (p_260013_ == null || !p_260013_.asBlockPos().equals(blockpos))) {
+@@ -131,8 +_,8 @@
+             ? false
+             : p_259365_.get()
+                 .stream()
+-                .filter(p_339971_ -> p_339971_.getType() == p_260091_.getType())
+-                .filter(p_339969_ -> p_259764_.closerToCenterThan(p_339969_.position(), 2.0))
++                .filter(p_337723_ -> p_337723_.getType() == p_260091_.getType())
++                .filter(p_337725_ -> p_259764_.closerToCenterThan(p_337725_.position(), 2.0))
+                 .anyMatch(p_258454_ -> isMobComingThroughDoor(p_258454_.getBrain(), p_259764_));
+     }
+ 
+@@ -163,10 +_,10 @@
+         MemoryAccessor<Mu, Set<GlobalPos>> p_262178_, Optional<Set<GlobalPos>> p_261639_, ServerLevel p_261528_, BlockPos p_261874_
+     ) {
+         GlobalPos globalpos = GlobalPos.of(p_261528_.dimension(), p_261874_);
+-        return Optional.of(p_261639_.map((p_261437_ -> {
++        return Optional.of(p_261639_.<Set<GlobalPos>>map(p_261437_ -> {
+             p_261437_.add(globalpos);
+             return p_261437_;
+-        })).orElseGet(() -> {
++        }).orElseGet(() -> {
+             Set<GlobalPos> set = Sets.newHashSet(globalpos);
+             p_262178_.set(set);
+             return set;

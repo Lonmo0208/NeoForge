@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/item/crafting/SuspiciousStewRecipe.java
++++ b/net/minecraft/world/item/crafting/SuspiciousStewRecipe.java
+@@ -21,14 +_,14 @@
+         boolean flag2 = false;
+         boolean flag3 = false;
+ 
+-        for(int i = 0; i < p_44499_.getContainerSize(); ++i) {
++        for (int i = 0; i < p_44499_.getContainerSize(); i++) {
+             ItemStack itemstack = p_44499_.getItem(i);
+             if (!itemstack.isEmpty()) {
+                 if (itemstack.is(Blocks.BROWN_MUSHROOM.asItem()) && !flag2) {
+                     flag2 = true;
+                 } else if (itemstack.is(Blocks.RED_MUSHROOM.asItem()) && !flag1) {
+                     flag1 = true;
+-                } else if ((itemstack.is(ItemTags.SMALL_FLOWERS) || itemstack.is(Items.POISONOUS_POTATO)) && !flag) {
++                } else if (itemstack.is(ItemTags.SMALL_FLOWERS) && !flag) {
+                     flag = true;
+                 } else {
+                     if (!itemstack.is(Items.BOWL) || flag3) {
+@@ -46,7 +_,7 @@
+     public ItemStack assemble(CraftingContainer p_44497_, HolderLookup.Provider p_336034_) {
+         ItemStack itemstack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
+ 
+-        for(int i = 0; i < p_44497_.getContainerSize(); ++i) {
++        for (int i = 0; i < p_44497_.getContainerSize(); i++) {
+             ItemStack itemstack1 = p_44497_.getItem(i);
+             if (!itemstack1.isEmpty()) {
+                 SuspiciousEffectHolder suspiciouseffectholder = SuspiciousEffectHolder.tryGet(itemstack1.getItem());

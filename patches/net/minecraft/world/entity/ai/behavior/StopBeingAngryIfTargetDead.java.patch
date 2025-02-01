@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/behavior/StopBeingAngryIfTargetDead.java
++++ b/net/minecraft/world/entity/ai/behavior/StopBeingAngryIfTargetDead.java
+@@ -21,7 +_,7 @@
+                                     .map(p_258802_ -> p_258802_ instanceof LivingEntity livingentity ? livingentity : null)
+                                     .filter(LivingEntity::isDeadOrDying)
+                                     .filter(
+-                                        p_340040_ -> p_340040_.getType() != EntityType.PLAYER
++                                        p_337782_ -> p_337782_.getType() != EntityType.PLAYER
+                                                 || p_258807_.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)
+                                     )
+                                     .ifPresent(p_258811_ -> p_258813_.erase());

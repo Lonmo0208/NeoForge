@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/state/properties/ChestType.java
++++ b/net/minecraft/world/level/block/state/properties/ChestType.java
+@@ -19,7 +_,7 @@
+     }
+ 
+     public ChestType getOpposite() {
+-        return switch(this) {
++        return switch (this) {
+             case SINGLE -> SINGLE;
+             case LEFT -> RIGHT;
+             case RIGHT -> LEFT;

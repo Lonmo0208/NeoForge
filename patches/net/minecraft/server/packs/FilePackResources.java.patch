@@ -1,0 +1,29 @@
+--- a/net/minecraft/server/packs/FilePackResources.java
++++ b/net/minecraft/server/packs/FilePackResources.java
+@@ -72,7 +_,7 @@
+             Set<String> set = Sets.newHashSet();
+             String s = this.addPrefix(p_10238_.getDirectory() + "/");
+ 
+-            while(enumeration.hasMoreElements()) {
++            while (enumeration.hasMoreElements()) {
+                 ZipEntry zipentry = enumeration.nextElement();
+                 String s1 = zipentry.getName();
+                 String s2 = extractNamespace(s, s1);
+@@ -113,7 +_,7 @@
+             String s = this.addPrefix(p_250500_.getDirectory() + "/" + p_249598_ + "/");
+             String s1 = s + p_251613_ + "/";
+ 
+-            while(enumeration.hasMoreElements()) {
++            while (enumeration.hasMoreElements()) {
+                 ZipEntry zipentry = enumeration.nextElement();
+                 if (!zipentry.isDirectory()) {
+                     String s2 = zipentry.getName();
+@@ -158,7 +_,7 @@
+             } else {
+                 List<PackResources> list1 = new ArrayList<>(list.size());
+ 
+-                for(String s : list) {
++                for (String s : list) {
+                     list1.add(new FilePackResources(p_326484_, filepackresources$sharedzipfileaccess, s));
+                 }
+ 

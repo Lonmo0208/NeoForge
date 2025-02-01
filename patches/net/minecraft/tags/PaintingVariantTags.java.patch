@@ -1,0 +1,10 @@
+--- a/net/minecraft/tags/PaintingVariantTags.java
++++ b/net/minecraft/tags/PaintingVariantTags.java
+@@ -6,7 +_,6 @@
+ 
+ public class PaintingVariantTags {
+     public static final TagKey<PaintingVariant> PLACEABLE = create("placeable");
+-    public static final TagKey<PaintingVariant> POTATO = create("potato");
+ 
+     private PaintingVariantTags() {
+     }

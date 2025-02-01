@@ -1,0 +1,38 @@
+--- a/net/minecraft/commands/execution/ExecutionContext.java
++++ b/net/minecraft/commands/execution/ExecutionContext.java
+@@ -76,7 +_,7 @@
+     }
+ 
+     public void discardAtDepthOrHigher(int p_306290_) {
+-        while(!this.commandQueue.isEmpty() && this.commandQueue.peek().frame().depth() >= p_306290_) {
++        while (!this.commandQueue.isEmpty() && this.commandQueue.peek().frame().depth() >= p_306290_) {
+             this.commandQueue.removeFirst();
+         }
+     }
+@@ -88,7 +_,7 @@
+     public void runCommandQueue() {
+         this.pushNewCommands();
+ 
+-        while(true) {
++        while (true) {
+             if (this.commandQuota <= 0) {
+                 LOGGER.info("Command execution stopped due to limit (executed {} commands)", this.commandLimit);
+                 break;
+@@ -113,7 +_,7 @@
+     }
+ 
+     private void pushNewCommands() {
+-        for(int i = this.newTopCommands.size() - 1; i >= 0; --i) {
++        for (int i = this.newTopCommands.size() - 1; i >= 0; i--) {
+             this.commandQueue.addFirst(this.newTopCommands.get(i));
+         }
+ 
+@@ -138,7 +_,7 @@
+     }
+ 
+     public void incrementCost() {
+-        --this.commandQuota;
++        this.commandQuota--;
+     }
+ 
+     @Override

@@ -1,0 +1,31 @@
+--- a/net/minecraft/client/model/PoisonousPotatoZombieModel.java
++++ /dev/null
+@@ -1,28 +_,0 @@
+-package net.minecraft.client.model;
+-
+-import net.minecraft.client.model.geom.ModelPart;
+-import net.minecraft.client.model.geom.PartPose;
+-import net.minecraft.client.model.geom.builders.CubeDeformation;
+-import net.minecraft.client.model.geom.builders.CubeListBuilder;
+-import net.minecraft.client.model.geom.builders.LayerDefinition;
+-import net.minecraft.client.model.geom.builders.MeshDefinition;
+-import net.minecraft.client.model.geom.builders.PartDefinition;
+-import net.minecraft.world.entity.monster.Zombie;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class PoisonousPotatoZombieModel<T extends Zombie> extends ZombieModel<T> {
+-    public PoisonousPotatoZombieModel(ModelPart p_340657_) {
+-        super(p_340657_);
+-    }
+-
+-    public static LayerDefinition createBodyLayer(CubeDeformation p_340817_) {
+-        MeshDefinition meshdefinition = HumanoidModel.createMesh(p_340817_, 0.0F);
+-        PartDefinition partdefinition = meshdefinition.getRoot();
+-        partdefinition.addOrReplaceChild(
+-            "head", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, p_340817_), PartPose.offset(5.0F, 2.0F, 0.0F)
+-        );
+-        return LayerDefinition.create(meshdefinition, 64, 64);
+-    }
+-}

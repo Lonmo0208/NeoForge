@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/structure/templatesystem/RandomBlockMatchTest.java
++++ b/net/minecraft/world/level/levelgen/structure/templatesystem/RandomBlockMatchTest.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.levelgen.structure.templatesystem;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.core.registries.BuiltInRegistries;
+@@ -9,7 +_,7 @@
+ import net.minecraft.world.level.block.state.BlockState;
+ 
+ public class RandomBlockMatchTest extends RuleTest {
+-    public static final Codec<RandomBlockMatchTest> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<RandomBlockMatchTest> CODEC = RecordCodecBuilder.mapCodec(
+         p_259017_ -> p_259017_.group(
+                     BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block").forGetter(p_163766_ -> p_163766_.block),
+                     Codec.FLOAT.fieldOf("probability").forGetter(p_163764_ -> p_163764_.probability)

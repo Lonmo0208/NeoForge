@@ -1,0 +1,10 @@
+--- a/net/minecraft/client/renderer/entity/BoggedRenderer.java
++++ b/net/minecraft/client/renderer/entity/BoggedRenderer.java
+@@ -19,6 +_,6 @@
+     }
+ 
+     public ResourceLocation getTextureLocation(Bogged p_331017_) {
+-        return p_331017_.isPotato() ? SkeletonRenderer.SKELETON_LOCATION : BOGGED_SKELETON_LOCATION;
++        return BOGGED_SKELETON_LOCATION;
+     }
+ }

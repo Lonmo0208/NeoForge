@@ -9,3 +9,21 @@
              GameLoadTimesEvent.INSTANCE.setBootstrapTime(Bootstrap.bootstrapDuration.get());
              Bootstrap.validate();
          } catch (Throwable throwable2) {
+@@ -234,7 +_,7 @@
+             };
+             thread1.start();
+ 
+-            while(minecraft1.isRunning()) {
++            while (minecraft1.isRunning()) {
+             }
+         } else {
+             thread1 = null;
+@@ -279,7 +_,7 @@
+         try {
+             return p_129639_.valueOf(p_129640_);
+         } catch (Throwable throwable) {
+-            if (p_129640_ instanceof ArgumentAcceptingOptionSpec argumentacceptingoptionspec) {
++            if (p_129640_ instanceof ArgumentAcceptingOptionSpec<T> argumentacceptingoptionspec) {
+                 List<T> list = argumentacceptingoptionspec.defaultValues();
+                 if (!list.isEmpty()) {
+                     return list.get(0);

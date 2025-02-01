@@ -1,0 +1,19 @@
+--- a/net/minecraft/server/commands/TellRawCommand.java
++++ b/net/minecraft/server/commands/TellRawCommand.java
+@@ -23,14 +_,14 @@
+                                     p_139066_ -> {
+                                         int i = 0;
+                             
+-                                        for(ServerPlayer serverplayer : EntityArgument.getPlayers(p_139066_, "targets")) {
++                                        for (ServerPlayer serverplayer : EntityArgument.getPlayers(p_139066_, "targets")) {
+                                             serverplayer.sendSystemMessage(
+                                                 ComponentUtils.updateForEntity(
+                                                     p_139066_.getSource(), ComponentArgument.getComponent(p_139066_, "message"), serverplayer, 0
+                                                 ),
+                                                 false
+                                             );
+-                                            ++i;
++                                            i++;
+                                         }
+                             
+                                         return i;

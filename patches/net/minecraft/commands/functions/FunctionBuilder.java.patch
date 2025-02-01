@@ -1,0 +1,20 @@
+--- a/net/minecraft/commands/functions/FunctionBuilder.java
++++ b/net/minecraft/commands/functions/FunctionBuilder.java
+@@ -37,7 +_,7 @@
+     private IntList convertToIndices(List<String> p_306261_) {
+         IntArrayList intarraylist = new IntArrayList(p_306261_.size());
+ 
+-        for(String s : p_306261_) {
++        for (String s : p_306261_) {
+             intarraylist.add(this.getArgumentIndex(s));
+         }
+ 
+@@ -49,7 +_,7 @@
+         if (this.plainEntries != null) {
+             this.macroEntries = new ArrayList<>(this.plainEntries.size() + 1);
+ 
+-            for(UnboundEntryAction<T> unboundentryaction : this.plainEntries) {
++            for (UnboundEntryAction<T> unboundentryaction : this.plainEntries) {
+                 this.macroEntries.add(new MacroFunction.PlainTextEntry<>(unboundentryaction));
+             }
+ 

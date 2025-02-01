@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/level/block/entity/StructureBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/StructureBlockEntity.java
+@@ -81,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155800_, HolderLookup.Provider p_324076_) {
+-        super.load(p_155800_, p_324076_);
++    protected void loadAdditional(CompoundTag p_155800_, HolderLookup.Provider p_324076_) {
++        super.loadAdditional(p_155800_, p_324076_);
+         this.setStructureName(p_155800_.getString("name"));
+         this.author = p_155800_.getString("author");
+         this.metaData = p_155800_.getString("metadata");
+@@ -143,7 +_,7 @@
+ 
+     @Override
+     public CompoundTag getUpdateTag(HolderLookup.Provider p_324257_) {
+-        return this.saveWithoutMetadata(p_324257_);
++        return this.saveCustomOnly(p_324257_);
+     }
+ 
+     public boolean usedBy(Player p_59854_) {

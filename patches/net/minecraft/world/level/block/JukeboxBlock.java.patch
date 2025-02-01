@@ -1,0 +1,65 @@
+--- a/net/minecraft/world/level/block/JukeboxBlock.java
++++ b/net/minecraft/world/level/block/JukeboxBlock.java
+@@ -8,7 +_,6 @@
+ import net.minecraft.world.InteractionResult;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.RecordItem;
+ import net.minecraft.world.item.component.CustomData;
+@@ -50,22 +_,18 @@
+ 
+     @Override
+     protected InteractionResult useWithoutItem(BlockState p_54281_, Level p_54282_, BlockPos p_54283_, Player p_54284_, BlockHitResult p_54286_) {
+-        if (p_54281_.getValue(HAS_RECORD)) {
+-            BlockEntity blockentity = p_54282_.getBlockEntity(p_54283_);
+-            if (blockentity instanceof JukeboxBlockEntity jukeboxblockentity) {
+-                jukeboxblockentity.popOutRecord();
+-                return InteractionResult.sidedSuccess(p_54282_.isClientSide);
+-            }
++        if (p_54281_.getValue(HAS_RECORD) && p_54282_.getBlockEntity(p_54283_) instanceof JukeboxBlockEntity jukeboxblockentity) {
++            jukeboxblockentity.popOutRecord();
++            return InteractionResult.sidedSuccess(p_54282_.isClientSide);
++        } else {
++            return InteractionResult.PASS;
+         }
+-
+-        return InteractionResult.PASS;
+     }
+ 
+     @Override
+     protected void onRemove(BlockState p_54288_, Level p_54289_, BlockPos p_54290_, BlockState p_54291_, boolean p_54292_) {
+         if (!p_54288_.is(p_54291_.getBlock())) {
+-            BlockEntity blockentity = p_54289_.getBlockEntity(p_54290_);
+-            if (blockentity instanceof JukeboxBlockEntity jukeboxblockentity) {
++            if (p_54289_.getBlockEntity(p_54290_) instanceof JukeboxBlockEntity jukeboxblockentity) {
+                 jukeboxblockentity.popOutRecord();
+             }
+ 
+@@ -85,8 +_,7 @@
+ 
+     @Override
+     public int getSignal(BlockState p_272942_, BlockGetter p_273232_, BlockPos p_273524_, Direction p_272902_) {
+-        BlockEntity blockentity = p_273232_.getBlockEntity(p_273524_);
+-        if (blockentity instanceof JukeboxBlockEntity jukeboxblockentity && jukeboxblockentity.isRecordPlaying()) {
++        if (p_273232_.getBlockEntity(p_273524_) instanceof JukeboxBlockEntity jukeboxblockentity && jukeboxblockentity.isRecordPlaying()) {
+             return 15;
+         }
+ 
+@@ -100,12 +_,9 @@
+ 
+     @Override
+     protected int getAnalogOutputSignal(BlockState p_54277_, Level p_54278_, BlockPos p_54279_) {
+-        BlockEntity blockentity = p_54278_.getBlockEntity(p_54279_);
+-        if (blockentity instanceof JukeboxBlockEntity jukeboxblockentity) {
+-            Item item = jukeboxblockentity.getTheItem().getItem();
+-            if (item instanceof RecordItem recorditem) {
+-                return recorditem.getAnalogOutput();
+-            }
++        if (p_54278_.getBlockEntity(p_54279_) instanceof JukeboxBlockEntity jukeboxblockentity
++            && jukeboxblockentity.getTheItem().getItem() instanceof RecordItem recorditem) {
++            return recorditem.getAnalogOutput();
+         }
+ 
+         return 0;

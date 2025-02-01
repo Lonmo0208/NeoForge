@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/gui/screens/ConfirmScreen.java
++++ b/net/minecraft/client/gui/screens/ConfirmScreen.java
+@@ -83,7 +_,7 @@
+     public void setDelay(int p_95664_) {
+         this.delayTicker = p_95664_;
+ 
+-        for(Button button : this.exitButtons) {
++        for (Button button : this.exitButtons) {
+             button.active = false;
+         }
+     }
+@@ -92,7 +_,7 @@
+     public void tick() {
+         super.tick();
+         if (--this.delayTicker == 0) {
+-            for(Button button : this.exitButtons) {
++            for (Button button : this.exitButtons) {
+                 button.active = true;
+             }
+         }

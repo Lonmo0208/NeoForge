@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/spectator/categories/TeleportToTeamMenuCategory.java
++++ b/net/minecraft/client/gui/spectator/categories/TeleportToTeamMenuCategory.java
+@@ -87,7 +_,7 @@
+         public static Optional<SpectatorMenuItem> create(Minecraft p_260048_, PlayerTeam p_259058_) {
+             List<PlayerInfo> list = new ArrayList<>();
+ 
+-            for(String s : p_259058_.getPlayers()) {
++            for (String s : p_259058_.getPlayers()) {
+                 PlayerInfo playerinfo = p_260048_.getConnection().getPlayerInfo(s);
+                 if (playerinfo != null && playerinfo.getGameMode() != GameType.SPECTATOR) {
+                     list.add(playerinfo);

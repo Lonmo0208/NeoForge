@@ -1,0 +1,25 @@
+--- a/net/minecraft/server/packs/metadata/MetadataSectionType.java
++++ b/net/minecraft/server/packs/metadata/MetadataSectionType.java
+@@ -4,7 +_,6 @@
+ import com.google.gson.JsonParseException;
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.JsonOps;
+-import net.minecraft.Util;
+ 
+ public interface MetadataSectionType<T> extends MetadataSectionSerializer<T> {
+     JsonObject toJson(T p_249140_);
+@@ -18,12 +_,12 @@
+ 
+             @Override
+             public T fromJson(JsonObject p_249450_) {
+-                return Util.getOrThrow(p_249525_.parse(JsonOps.INSTANCE, p_249450_), JsonParseException::new);
++                return p_249525_.parse(JsonOps.INSTANCE, p_249450_).getOrThrow(JsonParseException::new);
+             }
+ 
+             @Override
+             public JsonObject toJson(T p_250691_) {
+-                return Util.getOrThrow(p_249525_.encodeStart(JsonOps.INSTANCE, p_250691_), IllegalArgumentException::new).getAsJsonObject();
++                return p_249525_.encodeStart(JsonOps.INSTANCE, p_250691_).getOrThrow(IllegalArgumentException::new).getAsJsonObject();
+             }
+         };
+     }

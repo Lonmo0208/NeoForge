@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/item/ScaffoldingBlockItem.java
++++ b/net/minecraft/world/item/ScaffoldingBlockItem.java
+@@ -38,7 +_,7 @@
+             int i = 0;
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = blockpos.mutable().move(direction);
+ 
+-            while(i < 7) {
++            while (i < 7) {
+                 if (!level.isClientSide && !level.isInWorldBounds(blockpos$mutableblockpos)) {
+                     Player player = p_43063_.getPlayer();
+                     int j = level.getMaxBuildHeight();
+@@ -58,7 +_,7 @@
+ 
+                 blockpos$mutableblockpos.move(direction);
+                 if (direction.getAxis().isHorizontal()) {
+-                    ++i;
++                    i++;
+                 }
+             }
+ 

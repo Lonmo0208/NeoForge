@@ -1,0 +1,19 @@
+--- a/net/minecraft/server/commands/DamageCommand.java
++++ b/net/minecraft/server/commands/DamageCommand.java
+@@ -28,11 +_,11 @@
+                         .then(
+                             Commands.argument("amount", FloatArgumentType.floatArg(0.0F))
+                                 .executes(
+-                                    p_339778_ -> damage(
+-                                            p_339778_.getSource(),
+-                                            EntityArgument.getEntity(p_339778_, "target"),
+-                                            FloatArgumentType.getFloat(p_339778_, "amount"),
+-                                            p_339778_.getSource().getLevel().damageSources().generic()
++                                    p_329886_ -> damage(
++                                            p_329886_.getSource(),
++                                            EntityArgument.getEntity(p_329886_, "target"),
++                                            FloatArgumentType.getFloat(p_329886_, "amount"),
++                                            p_329886_.getSource().getLevel().damageSources().generic()
+                                         )
+                                 )
+                                 .then(

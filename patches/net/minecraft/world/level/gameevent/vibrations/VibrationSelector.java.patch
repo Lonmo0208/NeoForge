@@ -1,0 +1,31 @@
+--- a/net/minecraft/world/level/gameevent/vibrations/VibrationSelector.java
++++ b/net/minecraft/world/level/gameevent/vibrations/VibrationSelector.java
+@@ -8,11 +_,11 @@
+ 
+ public class VibrationSelector {
+     public static final Codec<VibrationSelector> CODEC = RecordCodecBuilder.create(
+-        p_249445_ -> p_249445_.group(
+-                    VibrationInfo.CODEC.optionalFieldOf("event").forGetter(p_251862_ -> p_251862_.currentVibrationData.map(Pair::getLeft)),
++        p_338089_ -> p_338089_.group(
++                    VibrationInfo.CODEC.lenientOptionalFieldOf("event").forGetter(p_251862_ -> p_251862_.currentVibrationData.map(Pair::getLeft)),
+                     Codec.LONG.fieldOf("tick").forGetter(p_251458_ -> p_251458_.currentVibrationData.map(Pair::getRight).orElse(-1L))
+                 )
+-                .apply(p_249445_, VibrationSelector::new)
++                .apply(p_338089_, VibrationSelector::new)
+     );
+     private Optional<Pair<VibrationInfo, Long>> currentVibrationData;
+ 
+@@ -42,10 +_,10 @@
+                 VibrationInfo vibrationinfo = pair.getLeft();
+                 if (p_248697_.distance() < vibrationinfo.distance()) {
+                     return true;
+-                } else if (p_248697_.distance() > vibrationinfo.distance()) {
+-                    return false;
+                 } else {
+-                    return VibrationSystem.getGameEventFrequency(p_248697_.gameEvent()) > VibrationSystem.getGameEventFrequency(vibrationinfo.gameEvent());
++                    return p_248697_.distance() > vibrationinfo.distance()
++                        ? false
++                        : VibrationSystem.getGameEventFrequency(p_248697_.gameEvent()) > VibrationSystem.getGameEventFrequency(vibrationinfo.gameEvent());
+                 }
+             }
+         }

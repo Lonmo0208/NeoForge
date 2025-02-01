@@ -1,0 +1,44 @@
+--- a/net/minecraft/network/protocol/game/ClientboundSectionBlocksUpdatePacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundSectionBlocksUpdatePacket.java
+@@ -28,12 +_,12 @@
+         this.states = new BlockState[i];
+         int j = 0;
+ 
+-        for(short short1 : p_285027_) {
++        for (short short1 : p_285027_) {
+             this.positions[j] = short1;
+             this.states[j] = p_285414_.getBlockState(
+                 SectionPos.sectionRelativeX(short1), SectionPos.sectionRelativeY(short1), SectionPos.sectionRelativeZ(short1)
+             );
+-            ++j;
++            j++;
+         }
+     }
+ 
+@@ -43,7 +_,7 @@
+         this.positions = new short[i];
+         this.states = new BlockState[i];
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             long k = p_179196_.readVarLong();
+             this.positions[j] = (short)((int)(k & 4095L));
+             this.states[j] = Block.BLOCK_STATE_REGISTRY.byId((int)(k >>> 12));
+@@ -54,7 +_,7 @@
+         p_133002_.writeLong(this.sectionPos.asLong());
+         p_133002_.writeVarInt(this.positions.length);
+ 
+-        for(int i = 0; i < this.positions.length; ++i) {
++        for (int i = 0; i < this.positions.length; i++) {
+             p_133002_.writeVarLong((long)Block.getId(this.states[i]) << 12 | (long)this.positions[i]);
+         }
+     }
+@@ -71,7 +_,7 @@
+     public void runUpdates(BiConsumer<BlockPos, BlockState> p_132993_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(int i = 0; i < this.positions.length; ++i) {
++        for (int i = 0; i < this.positions.length; i++) {
+             short short1 = this.positions[i];
+             blockpos$mutableblockpos.set(
+                 this.sectionPos.relativeToBlockX(short1), this.sectionPos.relativeToBlockY(short1), this.sectionPos.relativeToBlockZ(short1)

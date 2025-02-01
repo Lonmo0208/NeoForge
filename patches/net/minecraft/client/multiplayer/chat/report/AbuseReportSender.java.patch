@@ -1,0 +1,15 @@
+--- a/net/minecraft/client/multiplayer/chat/report/AbuseReportSender.java
++++ b/net/minecraft/client/multiplayer/chat/report/AbuseReportSender.java
+@@ -82,10 +_,11 @@
+         }
+ 
+         private Component getErrorDescription(MinecraftClientException p_240068_) {
+-            return switch(p_240068_.getType()) {
++            return switch (p_240068_.getType()) {
+                 case SERVICE_UNAVAILABLE -> SERVICE_UNAVAILABLE_TEXT;
+                 case HTTP_ERROR -> HTTP_ERROR_TEXT;
+                 case JSON_ERROR -> JSON_ERROR_TEXT;
++                default -> throw new MatchException(null, null);
+             };
+         }
+ 

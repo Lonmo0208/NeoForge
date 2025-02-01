@@ -1,0 +1,11 @@
+--- a/com/mojang/blaze3d/font/TrueTypeGlyphProvider.java
++++ b/com/mojang/blaze3d/font/TrueTypeGlyphProvider.java
+@@ -97,7 +_,7 @@
+         try (MemoryStack memorystack = MemoryStack.stackPush()) {
+             IntBuffer intbuffer = memorystack.mallocInt(1);
+ 
+-            for(long i = FreeType.FT_Get_First_Char(ft_face, intbuffer); intbuffer.get(0) != 0; i = FreeType.FT_Get_Next_Char(ft_face, i, intbuffer)) {
++            for (long i = FreeType.FT_Get_First_Char(ft_face, intbuffer); intbuffer.get(0) != 0; i = FreeType.FT_Get_Next_Char(ft_face, i, intbuffer)) {
+                 intset.add((int)i);
+             }
+         }

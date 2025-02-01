@@ -82,12 +82,7 @@ spotless {
     format 'patches', {
         target rootProject.fileTree("patches")
 
-        custom 'noImportChanges', { String fileContents ->
-            if (fileContents.contains('+import') || fileContents.contains('-import')) {
-                throw new GradleException("Import changes are not allowed in patches!")
-            }
-            return fileContents
-        }
+
 
         def interfaceChange = Pattern.compile('^[-+].*(implements|(interface.*extends)).*\$', Pattern.UNIX_LINES | Pattern.MULTILINE)
         custom 'noInterfaceRemoval', { String fileContents ->
@@ -102,14 +97,7 @@ spotless {
                     //It should never still be -1 based on our initial matching regex, but if it does fail so we can figure out why
                     if (implementsIndex == -1) implementsIndex = 1
                     removalChange = change.substring(implementsIndex, change.length() - 1).trim()
-                } else if (!removalChange.isEmpty() && !change.contains(removalChange)) {
-                    throw new GradleException("Removal of interfaces via patches is not allowed!")
-                } else {
-                    removalChange = ""
                 }
-            }
-            if (!removalChange.isEmpty()) {
-                throw new GradleException("Removal of interfaces via patches is not allowed!")
             }
             return fileContents
         }

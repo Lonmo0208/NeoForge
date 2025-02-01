@@ -1,0 +1,39 @@
+--- a/net/minecraft/world/level/levelgen/structure/pools/alias/Random.java
++++ b/net/minecraft/world/level/levelgen/structure/pools/alias/Random.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.pools.alias;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.function.BiConsumer;
+@@ -13,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+ 
+ record Random(ResourceKey<StructureTemplatePool> alias, SimpleWeightedRandomList<ResourceKey<StructureTemplatePool>> targets) implements PoolAliasBinding {
+-    static Codec<Random> CODEC = RecordCodecBuilder.create(
++    static MapCodec<Random> CODEC = RecordCodecBuilder.mapCodec(
+         p_307215_ -> p_307215_.group(
+                     ResourceKey.codec(Registries.TEMPLATE_POOL).fieldOf("alias").forGetter(Random::alias),
+                     SimpleWeightedRandomList.wrappedCodec(ResourceKey.codec(Registries.TEMPLATE_POOL)).fieldOf("targets").forGetter(Random::targets)
+@@ -23,16 +_,16 @@
+ 
+     @Override
+     public void forEachResolved(RandomSource p_307661_, BiConsumer<ResourceKey<StructureTemplatePool>, ResourceKey<StructureTemplatePool>> p_307635_) {
+-        this.targets.getRandom(p_307661_).ifPresent(p_307478_ -> p_307635_.accept(this.alias, p_307478_.getData()));
++        this.targets.getRandom(p_307661_).ifPresent(p_338105_ -> p_307635_.accept(this.alias, p_338105_.data()));
+     }
+ 
+     @Override
+     public Stream<ResourceKey<StructureTemplatePool>> allTargets() {
+-        return this.targets.unwrap().stream().map(WeightedEntry.Wrapper::getData);
++        return this.targets.unwrap().stream().map(WeightedEntry.Wrapper::data);
+     }
+ 
+     @Override
+-    public Codec<Random> codec() {
++    public MapCodec<Random> codec() {
+         return CODEC;
+     }
+ }

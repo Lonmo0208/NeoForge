@@ -1,0 +1,26 @@
+--- a/net/minecraft/advancements/critereon/EntityHurtPlayerTrigger.java
++++ b/net/minecraft/advancements/critereon/EntityHurtPlayerTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.damagesource.DamageSource;
+ 
+ public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPlayerTrigger.TriggerInstance> {
+@@ -23,11 +_,11 @@
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<DamagePredicate> damage)
+         implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<EntityHurtPlayerTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311421_ -> p_311421_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EntityHurtPlayerTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(DamagePredicate.CODEC, "damage").forGetter(EntityHurtPlayerTrigger.TriggerInstance::damage)
++            p_337361_ -> p_337361_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(EntityHurtPlayerTrigger.TriggerInstance::player),
++                        DamagePredicate.CODEC.optionalFieldOf("damage").forGetter(EntityHurtPlayerTrigger.TriggerInstance::damage)
+                     )
+-                    .apply(p_311421_, EntityHurtPlayerTrigger.TriggerInstance::new)
++                    .apply(p_337361_, EntityHurtPlayerTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<EntityHurtPlayerTrigger.TriggerInstance> entityHurtPlayer() {

@@ -1,0 +1,12 @@
+--- a/net/minecraft/world/level/block/TargetBlock.java
++++ b/net/minecraft/world/level/block/TargetBlock.java
+@@ -42,8 +_,7 @@
+     @Override
+     protected void onProjectileHit(Level p_57381_, BlockState p_57382_, BlockHitResult p_57383_, Projectile p_57384_) {
+         int i = updateRedstoneOutput(p_57381_, p_57382_, p_57383_, p_57384_);
+-        Entity entity = p_57384_.getOwner();
+-        if (entity instanceof ServerPlayer serverplayer) {
++        if (p_57384_.getOwner() instanceof ServerPlayer serverplayer) {
+             serverplayer.awardStat(Stats.TARGET_HIT);
+             CriteriaTriggers.TARGET_BLOCK_HIT.trigger(serverplayer, p_57384_, p_57383_.getLocation(), i);
+         }

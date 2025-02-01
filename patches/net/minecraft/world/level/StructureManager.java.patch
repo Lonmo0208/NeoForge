@@ -1,0 +1,56 @@
+--- a/net/minecraft/world/level/StructureManager.java
++++ b/net/minecraft/world/level/StructureManager.java
+@@ -51,7 +_,7 @@
+         Map<Structure, LongSet> map = this.level.getChunk(p_220478_.x, p_220478_.z, ChunkStatus.STRUCTURE_REFERENCES).getAllReferences();
+         Builder<StructureStart> builder = ImmutableList.builder();
+ 
+-        for(Entry<Structure, LongSet> entry : map.entrySet()) {
++        for (Entry<Structure, LongSet> entry : map.entrySet()) {
+             Structure structure = entry.getKey();
+             if (p_220479_.test(structure)) {
+                 this.fillStartsForStructure(structure, entry.getValue(), builder::add);
+@@ -69,7 +_,7 @@
+     }
+ 
+     public void fillStartsForStructure(Structure p_220481_, LongSet p_220482_, Consumer<StructureStart> p_220483_) {
+-        for(long i : p_220482_) {
++        for (long i : p_220482_) {
+             SectionPos sectionpos = SectionPos.of(new ChunkPos(i), this.level.getMinSection());
+             StructureStart structurestart = this.getStartForStructure(
+                 sectionpos, p_220481_, this.level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS)
+@@ -98,7 +_,7 @@
+     }
+ 
+     public StructureStart getStructureAt(BlockPos p_220495_, Structure p_220496_) {
+-        for(StructureStart structurestart : this.startsForStructure(SectionPos.of(p_220495_), p_220496_)) {
++        for (StructureStart structurestart : this.startsForStructure(SectionPos.of(p_220495_), p_220496_)) {
+             if (structurestart.getBoundingBox().isInside(p_220495_)) {
+                 return structurestart;
+             }
+@@ -118,7 +_,7 @@
+     public StructureStart getStructureWithPieceAt(BlockPos p_220489_, Predicate<Holder<Structure>> p_332144_) {
+         Registry<Structure> registry = this.registryAccess().registryOrThrow(Registries.STRUCTURE);
+ 
+-        for(StructureStart structurestart : this.startsForStructure(
++        for (StructureStart structurestart : this.startsForStructure(
+             new ChunkPos(p_220489_), p_330128_ -> registry.getHolder(registry.getId(p_330128_)).map(p_332144_::test).orElse(false)
+         )) {
+             if (this.structureHasPieceAt(p_220489_, structurestart)) {
+@@ -130,7 +_,7 @@
+     }
+ 
+     public StructureStart getStructureWithPieceAt(BlockPos p_220525_, Structure p_220526_) {
+-        for(StructureStart structurestart : this.startsForStructure(SectionPos.of(p_220525_), p_220526_)) {
++        for (StructureStart structurestart : this.startsForStructure(SectionPos.of(p_220525_), p_220526_)) {
+             if (this.structureHasPieceAt(p_220525_, structurestart)) {
+                 return structurestart;
+             }
+@@ -140,7 +_,7 @@
+     }
+ 
+     public boolean structureHasPieceAt(BlockPos p_220498_, StructureStart p_220499_) {
+-        for(StructurePiece structurepiece : p_220499_.getPieces()) {
++        for (StructurePiece structurepiece : p_220499_.getPieces()) {
+             if (structurepiece.getBoundingBox().isInside(p_220498_)) {
+                 return true;
+             }

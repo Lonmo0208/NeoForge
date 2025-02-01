@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/behavior/ShufflingList.java
++++ b/net/minecraft/world/entity/ai/behavior/ShufflingList.java
+@@ -26,7 +_,7 @@
+     }
+ 
+     public static <U> Codec<ShufflingList<U>> codec(Codec<U> p_147928_) {
+-        return ShufflingList.WeightedEntry.<U>codec(p_147928_).listOf().xmap(ShufflingList::new, p_147926_ -> p_147926_.entries);
++        return ShufflingList.WeightedEntry.codec(p_147928_).listOf().xmap(ShufflingList::new, p_147926_ -> p_147926_.entries);
+     }
+ 
+     public ShufflingList<U> add(U p_147930_, int p_147931_) {

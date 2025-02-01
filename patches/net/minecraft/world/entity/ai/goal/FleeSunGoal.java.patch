@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/goal/FleeSunGoal.java
++++ b/net/minecraft/world/entity/ai/goal/FleeSunGoal.java
+@@ -66,7 +_,7 @@
+         RandomSource randomsource = this.mob.getRandom();
+         BlockPos blockpos = this.mob.blockPosition();
+ 
+-        for(int i = 0; i < 10; ++i) {
++        for (int i = 0; i < 10; i++) {
+             BlockPos blockpos1 = blockpos.offset(randomsource.nextInt(20) - 10, randomsource.nextInt(6) - 3, randomsource.nextInt(20) - 10);
+             if (!this.level.canSeeSky(blockpos1) && this.mob.getWalkTargetValue(blockpos1) < 0.0F) {
+                 return Vec3.atBottomCenterOf(blockpos1);

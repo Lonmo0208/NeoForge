@@ -1,0 +1,38 @@
+--- a/net/minecraft/world/level/block/CrossCollisionBlock.java
++++ b/net/minecraft/world/level/block/CrossCollisionBlock.java
+@@ -40,7 +_,7 @@
+         this.collisionShapeByIndex = this.makeShapes(p_52320_, p_52321_, p_52324_, 0.0F, p_52324_);
+         this.shapeByIndex = this.makeShapes(p_52320_, p_52321_, p_52322_, 0.0F, p_52323_);
+ 
+-        for(BlockState blockstate : this.stateDefinition.getPossibleStates()) {
++        for (BlockState blockstate : this.stateDefinition.getPossibleStates()) {
+             this.getAABBIndex(blockstate);
+         }
+     }
+@@ -79,7 +_,7 @@
+             Shapes.or(voxelshape6, voxelshape5)
+         };
+ 
+-        for(int i = 0; i < 16; ++i) {
++        for (int i = 0; i < 16; i++) {
+             avoxelshape[i] = Shapes.or(voxelshape, avoxelshape[i]);
+         }
+ 
+@@ -140,7 +_,7 @@
+ 
+     @Override
+     protected BlockState rotate(BlockState p_52341_, Rotation p_52342_) {
+-        switch(p_52342_) {
++        switch (p_52342_) {
+             case CLOCKWISE_180:
+                 return p_52341_.setValue(NORTH, p_52341_.getValue(SOUTH))
+                     .setValue(EAST, p_52341_.getValue(WEST))
+@@ -163,7 +_,7 @@
+ 
+     @Override
+     protected BlockState mirror(BlockState p_52338_, Mirror p_52339_) {
+-        switch(p_52339_) {
++        switch (p_52339_) {
+             case LEFT_RIGHT:
+                 return p_52338_.setValue(NORTH, p_52338_.getValue(SOUTH)).setValue(SOUTH, p_52338_.getValue(NORTH));
+             case FRONT_BACK:

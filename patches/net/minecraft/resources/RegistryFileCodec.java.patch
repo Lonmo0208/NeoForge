@@ -1,0 +1,29 @@
+--- a/net/minecraft/resources/RegistryFileCodec.java
++++ b/net/minecraft/resources/RegistryFileCodec.java
+@@ -31,7 +_,7 @@
+     }
+ 
+     public <T> DataResult<T> encode(Holder<E> p_206716_, DynamicOps<T> p_206717_, T p_206718_) {
+-        if (p_206717_ instanceof RegistryOps registryops) {
++        if (p_206717_ instanceof RegistryOps<?> registryops) {
+             Optional<HolderOwner<E>> optional = registryops.owner(this.registryKey);
+             if (optional.isPresent()) {
+                 if (!p_206716_.canSerializeIn(optional.get())) {
+@@ -41,7 +_,7 @@
+                 return p_206716_.unwrap()
+                     .map(
+                         p_206714_ -> ResourceLocation.CODEC.encode(p_206714_.location(), p_206717_, p_206718_),
+-                        p_206710_ -> this.elementCodec.encode(p_206710_, p_206717_, p_206718_)
++                        p_206710_ -> this.elementCodec.encode((E)p_206710_, p_206717_, p_206718_)
+                     );
+             }
+         }
+@@ -51,7 +_,7 @@
+ 
+     @Override
+     public <T> DataResult<Pair<Holder<E>, T>> decode(DynamicOps<T> p_135608_, T p_135609_) {
+-        if (p_135608_ instanceof RegistryOps registryops) {
++        if (p_135608_ instanceof RegistryOps<?> registryops) {
+             Optional<HolderGetter<E>> optional = registryops.getter(this.registryKey);
+             if (optional.isEmpty()) {
+                 return DataResult.error(() -> "Registry does not exist: " + this.registryKey);

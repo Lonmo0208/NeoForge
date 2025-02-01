@@ -1,0 +1,120 @@
+--- a/net/minecraft/client/renderer/debug/BrainDebugRenderer.java
++++ b/net/minecraft/client/renderer/debug/BrainDebugRenderer.java
+@@ -130,7 +_,7 @@
+             }
+         });
+ 
+-        for(BlockPos blockpos1 : this.pois.keySet()) {
++        for (BlockPos blockpos1 : this.pois.keySet()) {
+             if (blockpos.closerThan(blockpos1, 30.0)) {
+                 highlightPoi(p_270747_, p_270289_, blockpos1);
+             }
+@@ -143,7 +_,7 @@
+         });
+         this.getGhostPois().forEach((p_269707_, p_269708_) -> {
+             if (blockpos.closerThan(p_269707_, 30.0)) {
+-                this.renderGhostPoi(p_270747_, p_270289_, p_269707_, p_269708_);
++                this.renderGhostPoi(p_270747_, p_270289_, p_269707_, (List<String>)p_269708_);
+             }
+         });
+     }
+@@ -169,7 +_,7 @@
+             renderTextOverPoi(p_270999_, p_270627_, set.size() + " ticket holders", p_270986_, i, -256);
+         }
+ 
+-        ++i;
++        i++;
+         Set<String> set1 = this.getPotentialTicketHolderNames(p_270986_);
+         if (set1.size() < 4) {
+             renderTextOverPoi(p_270999_, p_270627_, "Candidates: " + set1, p_270986_, i, -23296);
+@@ -195,10 +_,10 @@
+         boolean flag = this.isMobSelected(p_294452_);
+         int i = 0;
+         renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, p_294452_.name(), -1, 0.03F);
+-        ++i;
++        i++;
+         if (flag) {
+             renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, p_294452_.profession() + " " + p_294452_.xp() + " xp", -1, 0.02F);
+-            ++i;
++            i++;
+         }
+ 
+         if (flag) {
+@@ -212,54 +_,54 @@
+                 j,
+                 0.02F
+             );
+-            ++i;
++            i++;
+         }
+ 
+         if (flag && !p_294452_.inventory().equals("")) {
+             renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, p_294452_.inventory(), -98404, 0.02F);
+-            ++i;
++            i++;
+         }
+ 
+         if (flag) {
+-            for(String s : p_294452_.behaviors()) {
++            for (String s : p_294452_.behaviors()) {
+                 renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, s, -16711681, 0.02F);
+-                ++i;
++                i++;
+             }
+         }
+ 
+         if (flag) {
+-            for(String s1 : p_294452_.activities()) {
++            for (String s1 : p_294452_.activities()) {
+                 renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, s1, -16711936, 0.02F);
+-                ++i;
++                i++;
+             }
+         }
+ 
+         if (p_294452_.wantsGolem()) {
+             renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, "Wants Golem", -23296, 0.02F);
+-            ++i;
++            i++;
+         }
+ 
+         if (flag && p_294452_.angerLevel() != -1) {
+             renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, "Anger Level: " + p_294452_.angerLevel(), -98404, 0.02F);
+-            ++i;
++            i++;
+         }
+ 
+         if (flag) {
+-            for(String s2 : p_294452_.gossips()) {
++            for (String s2 : p_294452_.gossips()) {
+                 if (s2.startsWith(p_294452_.name())) {
+                     renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, s2, -1, 0.02F);
+                 } else {
+                     renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, s2, -23296, 0.02F);
+                 }
+ 
+-                ++i;
++                i++;
+             }
+         }
+ 
+         if (flag) {
+-            for(String s3 : Lists.reverse(p_294452_.memories())) {
++            for (String s3 : Lists.reverse(p_294452_.memories())) {
+                 renderTextOverMob(p_270145_, p_270489_, p_294452_.pos(), i, s3, -3355444, 0.02F);
+-                ++i;
++                i++;
+             }
+         }
+ 
+@@ -336,8 +_,8 @@
+     private Map<BlockPos, List<String>> getGhostPois() {
+         Map<BlockPos, List<String>> map = Maps.newHashMap();
+ 
+-        for(BrainDebugPayload.BrainDump braindebugpayload$braindump : this.brainDumpsPerEntity.values()) {
+-            for(BlockPos blockpos : Iterables.concat(braindebugpayload$braindump.pois(), braindebugpayload$braindump.potentialPois())) {
++        for (BrainDebugPayload.BrainDump braindebugpayload$braindump : this.brainDumpsPerEntity.values()) {
++            for (BlockPos blockpos : Iterables.concat(braindebugpayload$braindump.pois(), braindebugpayload$braindump.potentialPois())) {
+                 if (!this.pois.containsKey(blockpos)) {
+                     map.computeIfAbsent(blockpos, p_113292_ -> Lists.newArrayList()).add(braindebugpayload$braindump.name());
+                 }

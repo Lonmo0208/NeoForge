@@ -1,0 +1,28 @@
+--- a/net/minecraft/server/commands/LocateCommand.java
++++ b/net/minecraft/server/commands/LocateCommand.java
+@@ -100,12 +_,14 @@
+     private static Optional<? extends HolderSet.ListBacked<Structure>> getHolders(
+         ResourceOrTagKeyArgument.Result<Structure> p_251212_, Registry<Structure> p_249691_
+     ) {
+-        return p_251212_.unwrap().map(p_258231_ -> p_249691_.getHolder(p_258231_).map(p_214491_ -> HolderSet.direct(p_214491_)), p_249691_::getTag);
++        return p_251212_.unwrap()
++            .map(p_258231_ -> p_249691_.getHolder((ResourceKey<Structure>)p_258231_).map(p_214491_ -> HolderSet.direct(p_214491_)), p_249691_::getTag);
+     }
+ 
+     private static int locateStructure(CommandSourceStack p_214472_, ResourceOrTagKeyArgument.Result<Structure> p_249893_) throws CommandSyntaxException {
+         Registry<Structure> registry = p_214472_.getLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
+-        HolderSet<Structure> holderset = getHolders(p_249893_, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(p_249893_.asPrintable()));
++        HolderSet<Structure> holderset = (HolderSet<Structure>)getHolders(p_249893_, registry)
++            .orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(p_249893_.asPrintable()));
+         BlockPos blockpos = BlockPos.containing(p_214472_.getPosition());
+         ServerLevel serverlevel = p_214472_.getLevel();
+         Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
+@@ -170,7 +_,7 @@
+         Duration p_262960_
+     ) {
+         String s = p_263031_.unwrap()
+-            .map(p_214498_ -> p_214498_.location().toString(), p_315919_ -> "#" + p_315919_.location() + " (" + p_262959_.getSecond().getRegisteredName() + ")");
++            .map(p_214498_ -> p_214498_.location().toString(), p_339434_ -> "#" + p_339434_.location() + " (" + p_262959_.getSecond().getRegisteredName() + ")");
+         return showLocateResult(p_263019_, p_262989_, p_262959_, p_263045_, p_262934_, s, p_262960_);
+     }
+ 

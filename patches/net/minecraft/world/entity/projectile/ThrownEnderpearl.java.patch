@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
 +++ b/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
+@@ -41,7 +_,7 @@
+     protected void onHit(HitResult p_37504_) {
+         super.onHit(p_37504_);
+ 
+-        for(int i = 0; i < 32; ++i) {
++        for (int i = 0; i < 32; i++) {
+             this.level()
+                 .addParticle(
+                     ParticleTypes.PORTAL,
 @@ -58,6 +_,8 @@
              Entity entity = this.getOwner();
              if (entity instanceof ServerPlayer serverplayer) {
@@ -26,14 +35,14 @@
  
      @Nullable
      @Override
--    public Entity changeDimension(ServerLevel p_37506_) {
+-    public Entity changeDimension(ServerLevel p_37506_, boolean p_341567_) {
 +    public Entity changeDimension(ServerLevel p_37506_, net.neoforged.neoforge.common.util.ITeleporter teleporter) {
          Entity entity = this.getOwner();
          if (entity != null && entity.level().dimension() != p_37506_.dimension()) {
              this.setOwner(null);
          }
  
--        return super.changeDimension(p_37506_);
+-        return super.changeDimension(p_37506_, p_341567_);
 +        return super.changeDimension(p_37506_, teleporter);
      }
  }

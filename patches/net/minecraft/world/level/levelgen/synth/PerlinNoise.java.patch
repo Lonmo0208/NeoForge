@@ -1,0 +1,56 @@
+--- a/net/minecraft/world/level/levelgen/synth/PerlinNoise.java
++++ b/net/minecraft/world/level/levelgen/synth/PerlinNoise.java
+@@ -68,7 +_,7 @@
+                 DoubleList doublelist = new DoubleArrayList(new double[k]);
+                 IntBidirectionalIterator intbidirectionaliterator = p_75431_.iterator();
+ 
+-                while(intbidirectionaliterator.hasNext()) {
++                while (intbidirectionaliterator.hasNext()) {
+                     int l = intbidirectionaliterator.nextInt();
+                     doublelist.set(l + i, 1.0);
+                 }
+@@ -87,7 +_,7 @@
+         if (p_230517_) {
+             PositionalRandomFactory positionalrandomfactory = p_230515_.forkPositional();
+ 
+-            for(int k = 0; k < i; ++k) {
++            for (int k = 0; k < i; k++) {
+                 if (this.amplitudes.getDouble(k) != 0.0) {
+                     int l = this.firstOctave + k;
+                     this.noiseLevels[k] = new ImprovedNoise(positionalrandomfactory.fromHashOf("octave_" + l));
+@@ -102,7 +_,7 @@
+                 }
+             }
+ 
+-            for(int i1 = j - 1; i1 >= 0; --i1) {
++            for (int i1 = j - 1; i1 >= 0; i1--) {
+                 if (i1 < i) {
+                     double d1 = this.amplitudes.getDouble(i1);
+                     if (d1 != 0.0) {
+@@ -147,7 +_,7 @@
+         double d1 = this.lowestFreqInputFactor;
+         double d2 = this.lowestFreqValueFactor;
+ 
+-        for(int i = 0; i < this.noiseLevels.length; ++i) {
++        for (int i = 0; i < this.noiseLevels.length; i++) {
+             ImprovedNoise improvednoise = this.noiseLevels[i];
+             if (improvednoise != null) {
+                 double d3 = improvednoise.noise(
+@@ -171,7 +_,7 @@
+         double d0 = 0.0;
+         double d1 = this.lowestFreqValueFactor;
+ 
+-        for(int i = 0; i < this.noiseLevels.length; ++i) {
++        for (int i = 0; i < this.noiseLevels.length; i++) {
+             ImprovedNoise improvednoise = this.noiseLevels[i];
+             if (improvednoise != null) {
+                 d0 += this.amplitudes.getDouble(i) * p_210650_ * d1;
+@@ -206,7 +_,7 @@
+         List<String> list = this.amplitudes.stream().map(p_192889_ -> String.format(Locale.ROOT, "%.2f", p_192889_)).toList();
+         p_192891_.append("first octave: ").append(this.firstOctave).append(", amplitudes: ").append(list).append(", noise levels: [");
+ 
+-        for(int i = 0; i < this.noiseLevels.length; ++i) {
++        for (int i = 0; i < this.noiseLevels.length; i++) {
+             p_192891_.append(i).append(": ");
+             ImprovedNoise improvednoise = this.noiseLevels[i];
+             if (improvednoise == null) {

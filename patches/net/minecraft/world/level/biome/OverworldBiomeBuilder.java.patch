@@ -1,0 +1,124 @@
+--- a/net/minecraft/world/level/biome/OverworldBiomeBuilder.java
++++ b/net/minecraft/world/level/biome/OverworldBiomeBuilder.java
+@@ -159,7 +_,7 @@
+                 Biomes.PLAINS
+             )
+         );
+-        CubicSpline<?, ?> cubicspline = TerrainProvider.buildErosionOffsetSpline(
++        if (TerrainProvider.buildErosionOffsetSpline(
+             densityfunctions$spline$coordinate1,
+             densityfunctions$spline$coordinate2,
+             -0.15F,
+@@ -171,11 +_,10 @@
+             false,
+             false,
+             ToFloatFunction.IDENTITY
+-        );
+-        if (cubicspline instanceof CubicSpline.Multipoint multipoint) {
++        ) instanceof CubicSpline.Multipoint<?, ?> multipoint) {
+             ResourceKey<Biome> resourcekey = Biomes.DESERT;
+ 
+-            for(float f : multipoint.locations()) {
++            for (float f : multipoint.locations()) {
+                 p_256276_.accept(
+                     Pair.of(
+                         Climate.parameters(
+@@ -188,11 +_,10 @@
+             }
+         }
+ 
+-        CubicSpline<?, ?> cubicspline1 = TerrainProvider.overworldOffset(
+-            densityfunctions$spline$coordinate, densityfunctions$spline$coordinate1, densityfunctions$spline$coordinate2, false
+-        );
+-        if (cubicspline1 instanceof CubicSpline.Multipoint multipoint1) {
+-            for(float f1 : multipoint1.locations()) {
++        if (TerrainProvider.overworldOffset(densityfunctions$spline$coordinate, densityfunctions$spline$coordinate1, densityfunctions$spline$coordinate2, false) instanceof CubicSpline.Multipoint<?, ?> multipoint1
++            )
++         {
++            for (float f1 : multipoint1.locations()) {
+                 p_256276_.accept(
+                     Pair.of(
+                         Climate.parameters(
+@@ -216,7 +_,7 @@
+             p_187196_, this.FULL_RANGE, this.FULL_RANGE, this.mushroomFieldsContinentalness, this.FULL_RANGE, this.FULL_RANGE, 0.0F, Biomes.MUSHROOM_FIELDS
+         );
+ 
+-        for(int i = 0; i < this.temperatures.length; ++i) {
++        for (int i = 0; i < this.temperatures.length; i++) {
+             Climate.Parameter climate$parameter = this.temperatures[i];
+             this.addSurfaceBiome(
+                 p_187196_, climate$parameter, this.FULL_RANGE, this.deepOceanContinentalness, this.FULL_RANGE, this.FULL_RANGE, 0.0F, this.OCEANS[0][i]
+@@ -244,10 +_,10 @@
+     }
+ 
+     private void addPeaks(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> p_187178_, Climate.Parameter p_187179_) {
+-        for(int i = 0; i < this.temperatures.length; ++i) {
++        for (int i = 0; i < this.temperatures.length; i++) {
+             Climate.Parameter climate$parameter = this.temperatures[i];
+ 
+-            for(int j = 0; j < this.humidities.length; ++j) {
++            for (int j = 0; j < this.humidities.length; j++) {
+                 Climate.Parameter climate$parameter1 = this.humidities[j];
+                 ResourceKey<Biome> resourcekey = this.pickMiddleBiome(i, j, p_187179_);
+                 ResourceKey<Biome> resourcekey1 = this.pickMiddleBiomeOrBadlandsIfHot(i, j, p_187179_);
+@@ -357,10 +_,10 @@
+     }
+ 
+     private void addHighSlice(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> p_187198_, Climate.Parameter p_187199_) {
+-        for(int i = 0; i < this.temperatures.length; ++i) {
++        for (int i = 0; i < this.temperatures.length; i++) {
+             Climate.Parameter climate$parameter = this.temperatures[i];
+ 
+-            for(int j = 0; j < this.humidities.length; ++j) {
++            for (int j = 0; j < this.humidities.length; j++) {
+                 Climate.Parameter climate$parameter1 = this.humidities[j];
+                 ResourceKey<Biome> resourcekey = this.pickMiddleBiome(i, j, p_187199_);
+                 ResourceKey<Biome> resourcekey1 = this.pickMiddleBiomeOrBadlandsIfHot(i, j, p_187199_);
+@@ -508,10 +_,10 @@
+             Biomes.MANGROVE_SWAMP
+         );
+ 
+-        for(int i = 0; i < this.temperatures.length; ++i) {
++        for (int i = 0; i < this.temperatures.length; i++) {
+             Climate.Parameter climate$parameter = this.temperatures[i];
+ 
+-            for(int j = 0; j < this.humidities.length; ++j) {
++            for (int j = 0; j < this.humidities.length; j++) {
+                 Climate.Parameter climate$parameter1 = this.humidities[j];
+                 ResourceKey<Biome> resourcekey = this.pickMiddleBiome(i, j, p_187219_);
+                 ResourceKey<Biome> resourcekey1 = this.pickMiddleBiomeOrBadlandsIfHot(i, j, p_187219_);
+@@ -682,10 +_,10 @@
+             Biomes.MANGROVE_SWAMP
+         );
+ 
+-        for(int i = 0; i < this.temperatures.length; ++i) {
++        for (int i = 0; i < this.temperatures.length; i++) {
+             Climate.Parameter climate$parameter = this.temperatures[i];
+ 
+-            for(int j = 0; j < this.humidities.length; ++j) {
++            for (int j = 0; j < this.humidities.length; j++) {
+                 Climate.Parameter climate$parameter1 = this.humidities[j];
+                 ResourceKey<Biome> resourcekey = this.pickMiddleBiome(i, j, p_187230_);
+                 ResourceKey<Biome> resourcekey1 = this.pickMiddleBiomeOrBadlandsIfHot(i, j, p_187230_);
+@@ -882,10 +_,10 @@
+             Biomes.FROZEN_RIVER
+         );
+ 
+-        for(int i = 0; i < this.temperatures.length; ++i) {
++        for (int i = 0; i < this.temperatures.length; i++) {
+             Climate.Parameter climate$parameter = this.temperatures[i];
+ 
+-            for(int j = 0; j < this.humidities.length; ++j) {
++            for (int j = 0; j < this.humidities.length; j++) {
+                 Climate.Parameter climate$parameter1 = this.humidities[j];
+                 ResourceKey<Biome> resourcekey = this.pickMiddleBiomeOrBadlandsIfHot(i, j, p_187239_);
+                 this.addSurfaceBiome(
+@@ -1093,7 +_,7 @@
+     private static String getDebugStringForNoiseValue(double p_187158_, Climate.Parameter[] p_187159_) {
+         double d0 = (double)Climate.quantizeCoord((float)p_187158_);
+ 
+-        for(int i = 0; i < p_187159_.length; ++i) {
++        for (int i = 0; i < p_187159_.length; i++) {
+             if (d0 < (double)p_187159_[i].max()) {
+                 return i + "";
+             }

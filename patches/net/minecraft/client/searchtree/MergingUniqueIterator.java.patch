@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/searchtree/MergingUniqueIterator.java
++++ b/net/minecraft/client/searchtree/MergingUniqueIterator.java
+@@ -36,7 +_,7 @@
+                 this.secondIterator.next();
+             }
+ 
+-            return (T)(i <= 0 ? this.firstIterator.next() : this.secondIterator.next());
++            return i <= 0 ? this.firstIterator.next() : this.secondIterator.next();
+         }
+     }
+ }

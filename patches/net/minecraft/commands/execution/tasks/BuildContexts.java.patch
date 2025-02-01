@@ -1,0 +1,72 @@
+--- a/net/minecraft/commands/execution/tasks/BuildContexts.java
++++ b/net/minecraft/commands/execution/tasks/BuildContexts.java
+@@ -1,7 +_,6 @@
+ package net.minecraft.commands.execution.tasks;
+ 
+ import com.google.common.annotations.VisibleForTesting;
+-import com.mojang.brigadier.Command;
+ import com.mojang.brigadier.RedirectModifier;
+ import com.mojang.brigadier.context.CommandContext;
+ import com.mojang.brigadier.context.ContextChain;
+@@ -46,36 +_,37 @@
+             p_305977_.profiler().push(() -> "prepare " + this.commandInput);
+ 
+             try {
+-                for(int i = p_305977_.forkLimit(); contextchain.getStage() != Stage.EXECUTE; contextchain = contextchain.nextStage()) {
++                for (int i = p_305977_.forkLimit(); contextchain.getStage() != Stage.EXECUTE; contextchain = contextchain.nextStage()) {
+                     CommandContext<T> commandcontext = contextchain.getTopContext();
+                     if (commandcontext.isForked()) {
+                         chainmodifiers = chainmodifiers.setForked();
+                     }
+ 
+                     RedirectModifier<T> redirectmodifier = commandcontext.getRedirectModifier();
+-                    if (redirectmodifier instanceof CustomModifierExecutor custommodifierexecutor) {
++                    if (redirectmodifier instanceof CustomModifierExecutor<?>) {
++                        CustomModifierExecutor<T> custommodifierexecutor = (CustomModifierExecutor<T>) redirectmodifier;
+                         custommodifierexecutor.apply(p_309567_, list, contextchain, chainmodifiers, ExecutionControl.create(p_305977_, p_309603_));
+                         return;
+                     }
+ 
+                     if (redirectmodifier != null) {
+                         p_305977_.incrementCost();
+-                        boolean custommodifierexecutor = chainmodifiers.isForked();
++                        boolean flag = chainmodifiers.isForked();
+                         List<T> list1 = new ObjectArrayList<>();
+ 
+-                        for(T t : list) {
++                        for (T t : list) {
+                             try {
+                                 Collection<T> collection = ContextChain.runModifier(commandcontext, t, (p_309424_, p_309425_, p_309426_) -> {
+-                                }, (boolean)custommodifierexecutor);
++                                }, flag);
+                                 if (list1.size() + collection.size() >= i) {
+-                                    p_309567_.handleError(ERROR_FORK_LIMIT_REACHED.create(i), (boolean)custommodifierexecutor, p_305977_.tracer());
++                                    p_309567_.handleError(ERROR_FORK_LIMIT_REACHED.create(i), flag, p_305977_.tracer());
+                                     return;
+                                 }
+ 
+                                 list1.addAll(collection);
+                             } catch (CommandSyntaxException commandsyntaxexception) {
+-                                t.handleError(commandsyntaxexception, (boolean)custommodifierexecutor, p_305977_.tracer());
+-                                if (custommodifierexecutor == false) {
++                                t.handleError(commandsyntaxexception, flag, p_305977_.tracer());
++                                if (!flag) {
+                                     return;
+                                 }
+                             }
+@@ -95,11 +_,12 @@
+             }
+         } else {
+             CommandContext<T> commandcontext1 = contextchain.getTopContext();
+-            Command<T> command = commandcontext1.getCommand();
+-            if (command instanceof CustomCommandExecutor customcommandexecutor) {
++            com.mojang.brigadier.Command<T> command = commandcontext1.getCommand();
++            if (command instanceof CustomCommandExecutor<?>) {
++                CustomCommandExecutor<T> customcommandexecutor = (CustomCommandExecutor<T>) command;
+                 ExecutionControl<T> executioncontrol = ExecutionControl.create(p_305977_, p_309603_);
+ 
+-                for(T t2 : list) {
++                for (T t2 : list) {
+                     customcommandexecutor.run(t2, contextchain, chainmodifiers, executioncontrol);
+                 }
+             } else {

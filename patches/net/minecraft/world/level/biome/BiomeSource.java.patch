@@ -1,0 +1,79 @@
+--- a/net/minecraft/world/level/biome/BiomeSource.java
++++ b/net/minecraft/world/level/biome/BiomeSource.java
+@@ -5,6 +_,7 @@
+ import com.google.common.collect.Sets;
+ import com.mojang.datafixers.util.Pair;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import java.util.List;
+ import java.util.Set;
+ import java.util.function.Function;
+@@ -32,7 +_,7 @@
+     protected BiomeSource() {
+     }
+ 
+-    protected abstract Codec<? extends BiomeSource> codec();
++    protected abstract MapCodec<? extends BiomeSource> codec();
+ 
+     protected abstract Stream<Holder<Biome>> collectPossibleBiomes();
+ 
+@@ -52,9 +_,9 @@
+         int i2 = j1 - k + 1;
+         Set<Holder<Biome>> set = Sets.newHashSet();
+ 
+-        for(int j2 = 0; j2 < i2; ++j2) {
+-            for(int k2 = 0; k2 < k1; ++k2) {
+-                for(int l2 = 0; l2 < l1; ++l2) {
++        for (int j2 = 0; j2 < i2; j2++) {
++            for (int k2 = 0; k2 < k1; k2++) {
++                for (int l2 = 0; l2 < l1; l2++) {
+                     int i3 = i + k2;
+                     int j3 = j + l2;
+                     int k3 = k + j2;
+@@ -84,13 +_,13 @@
+             int i = Math.floorDiv(p_220579_, p_220580_);
+             int[] aint = Mth.outFromOrigin(p_220578_.getY(), p_220584_.getMinBuildHeight() + 1, p_220584_.getMaxBuildHeight(), p_220581_).toArray();
+ 
+-            for(BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.spiralAround(BlockPos.ZERO, i, Direction.EAST, Direction.SOUTH)) {
++            for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.spiralAround(BlockPos.ZERO, i, Direction.EAST, Direction.SOUTH)) {
+                 int j = p_220578_.getX() + blockpos$mutableblockpos.getX() * p_220580_;
+                 int k = p_220578_.getZ() + blockpos$mutableblockpos.getZ() * p_220580_;
+                 int l = QuartPos.fromBlock(j);
+                 int i1 = QuartPos.fromBlock(k);
+ 
+-                for(int j1 : aint) {
++                for (int j1 : aint) {
+                     int k1 = QuartPos.fromBlock(j1);
+                     Holder<Biome> holder = this.getNoiseBiome(l, k1, i1, p_220583_);
+                     if (set.contains(holder)) {
+@@ -122,12 +_,13 @@
+         Pair<BlockPos, Holder<Biome>> pair = null;
+         int i1 = 0;
+         int j1 = p_220568_ ? 0 : k;
++        int k1 = j1;
+ 
+-        for(int k1 = j1; k1 <= k; k1 += p_220565_) {
+-            for(int l1 = SharedConstants.debugGenerateSquareTerrainWithoutNoise ? 0 : -k1; l1 <= k1; l1 += p_220565_) {
++        while (k1 <= k) {
++            for (int l1 = SharedConstants.debugGenerateSquareTerrainWithoutNoise ? 0 : -k1; l1 <= k1; l1 += p_220565_) {
+                 boolean flag = Math.abs(l1) == k1;
+ 
+-                for(int i2 = -k1; i2 <= k1; i2 += p_220565_) {
++                for (int i2 = -k1; i2 <= k1; i2 += p_220565_) {
+                     if (p_220568_) {
+                         boolean flag1 = Math.abs(i2) == k1;
+                         if (!flag1 && !flag) {
+@@ -148,10 +_,12 @@
+                             pair = Pair.of(blockpos, holder);
+                         }
+ 
+-                        ++i1;
++                        i1++;
+                     }
+                 }
+             }
++
++            k1 += p_220565_;
+         }
+ 
+         return pair;

@@ -1,0 +1,17 @@
+--- a/net/minecraft/util/thread/ReentrantBlockableEventLoop.java
++++ b/net/minecraft/util/thread/ReentrantBlockableEventLoop.java
+@@ -18,12 +_,12 @@
+ 
+     @Override
+     public void doRunTask(R p_18769_) {
+-        ++this.reentrantCount;
++        this.reentrantCount++;
+ 
+         try {
+             super.doRunTask(p_18769_);
+         } finally {
+-            --this.reentrantCount;
++            this.reentrantCount--;
+         }
+     }
+ }

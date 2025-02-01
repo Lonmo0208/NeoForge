@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/packs/resources/ResourceMetadata.java
++++ b/net/minecraft/server/packs/resources/ResourceMetadata.java
+@@ -42,7 +_,7 @@
+     default ResourceMetadata copySections(Collection<MetadataSectionSerializer<?>> p_295308_) {
+         ResourceMetadata.Builder resourcemetadata$builder = new ResourceMetadata.Builder();
+ 
+-        for(MetadataSectionSerializer<?> metadatasectionserializer : p_295308_) {
++        for (MetadataSectionSerializer<?> metadatasectionserializer : p_295308_) {
+             this.copySection(resourcemetadata$builder, metadatasectionserializer);
+         }
+ 
+@@ -50,7 +_,7 @@
+     }
+ 
+     private <T> void copySection(ResourceMetadata.Builder p_295962_, MetadataSectionSerializer<T> p_294347_) {
+-        this.getSection(p_294347_).ifPresent(p_293816_ -> p_295962_.put(p_294347_, p_293816_));
++        this.getSection(p_294347_).ifPresent(p_293816_ -> p_295962_.put(p_294347_, (T)p_293816_));
+     }
+ 
+     public static class Builder {

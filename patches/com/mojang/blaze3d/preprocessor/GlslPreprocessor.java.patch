@@ -1,0 +1,20 @@
+--- a/com/mojang/blaze3d/preprocessor/GlslPreprocessor.java
++++ b/com/mojang/blaze3d/preprocessor/GlslPreprocessor.java
+@@ -38,7 +_,7 @@
+         List<String> list = Lists.newArrayList();
+         Matcher matcher = REGEX_MOJ_IMPORT.matcher(p_166470_);
+ 
+-        while(matcher.find()) {
++        while (matcher.find()) {
+             if (!isDirectiveDisabled(p_166470_, matcher, j)) {
+                 String s1 = matcher.group(2);
+                 boolean flag = s1 != null;
+@@ -55,7 +_,7 @@
+                             s4 = s4 + System.lineSeparator();
+                         }
+ 
+-                        ++p_166471_.sourceId;
++                        p_166471_.sourceId++;
+                         int k = p_166471_.sourceId;
+                         List<String> list1 = this.processImports(s4, p_166471_, flag ? FileUtil.getFullResourcePath(s3) : "");
+                         list1.set(0, String.format(Locale.ROOT, "#line %d %d\n%s", 0, k, this.processVersions(list1.get(0), p_166471_)));

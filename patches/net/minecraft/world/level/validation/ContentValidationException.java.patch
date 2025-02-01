@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/level/validation/ContentValidationException.java
++++ b/net/minecraft/world/level/validation/ContentValidationException.java
+@@ -22,6 +_,6 @@
+         return "Failed to validate '"
+             + p_289929_
+             + "'. Found forbidden symlinks: "
+-            + (String)p_289979_.stream().map(p_289919_ -> p_289919_.link() + "->" + p_289919_.target()).collect(Collectors.joining(", "));
++            + p_289979_.stream().map(p_339587_ -> p_339587_.link() + "->" + p_339587_.target()).collect(Collectors.joining(", "));
+     }
+ }

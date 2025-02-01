@@ -1,0 +1,36 @@
+--- a/net/minecraft/advancements/critereon/ItemDamagePredicate.java
++++ b/net/minecraft/advancements/critereon/ItemDamagePredicate.java
+@@ -5,16 +_,15 @@
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.core.component.DataComponentType;
+ import net.minecraft.core.component.DataComponents;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ 
+ public record ItemDamagePredicate(MinMaxBounds.Ints durability, MinMaxBounds.Ints damage) implements SingleComponentItemPredicate<Integer> {
+     public static final Codec<ItemDamagePredicate> CODEC = RecordCodecBuilder.create(
+-        p_334069_ -> p_334069_.group(
+-                    ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "durability", MinMaxBounds.Ints.ANY).forGetter(ItemDamagePredicate::durability),
+-                    ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "damage", MinMaxBounds.Ints.ANY).forGetter(ItemDamagePredicate::damage)
++        p_337369_ -> p_337369_.group(
++                    MinMaxBounds.Ints.CODEC.optionalFieldOf("durability", MinMaxBounds.Ints.ANY).forGetter(ItemDamagePredicate::durability),
++                    MinMaxBounds.Ints.CODEC.optionalFieldOf("damage", MinMaxBounds.Ints.ANY).forGetter(ItemDamagePredicate::damage)
+                 )
+-                .apply(p_334069_, ItemDamagePredicate::new)
++                .apply(p_337369_, ItemDamagePredicate::new)
+     );
+ 
+     @Override
+@@ -23,11 +_,7 @@
+     }
+ 
+     public boolean matches(ItemStack p_334074_, Integer p_333878_) {
+-        if (!this.durability.matches(p_334074_.getMaxDamage() - p_333878_)) {
+-            return false;
+-        } else {
+-            return this.damage.matches(p_333878_);
+-        }
++        return !this.durability.matches(p_334074_.getMaxDamage() - p_333878_) ? false : this.damage.matches(p_333878_);
+     }
+ 
+     public static ItemDamagePredicate durability(MinMaxBounds.Ints p_334087_) {

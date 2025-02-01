@@ -1,0 +1,30 @@
+--- a/net/minecraft/world/entity/ai/goal/target/DefendVillageTargetGoal.java
++++ b/net/minecraft/world/entity/ai/goal/target/DefendVillageTargetGoal.java
+@@ -29,10 +_,10 @@
+         List<? extends LivingEntity> list = this.golem.level().getNearbyEntities(Villager.class, this.attackTargeting, this.golem, aabb);
+         List<Player> list1 = this.golem.level().getNearbyPlayers(this.attackTargeting, this.golem, aabb);
+ 
+-        for(LivingEntity livingentity : list) {
++        for (LivingEntity livingentity : list) {
+             Villager villager = (Villager)livingentity;
+ 
+-            for(Player player : list1) {
++            for (Player player : list1) {
+                 int i = villager.getPlayerReputation(player);
+                 if (i <= -100) {
+                     this.potentialTarget = player;
+@@ -40,11 +_,9 @@
+             }
+         }
+ 
+-        if (this.potentialTarget == null) {
+-            return false;
+-        } else {
+-            return !(this.potentialTarget instanceof Player) || !this.potentialTarget.isSpectator() && !((Player)this.potentialTarget).isCreative();
+-        }
++        return this.potentialTarget == null
++            ? false
++            : !(this.potentialTarget instanceof Player) || !this.potentialTarget.isSpectator() && !((Player)this.potentialTarget).isCreative();
+     }
+ 
+     @Override

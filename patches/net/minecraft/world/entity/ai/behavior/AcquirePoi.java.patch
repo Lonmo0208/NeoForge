@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/ai/behavior/AcquirePoi.java
++++ b/net/minecraft/world/entity/ai/behavior/AcquirePoi.java
+@@ -81,7 +_,7 @@
+                                     Path path = findPathToPois(p_258293_, set);
+                                     if (path != null && path.canReach()) {
+                                         BlockPos blockpos = path.getTarget();
+-                                        poimanager.getType(blockpos).ifPresent(p_339950_ -> {
++                                        poimanager.getType(blockpos).ifPresent(p_330013_ -> {
+                                             poimanager.take(p_260007_, (p_217108_, p_217109_) -> p_217109_.equals(blockpos), blockpos, 1);
+                                             p_258300_.set(GlobalPos.of(p_258292_.dimension(), blockpos));
+                                             p_260129_.ifPresent(p_147369_ -> p_258292_.broadcastEntityEvent(p_258293_, p_147369_));
+@@ -89,7 +_,7 @@
+                                             DebugPackets.sendPoiTicketCountPacket(p_258292_, blockpos);
+                                         });
+                                     } else {
+-                                        for(Pair<Holder<PoiType>, BlockPos> pair : set) {
++                                        for (Pair<Holder<PoiType>, BlockPos> pair : set) {
+                                             long2objectmap.computeIfAbsent(
+                                                 pair.getSecond().asLong(), p_264881_ -> new AcquirePoi.JitteredLinearRetry(p_258292_.random, p_258294_)
+                                             );
+@@ -114,7 +_,7 @@
+             Set<BlockPos> set = new HashSet<>();
+             int i = 1;
+ 
+-            for(Pair<Holder<PoiType>, BlockPos> pair : p_217099_) {
++            for (Pair<Holder<PoiType>, BlockPos> pair : p_217099_) {
+                 i = Math.max(i, pair.getFirst().value().validRange());
+                 set.add(pair.getSecond());
+             }

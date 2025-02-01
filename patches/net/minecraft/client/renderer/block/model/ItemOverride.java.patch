@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/block/model/ItemOverride.java
++++ b/net/minecraft/client/renderer/block/model/ItemOverride.java
+@@ -48,7 +_,7 @@
+             Map<ResourceLocation, Float> map = Maps.newLinkedHashMap();
+             JsonObject jsonobject = GsonHelper.getAsJsonObject(p_173451_, "predicate");
+ 
+-            for(Entry<String, JsonElement> entry : jsonobject.entrySet()) {
++            for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
+                 map.put(new ResourceLocation(entry.getKey()), GsonHelper.convertToFloat(entry.getValue(), entry.getKey()));
+             }
+ 

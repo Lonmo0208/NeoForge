@@ -1,0 +1,25 @@
+--- a/net/minecraft/world/item/crafting/PoisonousPotatoCutterRecipe.java
++++ /dev/null
+@@ -1,22 +_,0 @@
+-package net.minecraft.world.item.crafting;
+-
+-import net.minecraft.world.Container;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Blocks;
+-
+-public class PoisonousPotatoCutterRecipe extends SingleItemRecipe {
+-    public PoisonousPotatoCutterRecipe(String p_341501_, Ingredient p_340938_, ItemStack p_341851_) {
+-        super(RecipeType.POISONOUS_POTATO_CUTTING, RecipeSerializer.POISONOUS_POTATO_CUTTER_RECIPE, p_341501_, p_340938_, p_341851_);
+-    }
+-
+-    @Override
+-    public boolean matches(Container p_341008_, Level p_341779_) {
+-        return this.ingredient.test(p_341008_.getItem(0));
+-    }
+-
+-    @Override
+-    public ItemStack getToastSymbol() {
+-        return new ItemStack(Blocks.POISONOUS_POTATO_CUTTER);
+-    }
+-}

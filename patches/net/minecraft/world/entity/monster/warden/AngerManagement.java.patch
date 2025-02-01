@@ -1,0 +1,47 @@
+--- a/net/minecraft/world/entity/monster/warden/AngerManagement.java
++++ b/net/minecraft/world/entity/monster/warden/AngerManagement.java
+@@ -78,7 +_,7 @@
+     }
+ 
+     public void tick(ServerLevel p_219264_, Predicate<Entity> p_219265_) {
+-        --this.conversionDelay;
++        this.conversionDelay--;
+         if (this.conversionDelay <= 0) {
+             this.convertFromUuids(p_219264_);
+             this.conversionDelay = 2;
+@@ -86,7 +_,7 @@
+ 
+         ObjectIterator<Entry<UUID>> objectiterator = this.angerByUuid.object2IntEntrySet().iterator();
+ 
+-        while(objectiterator.hasNext()) {
++        while (objectiterator.hasNext()) {
+             Entry<UUID> entry = objectiterator.next();
+             int i = entry.getIntValue();
+             if (i <= 1) {
+@@ -98,7 +_,7 @@
+ 
+         ObjectIterator<Entry<Entity>> objectiterator1 = this.angerBySuspect.object2IntEntrySet().iterator();
+ 
+-        while(objectiterator1.hasNext()) {
++        while (objectiterator1.hasNext()) {
+             Entry<Entity> entry1 = objectiterator1.next();
+             int j = entry1.getIntValue();
+             Entity entity = entry1.getKey();
+@@ -109,7 +_,7 @@
+                 this.suspects.remove(entity);
+                 objectiterator1.remove();
+                 if (j > 1 && entity$removalreason != null) {
+-                    switch(entity$removalreason) {
++                    switch (entity$removalreason) {
+                         case CHANGED_DIMENSION:
+                         case UNLOADED_TO_CHUNK:
+                         case UNLOADED_WITH_PLAYER:
+@@ -133,7 +_,7 @@
+     private void convertFromUuids(ServerLevel p_219262_) {
+         ObjectIterator<Entry<UUID>> objectiterator = this.angerByUuid.object2IntEntrySet().iterator();
+ 
+-        while(objectiterator.hasNext()) {
++        while (objectiterator.hasNext()) {
+             Entry<UUID> entry = objectiterator.next();
+             int i = entry.getIntValue();
+             Entity entity = p_219262_.getEntity(entry.getKey());

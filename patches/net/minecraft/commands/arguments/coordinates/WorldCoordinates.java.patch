@@ -1,0 +1,22 @@
+--- a/net/minecraft/commands/arguments/coordinates/WorldCoordinates.java
++++ b/net/minecraft/commands/arguments/coordinates/WorldCoordinates.java
+@@ -48,15 +_,12 @@
+     public boolean equals(Object p_120900_) {
+         if (this == p_120900_) {
+             return true;
+-        } else if (!(p_120900_ instanceof WorldCoordinates)) {
++        } else if (!(p_120900_ instanceof WorldCoordinates worldcoordinates)) {
++            return false;
++        } else if (!this.x.equals(worldcoordinates.x)) {
+             return false;
+         } else {
+-            WorldCoordinates worldcoordinates = (WorldCoordinates)p_120900_;
+-            if (!this.x.equals(worldcoordinates.x)) {
+-                return false;
+-            } else {
+-                return !this.y.equals(worldcoordinates.y) ? false : this.z.equals(worldcoordinates.z);
+-            }
++            return !this.y.equals(worldcoordinates.y) ? false : this.z.equals(worldcoordinates.z);
+         }
+     }
+ 

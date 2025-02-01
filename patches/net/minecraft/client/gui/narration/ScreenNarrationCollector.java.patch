@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/narration/ScreenNarrationCollector.java
++++ b/net/minecraft/client/gui/narration/ScreenNarrationCollector.java
+@@ -15,7 +_,7 @@
+     );
+ 
+     public void update(Consumer<NarrationElementOutput> p_169187_) {
+-        ++this.generation;
++        this.generation++;
+         p_169187_.accept(new ScreenNarrationCollector.Output(0));
+     }
+ 

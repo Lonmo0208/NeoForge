@@ -1,0 +1,25 @@
+--- a/net/minecraft/client/gui/screens/recipebook/RecipeButton.java
++++ b/net/minecraft/client/gui/screens/recipebook/RecipeButton.java
+@@ -42,11 +_,11 @@
+ 
+     public void init(RecipeCollection p_100480_, RecipeBookPage p_100481_) {
+         this.collection = p_100480_;
+-        this.menu = (RecipeBookMenu)p_100481_.getMinecraft().player.containerMenu;
++        this.menu = (RecipeBookMenu<?>)p_100481_.getMinecraft().player.containerMenu;
+         this.book = p_100481_.getRecipeBook();
+         List<RecipeHolder<?>> list = p_100480_.getRecipes(this.book.isFiltering(this.menu));
+ 
+-        for(RecipeHolder<?> recipeholder : list) {
++        for (RecipeHolder<?> recipeholder : list) {
+             if (this.book.willHighlight(recipeholder)) {
+                 p_100481_.recipesShown(list);
+                 this.animationTime = 15.0F;
+@@ -95,7 +_,7 @@
+         int i = 4;
+         if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
+             p_281385_.renderItem(itemstack, this.getX() + i + 1, this.getY() + i + 1, 0, 10);
+-            --i;
++            i--;
+         }
+ 
+         p_281385_.renderFakeItem(itemstack, this.getX() + i, this.getY() + i);

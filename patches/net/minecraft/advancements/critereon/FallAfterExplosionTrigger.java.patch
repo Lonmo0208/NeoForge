@@ -1,0 +1,46 @@
+--- a/net/minecraft/advancements/critereon/FallAfterExplosionTrigger.java
++++ b/net/minecraft/advancements/critereon/FallAfterExplosionTrigger.java
+@@ -9,7 +_,6 @@
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.level.storage.loot.LootContext;
+ import net.minecraft.world.phys.Vec3;
+@@ -33,15 +_,13 @@
+         Optional<ContextAwarePredicate> cause
+     ) implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<FallAfterExplosionTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_335730_ -> p_335730_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player")
+-                            .forGetter(FallAfterExplosionTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(LocationPredicate.CODEC, "start_position")
+-                            .forGetter(FallAfterExplosionTrigger.TriggerInstance::startPosition),
+-                        ExtraCodecs.strictOptionalField(DistancePredicate.CODEC, "distance").forGetter(FallAfterExplosionTrigger.TriggerInstance::distance),
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "cause").forGetter(FallAfterExplosionTrigger.TriggerInstance::cause)
++            p_337362_ -> p_337362_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(FallAfterExplosionTrigger.TriggerInstance::player),
++                        LocationPredicate.CODEC.optionalFieldOf("start_position").forGetter(FallAfterExplosionTrigger.TriggerInstance::startPosition),
++                        DistancePredicate.CODEC.optionalFieldOf("distance").forGetter(FallAfterExplosionTrigger.TriggerInstance::distance),
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("cause").forGetter(FallAfterExplosionTrigger.TriggerInstance::cause)
+                     )
+-                    .apply(p_335730_, FallAfterExplosionTrigger.TriggerInstance::new)
++                    .apply(p_337362_, FallAfterExplosionTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<FallAfterExplosionTrigger.TriggerInstance> fallAfterExplosion(DistancePredicate p_335666_, EntityPredicate.Builder p_335823_) {
+@@ -62,10 +_,10 @@
+         public boolean matches(ServerLevel p_335990_, Vec3 p_335477_, Vec3 p_336025_, @Nullable LootContext p_335849_) {
+             if (this.startPosition.isPresent() && !this.startPosition.get().matches(p_335990_, p_335477_.x, p_335477_.y, p_335477_.z)) {
+                 return false;
+-            } else if (this.distance.isPresent() && !this.distance.get().matches(p_335477_.x, p_335477_.y, p_335477_.z, p_336025_.x, p_336025_.y, p_336025_.z)) {
+-                return false;
+             } else {
+-                return !this.cause.isPresent() || p_335849_ != null && this.cause.get().matches(p_335849_);
++                return this.distance.isPresent() && !this.distance.get().matches(p_335477_.x, p_335477_.y, p_335477_.z, p_336025_.x, p_336025_.y, p_336025_.z)
++                    ? false
++                    : !this.cause.isPresent() || p_335849_ != null && this.cause.get().matches(p_335849_);
+             }
+         }
+     }

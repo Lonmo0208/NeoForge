@@ -1,0 +1,22 @@
+--- a/net/minecraft/util/datafix/fixes/BitStorageAlignFix.java
++++ b/net/minecraft/util/datafix/fixes/BitStorageAlignFix.java
+@@ -52,7 +_,9 @@
+             DSL.remainderFinder(),
+             p_14765_ -> p_14765_.update(
+                     "Heightmaps",
+-                    p_145113_ -> p_145113_.updateMapValues(p_145110_ -> p_145110_.mapSecond(p_145123_ -> updateBitStorage(p_14765_, p_145123_, 256, 9)))
++                    p_145113_ -> p_145113_.updateMapValues(
++                            p_145110_ -> p_145110_.mapSecond(p_145123_ -> updateBitStorage(p_14765_, (Dynamic<?>)p_145123_, 256, 9))
++                        )
+                 )
+         );
+     }
+@@ -99,7 +_,7 @@
+             long i2 = p_14740_[0];
+             long j2 = i > 1 ? p_14740_[1] : 0L;
+ 
+-            for(int k2 = 0; k2 < p_14738_; ++k2) {
++            for (int k2 = 0; k2 < p_14738_; k2++) {
+                 int l2 = k2 * p_14739_;
+                 int i3 = l2 >> 6;
+                 int j3 = (k2 + 1) * p_14739_ - 1 >> 6;

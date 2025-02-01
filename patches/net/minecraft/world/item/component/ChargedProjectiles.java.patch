@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/item/component/ChargedProjectiles.java
++++ b/net/minecraft/world/item/component/ChargedProjectiles.java
+@@ -30,7 +_,7 @@
+     }
+ 
+     public boolean contains(Item p_331165_) {
+-        for(ItemStack itemstack : this.items) {
++        for (ItemStack itemstack : this.items) {
+             if (itemstack.is(p_331165_)) {
+                 return true;
+             }

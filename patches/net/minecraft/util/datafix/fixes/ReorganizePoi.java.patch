@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/datafix/fixes/ReorganizePoi.java
++++ b/net/minecraft/util/datafix/fixes/ReorganizePoi.java
+@@ -32,7 +_,7 @@
+     private static <T> Dynamic<T> cap(Dynamic<T> p_16858_) {
+         Map<Dynamic<T>, Dynamic<T>> map = Maps.newHashMap();
+ 
+-        for(int i = 0; i < 16; ++i) {
++        for (int i = 0; i < 16; i++) {
+             String s = String.valueOf(i);
+             Optional<Dynamic<T>> optional = p_16858_.get(s).result();
+             if (optional.isPresent()) {

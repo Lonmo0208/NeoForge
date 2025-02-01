@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/block/DragonEggBlock.java
++++ b/net/minecraft/world/level/block/DragonEggBlock.java
+@@ -48,7 +_,7 @@
+     private void teleport(BlockState p_52936_, Level p_52937_, BlockPos p_52938_) {
+         WorldBorder worldborder = p_52937_.getWorldBorder();
+ 
+-        for(int i = 0; i < 1000; ++i) {
++        for (int i = 0; i < 1000; i++) {
+             BlockPos blockpos = p_52938_.offset(
+                 p_52937_.random.nextInt(16) - p_52937_.random.nextInt(16),
+                 p_52937_.random.nextInt(8) - p_52937_.random.nextInt(8),
+@@ -56,7 +_,7 @@
+             );
+             if (p_52937_.getBlockState(blockpos).isAir() && worldborder.isWithinBounds(blockpos)) {
+                 if (p_52937_.isClientSide) {
+-                    for(int j = 0; j < 128; ++j) {
++                    for (int j = 0; j < 128; j++) {
+                         double d0 = p_52937_.random.nextDouble();
+                         float f = (p_52937_.random.nextFloat() - 0.5F) * 0.2F;
+                         float f1 = (p_52937_.random.nextFloat() - 0.5F) * 0.2F;

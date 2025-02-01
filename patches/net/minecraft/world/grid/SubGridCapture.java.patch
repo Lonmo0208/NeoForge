@@ -1,0 +1,168 @@
+--- a/net/minecraft/world/grid/SubGridCapture.java
++++ /dev/null
+@@ -1,165 +_,0 @@
+-package net.minecraft.world.grid;
+-
+-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+-import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
+-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+-import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
+-import it.unimi.dsi.fastutil.longs.LongIterator;
+-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+-import it.unimi.dsi.fastutil.longs.LongSet;
+-import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
+-import java.util.function.Consumer;
+-import javax.annotation.Nullable;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.core.Direction;
+-import net.minecraft.world.level.GameRules;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Blocks;
+-import net.minecraft.world.level.block.FloataterBlock;
+-import net.minecraft.world.level.block.piston.PistonBaseBlock;
+-import net.minecraft.world.level.block.state.BlockState;
+-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+-import net.minecraft.world.level.material.FluidState;
+-import net.minecraft.world.phys.shapes.BooleanOp;
+-import net.minecraft.world.phys.shapes.Shapes;
+-import net.minecraft.world.phys.shapes.VoxelShape;
+-
+-public record SubGridCapture(SubGridBlocks blocks, LongSet mask, BlockPos minPos, int engines) {
+-    private static final Direction[] DIRECTIONS = Direction.values();
+-
+-    @Nullable
+-    public static SubGridCapture scan(Level p_341928_, BlockPos p_340424_, Direction p_340452_) {
+-        Long2ObjectMap<BlockState> long2objectmap = new Long2ObjectOpenHashMap<>();
+-        LongArrayFIFOQueue longarrayfifoqueue = new LongArrayFIFOQueue();
+-        long2objectmap.put(p_340424_.asLong(), p_341928_.getBlockState(p_340424_));
+-        longarrayfifoqueue.enqueue(p_340424_.asLong());
+-        int i = p_340424_.getX();
+-        int j = p_340424_.getY();
+-        int k = p_340424_.getZ();
+-        int l = p_340424_.getX();
+-        int i1 = p_340424_.getY();
+-        int j1 = p_340424_.getZ();
+-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+-        BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
+-        int k1 = p_341928_.getGameRules().getInt(GameRules.RULE_FLOATATER_SIZE_LIMIT);
+-
+-        while(!longarrayfifoqueue.isEmpty()) {
+-            long l1 = longarrayfifoqueue.dequeueLastLong();
+-            blockpos$mutableblockpos.set(l1);
+-            BlockState blockstate = long2objectmap.get(l1);
+-            i = Math.min(i, blockpos$mutableblockpos.getX());
+-            j = Math.min(j, blockpos$mutableblockpos.getY());
+-            k = Math.min(k, blockpos$mutableblockpos.getZ());
+-            l = Math.max(l, blockpos$mutableblockpos.getX());
+-            i1 = Math.max(i1, blockpos$mutableblockpos.getY());
+-            j1 = Math.max(j1, blockpos$mutableblockpos.getZ());
+-            if (l - i + 1 > k1 || i1 - j + 1 > k1 || j1 - k + 1 > k1) {
+-                return null;
+-            }
+-
+-            VoxelShape voxelshape = blockstate.getShape(p_341928_, blockpos$mutableblockpos);
+-
+-            for(Direction direction : DIRECTIONS) {
+-                blockpos$mutableblockpos1.setWithOffset(blockpos$mutableblockpos, direction);
+-                long j2 = blockpos$mutableblockpos1.asLong();
+-                if (!long2objectmap.containsKey(j2)) {
+-                    BlockState blockstate1 = p_341928_.getBlockState(blockpos$mutableblockpos1);
+-                    VoxelShape voxelshape1 = blockstate1.getShape(p_341928_, blockpos$mutableblockpos1);
+-                    boolean flag = direction == p_340452_ && !blockstate1.canBeReplaced();
+-                    if (flag || isConnected(direction, voxelshape, voxelshape1, blockstate, blockstate1)) {
+-                        longarrayfifoqueue.enqueue(j2);
+-                        long2objectmap.put(j2, blockstate1);
+-                    }
+-                }
+-            }
+-        }
+-
+-        int k2 = l - i + 1;
+-        int i2 = i1 - j + 1;
+-        int l2 = j1 - k + 1;
+-        SubGridBlocks subgridblocks = new SubGridBlocks(k2, i2, l2);
+-        int i3 = 0;
+-
+-        for(Entry<BlockState> entry : Long2ObjectMaps.fastIterable(long2objectmap)) {
+-            blockpos$mutableblockpos.set(entry.getLongKey());
+-            BlockState blockstate2 = entry.getValue().trySetValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false));
+-            if (blockstate2.is(Blocks.FLOATATER) && blockstate2.getValue(FloataterBlock.FACING) == p_340452_ && blockstate2.getValue(FloataterBlock.TRIGGERED)) {
+-                ++i3;
+-            }
+-
+-            if (blockstate2.getBlock() instanceof FlyingTickable) {
+-                subgridblocks.markTickable(
+-                    new BlockPos(blockpos$mutableblockpos.getX() - i, blockpos$mutableblockpos.getY() - j, blockpos$mutableblockpos.getZ() - k)
+-                );
+-            }
+-
+-            if (!blockstate2.hasBlockEntity()) {
+-                subgridblocks.setBlockState(
+-                    blockpos$mutableblockpos.getX() - i, blockpos$mutableblockpos.getY() - j, blockpos$mutableblockpos.getZ() - k, blockstate2
+-                );
+-            }
+-        }
+-
+-        return new SubGridCapture(subgridblocks, new LongOpenHashSet(long2objectmap.keySet()), new BlockPos(i, j, k), i3);
+-    }
+-
+-    private static boolean isConnected(Direction p_341226_, VoxelShape p_341494_, VoxelShape p_341641_, BlockState p_341193_, BlockState p_342012_) {
+-        if (isStickyInDirection(p_341193_, p_341226_) || isStickyInDirection(p_342012_, p_341226_.getOpposite())) {
+-            return true;
+-        } else if (!areShapesConnected(p_341226_, p_341494_, p_341641_)) {
+-            return false;
+-        } else {
+-            return !isNonStickyInDirection(p_341193_, p_341226_) && !isNonStickyInDirection(p_342012_, p_341226_.getOpposite());
+-        }
+-    }
+-
+-    private static boolean areShapesConnected(Direction p_341798_, VoxelShape p_340440_, VoxelShape p_341481_) {
+-        if (p_340440_ != Shapes.empty() && p_341481_ != Shapes.empty()) {
+-            VoxelShape voxelshape = Shapes.getFaceShape(p_340440_, p_341798_);
+-            VoxelShape voxelshape1 = Shapes.getFaceShape(p_341481_, p_341798_.getOpposite());
+-            return voxelshape == Shapes.block() && voxelshape1 == Shapes.block() ? true : Shapes.joinIsNotEmpty(voxelshape, voxelshape1, BooleanOp.AND);
+-        } else {
+-            return false;
+-        }
+-    }
+-
+-    private static boolean isNonStickyInDirection(BlockState p_341709_, Direction p_341533_) {
+-        return p_341709_.is(Blocks.FLOATATER) && p_341709_.getValue(FloataterBlock.FACING) != p_341533_;
+-    }
+-
+-    private static boolean isStickyInDirection(BlockState p_341082_, Direction p_340861_) {
+-        if (!p_341082_.is(Blocks.SLIME_BLOCK) && !p_341082_.is(Blocks.HONEY_BLOCK)) {
+-            if (p_341082_.is(Blocks.STICKY_PISTON) && p_341082_.getValue(PistonBaseBlock.FACING) == p_340861_) {
+-                return true;
+-            } else {
+-                return p_341082_.is(Blocks.FLOATATER) && p_341082_.getValue(FloataterBlock.FACING) == p_340861_;
+-            }
+-        } else {
+-            return true;
+-        }
+-    }
+-
+-    public void remove(Level p_341670_) {
+-        this.forEachPos(p_341293_ -> {
+-            BlockState blockstate = p_341670_.getBlockState(p_341293_);
+-            if (blockstate.hasBlockEntity()) {
+-                p_341670_.destroyBlock(p_341293_, true);
+-            } else {
+-                FluidState fluidstate = blockstate.getFluidState();
+-                BlockState blockstate1 = fluidstate.createLegacyBlock();
+-                p_341670_.setBlock(p_341293_, blockstate1, 18);
+-            }
+-        });
+-        this.forEachPos(p_341214_ -> p_341670_.blockUpdated(p_341214_, p_341670_.getBlockState(p_341214_).getBlock()));
+-    }
+-
+-    private void forEachPos(Consumer<BlockPos> p_341319_) {
+-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+-        LongIterator longiterator = this.mask.longIterator();
+-
+-        while(longiterator.hasNext()) {
+-            blockpos$mutableblockpos.set(longiterator.nextLong());
+-            p_341319_.accept(blockpos$mutableblockpos);
+-        }
+-    }
+-}

@@ -1,0 +1,35 @@
+--- a/net/minecraft/client/particle/DripParticle.java
++++ b/net/minecraft/client/particle/DripParticle.java
+@@ -48,7 +_,7 @@
+         this.zo = this.z;
+         this.preMoveUpdate();
+         if (!this.removed) {
+-            this.yd -= (double)this.gravity;
++            this.yd = this.yd - (double)this.gravity;
+             this.move(this.xd, this.yd, this.zd);
+             this.postMoveUpdate();
+             if (!this.removed) {
+@@ -279,23 +_,6 @@
+         dripparticle.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+         dripparticle.gravity = 0.007F;
+         dripparticle.setColor(0.92F, 0.782F, 0.72F);
+-        return dripparticle;
+-    }
+-
+-    public static TextureSheetParticle createPoisonFallParticle(
+-        SimpleParticleType p_341270_,
+-        ClientLevel p_341223_,
+-        double p_340380_,
+-        double p_341177_,
+-        double p_341143_,
+-        double p_341231_,
+-        double p_342038_,
+-        double p_340767_
+-    ) {
+-        DripParticle dripparticle = new DripParticle.FallingParticle(p_341223_, p_340380_, p_341177_, p_341143_, Fluids.EMPTY);
+-        dripparticle.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+-        dripparticle.gravity = 0.007F;
+-        dripparticle.setColor(0.69F, 0.78F, 0.22F);
+         return dripparticle;
+     }
+ 

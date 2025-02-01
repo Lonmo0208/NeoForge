@@ -1,0 +1,26 @@
+--- a/net/minecraft/advancements/critereon/ShotCrossbowTrigger.java
++++ b/net/minecraft/advancements/critereon/ShotCrossbowTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.ItemLike;
+ 
+@@ -23,11 +_,11 @@
+ 
+     public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item) implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<ShotCrossbowTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311435_ -> p_311435_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(ShotCrossbowTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(ShotCrossbowTrigger.TriggerInstance::item)
++            p_337393_ -> p_337393_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(ShotCrossbowTrigger.TriggerInstance::player),
++                        ItemPredicate.CODEC.optionalFieldOf("item").forGetter(ShotCrossbowTrigger.TriggerInstance::item)
+                     )
+-                    .apply(p_311435_, ShotCrossbowTrigger.TriggerInstance::new)
++                    .apply(p_337393_, ShotCrossbowTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<ShotCrossbowTrigger.TriggerInstance> shotCrossbow(Optional<ItemPredicate> p_300988_) {

@@ -1,0 +1,62 @@
+--- a/net/minecraft/client/gui/screens/SproutRespawnScreen.java
++++ /dev/null
+@@ -1,59 +_,0 @@
+-package net.minecraft.client.gui.screens;
+-
+-import net.minecraft.client.gui.GuiGraphics;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+-import net.minecraft.sounds.SoundEvents;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class SproutRespawnScreen extends Screen {
+-    private static final Component TITLE = Component.literal("potato");
+-    private int transparency;
+-    private final int delay = 20;
+-    private int counter;
+-
+-    public SproutRespawnScreen() {
+-        super(TITLE);
+-    }
+-
+-    @Override
+-    protected void init() {
+-        if (this.minecraft.player != null) {
+-            this.minecraft.player.makeSound(SoundEvents.PLAYER_SPROUT_RESPAWN_1);
+-        }
+-    }
+-
+-    @Override
+-    public void tick() {
+-        ++this.counter;
+-        if (this.counter >= 20) {
+-            this.onClose();
+-        }
+-    }
+-
+-    @Override
+-    public void render(GuiGraphics p_341686_, int p_341980_, int p_340328_, float p_340445_) {
+-        super.render(p_341686_, p_341980_, p_340328_, p_340445_);
+-        p_341686_.fill(0, 0, this.width, this.height, -16777216);
+-        p_341686_.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+-    }
+-
+-    @Override
+-    public void renderBackground(GuiGraphics p_342338_, int p_342408_, int p_340879_, float p_342565_) {
+-        super.renderBackground(p_342338_, p_342408_, p_340879_, p_342565_);
+-    }
+-
+-    @Override
+-    public void onClose() {
+-        this.sproutRespawn();
+-    }
+-
+-    private void sproutRespawn() {
+-        this.minecraft.setScreen(null);
+-        if (this.minecraft.player != null) {
+-            this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.SPROUT_RESPAWN));
+-        }
+-    }
+-}

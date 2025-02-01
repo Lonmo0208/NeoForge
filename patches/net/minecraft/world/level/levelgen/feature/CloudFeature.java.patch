@@ -1,0 +1,45 @@
+--- a/net/minecraft/world/level/levelgen/feature/CloudFeature.java
++++ /dev/null
+@@ -1,42 +_,0 @@
+-package net.minecraft.world.level.levelgen.feature;
+-
+-import com.mojang.serialization.Codec;
+-import net.minecraft.core.BlockPos;
+-import net.minecraft.util.RandomSource;
+-import net.minecraft.world.level.WorldGenLevel;
+-import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
+-
+-public class CloudFeature extends Feature<BlockStateConfiguration> {
+-    public CloudFeature(Codec<BlockStateConfiguration> p_340472_) {
+-        super(p_340472_);
+-    }
+-
+-    @Override
+-    public boolean place(FeaturePlaceContext<BlockStateConfiguration> p_341719_) {
+-        BlockPos blockpos = p_341719_.origin();
+-        WorldGenLevel worldgenlevel = p_341719_.level();
+-        if (!worldgenlevel.isEmptyBlock(blockpos)) {
+-            return false;
+-        } else {
+-            RandomSource randomsource = p_341719_.random();
+-            BlockStateConfiguration blockstateconfiguration = p_341719_.config();
+-
+-            for(int i = 0; i < 3; ++i) {
+-                int j = randomsource.nextInt(2) + 1;
+-                int k = randomsource.nextInt(2) + 1;
+-                int l = randomsource.nextInt(2) + 1;
+-                float f = (float)(j + k + l) * 0.333F + 0.5F;
+-
+-                for(BlockPos blockpos1 : BlockPos.betweenClosed(blockpos.offset(-j, -k, -l), blockpos.offset(j, k, l))) {
+-                    if (blockpos1.distSqr(blockpos) <= (double)(f * f)) {
+-                        worldgenlevel.setBlock(blockpos1, blockstateconfiguration.state, 3);
+-                    }
+-                }
+-
+-                blockpos = blockpos.offset(-1 + randomsource.nextInt(2), -randomsource.nextInt(2), -1 + randomsource.nextInt(2));
+-            }
+-
+-            return true;
+-        }
+-    }
+-}

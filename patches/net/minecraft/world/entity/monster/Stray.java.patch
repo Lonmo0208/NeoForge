@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/entity/monster/Stray.java
++++ b/net/minecraft/world/entity/monster/Stray.java
+@@ -21,11 +_,6 @@
+         super(p_33836_, p_33837_);
+     }
+ 
+-    @Override
+-    public boolean hasPotatoVariant() {
+-        return true;
+-    }
+-
+     public static boolean checkStraySpawnRules(
+         EntityType<Stray> p_219121_, ServerLevelAccessor p_219122_, MobSpawnType p_219123_, BlockPos p_219124_, RandomSource p_219125_
+     ) {
+@@ -33,7 +_,7 @@
+ 
+         do {
+             blockpos = blockpos.above();
+-        } while(p_219122_.getBlockState(blockpos).is(Blocks.POWDER_SNOW));
++        } while (p_219122_.getBlockState(blockpos).is(Blocks.POWDER_SNOW));
+ 
+         return checkMonsterSpawnRules(p_219121_, p_219122_, p_219123_, p_219124_, p_219125_)
+             && (MobSpawnType.isSpawner(p_219123_) || p_219122_.canSeeSky(blockpos.below()));

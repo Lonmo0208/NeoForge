@@ -1,0 +1,42 @@
+--- a/net/minecraft/util/GsonHelper.java
++++ b/net/minecraft/util/GsonHelper.java
+@@ -71,11 +_,7 @@
+     }
+ 
+     public static boolean isValidNode(@Nullable JsonObject p_13901_, String p_13902_) {
+-        if (p_13901_ == null) {
+-            return false;
+-        } else {
+-            return p_13901_.get(p_13902_) != null;
+-        }
++        return p_13901_ == null ? false : p_13901_.get(p_13902_) != null;
+     }
+ 
+     public static JsonElement getNonNull(JsonObject p_289782_, String p_289789_) {
+@@ -399,7 +_,7 @@
+     public static <T> T getAsObject(
+         JsonObject p_13846_, String p_13847_, @Nullable T p_13848_, JsonDeserializationContext p_13849_, Class<? extends T> p_13850_
+     ) {
+-        return (T)(p_13846_.has(p_13847_) ? convertToObject(p_13846_.get(p_13847_), p_13847_, p_13849_, p_13850_) : p_13848_);
++        return p_13846_.has(p_13847_) ? convertToObject(p_13846_.get(p_13847_), p_13847_, p_13849_, p_13850_) : p_13848_;
+     }
+ 
+     public static String getType(@Nullable JsonElement p_13884_) {
+@@ -551,7 +_,7 @@
+         } else if (p_216209_.isJsonArray()) {
+             p_216208_.beginArray();
+ 
+-            for(JsonElement jsonelement : p_216209_.getAsJsonArray()) {
++            for (JsonElement jsonelement : p_216209_.getAsJsonArray()) {
+                 writeValue(p_216208_, jsonelement, p_216210_);
+             }
+ 
+@@ -563,7 +_,7 @@
+ 
+             p_216208_.beginObject();
+ 
+-            for(Entry<String, JsonElement> entry : sortByKeyIfNeeded(p_216209_.getAsJsonObject().entrySet(), p_216210_)) {
++            for (Entry<String, JsonElement> entry : sortByKeyIfNeeded(p_216209_.getAsJsonObject().entrySet(), p_216210_)) {
+                 p_216208_.name(entry.getKey());
+                 writeValue(p_216208_, entry.getValue(), p_216210_);
+             }

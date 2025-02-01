@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/ListPlayersCommand.java
++++ b/net/minecraft/server/commands/ListPlayersCommand.java
+@@ -28,7 +_,7 @@
+     private static int listPlayersWithUuids(CommandSourceStack p_137832_) {
+         return format(
+             p_137832_,
+-            p_339799_ -> Component.translatable("commands.list.nameAndId", p_339799_.getName(), Component.translationArg(p_339799_.getGameProfile().getId()))
++            p_337534_ -> Component.translatable("commands.list.nameAndId", p_337534_.getName(), Component.translationArg(p_337534_.getGameProfile().getId()))
+         );
+     }
+ 

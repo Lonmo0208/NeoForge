@@ -1,0 +1,13 @@
+--- a/net/minecraft/client/renderer/texture/MissingTextureAtlasSprite.java
++++ b/net/minecraft/client/renderer/texture/MissingTextureAtlasSprite.java
+@@ -29,8 +_,8 @@
+         int i = -16777216;
+         int j = -524040;
+ 
+-        for(int k = 0; k < p_249362_; ++k) {
+-            for(int l = 0; l < p_249811_; ++l) {
++        for (int k = 0; k < p_249362_; k++) {
++            for (int l = 0; l < p_249811_; l++) {
+                 if (k < p_249362_ / 2 ^ l < p_249811_ / 2) {
+                     nativeimage.setPixelRGBA(l, k, -524040);
+                 } else {

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/item/WrittenBookItem.java
++++ b/net/minecraft/world/item/WrittenBookItem.java
+@@ -33,7 +_,7 @@
+     }
+ 
+     @Override
+-    public void appendHoverText(ItemStack p_43457_, @Nullable Level p_43458_, List<Component> p_43459_, TooltipFlag p_43460_) {
++    public void appendHoverText(ItemStack p_43457_, Item.TooltipContext p_339643_, List<Component> p_43459_, TooltipFlag p_43460_) {
+         WrittenBookContent writtenbookcontent = p_43457_.get(DataComponents.WRITTEN_BOOK_CONTENT);
+         if (writtenbookcontent != null) {
+             if (!StringUtil.isBlank(writtenbookcontent.author())) {

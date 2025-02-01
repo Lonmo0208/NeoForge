@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/entity/layers/BeeStingerLayer.java
++++ b/net/minecraft/client/renderer/entity/layers/BeeStingerLayer.java
+@@ -48,7 +_,7 @@
+         p_116584_.translate(2.5F, 0.0F, 0.0F);
+         VertexConsumer vertexconsumer = p_116585_.getBuffer(RenderType.entityCutoutNoCull(BEE_STINGER_LOCATION));
+ 
+-        for(int i = 0; i < 4; ++i) {
++        for (int i = 0; i < 4; i++) {
+             p_116584_.mulPose(Axis.XP.rotationDegrees(90.0F));
+             PoseStack.Pose posestack$pose = p_116584_.last();
+             vertex(vertexconsumer, posestack$pose, -4.5F, -1, 0.0F, 0.0F, p_116586_);

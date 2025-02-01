@@ -1,0 +1,30 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsResetNormalWorldScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsResetNormalWorldScreen.java
+@@ -5,6 +_,7 @@
+ import java.util.HashSet;
+ import java.util.Set;
+ import java.util.function.Consumer;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.CycleButton;
+ import net.minecraft.client.gui.components.EditBox;
+@@ -64,7 +_,9 @@
+         LinearLayout linearlayout1 = this.layout.addToFooter(LinearLayout.horizontal().spacing(10));
+         linearlayout1.addChild(Button.builder(this.buttonTitle, p_293585_ -> this.callback.accept(this.createWorldGenerationInfo())).build());
+         linearlayout1.addChild(Button.builder(CommonComponents.GUI_BACK, p_89288_ -> this.onClose()).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_321344_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321344_);
++        });
+         this.repositionElements();
+     }
+ 
+@@ -82,7 +_,7 @@
+                     p_305631_ -> this.minecraft.setScreen(new ExperimentsScreen(this, packrepository, p_305632_ -> {
+                             this.experiments.clear();
+             
+-                            for(Pack pack : p_305632_.getSelectedPacks()) {
++                            for (Pack pack : p_305632_.getSelectedPacks()) {
+                                 if (pack.getPackSource() == PackSource.FEATURE) {
+                                     this.experiments.add(pack.getId());
+                                 }

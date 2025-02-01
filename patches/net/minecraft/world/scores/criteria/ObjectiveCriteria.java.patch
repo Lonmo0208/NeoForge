@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/scores/criteria/ObjectiveCriteria.java
++++ b/net/minecraft/world/scores/criteria/ObjectiveCriteria.java
+@@ -100,7 +_,7 @@
+                 ? Optional.empty()
+                 : BuiltInRegistries.STAT_TYPE
+                     .getOptional(ResourceLocation.of(p_83615_.substring(0, i), '.'))
+-                    .flatMap(p_83619_ -> getStat(p_83619_, ResourceLocation.of(p_83615_.substring(i + 1), '.')));
++                    .flatMap(p_83619_ -> getStat((StatType<?>)p_83619_, ResourceLocation.of(p_83615_.substring(i + 1), '.')));
+         }
+     }
+ 

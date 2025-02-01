@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/telemetry/TelemetryEventInstance.java
++++ b/net/minecraft/client/telemetry/TelemetryEventInstance.java
+@@ -12,7 +_,7 @@
+ 
+     public TelemetryEventInstance(TelemetryEventType type, TelemetryPropertyMap properties) {
+         properties.propertySet().forEach(p_261699_ -> {
+-            if (!type.contains(p_261699_)) {
++            if (!type.contains((TelemetryProperty<?>)p_261699_)) {
+                 throw new IllegalArgumentException("Property '" + p_261699_.id() + "' not expected for event: '" + type.id() + "'");
+             }
+         });

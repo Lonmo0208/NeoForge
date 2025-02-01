@@ -1,0 +1,24 @@
+--- a/net/minecraft/world/level/pathfinder/AmphibiousNodeEvaluator.java
++++ b/net/minecraft/world/level/pathfinder/AmphibiousNodeEvaluator.java
+@@ -72,10 +_,10 @@
+             p_164676_[i++] = node1;
+         }
+ 
+-        for(int k = 0; k < i; ++k) {
++        for (int k = 0; k < i; k++) {
+             Node node2 = p_164676_[k];
+             if (node2.type == PathType.WATER && this.prefersShallowSwimming && node2.y < this.mob.level().getSeaLevel() - 10) {
+-                ++node2.costMalus;
++                node2.costMalus++;
+             }
+         }
+ 
+@@ -97,7 +_,7 @@
+         if (pathtype == PathType.WATER) {
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-            for(Direction direction : Direction.values()) {
++            for (Direction direction : Direction.values()) {
+                 blockpos$mutableblockpos.set(p_164667_, p_164668_, p_164669_).move(direction);
+                 PathType pathtype1 = p_330489_.getPathTypeFromState(
+                     blockpos$mutableblockpos.getX(), blockpos$mutableblockpos.getY(), blockpos$mutableblockpos.getZ()

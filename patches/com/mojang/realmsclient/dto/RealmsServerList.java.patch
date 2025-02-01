@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/dto/RealmsServerList.java
++++ b/com/mojang/realmsclient/dto/RealmsServerList.java
+@@ -28,7 +_,7 @@
+                 JsonArray jsonarray = jsonobject.get("servers").getAsJsonArray();
+                 Iterator<JsonElement> iterator = jsonarray.iterator();
+ 
+-                while(iterator.hasNext()) {
++                while (iterator.hasNext()) {
+                     realmsserverlist.servers.add(RealmsServer.parse(iterator.next().getAsJsonObject()));
+                 }
+             }

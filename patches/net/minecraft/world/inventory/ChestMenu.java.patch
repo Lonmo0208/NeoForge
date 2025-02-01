@@ -1,0 +1,27 @@
+--- a/net/minecraft/world/inventory/ChestMenu.java
++++ b/net/minecraft/world/inventory/ChestMenu.java
+@@ -55,19 +_,19 @@
+         p_39232_.startOpen(p_39231_.player);
+         int i = (this.containerRows - 4) * 18;
+ 
+-        for(int j = 0; j < this.containerRows; ++j) {
+-            for(int k = 0; k < 9; ++k) {
++        for (int j = 0; j < this.containerRows; j++) {
++            for (int k = 0; k < 9; k++) {
+                 this.addSlot(new Slot(p_39232_, k + j * 9, 8 + k * 18, 18 + j * 18));
+             }
+         }
+ 
+-        for(int l = 0; l < 3; ++l) {
+-            for(int j1 = 0; j1 < 9; ++j1) {
++        for (int l = 0; l < 3; l++) {
++            for (int j1 = 0; j1 < 9; j1++) {
+                 this.addSlot(new Slot(p_39231_, j1 + l * 9 + 9, 8 + j1 * 18, 103 + l * 18 + i));
+             }
+         }
+ 
+-        for(int i1 = 0; i1 < 9; ++i1) {
++        for (int i1 = 0; i1 < 9; i1++) {
+             this.addSlot(new Slot(p_39231_, i1, 8 + i1 * 18, 161 + i));
+         }
+     }

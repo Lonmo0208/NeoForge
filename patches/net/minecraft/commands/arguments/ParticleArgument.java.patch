@@ -1,0 +1,11 @@
+--- a/net/minecraft/commands/arguments/ParticleArgument.java
++++ b/net/minecraft/commands/arguments/ParticleArgument.java
+@@ -51,7 +_,7 @@
+ 
+     public static ParticleOptions readParticle(StringReader p_249275_, HolderLookup.Provider p_324619_) throws CommandSyntaxException {
+         ParticleType<?> particletype = readParticleType(p_249275_, p_324619_.lookupOrThrow(Registries.PARTICLE_TYPE));
+-        return readParticle(p_249275_, particletype, p_324619_);
++        return readParticle(p_249275_, (ParticleType<ParticleOptions>)particletype, p_324619_);
+     }
+ 
+     private static ParticleType<?> readParticleType(StringReader p_249621_, HolderLookup<ParticleType<?>> p_248983_) throws CommandSyntaxException {

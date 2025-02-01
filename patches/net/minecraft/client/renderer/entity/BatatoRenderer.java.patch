@@ -1,0 +1,24 @@
+--- a/net/minecraft/client/renderer/entity/BatatoRenderer.java
++++ /dev/null
+@@ -1,21 +_,0 @@
+-package net.minecraft.client.renderer.entity;
+-
+-import net.minecraft.client.model.BatatoModel;
+-import net.minecraft.client.model.geom.ModelLayers;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.world.entity.ambient.Batato;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class BatatoRenderer extends MobRenderer<Batato, BatatoModel> {
+-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/batato.png");
+-
+-    public BatatoRenderer(EntityRendererProvider.Context p_342584_) {
+-        super(p_342584_, new BatatoModel(p_342584_.bakeLayer(ModelLayers.BATATO)), 0.25F);
+-    }
+-
+-    public ResourceLocation getTextureLocation(Batato p_340507_) {
+-        return TEXTURE_LOCATION;
+-    }
+-}

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/ItemInteractionResult.java
++++ b/net/minecraft/world/ItemInteractionResult.java
+@@ -17,7 +_,7 @@
+     }
+ 
+     public InteractionResult result() {
+-        return switch(this) {
++        return switch (this) {
+             case SUCCESS -> InteractionResult.SUCCESS;
+             case CONSUME -> InteractionResult.CONSUME;
+             case CONSUME_PARTIAL -> InteractionResult.CONSUME_PARTIAL;

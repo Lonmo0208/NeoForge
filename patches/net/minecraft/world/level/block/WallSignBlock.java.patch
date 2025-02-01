@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/WallSignBlock.java
++++ b/net/minecraft/world/level/block/WallSignBlock.java
+@@ -79,7 +_,7 @@
+         BlockPos blockpos = p_58071_.getClickedPos();
+         Direction[] adirection = p_58071_.getNearestLookingDirections();
+ 
+-        for(Direction direction : adirection) {
++        for (Direction direction : adirection) {
+             if (direction.getAxis().isHorizontal()) {
+                 Direction direction1 = direction.getOpposite();
+                 blockstate = blockstate.setValue(FACING, direction1);

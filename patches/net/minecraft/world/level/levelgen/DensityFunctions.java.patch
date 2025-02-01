@@ -1,0 +1,204 @@
+--- a/net/minecraft/world/level/levelgen/DensityFunctions.java
++++ b/net/minecraft/world/level/levelgen/DensityFunctions.java
+@@ -31,7 +_,7 @@
+ public final class DensityFunctions {
+     private static final Codec<DensityFunction> CODEC = BuiltInRegistries.DENSITY_FUNCTION_TYPE
+         .byNameCodec()
+-        .dispatch(p_224053_ -> p_224053_.codec().codec(), Function.identity());
++        .dispatch(p_338092_ -> p_338092_.codec().codec(), Function.identity());
+     protected static final double MAX_REASONABLE_NOISE_VALUE = 1000000.0;
+     static final Codec<Double> NOISE_VALUE_CODEC = Codec.doubleRange(-1000000.0, 1000000.0);
+     public static final Codec<DensityFunction> DIRECT_CODEC = Codec.either(NOISE_VALUE_CODEC, CODEC)
+@@ -42,13 +_,13 @@
+                     : Either.right(p_224051_)
+         );
+ 
+-    public static Codec<? extends DensityFunction> bootstrap(Registry<Codec<? extends DensityFunction>> p_208343_) {
++    public static MapCodec<? extends DensityFunction> bootstrap(Registry<MapCodec<? extends DensityFunction>> p_208343_) {
+         register(p_208343_, "blend_alpha", DensityFunctions.BlendAlpha.CODEC);
+         register(p_208343_, "blend_offset", DensityFunctions.BlendOffset.CODEC);
+         register(p_208343_, "beardifier", DensityFunctions.BeardifierMarker.CODEC);
+         register(p_208343_, "old_blended_noise", BlendedNoise.CODEC);
+ 
+-        for(DensityFunctions.Marker.Type densityfunctions$marker$type : DensityFunctions.Marker.Type.values()) {
++        for (DensityFunctions.Marker.Type densityfunctions$marker$type : DensityFunctions.Marker.Type.values()) {
+             register(p_208343_, densityfunctions$marker$type.getSerializedName(), densityfunctions$marker$type.codec);
+         }
+ 
+@@ -63,11 +_,11 @@
+         register(p_208343_, "blend_density", DensityFunctions.BlendDensity.CODEC);
+         register(p_208343_, "clamp", DensityFunctions.Clamp.CODEC);
+ 
+-        for(DensityFunctions.Mapped.Type densityfunctions$mapped$type : DensityFunctions.Mapped.Type.values()) {
++        for (DensityFunctions.Mapped.Type densityfunctions$mapped$type : DensityFunctions.Mapped.Type.values()) {
+             register(p_208343_, densityfunctions$mapped$type.getSerializedName(), densityfunctions$mapped$type.codec);
+         }
+ 
+-        for(DensityFunctions.TwoArgumentSimpleFunction.Type densityfunctions$twoargumentsimplefunction$type : DensityFunctions.TwoArgumentSimpleFunction.Type.values(
++        for (DensityFunctions.TwoArgumentSimpleFunction.Type densityfunctions$twoargumentsimplefunction$type : DensityFunctions.TwoArgumentSimpleFunction.Type.values(
+             
+         )) {
+             register(p_208343_, densityfunctions$twoargumentsimplefunction$type.getSerializedName(), densityfunctions$twoargumentsimplefunction$type.codec);
+@@ -78,8 +_,8 @@
+         return register(p_208343_, "y_clamped_gradient", DensityFunctions.YClampedGradient.CODEC);
+     }
+ 
+-    private static Codec<? extends DensityFunction> register(
+-        Registry<Codec<? extends DensityFunction>> p_224035_, String p_224036_, KeyDispatchDataCodec<? extends DensityFunction> p_224037_
++    private static MapCodec<? extends DensityFunction> register(
++        Registry<MapCodec<? extends DensityFunction>> p_224035_, String p_224036_, KeyDispatchDataCodec<? extends DensityFunction> p_224037_
+     ) {
+         return Registry.register(p_224035_, p_224036_, p_224037_.codec());
+     }
+@@ -268,46 +_,46 @@
+         public double compute(DensityFunction.FunctionContext p_208410_) {
+             double d0 = this.argument1.compute(p_208410_);
+ 
+-            return switch(this.type) {
++            return switch (this.type) {
+                 case ADD -> d0 + this.argument2.compute(p_208410_);
+-                case MAX -> d0 > this.argument2.maxValue() ? d0 : Math.max(d0, this.argument2.compute(p_208410_));
+-                case MIN -> d0 < this.argument2.minValue() ? d0 : Math.min(d0, this.argument2.compute(p_208410_));
+                 case MUL -> d0 == 0.0 ? 0.0 : d0 * this.argument2.compute(p_208410_);
++                case MIN -> d0 < this.argument2.minValue() ? d0 : Math.min(d0, this.argument2.compute(p_208410_));
++                case MAX -> d0 > this.argument2.maxValue() ? d0 : Math.max(d0, this.argument2.compute(p_208410_));
+             };
+         }
+ 
+         @Override
+         public void fillArray(double[] p_208414_, DensityFunction.ContextProvider p_208415_) {
+             this.argument1.fillArray(p_208414_, p_208415_);
+-            switch(this.type) {
++            switch (this.type) {
+                 case ADD:
+                     double[] adouble = new double[p_208414_.length];
+                     this.argument2.fillArray(adouble, p_208415_);
+ 
+-                    for(int k = 0; k < p_208414_.length; ++k) {
++                    for (int k = 0; k < p_208414_.length; k++) {
+                         p_208414_[k] += adouble[k];
+                     }
+                     break;
+-                case MAX:
+-                    double d3 = this.argument2.maxValue();
+-
+-                    for(int l = 0; l < p_208414_.length; ++l) {
+-                        double d4 = p_208414_[l];
+-                        p_208414_[l] = d4 > d3 ? d4 : Math.max(d4, this.argument2.compute(p_208415_.forIndex(l)));
+-                    }
+-                    break;
+-                case MIN:
+-                    double d2 = this.argument2.minValue();
+-
+-                    for(int j = 0; j < p_208414_.length; ++j) {
+-                        double d1 = p_208414_[j];
+-                        p_208414_[j] = d1 < d2 ? d1 : Math.min(d1, this.argument2.compute(p_208415_.forIndex(j)));
+-                    }
+-                    break;
+                 case MUL:
+-                    for(int i = 0; i < p_208414_.length; ++i) {
+-                        double d0 = p_208414_[i];
+-                        p_208414_[i] = d0 == 0.0 ? 0.0 : d0 * this.argument2.compute(p_208415_.forIndex(i));
++                    for (int j = 0; j < p_208414_.length; j++) {
++                        double d1 = p_208414_[j];
++                        p_208414_[j] = d1 == 0.0 ? 0.0 : d1 * this.argument2.compute(p_208415_.forIndex(j));
++                    }
++                    break;
++                case MIN:
++                    double d3 = this.argument2.minValue();
++
++                    for (int l = 0; l < p_208414_.length; l++) {
++                        double d4 = p_208414_[l];
++                        p_208414_[l] = d4 < d3 ? d4 : Math.min(d4, this.argument2.compute(p_208415_.forIndex(l)));
++                    }
++                    break;
++                case MAX:
++                    double d0 = this.argument2.maxValue();
++
++                    for (int i = 0; i < p_208414_.length; i++) {
++                        double d2 = p_208414_[i];
++                        p_208414_[i] = d2 > d0 ? d2 : Math.max(d2, this.argument2.compute(p_208415_.forIndex(i)));
+                     }
+             }
+         }
+@@ -526,8 +_,8 @@
+             float f = 100.0F - Mth.sqrt((float)(p_224064_ * p_224064_ + p_224065_ * p_224065_)) * 8.0F;
+             f = Mth.clamp(f, -100.0F, 80.0F);
+ 
+-            for(int i1 = -12; i1 <= 12; ++i1) {
+-                for(int j1 = -12; j1 <= 12; ++j1) {
++            for (int i1 = -12; i1 <= 12; i1++) {
++                for (int j1 = -12; j1 <= 12; j1++) {
+                     long k1 = (long)(i + i1);
+                     long l1 = (long)(j + j1);
+                     if (k1 * k1 + l1 * l1 > 4096L && p_224063_.getValue((double)k1, (double)l1) < -0.9F) {
+@@ -610,7 +_,7 @@
+         }
+ 
+         private static double transform(DensityFunctions.Mapped.Type p_208669_, double p_208670_) {
+-            return switch(p_208669_) {
++            return switch (p_208669_) {
+                 case ABS -> Math.abs(p_208670_);
+                 case SQUARE -> p_208670_ * p_208670_;
+                 case CUBE -> p_208670_ * p_208670_ * p_208670_;
+@@ -743,7 +_,7 @@
+ 
+         @Override
+         public double transform(double p_208759_) {
+-            return switch(this.specificType) {
++            return switch (this.specificType) {
+                 case MUL -> p_208759_ * this.argument;
+                 case ADD -> p_208759_ + this.argument;
+             };
+@@ -831,7 +_,7 @@
+         default void fillArray(double[] p_208819_, DensityFunction.ContextProvider p_208820_) {
+             this.input().fillArray(p_208819_, p_208820_);
+ 
+-            for(int i = 0; i < p_208819_.length; ++i) {
++            for (int i = 0; i < p_208819_.length; i++) {
+                 p_208819_[i] = this.transform(p_208819_[i]);
+             }
+         }
+@@ -863,7 +_,7 @@
+         public void fillArray(double[] p_208843_, DensityFunction.ContextProvider p_208844_) {
+             this.input.fillArray(p_208843_, p_208844_);
+ 
+-            for(int i = 0; i < p_208843_.length; ++i) {
++            for (int i = 0; i < p_208843_.length; i++) {
+                 double d0 = p_208843_[i];
+                 if (d0 >= this.minInclusive && d0 < this.maxExclusive) {
+                     p_208843_[i] = this.whenInRange.compute(p_208844_.forIndex(i));
+@@ -1149,7 +_,7 @@
+         default void fillArray(double[] p_209069_, DensityFunction.ContextProvider p_209070_) {
+             this.input().fillArray(p_209069_, p_209070_);
+ 
+-            for(int i = 0; i < p_209069_.length; ++i) {
++            for (int i = 0; i < p_209069_.length; i++) {
+                 p_209069_[i] = this.transform(p_209070_.forIndex(i), p_209069_[i]);
+             }
+         }
+@@ -1174,18 +_,18 @@
+                     LOGGER.warn("Creating a " + p_209074_ + " function between two non-overlapping inputs: " + p_209075_ + " and " + p_209076_);
+                 }
+             }
+-            double d5 = switch(p_209074_) {
++            double d5 = switch (p_209074_) {
+                 case ADD -> d0 + d1;
+-                case MAX -> Math.max(d0, d1);
+-                case MIN -> Math.min(d0, d1);
+                 case MUL -> d0 > 0.0 && d1 > 0.0 ? d0 * d1 : (d2 < 0.0 && d3 < 0.0 ? d2 * d3 : Math.min(d0 * d3, d2 * d1));
++                case MIN -> Math.min(d0, d1);
++                case MAX -> Math.max(d0, d1);
+             };
+ 
+-            double d4 = switch(p_209074_) {
++            double d4 = switch (p_209074_) {
+                 case ADD -> d2 + d3;
+-                case MAX -> Math.max(d2, d3);
+-                case MIN -> Math.min(d2, d3);
+                 case MUL -> d0 > 0.0 && d1 > 0.0 ? d2 * d3 : (d2 < 0.0 && d3 < 0.0 ? d0 * d1 : Math.max(d0 * d1, d2 * d3));
++                case MIN -> Math.min(d2, d3);
++                case MAX -> Math.max(d2, d3);
+             };
+             if (p_209074_ == DensityFunctions.TwoArgumentSimpleFunction.Type.MUL || p_209074_ == DensityFunctions.TwoArgumentSimpleFunction.Type.ADD) {
+                 if (p_209075_ instanceof DensityFunctions.Constant densityfunctions$constant1) {

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/multiplayer/KnownPacksManager.java
++++ b/net/minecraft/client/multiplayer/KnownPacksManager.java
+@@ -36,7 +_,7 @@
+         List<KnownPack> list = new ArrayList<>(p_326056_.size());
+         List<String> list1 = new ArrayList<>(p_326056_.size());
+ 
+-        for(KnownPack knownpack : p_326056_) {
++        for (KnownPack knownpack : p_326056_) {
+             String s = this.knownPackToId.get(knownpack);
+             if (s != null) {
+                 list1.add(s);

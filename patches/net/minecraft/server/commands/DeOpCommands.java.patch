@@ -1,0 +1,15 @@
+--- a/net/minecraft/server/commands/DeOpCommands.java
++++ b/net/minecraft/server/commands/DeOpCommands.java
+@@ -37,10 +_,10 @@
+         PlayerList playerlist = p_136898_.getServer().getPlayerList();
+         int i = 0;
+ 
+-        for(GameProfile gameprofile : p_136899_) {
++        for (GameProfile gameprofile : p_136899_) {
+             if (playerlist.isOp(gameprofile)) {
+                 playerlist.deop(gameprofile);
+-                ++i;
++                i++;
+                 p_136898_.sendSuccess(() -> Component.translatable("commands.deop.success", p_136899_.iterator().next().getName()), true);
+             }
+         }

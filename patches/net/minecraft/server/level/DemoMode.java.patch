@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/level/DemoMode.java
++++ b/net/minecraft/server/level/DemoMode.java
+@@ -26,7 +_,7 @@
+     @Override
+     public void tick() {
+         super.tick();
+-        ++this.gameModeTicks;
++        this.gameModeTicks++;
+         long i = this.level.getGameTime();
+         long j = i / 24000L + 1L;
+         if (!this.displayedIntro && this.gameModeTicks > 20) {
+@@ -36,7 +_,7 @@
+ 
+         this.demoHasEnded = i > 120500L;
+         if (this.demoHasEnded) {
+-            ++this.demoEndedReminder;
++            this.demoEndedReminder++;
+         }
+ 
+         if (i % 24000L == 500L) {

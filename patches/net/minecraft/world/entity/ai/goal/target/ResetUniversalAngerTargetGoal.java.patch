@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/entity/ai/goal/target/ResetUniversalAngerTargetGoal.java
++++ b/net/minecraft/world/entity/ai/goal/target/ResetUniversalAngerTargetGoal.java
+@@ -50,6 +_,6 @@
+     private List<? extends Mob> getNearbyMobsOfSameType() {
+         double d0 = this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
+         AABB aabb = AABB.unitCubeFromLowerCorner(this.mob.position()).inflate(d0, 10.0, d0);
+-        return this.mob.level().getEntitiesOfClass(this.mob.getClass(), aabb, EntitySelector.NO_SPECTATORS);
++        return this.mob.level().getEntitiesOfClass((Class<? extends Mob>)this.mob.getClass(), aabb, EntitySelector.NO_SPECTATORS);
+     }
+ }

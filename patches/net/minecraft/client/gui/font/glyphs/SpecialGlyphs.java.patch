@@ -1,0 +1,13 @@
+--- a/net/minecraft/client/gui/font/glyphs/SpecialGlyphs.java
++++ b/net/minecraft/client/gui/font/glyphs/SpecialGlyphs.java
+@@ -25,8 +_,8 @@
+     private static NativeImage generate(int p_232609_, int p_232610_, SpecialGlyphs.PixelProvider p_232611_) {
+         NativeImage nativeimage = new NativeImage(NativeImage.Format.RGBA, p_232609_, p_232610_, false);
+ 
+-        for(int i = 0; i < p_232610_; ++i) {
+-            for(int j = 0; j < p_232609_; ++j) {
++        for (int i = 0; i < p_232610_; i++) {
++            for (int j = 0; j < p_232609_; j++) {
+                 nativeimage.setPixelRGBA(j, i, p_232611_.getColor(j, i));
+             }
+         }

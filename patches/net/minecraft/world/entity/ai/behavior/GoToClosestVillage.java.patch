@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/behavior/GoToClosestVillage.java
++++ b/net/minecraft/world/entity/ai/behavior/GoToClosestVillage.java
+@@ -26,7 +_,7 @@
+                                     int i = poimanager.sectionsToVillage(SectionPos.of(p_274971_.blockPosition()));
+                                     Vec3 vec3 = null;
+             
+-                                    for(int j = 0; j < 5; ++j) {
++                                    for (int j = 0; j < 5; j++) {
+                                         Vec3 vec31 = LandRandomPos.getPos(
+                                             p_274971_, 15, 7, p_147554_ -> (double)(-poimanager.sectionsToVillage(SectionPos.of(p_147554_)))
+                                         );

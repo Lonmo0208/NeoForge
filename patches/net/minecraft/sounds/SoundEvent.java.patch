@@ -1,0 +1,17 @@
+--- a/net/minecraft/sounds/SoundEvent.java
++++ b/net/minecraft/sounds/SoundEvent.java
+@@ -15,11 +_,11 @@
+ 
+ public class SoundEvent {
+     public static final Codec<SoundEvent> DIRECT_CODEC = RecordCodecBuilder.create(
+-        p_263380_ -> p_263380_.group(
++        p_337569_ -> p_337569_.group(
+                     ResourceLocation.CODEC.fieldOf("sound_id").forGetter(SoundEvent::getLocation),
+-                    Codec.FLOAT.optionalFieldOf("range").forGetter(SoundEvent::fixedRange)
++                    Codec.FLOAT.lenientOptionalFieldOf("range").forGetter(SoundEvent::fixedRange)
+                 )
+-                .apply(p_263380_, SoundEvent::create)
++                .apply(p_337569_, SoundEvent::create)
+     );
+     public static final Codec<Holder<SoundEvent>> CODEC = RegistryFileCodec.create(Registries.SOUND_EVENT, DIRECT_CODEC);
+     public static final StreamCodec<ByteBuf, SoundEvent> DIRECT_STREAM_CODEC = StreamCodec.composite(

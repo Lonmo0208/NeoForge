@@ -1,0 +1,59 @@
+--- a/net/minecraft/world/entity/ai/navigation/GroundPathNavigation.java
++++ b/net/minecraft/world/entity/ai/navigation/GroundPathNavigation.java
+@@ -51,7 +_,7 @@
+             if (levelchunk.getBlockState(p_26475_).isAir()) {
+                 BlockPos blockpos = p_26475_.below();
+ 
+-                while(blockpos.getY() > this.level.getMinBuildHeight() && levelchunk.getBlockState(blockpos).isAir()) {
++                while (blockpos.getY() > this.level.getMinBuildHeight() && levelchunk.getBlockState(blockpos).isAir()) {
+                     blockpos = blockpos.below();
+                 }
+ 
+@@ -59,7 +_,7 @@
+                     return super.createPath(blockpos.above(), p_26476_);
+                 }
+ 
+-                while(blockpos.getY() < this.level.getMaxBuildHeight() && levelchunk.getBlockState(blockpos).isAir()) {
++                while (blockpos.getY() < this.level.getMaxBuildHeight() && levelchunk.getBlockState(blockpos).isAir()) {
+                     blockpos = blockpos.above();
+                 }
+ 
+@@ -71,7 +_,7 @@
+             } else {
+                 BlockPos blockpos1 = p_26475_.above();
+ 
+-                while(blockpos1.getY() < this.level.getMaxBuildHeight() && levelchunk.getBlockState(blockpos1).isSolid()) {
++                while (blockpos1.getY() < this.level.getMaxBuildHeight() && levelchunk.getBlockState(blockpos1).isSolid()) {
+                     blockpos1 = blockpos1.above();
+                 }
+ 
+@@ -91,7 +_,7 @@
+             BlockState blockstate = this.level.getBlockState(BlockPos.containing(this.mob.getX(), (double)i, this.mob.getZ()));
+             int j = 0;
+ 
+-            while(blockstate.is(Blocks.WATER)) {
++            while (blockstate.is(Blocks.WATER)) {
+                 blockstate = this.level.getBlockState(BlockPos.containing(this.mob.getX(), (double)(++i), this.mob.getZ()));
+                 if (++j > 16) {
+                     return this.mob.getBlockY();
+@@ -112,7 +_,7 @@
+                 return;
+             }
+ 
+-            for(int i = 0; i < this.path.getNodeCount(); ++i) {
++            for (int i = 0; i < this.path.getNodeCount(); i++) {
+                 Node node = this.path.getNode(i);
+                 if (this.level.canSeeSky(new BlockPos(node.x, node.y, node.z))) {
+                     this.path.truncateNodes(i);
+@@ -125,10 +_,8 @@
+     protected boolean hasValidPathType(PathType p_326937_) {
+         if (p_326937_ == PathType.WATER) {
+             return false;
+-        } else if (p_326937_ == PathType.LAVA) {
+-            return false;
+         } else {
+-            return p_326937_ != PathType.OPEN;
++            return p_326937_ == PathType.LAVA ? false : p_326937_ != PathType.OPEN;
+         }
+     }
+ 

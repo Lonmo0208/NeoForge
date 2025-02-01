@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
++++ b/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
+@@ -26,9 +_,9 @@
+         List<GlobalPos> list = Lists.newArrayList();
+         int i = 4;
+ 
+-        for(int j = -4; j <= 4; ++j) {
+-            for(int k = -2; k <= 2; ++k) {
+-                for(int l = -4; l <= 4; ++l) {
++        for (int j = -4; j <= 4; j++) {
++            for (int k = -2; k <= 2; k++) {
++                for (int l = -4; l <= 4; l++) {
+                     BlockPos blockpos1 = blockpos.offset(j, k, l);
+                     if (p_26755_.getVillagerData().getProfession().secondaryPoi().contains(p_26754_.getBlockState(blockpos1).getBlock())) {
+                         list.add(GlobalPos.of(resourcekey, blockpos1));

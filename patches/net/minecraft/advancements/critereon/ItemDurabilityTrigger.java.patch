@@ -1,0 +1,45 @@
+--- a/net/minecraft/advancements/critereon/ItemDurabilityTrigger.java
++++ b/net/minecraft/advancements/critereon/ItemDurabilityTrigger.java
+@@ -7,7 +_,6 @@
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.advancements.Criterion;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ 
+ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurabilityTrigger.TriggerInstance> {
+@@ -24,15 +_,15 @@
+         Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, MinMaxBounds.Ints durability, MinMaxBounds.Ints delta
+     ) implements SimpleCriterionTrigger.SimpleInstance {
+         public static final Codec<ItemDurabilityTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_311425_ -> p_311425_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(ItemDurabilityTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(ItemDurabilityTrigger.TriggerInstance::item),
+-                        ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "durability", MinMaxBounds.Ints.ANY)
++            p_337370_ -> p_337370_.group(
++                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(ItemDurabilityTrigger.TriggerInstance::player),
++                        ItemPredicate.CODEC.optionalFieldOf("item").forGetter(ItemDurabilityTrigger.TriggerInstance::item),
++                        MinMaxBounds.Ints.CODEC
++                            .optionalFieldOf("durability", MinMaxBounds.Ints.ANY)
+                             .forGetter(ItemDurabilityTrigger.TriggerInstance::durability),
+-                        ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "delta", MinMaxBounds.Ints.ANY)
+-                            .forGetter(ItemDurabilityTrigger.TriggerInstance::delta)
++                        MinMaxBounds.Ints.CODEC.optionalFieldOf("delta", MinMaxBounds.Ints.ANY).forGetter(ItemDurabilityTrigger.TriggerInstance::delta)
+                     )
+-                    .apply(p_311425_, ItemDurabilityTrigger.TriggerInstance::new)
++                    .apply(p_337370_, ItemDurabilityTrigger.TriggerInstance::new)
+         );
+ 
+         public static Criterion<ItemDurabilityTrigger.TriggerInstance> changedDurability(Optional<ItemPredicate> p_299020_, MinMaxBounds.Ints p_151288_) {
+@@ -49,10 +_,8 @@
+         public boolean matches(ItemStack p_43699_, int p_43700_) {
+             if (this.item.isPresent() && !this.item.get().matches(p_43699_)) {
+                 return false;
+-            } else if (!this.durability.matches(p_43699_.getMaxDamage() - p_43700_)) {
+-                return false;
+             } else {
+-                return this.delta.matches(p_43699_.getDamageValue() - p_43700_);
++                return !this.durability.matches(p_43699_.getMaxDamage() - p_43700_) ? false : this.delta.matches(p_43699_.getDamageValue() - p_43700_);
+             }
+         }
+     }

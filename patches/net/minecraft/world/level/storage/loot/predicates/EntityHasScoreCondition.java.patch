@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/level/storage/loot/predicates/EntityHasScoreCondition.java
++++ b/net/minecraft/world/level/storage/loot/predicates/EntityHasScoreCondition.java
+@@ -3,6 +_,7 @@
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.ImmutableSet;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Map;
+@@ -18,7 +_,7 @@
+ import net.minecraft.world.scores.Scoreboard;
+ 
+ public record EntityHasScoreCondition(Map<String, IntRange> scores, LootContext.EntityTarget entityTarget) implements LootItemCondition {
+-    public static final Codec<EntityHasScoreCondition> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<EntityHasScoreCondition> CODEC = RecordCodecBuilder.mapCodec(
+         p_298176_ -> p_298176_.group(
+                     Codec.unboundedMap(Codec.STRING, IntRange.CODEC).fieldOf("scores").forGetter(EntityHasScoreCondition::scores),
+                     LootContext.EntityTarget.CODEC.fieldOf("entity").forGetter(EntityHasScoreCondition::entityTarget)
+@@ -46,7 +_,7 @@
+         } else {
+             Scoreboard scoreboard = p_81631_.getLevel().getScoreboard();
+ 
+-            for(Entry<String, IntRange> entry : this.scores.entrySet()) {
++            for (Entry<String, IntRange> entry : this.scores.entrySet()) {
+                 if (!this.hasScore(p_81631_, entity, scoreboard, entry.getKey(), entry.getValue())) {
+                     return false;
+                 }

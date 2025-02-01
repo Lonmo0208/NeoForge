@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/resources/language/FormattedBidiReorder.java
++++ b/net/minecraft/client/resources/language/FormattedBidiReorder.java
+@@ -21,7 +_,7 @@
+         List<FormattedCharSequence> list = Lists.newArrayList();
+         int i = bidi.countRuns();
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             BidiRun bidirun = bidi.getVisualRun(j);
+             list.addAll(substringsource.substring(bidirun.getStart(), bidirun.getLength(), bidirun.isOddRun()));
+         }

@@ -1,0 +1,11 @@
+--- a/net/minecraft/core/HolderGetter.java
++++ b/net/minecraft/core/HolderGetter.java
+@@ -21,7 +_,7 @@
+         <T> Optional<HolderGetter<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_256648_);
+ 
+         default <T> HolderGetter<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> p_255881_) {
+-            return this.<T>lookup(p_255881_).orElseThrow(() -> new IllegalStateException("Registry " + p_255881_.location() + " not found"));
++            return this.lookup(p_255881_).orElseThrow(() -> new IllegalStateException("Registry " + p_255881_.location() + " not found"));
+         }
+ 
+         default <T> Optional<Holder.Reference<T>> get(ResourceKey<? extends Registry<? extends T>> p_336145_, ResourceKey<T> p_335555_) {

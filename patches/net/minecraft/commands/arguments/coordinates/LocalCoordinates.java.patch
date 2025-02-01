@@ -1,0 +1,17 @@
+--- a/net/minecraft/commands/arguments/coordinates/LocalCoordinates.java
++++ b/net/minecraft/commands/arguments/coordinates/LocalCoordinates.java
+@@ -95,11 +_,10 @@
+     public boolean equals(Object p_119918_) {
+         if (this == p_119918_) {
+             return true;
+-        } else if (!(p_119918_ instanceof LocalCoordinates)) {
+-            return false;
+         } else {
+-            LocalCoordinates localcoordinates = (LocalCoordinates)p_119918_;
+-            return this.left == localcoordinates.left && this.up == localcoordinates.up && this.forwards == localcoordinates.forwards;
++            return !(p_119918_ instanceof LocalCoordinates localcoordinates)
++                ? false
++                : this.left == localcoordinates.left && this.up == localcoordinates.up && this.forwards == localcoordinates.forwards;
+         }
+     }
+ 

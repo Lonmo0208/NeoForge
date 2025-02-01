@@ -1,0 +1,11 @@
+--- a/net/minecraft/data/models/model/ModelTemplate.java
++++ b/net/minecraft/data/models/model/ModelTemplate.java
+@@ -36,7 +_,7 @@
+     public ResourceLocation createWithSuffix(
+         Block p_125597_, String p_125598_, TextureMapping p_125599_, BiConsumer<ResourceLocation, Supplier<JsonElement>> p_125600_
+     ) {
+-        return this.create(ModelLocationUtils.getModelLocation(p_125597_, p_125598_ + (String)this.suffix.orElse("")), p_125599_, p_125600_);
++        return this.create(ModelLocationUtils.getModelLocation(p_125597_, p_125598_ + this.suffix.orElse("")), p_125599_, p_125600_);
+     }
+ 
+     public ResourceLocation createWithOverride(

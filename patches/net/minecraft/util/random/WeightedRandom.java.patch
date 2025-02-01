@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/random/WeightedRandom.java
++++ b/net/minecraft/util/random/WeightedRandom.java
+@@ -12,7 +_,7 @@
+     public static int getTotalWeight(List<? extends WeightedEntry> p_146313_) {
+         long i = 0L;
+ 
+-        for(WeightedEntry weightedentry : p_146313_) {
++        for (WeightedEntry weightedentry : p_146313_) {
+             i += (long)weightedentry.getWeight().asInt();
+         }
+ 
+@@ -35,7 +_,7 @@
+     }
+ 
+     public static <T extends WeightedEntry> Optional<T> getWeightedItem(List<T> p_146315_, int p_146316_) {
+-        for(T t : p_146315_) {
++        for (T t : p_146315_) {
+             p_146316_ -= t.getWeight().asInt();
+             if (p_146316_ < 0) {
+                 return Optional.of(t);

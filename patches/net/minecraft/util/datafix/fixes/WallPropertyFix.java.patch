@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/datafix/fixes/WallPropertyFix.java
++++ b/net/minecraft/util/datafix/fixes/WallPropertyFix.java
+@@ -47,7 +_,7 @@
+ 
+     private static <T> Dynamic<T> fixWallProperty(Dynamic<T> p_17161_, String p_17162_) {
+         return p_17161_.update(
+-            p_17162_, p_17168_ -> DataFixUtils.orElse(p_17168_.asString().result().map(WallPropertyFix::mapProperty).map(p_17168_::createString), p_17168_)
++            p_17162_, p_337669_ -> DataFixUtils.orElse(p_337669_.asString().result().map(WallPropertyFix::mapProperty).map(p_337669_::createString), p_337669_)
+         );
+     }
+ 

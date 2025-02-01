@@ -1,0 +1,103 @@
+--- a/net/minecraft/advancements/critereon/MinMaxBounds.java
++++ b/net/minecraft/advancements/critereon/MinMaxBounds.java
+@@ -12,7 +_,6 @@
+ import java.util.function.Function;
+ import java.util.function.Supplier;
+ import net.minecraft.network.chat.Component;
+-import net.minecraft.util.ExtraCodecs;
+ 
+ public interface MinMaxBounds<T extends Number> {
+     SimpleCommandExceptionType ERROR_EMPTY = new SimpleCommandExceptionType(Component.translatable("argument.range.empty"));
+@@ -34,21 +_,17 @@
+ 
+     static <T extends Number, R extends MinMaxBounds<T>> Codec<R> createCodec(Codec<T> p_298521_, MinMaxBounds.BoundsFactory<T, R> p_298688_) {
+         Codec<R> codec = RecordCodecBuilder.create(
+-            p_298327_ -> p_298327_.group(
+-                        ExtraCodecs.strictOptionalField(p_298521_, "min").forGetter(MinMaxBounds::min),
+-                        ExtraCodecs.strictOptionalField(p_298521_, "max").forGetter(MinMaxBounds::max)
++            p_337383_ -> p_337383_.group(
++                        p_298521_.optionalFieldOf("min").forGetter(MinMaxBounds::min), p_298521_.optionalFieldOf("max").forGetter(MinMaxBounds::max)
+                     )
+-                    .apply(p_298327_, p_298688_::create)
++                    .apply(p_337383_, p_298688_::create)
+         );
+         return Codec.either(codec, p_298521_)
+             .xmap(
+-                p_298558_ -> p_298558_.map(
+-                        (Function<? super R, ? extends R>)(p_299210_ -> p_299210_),
+-                        p_298935_ -> p_298688_.create(Optional.of(p_298935_), Optional.of(p_298935_))
+-                    ),
++                p_298558_ -> p_298558_.map(p_299210_ -> (R)p_299210_, p_298935_ -> p_298688_.create(Optional.of((T)p_298935_), Optional.of((T)p_298935_))),
+                 p_298447_ -> {
+                     Optional<T> optional = p_298447_.unwrapPoint();
+-                    return optional.isPresent() ? Either.right(optional.get()) : Either.left(p_298447_);
++                    return optional.isPresent() ? Either.right(optional.get()) : Either.left((R)p_298447_);
+                 }
+             );
+     }
+@@ -96,7 +_,7 @@
+     ) throws CommandSyntaxException {
+         int i = p_55320_.getCursor();
+ 
+-        while(p_55320_.canRead() && isAllowedInputChat(p_55320_)) {
++        while (p_55320_.canRead() && isAllowedInputChat(p_55320_)) {
+             p_55320_.skip();
+         }
+ 
+@@ -115,11 +_,7 @@
+     private static boolean isAllowedInputChat(StringReader p_55312_) {
+         char c0 = p_55312_.peek();
+         if ((c0 < '0' || c0 > '9') && c0 != '-') {
+-            if (c0 != '.') {
+-                return false;
+-            } else {
+-                return !p_55312_.canRead(2) || p_55312_.peek(1) != '.';
+-            }
++            return c0 != '.' ? false : !p_55312_.canRead(2) || p_55312_.peek(1) != '.';
+         } else {
+             return true;
+         }
+@@ -172,19 +_,11 @@
+         }
+ 
+         public boolean matches(double p_154811_) {
+-            if (this.min.isPresent() && this.min.get() > p_154811_) {
+-                return false;
+-            } else {
+-                return this.max.isEmpty() || !(this.max.get() < p_154811_);
+-            }
++            return this.min.isPresent() && this.min.get() > p_154811_ ? false : this.max.isEmpty() || !(this.max.get() < p_154811_);
+         }
+ 
+         public boolean matchesSqr(double p_154813_) {
+-            if (this.minSq.isPresent() && this.minSq.get() > p_154813_) {
+-                return false;
+-            } else {
+-                return this.maxSq.isEmpty() || !(this.maxSq.get() < p_154813_);
+-            }
++            return this.minSq.isPresent() && this.minSq.get() > p_154813_ ? false : this.maxSq.isEmpty() || !(this.maxSq.get() < p_154813_);
+         }
+ 
+         public static MinMaxBounds.Doubles fromReader(StringReader p_154794_) throws CommandSyntaxException {
+@@ -235,19 +_,11 @@
+         }
+ 
+         public boolean matches(int p_55391_) {
+-            if (this.min.isPresent() && this.min.get() > p_55391_) {
+-                return false;
+-            } else {
+-                return this.max.isEmpty() || this.max.get() >= p_55391_;
+-            }
++            return this.min.isPresent() && this.min.get() > p_55391_ ? false : this.max.isEmpty() || this.max.get() >= p_55391_;
+         }
+ 
+         public boolean matchesSqr(long p_154818_) {
+-            if (this.minSq.isPresent() && this.minSq.get() > p_154818_) {
+-                return false;
+-            } else {
+-                return this.maxSq.isEmpty() || this.maxSq.get() >= p_154818_;
+-            }
++            return this.minSq.isPresent() && this.minSq.get() > p_154818_ ? false : this.maxSq.isEmpty() || this.maxSq.get() >= p_154818_;
+         }
+ 
+         public static MinMaxBounds.Ints fromReader(StringReader p_55376_) throws CommandSyntaxException {

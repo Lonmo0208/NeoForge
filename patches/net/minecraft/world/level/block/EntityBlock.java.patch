@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/level/block/EntityBlock.java
++++ b/net/minecraft/world/level/block/EntityBlock.java
+@@ -21,6 +_,6 @@
+ 
+     @Nullable
+     default <T extends BlockEntity> GameEventListener getListener(ServerLevel p_221121_, T p_221122_) {
+-        return p_221122_ instanceof GameEventListener.Provider provider ? provider.getListener() : null;
++        return p_221122_ instanceof GameEventListener.Provider<?> provider ? provider.getListener() : null;
+     }
+ }

@@ -1,0 +1,60 @@
+--- a/net/minecraft/world/level/block/SuspiciousEffectHolder.java
++++ b/net/minecraft/world/level/block/SuspiciousEffectHolder.java
+@@ -4,31 +_,13 @@
+ import java.util.Objects;
+ import java.util.stream.Collectors;
+ import javax.annotation.Nullable;
+-import net.minecraft.Util;
+-import net.minecraft.core.Holder;
+ import net.minecraft.core.registries.BuiltInRegistries;
+-import net.minecraft.util.RandomSource;
+-import net.minecraft.world.effect.MobEffect;
+-import net.minecraft.world.effect.MobEffects;
+ import net.minecraft.world.item.BlockItem;
+ import net.minecraft.world.item.Item;
+-import net.minecraft.world.item.Items;
+ import net.minecraft.world.item.component.SuspiciousStewEffects;
+ import net.minecraft.world.level.ItemLike;
+ 
+ public interface SuspiciousEffectHolder {
+-    RandomSource random = RandomSource.create();
+-    List<Holder<MobEffect>> POTATO_EFFECTS = List.of(
+-        MobEffects.DIG_SLOWDOWN,
+-        MobEffects.DIG_SPEED,
+-        MobEffects.POTATO_OIL,
+-        MobEffects.LUCK,
+-        MobEffects.UNLUCK,
+-        MobEffects.SLOW_FALLING,
+-        MobEffects.HERO_OF_THE_VILLAGE,
+-        MobEffects.GLOWING
+-    );
+-
+     SuspiciousStewEffects getSuspiciousEffects();
+ 
+     static List<SuspiciousEffectHolder> getAllEffectHolders() {
+@@ -37,21 +_,14 @@
+ 
+     @Nullable
+     static SuspiciousEffectHolder tryGet(ItemLike p_259322_) {
+-        Item item1 = p_259322_.asItem();
+-        if (item1 instanceof BlockItem blockitem) {
++        if (p_259322_.asItem() instanceof BlockItem blockitem) {
+             Block block = blockitem.getBlock();
+-            if (block instanceof SuspiciousEffectHolder suspiciouseffectholder1) {
+-                return suspiciouseffectholder1;
++            if (block instanceof SuspiciousEffectHolder) {
++                return (SuspiciousEffectHolder)block;
+             }
+         }
+ 
+         Item $$2 = p_259322_.asItem();
+-        if ($$2 instanceof SuspiciousEffectHolder suspiciouseffectholder) {
+-            return suspiciouseffectholder;
+-        } else {
+-            return p_259322_.asItem() == Items.POISONOUS_POTATO
+-                ? () -> new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(Util.getRandom(POTATO_EFFECTS, random), random.nextInt(60))))
+-                : null;
+-        }
++        return $$2 instanceof SuspiciousEffectHolder ? (SuspiciousEffectHolder)$$2 : null;
+     }
+ }

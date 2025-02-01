@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/WitherRoseBlock.java
++++ b/net/minecraft/world/level/block/WitherRoseBlock.java
+@@ -55,7 +_,7 @@
+         double d0 = (double)p_222689_.getX() + vec3.x;
+         double d1 = (double)p_222689_.getZ() + vec3.z;
+ 
+-        for(int i = 0; i < 3; ++i) {
++        for (int i = 0; i < 3; i++) {
+             if (p_222690_.nextBoolean()) {
+                 p_222688_.addParticle(
+                     ParticleTypes.SMOKE,

@@ -1,0 +1,15 @@
+--- a/net/minecraft/util/datafix/fixes/CriteriaRenameFix.java
++++ b/net/minecraft/util/datafix/fixes/CriteriaRenameFix.java
+@@ -36,9 +_,9 @@
+                     "criteria",
+                     p_216601_ -> p_216601_.updateMapValues(
+                             p_216592_ -> p_216592_.mapFirst(
+-                                    p_216603_ -> DataFixUtils.orElse(
+-                                            p_216603_.asString().map(p_216597_ -> p_216603_.createString(this.conversions.apply(p_216597_))).result(),
+-                                            p_216603_
++                                    p_337615_ -> DataFixUtils.orElse(
++                                            p_337615_.asString().map(p_216597_ -> p_337615_.createString(this.conversions.apply(p_216597_))).result(),
++                                            p_337615_
+                                         )
+                                 )
+                         )

@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/profiling/ActiveProfiler.java
++++ b/net/minecraft/util/profiling/ActiveProfiler.java
+@@ -114,7 +_,7 @@
+             long k = i - j;
+             ActiveProfiler.PathEntry activeprofiler$pathentry = this.getCurrentEntry();
+             activeprofiler$pathentry.accumulatedDuration += k;
+-            ++activeprofiler$pathentry.count;
++            activeprofiler$pathentry.count++;
+             activeprofiler$pathentry.maxDuration = Math.max(activeprofiler$pathentry.maxDuration, k);
+             activeprofiler$pathentry.minDuration = Math.min(activeprofiler$pathentry.minDuration, k);
+             if (this.warn && k > WARNING_TIME_NANOS) {

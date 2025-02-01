@@ -1,0 +1,32 @@
+--- a/net/minecraft/world/level/block/LeverBlock.java
++++ b/net/minecraft/world/level/block/LeverBlock.java
+@@ -55,9 +_,9 @@
+ 
+     @Override
+     protected VoxelShape getShape(BlockState p_54665_, BlockGetter p_54666_, BlockPos p_54667_, CollisionContext p_54668_) {
+-        switch((AttachFace)p_54665_.getValue(FACE)) {
++        switch ((AttachFace)p_54665_.getValue(FACE)) {
+             case FLOOR:
+-                switch(p_54665_.getValue(FACING).getAxis()) {
++                switch (p_54665_.getValue(FACING).getAxis()) {
+                     case X:
+                         return UP_AABB_X;
+                     case Z:
+@@ -65,7 +_,7 @@
+                         return UP_AABB_Z;
+                 }
+             case WALL:
+-                switch((Direction)p_54665_.getValue(FACING)) {
++                switch ((Direction)p_54665_.getValue(FACING)) {
+                     case EAST:
+                         return EAST_AABB;
+                     case WEST:
+@@ -78,7 +_,7 @@
+                 }
+             case CEILING:
+             default:
+-                switch(p_54665_.getValue(FACING).getAxis()) {
++                switch (p_54665_.getValue(FACING).getAxis()) {
+                     case X:
+                         return DOWN_AABB_X;
+                     case Z:

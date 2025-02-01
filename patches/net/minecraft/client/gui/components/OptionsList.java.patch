@@ -1,0 +1,48 @@
+--- a/net/minecraft/client/gui/components/OptionsList.java
++++ b/net/minecraft/client/gui/components/OptionsList.java
+@@ -34,14 +_,14 @@
+     }
+ 
+     public void addSmall(OptionInstance<?>... p_232534_) {
+-        for(int i = 0; i < p_232534_.length; i += 2) {
++        for (int i = 0; i < p_232534_.length; i += 2) {
+             OptionInstance<?> optioninstance = i < p_232534_.length - 1 ? p_232534_[i + 1] : null;
+             this.addEntry(OptionsList.OptionEntry.small(this.minecraft.options, p_232534_[i], optioninstance, this.screen));
+         }
+     }
+ 
+     public void addSmall(List<AbstractWidget> p_333735_) {
+-        for(int i = 0; i < p_333735_.size(); i += 2) {
++        for (int i = 0; i < p_333735_.size(); i += 2) {
+             this.addSmall(p_333735_.get(i), i < p_333735_.size() - 1 ? p_333735_.get(i + 1) : null);
+         }
+     }
+@@ -57,7 +_,7 @@
+ 
+     @Nullable
+     public AbstractWidget findOption(OptionInstance<?> p_232536_) {
+-        for(OptionsList.Entry optionslist$entry : this.children()) {
++        for (OptionsList.Entry optionslist$entry : this.children()) {
+             if (optionslist$entry instanceof OptionsList.OptionEntry optionslist$optionentry) {
+                 AbstractWidget abstractwidget = optionslist$optionentry.options.get(p_232536_);
+                 if (abstractwidget != null) {
+@@ -70,8 +_,8 @@
+     }
+ 
+     public Optional<GuiEventListener> getMouseOver(double p_94481_, double p_94482_) {
+-        for(OptionsList.Entry optionslist$entry : this.children()) {
+-            for(GuiEventListener guieventlistener : optionslist$entry.children()) {
++        for (OptionsList.Entry optionslist$entry : this.children()) {
++            for (GuiEventListener guieventlistener : optionslist$entry.children()) {
+                 if (guieventlistener.isMouseOver(p_94481_, p_94482_)) {
+                     return Optional.of(guieventlistener);
+                 }
+@@ -118,7 +_,7 @@
+             int i = 0;
+             int j = this.screen.width / 2 - 155;
+ 
+-            for(AbstractWidget abstractwidget : this.children) {
++            for (AbstractWidget abstractwidget : this.children) {
+                 abstractwidget.setPosition(j + i, p_94498_);
+                 abstractwidget.render(p_281311_, p_94502_, p_94503_, p_94505_);
+                 i += 160;

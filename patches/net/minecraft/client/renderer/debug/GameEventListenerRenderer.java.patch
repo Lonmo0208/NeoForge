@@ -1,0 +1,38 @@
+--- a/net/minecraft/client/renderer/debug/GameEventListenerRenderer.java
++++ b/net/minecraft/client/renderer/debug/GameEventListenerRenderer.java
+@@ -49,7 +_,7 @@
+             this.trackedListeners.removeIf(p_234512_ -> p_234512_.isExpired(level, vec3));
+             VertexConsumer vertexconsumer = p_173847_.getBuffer(RenderType.lines());
+ 
+-            for(GameEventListenerRenderer.TrackedListener gameeventlistenerrenderer$trackedlistener : this.trackedListeners) {
++            for (GameEventListenerRenderer.TrackedListener gameeventlistenerrenderer$trackedlistener : this.trackedListeners) {
+                 gameeventlistenerrenderer$trackedlistener.getPosition(level)
+                     .ifPresent(
+                         p_269731_ -> {
+@@ -78,7 +_,7 @@
+ 
+             VertexConsumer vertexconsumer1 = p_173847_.getBuffer(RenderType.debugFilledBox());
+ 
+-            for(GameEventListenerRenderer.TrackedListener gameeventlistenerrenderer$trackedlistener1 : this.trackedListeners) {
++            for (GameEventListenerRenderer.TrackedListener gameeventlistenerrenderer$trackedlistener1 : this.trackedListeners) {
+                 gameeventlistenerrenderer$trackedlistener1.getPosition(level)
+                     .ifPresent(
+                         p_269724_ -> LevelRenderer.addChainedFilledBoxVertices(
+@@ -98,7 +_,7 @@
+                     );
+             }
+ 
+-            for(GameEventListenerRenderer.TrackedListener gameeventlistenerrenderer$trackedlistener2 : this.trackedListeners) {
++            for (GameEventListenerRenderer.TrackedListener gameeventlistenerrenderer$trackedlistener2 : this.trackedListeners) {
+                 gameeventlistenerrenderer$trackedlistener2.getPosition(level)
+                     .ifPresent(
+                         p_274713_ -> {
+@@ -119,7 +_,7 @@
+                     );
+             }
+ 
+-            for(GameEventListenerRenderer.TrackedGameEvent gameeventlistenerrenderer$trackedgameevent : this.trackedGameEvents) {
++            for (GameEventListenerRenderer.TrackedGameEvent gameeventlistenerrenderer$trackedgameevent : this.trackedGameEvents) {
+                 Vec3 vec31 = gameeventlistenerrenderer$trackedgameevent.position;
+                 double d0 = 0.2F;
+                 double d1 = vec31.x - 0.2F;

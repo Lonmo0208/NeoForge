@@ -1,0 +1,19 @@
+--- a/net/minecraft/core/particles/VibrationParticleOption.java
++++ b/net/minecraft/core/particles/VibrationParticleOption.java
+@@ -3,6 +_,7 @@
+ import com.mojang.brigadier.StringReader;
+ import com.mojang.brigadier.exceptions.CommandSyntaxException;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Locale;
+@@ -17,7 +_,7 @@
+ import net.minecraft.world.phys.Vec3;
+ 
+ public class VibrationParticleOption implements ParticleOptions {
+-    public static final Codec<VibrationParticleOption> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<VibrationParticleOption> CODEC = RecordCodecBuilder.mapCodec(
+         p_235978_ -> p_235978_.group(
+                     PositionSource.CODEC.fieldOf("destination").forGetter(VibrationParticleOption::getDestination),
+                     Codec.INT.fieldOf("arrival_in_ticks").forGetter(VibrationParticleOption::getArrivalInTicks)

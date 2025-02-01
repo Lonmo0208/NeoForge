@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/item/SpawnEggItem.java
 +++ b/net/minecraft/world/item/SpawnEggItem.java
+@@ -29,7 +_,6 @@
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.Spawner;
+ import net.minecraft.world.level.block.LiquidBlock;
+-import net.minecraft.world.level.block.entity.BlockEntity;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.gameevent.GameEvent;
+ import net.minecraft.world.phys.BlockHitResult;
 @@ -43,11 +_,14 @@
      private final int highlightColor;
      private final EntityType<?> defaultType;
@@ -15,6 +23,16 @@
          BY_ID.put(p_43207_, this);
      }
  
+@@ -61,8 +_,7 @@
+             BlockPos blockpos = p_43223_.getClickedPos();
+             Direction direction = p_43223_.getClickedFace();
+             BlockState blockstate = level.getBlockState(blockpos);
+-            BlockEntity $$10 = level.getBlockEntity(blockpos);
+-            if ($$10 instanceof Spawner spawner) {
++            if (level.getBlockEntity(blockpos) instanceof Spawner spawner) {
+                 EntityType<?> entitytype1 = this.getType(itemstack);
+                 spawner.setEntityId(entitytype1, level.getRandom());
+                 level.sendBlockUpdated(blockpos, blockstate, blockstate, 3);
 @@ -136,6 +_,8 @@
  
      @Nullable

@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/level/levelgen/WorldgenRandom.java
++++ b/net/minecraft/world/level/levelgen/WorldgenRandom.java
+@@ -28,9 +_,8 @@
+ 
+     @Override
+     public int next(int p_64708_) {
+-        ++this.count;
+-        RandomSource randomsource = this.randomSource;
+-        return randomsource instanceof LegacyRandomSource legacyrandomsource
++        this.count++;
++        return this.randomSource instanceof LegacyRandomSource legacyrandomsource
+             ? legacyrandomsource.next(p_64708_)
+             : (int)(this.randomSource.nextLong() >>> 64 - p_64708_);
+     }

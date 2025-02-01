@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/item/context/DirectionalPlaceContext.java
++++ b/net/minecraft/world/item/context/DirectionalPlaceContext.java
+@@ -38,7 +_,7 @@
+ 
+     @Override
+     public Direction[] getNearestLookingDirections() {
+-        switch(this.direction) {
++        switch (this.direction) {
+             case DOWN:
+             default:
+                 return new Direction[]{Direction.DOWN, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP};

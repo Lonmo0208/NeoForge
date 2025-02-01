@@ -1,0 +1,35 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsBrokenWorldScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsBrokenWorldScreen.java
+@@ -71,7 +_,7 @@
+     }
+ 
+     private void addButtons() {
+-        for(Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
++        for (Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
+             int i = entry.getKey();
+             boolean flag = i != this.serverData.activeSlot || this.serverData.worldType == RealmsServer.WorldType.MINIGAME;
+             Button button;
+@@ -111,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        ++this.animTick;
++        this.animTick++;
+     }
+ 
+     @Override
+@@ -119,12 +_,12 @@
+         super.render(p_282934_, p_88317_, p_88318_, p_88319_);
+         p_282934_.drawCenteredString(this.font, this.title, this.width / 2, 17, -1);
+ 
+-        for(int i = 0; i < this.message.length; ++i) {
++        for (int i = 0; i < this.message.length; i++) {
+             p_282934_.drawCenteredString(this.font, this.message[i], this.width / 2, row(-1) + 3 + i * 12, -6250336);
+         }
+ 
+         if (this.serverData != null) {
+-            for(Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
++            for (Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
+                 if (entry.getValue().templateImage != null && entry.getValue().templateId != -1L) {
+                     this.drawSlotFrame(
+                         p_282934_,

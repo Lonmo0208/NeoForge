@@ -1,0 +1,51 @@
+--- a/net/minecraft/world/level/entity/LevelEntityGetter.java
++++ b/net/minecraft/world/level/entity/LevelEntityGetter.java
+@@ -1,6 +_,5 @@
+ package net.minecraft.world.level.entity;
+ 
+-import java.util.List;
+ import java.util.UUID;
+ import java.util.function.Consumer;
+ import javax.annotation.Nullable;
+@@ -8,41 +_,6 @@
+ import net.minecraft.world.phys.AABB;
+ 
+ public interface LevelEntityGetter<T extends EntityAccess> {
+-    LevelEntityGetter<?> EMPTY = new LevelEntityGetter<EntityAccess>() {
+-        @Nullable
+-        @Override
+-        public EntityAccess get(int p_341785_) {
+-            return null;
+-        }
+-
+-        @Nullable
+-        @Override
+-        public EntityAccess get(UUID p_342600_) {
+-            return null;
+-        }
+-
+-        @Override
+-        public Iterable<EntityAccess> getAll() {
+-            return List.of();
+-        }
+-
+-        @Override
+-        public <U extends EntityAccess> void get(EntityTypeTest<EntityAccess, U> p_340411_, AbortableIterationConsumer<U> p_341644_) {
+-        }
+-
+-        @Override
+-        public void get(AABB p_341046_, Consumer<EntityAccess> p_341042_) {
+-        }
+-
+-        @Override
+-        public <U extends EntityAccess> void get(EntityTypeTest<EntityAccess, U> p_342458_, AABB p_340647_, AbortableIterationConsumer<U> p_342273_) {
+-        }
+-    };
+-
+-    static <T extends EntityAccess> LevelEntityGetter<T> empty() {
+-        return (LevelEntityGetter<T>)EMPTY;
+-    }
+-
+     @Nullable
+     T get(int p_156931_);
+ 

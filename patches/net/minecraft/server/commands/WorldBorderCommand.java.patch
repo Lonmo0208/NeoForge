@@ -1,0 +1,33 @@
+--- a/net/minecraft/server/commands/WorldBorderCommand.java
++++ b/net/minecraft/server/commands/WorldBorderCommand.java
+@@ -54,21 +_,21 @@
+                         .then(
+                             Commands.argument("distance", DoubleArgumentType.doubleArg(-5.999997E7F, 5.999997E7F))
+                                 .executes(
+-                                    p_339830_ -> setSize(
+-                                            p_339830_.getSource(),
+-                                            p_339830_.getSource().getLevel().getWorldBorder().getSize() + DoubleArgumentType.getDouble(p_339830_, "distance"),
++                                    p_325624_ -> setSize(
++                                            p_325624_.getSource(),
++                                            p_325624_.getSource().getLevel().getWorldBorder().getSize() + DoubleArgumentType.getDouble(p_325624_, "distance"),
+                                             0L
+                                         )
+                                 )
+                                 .then(
+                                     Commands.argument("time", IntegerArgumentType.integer(0))
+                                         .executes(
+-                                            p_339831_ -> setSize(
+-                                                    p_339831_.getSource(),
+-                                                    p_339831_.getSource().getLevel().getWorldBorder().getSize()
+-                                                        + DoubleArgumentType.getDouble(p_339831_, "distance"),
+-                                                    p_339831_.getSource().getLevel().getWorldBorder().getLerpRemainingTime()
+-                                                        + (long)IntegerArgumentType.getInteger(p_339831_, "time") * 1000L
++                                            p_325625_ -> setSize(
++                                                    p_325625_.getSource(),
++                                                    p_325625_.getSource().getLevel().getWorldBorder().getSize()
++                                                        + DoubleArgumentType.getDouble(p_325625_, "distance"),
++                                                    p_325625_.getSource().getLevel().getWorldBorder().getLerpRemainingTime()
++                                                        + (long)IntegerArgumentType.getInteger(p_325625_, "time") * 1000L
+                                                 )
+                                         )
+                                 )

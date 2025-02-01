@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/LanternBlock.java
++++ b/net/minecraft/world/level/block/LanternBlock.java
+@@ -42,7 +_,7 @@
+     public BlockState getStateForPlacement(BlockPlaceContext p_153467_) {
+         FluidState fluidstate = p_153467_.getLevel().getFluidState(p_153467_.getClickedPos());
+ 
+-        for(Direction direction : p_153467_.getNearestLookingDirections()) {
++        for (Direction direction : p_153467_.getNearestLookingDirections()) {
+             if (direction.getAxis() == Direction.Axis.Y) {
+                 BlockState blockstate = this.defaultBlockState().setValue(HANGING, Boolean.valueOf(direction == Direction.UP));
+                 if (blockstate.canSurvive(p_153467_.getLevel(), p_153467_.getClickedPos())) {

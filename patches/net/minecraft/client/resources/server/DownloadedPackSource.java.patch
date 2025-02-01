@@ -1,0 +1,74 @@
+--- a/net/minecraft/client/resources/server/DownloadedPackSource.java
++++ b/net/minecraft/client/resources/server/DownloadedPackSource.java
+@@ -124,7 +_,7 @@
+ 
+             @Override
+             public void requestStart() {
+-                ++this.count;
++                this.count++;
+                 this.title = Component.translatable("download.pack.title", this.count, p_314632_);
+                 this.updateToast();
+                 DownloadedPackSource.LOGGER.debug("Starting pack {}/{} download", this.count, p_314632_);
+@@ -147,7 +_,7 @@
+             public void requestFinished(boolean p_314998_) {
+                 if (!p_314998_) {
+                     DownloadedPackSource.LOGGER.info("Pack {} failed to download", this.count);
+-                    ++this.failCount;
++                    this.failCount++;
+                 } else {
+                     DownloadedPackSource.LOGGER.debug("Download ended for pack {}", this.count);
+                 }
+@@ -220,7 +_,7 @@
+             }
+ 
+             private void runAllUpdates() {
+-                while(this.hasUpdates) {
++                while (this.hasUpdates) {
+                     this.hasUpdates = false;
+                     DownloadedPackSource.this.manager.tick();
+                 }
+@@ -238,7 +_,7 @@
+     private List<Pack> loadRequestedPacks(List<PackReloadConfig.IdAndPath> p_314642_) {
+         List<Pack> list = new ArrayList<>(p_314642_.size());
+ 
+-        for(PackReloadConfig.IdAndPath packreloadconfig$idandpath : Lists.reverse(p_314642_)) {
++        for (PackReloadConfig.IdAndPath packreloadconfig$idandpath : Lists.reverse(p_314642_)) {
+             String s = String.format(Locale.ROOT, "server/%08X/%s", this.packIdSerialNumber++, packreloadconfig$idandpath.id());
+             Path path = packreloadconfig$idandpath.path();
+             PackLocationInfo packlocationinfo = new PackLocationInfo(s, SERVER_NAME, this.packType, Optional.empty());
+@@ -338,9 +_,10 @@
+             public void reportUpdate(UUID p_314956_, PackLoadFeedback.Update p_314990_) {
+                 DownloadedPackSource.LOGGER.debug("Pack {} changed status to {}", p_314956_, p_314990_);
+ 
+-                ServerboundResourcePackPacket.Action serverboundresourcepackpacket$action = switch(p_314990_) {
++                ServerboundResourcePackPacket.Action serverboundresourcepackpacket$action = switch (p_314990_) {
+                     case ACCEPTED -> ServerboundResourcePackPacket.Action.ACCEPTED;
+                     case DOWNLOADED -> ServerboundResourcePackPacket.Action.DOWNLOADED;
++                    default -> throw new MatchException(null, null);
+                 };
+                 p_314519_.send(new ServerboundResourcePackPacket(p_314956_, serverboundresourcepackpacket$action));
+             }
+@@ -349,12 +_,13 @@
+             public void reportFinalResult(UUID p_315010_, PackLoadFeedback.FinalResult p_314963_) {
+                 DownloadedPackSource.LOGGER.debug("Pack {} changed status to {}", p_315010_, p_314963_);
+ 
+-                ServerboundResourcePackPacket.Action serverboundresourcepackpacket$action = switch(p_314963_) {
++                ServerboundResourcePackPacket.Action serverboundresourcepackpacket$action = switch (p_314963_) {
+                     case APPLIED -> ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED;
+                     case DOWNLOAD_FAILED -> ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD;
+                     case DECLINED -> ServerboundResourcePackPacket.Action.DECLINED;
+                     case DISCARDED -> ServerboundResourcePackPacket.Action.DISCARDED;
+                     case ACTIVATION_FAILED -> ServerboundResourcePackPacket.Action.FAILED_RELOAD;
++                    default -> throw new MatchException(null, null);
+                 };
+                 p_314519_.send(new ServerboundResourcePackPacket(p_315010_, serverboundresourcepackpacket$action));
+             }
+@@ -364,7 +_,7 @@
+     public void configureForServerControl(Connection p_314502_, ServerPackManager.PackPromptStatus p_314463_) {
+         this.packType = PackSource.SERVER;
+         this.packFeedback = createPackResponseSender(p_314502_);
+-        switch(p_314463_) {
++        switch (p_314463_) {
+             case ALLOWED:
+                 this.manager.allowServerPacks();
+                 break;

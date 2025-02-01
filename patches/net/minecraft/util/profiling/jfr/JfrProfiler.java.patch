@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/profiling/jfr/JfrProfiler.java
++++ b/net/minecraft/util/profiling/jfr/JfrProfiler.java
+@@ -81,7 +_,7 @@
+         FlightRecorder.addPeriodicEvent(NetworkSummaryEvent.class, () -> {
+             Iterator<NetworkSummaryEvent.SumAggregation> iterator = this.networkTrafficByAddress.values().iterator();
+ 
+-            while(iterator.hasNext()) {
++            while (iterator.hasNext()) {
+                 iterator.next().commitEvent();
+                 iterator.remove();
+             }

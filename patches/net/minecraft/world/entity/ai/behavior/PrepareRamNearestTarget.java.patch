@@ -1,0 +1,24 @@
+--- a/net/minecraft/world/entity/ai/behavior/PrepareRamNearestTarget.java
++++ b/net/minecraft/world/entity/ai/behavior/PrepareRamNearestTarget.java
+@@ -130,10 +_,10 @@
+             List<BlockPos> list = Lists.newArrayList();
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = blockpos.mutable();
+ 
+-            for(Direction direction : Direction.Plane.HORIZONTAL) {
++            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                 blockpos$mutableblockpos.set(blockpos);
+ 
+-                for(int i = 0; i < this.maxRamDistance; ++i) {
++                for (int i = 0; i < this.maxRamDistance; i++) {
+                     if (!this.isWalkableBlock(p_147743_, blockpos$mutableblockpos.move(direction))) {
+                         blockpos$mutableblockpos.move(direction.getOpposite());
+                         break;
+@@ -161,7 +_,7 @@
+     private void chooseRamPosition(PathfinderMob p_147766_, LivingEntity p_147767_) {
+         this.reachedRamPositionTimestamp = Optional.empty();
+         this.ramCandidate = this.calculateRammingStartPosition(p_147766_, p_147767_)
+-            .map(p_340009_ -> new PrepareRamNearestTarget.RamCandidate(p_340009_, p_147767_.blockPosition(), p_147767_));
++            .map(p_337763_ -> new PrepareRamNearestTarget.RamCandidate(p_337763_, p_147767_.blockPosition(), p_147767_));
+     }
+ 
+     public static class RamCandidate {

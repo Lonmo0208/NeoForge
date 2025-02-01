@@ -1,0 +1,45 @@
+--- a/net/minecraft/world/phys/AABB.java
++++ b/net/minecraft/world/phys/AABB.java
+@@ -102,23 +_,18 @@
+     public boolean equals(Object p_82398_) {
+         if (this == p_82398_) {
+             return true;
+-        } else if (!(p_82398_ instanceof AABB)) {
++        } else if (!(p_82398_ instanceof AABB aabb)) {
++            return false;
++        } else if (Double.compare(aabb.minX, this.minX) != 0) {
++            return false;
++        } else if (Double.compare(aabb.minY, this.minY) != 0) {
++            return false;
++        } else if (Double.compare(aabb.minZ, this.minZ) != 0) {
++            return false;
++        } else if (Double.compare(aabb.maxX, this.maxX) != 0) {
+             return false;
+         } else {
+-            AABB aabb = (AABB)p_82398_;
+-            if (Double.compare(aabb.minX, this.minX) != 0) {
+-                return false;
+-            } else if (Double.compare(aabb.minY, this.minY) != 0) {
+-                return false;
+-            } else if (Double.compare(aabb.minZ, this.minZ) != 0) {
+-                return false;
+-            } else if (Double.compare(aabb.maxX, this.maxX) != 0) {
+-                return false;
+-            } else if (Double.compare(aabb.maxY, this.maxY) != 0) {
+-                return false;
+-            } else {
+-                return Double.compare(aabb.maxZ, this.maxZ) == 0;
+-            }
++            return Double.compare(aabb.maxY, this.maxY) != 0 ? false : Double.compare(aabb.maxZ, this.maxZ) == 0;
+         }
+     }
+ 
+@@ -327,7 +_,7 @@
+         double d1 = p_82345_.y - p_82344_.y;
+         double d2 = p_82345_.z - p_82344_.z;
+ 
+-        for(AABB aabb : p_82343_) {
++        for (AABB aabb : p_82343_) {
+             direction = getDirection(aabb.move(p_82346_), p_82344_, adouble, direction, d0, d1, d2);
+         }
+ 

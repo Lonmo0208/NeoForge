@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/LayeredDraw.java
++++ b/net/minecraft/client/gui/LayeredDraw.java
+@@ -31,7 +_,7 @@
+     }
+ 
+     private void renderInner(GuiGraphics p_316483_, float p_316135_) {
+-        for(LayeredDraw.Layer layereddraw$layer : this.layers) {
++        for (LayeredDraw.Layer layereddraw$layer : this.layers) {
+             layereddraw$layer.render(p_316483_, p_316135_);
+             p_316483_.pose().translate(0.0F, 0.0F, 200.0F);
+         }

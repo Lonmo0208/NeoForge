@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/level/block/entity/JigsawBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/JigsawBlockEntity.java
+@@ -108,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155608_, HolderLookup.Provider p_324139_) {
+-        super.load(p_155608_, p_324139_);
++    protected void loadAdditional(CompoundTag p_155608_, HolderLookup.Provider p_324139_) {
++        super.loadAdditional(p_155608_, p_324139_);
+         this.name = new ResourceLocation(p_155608_.getString("name"));
+         this.target = new ResourceLocation(p_155608_.getString("target"));
+         this.pool = ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(p_155608_.getString("pool")));
+@@ -130,7 +_,7 @@
+ 
+     @Override
+     public CompoundTag getUpdateTag(HolderLookup.Provider p_323882_) {
+-        return this.saveWithoutMetadata(p_323882_);
++        return this.saveCustomOnly(p_323882_);
+     }
+ 
+     public void generate(ServerLevel p_59421_, int p_59422_, boolean p_59423_) {

@@ -1,0 +1,96 @@
+--- a/net/minecraft/client/StringSplitter.java
++++ b/net/minecraft/client/StringSplitter.java
+@@ -156,14 +_,14 @@
+         boolean flag = p_92357_ < 0;
+         int j = Math.abs(p_92357_);
+ 
+-        for(int k = 0; k < j; ++k) {
++        for (int k = 0; k < j; k++) {
+             if (flag) {
+-                while(p_92359_ && i > 0 && (p_92356_.charAt(i - 1) == ' ' || p_92356_.charAt(i - 1) == '\n')) {
+-                    --i;
++                while (p_92359_ && i > 0 && (p_92356_.charAt(i - 1) == ' ' || p_92356_.charAt(i - 1) == '\n')) {
++                    i--;
+                 }
+ 
+-                while(i > 0 && p_92356_.charAt(i - 1) != ' ' && p_92356_.charAt(i - 1) != '\n') {
+-                    --i;
++                while (i > 0 && p_92356_.charAt(i - 1) != ' ' && p_92356_.charAt(i - 1) != '\n') {
++                    i--;
+                 }
+             } else {
+                 int l = p_92356_.length();
+@@ -182,8 +_,8 @@
+                 if (i == -1) {
+                     i = l;
+                 } else {
+-                    while(p_92359_ && i < l && (p_92356_.charAt(i) == ' ' || p_92356_.charAt(i) == '\n')) {
+-                        ++i;
++                    while (p_92359_ && i < l && (p_92356_.charAt(i) == ' ' || p_92356_.charAt(i) == '\n')) {
++                        i++;
+                     }
+                 }
+             }
+@@ -195,10 +_,10 @@
+     public void splitLines(String p_92365_, int p_92366_, Style p_92367_, boolean p_92368_, StringSplitter.LinePosConsumer p_92369_) {
+         int i = 0;
+         int j = p_92365_.length();
++        Style style = p_92367_;
+ 
+-        StringSplitter.LineBreakFinder stringsplitter$linebreakfinder;
+-        for(Style style = p_92367_; i < j; style = stringsplitter$linebreakfinder.getSplitStyle()) {
+-            stringsplitter$linebreakfinder = new StringSplitter.LineBreakFinder((float)p_92366_);
++        while (i < j) {
++            StringSplitter.LineBreakFinder stringsplitter$linebreakfinder = new StringSplitter.LineBreakFinder((float)p_92366_);
+             boolean flag = StringDecomposer.iterateFormatted(p_92365_, i, style, p_92367_, stringsplitter$linebreakfinder);
+             if (flag) {
+                 p_92369_.accept(style, i, j);
+@@ -210,6 +_,7 @@
+             int l = c0 != '\n' && c0 != ' ' ? k : k + 1;
+             p_92369_.accept(style, i, p_92368_ ? l : k);
+             i = l;
++            style = stringsplitter$linebreakfinder.getSplitStyle();
+         }
+     }
+ 
+@@ -249,11 +_,11 @@
+         boolean flag1 = false;
+         boolean flag2 = false;
+ 
+-        while(flag) {
++        while (flag) {
+             flag = false;
+             StringSplitter.LineBreakFinder stringsplitter$linebreakfinder = new StringSplitter.LineBreakFinder((float)p_92395_);
+ 
+-            for(StringSplitter.LineComponent stringsplitter$linecomponent : stringsplitter$flatcomponents.parts) {
++            for (StringSplitter.LineComponent stringsplitter$linecomponent : stringsplitter$flatcomponents.parts) {
+                 boolean flag3 = StringDecomposer.iterateFormatted(
+                     stringsplitter$linecomponent.contents, 0, stringsplitter$linecomponent.style, p_92396_, stringsplitter$linebreakfinder
+                 );
+@@ -303,7 +_,7 @@
+             int i = p_92453_;
+             boolean flag = false;
+ 
+-            while(listiterator.hasNext()) {
++            while (listiterator.hasNext()) {
+                 StringSplitter.LineComponent stringsplitter$linecomponent = listiterator.next();
+                 String s = stringsplitter$linecomponent.contents;
+                 int j = s.length();
+@@ -371,7 +_,7 @@
+         @Override
+         public boolean accept(int p_92480_, Style p_92481_, int p_92482_) {
+             int i = p_92480_ + this.offset;
+-            switch(p_92482_) {
++            switch (p_92482_) {
+                 case 10:
+                     return this.finishIteration(i, p_92481_);
+                 case 32:
+@@ -451,7 +_,7 @@
+ 
+         @Override
+         public boolean accept(int p_92511_, Style p_92512_, int p_92513_) {
+-            this.maxWidth -= StringSplitter.this.widthProvider.getWidth(p_92513_, p_92512_);
++            this.maxWidth = this.maxWidth - StringSplitter.this.widthProvider.getWidth(p_92513_, p_92512_);
+             if (this.maxWidth >= 0.0F) {
+                 this.position = p_92511_ + Character.charCount(p_92513_);
+                 return true;

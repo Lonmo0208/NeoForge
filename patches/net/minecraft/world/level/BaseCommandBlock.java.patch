@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/BaseCommandBlock.java
++++ b/net/minecraft/world/level/BaseCommandBlock.java
+@@ -122,7 +_,7 @@
+                     this.lastOutput = null;
+                     CommandSourceStack commandsourcestack = this.createCommandSourceStack().withCallback((p_45418_, p_45419_) -> {
+                         if (p_45418_) {
+-                            ++this.successCount;
++                            this.successCount++;
+                         }
+                     });
+                     minecraftserver.getCommands().performPrefixedCommand(commandsourcestack, this.command);

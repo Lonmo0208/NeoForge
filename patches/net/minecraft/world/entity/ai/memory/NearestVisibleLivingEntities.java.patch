@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/ai/memory/NearestVisibleLivingEntities.java
++++ b/net/minecraft/world/entity/ai/memory/NearestVisibleLivingEntities.java
+@@ -31,7 +_,7 @@
+     }
+ 
+     public Optional<LivingEntity> findClosest(Predicate<LivingEntity> p_186117_) {
+-        for(LivingEntity livingentity : this.nearbyEntities) {
++        for (LivingEntity livingentity : this.nearbyEntities) {
+             if (p_186117_.test(livingentity) && this.lineOfSightTest.test(livingentity)) {
+                 return Optional.of(livingentity);
+             }
+@@ -53,7 +_,7 @@
+     }
+ 
+     public boolean contains(Predicate<LivingEntity> p_186131_) {
+-        for(LivingEntity livingentity : this.nearbyEntities) {
++        for (LivingEntity livingentity : this.nearbyEntities) {
+             if (p_186131_.test(livingentity) && this.lineOfSightTest.test(livingentity)) {
+                 return true;
+             }

@@ -1,0 +1,33 @@
+--- a/net/minecraft/world/level/pathfinder/SwimNodeEvaluator.java
++++ b/net/minecraft/world/level/pathfinder/SwimNodeEvaluator.java
+@@ -51,7 +_,7 @@
+         int i = 0;
+         Map<Direction, Node> map = Maps.newEnumMap(Direction.class);
+ 
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
+             Node node = this.findAcceptedNode(p_77484_.x + direction.getStepX(), p_77484_.y + direction.getStepY(), p_77484_.z + direction.getStepZ());
+             map.put(direction, node);
+             if (this.isNodeValid(node)) {
+@@ -59,7 +_,7 @@
+             }
+         }
+ 
+-        for(Direction direction1 : Direction.Plane.HORIZONTAL) {
++        for (Direction direction1 : Direction.Plane.HORIZONTAL) {
+             Direction direction2 = direction1.getClockWise();
+             if (hasMalus(map.get(direction1)) && hasMalus(map.get(direction2))) {
+                 Node node1 = this.findAcceptedNode(
+@@ -117,9 +_,9 @@
+     public PathType getPathTypeOfMob(PathfindingContext p_330584_, int p_77473_, int p_77474_, int p_77475_, Mob p_77476_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(int i = p_77473_; i < p_77473_ + this.entityWidth; ++i) {
+-            for(int j = p_77474_; j < p_77474_ + this.entityHeight; ++j) {
+-                for(int k = p_77475_; k < p_77475_ + this.entityDepth; ++k) {
++        for (int i = p_77473_; i < p_77473_ + this.entityWidth; i++) {
++            for (int j = p_77474_; j < p_77474_ + this.entityHeight; j++) {
++                for (int k = p_77475_; k < p_77475_ + this.entityDepth; k++) {
+                     BlockState blockstate = p_330584_.getBlockState(blockpos$mutableblockpos.set(i, j, k));
+                     FluidState fluidstate = blockstate.getFluidState();
+                     if (fluidstate.isEmpty() && blockstate.isPathfindable(PathComputationType.WATER) && blockstate.isAir()) {

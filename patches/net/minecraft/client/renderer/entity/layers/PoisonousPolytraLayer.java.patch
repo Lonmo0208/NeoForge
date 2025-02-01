@@ -1,0 +1,77 @@
+--- a/net/minecraft/client/renderer/entity/layers/PoisonousPolytraLayer.java
++++ /dev/null
+@@ -1,74 +_,0 @@
+-package net.minecraft.client.renderer.entity.layers;
+-
+-import com.mojang.blaze3d.vertex.PoseStack;
+-import com.mojang.blaze3d.vertex.VertexConsumer;
+-import net.minecraft.client.model.ElytraModel;
+-import net.minecraft.client.model.EntityModel;
+-import net.minecraft.client.model.geom.EntityModelSet;
+-import net.minecraft.client.model.geom.ModelLayers;
+-import net.minecraft.client.player.AbstractClientPlayer;
+-import net.minecraft.client.renderer.MultiBufferSource;
+-import net.minecraft.client.renderer.RenderType;
+-import net.minecraft.client.renderer.entity.ItemRenderer;
+-import net.minecraft.client.renderer.entity.RenderLayerParent;
+-import net.minecraft.client.renderer.texture.OverlayTexture;
+-import net.minecraft.client.resources.PlayerSkin;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.world.entity.EquipmentSlot;
+-import net.minecraft.world.entity.LivingEntity;
+-import net.minecraft.world.entity.player.PlayerModelPart;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.Items;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class PoisonousPolytraLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
+-    private static final ResourceLocation WINGS_LOCATION = new ResourceLocation("textures/entity/poisonous_polytra.png");
+-    private final ElytraModel<T> elytraModel;
+-
+-    public PoisonousPolytraLayer(RenderLayerParent<T, M> p_340543_, EntityModelSet p_341385_) {
+-        super(p_340543_);
+-        this.elytraModel = new ElytraModel<>(p_341385_.bakeLayer(ModelLayers.ELYTRA));
+-    }
+-
+-    public void render(
+-        PoseStack p_341043_,
+-        MultiBufferSource p_342056_,
+-        int p_341564_,
+-        T p_341073_,
+-        float p_341409_,
+-        float p_341660_,
+-        float p_341872_,
+-        float p_340720_,
+-        float p_341825_,
+-        float p_341935_
+-    ) {
+-        ItemStack itemstack = p_341073_.getItemBySlot(EquipmentSlot.CHEST);
+-        if (itemstack.is(Items.POISONOUS_POLYTRA)) {
+-            ResourceLocation resourcelocation;
+-            if (p_341073_ instanceof AbstractClientPlayer abstractclientplayer) {
+-                PlayerSkin playerskin = abstractclientplayer.getSkin();
+-                if (playerskin.elytraTexture() != null) {
+-                    resourcelocation = playerskin.elytraTexture();
+-                } else if (playerskin.capeTexture() != null && abstractclientplayer.isModelPartShown(PlayerModelPart.CAPE)) {
+-                    resourcelocation = playerskin.capeTexture();
+-                } else {
+-                    resourcelocation = WINGS_LOCATION;
+-                }
+-            } else {
+-                resourcelocation = WINGS_LOCATION;
+-            }
+-
+-            p_341043_.pushPose();
+-            p_341043_.translate(0.0F, 0.0F, 0.125F);
+-            this.getParentModel().copyPropertiesTo(this.elytraModel);
+-            this.elytraModel.setupAnim(p_341073_, p_341409_, p_341660_, p_340720_, p_341825_, p_341935_);
+-            VertexConsumer vertexconsumer = ItemRenderer.getArmorFoilBuffer(
+-                p_342056_, RenderType.armorCutoutNoCull(resourcelocation), false, itemstack.hasFoil()
+-            );
+-            this.elytraModel.renderToBuffer(p_341043_, vertexconsumer, p_341564_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+-            p_341043_.popPose();
+-        }
+-    }
+-}

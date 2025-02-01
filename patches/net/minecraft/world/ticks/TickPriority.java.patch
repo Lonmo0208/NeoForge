@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/ticks/TickPriority.java
++++ b/net/minecraft/world/ticks/TickPriority.java
+@@ -16,7 +_,7 @@
+     }
+ 
+     public static TickPriority byValue(int p_193447_) {
+-        for(TickPriority tickpriority : values()) {
++        for (TickPriority tickpriority : values()) {
+             if (tickpriority.value == p_193447_) {
+                 return tickpriority;
+             }

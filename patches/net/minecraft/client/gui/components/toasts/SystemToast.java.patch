@@ -1,0 +1,29 @@
+--- a/net/minecraft/client/gui/components/toasts/SystemToast.java
++++ b/net/minecraft/client/gui/components/toasts/SystemToast.java
+@@ -85,7 +_,7 @@
+             int l = Math.min(4, j - 28);
+             this.renderBackgroundRow(p_281624_, i, 0, 0, 28);
+ 
+-            for(int i1 = 28; i1 < j - l; i1 += 10) {
++            for (int i1 = 28; i1 < j - l; i1 += 10) {
+                 this.renderBackgroundRow(p_281624_, i, 16, i1, Math.min(16, j - i1 - l));
+             }
+ 
+@@ -97,7 +_,7 @@
+         } else {
+             p_281624_.drawString(p_282333_.getMinecraft().font, this.title, 18, 7, -256, false);
+ 
+-            for(int j1 = 0; j1 < this.messageLines.size(); ++j1) {
++            for (int j1 = 0; j1 < this.messageLines.size(); j1++) {
+                 p_281624_.drawString(p_282333_.getMinecraft().font, this.messageLines.get(j1), 18, 18 + j1 * 12, -1, false);
+             }
+         }
+@@ -113,7 +_,7 @@
+         ResourceLocation resourcelocation = BACKGROUND_SPRITE;
+         p_281840_.blitSprite(resourcelocation, 160, 32, 0, p_282371_, 0, p_283613_, i, p_282880_);
+ 
+-        for(int k = i; k < p_281750_ - j; k += 64) {
++        for (int k = i; k < p_281750_ - j; k += 64) {
+             p_281840_.blitSprite(resourcelocation, 160, 32, 32, p_282371_, k, p_283613_, Math.min(64, p_281750_ - k - j), p_282880_);
+         }
+ 

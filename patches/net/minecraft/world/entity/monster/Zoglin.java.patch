@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/entity/monster/Zoglin.java
++++ b/net/minecraft/world/entity/monster/Zoglin.java
+@@ -198,7 +_,8 @@
+         boolean flag = super.hurt(p_34214_, p_34215_);
+         if (this.level().isClientSide) {
+             return false;
+-        } else if (flag && p_34214_.getEntity() instanceof LivingEntity livingentity) {
++        } else if (flag && p_34214_.getEntity() instanceof LivingEntity) {
++            LivingEntity livingentity = (LivingEntity)p_34214_.getEntity();
+             if (this.canAttack(livingentity) && !BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(this, livingentity, 4.0)) {
+                 this.setAttackTarget(livingentity);
+             }
+@@ -254,7 +_,7 @@
+     @Override
+     public void aiStep() {
+         if (this.attackAnimationRemainingTicks > 0) {
+-            --this.attackAnimationRemainingTicks;
++            this.attackAnimationRemainingTicks--;
+         }
+ 
+         super.aiStep();

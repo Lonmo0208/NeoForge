@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/feature/EndGatewayFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/EndGatewayFeature.java
+@@ -19,7 +_,7 @@
+         WorldGenLevel worldgenlevel = p_159715_.level();
+         EndGatewayConfiguration endgatewayconfiguration = p_159715_.config();
+ 
+-        for(BlockPos blockpos1 : BlockPos.betweenClosed(blockpos.offset(-1, -2, -1), blockpos.offset(1, 2, 1))) {
++        for (BlockPos blockpos1 : BlockPos.betweenClosed(blockpos.offset(-1, -2, -1), blockpos.offset(1, 2, 1))) {
+             boolean flag = blockpos1.getX() == blockpos.getX();
+             boolean flag1 = blockpos1.getY() == blockpos.getY();
+             boolean flag2 = blockpos1.getZ() == blockpos.getZ();

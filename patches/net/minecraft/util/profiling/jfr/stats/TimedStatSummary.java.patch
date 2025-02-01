@@ -1,0 +1,13 @@
+--- a/net/minecraft/util/profiling/jfr/stats/TimedStatSummary.java
++++ b/net/minecraft/util/profiling/jfr/stats/TimedStatSummary.java
+@@ -16,8 +_,8 @@
+         } else {
+             List<T> list = p_185850_.stream().sorted(Comparator.comparing(TimedStat::duration)).toList();
+             Duration duration = list.stream().map(TimedStat::duration).reduce(Duration::plus).orElse(Duration.ZERO);
+-            T t = list.get(0);
+-            T t1 = list.get(list.size() - 1);
++            T t = (T)list.get(0);
++            T t1 = (T)list.get(list.size() - 1);
+             T t2 = list.size() > 1 ? list.get(list.size() - 2) : null;
+             int i = list.size();
+             Map<Integer, Double> map = Percentiles.evaluate(list.stream().mapToLong(p_185848_ -> p_185848_.duration().toNanos()).toArray());

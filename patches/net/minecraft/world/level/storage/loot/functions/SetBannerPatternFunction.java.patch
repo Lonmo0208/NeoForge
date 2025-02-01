@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SetBannerPatternFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/SetBannerPatternFunction.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.storage.loot.functions;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -14,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+ 
+ public class SetBannerPatternFunction extends LootItemConditionalFunction {
+-    public static final Codec<SetBannerPatternFunction> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<SetBannerPatternFunction> CODEC = RecordCodecBuilder.mapCodec(
+         p_330181_ -> commonFields(p_330181_)
+                 .and(
+                     p_330181_.group(

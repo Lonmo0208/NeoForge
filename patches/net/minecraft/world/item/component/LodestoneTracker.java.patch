@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/item/component/LodestoneTracker.java
++++ b/net/minecraft/world/item/component/LodestoneTracker.java
+@@ -10,16 +_,15 @@
+ import net.minecraft.network.codec.ByteBufCodecs;
+ import net.minecraft.network.codec.StreamCodec;
+ import net.minecraft.server.level.ServerLevel;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+ 
+ public record LodestoneTracker(Optional<GlobalPos> target, boolean tracked) {
+     public static final Codec<LodestoneTracker> CODEC = RecordCodecBuilder.create(
+-        p_332639_ -> p_332639_.group(
+-                    ExtraCodecs.strictOptionalField(GlobalPos.CODEC, "target").forGetter(LodestoneTracker::target),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "tracked", true).forGetter(LodestoneTracker::tracked)
++        p_337949_ -> p_337949_.group(
++                    GlobalPos.CODEC.optionalFieldOf("target").forGetter(LodestoneTracker::target),
++                    Codec.BOOL.optionalFieldOf("tracked", Boolean.valueOf(true)).forGetter(LodestoneTracker::tracked)
+                 )
+-                .apply(p_332639_, LodestoneTracker::new)
++                .apply(p_337949_, LodestoneTracker::new)
+     );
+     public static final StreamCodec<ByteBuf, LodestoneTracker> STREAM_CODEC = StreamCodec.composite(
+         GlobalPos.STREAM_CODEC.apply(ByteBufCodecs::optional), LodestoneTracker::target, ByteBufCodecs.BOOL, LodestoneTracker::tracked, LodestoneTracker::new

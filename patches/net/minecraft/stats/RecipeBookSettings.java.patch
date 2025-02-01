@@ -20,6 +20,66 @@
      private final Map<RecipeBookType, RecipeBookSettings.TypeSettings> states;
  
      private RecipeBookSettings(Map<RecipeBookType, RecipeBookSettings.TypeSettings> p_12730_) {
+@@ -29,7 +_,7 @@
+ 
+     public RecipeBookSettings() {
+         this(Util.make(Maps.newEnumMap(RecipeBookType.class), p_12740_ -> {
+-            for(RecipeBookType recipebooktype : RecipeBookType.values()) {
++            for (RecipeBookType recipebooktype : RecipeBookType.values()) {
+                 p_12740_.put(recipebooktype, new RecipeBookSettings.TypeSettings(false, false));
+             }
+         }));
+@@ -54,7 +_,7 @@
+     public static RecipeBookSettings read(FriendlyByteBuf p_12753_) {
+         Map<RecipeBookType, RecipeBookSettings.TypeSettings> map = Maps.newEnumMap(RecipeBookType.class);
+ 
+-        for(RecipeBookType recipebooktype : RecipeBookType.values()) {
++        for (RecipeBookType recipebooktype : RecipeBookType.values()) {
+             boolean flag = p_12753_.readBoolean();
+             boolean flag1 = p_12753_.readBoolean();
+             map.put(recipebooktype, new RecipeBookSettings.TypeSettings(flag, flag1));
+@@ -64,7 +_,7 @@
+     }
+ 
+     public void write(FriendlyByteBuf p_12762_) {
+-        for(RecipeBookType recipebooktype : RecipeBookType.values()) {
++        for (RecipeBookType recipebooktype : RecipeBookType.values()) {
+             RecipeBookSettings.TypeSettings recipebooksettings$typesettings = this.states.get(recipebooktype);
+             if (recipebooksettings$typesettings == null) {
+                 p_12762_.writeBoolean(false);
+@@ -97,7 +_,7 @@
+     public RecipeBookSettings copy() {
+         Map<RecipeBookType, RecipeBookSettings.TypeSettings> map = Maps.newEnumMap(RecipeBookType.class);
+ 
+-        for(RecipeBookType recipebooktype : RecipeBookType.values()) {
++        for (RecipeBookType recipebooktype : RecipeBookType.values()) {
+             RecipeBookSettings.TypeSettings recipebooksettings$typesettings = this.states.get(recipebooktype);
+             map.put(recipebooktype, recipebooksettings$typesettings.copy());
+         }
+@@ -108,7 +_,7 @@
+     public void replaceFrom(RecipeBookSettings p_12733_) {
+         this.states.clear();
+ 
+-        for(RecipeBookType recipebooktype : RecipeBookType.values()) {
++        for (RecipeBookType recipebooktype : RecipeBookType.values()) {
+             RecipeBookSettings.TypeSettings recipebooksettings$typesettings = p_12733_.states.get(recipebooktype);
+             this.states.put(recipebooktype, recipebooksettings$typesettings.copy());
+         }
+@@ -141,11 +_,10 @@
+         public boolean equals(Object p_12783_) {
+             if (this == p_12783_) {
+                 return true;
+-            } else if (!(p_12783_ instanceof RecipeBookSettings.TypeSettings)) {
+-                return false;
+             } else {
+-                RecipeBookSettings.TypeSettings recipebooksettings$typesettings = (RecipeBookSettings.TypeSettings)p_12783_;
+-                return this.open == recipebooksettings$typesettings.open && this.filtering == recipebooksettings$typesettings.filtering;
++                return !(p_12783_ instanceof RecipeBookSettings.TypeSettings recipebooksettings$typesettings)
++                    ? false
++                    : this.open == recipebooksettings$typesettings.open && this.filtering == recipebooksettings$typesettings.filtering;
+             }
+         }
+ 
 @@ -159,5 +_,9 @@
          public String toString() {
              return "[open=" + this.open + ", filtering=" + this.filtering + "]";

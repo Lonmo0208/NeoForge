@@ -1,8 +1,11 @@
 --- a/net/minecraft/world/level/block/piston/PistonStructureResolver.java
 +++ b/net/minecraft/world/level/block/piston/PistonStructureResolver.java
-@@ -50,7 +_,7 @@
+@@ -48,9 +_,9 @@
+         } else if (!this.addBlockLine(this.startPos, this.pushDirection)) {
+             return false;
          } else {
-             for(int i = 0; i < this.toPush.size(); ++i) {
+-            for(int i = 0; i < this.toPush.size(); ++i) {
++            for (int i = 0; i < this.toPush.size(); i++) {
                  BlockPos blockpos = this.toPush.get(i);
 -                if (isSticky(this.level.getBlockState(blockpos)) && !this.addBranchingBlocks(blockpos)) {
 +                if (this.level.getBlockState(blockpos).isStickyBlock() && !this.addBranchingBlocks(blockpos)) {
@@ -47,16 +50,51 @@
                          || !PistonBaseBlock.isPushable(blockstate, this.level, blockpos, this.pushDirection, false, this.pushDirection.getOpposite())
                          || blockpos.equals(this.pistonPos)) {
                          break;
-@@ -121,7 +_,7 @@
+@@ -106,22 +_,22 @@
  
-                         for(int k = 0; k <= j + l; ++k) {
+                 int l = 0;
+ 
+-                for(int i1 = i - 1; i1 >= 0; --i1) {
++                for (int i1 = i - 1; i1 >= 0; i1--) {
+                     this.toPush.add(p_60434_.relative(this.pushDirection.getOpposite(), i1));
+-                    ++l;
++                    l++;
+                 }
+ 
+                 int j1 = 1;
+ 
+-                while(true) {
++                while (true) {
+                     BlockPos blockpos1 = p_60434_.relative(this.pushDirection, j1);
+                     int j = this.toPush.indexOf(blockpos1);
+                     if (j > -1) {
+                         this.reorderListAtCollision(l, j);
+ 
+-                        for(int k = 0; k <= j + l; ++k) {
++                        for (int k = 0; k <= j + l; k++) {
                              BlockPos blockpos2 = this.toPush.get(k);
 -                            if (isSticky(this.level.getBlockState(blockpos2)) && !this.addBranchingBlocks(blockpos2)) {
 +                            if (this.level.getBlockState(blockpos2).isStickyBlock() && !this.addBranchingBlocks(blockpos2)) {
                                  return false;
                              }
                          }
-@@ -176,7 +_,7 @@
+@@ -149,8 +_,8 @@
+                     }
+ 
+                     this.toPush.add(blockpos1);
+-                    ++l;
+-                    ++j1;
++                    l++;
++                    j1++;
+                 }
+             }
+         }
+@@ -172,11 +_,11 @@
+     private boolean addBranchingBlocks(BlockPos p_60432_) {
+         BlockState blockstate = this.level.getBlockState(p_60432_);
+ 
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
              if (direction.getAxis() != this.pushDirection.getAxis()) {
                  BlockPos blockpos = p_60432_.relative(direction);
                  BlockState blockstate1 = this.level.getBlockState(blockpos);

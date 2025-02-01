@@ -1,0 +1,38 @@
+--- a/net/minecraft/world/level/storage/loot/functions/ListOperation.java
++++ b/net/minecraft/world/level/storage/loot/functions/ListOperation.java
+@@ -17,7 +_,7 @@
+ 
+ public interface ListOperation {
+     static MapCodec<ListOperation> codec(int p_336009_) {
+-        return ExtraCodecs.validate(ListOperation.Type.CODEC.dispatchMap("mode", ListOperation::mode, p_335796_ -> p_335796_.mapCodec.codec()), p_335630_ -> {
++        return ListOperation.Type.CODEC.<ListOperation>dispatchMap("mode", ListOperation::mode, p_338141_ -> p_338141_.mapCodec).validate(p_335630_ -> {
+             if (p_335630_ instanceof ListOperation.ReplaceSection listoperation$replacesection && listoperation$replacesection.size().isPresent()) {
+                 int i = listoperation$replacesection.size().get();
+                 if (i > p_336009_) {
+@@ -60,8 +_,8 @@
+     public static record Insert(int offset) implements ListOperation {
+         private static final Logger LOGGER = LogUtils.getLogger();
+         public static final MapCodec<ListOperation.Insert> MAP_CODEC = RecordCodecBuilder.mapCodec(
+-            p_333750_ -> p_333750_.group(ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "offset", 0).forGetter(ListOperation.Insert::offset))
+-                    .apply(p_333750_, ListOperation.Insert::new)
++            p_338142_ -> p_338142_.group(ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("offset", 0).forGetter(ListOperation.Insert::offset))
++                    .apply(p_338142_, ListOperation.Insert::new)
+         );
+ 
+         @Override
+@@ -109,11 +_,11 @@
+     public static record ReplaceSection(int offset, Optional<Integer> size) implements ListOperation {
+         private static final Logger LOGGER = LogUtils.getLogger();
+         public static final MapCodec<ListOperation.ReplaceSection> MAP_CODEC = RecordCodecBuilder.mapCodec(
+-            p_333842_ -> p_333842_.group(
+-                        ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "offset", 0).forGetter(ListOperation.ReplaceSection::offset),
+-                        ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "size").forGetter(ListOperation.ReplaceSection::size)
++            p_338143_ -> p_338143_.group(
++                        ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("offset", 0).forGetter(ListOperation.ReplaceSection::offset),
++                        ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("size").forGetter(ListOperation.ReplaceSection::size)
+                     )
+-                    .apply(p_333842_, ListOperation.ReplaceSection::new)
++                    .apply(p_338143_, ListOperation.ReplaceSection::new)
+         );
+ 
+         public ReplaceSection(int p_333961_) {

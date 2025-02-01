@@ -1,0 +1,69 @@
+--- a/net/minecraft/world/level/block/ChiseledBookShelfBlock.java
++++ b/net/minecraft/world/level/block/ChiseledBookShelfBlock.java
+@@ -56,7 +_,7 @@
+         super(p_249989_);
+         BlockState blockstate = this.stateDefinition.any().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH);
+ 
+-        for(BooleanProperty booleanproperty : SLOT_OCCUPIED_PROPERTIES) {
++        for (BooleanProperty booleanproperty : SLOT_OCCUPIED_PROPERTIES) {
+             blockstate = blockstate.setValue(booleanproperty, Boolean.valueOf(false));
+         }
+ 
+@@ -72,8 +_,7 @@
+     protected ItemInteractionResult useItemOn(
+         ItemStack p_316457_, BlockState p_316201_, Level p_316747_, BlockPos p_316462_, Player p_316228_, InteractionHand p_316721_, BlockHitResult p_316464_
+     ) {
+-        BlockEntity $$9 = p_316747_.getBlockEntity(p_316462_);
+-        if ($$9 instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity) {
++        if (p_316747_.getBlockEntity(p_316462_) instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity) {
+             if (!p_316457_.is(ItemTags.BOOKSHELF_BOOKS)) {
+                 return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+             } else {
+@@ -94,8 +_,7 @@
+ 
+     @Override
+     protected InteractionResult useWithoutItem(BlockState p_316403_, Level p_316842_, BlockPos p_316539_, Player p_316349_, BlockHitResult p_316278_) {
+-        BlockEntity $$7 = p_316842_.getBlockEntity(p_316539_);
+-        if ($$7 instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity) {
++        if (p_316842_.getBlockEntity(p_316539_) instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity) {
+             OptionalInt optionalint = this.getHitSlot(p_316278_, p_316403_);
+             if (optionalint.isEmpty()) {
+                 return InteractionResult.PASS;
+@@ -129,12 +_,13 @@
+             double d1 = vec3.y();
+             double d2 = vec3.z();
+ 
+-            return switch(direction) {
++            return switch (direction) {
+                 case NORTH -> Optional.of(new Vec2((float)(1.0 - d0), (float)d1));
+                 case SOUTH -> Optional.of(new Vec2((float)d0, (float)d1));
+                 case WEST -> Optional.of(new Vec2((float)d2, (float)d1));
+                 case EAST -> Optional.of(new Vec2((float)(1.0 - d2), (float)d1));
+                 case DOWN, UP -> Optional.empty();
++                default -> throw new MatchException(null, null);
+             };
+         }
+     }
+@@ -196,9 +_,9 @@
+     @Override
+     protected void onRemove(BlockState p_250071_, Level p_251485_, BlockPos p_251954_, BlockState p_251852_, boolean p_252250_) {
+         if (!p_250071_.is(p_251852_.getBlock())) {
+-            BlockEntity blockentity = p_251485_.getBlockEntity(p_251954_);
+-            if (blockentity instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity && !chiseledbookshelfblockentity.isEmpty()) {
+-                for(int i = 0; i < 6; ++i) {
++            if (p_251485_.getBlockEntity(p_251954_) instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity
++                && !chiseledbookshelfblockentity.isEmpty()) {
++                for (int i = 0; i < 6; i++) {
+                     ItemStack itemstack = chiseledbookshelfblockentity.getItem(i);
+                     if (!itemstack.isEmpty()) {
+                         Containers.dropItemStack(p_251485_, (double)p_251954_.getX(), (double)p_251954_.getY(), (double)p_251954_.getZ(), itemstack);
+@@ -238,8 +_,7 @@
+         if (p_252207_.isClientSide()) {
+             return 0;
+         } else {
+-            BlockEntity blockentity = p_252207_.getBlockEntity(p_248999_);
+-            return blockentity instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity
++            return p_252207_.getBlockEntity(p_248999_) instanceof ChiseledBookShelfBlockEntity chiseledbookshelfblockentity
+                 ? chiseledbookshelfblockentity.getLastInteractedSlot() + 1
+                 : 0;
+         }

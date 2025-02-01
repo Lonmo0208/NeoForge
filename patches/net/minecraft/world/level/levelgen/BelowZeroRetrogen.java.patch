@@ -1,0 +1,34 @@
+--- a/net/minecraft/world/level/levelgen/BelowZeroRetrogen.java
++++ b/net/minecraft/world/level/levelgen/BelowZeroRetrogen.java
+@@ -33,16 +_,16 @@
+     private static final Codec<ChunkStatus> NON_EMPTY_CHUNK_STATUS = BuiltInRegistries.CHUNK_STATUS
+         .byNameCodec()
+         .comapFlatMap(
+-            p_330147_ -> p_330147_ == ChunkStatus.EMPTY ? DataResult.error(() -> "target_status cannot be empty") : DataResult.success(p_330147_),
++            p_330147_ -> p_330147_ == ChunkStatus.EMPTY ? DataResult.error(() -> "target_status cannot be empty") : DataResult.success((ChunkStatus)p_330147_),
+             Function.identity()
+         );
+     public static final Codec<BelowZeroRetrogen> CODEC = RecordCodecBuilder.create(
+-        p_188471_ -> p_188471_.group(
++        p_338091_ -> p_338091_.group(
+                     NON_EMPTY_CHUNK_STATUS.fieldOf("target_status").forGetter(BelowZeroRetrogen::targetStatus),
+-                    BITSET_CODEC.optionalFieldOf("missing_bedrock")
++                    BITSET_CODEC.lenientOptionalFieldOf("missing_bedrock")
+                         .forGetter(p_188480_ -> p_188480_.missingBedrock.isEmpty() ? Optional.empty() : Optional.of(p_188480_.missingBedrock))
+                 )
+-                .apply(p_188471_, BelowZeroRetrogen::new)
++                .apply(p_338091_, BelowZeroRetrogen::new)
+     );
+     private static final Set<ResourceKey<Biome>> RETAINED_RETROGEN_BIOMES = Set.of(Biomes.LUSH_CAVES, Biomes.DRIPSTONE_CAVES, Biomes.DEEP_DARK);
+     public static final LevelHeightAccessor UPGRADE_HEIGHT_ACCESSOR = new LevelHeightAccessor() {
+@@ -86,8 +_,8 @@
+         int i = levelheightaccessor.getMinBuildHeight();
+         int j = levelheightaccessor.getMaxBuildHeight() - 1;
+ 
+-        for(int k = 0; k < 16; ++k) {
+-            for(int l = 0; l < 16; ++l) {
++        for (int k = 0; k < 16; k++) {
++            for (int l = 0; l < 16; l++) {
+                 if (this.hasBedrockHole(k, l)) {
+                     BlockPos.betweenClosed(k, i, l, k, j, l).forEach(p_198219_ -> p_198222_.setBlockState(p_198219_, Blocks.AIR.defaultBlockState(), false));
+                 }

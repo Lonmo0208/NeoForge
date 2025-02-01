@@ -1,0 +1,41 @@
+--- a/net/minecraft/client/renderer/debug/HeightMapRenderer.java
++++ b/net/minecraft/client/renderer/debug/HeightMapRenderer.java
+@@ -33,17 +_,17 @@
+         VertexConsumer vertexconsumer = p_113577_.getBuffer(RenderType.debugFilledBox());
+         BlockPos blockpos = BlockPos.containing(p_113578_, 0.0, p_113580_);
+ 
+-        for(int i = -2; i <= 2; ++i) {
+-            for(int j = -2; j <= 2; ++j) {
++        for (int i = -2; i <= 2; i++) {
++            for (int j = -2; j <= 2; j++) {
+                 ChunkAccess chunkaccess = levelaccessor.getChunk(blockpos.offset(i * 16, 0, j * 16));
+ 
+-                for(Entry<Heightmap.Types, Heightmap> entry : chunkaccess.getHeightmaps()) {
++                for (Entry<Heightmap.Types, Heightmap> entry : chunkaccess.getHeightmaps()) {
+                     Heightmap.Types heightmap$types = entry.getKey();
+                     ChunkPos chunkpos = chunkaccess.getPos();
+                     Vector3f vector3f = this.getColor(heightmap$types);
+ 
+-                    for(int k = 0; k < 16; ++k) {
+-                        for(int l = 0; l < 16; ++l) {
++                    for (int k = 0; k < 16; k++) {
++                        for (int l = 0; l < 16; l++) {
+                             int i1 = SectionPos.sectionToBlockCoord(chunkpos.x, k);
+                             int j1 = SectionPos.sectionToBlockCoord(chunkpos.z, l);
+                             float f = (float)(
+@@ -71,13 +_,14 @@
+     }
+ 
+     private Vector3f getColor(Heightmap.Types p_113574_) {
+-        return switch(p_113574_) {
++        return switch (p_113574_) {
+             case WORLD_SURFACE_WG -> new Vector3f(1.0F, 1.0F, 0.0F);
+             case OCEAN_FLOOR_WG -> new Vector3f(1.0F, 0.0F, 1.0F);
+             case WORLD_SURFACE -> new Vector3f(0.0F, 0.7F, 0.0F);
+             case OCEAN_FLOOR -> new Vector3f(0.0F, 0.0F, 0.5F);
+             case MOTION_BLOCKING -> new Vector3f(0.0F, 0.3F, 0.3F);
+             case MOTION_BLOCKING_NO_LEAVES -> new Vector3f(0.0F, 0.5F, 0.5F);
++            default -> throw new MatchException(null, null);
+         };
+     }
+ }

@@ -1,0 +1,17 @@
+--- a/net/minecraft/server/commands/ForceLoadCommand.java
++++ b/net/minecraft/server/commands/ForceLoadCommand.java
+@@ -167,11 +_,11 @@
+                 ChunkPos chunkpos = null;
+                 int j2 = 0;
+ 
+-                for(int k2 = i1; k2 <= k1; ++k2) {
+-                    for(int l2 = j1; l2 <= l1; ++l2) {
++                for (int k2 = i1; k2 <= k1; k2++) {
++                    for (int l2 = j1; l2 <= l1; l2++) {
+                         boolean flag = serverlevel.setChunkForced(k2, l2, p_137689_);
+                         if (flag) {
+-                            ++j2;
++                            j2++;
+                             if (chunkpos == null) {
+                                 chunkpos = new ChunkPos(k2, l2);
+                             }

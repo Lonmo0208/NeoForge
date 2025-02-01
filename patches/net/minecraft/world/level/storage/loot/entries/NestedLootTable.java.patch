@@ -1,0 +1,43 @@
+--- a/net/minecraft/world/level/storage/loot/entries/NestedLootTable.java
++++ b/net/minecraft/world/level/storage/loot/entries/NestedLootTable.java
+@@ -2,6 +_,7 @@
+ 
+ import com.mojang.datafixers.util.Either;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -18,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+ 
+ public class NestedLootTable extends LootPoolSingletonContainer {
+-    public static final Codec<NestedLootTable> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<NestedLootTable> CODEC = RecordCodecBuilder.mapCodec(
+         p_335330_ -> p_335330_.group(
+                     Codec.either(ResourceKey.codec(Registries.LOOT_TABLE), LootTable.DIRECT_CODEC).fieldOf("value").forGetter(p_331842_ -> p_331842_.contents)
+                 )
+@@ -42,7 +_,10 @@
+     @Override
+     public void createItemStack(Consumer<ItemStack> p_331038_, LootContext p_331648_) {
+         this.contents
+-            .map(p_335324_ -> p_331648_.getResolver().get(Registries.LOOT_TABLE, p_335324_).map(Holder::value).orElse(LootTable.EMPTY), p_330212_ -> p_330212_)
++            .map(
++                p_335324_ -> p_331648_.getResolver().get(Registries.LOOT_TABLE, (ResourceKey<LootTable>)p_335324_).map(Holder::value).orElse(LootTable.EMPTY),
++                p_330212_ -> (LootTable)p_330212_
++            )
+             .getRandomItemsRaw(p_331648_, p_331038_);
+     }
+ 
+@@ -61,9 +_,9 @@
+         this.contents
+             .ifLeft(
+                 p_335332_ -> p_330583_.resolver()
+-                        .get(Registries.LOOT_TABLE, p_335332_)
++                        .get(Registries.LOOT_TABLE, (ResourceKey<LootTable>)p_335332_)
+                         .ifPresentOrElse(
+-                            p_335327_ -> ((LootTable)p_335327_.value()).validate(p_330583_.enterElement("->{" + p_335332_.location() + "}", p_335332_)),
++                            p_339565_ -> p_339565_.value().validate(p_330583_.enterElement("->{" + p_335332_.location() + "}", (ResourceKey<?>)p_335332_)),
+                             () -> p_330583_.reportProblem("Unknown loot table called " + p_335332_.location())
+                         )
+             )

@@ -1,0 +1,27 @@
+--- a/net/minecraft/data/advancements/packs/UpdateOneTwentyOneAdventureAdvancements.java
++++ b/net/minecraft/data/advancements/packs/UpdateOneTwentyOneAdventureAdvancements.java
+@@ -35,7 +_,6 @@
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.block.CopperBulbBlock;
+ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+-import net.minecraft.world.level.levelgen.structure.Structure;
+ 
+ public class UpdateOneTwentyOneAdventureAdvancements implements AdvancementSubProvider {
+     @Override
+@@ -61,7 +_,7 @@
+             .addCriterion(
+                 "minecraft_trials_edition",
+                 PlayerTrigger.TriggerInstance.located(
+-                    LocationPredicate.Builder.inStructure(p_314658_.<Structure>lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.TRIAL_CHAMBERS))
++                    LocationPredicate.Builder.inStructure(p_314658_.lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.TRIAL_CHAMBERS))
+                 )
+             )
+             .save(p_314518_, "adventure/minecraft_trials_edition");
+@@ -193,6 +_,7 @@
+                         .dealtDamage(MinMaxBounds.Doubles.atLeast(100.0))
+                         .type(
+                             DamageSourcePredicate.Builder.damageType()
++                                .tag(TagPredicate.is(DamageTypeTags.IS_PLAYER_ATTACK))
+                                 .direct(
+                                     EntityPredicate.Builder.entity()
+                                         .of(EntityType.PLAYER)

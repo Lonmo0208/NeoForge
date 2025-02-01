@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/level/storage/loot/functions/CopyBlockState.java
++++ b/net/minecraft/world/level/storage/loot/functions/CopyBlockState.java
+@@ -2,6 +_,7 @@
+ 
+ import com.google.common.collect.ImmutableSet;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -22,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+ 
+ public class CopyBlockState extends LootItemConditionalFunction {
+-    public static final Codec<CopyBlockState> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<CopyBlockState> CODEC = RecordCodecBuilder.mapCodec(
+         p_298063_ -> commonFields(p_298063_)
+                 .and(
+                     p_298063_.group(
+@@ -64,7 +_,7 @@
+         BlockState blockstate = p_80061_.getParamOrNull(LootContextParams.BLOCK_STATE);
+         if (blockstate != null) {
+             p_80060_.update(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY, p_330174_ -> {
+-                for(Property<?> property : this.properties) {
++                for (Property<?> property : this.properties) {
+                     if (blockstate.hasProperty(property)) {
+                         p_330174_ = p_330174_.with(property, blockstate);
+                     }

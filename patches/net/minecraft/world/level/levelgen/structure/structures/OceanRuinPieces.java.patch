@@ -1,0 +1,46 @@
+--- a/net/minecraft/world/level/levelgen/structure/structures/OceanRuinPieces.java
++++ b/net/minecraft/world/level/levelgen/structure/structures/OceanRuinPieces.java
+@@ -180,7 +_,7 @@
+         List<BlockPos> list = allPositions(p_228989_, blockpos2);
+         int i = Mth.nextInt(p_228989_, 4, 8);
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             if (!list.isEmpty()) {
+                 int k = p_228989_.nextInt(list.size());
+                 BlockPos blockpos3 = list.remove(k);
+@@ -217,7 +_,7 @@
+         boolean p_229008_,
+         float p_229009_
+     ) {
+-        switch(p_229007_.biomeTemp) {
++        switch (p_229007_.biomeTemp) {
+             case WARM:
+             default:
+                 ResourceLocation resourcelocation = p_229008_ ? getBigWarmRuin(p_229006_) : getSmallWarmRuin(p_229006_);
+@@ -365,14 +_,14 @@
+             int k = i - 1;
+             int l = 0;
+ 
+-            for(BlockPos blockpos : BlockPos.betweenClosed(p_229042_, p_229044_)) {
++            for (BlockPos blockpos : BlockPos.betweenClosed(p_229042_, p_229044_)) {
+                 int i1 = blockpos.getX();
+                 int j1 = blockpos.getZ();
+                 int k1 = p_229042_.getY() - 1;
+                 BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(i1, k1, j1);
+                 BlockState blockstate = p_229043_.getBlockState(blockpos$mutableblockpos);
+ 
+-                for(FluidState fluidstate = p_229043_.getFluidState(blockpos$mutableblockpos);
++                for (FluidState fluidstate = p_229043_.getFluidState(blockpos$mutableblockpos);
+                     (blockstate.isAir() || fluidstate.is(FluidTags.WATER) || blockstate.is(BlockTags.ICE)) && k1 > p_229043_.getMinBuildHeight() + 1;
+                     fluidstate = p_229043_.getFluidState(blockpos$mutableblockpos)
+                 ) {
+@@ -382,7 +_,7 @@
+ 
+                 j = Math.min(j, k1);
+                 if (k1 < k - 2) {
+-                    ++l;
++                    l++;
+                 }
+             }
+ 

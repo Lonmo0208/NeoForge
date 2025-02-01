@@ -1,0 +1,43 @@
+--- a/net/minecraft/world/item/ExperienceBottleItem.java
++++ b/net/minecraft/world/item/ExperienceBottleItem.java
+@@ -1,15 +_,18 @@
+ package net.minecraft.world.item;
+ 
++import net.minecraft.core.Direction;
++import net.minecraft.core.Position;
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.stats.Stats;
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.InteractionResultHolder;
+ import net.minecraft.world.entity.player.Player;
++import net.minecraft.world.entity.projectile.Projectile;
+ import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
+ import net.minecraft.world.level.Level;
+ 
+-public class ExperienceBottleItem extends Item {
++public class ExperienceBottleItem extends Item implements ProjectileItem {
+     public ExperienceBottleItem(Item.Properties p_41194_) {
+         super(p_41194_);
+     }
+@@ -37,5 +_,20 @@
+         p_41197_.awardStat(Stats.ITEM_USED.get(this));
+         itemstack.consume(1, p_41197_);
+         return InteractionResultHolder.sidedSuccess(itemstack, p_41196_.isClientSide());
++    }
++
++    @Override
++    public Projectile asProjectile(Level p_338868_, Position p_338766_, ItemStack p_338321_, Direction p_338772_) {
++        ThrownExperienceBottle thrownexperiencebottle = new ThrownExperienceBottle(p_338868_, p_338766_.x(), p_338766_.y(), p_338766_.z());
++        thrownexperiencebottle.setItem(p_338321_);
++        return thrownexperiencebottle;
++    }
++
++    @Override
++    public ProjectileItem.DispenseConfig createDispenseConfig() {
++        return ProjectileItem.DispenseConfig.builder()
++            .uncertainty(ProjectileItem.DispenseConfig.DEFAULT.uncertainty() * 0.5F)
++            .power(ProjectileItem.DispenseConfig.DEFAULT.power() * 1.25F)
++            .build();
+     }
+ }

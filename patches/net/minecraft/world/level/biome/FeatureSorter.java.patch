@@ -1,0 +1,62 @@
+--- a/net/minecraft/world/level/biome/FeatureSorter.java
++++ b/net/minecraft/world/level/biome/FeatureSorter.java
+@@ -38,19 +_,19 @@
+         Map<FeatureData, Set<FeatureData>> map = new TreeMap<>(comparator);
+         int i = 0;
+ 
+-        for(T t : p_220604_) {
++        for (T t : p_220604_) {
+             List<FeatureData> list = Lists.newArrayList();
+             List<HolderSet<PlacedFeature>> list1 = p_220605_.apply(t);
+             i = Math.max(i, list1.size());
+ 
+-            for(int j = 0; j < list1.size(); ++j) {
+-                for(Holder<PlacedFeature> holder : list1.get(j)) {
++            for (int j = 0; j < list1.size(); j++) {
++                for (Holder<PlacedFeature> holder : list1.get(j)) {
+                     PlacedFeature placedfeature = holder.value();
+                     list.add(new FeatureData(object2intmap.computeIfAbsent(placedfeature, p_220609_ -> mutableint.getAndIncrement()), j, placedfeature));
+                 }
+             }
+ 
+-            for(int k = 0; k < list.size(); ++k) {
++            for (int k = 0; k < list.size(); k++) {
+                 Set<FeatureData> set2 = map.computeIfAbsent(list.get(k), p_220602_ -> new TreeSet<>(comparator));
+                 if (k < list.size() - 1) {
+                     set2.add(list.get(k + 1));
+@@ -62,7 +_,7 @@
+         Set<FeatureData> set1 = new TreeSet<>(comparator);
+         List<FeatureData> list2 = Lists.newArrayList();
+ 
+-        for(FeatureData featuresorter$1featuredata : map.keySet()) {
++        for (FeatureData featuresorter$1featuredata : map.keySet()) {
+             if (!set1.isEmpty()) {
+                 throw new IllegalStateException("You somehow broke the universe; DFS bork (iteration finished with non-empty in-progress vertex set");
+             }
+@@ -79,7 +_,7 @@
+                     j1 = list3.size();
+                     ListIterator<T> listiterator = list3.listIterator();
+ 
+-                    while(listiterator.hasNext()) {
++                    while (listiterator.hasNext()) {
+                         T t1 = listiterator.next();
+                         listiterator.remove();
+ 
+@@ -91,7 +_,7 @@
+ 
+                         listiterator.add(t1);
+                     }
+-                } while(j1 != list3.size());
++                } while (j1 != list3.size());
+ 
+                 throw new IllegalStateException("Feature order cycle found, involved sources: " + list3);
+             }
+@@ -100,7 +_,7 @@
+         Collections.reverse(list2);
+         Builder<FeatureSorter.StepFeatureData> builder = ImmutableList.builder();
+ 
+-        for(int l = 0; l < i; ++l) {
++        for (int l = 0; l < i; l++) {
+             int i1 = l;
+             List<PlacedFeature> list4 = list2.stream().filter(p_220599_ -> p_220599_.step() == i1).map(FeatureData::feature).collect(Collectors.toList());
+             builder.add(new FeatureSorter.StepFeatureData(list4));

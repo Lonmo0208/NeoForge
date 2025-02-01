@@ -1,0 +1,26 @@
+--- a/net/minecraft/tags/TagNetworkSerialization.java
++++ b/net/minecraft/tags/TagNetworkSerialization.java
+@@ -31,11 +_,11 @@
+ 
+     private static <T> TagNetworkSerialization.NetworkPayload serializeToNetwork(Registry<T> p_203943_) {
+         Map<ResourceLocation, IntList> map = new HashMap<>();
+-        p_203943_.getTags().forEach(p_203947_ -> {
+-            HolderSet<T> holderset = p_203947_.getSecond();
++        p_203943_.getTags().forEach(p_339471_ -> {
++            HolderSet<T> holderset = p_339471_.getSecond();
+             IntList intlist = new IntArrayList(holderset.size());
+ 
+-            for(Holder<T> holder : holderset) {
++            for (Holder<T> holder : holderset) {
+                 if (holder.kind() != Holder.Kind.REFERENCE) {
+                     throw new IllegalStateException("Can't serialize unregistered value " + holder);
+                 }
+@@ -43,7 +_,7 @@
+                 intlist.add(p_203943_.getId(holder.value()));
+             }
+ 
+-            map.put(p_203947_.getFirst().location(), intlist);
++            map.put(p_339471_.getFirst().location(), intlist);
+         });
+         return new TagNetworkSerialization.NetworkPayload(map);
+     }

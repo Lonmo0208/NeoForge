@@ -1,0 +1,56 @@
+--- a/net/minecraft/world/item/AdventureModePredicate.java
++++ b/net/minecraft/world/item/AdventureModePredicate.java
+@@ -23,13 +_,13 @@
+     private static final Codec<AdventureModePredicate> SIMPLE_CODEC = BlockPredicate.CODEC
+         .flatComapMap(p_330742_ -> new AdventureModePredicate(List.of(p_330742_), true), p_330884_ -> DataResult.error(() -> "Cannot encode"));
+     private static final Codec<AdventureModePredicate> FULL_CODEC = RecordCodecBuilder.create(
+-        p_330689_ -> p_330689_.group(
++        p_337904_ -> p_337904_.group(
+                     ExtraCodecs.nonEmptyList(BlockPredicate.CODEC.listOf()).fieldOf("predicates").forGetter(p_331329_ -> p_331329_.predicates),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(AdventureModePredicate::showInTooltip)
++                    Codec.BOOL.optionalFieldOf("show_in_tooltip", Boolean.valueOf(true)).forGetter(AdventureModePredicate::showInTooltip)
+                 )
+-                .apply(p_330689_, AdventureModePredicate::new)
++                .apply(p_337904_, AdventureModePredicate::new)
+     );
+-    public static final Codec<AdventureModePredicate> CODEC = ExtraCodecs.withAlternative(FULL_CODEC, SIMPLE_CODEC);
++    public static final Codec<AdventureModePredicate> CODEC = Codec.withAlternative(FULL_CODEC, SIMPLE_CODEC);
+     public static final StreamCodec<RegistryFriendlyByteBuf, AdventureModePredicate> STREAM_CODEC = StreamCodec.composite(
+         BlockPredicate.STREAM_CODEC.apply(ByteBufCodecs.list()),
+         p_331439_ -> p_331439_.predicates,
+@@ -82,9 +_,9 @@
+             this.lastCheckedBlock = p_331911_;
+             this.checksBlockEntity = false;
+ 
+-            for(BlockPredicate blockpredicate : this.predicates) {
++            for (BlockPredicate blockpredicate : this.predicates) {
+                 if (blockpredicate.matches(p_331911_)) {
+-                    this.checksBlockEntity |= blockpredicate.requiresNbt();
++                    this.checksBlockEntity = this.checksBlockEntity | blockpredicate.requiresNbt();
+                     this.lastResult = true;
+                     return true;
+                 }
+@@ -104,7 +_,7 @@
+     }
+ 
+     private static List<Component> computeTooltip(List<BlockPredicate> p_332164_) {
+-        for(BlockPredicate blockpredicate : p_332164_) {
++        for (BlockPredicate blockpredicate : p_332164_) {
+             if (blockpredicate.blocks().isEmpty()) {
+                 return List.of(UNKNOWN_USE);
+             }
+@@ -125,11 +_,10 @@
+     public boolean equals(Object p_330844_) {
+         if (this == p_330844_) {
+             return true;
+-        } else if (!(p_330844_ instanceof AdventureModePredicate)) {
+-            return false;
+         } else {
+-            AdventureModePredicate adventuremodepredicate = (AdventureModePredicate)p_330844_;
+-            return this.predicates.equals(adventuremodepredicate.predicates) && this.showInTooltip == adventuremodepredicate.showInTooltip;
++            return !(p_330844_ instanceof AdventureModePredicate adventuremodepredicate)
++                ? false
++                : this.predicates.equals(adventuremodepredicate.predicates) && this.showInTooltip == adventuremodepredicate.showInTooltip;
+         }
+     }
+ 

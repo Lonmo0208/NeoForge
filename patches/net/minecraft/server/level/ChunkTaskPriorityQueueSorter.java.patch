@@ -1,0 +1,40 @@
+--- a/net/minecraft/server/level/ChunkTaskPriorityQueueSorter.java
++++ b/net/minecraft/server/level/ChunkTaskPriorityQueueSorter.java
+@@ -32,7 +_,7 @@
+ 
+     public ChunkTaskPriorityQueueSorter(List<ProcessorHandle<?>> p_140555_, Executor p_140556_, int p_140557_) {
+         this.queues = p_140555_.stream()
+-            .collect(Collectors.toMap(Function.identity(), p_140561_ -> new ChunkTaskPriorityQueue(p_140561_.name() + "_queue", p_140557_)));
++            .collect(Collectors.toMap(Function.identity(), p_140561_ -> new ChunkTaskPriorityQueue<>(p_140561_.name() + "_queue", p_140557_)));
+         this.sleeping = Sets.newHashSet(p_140555_);
+         this.mailbox = new ProcessorMailbox<>(new StrictQueue.FixedPriorityQueue(4), p_140556_, "sorter");
+     }
+@@ -146,7 +_,7 @@
+                 CompletableFuture.allOf(stream.map(p_143172_ -> p_143172_.map(p_140647_::ask, p_143180_ -> {
+                         p_143180_.run();
+                         return CompletableFuture.completedFuture(Unit.INSTANCE);
+-                    })).toArray(p_212890_ -> new CompletableFuture[p_212890_])).thenAccept(p_212894_ -> this.pollTask(p_140646_, p_140647_));
++                    })).toArray(CompletableFuture[]::new)).thenAccept(p_212894_ -> this.pollTask(p_140646_, p_140647_));
+             }
+         }));
+     }
+@@ -162,16 +_,16 @@
+ 
+     @VisibleForTesting
+     public String getDebugStatus() {
+-        return (String)this.queues
++        return this.queues
+                 .entrySet()
+                 .stream()
+                 .map(
+                     p_212898_ -> p_212898_.getKey().name()
+                             + "=["
+-                            + (String)p_212898_.getValue()
++                            + p_212898_.getValue()
+                                 .getAcquired()
+                                 .stream()
+-                                .map(p_212896_ -> p_212896_ + ":" + new ChunkPos(p_212896_))
++                                .map(p_339451_ -> p_339451_ + ":" + new ChunkPos(p_339451_))
+                                 .collect(Collectors.joining(","))
+                             + "]"
+                 )

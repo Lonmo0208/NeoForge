@@ -1,0 +1,26 @@
+--- a/net/minecraft/client/renderer/entity/GridCarrierEntityRenderer.java
++++ /dev/null
+@@ -1,23 +_,0 @@
+-package net.minecraft.client.renderer.entity;
+-
+-import com.mojang.blaze3d.vertex.PoseStack;
+-import net.minecraft.client.renderer.MultiBufferSource;
+-import net.minecraft.client.renderer.texture.TextureAtlas;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.world.grid.GridCarrier;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class GridCarrierEntityRenderer extends EntityRenderer<GridCarrier> {
+-    public GridCarrierEntityRenderer(EntityRendererProvider.Context p_341951_) {
+-        super(p_341951_);
+-    }
+-
+-    public void render(GridCarrier p_341543_, float p_340369_, float p_342366_, PoseStack p_341956_, MultiBufferSource p_341134_, int p_342223_) {
+-    }
+-
+-    public ResourceLocation getTextureLocation(GridCarrier p_342537_) {
+-        return TextureAtlas.LOCATION_BLOCKS;
+-    }
+-}

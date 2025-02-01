@@ -1,0 +1,101 @@
+--- a/net/minecraft/client/renderer/SectionOcclusionGraph.java
++++ b/net/minecraft/client/renderer/SectionOcclusionGraph.java
+@@ -76,7 +_,7 @@
+     }
+ 
+     public void addSectionsInFrustum(Frustum p_294180_, List<SectionRenderDispatcher.RenderSection> p_296160_) {
+-        for(SectionOcclusionGraph.Node sectionocclusiongraph$node : this.currentGraph.get().storage().renderSections) {
++        for (SectionOcclusionGraph.Node sectionocclusiongraph$node : this.currentGraph.get().storage().renderSections) {
+             if (p_294180_.isVisible(sectionocclusiongraph$node.section.getBoundingBox())) {
+                 p_296160_.add(sectionocclusiongraph$node.section);
+             }
+@@ -142,7 +_,7 @@
+         if (!sectionocclusiongraph$graphstate.events.sectionsToPropagateFrom.isEmpty()) {
+             Queue<SectionOcclusionGraph.Node> queue = Queues.newArrayDeque();
+ 
+-            while(!sectionocclusiongraph$graphstate.events.sectionsToPropagateFrom.isEmpty()) {
++            while (!sectionocclusiongraph$graphstate.events.sectionsToPropagateFrom.isEmpty()) {
+                 SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = sectionocclusiongraph$graphstate.events
+                     .sectionsToPropagateFrom
+                     .poll();
+@@ -167,7 +_,7 @@
+     private void queueSectionsWithNewNeighbors(SectionOcclusionGraph.GraphState p_296471_) {
+         LongIterator longiterator = p_296471_.events.chunksWhichReceivedNeighbors.iterator();
+ 
+-        while(longiterator.hasNext()) {
++        while (longiterator.hasNext()) {
+             long i = longiterator.nextLong();
+             List<SectionRenderDispatcher.RenderSection> list = p_296471_.storage.chunksWaitingForNeighbors.get(i);
+             if (list != null && list.get(0).hasAllNeighbors()) {
+@@ -200,8 +_,8 @@
+             int i1 = this.viewArea.getViewDistance();
+             List<SectionOcclusionGraph.Node> list = Lists.newArrayList();
+ 
+-            for(int j1 = -i1; j1 <= i1; ++j1) {
+-                for(int k1 = -i1; k1 <= i1; ++k1) {
++            for (int j1 = -i1; j1 <= i1; j1++) {
++                for (int k1 = -i1; k1 <= i1; k1++) {
+                     SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection1 = this.viewArea
+                         .getRenderSectionAt(new BlockPos(k + SectionPos.sectionToBlockCoord(j1, 8), j, l + SectionPos.sectionToBlockCoord(k1, 8)));
+                     if (sectionrenderdispatcher$rendersection1 != null && this.isInViewDistance(blockpos, sectionrenderdispatcher$rendersection1.getOrigin())) {
+@@ -245,7 +_,7 @@
+         BlockPos blockpos = new BlockPos(Mth.floor(p_294343_.x / 16.0) * 16, Mth.floor(p_294343_.y / 16.0) * 16, Mth.floor(p_294343_.z / 16.0) * 16);
+         BlockPos blockpos1 = blockpos.offset(8, 8, 8);
+ 
+-        while(!p_295598_.isEmpty()) {
++        while (!p_295598_.isEmpty()) {
+             SectionOcclusionGraph.Node sectionocclusiongraph$node = p_295598_.poll();
+             SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = sectionocclusiongraph$node.section;
+             if (p_295507_.renderSections.add(sectionocclusiongraph$node)) {
+@@ -256,7 +_,7 @@
+                 || Math.abs(sectionrenderdispatcher$rendersection.getOrigin().getY() - blockpos.getY()) > 60
+                 || Math.abs(sectionrenderdispatcher$rendersection.getOrigin().getZ() - blockpos.getZ()) > 60;
+ 
+-            for(Direction direction : DIRECTIONS) {
++            for (Direction direction : DIRECTIONS) {
+                 SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection1 = this.getRelativeFrom(
+                     blockpos, sectionrenderdispatcher$rendersection, direction
+                 );
+@@ -265,7 +_,7 @@
+                         SectionRenderDispatcher.CompiledSection sectionrenderdispatcher$compiledsection = sectionrenderdispatcher$rendersection.getCompiled();
+                         boolean flag1 = false;
+ 
+-                        for(int j = 0; j < DIRECTIONS.length; ++j) {
++                        for (int j = 0; j < DIRECTIONS.length; j++) {
+                             if (sectionocclusiongraph$node.hasSourceDirection(j)
+                                 && sectionrenderdispatcher$compiledsection.facesCanSeeEachother(DIRECTIONS[j].getOpposite(), direction)) {
+                                 flag1 = true;
+@@ -289,7 +_,7 @@
+                         Vec3 vec3 = p_294343_.subtract(vec31).normalize().scale(CEILED_SECTION_DIAGONAL);
+                         boolean flag2 = true;
+ 
+-                        while(p_294343_.subtract(vec31).lengthSqr() > 3600.0) {
++                        while (p_294343_.subtract(vec31).lengthSqr() > 3600.0) {
+                             vec31 = vec31.add(vec3);
+                             LevelHeightAccessor levelheightaccessor = this.viewArea.getLevelHeightAccessor();
+                             if (vec31.y > (double)levelheightaccessor.getMaxBuildHeight() || vec31.y < (double)levelheightaccessor.getMinBuildHeight()) {
+@@ -324,7 +_,7 @@
+                         } else if (this.isInViewDistance(blockpos, sectionrenderdispatcher$rendersection1.getOrigin())) {
+                             p_295507_.sectionToNodeMap.put(sectionrenderdispatcher$rendersection1, sectionocclusiongraph$node2);
+                             p_295507_.chunksWaitingForNeighbors
+-                                .computeIfAbsent(ChunkPos.asLong(sectionrenderdispatcher$rendersection1.getOrigin()), p_294377_ -> new ArrayList())
++                                .computeIfAbsent(ChunkPos.asLong(sectionrenderdispatcher$rendersection1.getOrigin()), p_294377_ -> new ArrayList<>())
+                                 .add(sectionrenderdispatcher$rendersection1);
+                         }
+                     }
+@@ -431,12 +_,9 @@
+ 
+         @Override
+         public boolean equals(Object p_295498_) {
+-            if (!(p_295498_ instanceof SectionOcclusionGraph.Node)) {
+-                return false;
+-            } else {
+-                SectionOcclusionGraph.Node sectionocclusiongraph$node = (SectionOcclusionGraph.Node)p_295498_;
+-                return this.section.getOrigin().equals(sectionocclusiongraph$node.section.getOrigin());
+-            }
++            return !(p_295498_ instanceof SectionOcclusionGraph.Node sectionocclusiongraph$node)
++                ? false
++                : this.section.getOrigin().equals(sectionocclusiongraph$node.section.getOrigin());
+         }
+     }
+ 

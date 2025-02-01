@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/datafix/fixes/BlockStateData.java
++++ b/net/minecraft/util/datafix/fixes/BlockStateData.java
+@@ -25,7 +_,7 @@
+             BLOCK_DEFAULTS[i] = dynamic;
+         }
+ 
+-        for(String s : p_14945_) {
++        for (String s : p_14945_) {
+             Dynamic<?> dynamic1 = parse(s);
+             String s1 = dynamic1.get("Name").asString("");
+             ID_BY_OLD_NAME.putIfAbsent(s1, p_14943_);
+@@ -34,7 +_,7 @@
+     }
+ 
+     private static void finalizeMaps() {
+-        for(int i = 0; i < MAP.length; ++i) {
++        for (int i = 0; i < MAP.length; i++) {
+             if (MAP[i] == null) {
+                 MAP[i] = BLOCK_DEFAULTS[i >> 4];
+             }

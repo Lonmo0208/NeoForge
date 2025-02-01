@@ -1,0 +1,22 @@
+--- a/net/minecraft/util/datafix/fixes/ItemIdFix.java
++++ b/net/minecraft/util/datafix/fixes/ItemIdFix.java
+@@ -12,7 +_,6 @@
+ import com.mojang.datafixers.util.Pair;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+-import java.util.function.Function;
+ import net.minecraft.util.datafix.schemas.NamespacedSchema;
+ 
+ public class ItemIdFix extends DataFix {
+@@ -357,10 +_,7 @@
+             p_15947_ -> p_15947_.update(
+                     opticfinder,
+                     type1,
+-                    p_145386_ -> p_145386_.map(
+-                            p_145390_ -> Pair.of(References.ITEM_NAME.typeName(), getItem(p_145390_)),
+-                            (Function<? super Pair<String, String>, ? extends Pair<String, String>>)(p_145388_ -> p_145388_)
+-                        )
++                    p_145386_ -> p_145386_.map(p_145390_ -> Pair.of(References.ITEM_NAME.typeName(), getItem(p_145390_)), p_145388_ -> p_145388_)
+                 )
+         );
+     }

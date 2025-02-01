@@ -1,0 +1,29 @@
+--- a/net/minecraft/data/structures/SnbtToNbt.java
++++ b/net/minecraft/data/structures/SnbtToNbt.java
+@@ -42,7 +_,7 @@
+     private CompoundTag applyFilters(String p_126461_, CompoundTag p_126462_) {
+         CompoundTag compoundtag = p_126462_;
+ 
+-        for(SnbtToNbt.Filter snbttonbt$filter : this.filters) {
++        for (SnbtToNbt.Filter snbttonbt$filter : this.filters) {
+             compoundtag = snbttonbt$filter.apply(p_126461_, compoundtag);
+         }
+ 
+@@ -54,7 +_,7 @@
+         Path path = this.output.getOutputFolder();
+         List<CompletableFuture<?>> list = Lists.newArrayList();
+ 
+-        for(Path path1 : this.inputFolders) {
++        for (Path path1 : this.inputFolders) {
+             list.add(
+                 CompletableFuture.<CompletableFuture>supplyAsync(
+                         () -> {
+@@ -65,7 +_,7 @@
+                                         stream.filter(p_126464_ -> p_126464_.toString().endsWith(".snbt")).map(p_253432_ -> CompletableFuture.runAsync(() -> {
+                                                 SnbtToNbt.TaskResult snbttonbt$taskresult = this.readStructure(p_253432_, this.getName(path1, p_253432_));
+                                                 this.storeStructureIfChanged(p_254336_, snbttonbt$taskresult, path);
+-                                            }, Util.backgroundExecutor())).toArray(p_253433_ -> new CompletableFuture[p_253433_])
++                                            }, Util.backgroundExecutor())).toArray(CompletableFuture[]::new)
+                                     );
+                                 }
+             

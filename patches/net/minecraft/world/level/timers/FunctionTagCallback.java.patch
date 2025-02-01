@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/timers/FunctionTagCallback.java
++++ b/net/minecraft/world/level/timers/FunctionTagCallback.java
+@@ -17,7 +_,7 @@
+     public void handle(MinecraftServer p_82199_, TimerQueue<MinecraftServer> p_82200_, long p_82201_) {
+         ServerFunctionManager serverfunctionmanager = p_82199_.getFunctions();
+ 
+-        for(CommandFunction<CommandSourceStack> commandfunction : serverfunctionmanager.getTag(this.tagId)) {
++        for (CommandFunction<CommandSourceStack> commandfunction : serverfunctionmanager.getTag(this.tagId)) {
+             serverfunctionmanager.execute(commandfunction, serverfunctionmanager.getGameLoopSender());
+         }
+     }

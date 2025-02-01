@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/tutorial/CraftPlanksTutorialStep.java
++++ b/net/minecraft/client/tutorial/CraftPlanksTutorialStep.java
+@@ -28,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        ++this.timeWaiting;
++        this.timeWaiting++;
+         if (!this.tutorial.isSurvival()) {
+             this.tutorial.setStep(TutorialSteps.NONE);
+         } else {
+@@ -70,7 +_,7 @@
+     }
+ 
+     public static boolean hasCraftedPlanksPreviously(LocalPlayer p_205663_, TagKey<Item> p_205664_) {
+-        for(Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(p_205664_)) {
++        for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(p_205664_)) {
+             if (p_205663_.getStats().getValue(Stats.ITEM_CRAFTED.get(holder.value())) > 0) {
+                 return true;
+             }

@@ -1,0 +1,31 @@
+--- a/net/minecraft/commands/arguments/item/ItemParser.java
++++ b/net/minecraft/commands/arguments/item/ItemParser.java
+@@ -16,7 +_,6 @@
+ import java.util.Map.Entry;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.function.Function;
+-import net.minecraft.Util;
+ import net.minecraft.commands.SharedSuggestionProvider;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.HolderLookup;
+@@ -140,7 +_,7 @@
+             this.visitor.visitSuggestions(this::suggestComponentAssignment);
+             Set<DataComponentType<?>> set = new ReferenceArraySet<>();
+ 
+-            while(this.reader.canRead() && this.reader.peek() != ']') {
++            while (this.reader.canRead() && this.reader.peek() != ']') {
+                 this.reader.skipWhitespace();
+                 DataComponentType<?> datacomponenttype = readComponentType(this.reader);
+                 if (!set.add(datacomponenttype)) {
+@@ -191,9 +_,9 @@
+             int i = this.reader.getCursor();
+             Tag tag = new TagParser(this.reader).readValue();
+             DataResult<T> dataresult = p_335594_.codecOrThrow().parse(ItemParser.this.registryOps, tag);
+-            this.visitor.visitComponent(p_335594_, Util.getOrThrow(dataresult, p_335772_ -> {
++            this.visitor.visitComponent(p_335594_, dataresult.getOrThrow(p_339324_ -> {
+                 this.reader.setCursor(i);
+-                return ItemParser.ERROR_MALFORMED_COMPONENT.createWithContext(this.reader, p_335594_.toString(), p_335772_);
++                return ItemParser.ERROR_MALFORMED_COMPONENT.createWithContext(this.reader, p_335594_.toString(), p_339324_);
+             }));
+         }
+ 

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/debug/RaidDebugRenderer.java
++++ b/net/minecraft/client/renderer/debug/RaidDebugRenderer.java
+@@ -29,7 +_,7 @@
+     public void render(PoseStack p_113652_, MultiBufferSource p_113653_, double p_113654_, double p_113655_, double p_113656_) {
+         BlockPos blockpos = this.getCamera().getBlockPosition();
+ 
+-        for(BlockPos blockpos1 : this.raidCenters) {
++        for (BlockPos blockpos1 : this.raidCenters) {
+             if (blockpos.closerThan(blockpos1, 160.0)) {
+                 highlightRaidCenter(p_113652_, p_113653_, blockpos1);
+             }

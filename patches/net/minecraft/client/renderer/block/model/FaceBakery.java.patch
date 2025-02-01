@@ -16,3 +16,57 @@
      }
  
      public static BlockFaceUV recomputeUVs(BlockFaceUV p_111582_, Direction p_111583_, Transformation p_111584_, ResourceLocation p_111585_) {
+@@ -112,7 +_,7 @@
+     ) {
+         int[] aint = new int[32];
+ 
+-        for(int i = 0; i < 4; ++i) {
++        for (int i = 0; i < 4; i++) {
+             this.bakeVertex(aint, i, p_111576_, p_111574_, p_111577_, p_111575_, p_111578_, p_111579_, p_111580_);
+         }
+ 
+@@ -162,7 +_,7 @@
+         if (p_254150_ != null) {
+             Vector3f vector3f;
+             Vector3f vector3f1;
+-            switch(p_254150_.axis()) {
++            switch (p_254150_.axis()) {
+                 case X:
+                     vector3f = new Vector3f(1.0F, 0.0F, 0.0F);
+                     vector3f1 = new Vector3f(0.0F, 1.0F, 1.0F);
+@@ -221,7 +_,7 @@
+             Direction direction = null;
+             float f = 0.0F;
+ 
+-            for(Direction direction1 : Direction.values()) {
++            for (Direction direction1 : Direction.values()) {
+                 Vec3i vec3i = direction1.getNormal();
+                 Vector3f vector3f6 = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
+                 float f1 = vector3f5.dot(vector3f6);
+@@ -246,7 +_,7 @@
+         afloat[FaceInfo.Constants.MAX_Y] = -999.0F;
+         afloat[FaceInfo.Constants.MAX_Z] = -999.0F;
+ 
+-        for(int i = 0; i < 4; ++i) {
++        for (int i = 0; i < 4; i++) {
+             int j = 8 * i;
+             float f = Float.intBitsToFloat(aint[j]);
+             float f1 = Float.intBitsToFloat(aint[j + 1]);
+@@ -278,7 +_,7 @@
+ 
+         FaceInfo faceinfo = FaceInfo.fromFacing(p_111632_);
+ 
+-        for(int i1 = 0; i1 < 4; ++i1) {
++        for (int i1 = 0; i1 < 4; i1++) {
+             int j1 = 8 * i1;
+             FaceInfo.VertexInfo faceinfo$vertexinfo = faceinfo.getVertexInfo(i1);
+             float f8 = afloat[faceinfo$vertexinfo.xFace];
+@@ -288,7 +_,7 @@
+             p_111631_[j1 + 1] = Float.floatToRawIntBits(f3);
+             p_111631_[j1 + 2] = Float.floatToRawIntBits(f4);
+ 
+-            for(int k = 0; k < 4; ++k) {
++            for (int k = 0; k < 4; k++) {
+                 int l = 8 * k;
+                 float f5 = Float.intBitsToFloat(aint[l]);
+                 float f6 = Float.intBitsToFloat(aint[l + 1]);

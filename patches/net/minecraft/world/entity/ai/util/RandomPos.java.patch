@@ -1,0 +1,45 @@
+--- a/net/minecraft/world/entity/ai/util/RandomPos.java
++++ b/net/minecraft/world/entity/ai/util/RandomPos.java
+@@ -45,7 +_,7 @@
+         } else {
+             BlockPos blockpos = p_148546_.above();
+ 
+-            while(blockpos.getY() < p_148547_ && p_148548_.test(blockpos)) {
++            while (blockpos.getY() < p_148547_ && p_148548_.test(blockpos)) {
+                 blockpos = blockpos.above();
+             }
+ 
+@@ -62,17 +_,19 @@
+         } else {
+             BlockPos blockpos = p_26948_.above();
+ 
+-            while(blockpos.getY() < p_26950_ && p_26951_.test(blockpos)) {
++            while (blockpos.getY() < p_26950_ && p_26951_.test(blockpos)) {
+                 blockpos = blockpos.above();
+             }
+ 
+-            BlockPos blockpos1;
+-            BlockPos blockpos2;
+-            for(blockpos1 = blockpos; blockpos1.getY() < p_26950_ && blockpos1.getY() - blockpos.getY() < p_26949_; blockpos1 = blockpos2) {
+-                blockpos2 = blockpos1.above();
++            BlockPos blockpos1 = blockpos;
++
++            while (blockpos1.getY() < p_26950_ && blockpos1.getY() - blockpos.getY() < p_26949_) {
++                BlockPos blockpos2 = blockpos1.above();
+                 if (p_26951_.test(blockpos2)) {
+                     break;
+                 }
++
++                blockpos1 = blockpos2;
+             }
+ 
+             return blockpos1;
+@@ -89,7 +_,7 @@
+         double d0 = Double.NEGATIVE_INFINITY;
+         BlockPos blockpos = null;
+ 
+-        for(int i = 0; i < 10; ++i) {
++        for (int i = 0; i < 10; i++) {
+             BlockPos blockpos1 = p_148562_.get();
+             if (blockpos1 != null) {
+                 double d1 = p_148563_.applyAsDouble(blockpos1);

@@ -1,0 +1,35 @@
+--- a/net/minecraft/network/protocol/game/DebugPackets.java
++++ b/net/minecraft/network/protocol/game/DebugPackets.java
+@@ -112,12 +_,12 @@
+         Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> map = p_179496_.getBrain().getMemories();
+         List<String> list = Lists.newArrayList();
+ 
+-        for(Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : map.entrySet()) {
++        for (Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : map.entrySet()) {
+             MemoryModuleType<?> memorymoduletype = entry.getKey();
+             Optional<? extends ExpirableValue<?>> optional = entry.getValue();
+             String s;
+             if (optional.isPresent()) {
+-                ExpirableValue<?> expirablevalue = optional.get();
++                ExpirableValue<?> expirablevalue = (ExpirableValue<?>)optional.get();
+                 Object object = expirablevalue.getValue();
+                 if (memorymoduletype == MemoryModuleType.HEARD_BELL_TIME) {
+                     long i = p_179497_ - (Long)object;
+@@ -164,7 +_,7 @@
+         } else {
+             List<String> list = Lists.newArrayList();
+ 
+-            for(Object object : (Iterable)p_179494_) {
++            for (Object object : (Iterable)p_179494_) {
+                 list.add(getShortDescription(p_179493_, object));
+             }
+ 
+@@ -175,7 +_,7 @@
+     private static void sendPacketToAllPlayers(ServerLevel p_133692_, CustomPacketPayload p_296119_) {
+         Packet<?> packet = new ClientboundCustomPayloadPacket(p_296119_);
+ 
+-        for(ServerPlayer serverplayer : p_133692_.players()) {
++        for (ServerPlayer serverplayer : p_133692_.players()) {
+             serverplayer.connection.send(packet);
+         }
+     }

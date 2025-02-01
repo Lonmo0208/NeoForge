@@ -1,0 +1,22 @@
+--- a/net/minecraft/data/models/model/TextureMapping.java
++++ b/net/minecraft/data/models/model/TextureMapping.java
+@@ -42,7 +_,7 @@
+     }
+ 
+     public ResourceLocation get(TextureSlot p_125757_) {
+-        for(TextureSlot textureslot = p_125757_; textureslot != null; textureslot = textureslot.getParent()) {
++        for (TextureSlot textureslot = p_125757_; textureslot != null; textureslot = textureslot.getParent()) {
+             ResourceLocation resourcelocation = this.slots.get(textureslot);
+             if (resourcelocation != null) {
+                 return resourcelocation;
+@@ -327,10 +_,6 @@
+ 
+     public static TextureMapping campfire(Block p_125737_) {
+         return new TextureMapping().put(TextureSlot.LIT_LOG, getBlockTexture(p_125737_, "_log_lit")).put(TextureSlot.FIRE, getBlockTexture(p_125737_, "_fire"));
+-    }
+-
+-    public static TextureMapping fryingTable(Block p_341456_) {
+-        return new TextureMapping().put(TextureSlot.FRYING_TABLE, getBlockTexture(p_341456_));
+     }
+ 
+     public static TextureMapping candleCake(Block p_181477_, boolean p_181478_) {

@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/level/levelgen/synth/ImprovedNoise.java
++++ b/net/minecraft/world/level/levelgen/synth/ImprovedNoise.java
+@@ -17,11 +_,11 @@
+         this.zo = p_230499_.nextDouble() * 256.0;
+         this.p = new byte[256];
+ 
+-        for(int i = 0; i < 256; ++i) {
++        for (int i = 0; i < 256; i++) {
+             this.p[i] = (byte)i;
+         }
+ 
+-        for(int k = 0; k < 256; ++k) {
++        for (int k = 0; k < 256; k++) {
+             int j = p_230499_.nextInt(256 - k);
+             byte b0 = this.p[k];
+             this.p[k] = this.p[k + j];

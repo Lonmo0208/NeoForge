@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/animal/allay/AllayAi.java
++++ b/net/minecraft/world/entity/animal/allay/AllayAi.java
+@@ -11,7 +_,6 @@
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.util.valueproviders.UniformInt;
+-import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.ai.Brain;
+ import net.minecraft.world.entity.ai.behavior.AnimalPanic;
+@@ -145,8 +_,7 @@
+         if (!level.isClientSide() && level instanceof ServerLevel serverlevel) {
+             Optional<UUID> optional = p_218411_.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
+             if (optional.isPresent()) {
+-                Entity entity = serverlevel.getEntity(optional.get());
+-                if (entity instanceof ServerPlayer serverplayer
++                if (serverlevel.getEntity(optional.get()) instanceof ServerPlayer serverplayer
+                     && (serverplayer.gameMode.isSurvival() || serverplayer.gameMode.isCreative())
+                     && serverplayer.closerThan(p_218411_, 64.0)) {
+                     return Optional.of(serverplayer);

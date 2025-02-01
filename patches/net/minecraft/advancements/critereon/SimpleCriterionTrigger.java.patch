@@ -1,0 +1,20 @@
+--- a/net/minecraft/advancements/critereon/SimpleCriterionTrigger.java
++++ b/net/minecraft/advancements/critereon/SimpleCriterionTrigger.java
+@@ -45,7 +_,7 @@
+             LootContext lootcontext = EntityPredicate.createContext(p_66235_, p_66235_);
+             List<CriterionTrigger.Listener<T>> list = null;
+ 
+-            for(CriterionTrigger.Listener<T> listener : set) {
++            for (CriterionTrigger.Listener<T> listener : set) {
+                 T t = listener.trigger();
+                 if (p_66236_.test(t)) {
+                     Optional<ContextAwarePredicate> optional = t.player();
+@@ -60,7 +_,7 @@
+             }
+ 
+             if (list != null) {
+-                for(CriterionTrigger.Listener<T> listener1 : list) {
++                for (CriterionTrigger.Listener<T> listener1 : list) {
+                     listener1.run(playeradvancements);
+                 }
+             }

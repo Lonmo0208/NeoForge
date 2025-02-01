@@ -1,0 +1,61 @@
+--- a/net/minecraft/advancements/critereon/ThrowLubricatedTrigger.java
++++ /dev/null
+@@ -1,58 +_,0 @@
+-package net.minecraft.advancements.critereon;
+-
+-import com.mojang.serialization.Codec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import java.util.Optional;
+-import net.minecraft.advancements.CriteriaTriggers;
+-import net.minecraft.advancements.Criterion;
+-import net.minecraft.core.component.DataComponents;
+-import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.util.ExtraCodecs;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.level.block.entity.LubricationComponent;
+-
+-public class ThrowLubricatedTrigger extends SimpleCriterionTrigger<ThrowLubricatedTrigger.TriggerInstance> {
+-    @Override
+-    public Codec<ThrowLubricatedTrigger.TriggerInstance> codec() {
+-        return ThrowLubricatedTrigger.TriggerInstance.CODEC;
+-    }
+-
+-    public void trigger(ServerPlayer p_342452_, ItemStack p_340649_) {
+-        this.trigger(p_342452_, p_340596_ -> p_340596_.matches(p_340649_));
+-    }
+-
+-    public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> itemPredicate, int minLubrication)
+-        implements SimpleCriterionTrigger.SimpleInstance {
+-        public static final Codec<ThrowLubricatedTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+-            p_341217_ -> p_341217_.group(
+-                        ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(ThrowLubricatedTrigger.TriggerInstance::player),
+-                        ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item_predicate").forGetter(ThrowLubricatedTrigger.TriggerInstance::itemPredicate),
+-                        Codec.INT.fieldOf("min_lubrication").forGetter(ThrowLubricatedTrigger.TriggerInstance::minLubrication)
+-                    )
+-                    .apply(p_341217_, ThrowLubricatedTrigger.TriggerInstance::new)
+-        );
+-
+-        public static Criterion<ThrowLubricatedTrigger.TriggerInstance> thrownWithAtLeast(int p_341978_) {
+-            return CriteriaTriggers.THROW_LUBRICATED.createCriterion(new ThrowLubricatedTrigger.TriggerInstance(Optional.empty(), Optional.empty(), p_341978_));
+-        }
+-
+-        public static Criterion<ThrowLubricatedTrigger.TriggerInstance> thrownWithAtLeast(ItemPredicate p_340627_, int p_341603_) {
+-            return CriteriaTriggers.THROW_LUBRICATED
+-                .createCriterion(new ThrowLubricatedTrigger.TriggerInstance(Optional.empty(), Optional.of(p_340627_), p_341603_));
+-        }
+-
+-        public boolean matches(ItemStack p_341797_) {
+-            if (this.itemPredicate.isPresent() && !this.itemPredicate.get().matches(p_341797_)) {
+-                return false;
+-            } else {
+-                LubricationComponent lubricationcomponent = p_341797_.get(DataComponents.LUBRICATION);
+-                if (lubricationcomponent == null) {
+-                    return false;
+-                } else {
+-                    return lubricationcomponent.getLevel() >= this.minLubrication;
+-                }
+-            }
+-        }
+-    }
+-}

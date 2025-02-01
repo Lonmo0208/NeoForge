@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/chat/FormattedText.java
++++ b/net/minecraft/network/chat/FormattedText.java
+@@ -59,7 +_,7 @@
+         return new FormattedText() {
+             @Override
+             public <T> Optional<T> visit(FormattedText.ContentConsumer<T> p_130805_) {
+-                for(FormattedText formattedtext : p_130769_) {
++                for (FormattedText formattedtext : p_130769_) {
+                     Optional<T> optional = formattedtext.visit(p_130805_);
+                     if (optional.isPresent()) {
+                         return optional;
+@@ -71,7 +_,7 @@
+ 
+             @Override
+             public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> p_130807_, Style p_130808_) {
+-                for(FormattedText formattedtext : p_130769_) {
++                for (FormattedText formattedtext : p_130769_) {
+                     Optional<T> optional = formattedtext.visit(p_130807_, p_130808_);
+                     if (optional.isPresent()) {
+                         return optional;

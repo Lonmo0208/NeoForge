@@ -1,6 +1,6 @@
 --- a/net/minecraft/CrashReport.java
 +++ b/net/minecraft/CrashReport.java
-@@ -59,14 +_,8 @@
+@@ -59,21 +_,16 @@
          if (this.uncategorizedStackTrace != null && this.uncategorizedStackTrace.length > 0) {
              p_127520_.append("-- Head --\n");
              p_127520_.append("Thread: ").append(Thread.currentThread().getName()).append("\n");
@@ -16,8 +16,9 @@
 +            p_127520_.append(net.neoforged.neoforge.logging.CrashReportExtender.generateEnhancedStackTrace(this.uncategorizedStackTrace));
          }
  
-         for(CrashReportCategory crashreportcategory : this.details) {
-@@ -74,6 +_,7 @@
+-        for(CrashReportCategory crashreportcategory : this.details) {
++        for (CrashReportCategory crashreportcategory : this.details) {
+             crashreportcategory.getDetails(p_127520_);
              p_127520_.append("\n\n");
          }
  
@@ -51,3 +52,21 @@
          stringbuilder.append("// ");
          stringbuilder.append(getErrorComment());
          stringbuilder.append("\n\n");
+@@ -122,7 +_,7 @@
+         stringbuilder.append(this.getExceptionMessage());
+         stringbuilder.append("\n\nA detailed walkthrough of the error, its code path and all known details is as follows:\n");
+ 
+-        for(int i = 0; i < 87; ++i) {
++        for (int i = 0; i < 87; i++) {
+             stringbuilder.append("-");
+         }
+ 
+@@ -249,7 +_,7 @@
+     }
+ 
+     public static CrashReport forThrowable(Throwable p_127522_, String p_127523_) {
+-        while(p_127522_ instanceof CompletionException && p_127522_.getCause() != null) {
++        while (p_127522_ instanceof CompletionException && p_127522_.getCause() != null) {
+             p_127522_ = p_127522_.getCause();
+         }
+ 

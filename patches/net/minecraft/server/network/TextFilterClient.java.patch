@@ -1,0 +1,29 @@
+--- a/net/minecraft/server/network/TextFilterClient.java
++++ b/net/minecraft/server/network/TextFilterClient.java
+@@ -210,7 +_,7 @@
+         } else {
+             FilterMask filtermask = new FilterMask(p_243283_.length());
+ 
+-            for(int i = 0; i < p_243222_.size(); ++i) {
++            for (int i = 0; i < p_243222_.size(); i++) {
+                 filtermask.setFiltered(p_243222_.get(i).getAsInt());
+             }
+ 
+@@ -226,7 +_,7 @@
+     private void drainStream(InputStream p_10146_) throws IOException {
+         byte[] abyte = new byte[1024];
+ 
+-        while(p_10146_.read(abyte) != -1) {
++        while (p_10146_.read(abyte) != -1) {
+         }
+     }
+ 
+@@ -306,7 +_,7 @@
+         }
+ 
+         static TextFilterClient.IgnoreStrategy select(int p_143745_) {
+-            return switch(p_143745_) {
++            return switch (p_143745_) {
+                 case -1 -> NEVER_IGNORE;
+                 case 0 -> IGNORE_FULLY_FILTERED;
+                 default -> ignoreOverThreshold(p_143745_);

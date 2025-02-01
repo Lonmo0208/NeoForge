@@ -1,0 +1,16 @@
+--- a/net/minecraft/client/model/HorseModel.java
++++ b/net/minecraft/client/model/HorseModel.java
+@@ -177,11 +_,11 @@
+         boolean flag = p_102785_.isSaddled();
+         boolean flag1 = p_102785_.isVehicle();
+ 
+-        for(ModelPart modelpart : this.saddleParts) {
++        for (ModelPart modelpart : this.saddleParts) {
+             modelpart.visible = flag;
+         }
+ 
+-        for(ModelPart modelpart1 : this.ridingParts) {
++        for (ModelPart modelpart1 : this.ridingParts) {
+             modelpart1.visible = flag1 && flag;
+         }
+ 

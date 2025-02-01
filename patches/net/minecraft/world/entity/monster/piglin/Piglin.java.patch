@@ -1,5 +1,15 @@
 --- a/net/minecraft/world/entity/monster/piglin/Piglin.java
 +++ b/net/minecraft/world/entity/monster/piglin/Piglin.java
+@@ -153,8 +_,7 @@
+     @Override
+     protected void dropCustomDeathLoot(DamageSource p_34697_, int p_34698_, boolean p_34699_) {
+         super.dropCustomDeathLoot(p_34697_, p_34698_, p_34699_);
+-        Entity entity = p_34697_.getEntity();
+-        if (entity instanceof Creeper creeper && creeper.canDropMobsSkull()) {
++        if (p_34697_.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
+             ItemStack itemstack = new ItemStack(Items.PIGLIN_HEAD);
+             creeper.increaseDroppedSkulls();
+             this.spawnAtLocation(itemstack);
 @@ -350,7 +_,7 @@
          } else if (this.isChargingCrossbow()) {
              return PiglinArmPose.CROSSBOW_CHARGE;

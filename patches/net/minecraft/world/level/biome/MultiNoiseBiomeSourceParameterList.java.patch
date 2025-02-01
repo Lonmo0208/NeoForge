@@ -1,0 +1,53 @@
+--- a/net/minecraft/world/level/biome/MultiNoiseBiomeSourceParameterList.java
++++ b/net/minecraft/world/level/biome/MultiNoiseBiomeSourceParameterList.java
+@@ -48,7 +_,11 @@
+         return MultiNoiseBiomeSourceParameterList.Preset.BY_NAME
+             .values()
+             .stream()
+-            .collect(Collectors.toMap(p_275210_ -> p_275210_, p_275480_ -> p_275480_.provider().apply(p_275406_ -> p_275406_)));
++            .collect(
++                Collectors.toMap(
++                    p_275210_ -> (MultiNoiseBiomeSourceParameterList.Preset)p_275210_, p_275480_ -> p_275480_.provider().apply(p_275406_ -> p_275406_)
++                )
++            );
+     }
+ 
+     public static record Preset(ResourceLocation id, MultiNoiseBiomeSourceParameterList.Preset.SourceProvider provider) {
+@@ -69,33 +_,16 @@
+                 }
+             }
+         );
+-        public static final MultiNoiseBiomeSourceParameterList.Preset POTATO = new MultiNoiseBiomeSourceParameterList.Preset(
+-            new ResourceLocation("potato"),
+-            new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
+-                @Override
+-                public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> p_275530_) {
+-                    return new Climate.ParameterList<>(
+-                        List.of(
+-                            Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), p_275530_.apply(Biomes.FIELDS)),
+-                            Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), p_275530_.apply(Biomes.ARBORETUM)),
+-                            Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), p_275530_.apply(Biomes.HASH)),
+-                            Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), p_275530_.apply(Biomes.WASTELAND)),
+-                            Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), p_275530_.apply(Biomes.CORRUPTION))
+-                        )
+-                    );
+-                }
+-            }
+-        );
+         public static final MultiNoiseBiomeSourceParameterList.Preset OVERWORLD = new MultiNoiseBiomeSourceParameterList.Preset(
+             new ResourceLocation("overworld"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
+                 @Override
+-                public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> p_341297_) {
+-                    return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(p_341297_);
++                public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> p_275530_) {
++                    return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(p_275530_);
+                 }
+             }
+         );
+-        static final Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset> BY_NAME = Stream.of(NETHER, OVERWORLD, POTATO)
+-            .collect(Collectors.toMap(MultiNoiseBiomeSourceParameterList.Preset::id, p_275365_ -> p_275365_));
++        static final Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset> BY_NAME = Stream.of(NETHER, OVERWORLD)
++            .collect(Collectors.toMap(MultiNoiseBiomeSourceParameterList.Preset::id, p_275365_ -> (MultiNoiseBiomeSourceParameterList.Preset)p_275365_));
+         public static final Codec<MultiNoiseBiomeSourceParameterList.Preset> CODEC = ResourceLocation.CODEC
+             .flatXmap(
+                 p_275567_ -> Optional.ofNullable(BY_NAME.get(p_275567_))

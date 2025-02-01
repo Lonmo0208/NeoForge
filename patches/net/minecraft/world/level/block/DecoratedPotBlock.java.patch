@@ -1,0 +1,62 @@
+--- a/net/minecraft/world/level/block/DecoratedPotBlock.java
++++ b/net/minecraft/world/level/block/DecoratedPotBlock.java
+@@ -9,7 +_,6 @@
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+-import net.minecraft.core.RegistryAccess;
+ import net.minecraft.core.component.DataComponents;
+ import net.minecraft.core.particles.ParticleTypes;
+ import net.minecraft.network.chat.CommonComponents;
+@@ -104,8 +_,7 @@
+     protected ItemInteractionResult useItemOn(
+         ItemStack p_316569_, BlockState p_316562_, Level p_316177_, BlockPos p_316898_, Player p_316632_, InteractionHand p_316424_, BlockHitResult p_316345_
+     ) {
+-        BlockEntity $$9 = p_316177_.getBlockEntity(p_316898_);
+-        if ($$9 instanceof DecoratedPotBlockEntity decoratedpotblockentity) {
++        if (p_316177_.getBlockEntity(p_316898_) instanceof DecoratedPotBlockEntity decoratedpotblockentity) {
+             if (p_316177_.isClientSide) {
+                 return ItemInteractionResult.CONSUME;
+             } else {
+@@ -156,8 +_,7 @@
+ 
+     @Override
+     protected InteractionResult useWithoutItem(BlockState p_316866_, Level p_316544_, BlockPos p_316541_, Player p_316732_, BlockHitResult p_316860_) {
+-        BlockEntity blockentity = p_316544_.getBlockEntity(p_316541_);
+-        if (blockentity instanceof DecoratedPotBlockEntity decoratedpotblockentity) {
++        if (p_316544_.getBlockEntity(p_316541_) instanceof DecoratedPotBlockEntity decoratedpotblockentity) {
+             p_316544_.playSound(null, p_316541_, SoundEvents.DECORATED_POT_INSERT_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F);
+             decoratedpotblockentity.wobble(DecoratedPotBlockEntity.WobbleStyle.NEGATIVE);
+             p_316544_.gameEvent(p_316732_, GameEvent.BLOCK_CHANGE, p_316541_);
+@@ -199,7 +_,7 @@
+         BlockEntity blockentity = p_287582_.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+         if (blockentity instanceof DecoratedPotBlockEntity decoratedpotblockentity) {
+             p_287582_.withDynamicDrop(SHERDS_DYNAMIC_DROP_ID, p_330132_ -> {
+-                for(Item item : decoratedpotblockentity.getDecorations().ordered()) {
++                for (Item item : decoratedpotblockentity.getDecorations().ordered()) {
+                     p_330132_.accept(item.getDefaultInstance());
+                 }
+             });
+@@ -231,10 +_,8 @@
+     }
+ 
+     @Override
+-    public void appendHoverText(
+-        ItemStack p_285238_, @Nullable BlockGetter p_285450_, List<Component> p_285448_, TooltipFlag p_284997_, @Nullable RegistryAccess p_324019_
+-    ) {
+-        super.appendHoverText(p_285238_, p_285450_, p_285448_, p_284997_, p_324019_);
++    public void appendHoverText(ItemStack p_285238_, Item.TooltipContext p_339662_, List<Component> p_285448_, TooltipFlag p_284997_) {
++        super.appendHoverText(p_285238_, p_339662_, p_285448_, p_284997_);
+         PotDecorations potdecorations = p_285238_.getOrDefault(DataComponents.POT_DECORATIONS, PotDecorations.EMPTY);
+         if (!potdecorations.equals(PotDecorations.EMPTY)) {
+             p_285448_.add(CommonComponents.EMPTY);
+@@ -254,8 +_,7 @@
+ 
+     @Override
+     public ItemStack getCloneItemStack(LevelReader p_304622_, BlockPos p_294412_, BlockState p_294723_) {
+-        BlockEntity blockentity = p_304622_.getBlockEntity(p_294412_);
+-        return blockentity instanceof DecoratedPotBlockEntity decoratedpotblockentity
++        return p_304622_.getBlockEntity(p_294412_) instanceof DecoratedPotBlockEntity decoratedpotblockentity
+             ? decoratedpotblockentity.getPotAsItem()
+             : super.getCloneItemStack(p_304622_, p_294412_, p_294723_);
+     }

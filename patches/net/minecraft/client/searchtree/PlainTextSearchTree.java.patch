@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/searchtree/PlainTextSearchTree.java
++++ b/net/minecraft/client/searchtree/PlainTextSearchTree.java
+@@ -19,7 +_,7 @@
+         } else {
+             SuffixArray<T> suffixarray = new SuffixArray<>();
+ 
+-            for(T t : p_235198_) {
++            for (T t : p_235198_) {
+                 p_235199_.apply(t).forEach(p_235194_ -> suffixarray.add(t, p_235194_.toLowerCase(Locale.ROOT)));
+             }
+ 

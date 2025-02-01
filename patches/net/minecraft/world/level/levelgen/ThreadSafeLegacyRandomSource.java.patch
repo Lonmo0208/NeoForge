@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/ThreadSafeLegacyRandomSource.java
++++ b/net/minecraft/world/level/levelgen/ThreadSafeLegacyRandomSource.java
+@@ -38,7 +_,7 @@
+         do {
+             i = this.seed.get();
+             j = i * 25214903917L + 11L & 281474976710655L;
+-        } while(!this.seed.compareAndSet(i, j));
++        } while (!this.seed.compareAndSet(i, j));
+ 
+         return (int)(j >>> 48 - p_224668_);
+     }

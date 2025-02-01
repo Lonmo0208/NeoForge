@@ -1,0 +1,45 @@
+--- a/net/minecraft/world/item/enchantment/Enchantments.java
++++ b/net/minecraft/world/item/enchantment/Enchantments.java
+@@ -111,7 +_,7 @@
+         "sharpness",
+         new DamageEnchantment(
+             Enchantment.definition(
+-                ItemTags.WEAPON_ENCHANTABLE,
++                ItemTags.SHARP_WEAPON_ENCHANTABLE,
+                 ItemTags.SWORD_ENCHANTABLE,
+                 10,
+                 5,
+@@ -165,7 +_,7 @@
+         "fire_aspect",
+         new Enchantment(
+             Enchantment.definition(
+-                ItemTags.SWORD_ENCHANTABLE, 2, 2, Enchantment.dynamicCost(10, 20), Enchantment.dynamicCost(60, 20), 4, EquipmentSlot.MAINHAND
++                ItemTags.FIRE_ASPECT_ENCHANTABLE, 2, 2, Enchantment.dynamicCost(10, 20), Enchantment.dynamicCost(60, 20), 4, EquipmentSlot.MAINHAND
+             )
+         )
+     );
+@@ -213,14 +_,6 @@
+             )
+         )
+     );
+-    public static final Enchantment POTATOFICATION = register(
+-        "potatofication",
+-        new Enchantment(
+-            Enchantment.definition(
+-                ItemTags.MINING_ENCHANTABLE, 10, 5, Enchantment.dynamicCost(1, 10), Enchantment.dynamicCost(16, 10), 1, EquipmentSlot.MAINHAND
+-            )
+-        )
+-    );
+     public static final Enchantment POWER = register(
+         "power",
+         new Enchantment(
+@@ -308,6 +_,9 @@
+             )
+         )
+     );
++    public static final Enchantment DENSITY = register("density", new DensityEnchantment());
++    public static final Enchantment BREACH = register("breach", new BreachEnchantment());
++    public static final Enchantment WIND_BURST = register("wind_burst", new WindBurstEnchantment());
+     public static final Enchantment MENDING = register(
+         "mending",
+         new MendingEnchantment(

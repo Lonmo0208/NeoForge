@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/datafix/fixes/HorseBodyArmorItemFix.java
++++ b/net/minecraft/util/datafix/fixes/HorseBodyArmorItemFix.java
+@@ -16,7 +_,7 @@
+     protected <T> Dynamic<T> fix(Dynamic<T> p_324321_) {
+         Optional<? extends Dynamic<?>> optional = p_324321_.get(this.previousBodyArmorTag).result();
+         if (optional.isPresent()) {
+-            Dynamic<?> dynamic = optional.get();
++            Dynamic<?> dynamic = (Dynamic<?>)optional.get();
+             Dynamic<T> dynamic1 = p_324321_.remove(this.previousBodyArmorTag);
+             dynamic1 = dynamic1.set("body_armor_item", dynamic);
+             return dynamic1.set("body_armor_drop_chance", p_324321_.createFloat(2.0F));

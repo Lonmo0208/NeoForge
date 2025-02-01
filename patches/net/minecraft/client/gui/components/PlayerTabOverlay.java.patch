@@ -1,0 +1,86 @@
+--- a/net/minecraft/client/gui/components/PlayerTabOverlay.java
++++ b/net/minecraft/client/gui/components/PlayerTabOverlay.java
+@@ -106,7 +_,7 @@
+         int j = 0;
+         int k = 0;
+ 
+-        for(PlayerInfo playerinfo : list) {
++        for (PlayerInfo playerinfo : list) {
+             Component component = this.getNameForDisplay(playerinfo);
+             j = Math.max(j, this.minecraft.font.width(component));
+             int l = 0;
+@@ -139,8 +_,8 @@
+         int k2 = j2;
+ 
+         int l2;
+-        for(l2 = 1; k2 > 20; k2 = (j2 + l2 - 1) / l2) {
+-            ++l2;
++        for (l2 = 1; k2 > 20; k2 = (j2 + l2 - 1) / l2) {
++            l2++;
+         }
+ 
+         boolean flag2 = this.minecraft.isLocalServer() || this.minecraft.getConnection().getConnection().isEncrypted();
+@@ -163,7 +_,7 @@
+         if (this.header != null) {
+             list2 = this.minecraft.font.split(this.header, p_283602_ - 50);
+ 
+-            for(FormattedCharSequence formattedcharsequence : list2) {
++            for (FormattedCharSequence formattedcharsequence : list2) {
+                 i4 = Math.max(i4, this.minecraft.font.width(formattedcharsequence));
+             }
+         }
+@@ -172,7 +_,7 @@
+         if (this.footer != null) {
+             list3 = this.minecraft.font.split(this.footer, p_283602_ - 50);
+ 
+-            for(FormattedCharSequence formattedcharsequence1 : list3) {
++            for (FormattedCharSequence formattedcharsequence1 : list3) {
+                 i4 = Math.max(i4, this.minecraft.font.width(formattedcharsequence1));
+             }
+         }
+@@ -180,19 +_,19 @@
+         if (list2 != null) {
+             p_281484_.fill(p_283602_ / 2 - i4 / 2 - 1, l3 - 1, p_283602_ / 2 + i4 / 2 + 1, l3 + list2.size() * 9, Integer.MIN_VALUE);
+ 
+-            for(FormattedCharSequence formattedcharsequence2 : list2) {
++            for (FormattedCharSequence formattedcharsequence2 : list2) {
+                 int j1 = this.minecraft.font.width(formattedcharsequence2);
+                 p_281484_.drawString(this.minecraft.font, formattedcharsequence2, p_283602_ / 2 - j1 / 2, l3, -1);
+                 l3 += 9;
+             }
+ 
+-            ++l3;
++            l3++;
+         }
+ 
+         p_281484_.fill(p_283602_ / 2 - i4 / 2 - 1, l3 - 1, p_283602_ / 2 + i4 / 2 + 1, l3 + k2 * 9, Integer.MIN_VALUE);
+         int j4 = this.minecraft.options.getBackgroundColor(553648127);
+ 
+-        for(int k4 = 0; k4 < j2; ++k4) {
++        for (int k4 = 0; k4 < j2; k4++) {
+             int l4 = k4 / k2;
+             int k1 = k4 % k2;
+             int l1 = k3 + l4 * j3 + l4 * 5;
+@@ -230,7 +_,7 @@
+             l3 += k2 * 9 + 1;
+             p_281484_.fill(p_283602_ / 2 - i4 / 2 - 1, l3 - 1, p_283602_ / 2 + i4 / 2 + 1, l3 + list3.size() * 9, Integer.MIN_VALUE);
+ 
+-            for(FormattedCharSequence formattedcharsequence3 : list3) {
++            for (FormattedCharSequence formattedcharsequence3 : list3) {
+                 int i5 = this.minecraft.font.width(formattedcharsequence3);
+                 p_281484_.drawString(this.minecraft.font, formattedcharsequence3, p_283602_ / 2 - i5 / 2, l3, -1);
+                 l3 += 9;
+@@ -295,11 +_,11 @@
+             } else {
+                 ResourceLocation resourcelocation = flag ? HEART_CONTAINER_BLINKING_SPRITE : HEART_CONTAINER_SPRITE;
+ 
+-                for(int l = i; l < j; ++l) {
++                for (int l = i; l < j; l++) {
+                     p_281723_.blitSprite(resourcelocation, p_283173_ + l * k, p_282904_, 9, 9);
+                 }
+ 
+-                for(int i1 = 0; i1 < i; ++i1) {
++                for (int i1 = 0; i1 < i; i1++) {
+                     p_281723_.blitSprite(resourcelocation, p_283173_ + i1 * k, p_282904_, 9, 9);
+                     if (flag) {
+                         if (i1 * 2 + 1 < playertaboverlay$healthstate.displayedValue()) {

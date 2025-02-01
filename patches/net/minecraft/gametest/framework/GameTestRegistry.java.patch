@@ -59,7 +59,15 @@
          String s4 = gametest.batch();
          Rotation rotation = StructureUtils.getRotationForRotationSteps(gametest.rotationSteps());
          return new TestFunction(
-@@ -135,7 +_,9 @@
+@@ -128,14 +_,16 @@
+             gametest.requiredSuccesses(),
+             gametest.attempts(),
+             gametest.skyAccess(),
+-            (Consumer<net.minecraft.gametest.framework.GameTestHelper>)turnMethodIntoConsumer(p_177516_)
++            (Consumer<GameTestHelper>)turnMethodIntoConsumer(p_177516_)
+         );
+     }
+ 
      private static Consumer<?> turnMethodIntoConsumer(Method p_177520_) {
          return p_177512_ -> {
              try {

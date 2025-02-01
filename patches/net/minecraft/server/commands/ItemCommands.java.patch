@@ -1,0 +1,38 @@
+--- a/net/minecraft/server/commands/ItemCommands.java
++++ b/net/minecraft/server/commands/ItemCommands.java
+@@ -92,7 +_,7 @@
+                                                                         )
+                                                                 )
+                                                                 .then(
+-                                                                    Commands.argument("count", IntegerArgumentType.integer(1, 64))
++                                                                    Commands.argument("count", IntegerArgumentType.integer(1, 99))
+                                                                         .executes(
+                                                                             p_180381_ -> setBlockItem(
+                                                                                     p_180381_.getSource(),
+@@ -196,7 +_,7 @@
+                                                                         )
+                                                                 )
+                                                                 .then(
+-                                                                    Commands.argument("count", IntegerArgumentType.integer(1, 64))
++                                                                    Commands.argument("count", IntegerArgumentType.integer(1, 99))
+                                                                         .executes(
+                                                                             p_180369_ -> setEntityItem(
+                                                                                     p_180369_.getSource(),
+@@ -350,7 +_,7 @@
+     private static int modifyEntityItem(CommandSourceStack p_180337_, Collection<? extends Entity> p_180338_, int p_180339_, Holder<LootItemFunction> p_335904_) throws CommandSyntaxException {
+         Map<Entity, ItemStack> map = Maps.newHashMapWithExpectedSize(p_180338_.size());
+ 
+-        for(Entity entity : p_180338_) {
++        for (Entity entity : p_180338_) {
+             SlotAccess slotaccess = entity.getSlot(p_180339_);
+             if (slotaccess != SlotAccess.NULL) {
+                 ItemStack itemstack = applyModifier(p_180337_, p_335904_, slotaccess.get().copy());
+@@ -408,7 +_,7 @@
+     private static int setEntityItem(CommandSourceStack p_180332_, Collection<? extends Entity> p_180333_, int p_180334_, ItemStack p_180335_) throws CommandSyntaxException {
+         List<Entity> list = Lists.newArrayListWithCapacity(p_180333_.size());
+ 
+-        for(Entity entity : p_180333_) {
++        for (Entity entity : p_180333_) {
+             SlotAccess slotaccess = entity.getSlot(p_180334_);
+             if (slotaccess != SlotAccess.NULL && slotaccess.set(p_180335_.copy())) {
+                 list.add(entity);

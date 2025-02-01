@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/gui/screens/CreateFlatWorldScreen.java
++++ b/net/minecraft/client/gui/screens/CreateFlatWorldScreen.java
+@@ -114,7 +_,7 @@
+         public DetailsList() {
+             super(CreateFlatWorldScreen.this.minecraft, CreateFlatWorldScreen.this.width, CreateFlatWorldScreen.this.height - 103, 43, 24);
+ 
+-            for(int i = 0; i < CreateFlatWorldScreen.this.generator.getLayersInfo().size(); ++i) {
++            for (int i = 0; i < CreateFlatWorldScreen.this.generator.getLayersInfo().size(); i++) {
+                 this.addEntry(new CreateFlatWorldScreen.DetailsList.Entry());
+             }
+         }
+@@ -128,7 +_,7 @@
+             int i = this.children().indexOf(this.getSelected());
+             this.clearEntries();
+ 
+-            for(int j = 0; j < CreateFlatWorldScreen.this.generator.getLayersInfo().size(); ++j) {
++            for (int j = 0; j < CreateFlatWorldScreen.this.generator.getLayersInfo().size(); j++) {
+                 this.addEntry(new CreateFlatWorldScreen.DetailsList.Entry());
+             }
+ 

@@ -1,0 +1,66 @@
+--- a/net/minecraft/world/level/block/state/StateDefinition.java
++++ b/net/minecraft/world/level/block/state/StateDefinition.java
+@@ -36,7 +_,7 @@
+         Supplier<S> supplier = () -> p_61052_.apply(p_61053_);
+         MapCodec<S> mapcodec = MapCodec.of(Encoder.empty(), Decoder.unit(supplier));
+ 
+-        for(Entry<String, Property<?>> entry : this.propertiesByName.entrySet()) {
++        for (Entry<String, Property<?>> entry : this.propertiesByName.entrySet()) {
+             mapcodec = appendPropertyCodec(mapcodec, supplier, entry.getKey(), entry.getValue());
+         }
+ 
+@@ -45,7 +_,7 @@
+         List<S> list = Lists.newArrayList();
+         Stream<List<Pair<Property<?>, Comparable<?>>>> stream = Stream.of(Collections.emptyList());
+ 
+-        for(Property<?> property : this.propertiesByName.values()) {
++        for (Property<?> property : this.propertiesByName.values()) {
+             stream = stream.flatMap(p_61072_ -> property.getPossibleValues().stream().map(p_155961_ -> {
+                     List<Pair<Property<?>, Comparable<?>>> list1 = Lists.newArrayList(p_61072_);
+                     list1.add(Pair.of(property, p_155961_));
+@@ -56,7 +_,7 @@
+         stream.forEach(p_325887_ -> {
+             Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2objectarraymap = new Reference2ObjectArrayMap<>(p_325887_.size());
+ 
+-            for(Pair<Property<?>, Comparable<?>> pair : p_325887_) {
++            for (Pair<Property<?>, Comparable<?>> pair : p_325887_) {
+                 reference2objectarraymap.put(pair.getFirst(), pair.getSecond());
+             }
+ 
+@@ -65,7 +_,7 @@
+             list.add(s1);
+         });
+ 
+-        for(S s : list) {
++        for (S s : list) {
+             s.populateNeighbours(map);
+         }
+ 
+@@ -78,7 +_,8 @@
+         return Codec.mapPair(p_61077_, p_61080_.valueCodec().fieldOf(p_61079_).orElseGet(p_187541_ -> {
+             }, () -> p_61080_.value(p_61078_.get())))
+             .xmap(
+-                p_187536_ -> p_187536_.getFirst().setValue(p_61080_, p_187536_.getSecond().value()), p_187533_ -> Pair.of(p_187533_, p_61080_.value(p_187533_))
++                p_187536_ -> p_187536_.getFirst().setValue(p_61080_, p_187536_.getSecond().value()),
++                p_187533_ -> Pair.of((S)p_187533_, p_61080_.value(p_187533_))
+             );
+     }
+ 
+@@ -120,7 +_,7 @@
+         }
+ 
+         public StateDefinition.Builder<O, S> add(Property<?>... p_61105_) {
+-            for(Property<?> property : p_61105_) {
++            for (Property<?> property : p_61105_) {
+                 this.validateProperty(property);
+                 this.properties.put(property.getName(), property);
+             }
+@@ -137,7 +_,7 @@
+                 if (collection.size() <= 1) {
+                     throw new IllegalArgumentException(this.owner + " attempted use property " + s + " with <= 1 possible values");
+                 } else {
+-                    for(T t : collection) {
++                    for (T t : collection) {
+                         String s1 = p_61100_.getName(t);
+                         if (!StateDefinition.NAME_PATTERN.matcher(s1).matches()) {
+                             throw new IllegalArgumentException(this.owner + " has property: " + s + " with invalidly named value: " + s1);

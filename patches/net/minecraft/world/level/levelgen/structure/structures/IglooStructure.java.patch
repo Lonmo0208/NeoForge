@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/structure/structures/IglooStructure.java
++++ b/net/minecraft/world/level/levelgen/structure/structures/IglooStructure.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.structure.structures;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import java.util.Optional;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.world.level.ChunkPos;
+@@ -12,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+ 
+ public class IglooStructure extends Structure {
+-    public static final Codec<IglooStructure> CODEC = simpleCodec(IglooStructure::new);
++    public static final MapCodec<IglooStructure> CODEC = simpleCodec(IglooStructure::new);
+ 
+     public IglooStructure(Structure.StructureSettings p_227593_) {
+         super(p_227593_);

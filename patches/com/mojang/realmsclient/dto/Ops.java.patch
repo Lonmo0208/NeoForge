@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/dto/Ops.java
++++ b/com/mojang/realmsclient/dto/Ops.java
+@@ -21,7 +_,7 @@
+             JsonObject jsonobject = jsonelement.getAsJsonObject();
+             JsonElement jsonelement1 = jsonobject.get("ops");
+             if (jsonelement1.isJsonArray()) {
+-                for(JsonElement jsonelement2 : jsonelement1.getAsJsonArray()) {
++                for (JsonElement jsonelement2 : jsonelement1.getAsJsonArray()) {
+                     ops.ops.add(jsonelement2.getAsString());
+                 }
+             }

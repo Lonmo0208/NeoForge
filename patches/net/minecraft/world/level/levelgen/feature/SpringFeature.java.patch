@@ -1,0 +1,64 @@
+--- a/net/minecraft/world/level/levelgen/feature/SpringFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/SpringFeature.java
+@@ -28,50 +_,50 @@
+                 int i = 0;
+                 int j = 0;
+                 if (worldgenlevel.getBlockState(blockpos.west()).is(springconfiguration.validBlocks)) {
+-                    ++j;
++                    j++;
+                 }
+ 
+                 if (worldgenlevel.getBlockState(blockpos.east()).is(springconfiguration.validBlocks)) {
+-                    ++j;
++                    j++;
+                 }
+ 
+                 if (worldgenlevel.getBlockState(blockpos.north()).is(springconfiguration.validBlocks)) {
+-                    ++j;
++                    j++;
+                 }
+ 
+                 if (worldgenlevel.getBlockState(blockpos.south()).is(springconfiguration.validBlocks)) {
+-                    ++j;
++                    j++;
+                 }
+ 
+                 if (worldgenlevel.getBlockState(blockpos.below()).is(springconfiguration.validBlocks)) {
+-                    ++j;
++                    j++;
+                 }
+ 
+                 int k = 0;
+                 if (worldgenlevel.isEmptyBlock(blockpos.west())) {
+-                    ++k;
++                    k++;
+                 }
+ 
+                 if (worldgenlevel.isEmptyBlock(blockpos.east())) {
+-                    ++k;
++                    k++;
+                 }
+ 
+                 if (worldgenlevel.isEmptyBlock(blockpos.north())) {
+-                    ++k;
++                    k++;
+                 }
+ 
+                 if (worldgenlevel.isEmptyBlock(blockpos.south())) {
+-                    ++k;
++                    k++;
+                 }
+ 
+                 if (worldgenlevel.isEmptyBlock(blockpos.below())) {
+-                    ++k;
++                    k++;
+                 }
+ 
+                 if (j == springconfiguration.rockCount && k == springconfiguration.holeCount) {
+                     worldgenlevel.setBlock(blockpos, springconfiguration.state.createLegacyBlock(), 2);
+                     worldgenlevel.scheduleTick(blockpos, springconfiguration.state.getType(), 0);
+-                    ++i;
++                    i++;
+                 }
+ 
+                 return i > 0;

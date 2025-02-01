@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/searchtree/ResourceLocationSearchTree.java
++++ b/net/minecraft/client/searchtree/ResourceLocationSearchTree.java
+@@ -31,7 +_,7 @@
+             final SuffixArray<T> suffixarray = new SuffixArray<>();
+             final SuffixArray<T> suffixarray1 = new SuffixArray<>();
+ 
+-            for(T t : p_235213_) {
++            for (T t : p_235213_) {
+                 p_235214_.apply(t).forEach(p_235210_ -> {
+                     suffixarray.add(t, p_235210_.getNamespace().toLowerCase(Locale.ROOT));
+                     suffixarray1.add(t, p_235210_.getPath().toLowerCase(Locale.ROOT));

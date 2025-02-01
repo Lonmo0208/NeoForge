@@ -1,0 +1,42 @@
+--- /dev/null
++++ b/net/minecraft/world/effect/OozingMobEffect.java
+@@ -1,0 +_,39 @@
++package net.minecraft.world.effect;
++
++import java.util.function.ToIntFunction;
++import net.minecraft.core.particles.ParticleTypes;
++import net.minecraft.util.RandomSource;
++import net.minecraft.world.entity.Entity;
++import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.LivingEntity;
++import net.minecraft.world.entity.monster.Slime;
++import net.minecraft.world.level.Level;
++
++class OozingMobEffect extends MobEffect {
++    private final ToIntFunction<RandomSource> spawnedCount;
++
++    protected OozingMobEffect(MobEffectCategory p_338567_, int p_338409_, ToIntFunction<RandomSource> p_338888_) {
++        super(p_338567_, p_338409_, ParticleTypes.ITEM_SLIME);
++        this.spawnedCount = p_338888_;
++    }
++
++    @Override
++    public void onMobRemoved(LivingEntity p_338339_, int p_338421_, Entity.RemovalReason p_338677_) {
++        if (p_338677_ == Entity.RemovalReason.KILLED) {
++            int i = this.spawnedCount.applyAsInt(p_338339_.getRandom());
++
++            for (int j = 0; j < i; j++) {
++                this.spawnSlimeOffspring(p_338339_.level(), p_338339_.getX(), p_338339_.getY() + 0.5, p_338339_.getZ());
++            }
++        }
++    }
++
++    private void spawnSlimeOffspring(Level p_338724_, double p_338555_, double p_338811_, double p_338192_) {
++        Slime slime = EntityType.SLIME.create(p_338724_);
++        if (slime != null) {
++            slime.setSize(2, true);
++            slime.moveTo(p_338555_, p_338811_, p_338192_, p_338724_.getRandom().nextFloat() * 360.0F, 0.0F);
++            p_338724_.addFreshEntity(slime);
++        }
++    }
++}

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/structure/pieces/StructurePiecesBuilder.java
++++ b/net/minecraft/world/level/levelgen/structure/pieces/StructurePiecesBuilder.java
+@@ -24,7 +_,7 @@
+ 
+     @Deprecated
+     public void offsetPiecesVertically(int p_192782_) {
+-        for(StructurePiece structurepiece : this.pieces) {
++        for (StructurePiece structurepiece : this.pieces) {
+             structurepiece.move(0, p_192782_, 0);
+         }
+     }

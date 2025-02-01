@@ -1,0 +1,50 @@
+--- a/net/minecraft/core/Vec3i.java
++++ b/net/minecraft/core/Vec3i.java
+@@ -6,14 +_,13 @@
+ import java.util.stream.IntStream;
+ import javax.annotation.concurrent.Immutable;
+ import net.minecraft.Util;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.util.Mth;
+ 
+ @Immutable
+ public class Vec3i implements Comparable<Vec3i> {
+     public static final Codec<Vec3i> CODEC = Codec.INT_STREAM
+         .comapFlatMap(
+-            p_123318_ -> Util.fixedSize(p_123318_, 3).map(p_175586_ -> new Vec3i(p_175586_[0], p_175586_[1], p_175586_[2])),
++            p_337447_ -> Util.fixedSize(p_337447_, 3).map(p_175586_ -> new Vec3i(p_175586_[0], p_175586_[1], p_175586_[2])),
+             p_123313_ -> IntStream.of(p_123313_.getX(), p_123313_.getY(), p_123313_.getZ())
+         );
+     public static final Vec3i ZERO = new Vec3i(0, 0, 0);
+@@ -22,8 +_,7 @@
+     private int z;
+ 
+     public static Codec<Vec3i> offsetCodec(int p_194651_) {
+-        return ExtraCodecs.validate(
+-            CODEC,
++        return CODEC.validate(
+             p_274739_ -> Math.abs(p_274739_.getX()) < p_194651_ && Math.abs(p_274739_.getY()) < p_194651_ && Math.abs(p_274739_.getZ()) < p_194651_
+                     ? DataResult.success(p_274739_)
+                     : DataResult.error(() -> "Position out of range, expected at most " + p_194651_ + ": " + p_274739_)
+@@ -40,17 +_,12 @@
+     public boolean equals(Object p_123327_) {
+         if (this == p_123327_) {
+             return true;
+-        } else if (!(p_123327_ instanceof Vec3i)) {
++        } else if (!(p_123327_ instanceof Vec3i vec3i)) {
++            return false;
++        } else if (this.getX() != vec3i.getX()) {
+             return false;
+         } else {
+-            Vec3i vec3i = (Vec3i)p_123327_;
+-            if (this.getX() != vec3i.getX()) {
+-                return false;
+-            } else if (this.getY() != vec3i.getY()) {
+-                return false;
+-            } else {
+-                return this.getZ() == vec3i.getZ();
+-            }
++            return this.getY() != vec3i.getY() ? false : this.getZ() == vec3i.getZ();
+         }
+     }
+ 

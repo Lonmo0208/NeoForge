@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/decoration/LeashFenceKnotEntity.java
++++ b/net/minecraft/world/entity/decoration/LeashFenceKnotEntity.java
+@@ -87,7 +_,7 @@
+                     Mob.class, new AABB(this.getX() - 7.0, this.getY() - 7.0, this.getZ() - 7.0, this.getX() + 7.0, this.getY() + 7.0, this.getZ() + 7.0)
+                 );
+ 
+-            for(Mob mob : list) {
++            for (Mob mob : list) {
+                 if (mob.getLeashHolder() == p_31842_) {
+                     mob.setLeashedTo(this, true);
+                     flag = true;
+@@ -98,7 +_,7 @@
+             if (!flag) {
+                 this.discard();
+                 if (p_31842_.getAbilities().instabuild) {
+-                    for(Mob mob1 : list) {
++                    for (Mob mob1 : list) {
+                         if (mob1.isLeashed() && mob1.getLeashHolder() == this) {
+                             mob1.dropLeash(true, false);
+                             flag1 = true;
+@@ -125,7 +_,7 @@
+         int j = p_31846_.getY();
+         int k = p_31846_.getZ();
+ 
+-        for(LeashFenceKnotEntity leashfenceknotentity : p_31845_.getEntitiesOfClass(
++        for (LeashFenceKnotEntity leashfenceknotentity : p_31845_.getEntitiesOfClass(
+             LeashFenceKnotEntity.class, new AABB((double)i - 1.0, (double)j - 1.0, (double)k - 1.0, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0)
+         )) {
+             if (leashfenceknotentity.getPos().equals(p_31846_)) {

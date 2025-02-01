@@ -1,0 +1,39 @@
+--- a/net/minecraft/util/datafix/schemas/V3819.java
++++ /dev/null
+@@ -1,36 +_,0 @@
+-package net.minecraft.util.datafix.schemas;
+-
+-import com.mojang.datafixers.schemas.Schema;
+-import com.mojang.datafixers.types.templates.TypeTemplate;
+-import java.util.Map;
+-import java.util.function.Supplier;
+-
+-public class V3819 extends NamespacedSchema {
+-    public V3819(int p_341194_, Schema p_341311_) {
+-        super(p_341194_, p_341311_);
+-    }
+-
+-    @Override
+-    public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema p_342346_) {
+-        Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(p_342346_);
+-        p_342346_.registerSimple(map, "minecraft:big_brain");
+-        p_342346_.registerSimple(map, "minecraft:poisonous_potato_cutter");
+-        p_342346_.registerSimple(map, "minecraft:fletching");
+-        p_342346_.registerSimple(map, "minecraft:potato_refinery");
+-        return map;
+-    }
+-
+-    @Override
+-    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema p_340667_) {
+-        Map<String, Supplier<TypeTemplate>> map = super.registerEntities(p_340667_);
+-        V1460.registerMob(p_340667_, map, "minecraft:batato");
+-        V1460.registerMob(p_340667_, map, "minecraft:toxifin");
+-        V1460.registerMob(p_340667_, map, "minecraft:plaguewhale");
+-        V1460.registerMob(p_340667_, map, "minecraft:poisonous_potato_zombie");
+-        V1460.registerMob(p_340667_, map, "minecraft:mega_spud");
+-        p_340667_.registerSimple(map, "minecraft:grid_carrier");
+-        p_340667_.registerSimple(map, "minecraft:vine_projectile");
+-        p_340667_.registerSimple(map, "minecraft:eye_of_potato");
+-        return map;
+-    }
+-}

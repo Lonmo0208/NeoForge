@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/ChainBlock.java
++++ b/net/minecraft/world/level/block/ChainBlock.java
+@@ -39,7 +_,7 @@
+ 
+     @Override
+     protected VoxelShape getShape(BlockState p_51470_, BlockGetter p_51471_, BlockPos p_51472_, CollisionContext p_51473_) {
+-        switch((Direction.Axis)p_51470_.getValue(AXIS)) {
++        switch ((Direction.Axis)p_51470_.getValue(AXIS)) {
+             case X:
+             default:
+                 return X_AXIS_AABB;

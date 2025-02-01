@@ -1,0 +1,29 @@
+--- a/net/minecraft/commands/functions/StringTemplate.java
++++ b/net/minecraft/commands/functions/StringTemplate.java
+@@ -12,7 +_,7 @@
+         int j = 0;
+         int k = p_306229_.indexOf(36);
+ 
+-        while(k != -1) {
++        while (k != -1) {
+             if (k != i - 1 && p_306229_.charAt(k + 1) == '(') {
+                 builder.add(p_306229_.substring(j, k));
+                 int l = p_306229_.indexOf(41, k + 1);
+@@ -45,7 +_,7 @@
+     }
+ 
+     private static boolean isValidVariableName(String p_306141_) {
+-        for(int i = 0; i < p_306141_.length(); ++i) {
++        for (int i = 0; i < p_306141_.length(); i++) {
+             char c0 = p_306141_.charAt(i);
+             if (!Character.isLetterOrDigit(c0) && c0 != '_') {
+                 return false;
+@@ -58,7 +_,7 @@
+     public String substitute(List<String> p_306329_) {
+         StringBuilder stringbuilder = new StringBuilder();
+ 
+-        for(int i = 0; i < this.variables.size(); ++i) {
++        for (int i = 0; i < this.variables.size(); i++) {
+             stringbuilder.append(this.segments.get(i)).append(p_306329_.get(i));
+             CommandFunction.checkCommandLineLength(stringbuilder);
+         }

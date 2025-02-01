@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/entity/ai/behavior/AnimalPanic.java
++++ b/net/minecraft/world/entity/ai/behavior/AnimalPanic.java
+@@ -23,9 +_,9 @@
+     private static final int PANIC_MAX_DURATION = 120;
+     private static final int PANIC_DISTANCE_HORIZONTAL = 5;
+     private static final int PANIC_DISTANCE_VERTICAL = 4;
+-    private static final Predicate<PathfinderMob> DEFAULT_SHOULD_PANIC_PREDICATE = p_339953_ -> p_339953_.getLastHurtByMob() != null
+-            || p_339953_.isFreezing()
+-            || p_339953_.isOnFire();
++    private static final Predicate<PathfinderMob> DEFAULT_SHOULD_PANIC_PREDICATE = p_337707_ -> p_337707_.getLastHurtByMob() != null
++            || p_337707_.isFreezing()
++            || p_337707_.isOnFire();
+     private final float speedMultiplier;
+     private final Predicate<E> shouldPanic;
+ 

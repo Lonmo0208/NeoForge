@@ -1,0 +1,23 @@
+--- a/net/minecraft/client/gui/screens/reporting/ChatReportScreen.java
++++ b/net/minecraft/client/gui/screens/reporting/ChatReportScreen.java
+@@ -3,6 +_,7 @@
+ import it.unimi.dsi.fastutil.ints.IntSet;
+ import java.util.UUID;
+ import net.minecraft.Optionull;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.MultiLineEditBox;
+ import net.minecraft.client.gui.components.StringWidget;
+@@ -76,8 +_,10 @@
+         this.layout.addChild(CommonLayouts.labeledElement(this.font, this.commentBox, MORE_COMMENTS_LABEL, p_299798_ -> p_299798_.paddingBottom(12)));
+         LinearLayout linearlayout = this.layout.addChild(LinearLayout.horizontal().spacing(8));
+         linearlayout.addChild(Button.builder(CommonComponents.GUI_BACK, p_315825_ -> this.onClose()).width(120).build());
+-        this.sendButton = linearlayout.addChild(Button.builder(SEND_REPORT, p_339481_ -> this.sendReport()).width(120).build());
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.sendButton = linearlayout.addChild(Button.builder(SEND_REPORT, p_329737_ -> this.sendReport()).width(120).build());
++        this.layout.visitWidgets(p_321358_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321358_);
++        });
+         this.repositionElements();
+         this.onReportChanged();
+     }

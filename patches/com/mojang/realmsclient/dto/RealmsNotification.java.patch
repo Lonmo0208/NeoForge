@@ -1,0 +1,20 @@
+--- a/com/mojang/realmsclient/dto/RealmsNotification.java
++++ b/com/mojang/realmsclient/dto/RealmsNotification.java
+@@ -61,7 +_,7 @@
+         List<RealmsNotification> list = new ArrayList<>();
+ 
+         try {
+-            for(JsonElement jsonelement : JsonParser.parseString(p_275464_).getAsJsonObject().get("notifications").getAsJsonArray()) {
++            for (JsonElement jsonelement : JsonParser.parseString(p_275464_).getAsJsonObject().get("notifications").getAsJsonArray()) {
+                 list.add(parse(jsonelement.getAsJsonObject()));
+             }
+         } catch (Exception exception) {
+@@ -81,7 +_,7 @@
+             String s = JsonUtils.getRequiredString("type", p_275549_);
+             RealmsNotification realmsnotification = new RealmsNotification(uuid, flag, flag1, s);
+ 
+-            return (RealmsNotification)(switch(s) {
++            return (RealmsNotification)(switch (s) {
+                 case "visitUrl" -> RealmsNotification.VisitUrl.parse(realmsnotification, p_275549_);
+                 case "infoPopup" -> RealmsNotification.InfoPopup.parse(realmsnotification, p_275549_);
+                 default -> realmsnotification;

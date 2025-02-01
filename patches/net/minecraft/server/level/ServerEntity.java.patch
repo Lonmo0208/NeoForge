@@ -1,8 +1,39 @@
 --- a/net/minecraft/server/level/ServerEntity.java
 +++ b/net/minecraft/server/level/ServerEntity.java
-@@ -99,9 +_,9 @@
-         Entity $$11 = this.entity;
-         if ($$11 instanceof ItemFrame itemframe && this.tickCount % 10 == 0) {
+@@ -16,6 +_,7 @@
+ import net.minecraft.network.protocol.game.ClientGamePacketListener;
+ import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+ import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
++import net.minecraft.network.protocol.game.ClientboundProjectilePowerPacket;
+ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+ import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+@@ -35,6 +_,7 @@
+ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+ import net.minecraft.world.entity.decoration.ItemFrame;
+ import net.minecraft.world.entity.projectile.AbstractArrow;
++import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.MapItem;
+ import net.minecraft.world.level.saveddata.maps.MapId;
+@@ -86,8 +_,8 @@
+             this.broadcast.accept(new ClientboundSetPassengersPacket(this.entity));
+             removedPassengers(list, this.lastPassengers)
+                 .forEach(
+-                    p_339835_ -> {
+-                        if (p_339835_ instanceof ServerPlayer serverplayer1) {
++                    p_337545_ -> {
++                        if (p_337545_ instanceof ServerPlayer serverplayer1) {
+                             serverplayer1.connection
+                                 .teleport(serverplayer1.getX(), serverplayer1.getY(), serverplayer1.getZ(), serverplayer1.getYRot(), serverplayer1.getXRot());
+                         }
+@@ -96,14 +_,13 @@
+             this.lastPassengers = list;
+         }
+ 
+-        Entity $$11 = this.entity;
+-        if ($$11 instanceof ItemFrame itemframe && this.tickCount % 10 == 0) {
++        if (this.entity instanceof ItemFrame itemframe && this.tickCount % 10 == 0) {
              ItemStack itemstack = itemframe.getItem();
 -            if (itemstack.getItem() instanceof MapItem) {
 +            if (true) {
@@ -10,8 +41,39 @@
 -                MapItemSavedData mapitemsaveddata = MapItem.getSavedData(mapid, this.level);
 +                MapItemSavedData mapitemsaveddata = MapItem.getSavedData(itemstack, this.level);
                  if (mapitemsaveddata != null) {
-                     for(ServerPlayer serverplayer : this.level.players()) {
+-                    for(ServerPlayer serverplayer : this.level.players()) {
++                    for (ServerPlayer serverplayer : this.level.players()) {
                          mapitemsaveddata.tickCarriedBy(serverplayer, itemstack);
+                         Packet<?> packet = mapitemsaveddata.getUpdatePacket(mapid, serverplayer);
+                         if (packet != null) {
+@@ -131,7 +_,7 @@
+                 this.sendDirtyEntityData();
+                 this.wasRiding = true;
+             } else {
+-                ++this.teleportDelay;
++                this.teleportDelay++;
+                 int l = Mth.floor(this.entity.getYRot() * 256.0F / 360.0F);
+                 int k1 = Mth.floor(this.entity.getXRot() * 256.0F / 360.0F);
+                 Vec3 vec3 = this.entity.trackingPosition();
+@@ -207,9 +_,17 @@
+             this.entity.hasImpulse = false;
+         }
+ 
+-        ++this.tickCount;
++        this.tickCount++;
+         if (this.entity.hurtMarked) {
+             this.broadcastAndSend(new ClientboundSetEntityMotionPacket(this.entity));
++            if (this.entity instanceof AbstractHurtingProjectile abstracthurtingprojectile) {
++                this.broadcastAndSend(
++                    new ClientboundProjectilePowerPacket(
++                        abstracthurtingprojectile.getId(), abstracthurtingprojectile.xPower, abstracthurtingprojectile.yPower, abstracthurtingprojectile.zPower
++                    )
++                );
++            }
++
+             this.entity.hurtMarked = false;
+         }
+     }
 @@ -221,16 +_,18 @@
      public void removePairing(ServerPlayer p_8535_) {
          this.entity.stopSeenByPlayer(p_8535_);
@@ -41,3 +103,22 @@
          if (this.trackedDataValues != null) {
              p_289563_.accept(new ClientboundSetEntityDataPacket(this.entity.getId(), this.trackedDataValues));
          }
+@@ -262,7 +_,7 @@
+         if (this.entity instanceof LivingEntity) {
+             List<Pair<EquipmentSlot, ItemStack>> list = Lists.newArrayList();
+ 
+-            for(EquipmentSlot equipmentslot : EquipmentSlot.values()) {
++            for (EquipmentSlot equipmentslot : EquipmentSlot.values()) {
+                 ItemStack itemstack = ((LivingEntity)this.entity).getItemBySlot(equipmentslot);
+                 if (!itemstack.isEmpty()) {
+                     list.add(Pair.of(equipmentslot, itemstack.copy()));
+@@ -282,8 +_,7 @@
+             p_289563_.accept(new ClientboundSetPassengersPacket(this.entity.getVehicle()));
+         }
+ 
+-        Entity entityx = this.entity;
+-        if (entityx instanceof Mob mob && mob.isLeashed()) {
++        if (this.entity instanceof Mob mob && mob.isLeashed()) {
+             p_289563_.accept(new ClientboundSetEntityLinkPacket(mob, mob.getLeashHolder()));
+         }
+     }

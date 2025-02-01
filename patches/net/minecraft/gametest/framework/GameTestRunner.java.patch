@@ -1,0 +1,19 @@
+--- a/net/minecraft/gametest/framework/GameTestRunner.java
++++ b/net/minecraft/gametest/framework/GameTestRunner.java
+@@ -10,6 +_,7 @@
+ import java.util.Optional;
+ import java.util.stream.Collectors;
+ import javax.annotation.Nullable;
++import net.minecraft.Util;
+ import net.minecraft.network.protocol.game.DebugPackets;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.level.ChunkPos;
+@@ -45,7 +_,7 @@
+         this.existingStructureSpawner = p_320336_;
+         this.newStructureSpawner = p_320643_;
+         this.batches = ImmutableList.copyOf(p_320022_);
+-        this.allTestInfos = this.batches.stream().flatMap(p_319468_ -> p_319468_.gameTestInfos().stream()).collect(Collectors.toList());
++        this.allTestInfos = this.batches.stream().flatMap(p_319468_ -> p_319468_.gameTestInfos().stream()).collect(Util.toMutableList());
+         p_320736_.setRunner(this);
+         this.allTestInfos.forEach(p_319464_ -> p_319464_.addListener(new ReportGameListener()));
+     }

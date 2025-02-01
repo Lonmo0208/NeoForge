@@ -1,5 +1,22 @@
 --- a/net/minecraft/server/packs/resources/MultiPackResourceManager.java
 +++ b/net/minecraft/server/packs/resources/MultiPackResourceManager.java
+@@ -26,14 +_,14 @@
+         Map<String, FallbackResourceManager> map = new HashMap<>();
+         List<String> list = p_203798_.stream().flatMap(p_215471_ -> p_215471_.getNamespaces(p_203797_).stream()).distinct().toList();
+ 
+-        for(PackResources packresources : p_203798_) {
++        for (PackResources packresources : p_203798_) {
+             ResourceFilterSection resourcefiltersection = this.getPackFilterSection(packresources);
+             Set<String> set = packresources.getNamespaces(p_203797_);
+             Predicate<ResourceLocation> predicate = resourcefiltersection != null
+                 ? p_215474_ -> resourcefiltersection.isPathFiltered(p_215474_.getPath())
+                 : null;
+ 
+-            for(String s : list) {
++            for (String s : list) {
+                 boolean flag = set.contains(s);
+                 boolean flag1 = resourcefiltersection != null && resourcefiltersection.isNamespaceFiltered(s);
+                 if (flag || flag1) {
 @@ -62,6 +_,7 @@
          try {
              return p_215468_.getMetadataSection(ResourceFilterSection.TYPE);
@@ -8,3 +25,21 @@
              LOGGER.error("Failed to get filter section from pack {}", p_215468_.packId());
              return null;
          }
+@@ -89,7 +_,7 @@
+         checkTrailingDirectoryPath(p_215476_);
+         Map<ResourceLocation, Resource> map = new TreeMap<>();
+ 
+-        for(FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
++        for (FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
+             map.putAll(fallbackresourcemanager.listResources(p_215476_, p_215477_));
+         }
+ 
+@@ -101,7 +_,7 @@
+         checkTrailingDirectoryPath(p_215479_);
+         Map<ResourceLocation, List<Resource>> map = new TreeMap<>();
+ 
+-        for(FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
++        for (FallbackResourceManager fallbackresourcemanager : this.namespacedManagers.values()) {
+             map.putAll(fallbackresourcemanager.listResourceStacks(p_215479_, p_215480_));
+         }
+ 

@@ -1,0 +1,11 @@
+--- a/net/minecraft/core/dispenser/ShearsDispenseItemBehavior.java
++++ b/net/minecraft/core/dispenser/ShearsDispenseItemBehavior.java
+@@ -50,7 +_,7 @@
+     }
+ 
+     private static boolean tryShearLivingEntity(ServerLevel p_123583_, BlockPos p_123584_) {
+-        for(LivingEntity livingentity : p_123583_.getEntitiesOfClass(LivingEntity.class, new AABB(p_123584_), EntitySelector.NO_SPECTATORS)) {
++        for (LivingEntity livingentity : p_123583_.getEntitiesOfClass(LivingEntity.class, new AABB(p_123584_), EntitySelector.NO_SPECTATORS)) {
+             if (livingentity instanceof Shearable shearable && shearable.readyForShearing()) {
+                 shearable.shear(SoundSource.BLOCKS);
+                 p_123583_.gameEvent(null, GameEvent.SHEAR, p_123584_);

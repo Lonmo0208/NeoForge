@@ -1,0 +1,36 @@
+--- a/net/minecraft/world/item/component/WrittenBookContent.java
++++ b/net/minecraft/world/item/component/WrittenBookContent.java
+@@ -34,11 +_,11 @@
+     public static final Codec<List<Filterable<Component>>> PAGES_CODEC = pagesCodec(CONTENT_CODEC);
+     public static final Codec<WrittenBookContent> CODEC = RecordCodecBuilder.create(
+         p_331461_ -> p_331461_.group(
+-                    Filterable.codec(ExtraCodecs.sizeLimitedString(0, 32)).fieldOf("title").forGetter(WrittenBookContent::title),
++                    Filterable.codec(Codec.string(0, 32)).fieldOf("title").forGetter(WrittenBookContent::title),
+                     Codec.STRING.fieldOf("author").forGetter(WrittenBookContent::author),
+-                    ExtraCodecs.strictOptionalField(ExtraCodecs.intRange(0, 3), "generation", 0).forGetter(WrittenBookContent::generation),
+-                    ExtraCodecs.strictOptionalField(PAGES_CODEC, "pages", List.of()).forGetter(WrittenBookContent::pages),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "resolved", false).forGetter(WrittenBookContent::resolved)
++                    ExtraCodecs.intRange(0, 3).optionalFieldOf("generation", 0).forGetter(WrittenBookContent::generation),
++                    PAGES_CODEC.optionalFieldOf("pages", List.of()).forGetter(WrittenBookContent::pages),
++                    Codec.BOOL.optionalFieldOf("resolved", Boolean.valueOf(false)).forGetter(WrittenBookContent::resolved)
+                 )
+                 .apply(p_331461_, WrittenBookContent::new)
+     );
+@@ -61,7 +_,7 @@
+     }
+ 
+     public static Codec<List<Filterable<Component>>> pagesCodec(Codec<Component> p_335930_) {
+-        return ExtraCodecs.sizeLimitedList(pageCodec(p_335930_).listOf(), 100);
++        return pageCodec(p_335930_).sizeLimitedListOf(100);
+     }
+ 
+     @Nullable
+@@ -76,7 +_,7 @@
+         } else {
+             Builder<Filterable<Component>> builder = ImmutableList.builderWithExpectedSize(this.pages.size());
+ 
+-            for(Filterable<Component> filterable : this.pages) {
++            for (Filterable<Component> filterable : this.pages) {
+                 Optional<Filterable<Component>> optional = resolvePage(p_330312_, p_331808_, filterable);
+                 if (optional.isEmpty()) {
+                     return null;

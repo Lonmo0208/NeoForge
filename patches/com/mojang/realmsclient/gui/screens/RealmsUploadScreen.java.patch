@@ -1,0 +1,256 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsUploadScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsUploadScreen.java
+@@ -32,6 +_,7 @@
+ import net.minecraft.Util;
+ import net.minecraft.client.GameNarrator;
+ import net.minecraft.client.gui.GuiGraphics;
++import net.minecraft.client.gui.components.AbstractWidget;
+ import net.minecraft.client.gui.components.Button;
+ import net.minecraft.client.gui.components.events.GuiEventListener;
+ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+@@ -124,7 +_,9 @@
+             }
+         }
+ 
+-        this.layout.visitWidgets(this::addRenderableWidget);
++        this.layout.visitWidgets(p_321350_ -> {
++            AbstractWidget abstractwidget = this.addRenderableWidget(p_321350_);
++        });
+         this.repositionElements();
+     }
+ 
+@@ -180,7 +_,7 @@
+ 
+         Component[] acomponent = this.errorMessage;
+         if (acomponent != null) {
+-            for(int i = 0; i < acomponent.length; ++i) {
++            for (int i = 0; i < acomponent.length; i++) {
+                 p_282140_.drawCenteredString(this.font, acomponent[i], this.width / 2, 110 + 12 * i, -65536);
+             }
+         }
+@@ -227,7 +_,7 @@
+     @Override
+     public void tick() {
+         super.tick();
+-        ++this.tickCount;
++        this.tickCount++;
+         if (this.narrationRateLimiter.tryAcquire(1)) {
+             Component component = this.createProgressNarrationMessage();
+             this.minecraft.getNarrator().sayNow(component);
+@@ -256,115 +_,111 @@
+                     RealmsClient realmsclient = RealmsClient.create();
+         
+                     try {
+-                        UploadInfo uploadinfo;
+-                        try {
+-                            if (!UPLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
++                        if (!UPLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
++                            this.status = Component.translatable("mco.upload.close.failure");
++                        } else {
++                            UploadInfo uploadinfo = null;
++
++                            for (int i = 0; i < 20; i++) {
++                                try {
++                                    if (this.cancelled) {
++                                        this.uploadCancelled();
++                                        return;
++                                    }
++
++                                    uploadinfo = realmsclient.requestUploadInfo(this.realmId, UploadTokenCache.get(this.realmId));
++                                    if (uploadinfo != null) {
++                                        break;
++                                    }
++                                } catch (RetryCallException retrycallexception) {
++                                    Thread.sleep((long)(retrycallexception.delaySeconds * 1000));
++                                }
++                            }
++
++                            if (uploadinfo == null) {
+                                 this.status = Component.translatable("mco.upload.close.failure");
+                             } else {
+-                                uploadinfo = null;
+-        
+-                                int i;
+-                                for(i = 0; i < 20; ++i) {
+-                                    try {
+-                                        if (this.cancelled) {
+-                                            this.uploadCancelled();
+-                                            return;
+-                                        }
+-        
+-                                        uploadinfo = realmsclient.requestUploadInfo(this.realmId, UploadTokenCache.get(this.realmId));
+-                                        if (uploadinfo != null) {
+-                                            break;
+-                                        }
+-                                    } catch (RetryCallException retrycallexception) {
+-                                        Thread.sleep((long)(retrycallexception.delaySeconds * 1000));
+-                                    }
+-                                }
+-        
+-                                if (uploadinfo == null) {
++                                UploadTokenCache.put(this.realmId, uploadinfo.getToken());
++                                if (!uploadinfo.isWorldClosed()) {
+                                     this.status = Component.translatable("mco.upload.close.failure");
++                                } else if (this.cancelled) {
++                                    this.uploadCancelled();
+                                 } else {
+-                                    UploadTokenCache.put(this.realmId, uploadinfo.getToken());
+-                                    if (!uploadinfo.isWorldClosed()) {
+-                                        this.status = Component.translatable("mco.upload.close.failure");
+-                                    } else if (this.cancelled) {
++                                    File file2 = new File(this.minecraft.gameDirectory.getAbsolutePath(), "saves");
++                                    file1 = this.tarGzipArchive(new File(file2, this.selectedLevel.getLevelId()));
++                                    if (this.cancelled) {
+                                         this.uploadCancelled();
++                                    } else if (this.verify(file1)) {
++                                        this.status = Component.translatable("mco.upload.uploading", this.selectedLevel.getLevelName());
++                                        FileUpload fileupload = new FileUpload(
++                                            file1,
++                                            this.realmId,
++                                            this.slotId,
++                                            uploadinfo,
++                                            this.minecraft.getUser(),
++                                            SharedConstants.getCurrentVersion().getName(),
++                                            this.selectedLevel.levelVersion().minecraftVersionName(),
++                                            this.uploadStatus
++                                        );
++                                        fileupload.upload(p_319370_ -> {
++                                            if (p_319370_.statusCode >= 200 && p_319370_.statusCode < 300) {
++                                                this.uploadFinished = true;
++                                                this.status = Component.translatable("mco.upload.done");
++                                                if (this.backButton != null) {
++                                                    this.backButton.setMessage(CommonComponents.GUI_DONE);
++                                                }
++
++                                                UploadTokenCache.invalidate(this.realmId);
++                                            } else if (p_319370_.statusCode == 400 && p_319370_.errorMessage != null) {
++                                                this.setErrorMessage(Component.translatable("mco.upload.failed", p_319370_.errorMessage));
++                                            } else {
++                                                this.setErrorMessage(Component.translatable("mco.upload.failed", p_319370_.statusCode));
++                                            }
++                                        });
++
++                                        while (!fileupload.isFinished()) {
++                                            if (this.cancelled) {
++                                                fileupload.cancel();
++                                                this.uploadCancelled();
++                                                return;
++                                            }
++
++                                            try {
++                                                Thread.sleep(500L);
++                                            } catch (InterruptedException interruptedexception) {
++                                                LOGGER.error("Failed to check Realms file upload status");
++                                            }
++                                        }
+                                     } else {
+-                                        File file = (new File(this.minecraft.gameDirectory.getAbsolutePath(), "saves"));
+-                                        file1 = this.tarGzipArchive(new File(file, this.selectedLevel.getLevelId()));
+-                                        if (this.cancelled) {
+-                                            this.uploadCancelled();
+-                                        } else if (this.verify(file1)) {
+-                                            this.status = Component.translatable("mco.upload.uploading", this.selectedLevel.getLevelName());
+-                                            FileUpload fileupload = new FileUpload(
+-                                                file1,
+-                                                this.realmId,
+-                                                this.slotId,
+-                                                uploadinfo,
+-                                                this.minecraft.getUser(),
+-                                                SharedConstants.getCurrentVersion().getName(),
+-                                                this.selectedLevel.levelVersion().minecraftVersionName(),
+-                                                this.uploadStatus
++                                        long j = file1.length();
++                                        Unit unit = Unit.getLargest(j);
++                                        Unit unit1 = Unit.getLargest(5368709120L);
++                                        if (Unit.humanReadable(j, unit).equals(Unit.humanReadable(5368709120L, unit1)) && unit != Unit.B) {
++                                            Unit unit2 = Unit.values()[unit.ordinal() - 1];
++                                            this.setErrorMessage(
++                                                Component.translatable("mco.upload.size.failure.line1", this.selectedLevel.getLevelName()),
++                                                Component.translatable(
++                                                    "mco.upload.size.failure.line2", Unit.humanReadable(j, unit2), Unit.humanReadable(5368709120L, unit2)
++                                                )
+                                             );
+-                                            fileupload.upload(p_319370_ -> {
+-                                                if (p_319370_.statusCode >= 200 && p_319370_.statusCode < 300) {
+-                                                    this.uploadFinished = true;
+-                                                    this.status = Component.translatable("mco.upload.done");
+-                                                    if (this.backButton != null) {
+-                                                        this.backButton.setMessage(CommonComponents.GUI_DONE);
+-                                                    }
+-        
+-                                                    UploadTokenCache.invalidate(this.realmId);
+-                                                } else if (p_319370_.statusCode == 400 && p_319370_.errorMessage != null) {
+-                                                    this.setErrorMessage(Component.translatable("mco.upload.failed", p_319370_.errorMessage));
+-                                                } else {
+-                                                    this.setErrorMessage(Component.translatable("mco.upload.failed", p_319370_.statusCode));
+-                                                }
+-                                            });
+-        
+-                                            while(!fileupload.isFinished()) {
+-                                                if (this.cancelled) {
+-                                                    fileupload.cancel();
+-                                                    this.uploadCancelled();
+-                                                    return;
+-                                                }
+-        
+-                                                try {
+-                                                    Thread.sleep(500L);
+-                                                } catch (InterruptedException interruptedexception) {
+-                                                    LOGGER.error("Failed to check Realms file upload status");
+-                                                }
+-                                            }
+                                         } else {
+-                                            long j = file1.length();
+-                                            Unit unit = Unit.getLargest(j);
+-                                            Unit unit1 = Unit.getLargest(5368709120L);
+-                                            if (Unit.humanReadable(j, unit).equals(Unit.humanReadable(5368709120L, unit1)) && unit != Unit.B) {
+-                                                Unit unit2 = Unit.values()[unit.ordinal() - 1];
+-                                                this.setErrorMessage(
+-                                                    Component.translatable("mco.upload.size.failure.line1", this.selectedLevel.getLevelName()),
+-                                                    Component.translatable(
+-                                                        "mco.upload.size.failure.line2", Unit.humanReadable(j, unit2), Unit.humanReadable(5368709120L, unit2)
+-                                                    )
+-                                                );
+-                                            } else {
+-                                                this.setErrorMessage(
+-                                                    Component.translatable("mco.upload.size.failure.line1", this.selectedLevel.getLevelName()),
+-                                                    Component.translatable(
+-                                                        "mco.upload.size.failure.line2", Unit.humanReadable(j, unit), Unit.humanReadable(5368709120L, unit1)
+-                                                    )
+-                                                );
+-                                            }
++                                            this.setErrorMessage(
++                                                Component.translatable("mco.upload.size.failure.line1", this.selectedLevel.getLevelName()),
++                                                Component.translatable(
++                                                    "mco.upload.size.failure.line2", Unit.humanReadable(j, unit), Unit.humanReadable(5368709120L, unit1)
++                                                )
++                                            );
+                                         }
+                                     }
+                                 }
+                             }
+-                        } catch (IOException ioexception) {
+-                            this.setErrorMessage(Component.translatable("mco.upload.failed", ioexception.getMessage()));
+-                        } catch (RealmsServiceException realmsserviceexception) {
+-                            this.setErrorMessage(Component.translatable("mco.upload.failed", realmsserviceexception.realmsError.errorMessage()));
+-                        } catch (InterruptedException interruptedexception1) {
+-                            LOGGER.error("Could not acquire upload lock");
+                         }
++                    } catch (IOException ioexception) {
++                        this.setErrorMessage(Component.translatable("mco.upload.failed", ioexception.getMessage()));
++                    } catch (RealmsServiceException realmsserviceexception) {
++                        this.setErrorMessage(Component.translatable("mco.upload.failed", realmsserviceexception.realmsError.errorMessage()));
++                    } catch (InterruptedException interruptedexception1) {
++                        LOGGER.error("Could not acquire upload lock");
+                     } finally {
+                         this.uploadFinished = true;
+                         if (UPLOAD_LOCK.isHeldByCurrentThread()) {
+@@ -440,7 +_,7 @@
+                 p_90108_.closeArchiveEntry();
+                 File[] afile = file1.listFiles();
+                 if (afile != null) {
+-                    for(File file2 : afile) {
++                    for (File file2 : afile) {
+                         this.addFileToTarGz(p_90108_, file2.getAbsolutePath(), s + "/", false);
+                     }
+                 }

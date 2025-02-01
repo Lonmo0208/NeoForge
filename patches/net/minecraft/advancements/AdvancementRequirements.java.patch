@@ -1,0 +1,50 @@
+--- a/net/minecraft/advancements/AdvancementRequirements.java
++++ b/net/minecraft/advancements/AdvancementRequirements.java
+@@ -41,7 +_,7 @@
+         if (this.requirements.isEmpty()) {
+             return false;
+         } else {
+-            for(List<String> list : this.requirements) {
++            for (List<String> list : this.requirements) {
+                 if (!anyMatch(list, p_301112_)) {
+                     return false;
+                 }
+@@ -54,9 +_,9 @@
+     public int count(Predicate<String> p_301229_) {
+         int i = 0;
+ 
+-        for(List<String> list : this.requirements) {
++        for (List<String> list : this.requirements) {
+             if (anyMatch(list, p_301229_)) {
+-                ++i;
++                i++;
+             }
+         }
+ 
+@@ -64,7 +_,7 @@
+     }
+ 
+     private static boolean anyMatch(List<String> p_312163_, Predicate<String> p_301321_) {
+-        for(String s : p_312163_) {
++        for (String s : p_312163_) {
+             if (p_301321_.test(s)) {
+                 return true;
+             }
+@@ -76,7 +_,7 @@
+     public DataResult<AdvancementRequirements> validate(Set<String> p_312891_) {
+         Set<String> set = new ObjectOpenHashSet<>();
+ 
+-        for(List<String> list : this.requirements) {
++        for (List<String> list : this.requirements) {
+             if (list.isEmpty() && p_312891_.isEmpty()) {
+                 return DataResult.error(() -> "Requirement entry cannot be empty");
+             }
+@@ -107,7 +_,7 @@
+     public Set<String> names() {
+         Set<String> set = new ObjectOpenHashSet<>();
+ 
+-        for(List<String> list : this.requirements) {
++        for (List<String> list : this.requirements) {
+             set.addAll(list);
+         }
+ 

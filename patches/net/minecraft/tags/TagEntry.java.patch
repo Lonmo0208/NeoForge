@@ -1,5 +1,14 @@
 --- a/net/minecraft/tags/TagEntry.java
 +++ b/net/minecraft/tags/TagEntry.java
+@@ -21,7 +_,7 @@
+     );
+     public static final Codec<TagEntry> CODEC = Codec.either(ExtraCodecs.TAG_OR_ELEMENT_ID, FULL_CODEC)
+         .xmap(
+-            p_215935_ -> p_215935_.map(p_215933_ -> new TagEntry(p_215933_, true), p_215946_ -> p_215946_),
++            p_215935_ -> p_215935_.map(p_215933_ -> new TagEntry(p_215933_, true), p_215946_ -> (TagEntry)p_215946_),
+             p_215931_ -> p_215931_.required ? Either.left(p_215931_.elementOrTag()) : Either.right(p_215931_)
+         );
+     private final ResourceLocation id;
 @@ -111,11 +_,21 @@
          return stringbuilder.toString();
      }

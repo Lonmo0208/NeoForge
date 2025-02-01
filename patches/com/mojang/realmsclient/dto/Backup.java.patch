@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/dto/Backup.java
++++ b/com/mojang/realmsclient/dto/Backup.java
+@@ -33,7 +_,7 @@
+             if (jsonobject.has("metadata")) {
+                 JsonObject jsonobject1 = jsonobject.getAsJsonObject("metadata");
+ 
+-                for(Entry<String, JsonElement> entry : jsonobject1.entrySet()) {
++                for (Entry<String, JsonElement> entry : jsonobject1.entrySet()) {
+                     if (!entry.getValue().isJsonNull()) {
+                         backup.metadata.put(entry.getKey(), entry.getValue().getAsString());
+                     }

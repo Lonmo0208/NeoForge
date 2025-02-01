@@ -1,0 +1,37 @@
+--- a/net/minecraft/world/entity/ai/behavior/MoveToSkySeeingSpot.java
++++ b/net/minecraft/world/entity/ai/behavior/MoveToSkySeeingSpot.java
+@@ -16,16 +_,15 @@
+ public class MoveToSkySeeingSpot {
+     public static OneShot<LivingEntity> create(float p_259860_) {
+         return BehaviorBuilder.create(
+-            p_258543_ -> p_258543_.group(p_258543_.absent(MemoryModuleType.WALK_TARGET))
+-                    .apply(p_258543_, p_258545_ -> (p_340005_, p_340006_, p_340007_) -> {
+-                            if (p_340005_.canSeeSky(p_340006_.blockPosition())) {
+-                                return false;
+-                            } else {
+-                                Optional<Vec3> optional = Optional.ofNullable(getOutdoorPosition(p_340005_, p_340006_));
+-                                optional.ifPresent(p_258548_ -> p_258545_.set(new WalkTarget(p_258548_, p_259860_, 0)));
+-                                return true;
+-                            }
+-                        })
++            p_258543_ -> p_258543_.group(p_258543_.absent(MemoryModuleType.WALK_TARGET)).apply(p_258543_, p_258545_ -> (p_337759_, p_337760_, p_337761_) -> {
++                        if (p_337759_.canSeeSky(p_337760_.blockPosition())) {
++                            return false;
++                        } else {
++                            Optional<Vec3> optional = Optional.ofNullable(getOutdoorPosition(p_337759_, p_337760_));
++                            optional.ifPresent(p_258548_ -> p_258545_.set(new WalkTarget(p_258548_, p_259860_, 0)));
++                            return true;
++                        }
++                    })
+         );
+     }
+ 
+@@ -34,7 +_,7 @@
+         RandomSource randomsource = p_23566_.getRandom();
+         BlockPos blockpos = p_23566_.blockPosition();
+ 
+-        for(int i = 0; i < 10; ++i) {
++        for (int i = 0; i < 10; i++) {
+             BlockPos blockpos1 = blockpos.offset(randomsource.nextInt(20) - 10, randomsource.nextInt(6) - 3, randomsource.nextInt(20) - 10);
+             if (hasNoBlocksAbove(p_23565_, p_23566_, blockpos1)) {
+                 return Vec3.atBottomCenterOf(blockpos1);

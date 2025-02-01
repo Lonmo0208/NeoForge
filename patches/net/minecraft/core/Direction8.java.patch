@@ -1,0 +1,11 @@
+--- a/net/minecraft/core/Direction8.java
++++ b/net/minecraft/core/Direction8.java
+@@ -21,7 +_,7 @@
+         this.directions = Sets.immutableEnumSet(Arrays.asList(p_122592_));
+         this.step = new Vec3i(0, 0, 0);
+ 
+-        for(Direction direction : p_122592_) {
++        for (Direction direction : p_122592_) {
+             this.step.setX(this.step.getX() + direction.getStepX()).setY(this.step.getY() + direction.getStepY()).setZ(this.step.getZ() + direction.getStepZ());
+         }
+     }

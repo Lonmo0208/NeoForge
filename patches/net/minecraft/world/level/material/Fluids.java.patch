@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/level/material/Fluids.java
++++ b/net/minecraft/world/level/material/Fluids.java
+@@ -15,8 +_,8 @@
+     }
+ 
+     static {
+-        for(Fluid fluid : BuiltInRegistries.FLUID) {
+-            for(FluidState fluidstate : fluid.getStateDefinition().getPossibleStates()) {
++        for (Fluid fluid : BuiltInRegistries.FLUID) {
++            for (FluidState fluidstate : fluid.getStateDefinition().getPossibleStates()) {
+                 Fluid.FLUID_STATE_REGISTRY.add(fluidstate);
+             }
+         }

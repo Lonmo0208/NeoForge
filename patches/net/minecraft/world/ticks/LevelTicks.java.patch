@@ -1,0 +1,58 @@
+--- a/net/minecraft/world/ticks/LevelTicks.java
++++ b/net/minecraft/world/ticks/LevelTicks.java
+@@ -103,7 +_,7 @@
+     private void sortContainersToTick(long p_193217_) {
+         ObjectIterator<Entry> objectiterator = Long2LongMaps.fastIterator(this.nextTickForContainer);
+ 
+-        while(objectiterator.hasNext()) {
++        while (objectiterator.hasNext()) {
+             Entry entry = objectiterator.next();
+             long i = entry.getLongKey();
+             long j = entry.getLongValue();
+@@ -128,7 +_,7 @@
+ 
+     private void drainContainers(long p_193219_, int p_193220_) {
+         LevelChunkTicks<T> levelchunkticks;
+-        while(this.canScheduleMoreTicks(p_193220_) && (levelchunkticks = this.containersToTick.poll()) != null) {
++        while (this.canScheduleMoreTicks(p_193220_) && (levelchunkticks = this.containersToTick.poll()) != null) {
+             ScheduledTick<T> scheduledtick = levelchunkticks.poll();
+             this.scheduleForThisTick(scheduledtick);
+             this.drainFromCurrentContainer(this.containersToTick, levelchunkticks, p_193219_, p_193220_);
+@@ -144,7 +_,7 @@
+     }
+ 
+     private void rescheduleLeftoverContainers() {
+-        for(LevelChunkTicks<T> levelchunkticks : this.containersToTick) {
++        for (LevelChunkTicks<T> levelchunkticks : this.containersToTick) {
+             this.updateContainerScheduling(levelchunkticks.peek());
+         }
+     }
+@@ -158,7 +_,7 @@
+             LevelChunkTicks<T> levelchunkticks = p_193268_.peek();
+             ScheduledTick<T> scheduledtick = levelchunkticks != null ? levelchunkticks.peek() : null;
+ 
+-            while(this.canScheduleMoreTicks(p_193271_)) {
++            while (this.canScheduleMoreTicks(p_193271_)) {
+                 ScheduledTick<T> scheduledtick1 = p_193269_.peek();
+                 if (scheduledtick1 == null
+                     || scheduledtick1.triggerTick() > p_193270_
+@@ -181,7 +_,7 @@
+     }
+ 
+     private void runCollectedTicks(BiConsumer<BlockPos, T> p_193273_) {
+-        while(!this.toRunThisTick.isEmpty()) {
++        while (!this.toRunThisTick.isEmpty()) {
+             ScheduledTick<T> scheduledtick = this.toRunThisTick.poll();
+             if (!this.toRunThisTickSet.isEmpty()) {
+                 this.toRunThisTickSet.remove(scheduledtick);
+@@ -223,8 +_,8 @@
+         int k = SectionPos.posToSectionCoord((double)p_193237_.maxX());
+         int l = SectionPos.posToSectionCoord((double)p_193237_.maxZ());
+ 
+-        for(int i1 = i; i1 <= k; ++i1) {
+-            for(int j1 = j; j1 <= l; ++j1) {
++        for (int i1 = i; i1 <= k; i1++) {
++            for (int j1 = j; j1 <= l; j1++) {
+                 long k1 = ChunkPos.asLong(i1, j1);
+                 LevelChunkTicks<T> levelchunkticks = this.allContainers.get(k1);
+                 if (levelchunkticks != null) {

@@ -1,0 +1,38 @@
+--- a/net/minecraft/world/level/block/PotatoPeelsBlock.java
++++ /dev/null
+@@ -1,35 +_,0 @@
+-package net.minecraft.world.level.block;
+-
+-import com.mojang.serialization.MapCodec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import net.minecraft.world.item.DyeColor;
+-import net.minecraft.world.item.Item;
+-import net.minecraft.world.item.Items;
+-import net.minecraft.world.level.block.state.BlockBehaviour;
+-
+-public class PotatoPeelsBlock extends Block {
+-    public static final MapCodec<PotatoPeelsBlock> CODEC = RecordCodecBuilder.mapCodec(
+-        p_340397_ -> p_340397_.group(propertiesCodec(), DyeColor.CODEC.fieldOf("color").forGetter(p_340722_ -> p_340722_.color))
+-                .apply(p_340397_, PotatoPeelsBlock::new)
+-    );
+-    private final DyeColor color;
+-
+-    public PotatoPeelsBlock(BlockBehaviour.Properties p_341211_, DyeColor p_340862_) {
+-        super(p_341211_);
+-        this.color = p_340862_;
+-    }
+-
+-    @Override
+-    protected MapCodec<PotatoPeelsBlock> codec() {
+-        return CODEC;
+-    }
+-
+-    public DyeColor getColor() {
+-        return this.color;
+-    }
+-
+-    public Item getPeelsItem() {
+-        return Items.POTATO_PEELS_MAP.get(this.getColor());
+-    }
+-}

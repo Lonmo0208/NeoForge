@@ -52,3 +52,17 @@
          this.blockTags = p_275634_;
      }
  
+@@ -41,11 +_,11 @@
+     protected CompletableFuture<HolderLookup.Provider> createContentsProvider() {
+         return super.createContentsProvider().thenCombineAsync(this.blockTags, (p_274766_, p_274767_) -> {
+             this.tagsToCopy.forEach((p_274763_, p_274764_) -> {
+-                TagBuilder tagbuilder = this.getOrCreateRawBuilder(p_274764_);
++                TagBuilder tagbuilder = this.getOrCreateRawBuilder((TagKey<Item>)p_274764_);
+                 Optional<TagBuilder> optional = p_274767_.apply(p_274763_);
+                 optional.orElseThrow(() -> new IllegalStateException("Missing block tag " + p_274764_.location())).build().forEach(tagbuilder::add);
+             });
+-            return p_274766_;
++            return (HolderLookup.Provider)p_274766_;
+         });
+     }
+ }

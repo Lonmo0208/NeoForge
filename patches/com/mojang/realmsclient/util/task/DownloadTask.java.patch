@@ -1,0 +1,20 @@
+--- a/com/mojang/realmsclient/util/task/DownloadTask.java
++++ b/com/mojang/realmsclient/util/task/DownloadTask.java
+@@ -34,7 +_,7 @@
+         RealmsClient realmsclient = RealmsClient.create();
+         int i = 0;
+ 
+-        while(i < 25) {
++        while (i < 25) {
+             try {
+                 if (this.aborted()) {
+                     return;
+@@ -55,7 +_,7 @@
+                 }
+ 
+                 pause((long)retrycallexception.delaySeconds);
+-                ++i;
++                i++;
+             } catch (RealmsServiceException realmsserviceexception) {
+                 if (this.aborted()) {
+                     return;

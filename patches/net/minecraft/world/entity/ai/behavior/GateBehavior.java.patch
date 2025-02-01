@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/ai/behavior/GateBehavior.java
++++ b/net/minecraft/world/entity/ai/behavior/GateBehavior.java
+@@ -32,7 +_,7 @@
+         this.exitErasedMemories = p_22874_;
+         this.orderPolicy = p_22875_;
+         this.runningPolicy = p_22876_;
+-        p_22877_.forEach(p_258332_ -> this.behaviors.add(p_258332_.getFirst(), p_258332_.getSecond()));
++        p_22877_.forEach(p_258332_ -> this.behaviors.add((BehaviorControl<? super E>)p_258332_.getFirst(), p_258332_.getSecond()));
+     }
+ 
+     @Override
+@@ -41,7 +_,7 @@
+     }
+ 
+     private boolean hasRequiredMemories(E p_259419_) {
+-        for(Entry<MemoryModuleType<?>, MemoryStatus> entry : this.entryCondition.entrySet()) {
++        for (Entry<MemoryModuleType<?>, MemoryStatus> entry : this.entryCondition.entrySet()) {
+             MemoryModuleType<?> memorymoduletype = entry.getKey();
+             MemoryStatus memorystatus = entry.getValue();
+             if (!p_259419_.getBrain().checkMemory(memorymoduletype, memorystatus)) {

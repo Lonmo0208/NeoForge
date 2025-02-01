@@ -1,0 +1,70 @@
+--- a/net/minecraft/world/level/block/entity/ChiseledBookShelfBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/ChiseledBookShelfBlockEntity.java
+@@ -36,7 +_,7 @@
+             this.lastInteractedSlot = p_261806_;
+             BlockState blockstate = this.getBlockState();
+ 
+-            for(int i = 0; i < ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.size(); ++i) {
++            for (int i = 0; i < ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.size(); i++) {
+                 boolean flag = !this.getItem(i).isEmpty();
+                 BooleanProperty booleanproperty = ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(i);
+                 blockstate = blockstate.setValue(booleanproperty, Boolean.valueOf(flag));
+@@ -50,14 +_,16 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_249911_, HolderLookup.Provider p_323880_) {
++    protected void loadAdditional(CompoundTag p_338883_, HolderLookup.Provider p_338454_) {
++        super.loadAdditional(p_338883_, p_338454_);
+         this.items.clear();
+-        ContainerHelper.loadAllItems(p_249911_, this.items, p_323880_);
+-        this.lastInteractedSlot = p_249911_.getInt("last_interacted_slot");
++        ContainerHelper.loadAllItems(p_338883_, this.items, p_338454_);
++        this.lastInteractedSlot = p_338883_.getInt("last_interacted_slot");
+     }
+ 
+     @Override
+     protected void saveAdditional(CompoundTag p_251872_, HolderLookup.Provider p_323649_) {
++        super.saveAdditional(p_251872_, p_323649_);
+         ContainerHelper.saveAllItems(p_251872_, this.items, true, p_323649_);
+         p_251872_.putInt("last_interacted_slot", this.lastInteractedSlot);
+     }
+@@ -115,14 +_,10 @@
+     @Override
+     public boolean canTakeItem(Container p_282172_, int p_281387_, ItemStack p_283257_) {
+         return p_282172_.hasAnyMatching(
+-            p_335300_ -> {
+-                if (p_335300_.isEmpty()) {
+-                    return true;
+-                } else {
+-                    return ItemStack.isSameItemSameComponents(p_283257_, p_335300_)
+-                        && p_335300_.getCount() + p_283257_.getCount() <= p_282172_.getMaxStackSize(p_335300_);
+-                }
+-            }
++            p_335300_ -> p_335300_.isEmpty()
++                    ? true
++                    : ItemStack.isSameItemSameComponents(p_283257_, p_335300_)
++                        && p_335300_.getCount() + p_283257_.getCount() <= p_282172_.getMaxStackSize(p_335300_)
+         );
+     }
+ 
+@@ -146,13 +_,15 @@
+     }
+ 
+     @Override
+-    public void applyComponents(DataComponentMap p_332825_) {
+-        p_332825_.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.items);
++    protected void applyImplicitComponents(BlockEntity.DataComponentInput p_338565_) {
++        super.applyImplicitComponents(p_338565_);
++        p_338565_.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.items);
+     }
+ 
+     @Override
+-    public void collectComponents(DataComponentMap.Builder p_332661_) {
+-        p_332661_.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.items));
++    protected void collectImplicitComponents(DataComponentMap.Builder p_338540_) {
++        super.collectImplicitComponents(p_338540_);
++        p_338540_.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.items));
+     }
+ 
+     @Override

@@ -1,0 +1,29 @@
+--- a/net/minecraft/client/sounds/WeighedSoundEvents.java
++++ b/net/minecraft/client/sounds/WeighedSoundEvents.java
+@@ -24,7 +_,7 @@
+     public int getWeight() {
+         int i = 0;
+ 
+-        for(Weighted<Sound> weighted : this.list) {
++        for (Weighted<Sound> weighted : this.list) {
+             i += weighted.getWeight();
+         }
+ 
+@@ -36,7 +_,7 @@
+         if (!this.list.isEmpty() && i != 0) {
+             int j = p_235265_.nextInt(i);
+ 
+-            for(Weighted<Sound> weighted : this.list) {
++            for (Weighted<Sound> weighted : this.list) {
+                 j -= weighted.getWeight();
+                 if (j < 0) {
+                     return weighted.getSound(p_235265_);
+@@ -60,7 +_,7 @@
+ 
+     @Override
+     public void preloadIfRequired(SoundEngine p_120450_) {
+-        for(Weighted<Sound> weighted : this.list) {
++        for (Weighted<Sound> weighted : this.list) {
+             weighted.preloadIfRequired(p_120450_);
+         }
+     }

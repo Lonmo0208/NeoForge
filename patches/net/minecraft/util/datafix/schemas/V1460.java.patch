@@ -1,0 +1,50 @@
+--- a/net/minecraft/util/datafix/schemas/V1460.java
++++ b/net/minecraft/util/datafix/schemas/V1460.java
+@@ -8,7 +_,6 @@
+ import com.mojang.datafixers.util.Pair;
+ import java.util.Map;
+ import java.util.function.Supplier;
+-import net.minecraft.util.datafix.ExtraDataFixUtils;
+ import net.minecraft.util.datafix.fixes.References;
+ 
+ public class V1460 extends NamespacedSchema {
+@@ -224,7 +_,7 @@
+         p_17660_.registerType(
+             false,
+             References.PLAYER,
+-            () -> ExtraDataFixUtils.optionalFields(
++            () -> DSL.optionalFields(
+                     Pair.of("RootVehicle", DSL.optionalFields("Entity", References.ENTITY_TREE.in(p_17660_))),
+                     Pair.of("Inventory", DSL.list(References.ITEM_STACK.in(p_17660_))),
+                     Pair.of("EnderItems", DSL.list(References.ITEM_STACK.in(p_17660_))),
+@@ -253,7 +_,11 @@
+                     )
+                 )
+         );
+-        p_17660_.registerType(true, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", namespacedString(), p_17662_));
++        p_17660_.registerType(
++            true,
++            References.BLOCK_ENTITY,
++            () -> DSL.optionalFields("components", References.DATA_COMPONENTS.in(p_17660_), DSL.taggedChoiceLazy("id", namespacedString(), p_17662_))
++        );
+         p_17660_.registerType(
+             true, References.ENTITY_TREE, () -> DSL.optionalFields("Passengers", DSL.list(References.ENTITY_TREE.in(p_17660_)), References.ENTITY.in(p_17660_))
+         );
+@@ -266,7 +_,7 @@
+                         "id",
+                         References.ITEM_NAME.in(p_17660_),
+                         "tag",
+-                        ExtraDataFixUtils.optionalFields(
++                        DSL.optionalFields(
+                             Pair.of("EntityTag", References.ENTITY_TREE.in(p_17660_)),
+                             Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(p_17660_)),
+                             Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(p_17660_))),
+@@ -303,7 +_,7 @@
+             References.STATS,
+             () -> DSL.optionalFields(
+                     "stats",
+-                    ExtraDataFixUtils.optionalFields(
++                    DSL.optionalFields(
+                         Pair.of("minecraft:mined", DSL.compoundList(References.BLOCK_NAME.in(p_17660_), DSL.constType(DSL.intType()))),
+                         Pair.of("minecraft:crafted", supplier.get()),
+                         Pair.of("minecraft:used", supplier.get()),

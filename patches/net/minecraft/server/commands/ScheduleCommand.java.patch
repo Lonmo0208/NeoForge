@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/ScheduleCommand.java
++++ b/net/minecraft/server/commands/ScheduleCommand.java
+@@ -116,7 +_,7 @@
+                     }
+                 )
+                 .ifRight(
+-                    p_288548_ -> {
++                    p_339441_ -> {
+                         String s = "#" + resourcelocation;
+                         if (p_138432_) {
+                             timerqueue.remove(s);

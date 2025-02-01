@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/level/block/entity/LecternBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/LecternBlockEntity.java
+@@ -201,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155625_, HolderLookup.Provider p_324025_) {
+-        super.load(p_155625_, p_324025_);
++    protected void loadAdditional(CompoundTag p_155625_, HolderLookup.Provider p_324025_) {
++        super.loadAdditional(p_155625_, p_324025_);
+         if (p_155625_.contains("Book", 10)) {
+             this.book = this.resolveBook(ItemStack.parse(p_324025_, p_155625_.getCompound("Book")).orElse(ItemStack.EMPTY), null);
+         } else {

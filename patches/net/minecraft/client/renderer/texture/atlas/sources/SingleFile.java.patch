@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/renderer/texture/atlas/sources/SingleFile.java
++++ b/net/minecraft/client/renderer/texture/atlas/sources/SingleFile.java
+@@ -1,7 +_,7 @@
+ package net.minecraft.client.renderer.texture.atlas.sources;
+ 
+ import com.mojang.logging.LogUtils;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Optional;
+@@ -18,7 +_,7 @@
+ @OnlyIn(Dist.CLIENT)
+ public class SingleFile implements SpriteSource {
+     private static final Logger LOGGER = LogUtils.getLogger();
+-    public static final Codec<SingleFile> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<SingleFile> CODEC = RecordCodecBuilder.mapCodec(
+         p_261903_ -> p_261903_.group(
+                     ResourceLocation.CODEC.fieldOf("resource").forGetter(p_261913_ -> p_261913_.resourceId),
+                     ResourceLocation.CODEC.optionalFieldOf("sprite").forGetter(p_261615_ -> p_261615_.spriteId)

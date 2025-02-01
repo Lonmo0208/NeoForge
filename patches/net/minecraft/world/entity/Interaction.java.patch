@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/entity/Interaction.java
++++ b/net/minecraft/world/entity/Interaction.java
+@@ -89,14 +_,11 @@
+         p_273772_.putFloat("width", this.getWidth());
+         p_273772_.putFloat("height", this.getHeight());
+         if (this.attack != null) {
+-            Interaction.PlayerAction.CODEC.encodeStart(NbtOps.INSTANCE, this.attack).result().ifPresent(p_272806_ -> p_273772_.put("attack", p_272806_));
++            Interaction.PlayerAction.CODEC.encodeStart(NbtOps.INSTANCE, this.attack).ifSuccess(p_272806_ -> p_273772_.put("attack", p_272806_));
+         }
+ 
+         if (this.interaction != null) {
+-            Interaction.PlayerAction.CODEC
+-                .encodeStart(NbtOps.INSTANCE, this.interaction)
+-                .result()
+-                .ifPresent(p_272925_ -> p_273772_.put("interaction", p_272925_));
++            Interaction.PlayerAction.CODEC.encodeStart(NbtOps.INSTANCE, this.interaction).ifSuccess(p_272925_ -> p_273772_.put("interaction", p_272925_));
+         }
+ 
+         p_273772_.putBoolean("response", this.getResponse());

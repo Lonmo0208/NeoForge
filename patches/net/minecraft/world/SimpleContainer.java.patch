@@ -1,0 +1,83 @@
+--- a/net/minecraft/world/SimpleContainer.java
++++ b/net/minecraft/world/SimpleContainer.java
+@@ -67,7 +_,7 @@
+     public ItemStack removeItemType(Item p_19171_, int p_19172_) {
+         ItemStack itemstack = new ItemStack(p_19171_, 0);
+ 
+-        for(int i = this.size - 1; i >= 0; --i) {
++        for (int i = this.size - 1; i >= 0; i--) {
+             ItemStack itemstack1 = this.getItem(i);
+             if (itemstack1.getItem().equals(p_19171_)) {
+                 int j = p_19172_ - itemstack.getCount();
+@@ -104,7 +_,7 @@
+     public boolean canAddItem(ItemStack p_19184_) {
+         boolean flag = false;
+ 
+-        for(ItemStack itemstack : this.items) {
++        for (ItemStack itemstack : this.items) {
+             if (itemstack.isEmpty() || ItemStack.isSameItemSameComponents(itemstack, p_19184_) && itemstack.getCount() < itemstack.getMaxStackSize()) {
+                 flag = true;
+                 break;
+@@ -139,7 +_,7 @@
+ 
+     @Override
+     public boolean isEmpty() {
+-        for(ItemStack itemstack : this.items) {
++        for (ItemStack itemstack : this.items) {
+             if (!itemstack.isEmpty()) {
+                 return false;
+             }
+@@ -151,7 +_,7 @@
+     @Override
+     public void setChanged() {
+         if (this.listeners != null) {
+-            for(ContainerListener containerlistener : this.listeners) {
++            for (ContainerListener containerlistener : this.listeners) {
+                 containerlistener.containerChanged(this);
+             }
+         }
+@@ -170,7 +_,7 @@
+ 
+     @Override
+     public void fillStackedContents(StackedContents p_19169_) {
+-        for(ItemStack itemstack : this.items) {
++        for (ItemStack itemstack : this.items) {
+             p_19169_.accountStack(itemstack);
+         }
+     }
+@@ -181,7 +_,7 @@
+     }
+ 
+     private void moveItemToEmptySlots(ItemStack p_19190_) {
+-        for(int i = 0; i < this.size; ++i) {
++        for (int i = 0; i < this.size; i++) {
+             ItemStack itemstack = this.getItem(i);
+             if (itemstack.isEmpty()) {
+                 this.setItem(i, p_19190_.copyAndClear());
+@@ -191,7 +_,7 @@
+     }
+ 
+     private void moveItemToOccupiedSlotsWithSameType(ItemStack p_19192_) {
+-        for(int i = 0; i < this.size; ++i) {
++        for (int i = 0; i < this.size; i++) {
+             ItemStack itemstack = this.getItem(i);
+             if (ItemStack.isSameItemSameComponents(itemstack, p_19192_)) {
+                 this.moveItemsBetweenStacks(p_19192_, itemstack);
+@@ -215,7 +_,7 @@
+     public void fromTag(ListTag p_19178_, HolderLookup.Provider p_331527_) {
+         this.clearContent();
+ 
+-        for(int i = 0; i < p_19178_.size(); ++i) {
++        for (int i = 0; i < p_19178_.size(); i++) {
+             ItemStack.parse(p_331527_, p_19178_.getCompound(i)).ifPresent(this::addItem);
+         }
+     }
+@@ -223,7 +_,7 @@
+     public ListTag createTag(HolderLookup.Provider p_330840_) {
+         ListTag listtag = new ListTag();
+ 
+-        for(int i = 0; i < this.getContainerSize(); ++i) {
++        for (int i = 0; i < this.getContainerSize(); i++) {
+             ItemStack itemstack = this.getItem(i);
+             if (!itemstack.isEmpty()) {
+                 listtag.add(itemstack.save(p_330840_));

@@ -1,0 +1,34 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SetFireworksFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/SetFireworksFunction.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.storage.loot.functions;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -14,17 +_,16 @@
+ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+ 
+ public class SetFireworksFunction extends LootItemConditionalFunction {
+-    public static final Codec<SetFireworksFunction> CODEC = RecordCodecBuilder.create(
+-        p_335356_ -> commonFields(p_335356_)
++    public static final MapCodec<SetFireworksFunction> CODEC = RecordCodecBuilder.mapCodec(
++        p_338150_ -> commonFields(p_338150_)
+                 .and(
+-                    p_335356_.group(
+-                        ExtraCodecs.strictOptionalField(ExtraCodecs.sizeLimitedList(FireworkExplosion.CODEC.listOf(), 256), "explosions", List.of())
+-                            .forGetter(p_333932_ -> p_333932_.explosions),
++                    p_338150_.group(
++                        FireworkExplosion.CODEC.sizeLimitedListOf(256).optionalFieldOf("explosions", List.of()).forGetter(p_333932_ -> p_333932_.explosions),
+                         ListOperation.codec(256).forGetter(p_333965_ -> p_333965_.explosionsOperation),
+-                        ExtraCodecs.strictOptionalField(ExtraCodecs.UNSIGNED_BYTE, "flight_duration").forGetter(p_333834_ -> p_333834_.flightDuration)
++                        ExtraCodecs.UNSIGNED_BYTE.optionalFieldOf("flight_duration").forGetter(p_333834_ -> p_333834_.flightDuration)
+                     )
+                 )
+-                .apply(p_335356_, SetFireworksFunction::new)
++                .apply(p_338150_, SetFireworksFunction::new)
+     );
+     public static final Fireworks DEFAULT_VALUE = new Fireworks(0, List.of());
+     private final List<FireworkExplosion> explosions;

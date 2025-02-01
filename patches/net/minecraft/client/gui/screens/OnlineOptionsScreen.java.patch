@@ -1,0 +1,13 @@
+--- a/net/minecraft/client/gui/screens/OnlineOptionsScreen.java
++++ b/net/minecraft/client/gui/screens/OnlineOptionsScreen.java
+@@ -28,8 +_,8 @@
+         list.add(p_261609_.allowServerListing());
+         OptionInstance<Unit> optioninstance = Optionull.map(
+             p_262120_.level,
+-            p_339480_ -> {
+-                Difficulty difficulty = p_339480_.getDifficulty();
++            p_329721_ -> {
++                Difficulty difficulty = p_329721_.getDifficulty();
+                 return new OptionInstance<>(
+                     "options.difficulty.online",
+                     OptionInstance.noTooltip(),

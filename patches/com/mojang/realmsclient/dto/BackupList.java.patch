@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/dto/BackupList.java
++++ b/com/mojang/realmsclient/dto/BackupList.java
+@@ -25,7 +_,7 @@
+             if (jsonelement.isJsonArray()) {
+                 Iterator<JsonElement> iterator = jsonelement.getAsJsonArray().iterator();
+ 
+-                while(iterator.hasNext()) {
++                while (iterator.hasNext()) {
+                     backuplist.backups.add(Backup.parse(iterator.next()));
+                 }
+             }

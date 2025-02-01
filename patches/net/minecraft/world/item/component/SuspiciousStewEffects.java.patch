@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/item/component/SuspiciousStewEffects.java
++++ b/net/minecraft/world/item/component/SuspiciousStewEffects.java
+@@ -29,11 +_,11 @@
+ 
+     public static record Entry(Holder<MobEffect> effect, int duration) {
+         public static final Codec<SuspiciousStewEffects.Entry> CODEC = RecordCodecBuilder.create(
+-            p_332165_ -> p_332165_.group(
++            p_337952_ -> p_337952_.group(
+                         BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("id").forGetter(SuspiciousStewEffects.Entry::effect),
+-                        Codec.INT.optionalFieldOf("duration", Integer.valueOf(160)).forGetter(SuspiciousStewEffects.Entry::duration)
++                        Codec.INT.lenientOptionalFieldOf("duration", Integer.valueOf(160)).forGetter(SuspiciousStewEffects.Entry::duration)
+                     )
+-                    .apply(p_332165_, SuspiciousStewEffects.Entry::new)
++                    .apply(p_337952_, SuspiciousStewEffects.Entry::new)
+         );
+         public static final StreamCodec<RegistryFriendlyByteBuf, SuspiciousStewEffects.Entry> STREAM_CODEC = StreamCodec.composite(
+             ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT),

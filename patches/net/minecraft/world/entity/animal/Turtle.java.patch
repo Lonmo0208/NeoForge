@@ -1,0 +1,53 @@
+--- a/net/minecraft/world/entity/animal/Turtle.java
++++ b/net/minecraft/world/entity/animal/Turtle.java
+@@ -75,7 +_,7 @@
+         .withAttachments(EntityAttachments.builder().attach(EntityAttachment.PASSENGER, 0.0F, EntityType.TURTLE.getHeight(), -0.25F))
+         .scale(0.3F);
+     int layEggCounter;
+-    public static final Predicate<LivingEntity> BABY_ON_LAND_SELECTOR = p_340119_ -> p_340119_.isBaby() && !p_340119_.isInWater();
++    public static final Predicate<LivingEntity> BABY_ON_LAND_SELECTOR = p_337837_ -> p_337837_.isBaby() && !p_337837_.isInWater();
+ 
+     public Turtle(EntityType<? extends Turtle> p_30132_, Level p_30133_) {
+         super(p_30132_, p_30133_);
+@@ -392,10 +_,10 @@
+                 return false;
+             } else if (this.turtle.hasEgg()) {
+                 return true;
+-            } else if (this.turtle.getRandom().nextInt(reducedTickDelay(700)) != 0) {
+-                return false;
+             } else {
+-                return !this.turtle.getHomePos().closerToCenterThan(this.turtle.position(), 64.0);
++                return this.turtle.getRandom().nextInt(reducedTickDelay(700)) != 0
++                    ? false
++                    : !this.turtle.getHomePos().closerToCenterThan(this.turtle.position(), 64.0);
+             }
+         }
+ 
+@@ -423,7 +_,7 @@
+             BlockPos blockpos = this.turtle.getHomePos();
+             boolean flag = blockpos.closerToCenterThan(this.turtle.position(), 16.0);
+             if (flag) {
+-                ++this.closeToHomeTryTicks;
++                this.closeToHomeTryTicks++;
+             }
+ 
+             if (this.turtle.getNavigation().isDone()) {
+@@ -522,7 +_,7 @@
+                 }
+ 
+                 if (this.turtle.isLayingEgg()) {
+-                    ++this.turtle.layEggCounter;
++                    this.turtle.layEggCounter++;
+                 }
+             }
+         }
+@@ -611,8 +_,7 @@
+ 
+         @Override
+         public boolean isStableDestination(BlockPos p_30300_) {
+-            Mob mob = this.mob;
+-            if (mob instanceof Turtle turtle && turtle.isTravelling()) {
++            if (this.mob instanceof Turtle turtle && turtle.isTravelling()) {
+                 return this.level.getBlockState(p_30300_).is(Blocks.WATER);
+             }
+ 

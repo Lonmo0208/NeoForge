@@ -1,0 +1,375 @@
+--- a/net/minecraft/util/datafix/fixes/ItemStackComponentizationFix.java
++++ b/net/minecraft/util/datafix/fixes/ItemStackComponentizationFix.java
+@@ -22,7 +_,7 @@
+ import java.util.stream.Stream;
+ import javax.annotation.Nullable;
+ import net.minecraft.util.Mth;
+-import net.minecraft.util.datafix.ExtraDataFixUtils;
++import net.minecraft.util.datafix.ComponentDataFixUtils;
+ import net.minecraft.util.datafix.schemas.NamespacedSchema;
+ 
+ public class ItemStackComponentizationFix extends DataFix {
+@@ -48,6 +_,55 @@
+     private static final List<String> BUCKETED_MOB_TAGS = List.of(
+         "NoAI", "Silent", "NoGravity", "Glowing", "Invulnerable", "Health", "Age", "Variant", "HuntingCooldown", "BucketVariantTag"
+     );
++    private static final Set<String> BOOLEAN_BLOCK_STATE_PROPERTIES = Set.of(
++        "attached",
++        "bottom",
++        "conditional",
++        "disarmed",
++        "drag",
++        "enabled",
++        "extended",
++        "eye",
++        "falling",
++        "hanging",
++        "has_bottle_0",
++        "has_bottle_1",
++        "has_bottle_2",
++        "has_record",
++        "has_book",
++        "inverted",
++        "in_wall",
++        "lit",
++        "locked",
++        "occupied",
++        "open",
++        "persistent",
++        "powered",
++        "short",
++        "signal_fire",
++        "snowy",
++        "triggered",
++        "unstable",
++        "waterlogged",
++        "berries",
++        "bloom",
++        "shrieking",
++        "can_summon",
++        "up",
++        "down",
++        "north",
++        "east",
++        "south",
++        "west",
++        "slot_0_occupied",
++        "slot_1_occupied",
++        "slot_2_occupied",
++        "slot_3_occupied",
++        "slot_4_occupied",
++        "slot_5_occupied",
++        "cracked",
++        "crafting"
++    );
+     private static final Splitter PROPERTY_SPLITTER = Splitter.on(',');
+ 
+     public ItemStackComponentizationFix(Schema p_331673_) {
+@@ -59,7 +_,9 @@
+         p_332167_.moveTagToComponent("Damage", "minecraft:damage", p_330498_.createInt(0));
+         p_332167_.moveTagToComponent("RepairCost", "minecraft:repair_cost", p_330498_.createInt(0));
+         p_332167_.moveTagToComponent("CustomModelData", "minecraft:custom_model_data");
+-        p_332167_.removeTag("BlockStateTag").result().ifPresent(p_332594_ -> p_332167_.setComponent("minecraft:block_state", fixBlockStateTag(p_332594_)));
++        p_332167_.removeTag("BlockStateTag")
++            .result()
++            .ifPresent(p_332594_ -> p_332167_.setComponent("minecraft:block_state", fixBlockStateTag((Dynamic<?>)p_332594_)));
+         p_332167_.moveTagToComponent("EntityTag", "minecraft:entity_data");
+         p_332167_.fixSubTag("BlockEntityTag", false, p_330655_ -> {
+             String s = NamespacedSchema.ensureNamespaced(p_330655_.get("id").asString(""));
+@@ -68,7 +_,7 @@
+             return dynamic2.equals(p_330655_.emptyMap()) ? dynamic2 : p_330655_;
+         });
+         p_332167_.moveTagToComponent("BlockEntityTag", "minecraft:block_entity_data");
+-        if (ExtraDataFixUtils.asBoolean(p_332167_.removeTag("Unbreakable"), false)) {
++        if (p_332167_.removeTag("Unbreakable").asBoolean(false)) {
+             Dynamic<?> dynamic = p_330498_.emptyMap();
+             if ((i & 4) != 0) {
+                 dynamic = dynamic.set("show_in_tooltip", p_330498_.createBoolean(false));
+@@ -87,7 +_,7 @@
+         fixAttributeModifiers(p_332167_, p_330498_, i);
+         Optional<? extends Dynamic<?>> optional = p_332167_.removeTag("Trim").result();
+         if (optional.isPresent()) {
+-            Dynamic<?> dynamic1 = optional.get();
++            Dynamic<?> dynamic1 = (Dynamic<?>)optional.get();
+             if ((i & 128) != 0) {
+                 dynamic1 = dynamic1.set("show_in_tooltip", dynamic1.createBoolean(false));
+             }
+@@ -113,7 +_,7 @@
+             Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = p_332167_.removeTag("Decorations")
+                 .asStream()
+                 .map(ItemStackComponentizationFix::fixMapDecoration)
+-                .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, (p_332595_, p_332596_) -> p_332595_));
++                .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, (p_332591_, p_339605_) -> p_332591_));
+             if (!map.isEmpty()) {
+                 p_332167_.setComponent("minecraft:map_decorations", p_330498_.createMap(map));
+             }
+@@ -164,20 +_,24 @@
+         }
+ 
+         if (p_332167_.is("minecraft:player_head")) {
+-            p_332167_.removeTag("SkullOwner").result().ifPresent(p_330565_ -> p_332167_.setComponent("minecraft:profile", fixProfile(p_330565_)));
++            p_332167_.removeTag("SkullOwner").result().ifPresent(p_330565_ -> p_332167_.setComponent("minecraft:profile", fixProfile((Dynamic<?>)p_330565_)));
+         }
+     }
+ 
+     private static Dynamic<?> fixBlockStateTag(Dynamic<?> p_332829_) {
+-        return p_332829_.createMap(p_332829_.asMap(p_332591_ -> p_332591_, p_332592_ -> {
+-            Optional<Boolean> optional = ExtraDataFixUtils.asBoolean(p_332592_).result();
+-            if (optional.isPresent()) {
+-                return p_332592_.createString(String.valueOf(optional.get()));
+-            } else {
+-                Optional<Number> optional1 = p_332592_.asNumber().result();
+-                return optional1.isPresent() ? p_332592_.createString(optional1.get().toString()) : p_332592_;
+-            }
+-        }));
++        return DataFixUtils.orElse(p_332829_.asMapOpt().result().map(p_339491_ -> p_339491_.collect(Collectors.toMap(Pair::getFirst, p_339490_ -> {
++                String s = ((Dynamic)p_339490_.getFirst()).asString("");
++                Dynamic<?> dynamic = (Dynamic<?>)p_339490_.getSecond();
++                if (BOOLEAN_BLOCK_STATE_PROPERTIES.contains(s)) {
++                    Optional<Boolean> optional = dynamic.asBoolean().result();
++                    if (optional.isPresent()) {
++                        return dynamic.createString(String.valueOf(optional.get()));
++                    }
++                }
++
++                Optional<Number> optional1 = dynamic.asNumber().result();
++                return optional1.isPresent() ? dynamic.createString(optional1.get().toString()) : dynamic;
++            }))).map(p_332829_::createMap), p_332829_);
+     }
+ 
+     private static Dynamic<?> fixDisplay(ItemStackComponentizationFix.ItemStackData p_331302_, Dynamic<?> p_331703_, int p_331793_) {
+@@ -194,12 +_,17 @@
+             p_331302_.setComponent("minecraft:dyed_color", dynamic);
+         }
+ 
++        Optional<String> optional1 = p_331703_.get("LocName").asString().result();
++        if (optional1.isPresent()) {
++            p_331302_.setComponent("minecraft:item_name", ComponentDataFixUtils.createTranslatableComponent(p_331703_.getOps(), optional1.get()));
++        }
++
+         if (p_331302_.is("minecraft:filled_map")) {
+             p_331302_.setComponent("minecraft:map_color", p_331703_.get("MapColor"));
+             p_331703_ = p_331703_.remove("MapColor");
+         }
+ 
+-        return p_331703_.remove("Name").remove("Lore").remove("color");
++        return p_331703_.remove("Name").remove("Lore").remove("color").remove("LocName");
+     }
+ 
+     private static <T> Dynamic<T> fixBlockEntityTag(ItemStackComponentizationFix.ItemStackData p_330721_, Dynamic<T> p_331427_, String p_331421_) {
+@@ -216,7 +_,7 @@
+             p_330721_.setComponent("minecraft:container_loot", dynamic);
+             p_331427_ = p_331427_.remove("LootTable").remove("LootTableSeed");
+         }
+-        return switch(p_331421_) {
++        return switch (p_331421_) {
+             case "minecraft:skull" -> {
+                 p_330721_.setComponent("minecraft:note_block_sound", p_331427_.get("note_block_sound"));
+                 yield p_331427_.remove("note_block_sound");
+@@ -266,13 +_,16 @@
+     private static void fixEnchantments(
+         ItemStackComponentizationFix.ItemStackData p_331903_, Dynamic<?> p_330744_, String p_331654_, String p_331804_, boolean p_331955_
+     ) {
+-        List<? extends Dynamic<?>> list = p_331903_.removeTag(p_331654_).asList(Function.identity());
+-        List<Pair<String, Integer>> list1 = list.stream().flatMap(p_330659_ -> parseEnchantment(p_330659_).stream()).toList();
+-        if (!list1.isEmpty() || p_331955_) {
++        OptionalDynamic<?> optionaldynamic = p_331903_.removeTag(p_331654_);
++        List<Pair<String, Integer>> list = optionaldynamic.asList(Function.identity())
++            .stream()
++            .flatMap(p_330659_ -> parseEnchantment((Dynamic<?>)p_330659_).stream())
++            .toList();
++        if (!list.isEmpty() || p_331955_) {
+             Dynamic<?> dynamic = p_330744_.emptyMap();
+             Dynamic<?> dynamic1 = p_330744_.emptyMap();
+ 
+-            for(Pair<String, Integer> pair : list1) {
++            for (Pair<String, Integer> pair : list) {
+                 dynamic1 = dynamic1.set(pair.getFirst(), p_330744_.createInt(pair.getSecond()));
+             }
+ 
+@@ -284,7 +_,7 @@
+             p_331903_.setComponent(p_331804_, dynamic);
+         }
+ 
+-        if (!list.isEmpty() && list1.isEmpty()) {
++        if (optionaldynamic.result().isPresent() && list.isEmpty()) {
+             p_331903_.setComponent("minecraft:enchantment_glint_override", p_330744_.createBoolean(true));
+         }
+     }
+@@ -313,8 +_,8 @@
+                         optional.get()
+                             .asStream()
+                             .map(
+-                                p_330766_ -> DataFixUtils.orElse(
+-                                        p_330766_.asString().map(p_330959_ -> fixBlockStatePredicate(p_330766_, p_330959_)).result(), p_330766_
++                                p_337638_ -> DataFixUtils.orElse(
++                                        p_337638_.asString().map(p_330959_ -> fixBlockStatePredicate((Dynamic<?>)p_337638_, p_330959_)).result(), p_337638_
+                                     )
+                             )
+                     )
+@@ -345,7 +_,7 @@
+         if (i != -1 && l != -1) {
+             Dynamic<?> dynamic1 = p_331862_.emptyMap();
+ 
+-            for(String s1 : PROPERTY_SPLITTER.split(p_332123_.substring(i + 1, l))) {
++            for (String s1 : PROPERTY_SPLITTER.split(p_332123_.substring(i + 1, l))) {
+                 int i1 = s1.indexOf(61);
+                 if (i1 != -1) {
+                     String s2 = s1.substring(0, i1).trim();
+@@ -383,13 +_,13 @@
+             .set("name", p_331035_.createString(""))
+             .set("amount", p_331035_.createDouble(0.0))
+             .set("operation", p_331035_.createString("add_value"));
+-        dynamic = ExtraDataFixUtils.copyField(p_331035_, "AttributeName", dynamic, "type");
+-        dynamic = ExtraDataFixUtils.copyField(p_331035_, "Slot", dynamic, "slot");
+-        dynamic = ExtraDataFixUtils.copyField(p_331035_, "UUID", dynamic, "uuid");
+-        dynamic = ExtraDataFixUtils.copyField(p_331035_, "Name", dynamic, "name");
+-        dynamic = ExtraDataFixUtils.copyField(p_331035_, "Amount", dynamic, "amount");
+-        return ExtraDataFixUtils.copyAndFixField(p_331035_, "Operation", dynamic, "operation", p_330453_ -> {
+-            return p_330453_.createString(switch(p_330453_.asInt(0)) {
++        dynamic = Dynamic.copyField(p_331035_, "AttributeName", dynamic, "type");
++        dynamic = Dynamic.copyField(p_331035_, "Slot", dynamic, "slot");
++        dynamic = Dynamic.copyField(p_331035_, "UUID", dynamic, "uuid");
++        dynamic = Dynamic.copyField(p_331035_, "Name", dynamic, "name");
++        dynamic = Dynamic.copyField(p_331035_, "Amount", dynamic, "amount");
++        return Dynamic.copyAndFixField(p_331035_, "Operation", dynamic, "operation", p_330453_ -> {
++            return p_330453_.createString(switch (p_330453_.asInt(0)) {
+                 case 1 -> "add_multiplied_base";
+                 case 2 -> "add_multiplied_total";
+                 default -> "add_value";
+@@ -408,7 +_,7 @@
+     }
+ 
+     private static String fixMapDecorationType(int p_330596_) {
+-        return switch(p_330596_) {
++        return switch (p_330596_) {
+             case 1 -> "frame";
+             case 2 -> "red_marker";
+             case 3 -> "blue_marker";
+@@ -492,7 +_,7 @@
+         } else {
+             List<Dynamic<?>> list1 = new ArrayList<>(list.size());
+ 
+-            for(int i = 0; i < list.size(); ++i) {
++            for (int i = 0; i < list.size(); i++) {
+                 String s = list.get(i);
+                 String s1 = map.get(String.valueOf(i));
+                 list1.add(createFilteredText(p_330407_, s, Optional.ofNullable(s1)));
+@@ -503,7 +_,7 @@
+     }
+ 
+     private static Dynamic<?> createFilteredText(Dynamic<?> p_331589_, String p_330423_, Optional<String> p_330385_) {
+-        Dynamic<?> dynamic = p_331589_.emptyMap().set("text", p_331589_.createString(p_330423_));
++        Dynamic<?> dynamic = p_331589_.emptyMap().set("raw", p_331589_.createString(p_330423_));
+         if (p_330385_.isPresent()) {
+             dynamic = dynamic.set("filtered", p_331589_.createString(p_330385_.get()));
+         }
+@@ -514,7 +_,7 @@
+     private static void fixBucketedMobData(ItemStackComponentizationFix.ItemStackData p_331570_, Dynamic<?> p_330855_) {
+         Dynamic<?> dynamic = p_330855_.emptyMap();
+ 
+-        for(String s : BUCKETED_MOB_TAGS) {
++        for (String s : BUCKETED_MOB_TAGS) {
+             dynamic = p_331570_.moveTagInto(s, dynamic, s);
+         }
+ 
+@@ -527,10 +_,10 @@
+         Optional<? extends Dynamic<?>> optional = p_332824_.removeTag("LodestonePos").result();
+         Optional<? extends Dynamic<?>> optional1 = p_332824_.removeTag("LodestoneDimension").result();
+         if (!optional.isEmpty() || !optional1.isEmpty()) {
+-            boolean flag = ExtraDataFixUtils.asBoolean(p_332824_.removeTag("LodestoneTracked"), true);
++            boolean flag = p_332824_.removeTag("LodestoneTracked").asBoolean(true);
+             Dynamic<?> dynamic = p_332755_.emptyMap();
+             if (optional.isPresent() && optional1.isPresent()) {
+-                dynamic = dynamic.set("target", p_332755_.emptyMap().set("pos", optional.get()).set("dimension", optional1.get()));
++                dynamic = dynamic.set("target", p_332755_.emptyMap().set("pos", (Dynamic<?>)optional.get()).set("dimension", (Dynamic<?>)optional1.get()));
+             }
+ 
+             if (!flag) {
+@@ -565,8 +_,8 @@
+     }
+ 
+     private static Dynamic<?> fixFireworkExplosion(Dynamic<?> p_332063_) {
+-        p_332063_ = ExtraDataFixUtils.renameAndFixField(p_332063_, "Type", "shape", p_331146_ -> {
+-            return p_331146_.createString(switch(p_331146_.asInt(0)) {
++        p_332063_ = p_332063_.renameAndFixField("Type", "shape", p_331146_ -> {
++            return p_331146_.createString(switch (p_331146_.asInt(0)) {
+                 case 1 -> "large_ball";
+                 case 2 -> "star";
+                 case 3 -> "creeper";
+@@ -574,10 +_,10 @@
+                 default -> "small_ball";
+             });
+         });
+-        p_332063_ = ExtraDataFixUtils.renameField(p_332063_, "Colors", "colors");
+-        p_332063_ = ExtraDataFixUtils.renameField(p_332063_, "FadeColors", "fade_colors");
+-        p_332063_ = ExtraDataFixUtils.renameField(p_332063_, "Trail", "has_trail");
+-        return ExtraDataFixUtils.renameField(p_332063_, "Flicker", "has_twinkle");
++        p_332063_ = p_332063_.renameField("Colors", "colors");
++        p_332063_ = p_332063_.renameField("FadeColors", "fade_colors");
++        p_332063_ = p_332063_.renameField("Trail", "has_trail");
++        return p_332063_.renameField("Flicker", "has_twinkle");
+     }
+ 
+     public static Dynamic<?> fixProfile(Dynamic<?> p_330375_) {
+@@ -594,7 +_,7 @@
+             }
+ 
+             if (optional1.isPresent()) {
+-                dynamic1 = dynamic1.set("id", optional1.get());
++                dynamic1 = dynamic1.set("id", (Dynamic<?>)optional1.get());
+             }
+ 
+             if (dynamic != null) {
+@@ -612,9 +_,9 @@
+     @Nullable
+     private static Dynamic<?> fixProfileProperties(OptionalDynamic<?> p_330875_) {
+         Map<String, List<Pair<String, Optional<String>>>> map = p_330875_.asMap(
+-            p_331855_ -> p_331855_.asString(""), p_331384_ -> p_331384_.asList(p_331346_ -> {
+-                    String s = p_331346_.get("Value").asString("");
+-                    Optional<String> optional = p_331346_.get("Signature").asString().result();
++            p_331855_ -> p_331855_.asString(""), p_331384_ -> p_331384_.asList(p_337640_ -> {
++                    String s = p_337640_.get("Value").asString("");
++                    Optional<String> optional = p_337640_.get("Signature").asString().result();
+                     return Pair.of(s, optional);
+                 })
+         );
+@@ -693,23 +_,23 @@
+         }
+ 
+         public void setComponent(String p_331000_, OptionalDynamic<?> p_332145_) {
+-            p_332145_.result().ifPresent(p_332105_ -> this.components = this.components.set(p_331000_, p_332105_));
++            p_332145_.result().ifPresent(p_332105_ -> this.components = this.components.set(p_331000_, (Dynamic<?>)p_332105_));
+         }
+ 
+         public Dynamic<?> moveTagInto(String p_330240_, Dynamic<?> p_330972_, String p_331818_) {
+             Optional<? extends Dynamic<?>> optional = this.removeTag(p_330240_).result();
+-            return optional.isPresent() ? p_330972_.set(p_331818_, optional.get()) : p_330972_;
++            return optional.isPresent() ? p_330972_.set(p_331818_, (Dynamic<?>)optional.get()) : p_330972_;
+         }
+ 
+         public void moveTagToComponent(String p_331198_, String p_330485_, Dynamic<?> p_330981_) {
+             Optional<? extends Dynamic<?>> optional = this.removeTag(p_331198_).result();
+             if (optional.isPresent() && !optional.get().equals(p_330981_)) {
+-                this.setComponent(p_330485_, optional.get());
++                this.setComponent(p_330485_, (Dynamic<?>)optional.get());
+             }
+         }
+ 
+         public void moveTagToComponent(String p_330961_, String p_330509_) {
+-            this.removeTag(p_330961_).result().ifPresent(p_330514_ -> this.setComponent(p_330509_, p_330514_));
++            this.removeTag(p_330961_).result().ifPresent(p_330514_ -> this.setComponent(p_330509_, (Dynamic<?>)p_330514_));
+         }
+ 
+         public void fixSubTag(String p_330776_, boolean p_330566_, UnaryOperator<Dynamic<?>> p_330246_) {
+@@ -741,8 +_,8 @@
+         private static <T> Dynamic<T> mergeRemainder(Dynamic<T> p_331175_, Dynamic<?> p_330435_) {
+             DynamicOps<T> dynamicops = p_331175_.getOps();
+             return dynamicops.getMap(p_331175_.getValue())
+-                .flatMap(p_330670_ -> dynamicops.mergeToMap(p_330435_.convert(dynamicops).getValue(), p_330670_))
+-                .map(p_331482_ -> new Dynamic<>(dynamicops, p_331482_))
++                .flatMap(p_330670_ -> dynamicops.mergeToMap(p_330435_.convert(dynamicops).getValue(), (MapLike<T>)p_330670_))
++                .map(p_331482_ -> new Dynamic<>(dynamicops, (T)p_331482_))
+                 .result()
+                 .orElse(p_331175_);
+         }

@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/ClearInventoryCommands.java
++++ b/net/minecraft/server/commands/ClearInventoryCommands.java
+@@ -67,7 +_,7 @@
+     private static int clearInventory(CommandSourceStack p_136706_, Collection<ServerPlayer> p_136707_, Predicate<ItemStack> p_136708_, int p_136709_) throws CommandSyntaxException {
+         int i = 0;
+ 
+-        for(ServerPlayer serverplayer : p_136707_) {
++        for (ServerPlayer serverplayer : p_136707_) {
+             i += serverplayer.getInventory().clearOrCountMatchingItems(p_136708_, p_136709_, serverplayer.inventoryMenu.getCraftSlots());
+             serverplayer.containerMenu.broadcastChanges();
+             serverplayer.inventoryMenu.slotsChanged(serverplayer.getInventory());

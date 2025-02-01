@@ -1,0 +1,12 @@
+--- a/net/minecraft/world/entity/ai/behavior/EntityTracker.java
++++ b/net/minecraft/world/entity/ai/behavior/EntityTracker.java
+@@ -29,8 +_,7 @@
+ 
+     @Override
+     public boolean isVisibleBy(LivingEntity p_22853_) {
+-        Entity $$3 = this.entity;
+-        if ($$3 instanceof LivingEntity livingentity) {
++        if (this.entity instanceof LivingEntity livingentity) {
+             if (!livingentity.isAlive()) {
+                 return false;
+             } else {

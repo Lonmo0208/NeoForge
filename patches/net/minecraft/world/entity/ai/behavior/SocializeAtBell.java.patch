@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/entity/ai/behavior/SocializeAtBell.java
++++ b/net/minecraft/world/entity/ai/behavior/SocializeAtBell.java
+@@ -30,9 +_,9 @@
+                                 if (p_258766_.getRandom().nextInt(100) == 0
+                                     && p_258766_.dimension() == globalpos.dimension()
+                                     && globalpos.pos().closerToCenterThan(p_258767_.position(), 4.0)
+-                                    && nearestvisiblelivingentities.contains(p_340036_ -> EntityType.VILLAGER.equals(p_340036_.getType()))) {
++                                    && nearestvisiblelivingentities.contains(p_337780_ -> EntityType.VILLAGER.equals(p_337780_.getType()))) {
+                                     nearestvisiblelivingentities.findClosest(
+-                                            p_340038_ -> EntityType.VILLAGER.equals(p_340038_.getType()) && p_340038_.distanceToSqr(p_258767_) <= 32.0
++                                            p_337779_ -> EntityType.VILLAGER.equals(p_337779_.getType()) && p_337779_.distanceToSqr(p_258767_) <= 32.0
+                                         )
+                                         .ifPresent(p_258759_ -> {
+                                             p_258754_.set(p_258759_);

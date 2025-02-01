@@ -1,0 +1,41 @@
+--- a/net/minecraft/world/item/InstrumentItem.java
++++ b/net/minecraft/world/item/InstrumentItem.java
+@@ -3,7 +_,6 @@
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Optional;
+-import javax.annotation.Nullable;
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.Util;
+ import net.minecraft.core.Holder;
+@@ -32,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void appendHoverText(ItemStack p_220115_, @Nullable Level p_220116_, List<Component> p_220117_, TooltipFlag p_220118_) {
+-        super.appendHoverText(p_220115_, p_220116_, p_220117_, p_220118_);
++    public void appendHoverText(ItemStack p_220115_, Item.TooltipContext p_339630_, List<Component> p_220117_, TooltipFlag p_220118_) {
++        super.appendHoverText(p_220115_, p_339630_, p_220117_, p_220118_);
+         Optional<ResourceKey<Instrument>> optional = this.getInstrument(p_220115_).flatMap(Holder::unwrapKey);
+         if (optional.isPresent()) {
+             MutableComponent mutablecomponent = Component.translatable(Util.makeDescriptionId("instrument", optional.get().location()));
+@@ -49,15 +_,15 @@
+ 
+     public static void setRandom(ItemStack p_220111_, TagKey<Instrument> p_220112_, RandomSource p_220113_) {
+         Optional<Holder<Instrument>> optional = BuiltInRegistries.INSTRUMENT.getRandomElementOf(p_220112_, p_220113_);
+-        optional.ifPresent(p_330088_ -> p_220111_.set(DataComponents.INSTRUMENT, p_330088_));
++        optional.ifPresent(p_330088_ -> p_220111_.set(DataComponents.INSTRUMENT, (Holder<Instrument>)p_330088_));
+     }
+ 
+     @Override
+     public InteractionResultHolder<ItemStack> use(Level p_220123_, Player p_220124_, InteractionHand p_220125_) {
+         ItemStack itemstack = p_220124_.getItemInHand(p_220125_);
+-        Holder<Instrument> holder = itemstack.get(DataComponents.INSTRUMENT);
+-        if (holder != null) {
+-            Instrument instrument = holder.value();
++        Optional<? extends Holder<Instrument>> optional = this.getInstrument(itemstack);
++        if (optional.isPresent()) {
++            Instrument instrument = optional.get().value();
+             p_220124_.startUsingItem(p_220125_);
+             play(p_220123_, p_220124_, instrument);
+             p_220124_.getCooldowns().addCooldown(this, instrument.useDuration());

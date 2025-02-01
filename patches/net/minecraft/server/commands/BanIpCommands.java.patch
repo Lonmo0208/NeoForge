@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/BanIpCommands.java
++++ b/net/minecraft/server/commands/BanIpCommands.java
+@@ -68,7 +_,7 @@
+                 p_136540_.sendSuccess(() -> Component.translatable("commands.banip.info", list.size(), EntitySelector.joinNames(list)), true);
+             }
+ 
+-            for(ServerPlayer serverplayer : list) {
++            for (ServerPlayer serverplayer : list) {
+                 serverplayer.connection.disconnect(Component.translatable("multiplayer.disconnect.ip_banned"));
+             }
+ 

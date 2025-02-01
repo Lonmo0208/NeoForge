@@ -1,0 +1,70 @@
+--- a/net/minecraft/server/ServerScoreboard.java
++++ b/net/minecraft/server/ServerScoreboard.java
+@@ -175,7 +_,7 @@
+     }
+ 
+     protected void setDirty() {
+-        for(Runnable runnable : this.dirtyListeners) {
++        for (Runnable runnable : this.dirtyListeners) {
+             runnable.run();
+         }
+     }
+@@ -184,13 +_,13 @@
+         List<Packet<?>> list = Lists.newArrayList();
+         list.add(new ClientboundSetObjectivePacket(p_136230_, 0));
+ 
+-        for(DisplaySlot displayslot : DisplaySlot.values()) {
++        for (DisplaySlot displayslot : DisplaySlot.values()) {
+             if (this.getDisplayObjective(displayslot) == p_136230_) {
+                 list.add(new ClientboundSetDisplayObjectivePacket(displayslot, p_136230_));
+             }
+         }
+ 
+-        for(PlayerScoreEntry playerscoreentry : this.listPlayerScores(p_136230_)) {
++        for (PlayerScoreEntry playerscoreentry : this.listPlayerScores(p_136230_)) {
+             list.add(
+                 new ClientboundSetScorePacket(
+                     playerscoreentry.owner(),
+@@ -208,8 +_,8 @@
+     public void startTrackingObjective(Objective p_136232_) {
+         List<Packet<?>> list = this.getStartTrackingPackets(p_136232_);
+ 
+-        for(ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
+-            for(Packet<?> packet : list) {
++        for (ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
++            for (Packet<?> packet : list) {
+                 serverplayer.connection.send(packet);
+             }
+         }
+@@ -221,7 +_,7 @@
+         List<Packet<?>> list = Lists.newArrayList();
+         list.add(new ClientboundSetObjectivePacket(p_136234_, 1));
+ 
+-        for(DisplaySlot displayslot : DisplaySlot.values()) {
++        for (DisplaySlot displayslot : DisplaySlot.values()) {
+             if (this.getDisplayObjective(displayslot) == p_136234_) {
+                 list.add(new ClientboundSetDisplayObjectivePacket(displayslot, p_136234_));
+             }
+@@ -233,8 +_,8 @@
+     public void stopTrackingObjective(Objective p_136236_) {
+         List<Packet<?>> list = this.getStopTrackingPackets(p_136236_);
+ 
+-        for(ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
+-            for(Packet<?> packet : list) {
++        for (ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
++            for (Packet<?> packet : list) {
+                 serverplayer.connection.send(packet);
+             }
+         }
+@@ -245,9 +_,9 @@
+     public int getObjectiveDisplaySlotCount(Objective p_136238_) {
+         int i = 0;
+ 
+-        for(DisplaySlot displayslot : DisplaySlot.values()) {
++        for (DisplaySlot displayslot : DisplaySlot.values()) {
+             if (this.getDisplayObjective(displayslot) == p_136238_) {
+-                ++i;
++                i++;
+             }
+         }
+ 

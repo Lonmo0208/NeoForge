@@ -1,0 +1,42 @@
+--- a/net/minecraft/world/item/crafting/ArmorDyeRecipe.java
++++ b/net/minecraft/world/item/crafting/ArmorDyeRecipe.java
+@@ -6,7 +_,6 @@
+ import net.minecraft.tags.ItemTags;
+ import net.minecraft.world.inventory.CraftingContainer;
+ import net.minecraft.world.item.DyeItem;
+-import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.component.DyedItemColor;
+ import net.minecraft.world.level.Level;
+@@ -20,7 +_,7 @@
+         ItemStack itemstack = ItemStack.EMPTY;
+         List<ItemStack> list = Lists.newArrayList();
+ 
+-        for(int i = 0; i < p_43769_.getContainerSize(); ++i) {
++        for (int i = 0; i < p_43769_.getContainerSize(); i++) {
+             ItemStack itemstack1 = p_43769_.getItem(i);
+             if (!itemstack1.isEmpty()) {
+                 if (itemstack1.is(ItemTags.DYEABLE)) {
+@@ -46,7 +_,7 @@
+         List<DyeItem> list = Lists.newArrayList();
+         ItemStack itemstack = ItemStack.EMPTY;
+ 
+-        for(int i = 0; i < p_43767_.getContainerSize(); ++i) {
++        for (int i = 0; i < p_43767_.getContainerSize(); i++) {
+             ItemStack itemstack1 = p_43767_.getItem(i);
+             if (!itemstack1.isEmpty()) {
+                 if (itemstack1.is(ItemTags.DYEABLE)) {
+@@ -56,12 +_,10 @@
+ 
+                     itemstack = itemstack1.copy();
+                 } else {
+-                    Item item = itemstack1.getItem();
+-                    if (!(item instanceof DyeItem)) {
++                    if (!(itemstack1.getItem() instanceof DyeItem dyeitem)) {
+                         return ItemStack.EMPTY;
+                     }
+ 
+-                    DyeItem dyeitem = (DyeItem)item;
+                     list.add(dyeitem);
+                 }
+             }

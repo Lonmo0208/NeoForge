@@ -1,0 +1,42 @@
+--- a/net/minecraft/world/level/levelgen/feature/SpikeFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/SpikeFeature.java
+@@ -56,7 +_,7 @@
+             list = getSpikesForLevel(worldgenlevel);
+         }
+ 
+-        for(SpikeFeature.EndSpike spikefeature$endspike : list) {
++        for (SpikeFeature.EndSpike spikefeature$endspike : list) {
+             if (spikefeature$endspike.isCenterWithinChunk(blockpos)) {
+                 this.placeSpike(worldgenlevel, randomsource, spikeconfiguration, spikefeature$endspike);
+             }
+@@ -68,7 +_,7 @@
+     private void placeSpike(ServerLevelAccessor p_225247_, RandomSource p_225248_, SpikeConfiguration p_225249_, SpikeFeature.EndSpike p_225250_) {
+         int i = p_225250_.getRadius();
+ 
+-        for(BlockPos blockpos : BlockPos.betweenClosed(
++        for (BlockPos blockpos : BlockPos.betweenClosed(
+             new BlockPos(p_225250_.getCenterX() - i, p_225247_.getMinBuildHeight(), p_225250_.getCenterZ() - i),
+             new BlockPos(p_225250_.getCenterX() + i, p_225250_.getHeight() + 10, p_225250_.getCenterZ() + i)
+         )) {
+@@ -86,9 +_,9 @@
+             int j = 3;
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-            for(int k = -2; k <= 2; ++k) {
+-                for(int l = -2; l <= 2; ++l) {
+-                    for(int i1 = 0; i1 <= 3; ++i1) {
++            for (int k = -2; k <= 2; k++) {
++                for (int l = -2; l <= 2; l++) {
++                    for (int i1 = 0; i1 <= 3; i1++) {
+                         boolean flag = Mth.abs(k) == 2;
+                         boolean flag1 = Mth.abs(l) == 2;
+                         boolean flag2 = i1 == 3;
+@@ -199,7 +_,7 @@
+             IntArrayList intarraylist = Util.toShuffledList(IntStream.range(0, 10), RandomSource.create(p_66910_));
+             List<SpikeFeature.EndSpike> list = Lists.newArrayList();
+ 
+-            for(int i = 0; i < 10; ++i) {
++            for (int i = 0; i < 10; i++) {
+                 int j = Mth.floor(42.0 * Math.cos(2.0 * (-Math.PI + (Math.PI / 10) * (double)i)));
+                 int k = Mth.floor(42.0 * Math.sin(2.0 * (-Math.PI + (Math.PI / 10) * (double)i)));
+                 int l = intarraylist.get(i);

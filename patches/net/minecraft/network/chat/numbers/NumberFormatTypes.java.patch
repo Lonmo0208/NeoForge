@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/chat/numbers/NumberFormatTypes.java
++++ b/net/minecraft/network/chat/numbers/NumberFormatTypes.java
+@@ -13,7 +_,7 @@
+ public class NumberFormatTypes {
+     public static final MapCodec<NumberFormat> MAP_CODEC = BuiltInRegistries.NUMBER_FORMAT_TYPE
+         .byNameCodec()
+-        .dispatchMap(NumberFormat::type, p_313782_ -> p_313782_.mapCodec().codec());
++        .dispatchMap(NumberFormat::type, NumberFormatType::mapCodec);
+     public static final Codec<NumberFormat> CODEC = MAP_CODEC.codec();
+     public static final StreamCodec<RegistryFriendlyByteBuf, NumberFormat> STREAM_CODEC = ByteBufCodecs.registry(Registries.NUMBER_FORMAT_TYPE)
+         .dispatch(NumberFormat::type, NumberFormatType::streamCodec);

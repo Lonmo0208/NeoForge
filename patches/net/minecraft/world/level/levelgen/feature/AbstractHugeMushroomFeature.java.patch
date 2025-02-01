@@ -1,0 +1,26 @@
+--- a/net/minecraft/world/level/levelgen/feature/AbstractHugeMushroomFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/AbstractHugeMushroomFeature.java
+@@ -23,7 +_,7 @@
+         int p_224934_,
+         BlockPos.MutableBlockPos p_224935_
+     ) {
+-        for(int i = 0; i < p_224934_; ++i) {
++        for (int i = 0; i < p_224934_; i++) {
+             p_224935_.set(p_224932_).move(Direction.UP, i);
+             if (!p_224930_.getBlockState(p_224935_).isSolidRender(p_224930_, p_224935_)) {
+                 this.setBlock(p_224930_, p_224935_, p_224933_.stemProvider.getState(p_224931_, p_224932_));
+@@ -49,11 +_,11 @@
+             if (!isDirt(blockstate) && !blockstate.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
+                 return false;
+             } else {
+-                for(int j = 0; j <= p_65101_; ++j) {
++                for (int j = 0; j <= p_65101_; j++) {
+                     int k = this.getTreeRadiusForHeight(-1, -1, p_65103_.foliageRadius, j);
+ 
+-                    for(int l = -k; l <= k; ++l) {
+-                        for(int i1 = -k; i1 <= k; ++i1) {
++                    for (int l = -k; l <= k; l++) {
++                        for (int i1 = -k; i1 <= k; i1++) {
+                             BlockState blockstate1 = p_65099_.getBlockState(p_65102_.setWithOffset(p_65100_, l, j, i1));
+                             if (!blockstate1.isAir() && !blockstate1.is(BlockTags.LEAVES)) {
+                                 return false;

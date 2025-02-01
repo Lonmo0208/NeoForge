@@ -1,0 +1,74 @@
+--- a/net/minecraft/client/gui/components/MultilineTextField.java
++++ b/net/minecraft/client/gui/components/MultilineTextField.java
+@@ -107,7 +_,7 @@
+     }
+ 
+     public int getLineAtCursor() {
+-        for(int i = 0; i < this.displayLines.size(); ++i) {
++        for (int i = 0; i < this.displayLines.size(); i++) {
+             MultilineTextField.StringView multilinetextfield$stringview = this.displayLines.get(i);
+             if (this.cursor >= multilinetextfield$stringview.beginIndex && this.cursor <= multilinetextfield$stringview.endIndex) {
+                 return i;
+@@ -122,7 +_,7 @@
+     }
+ 
+     public void seekCursor(Whence p_239798_, int p_239799_) {
+-        switch(p_239798_) {
++        switch (p_239798_) {
+             case ABSOLUTE:
+                 this.cursor = p_239799_;
+                 break;
+@@ -178,7 +_,7 @@
+             this.insertText("");
+             return true;
+         } else {
+-            switch(p_239712_) {
++            switch (p_239712_) {
+                 case 257:
+                 case 335:
+                     this.insertText("\n");
+@@ -293,12 +_,12 @@
+         } else {
+             int i = Mth.clamp(this.cursor, 0, this.value.length() - 1);
+ 
+-            while(i > 0 && Character.isWhitespace(this.value.charAt(i - 1))) {
+-                --i;
++            while (i > 0 && Character.isWhitespace(this.value.charAt(i - 1))) {
++                i--;
+             }
+ 
+-            while(i > 0 && !Character.isWhitespace(this.value.charAt(i - 1))) {
+-                --i;
++            while (i > 0 && !Character.isWhitespace(this.value.charAt(i - 1))) {
++                i--;
+             }
+ 
+             return new MultilineTextField.StringView(i, this.getWordEndPosition(i));
+@@ -312,12 +_,12 @@
+         } else {
+             int i = Mth.clamp(this.cursor, 0, this.value.length() - 1);
+ 
+-            while(i < this.value.length() && !Character.isWhitespace(this.value.charAt(i))) {
+-                ++i;
++            while (i < this.value.length() && !Character.isWhitespace(this.value.charAt(i))) {
++                i++;
+             }
+ 
+-            while(i < this.value.length() && Character.isWhitespace(this.value.charAt(i))) {
+-                ++i;
++            while (i < this.value.length() && Character.isWhitespace(this.value.charAt(i))) {
++                i++;
+             }
+ 
+             return new MultilineTextField.StringView(i, this.getWordEndPosition(i));
+@@ -327,8 +_,8 @@
+     private int getWordEndPosition(int p_240093_) {
+         int i = p_240093_;
+ 
+-        while(i < this.value.length() && !Character.isWhitespace(this.value.charAt(i))) {
+-            ++i;
++        while (i < this.value.length() && !Character.isWhitespace(this.value.charAt(i))) {
++            i++;
+         }
+ 
+         return i;

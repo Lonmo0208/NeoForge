@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/BanListCommands.java
++++ b/net/minecraft/server/commands/BanListCommands.java
+@@ -41,7 +_,7 @@
+         } else {
+             p_136550_.sendSuccess(() -> Component.translatable("commands.banlist.list", p_136551_.size()), false);
+ 
+-            for(BanListEntry<?> banlistentry : p_136551_) {
++            for (BanListEntry<?> banlistentry : p_136551_) {
+                 p_136550_.sendSuccess(
+                     () -> Component.translatable("commands.banlist.entry", banlistentry.getDisplayName(), banlistentry.getSource(), banlistentry.getReason()),
+                     false

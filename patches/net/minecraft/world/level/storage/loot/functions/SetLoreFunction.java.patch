@@ -1,0 +1,42 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SetLoreFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/SetLoreFunction.java
+@@ -1,7 +_,7 @@
+ package net.minecraft.world.level.storage.loot.functions;
+ 
+ import com.google.common.collect.ImmutableList;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -12,7 +_,6 @@
+ import net.minecraft.core.component.DataComponents;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.chat.ComponentSerialization;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.component.ItemLore;
+ import net.minecraft.world.level.storage.loot.LootContext;
+@@ -20,16 +_,16 @@
+ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+ 
+ public class SetLoreFunction extends LootItemConditionalFunction {
+-    public static final Codec<SetLoreFunction> CODEC = RecordCodecBuilder.create(
+-        p_335358_ -> commonFields(p_335358_)
++    public static final MapCodec<SetLoreFunction> CODEC = RecordCodecBuilder.mapCodec(
++        p_338151_ -> commonFields(p_338151_)
+                 .and(
+-                    p_335358_.group(
+-                        ExtraCodecs.sizeLimitedList(ComponentSerialization.CODEC.listOf(), 256).fieldOf("lore").forGetter(p_299022_ -> p_299022_.lore),
++                    p_338151_.group(
++                        ComponentSerialization.CODEC.sizeLimitedListOf(256).fieldOf("lore").forGetter(p_299022_ -> p_299022_.lore),
+                         ListOperation.codec(256).forGetter(p_335357_ -> p_335357_.mode),
+-                        ExtraCodecs.strictOptionalField(LootContext.EntityTarget.CODEC, "entity").forGetter(p_298481_ -> p_298481_.resolutionContext)
++                        LootContext.EntityTarget.CODEC.optionalFieldOf("entity").forGetter(p_298481_ -> p_298481_.resolutionContext)
+                     )
+                 )
+-                .apply(p_335358_, SetLoreFunction::new)
++                .apply(p_338151_, SetLoreFunction::new)
+     );
+     private final List<Component> lore;
+     private final ListOperation mode;

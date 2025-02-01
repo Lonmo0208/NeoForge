@@ -1,0 +1,11 @@
+--- a/net/minecraft/nbt/visitors/SkipFields.java
++++ b/net/minecraft/nbt/visitors/SkipFields.java
+@@ -12,7 +_,7 @@
+     public SkipFields(FieldSelector... p_202549_) {
+         FieldTree fieldtree = FieldTree.createRoot();
+ 
+-        for(FieldSelector fieldselector : p_202549_) {
++        for (FieldSelector fieldselector : p_202549_) {
+             fieldtree.addEntry(fieldselector);
+         }
+ 

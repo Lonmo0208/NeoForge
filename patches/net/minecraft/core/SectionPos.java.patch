@@ -1,0 +1,15 @@
+--- a/net/minecraft/core/SectionPos.java
++++ b/net/minecraft/core/SectionPos.java
+@@ -277,9 +_,9 @@
+         if (i == j && k == l && i1 == j1) {
+             p_194638_.accept(asLong(i, k, i1));
+         } else {
+-            for(int k1 = i; k1 <= j; ++k1) {
+-                for(int l1 = k; l1 <= l; ++l1) {
+-                    for(int i2 = i1; i2 <= j1; ++i2) {
++            for (int k1 = i; k1 <= j; k1++) {
++                for (int l1 = k; l1 <= l; l1++) {
++                    for (int i2 = i1; i2 <= j1; i2++) {
+                         p_194638_.accept(asLong(k1, l1, i2));
+                     }
+                 }

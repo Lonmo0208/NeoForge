@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/level/storage/loot/functions/EnchantWithLevelsFunction.java
++++ b/net/minecraft/world/level/storage/loot/functions/EnchantWithLevelsFunction.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.storage.loot.functions;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -15,7 +_,7 @@
+ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
+ 
+ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
+-    public static final Codec<EnchantWithLevelsFunction> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<EnchantWithLevelsFunction> CODEC = RecordCodecBuilder.mapCodec(
+         p_298469_ -> commonFields(p_298469_)
+                 .and(
+                     p_298469_.group(
+@@ -47,7 +_,7 @@
+     @Override
+     public ItemStack run(ItemStack p_80483_, LootContext p_80484_) {
+         RandomSource randomsource = p_80484_.getRandom();
+-        return EnchantmentHelper.enchantItem(randomsource, p_80483_, this.levels.getInt(p_80484_), this.treasure);
++        return EnchantmentHelper.enchantItem(p_80484_.getLevel().enabledFeatures(), randomsource, p_80483_, this.levels.getInt(p_80484_), this.treasure);
+     }
+ 
+     public static EnchantWithLevelsFunction.Builder enchantWithLevels(NumberProvider p_165197_) {

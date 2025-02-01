@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/level/entity/EntityLookup.java
++++ b/net/minecraft/world/level/entity/EntityLookup.java
+@@ -17,8 +_,8 @@
+     private final Map<UUID, T> byUuid = Maps.newHashMap();
+ 
+     public <U extends T> void getEntities(EntityTypeTest<T, U> p_261575_, AbortableIterationConsumer<U> p_261925_) {
+-        for(T t : this.byId.values()) {
+-            U u = p_261575_.tryCast(t);
++        for (T t : this.byId.values()) {
++            U u = (U)p_261575_.tryCast(t);
+             if (u != null && p_261925_.accept(u).shouldAbort()) {
+                 return;
+             }

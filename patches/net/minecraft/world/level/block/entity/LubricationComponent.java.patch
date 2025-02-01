@@ -1,0 +1,90 @@
+--- a/net/minecraft/world/level/block/entity/LubricationComponent.java
++++ /dev/null
+@@ -1,87 +_,0 @@
+-package net.minecraft.world.level.block.entity;
+-
+-import com.mojang.serialization.Codec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import io.netty.buffer.ByteBuf;
+-import java.util.Objects;
+-import java.util.function.Consumer;
+-import net.minecraft.ChatFormatting;
+-import net.minecraft.core.component.DataComponents;
+-import net.minecraft.network.chat.Component;
+-import net.minecraft.network.chat.MutableComponent;
+-import net.minecraft.network.codec.ByteBufCodecs;
+-import net.minecraft.network.codec.StreamCodec;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.TooltipFlag;
+-import net.minecraft.world.item.component.TooltipProvider;
+-
+-public class LubricationComponent implements TooltipProvider {
+-    public static final Codec<LubricationComponent> CODEC = RecordCodecBuilder.create(
+-        p_341998_ -> p_341998_.group(Codec.INT.fieldOf("level").forGetter(p_341903_ -> p_341903_.level)).apply(p_341998_, LubricationComponent::new)
+-    );
+-    public static final StreamCodec<ByteBuf, LubricationComponent> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
+-    private final int level;
+-    private final float lubricationFactor;
+-
+-    public LubricationComponent(int p_340402_) {
+-        this.level = p_340402_;
+-        this.lubricationFactor = calculateLubricationFactor(p_340402_);
+-    }
+-
+-    public boolean isLubricated() {
+-        return this.level >= 1;
+-    }
+-
+-    public int getLevel() {
+-        return this.level;
+-    }
+-
+-    @Override
+-    public void addToTooltip(Consumer<Component> p_342457_, TooltipFlag p_342007_) {
+-        if (this.isLubricated()) {
+-            MutableComponent mutablecomponent = this.level == 1
+-                ? Component.translatable("lubrication.tooltip.lubricated")
+-                : Component.translatable("lubrication.tooltip.lubricated_times", this.level);
+-            p_342457_.accept(mutablecomponent.withStyle(ChatFormatting.GOLD));
+-        }
+-
+-        if (p_342007_.isAdvanced()) {
+-            p_342457_.accept(Component.literal("lubricationFactor: " + this.lubricationFactor).withStyle(ChatFormatting.GRAY));
+-        }
+-    }
+-
+-    private static float calculateLubricationFactor(int p_342507_) {
+-        return p_342507_ <= 0 ? 0.0F : 1.0F - (float)Math.pow(0.75, (double)p_342507_ + 6.228262518959627);
+-    }
+-
+-    public float applyToFriction(float p_340973_) {
+-        return this.isLubricated() ? 1.0F - (1.0F - p_340973_) * (1.0F - this.lubricationFactor) : p_340973_;
+-    }
+-
+-    @Override
+-    public boolean equals(Object p_342520_) {
+-        if (this == p_342520_) {
+-            return true;
+-        } else if (p_342520_ != null && this.getClass() == p_342520_.getClass()) {
+-            LubricationComponent lubricationcomponent = (LubricationComponent)p_342520_;
+-            return this.level == lubricationcomponent.level;
+-        } else {
+-            return false;
+-        }
+-    }
+-
+-    @Override
+-    public int hashCode() {
+-        return Objects.hash(this.level);
+-    }
+-
+-    public static void lubricate(ItemStack p_341787_) {
+-        LubricationComponent lubricationcomponent = p_341787_.get(DataComponents.LUBRICATION);
+-        if (lubricationcomponent != null) {
+-            p_341787_.set(DataComponents.LUBRICATION, new LubricationComponent(lubricationcomponent.level + 1));
+-        } else {
+-            p_341787_.set(DataComponents.LUBRICATION, new LubricationComponent(1));
+-        }
+-    }
+-}

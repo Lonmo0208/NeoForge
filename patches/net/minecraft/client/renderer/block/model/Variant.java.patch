@@ -1,0 +1,23 @@
+--- a/net/minecraft/client/renderer/block/model/Variant.java
++++ b/net/minecraft/client/renderer/block/model/Variant.java
+@@ -57,14 +_,13 @@
+     public boolean equals(Object p_111888_) {
+         if (this == p_111888_) {
+             return true;
+-        } else if (!(p_111888_ instanceof Variant)) {
+-            return false;
+         } else {
+-            Variant variant = (Variant)p_111888_;
+-            return this.modelLocation.equals(variant.modelLocation)
+-                && Objects.equals(this.rotation, variant.rotation)
+-                && this.uvLock == variant.uvLock
+-                && this.weight == variant.weight;
++            return !(p_111888_ instanceof Variant variant)
++                ? false
++                : this.modelLocation.equals(variant.modelLocation)
++                    && Objects.equals(this.rotation, variant.rotation)
++                    && this.uvLock == variant.uvLock
++                    && this.weight == variant.weight;
+         }
+     }
+ 

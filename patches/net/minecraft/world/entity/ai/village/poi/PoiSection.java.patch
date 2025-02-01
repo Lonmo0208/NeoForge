@@ -1,0 +1,18 @@
+--- a/net/minecraft/world/entity/ai/village/poi/PoiSection.java
++++ b/net/minecraft/world/entity/ai/village/poi/PoiSection.java
+@@ -34,12 +_,12 @@
+ 
+     public static Codec<PoiSection> codec(Runnable p_27296_) {
+         return RecordCodecBuilder.<PoiSection>create(
+-                p_27299_ -> p_27299_.group(
++                p_337825_ -> p_337825_.group(
+                             RecordCodecBuilder.point(p_27296_),
+-                            Codec.BOOL.optionalFieldOf("Valid", Boolean.valueOf(false)).forGetter(p_148681_ -> p_148681_.isValid),
++                            Codec.BOOL.lenientOptionalFieldOf("Valid", Boolean.valueOf(false)).forGetter(p_148681_ -> p_148681_.isValid),
+                             PoiRecord.codec(p_27296_).listOf().fieldOf("Records").forGetter(p_148675_ -> ImmutableList.copyOf(p_148675_.records.values()))
+                         )
+-                        .apply(p_27299_, PoiSection::new)
++                        .apply(p_337825_, PoiSection::new)
+             )
+             .orElseGet(Util.prefix("Failed to read POI section: ", LOGGER::error), () -> new PoiSection(p_27296_, false, ImmutableList.of()));
+     }

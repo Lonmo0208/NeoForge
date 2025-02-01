@@ -1,0 +1,45 @@
+--- a/net/minecraft/world/item/PotionItem.java
++++ b/net/minecraft/world/item/PotionItem.java
+@@ -1,7 +_,6 @@
+ package net.minecraft.world.item;
+ 
+ import java.util.List;
+-import javax.annotation.Nullable;
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+@@ -39,11 +_,7 @@
+     @Override
+     public ItemStack getDefaultInstance() {
+         ItemStack itemstack = super.getDefaultInstance();
+-        itemstack.applyComponents(this.components());
+-        if (itemstack.get(DataComponents.POTION_CONTENTS) == null) {
+-            itemstack.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER));
+-        }
+-
++        itemstack.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER));
+         return itemstack;
+     }
+ 
+@@ -99,7 +_,7 @@
+             if (!level.isClientSide) {
+                 ServerLevel serverlevel = (ServerLevel)level;
+ 
+-                for(int i = 0; i < 5; ++i) {
++                for (int i = 0; i < 5; i++) {
+                     serverlevel.sendParticles(
+                         ParticleTypes.SPLASH,
+                         (double)blockpos.getX() + level.random.nextDouble(),
+@@ -144,10 +_,10 @@
+     }
+ 
+     @Override
+-    public void appendHoverText(ItemStack p_42988_, @Nullable Level p_42989_, List<Component> p_42990_, TooltipFlag p_42991_) {
++    public void appendHoverText(ItemStack p_42988_, Item.TooltipContext p_339608_, List<Component> p_42990_, TooltipFlag p_42991_) {
+         PotionContents potioncontents = p_42988_.get(DataComponents.POTION_CONTENTS);
+         if (potioncontents != null) {
+-            potioncontents.addPotionTooltip(p_42990_::add, 1.0F, p_42989_ == null ? 20.0F : p_42989_.tickRateManager().tickrate());
++            potioncontents.addPotionTooltip(p_42990_::add, 1.0F, p_339608_.tickRate());
+         }
+     }
+ }

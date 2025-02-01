@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/resources/sounds/Sound.java
++++ b/net/minecraft/client/resources/sounds/Sound.java
+@@ -108,7 +_,7 @@
+ 
+         @Nullable
+         public static Sound.Type getByName(String p_119811_) {
+-            for(Sound.Type sound$type : values()) {
++            for (Sound.Type sound$type : values()) {
+                 if (sound$type.name.equals(p_119811_)) {
+                     return sound$type;
+                 }

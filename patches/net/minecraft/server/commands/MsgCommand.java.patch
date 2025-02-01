@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/MsgCommand.java
++++ b/net/minecraft/server/commands/MsgCommand.java
+@@ -38,7 +_,7 @@
+         OutgoingChatMessage outgoingchatmessage = OutgoingChatMessage.create(p_249416_);
+         boolean flag = false;
+ 
+-        for(ServerPlayer serverplayer : p_252344_) {
++        for (ServerPlayer serverplayer : p_252344_) {
+             ChatType.Bound chattype$bound1 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, p_250209_).withTargetName(serverplayer.getDisplayName());
+             p_250209_.sendChatMessage(outgoingchatmessage, false, chattype$bound1);
+             boolean flag1 = p_250209_.shouldFilterMessageTo(serverplayer);

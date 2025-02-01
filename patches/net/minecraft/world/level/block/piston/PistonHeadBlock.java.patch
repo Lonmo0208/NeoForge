@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/level/block/piston/PistonHeadBlock.java
++++ b/net/minecraft/world/level/block/piston/PistonHeadBlock.java
+@@ -62,11 +_,11 @@
+     }
+ 
+     private static VoxelShape[] makeShapes(boolean p_60313_) {
+-        return Arrays.stream(Direction.values()).map(p_60316_ -> calculateShape(p_60316_, p_60313_)).toArray(p_60318_ -> new VoxelShape[p_60318_]);
++        return Arrays.stream(Direction.values()).map(p_60316_ -> calculateShape(p_60316_, p_60313_)).toArray(VoxelShape[]::new);
+     }
+ 
+     private static VoxelShape calculateShape(Direction p_60310_, boolean p_60311_) {
+-        switch(p_60310_) {
++        switch (p_60310_) {
+             case DOWN:
+             default:
+                 return Shapes.or(DOWN_AABB, p_60311_ ? SHORT_DOWN_ARM_AABB : DOWN_ARM_AABB);

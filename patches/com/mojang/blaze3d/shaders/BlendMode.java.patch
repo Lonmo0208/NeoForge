@@ -1,0 +1,40 @@
+--- a/com/mojang/blaze3d/shaders/BlendMode.java
++++ b/com/mojang/blaze3d/shaders/BlendMode.java
+@@ -65,25 +_,20 @@
+     public boolean equals(Object p_85533_) {
+         if (this == p_85533_) {
+             return true;
+-        } else if (!(p_85533_ instanceof BlendMode)) {
++        } else if (!(p_85533_ instanceof BlendMode blendmode)) {
++            return false;
++        } else if (this.blendFunc != blendmode.blendFunc) {
++            return false;
++        } else if (this.dstAlphaFactor != blendmode.dstAlphaFactor) {
++            return false;
++        } else if (this.dstColorFactor != blendmode.dstColorFactor) {
++            return false;
++        } else if (this.opaque != blendmode.opaque) {
++            return false;
++        } else if (this.separateBlend != blendmode.separateBlend) {
+             return false;
+         } else {
+-            BlendMode blendmode = (BlendMode)p_85533_;
+-            if (this.blendFunc != blendmode.blendFunc) {
+-                return false;
+-            } else if (this.dstAlphaFactor != blendmode.dstAlphaFactor) {
+-                return false;
+-            } else if (this.dstColorFactor != blendmode.dstColorFactor) {
+-                return false;
+-            } else if (this.opaque != blendmode.opaque) {
+-                return false;
+-            } else if (this.separateBlend != blendmode.separateBlend) {
+-                return false;
+-            } else if (this.srcAlphaFactor != blendmode.srcAlphaFactor) {
+-                return false;
+-            } else {
+-                return this.srcColorFactor == blendmode.srcColorFactor;
+-            }
++            return this.srcAlphaFactor != blendmode.srcAlphaFactor ? false : this.srcColorFactor == blendmode.srcColorFactor;
+         }
+     }
+ 

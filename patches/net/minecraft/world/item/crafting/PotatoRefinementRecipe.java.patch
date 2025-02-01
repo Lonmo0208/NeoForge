@@ -1,0 +1,124 @@
+--- a/net/minecraft/world/item/crafting/PotatoRefinementRecipe.java
++++ /dev/null
+@@ -1,121 +_,0 @@
+-package net.minecraft.world.item.crafting;
+-
+-import com.mojang.serialization.Codec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import net.minecraft.core.HolderLookup;
+-import net.minecraft.network.RegistryFriendlyByteBuf;
+-import net.minecraft.network.codec.StreamCodec;
+-import net.minecraft.world.Container;
+-import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Blocks;
+-
+-public class PotatoRefinementRecipe implements Recipe<Container> {
+-    private final RecipeType<?> type = RecipeType.POTATO_REFINEMENT;
+-    private final String group;
+-    private final CookingBookCategory category;
+-    final Ingredient ingredient;
+-    final Ingredient bottleIngredient;
+-    final ItemStack result;
+-    final float experience;
+-    protected final int refinementTime;
+-
+-    public PotatoRefinementRecipe(Ingredient p_340346_, Ingredient p_342139_, ItemStack p_342286_, float p_341247_, int p_341454_) {
+-        this("", CookingBookCategory.MISC, p_340346_, p_342139_, p_342286_, p_341247_, p_341454_);
+-    }
+-
+-    private PotatoRefinementRecipe(
+-        String p_342512_, CookingBookCategory p_340545_, Ingredient p_341410_, Ingredient p_340384_, ItemStack p_342271_, float p_341116_, int p_342058_
+-    ) {
+-        this.group = p_342512_;
+-        this.category = p_340545_;
+-        this.ingredient = p_341410_;
+-        this.bottleIngredient = p_340384_;
+-        this.result = p_342271_;
+-        this.experience = p_341116_;
+-        this.refinementTime = p_342058_;
+-    }
+-
+-    @Override
+-    public boolean matches(Container p_342144_, Level p_340612_) {
+-        return this.ingredient.test(p_342144_.getItem(0)) && this.bottleIngredient.test(p_342144_.getItem(2));
+-    }
+-
+-    @Override
+-    public ItemStack assemble(Container p_340566_, HolderLookup.Provider p_342340_) {
+-        return this.result.copy();
+-    }
+-
+-    @Override
+-    public boolean canCraftInDimensions(int p_341587_, int p_340704_) {
+-        return true;
+-    }
+-
+-    @Override
+-    public ItemStack getResultItem(HolderLookup.Provider p_340363_) {
+-        return this.result;
+-    }
+-
+-    @Override
+-    public ItemStack getToastSymbol() {
+-        return new ItemStack(Blocks.POTATO_REFINERY);
+-    }
+-
+-    @Override
+-    public RecipeSerializer<?> getSerializer() {
+-        return RecipeSerializer.POTATO_REFINEMENT_RECIPE;
+-    }
+-
+-    @Override
+-    public RecipeType<?> getType() {
+-        return this.type;
+-    }
+-
+-    public int getRefinementTime() {
+-        return this.refinementTime;
+-    }
+-
+-    public static class Serializer implements RecipeSerializer<PotatoRefinementRecipe> {
+-        private static final Codec<PotatoRefinementRecipe> CODEC = RecordCodecBuilder.create(
+-            p_340968_ -> p_340968_.group(
+-                        Ingredient.CODEC.fieldOf("ingredient").forGetter(p_342426_ -> p_342426_.ingredient),
+-                        Ingredient.CODEC.fieldOf("bottle_ingredient").forGetter(p_341000_ -> p_341000_.bottleIngredient),
+-                        ItemStack.CODEC.fieldOf("result").forGetter(p_341028_ -> p_341028_.result),
+-                        Codec.FLOAT.fieldOf("experience").forGetter(p_341557_ -> p_341557_.experience),
+-                        Codec.INT.fieldOf("refinement_time").forGetter(p_340408_ -> p_340408_.refinementTime)
+-                    )
+-                    .apply(p_340968_, PotatoRefinementRecipe::new)
+-        );
+-        public static final StreamCodec<RegistryFriendlyByteBuf, PotatoRefinementRecipe> STREAM_CODEC = StreamCodec.of(
+-            PotatoRefinementRecipe.Serializer::toNetwork, PotatoRefinementRecipe.Serializer::fromNetwork
+-        );
+-
+-        @Override
+-        public Codec<PotatoRefinementRecipe> codec() {
+-            return CODEC;
+-        }
+-
+-        @Override
+-        public StreamCodec<RegistryFriendlyByteBuf, PotatoRefinementRecipe> streamCodec() {
+-            return STREAM_CODEC;
+-        }
+-
+-        private static PotatoRefinementRecipe fromNetwork(RegistryFriendlyByteBuf p_342052_) {
+-            Ingredient ingredient = Ingredient.CONTENTS_STREAM_CODEC.decode(p_342052_);
+-            Ingredient ingredient1 = Ingredient.CONTENTS_STREAM_CODEC.decode(p_342052_);
+-            ItemStack itemstack = ItemStack.STREAM_CODEC.decode(p_342052_);
+-            float f = p_342052_.readFloat();
+-            int i = p_342052_.readInt();
+-            return new PotatoRefinementRecipe(ingredient, ingredient1, itemstack, f, i);
+-        }
+-
+-        private static void toNetwork(RegistryFriendlyByteBuf p_340957_, PotatoRefinementRecipe p_342037_) {
+-            Ingredient.CONTENTS_STREAM_CODEC.encode(p_340957_, p_342037_.ingredient);
+-            Ingredient.CONTENTS_STREAM_CODEC.encode(p_340957_, p_342037_.bottleIngredient);
+-            ItemStack.STREAM_CODEC.encode(p_340957_, p_342037_.result);
+-            p_340957_.writeFloat(p_342037_.experience);
+-            p_340957_.writeInt(p_342037_.refinementTime);
+-        }
+-    }
+-}

@@ -1,0 +1,51 @@
+--- a/net/minecraft/server/packs/VanillaPackResourcesBuilder.java
++++ b/net/minecraft/server/packs/VanillaPackResourcesBuilder.java
+@@ -32,10 +_,10 @@
+     public static Consumer<VanillaPackResourcesBuilder> developmentConfig = p_251787_ -> {
+     };
+     private static final Map<PackType, Path> ROOT_DIR_BY_TYPE = Util.make(() -> {
+-        synchronized(VanillaPackResources.class) {
++        synchronized (VanillaPackResources.class) {
+             Builder<PackType, Path> builder = ImmutableMap.builder();
+ 
+-            for(PackType packtype : PackType.values()) {
++            for (PackType packtype : PackType.values()) {
+                 String s = "/" + packtype.getDirectory() + "/.mcassetsroot";
+                 URL url = VanillaPackResources.class.getResource(s);
+                 if (url == null) {
+@@ -98,7 +_,7 @@
+ 
+     private void pushPathForType(PackType p_250073_, Path p_252259_) {
+         if (this.validateDirPath(p_252259_)) {
+-            this.pathsForType.computeIfAbsent(p_250073_, p_250639_ -> new LinkedHashSet()).add(p_252259_);
++            this.pathsForType.computeIfAbsent(p_250073_, p_250639_ -> new LinkedHashSet<>()).add(p_252259_);
+         }
+     }
+ 
+@@ -118,7 +_,7 @@
+         } catch (IOException ioexception) {
+         }
+ 
+-        while(enumeration != null && enumeration.hasMoreElements()) {
++        while (enumeration != null && enumeration.hasMoreElements()) {
+             URL url = enumeration.nextElement();
+ 
+             try {
+@@ -144,7 +_,7 @@
+     public VanillaPackResourcesBuilder pushUniversalPath(Path p_249464_) {
+         this.pushRootPath(p_249464_);
+ 
+-        for(PackType packtype : PackType.values()) {
++        for (PackType packtype : PackType.values()) {
+             this.pushPathForType(packtype, p_249464_.resolve(packtype.getDirectory()));
+         }
+ 
+@@ -170,7 +_,7 @@
+     public VanillaPackResources build(PackLocationInfo p_326441_) {
+         Map<PackType, List<Path>> map = new EnumMap<>(PackType.class);
+ 
+-        for(PackType packtype : PackType.values()) {
++        for (PackType packtype : PackType.values()) {
+             List<Path> list = copyAndReverse(this.pathsForType.getOrDefault(packtype, Set.of()));
+             map.put(packtype, list);
+         }

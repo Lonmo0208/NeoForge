@@ -1,0 +1,10 @@
+--- a/net/minecraft/advancements/Criterion.java
++++ b/net/minecraft/advancements/Criterion.java
+@@ -11,6 +_,6 @@
+     public static final Codec<Criterion<?>> CODEC = MAP_CODEC.codec();
+ 
+     private static <T extends CriterionTriggerInstance> Codec<Criterion<T>> criterionCodec(CriterionTrigger<T> p_312665_) {
+-        return p_312665_.codec().xmap(p_312166_ -> new Criterion<>(p_312665_, p_312166_), Criterion::triggerInstance);
++        return p_312665_.codec().xmap(p_312166_ -> new Criterion<>(p_312665_, (T)p_312166_), Criterion::triggerInstance);
+     }
+ }

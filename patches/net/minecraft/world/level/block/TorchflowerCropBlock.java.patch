@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/level/block/TorchflowerCropBlock.java
++++ b/net/minecraft/world/level/block/TorchflowerCropBlock.java
+@@ -59,8 +_,8 @@
+     }
+ 
+     @Override
+-    public BlockState getStateForAge(int p_275698_, BlockState p_342073_) {
+-        return p_275698_ == 2 ? Blocks.TORCHFLOWER.defaultBlockState() : super.getStateForAge(p_275698_, p_342073_);
++    public BlockState getStateForAge(int p_275698_) {
++        return p_275698_ == 2 ? Blocks.TORCHFLOWER.defaultBlockState() : super.getStateForAge(p_275698_);
+     }
+ 
+     @Override

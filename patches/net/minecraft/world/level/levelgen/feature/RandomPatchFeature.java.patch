@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/levelgen/feature/RandomPatchFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RandomPatchFeature.java
+@@ -22,7 +_,7 @@
+         int j = randompatchconfiguration.xzSpread() + 1;
+         int k = randompatchconfiguration.ySpread() + 1;
+ 
+-        for(int l = 0; l < randompatchconfiguration.tries(); ++l) {
++        for (int l = 0; l < randompatchconfiguration.tries(); l++) {
+             blockpos$mutableblockpos.setWithOffset(
+                 blockpos,
+                 randomsource.nextInt(j) - randomsource.nextInt(j),
+@@ -30,7 +_,7 @@
+                 randomsource.nextInt(j) - randomsource.nextInt(j)
+             );
+             if (randompatchconfiguration.feature().value().place(worldgenlevel, p_160210_.chunkGenerator(), randomsource, blockpos$mutableblockpos)) {
+-                ++i;
++                i++;
+             }
+         }
+ 

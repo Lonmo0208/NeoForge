@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/chat/CommonComponents.java
++++ b/net/minecraft/network/chat/CommonComponents.java
+@@ -58,7 +_,7 @@
+     public static MutableComponent joinForNarration(Component... p_267948_) {
+         MutableComponent mutablecomponent = Component.empty();
+ 
+-        for(int i = 0; i < p_267948_.length; ++i) {
++        for (int i = 0; i < p_267948_.length; i++) {
+             mutablecomponent.append(p_267948_[i]);
+             if (i != p_267948_.length - 1) {
+                 mutablecomponent.append(NARRATION_SEPARATOR);

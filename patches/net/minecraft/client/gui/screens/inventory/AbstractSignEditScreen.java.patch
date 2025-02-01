@@ -1,0 +1,38 @@
+--- a/net/minecraft/client/gui/screens/inventory/AbstractSignEditScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/AbstractSignEditScreen.java
+@@ -47,7 +_,7 @@
+         this.messages = IntStream.range(0, 4)
+             .mapToObj(p_277214_ -> this.text.getMessage(p_277214_, p_278039_))
+             .map(Component::getString)
+-            .toArray(p_249111_ -> new String[p_249111_]);
++            .toArray(String[]::new);
+     }
+ 
+     @Override
+@@ -66,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        ++this.frame;
++        this.frame++;
+         if (!this.isValid()) {
+             this.onDone();
+         }
+@@ -166,7 +_,7 @@
+         int l = 4 * this.sign.getTextLineHeight() / 2;
+         int i1 = this.line * this.sign.getTextLineHeight() - l;
+ 
+-        for(int j1 = 0; j1 < this.messages.length; ++j1) {
++        for (int j1 = 0; j1 < this.messages.length; j1++) {
+             String s = this.messages[j1];
+             if (s != null) {
+                 if (this.font.isBidirectional()) {
+@@ -185,7 +_,7 @@
+             }
+         }
+ 
+-        for(int k3 = 0; k3 < this.messages.length; ++k3) {
++        for (int k3 = 0; k3 < this.messages.length; k3++) {
+             String s1 = this.messages[k3];
+             if (s1 != null && k3 == this.line && j >= 0) {
+                 int l3 = this.font.width(s1.substring(0, Math.max(Math.min(j, s1.length()), 0)));

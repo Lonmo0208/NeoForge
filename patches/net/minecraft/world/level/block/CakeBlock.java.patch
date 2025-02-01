@@ -1,0 +1,36 @@
+--- a/net/minecraft/world/level/block/CakeBlock.java
++++ b/net/minecraft/world/level/block/CakeBlock.java
+@@ -65,22 +_,19 @@
+         ItemStack p_316238_, BlockState p_316837_, Level p_316766_, BlockPos p_316227_, Player p_316853_, InteractionHand p_316422_, BlockHitResult p_316869_
+     ) {
+         Item item = p_316238_.getItem();
+-        if (p_316238_.is(ItemTags.CANDLES) && p_316837_.getValue(BITES) == 0) {
+-            Block block = Block.byItem(item);
+-            if (block instanceof CandleBlock candleblock) {
+-                if (!p_316853_.isCreative()) {
+-                    p_316238_.shrink(1);
+-                }
+-
+-                p_316766_.playSound(null, p_316227_, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
+-                p_316766_.setBlockAndUpdate(p_316227_, CandleCakeBlock.byCandle(candleblock));
+-                p_316766_.gameEvent(p_316853_, GameEvent.BLOCK_CHANGE, p_316227_);
+-                p_316853_.awardStat(Stats.ITEM_USED.get(item));
+-                return ItemInteractionResult.SUCCESS;
++        if (p_316238_.is(ItemTags.CANDLES) && p_316837_.getValue(BITES) == 0 && Block.byItem(item) instanceof CandleBlock candleblock) {
++            if (!p_316853_.isCreative()) {
++                p_316238_.shrink(1);
+             }
++
++            p_316766_.playSound(null, p_316227_, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
++            p_316766_.setBlockAndUpdate(p_316227_, CandleCakeBlock.byCandle(candleblock));
++            p_316766_.gameEvent(p_316853_, GameEvent.BLOCK_CHANGE, p_316227_);
++            p_316853_.awardStat(Stats.ITEM_USED.get(item));
++            return ItemInteractionResult.SUCCESS;
++        } else {
++            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+         }
+-
+-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+     }
+ 
+     @Override

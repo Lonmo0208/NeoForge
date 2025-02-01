@@ -1,0 +1,55 @@
+--- a/net/minecraft/world/level/CollisionGetter.java
++++ b/net/minecraft/world/level/CollisionGetter.java
+@@ -44,28 +_,24 @@
+     }
+ 
+     default boolean noCollision(@Nullable Entity p_45757_, AABB p_45758_) {
+-        return this.noCollision(p_45757_, p_45758_, false);
+-    }
+-
+-    default boolean noCollision(@Nullable Entity p_342171_, AABB p_341225_, boolean p_340856_) {
+-        for(VoxelShape voxelshape : this.getBlockCollisions(p_342171_, p_341225_)) {
++        for (VoxelShape voxelshape : this.getBlockCollisions(p_45757_, p_45758_)) {
+             if (!voxelshape.isEmpty()) {
+                 return false;
+             }
+         }
+ 
+-        if (!this.getEntityCollisions(p_342171_, p_341225_).isEmpty()) {
++        if (!this.getEntityCollisions(p_45757_, p_45758_).isEmpty()) {
+             return false;
+-        } else if (p_342171_ == null) {
++        } else if (p_45757_ == null) {
+             return true;
+         } else {
+-            VoxelShape voxelshape1 = this.borderCollision(p_342171_, p_341225_);
+-            return voxelshape1 == null || !Shapes.joinIsNotEmpty(voxelshape1, Shapes.create(p_341225_), BooleanOp.AND);
++            VoxelShape voxelshape1 = this.borderCollision(p_45757_, p_45758_);
++            return voxelshape1 == null || !Shapes.joinIsNotEmpty(voxelshape1, Shapes.create(p_45758_), BooleanOp.AND);
+         }
+     }
+ 
+     default boolean noBlockCollision(@Nullable Entity p_295728_, AABB p_294209_) {
+-        for(VoxelShape voxelshape : this.getBlockCollisions(p_295728_, p_294209_)) {
++        for (VoxelShape voxelshape : this.getBlockCollisions(p_295728_, p_294209_)) {
+             if (!voxelshape.isEmpty()) {
+                 return false;
+             }
+@@ -95,7 +_,7 @@
+     default boolean collidesWithSuffocatingBlock(@Nullable Entity p_186438_, AABB p_186439_) {
+         BlockCollisions<VoxelShape> blockcollisions = new BlockCollisions<>(this, p_186438_, p_186439_, true, (p_286211_, p_286212_) -> p_286212_);
+ 
+-        while(blockcollisions.hasNext()) {
++        while (blockcollisions.hasNext()) {
+             if (!blockcollisions.next().isEmpty()) {
+                 return true;
+             }
+@@ -109,7 +_,7 @@
+         double d0 = Double.MAX_VALUE;
+         BlockCollisions<BlockPos> blockcollisions = new BlockCollisions<>(this, p_286468_, p_286792_, false, (p_286213_, p_286214_) -> p_286213_);
+ 
+-        while(blockcollisions.hasNext()) {
++        while (blockcollisions.hasNext()) {
+             BlockPos blockpos1 = blockcollisions.next();
+             double d1 = blockpos1.distToCenterSqr(p_286468_.position());
+             if (d1 < d0 || d1 == d0 && (blockpos == null || blockpos.compareTo(blockpos1) < 0)) {

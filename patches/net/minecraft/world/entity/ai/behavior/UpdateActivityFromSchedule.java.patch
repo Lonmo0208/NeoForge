@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/entity/ai/behavior/UpdateActivityFromSchedule.java
++++ b/net/minecraft/world/entity/ai/behavior/UpdateActivityFromSchedule.java
+@@ -6,8 +_,8 @@
+ 
+ public class UpdateActivityFromSchedule {
+     public static BehaviorControl<LivingEntity> create() {
+-        return BehaviorBuilder.create(p_259429_ -> p_259429_.point((p_340041_, p_340042_, p_340043_) -> {
+-                p_340042_.getBrain().updateActivityFromSchedule(p_340041_.getDayTime(), p_340041_.getGameTime());
++        return BehaviorBuilder.create(p_259429_ -> p_259429_.point((p_330039_, p_330040_, p_330041_) -> {
++                p_330040_.getBrain().updateActivityFromSchedule(p_330039_.getDayTime(), p_330039_.getGameTime());
+                 return true;
+             }));
+     }

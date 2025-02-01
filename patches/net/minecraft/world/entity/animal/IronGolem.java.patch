@@ -1,0 +1,25 @@
+--- a/net/minecraft/world/entity/animal/IronGolem.java
++++ b/net/minecraft/world/entity/animal/IronGolem.java
+@@ -112,11 +_,11 @@
+     public void aiStep() {
+         super.aiStep();
+         if (this.attackAnimationTick > 0) {
+-            --this.attackAnimationTick;
++            this.attackAnimationTick--;
+         }
+ 
+         if (this.offerFlowerTick > 0) {
+-            --this.offerFlowerTick;
++            this.offerFlowerTick--;
+         }
+ 
+         if (!this.level().isClientSide) {
+@@ -307,7 +_,7 @@
+         if (!blockstate.entityCanStandOn(p_28853_, blockpos1, this)) {
+             return false;
+         } else {
+-            for(int i = 1; i < 3; ++i) {
++            for (int i = 1; i < 3; i++) {
+                 BlockPos blockpos2 = blockpos.above(i);
+                 BlockState blockstate1 = p_28853_.getBlockState(blockpos2);
+                 if (!NaturalSpawner.isValidEmptySpawnBlock(p_28853_, blockpos2, blockstate1, blockstate1.getFluidState(), EntityType.IRON_GOLEM)) {

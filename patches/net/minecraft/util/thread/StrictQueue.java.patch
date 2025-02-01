@@ -1,0 +1,19 @@
+--- a/net/minecraft/util/thread/StrictQueue.java
++++ b/net/minecraft/util/thread/StrictQueue.java
+@@ -23,14 +_,14 @@
+         public FixedPriorityQueue(int p_18773_) {
+             this.queues = new Queue[p_18773_];
+ 
+-            for(int i = 0; i < p_18773_; ++i) {
++            for (int i = 0; i < p_18773_; i++) {
+                 this.queues[i] = Queues.newConcurrentLinkedQueue();
+             }
+         }
+ 
+         @Nullable
+         public Runnable pop() {
+-            for(Queue<Runnable> queue : this.queues) {
++            for (Queue<Runnable> queue : this.queues) {
+                 Runnable runnable = queue.poll();
+                 if (runnable != null) {
+                     this.size.decrementAndGet();

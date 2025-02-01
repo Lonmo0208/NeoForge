@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/level/levelgen/feature/BlueIceFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/BlueIceFeature.java
+@@ -26,7 +_,7 @@
+         } else {
+             boolean flag = false;
+ 
+-            for(Direction direction : Direction.values()) {
++            for (Direction direction : Direction.values()) {
+                 if (direction != Direction.DOWN && worldgenlevel.getBlockState(blockpos.relative(direction)).is(Blocks.PACKED_ICE)) {
+                     flag = true;
+                     break;
+@@ -38,7 +_,7 @@
+             } else {
+                 worldgenlevel.setBlock(blockpos, Blocks.BLUE_ICE.defaultBlockState(), 2);
+ 
+-                for(int i = 0; i < 200; ++i) {
++                for (int i = 0; i < 200; i++) {
+                     int j = randomsource.nextInt(5) - randomsource.nextInt(6);
+                     int k = 3;
+                     if (j < 2) {
+@@ -51,7 +_,7 @@
+                         );
+                         BlockState blockstate = worldgenlevel.getBlockState(blockpos1);
+                         if (blockstate.isAir() || blockstate.is(Blocks.WATER) || blockstate.is(Blocks.PACKED_ICE) || blockstate.is(Blocks.ICE)) {
+-                            for(Direction direction1 : Direction.values()) {
++                            for (Direction direction1 : Direction.values()) {
+                                 BlockState blockstate1 = worldgenlevel.getBlockState(blockpos1.relative(direction1));
+                                 if (blockstate1.is(Blocks.BLUE_ICE)) {
+                                     worldgenlevel.setBlock(blockpos1, Blocks.BLUE_ICE.defaultBlockState(), 2);

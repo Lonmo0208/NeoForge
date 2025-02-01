@@ -1,0 +1,40 @@
+--- a/net/minecraft/world/level/levelgen/feature/HugeFungusFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/HugeFungusFeature.java
+@@ -72,11 +_,11 @@
+         BlockState blockstate = p_285198_.stemState;
+         int i = p_285355_ ? 1 : 0;
+ 
+-        for(int j = -i; j <= i; ++j) {
+-            for(int k = -i; k <= i; ++k) {
++        for (int j = -i; j <= i; j++) {
++            for (int k = -i; k <= i; k++) {
+                 boolean flag = p_285355_ && Mth.abs(j) == i && Mth.abs(k) == i;
+ 
+-                for(int l = 0; l < p_285249_; ++l) {
++                for (int l = 0; l < p_285249_; l++) {
+                     blockpos$mutableblockpos.setWithOffset(p_285090_, j, l, k);
+                     if (isReplaceable(p_285364_, blockpos$mutableblockpos, p_285198_, true)) {
+                         if (p_285198_.planted) {
+@@ -106,18 +_,18 @@
+         int i = Math.min(p_285456_.nextInt(1 + p_285156_ / 3) + 5, p_285156_);
+         int j = p_285156_ - i;
+ 
+-        for(int k = j; k <= p_285156_; ++k) {
++        for (int k = j; k <= p_285156_; k++) {
+             int l = k < p_285156_ - p_285456_.nextInt(3) ? 2 : 1;
+             if (i > 8 && k < j + 4) {
+                 l = 3;
+             }
+ 
+             if (p_285265_) {
+-                ++l;
++                l++;
+             }
+ 
+-            for(int i1 = -l; i1 <= l; ++i1) {
+-                for(int j1 = -l; j1 <= l; ++j1) {
++            for (int i1 = -l; i1 <= l; i1++) {
++                for (int j1 = -l; j1 <= l; j1++) {
+                     boolean flag1 = i1 == -l || i1 == l;
+                     boolean flag2 = j1 == -l || j1 == l;
+                     boolean flag3 = !flag1 && !flag2 && k != p_285156_;

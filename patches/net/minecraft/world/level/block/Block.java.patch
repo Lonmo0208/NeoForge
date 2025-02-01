@@ -1,6 +1,22 @@
 --- a/net/minecraft/world/level/block/Block.java
 +++ b/net/minecraft/world/level/block/Block.java
-@@ -63,11 +_,12 @@
+@@ -17,7 +_,6 @@
+ import net.minecraft.core.Direction;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.IdMapper;
+-import net.minecraft.core.RegistryAccess;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.network.chat.MutableComponent;
+@@ -37,7 +_,6 @@
+ import net.minecraft.world.item.BlockItem;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.Items;
+ import net.minecraft.world.item.TooltipFlag;
+ import net.minecraft.world.item.context.BlockPlaceContext;
+ import net.minecraft.world.item.enchantment.EnchantmentHelper;
+@@ -64,11 +_,12 @@
  import net.minecraft.world.phys.shapes.VoxelShape;
  import org.slf4j.Logger;
  
@@ -15,7 +31,25 @@
      private static final LoadingCache<VoxelShape, Boolean> SHAPE_FULL_BLOCK_CACHE = CacheBuilder.newBuilder()
          .maximumSize(512L)
          .weakKeys()
-@@ -188,12 +_,13 @@
+@@ -142,7 +_,7 @@
+         if (voxelshape.isEmpty()) {
+             return p_49899_;
+         } else {
+-            for(Entity entity : p_238252_.getEntities(null, voxelshape.bounds())) {
++            for (Entity entity : p_238252_.getEntities(null, voxelshape.bounds())) {
+                 double d0 = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), List.of(voxelshape), -1.0);
+                 entity.teleportRelative(0.0, 1.0 + d0, 0.0);
+             }
+@@ -159,7 +_,7 @@
+         BlockState blockstate = p_49932_;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(Direction direction : UPDATE_SHAPE_ORDER) {
++        for (Direction direction : UPDATE_SHAPE_ORDER) {
+             blockpos$mutableblockpos.setWithOffset(p_49934_, direction);
+             blockstate = blockstate.updateShape(direction, p_49933_.getBlockState(blockpos$mutableblockpos), p_49933_, p_49934_, blockpos$mutableblockpos);
+         }
+@@ -189,12 +_,13 @@
          this.createBlockStateDefinition(builder);
          this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
          this.registerDefaultState(this.stateDefinition.any());
@@ -30,7 +64,7 @@
      }
  
      public static boolean isExceptionForConnection(BlockState p_152464_) {
-@@ -210,6 +_,8 @@
+@@ -211,6 +_,8 @@
          BlockState blockstate = p_152446_.getBlockState(p_152449_);
          if (p_152445_.skipRendering(blockstate, p_152448_)) {
              return false;
@@ -39,7 +73,7 @@
          } else if (blockstate.canOcclude()) {
              Block.BlockStatePairKey block$blockstatepairkey = new Block.BlockStatePairKey(p_152445_, blockstate, p_152448_);
              Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = OCCLUSION_CACHE.get();
-@@ -298,9 +_,12 @@
+@@ -299,34 +_,12 @@
      public static void dropResources(
          BlockState p_49882_, Level p_49883_, BlockPos p_49884_, @Nullable BlockEntity p_49885_, @Nullable Entity p_49886_, ItemStack p_49887_
      ) {
@@ -48,12 +82,37 @@
 +    public static void dropResources(BlockState p_49882_, Level p_49883_, BlockPos p_49884_, @Nullable BlockEntity p_49885_, @Nullable Entity p_49886_, ItemStack p_49887_, boolean dropXp) {
          if (p_49883_ instanceof ServerLevel) {
              getDrops(p_49882_, (ServerLevel)p_49883_, p_49884_, p_49885_, p_49886_, p_49887_).forEach(p_49944_ -> popResource(p_49883_, p_49884_, p_49944_));
+-            int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POTATOFICATION, p_49887_);
+-            if (i > 0) {
+-                int j = p_49883_.random.nextInt(i + 1);
+-                int k = i - j;
+-                popPotatoes(j, p_49883_, p_49884_, Items.POISONOUS_POTATO);
+-                popPotatoes(k, p_49883_, p_49884_, Items.POTATO);
+-                if (p_49883_.random.nextFloat() <= 0.05F) {
+-                    popPotatoes(1, p_49883_, p_49884_, Items.POISONOUS_POTATO_PLANT);
+-                }
+-            }
+-
 -            p_49882_.spawnAfterBreak((ServerLevel)p_49883_, p_49884_, p_49887_, true);
+-        }
+-    }
+-
+-    public static void popPotatoes(int p_341595_, Level p_340629_, BlockPos p_342420_, Item p_342129_) {
+-        for(int i = 0; i < Mth.square(p_341595_); ++i) {
+-            ItemStack itemstack = new ItemStack(p_342129_);
+-            double d0 = (double)EntityType.ITEM.getHeight() / 2.0;
+-            double d1 = (double)p_342420_.getX() + 0.5 + Mth.nextDouble(p_340629_.random, -0.25, 0.25);
+-            double d2 = (double)p_342420_.getY() + 0.5 + Mth.nextDouble(p_340629_.random, -0.25, 0.25) - d0;
+-            double d3 = (double)p_342420_.getZ() + 0.5 + Mth.nextDouble(p_340629_.random, -0.25, 0.25);
+-            double d4 = Mth.nextDouble(p_340629_.random, -0.25, 0.25);
+-            double d5 = Mth.nextDouble(p_340629_.random, 0.0, 0.25);
+-            double d6 = Mth.nextDouble(p_340629_.random, -0.25, 0.25);
+-            popResource(p_340629_, () -> new ItemEntity(p_340629_, d1, d2, d3, itemstack, d4, d5, d6), itemstack);
 +            p_49882_.spawnAfterBreak((ServerLevel)p_49883_, p_49884_, p_49887_, dropXp);
          }
      }
  
-@@ -328,7 +_,7 @@
+@@ -354,7 +_,7 @@
      }
  
      private static void popResource(Level p_152441_, Supplier<ItemEntity> p_152442_, ItemStack p_152443_) {
@@ -62,7 +121,7 @@
              ItemEntity itementity = p_152442_.get();
              itementity.setDefaultPickUpDelay();
              p_152441_.addFreshEntity(itementity);
-@@ -336,11 +_,12 @@
+@@ -362,11 +_,12 @@
      }
  
      public void popExperience(ServerLevel p_49806_, BlockPos p_49807_, int p_49808_) {
@@ -76,7 +135,7 @@
      public float getExplosionResistance() {
          return this.explosionResistance;
      }
-@@ -359,7 +_,8 @@
+@@ -385,7 +_,8 @@
      public void playerDestroy(Level p_49827_, Player p_49828_, BlockPos p_49829_, BlockState p_49830_, @Nullable BlockEntity p_49831_, ItemStack p_49832_) {
          p_49828_.awardStat(Stats.BLOCK_MINED.get(this));
          p_49828_.causeFoodExhaustion(0.005F);
@@ -86,7 +145,7 @@
      }
  
      public void setPlacedBy(Level p_49847_, BlockPos p_49848_, BlockState p_49849_, @Nullable LivingEntity p_49850_, ItemStack p_49851_) {
-@@ -387,8 +_,10 @@
+@@ -413,8 +_,10 @@
  
      public void updateEntityAfterFallOn(BlockGetter p_49821_, Entity p_49822_) {
          p_49822_.setDeltaMovement(p_49822_.getDeltaMovement().multiply(1.0, 0.0, 1.0));
@@ -97,7 +156,7 @@
      public ItemStack getCloneItemStack(LevelReader p_304395_, BlockPos p_49824_, BlockState p_49825_) {
          return new ItemStack(this);
      }
-@@ -422,6 +_,7 @@
+@@ -448,6 +_,7 @@
      public void handlePrecipitation(BlockState p_152450_, Level p_152451_, BlockPos p_152452_, Biome.Precipitation p_152453_) {
      }
  
@@ -105,7 +164,27 @@
      public boolean dropFromExplosion(Explosion p_49826_) {
          return true;
      }
-@@ -489,6 +_,75 @@
+@@ -470,7 +_,7 @@
+     public final BlockState withPropertiesOf(BlockState p_152466_) {
+         BlockState blockstate = this.defaultBlockState();
+ 
+-        for(Property<?> property : p_152466_.getBlock().getStateDefinition().getProperties()) {
++        for (Property<?> property : p_152466_.getBlock().getStateDefinition().getProperties()) {
+             if (blockstate.hasProperty(property)) {
+                 blockstate = copyProperty(p_152466_, blockstate, property);
+             }
+@@ -501,9 +_,7 @@
+         return "Block{" + BuiltInRegistries.BLOCK.getKey(this) + "}";
+     }
+ 
+-    public void appendHoverText(
+-        ItemStack p_49816_, @Nullable BlockGetter p_49817_, List<Component> p_49818_, TooltipFlag p_49819_, @Nullable RegistryAccess p_324374_
+-    ) {
++    public void appendHoverText(ItemStack p_49816_, Item.TooltipContext p_339606_, List<Component> p_49818_, TooltipFlag p_49819_) {
+     }
+ 
+     @Override
+@@ -515,6 +_,75 @@
          return this.stateDefinition.getPossibleStates().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), p_152459_));
      }
  
@@ -181,3 +260,22 @@
      @Deprecated
      public Holder.Reference<Block> builtInRegistryHolder() {
          return this.builtInRegistryHolder;
+@@ -544,13 +_,12 @@
+         public boolean equals(Object p_49988_) {
+             if (this == p_49988_) {
+                 return true;
+-            } else if (!(p_49988_ instanceof Block.BlockStatePairKey)) {
+-                return false;
+             } else {
+-                Block.BlockStatePairKey block$blockstatepairkey = (Block.BlockStatePairKey)p_49988_;
+-                return this.first == block$blockstatepairkey.first
+-                    && this.second == block$blockstatepairkey.second
+-                    && this.direction == block$blockstatepairkey.direction;
++                return !(p_49988_ instanceof Block.BlockStatePairKey block$blockstatepairkey)
++                    ? false
++                    : this.first == block$blockstatepairkey.first
++                        && this.second == block$blockstatepairkey.second
++                        && this.direction == block$blockstatepairkey.direction;
+             }
+         }
+ 

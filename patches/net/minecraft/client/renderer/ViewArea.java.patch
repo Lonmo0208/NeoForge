@@ -1,0 +1,45 @@
+--- a/net/minecraft/client/renderer/ViewArea.java
++++ b/net/minecraft/client/renderer/ViewArea.java
+@@ -34,9 +_,9 @@
+             int i = this.sectionGridSizeX * this.sectionGridSizeY * this.sectionGridSizeZ;
+             this.sections = new SectionRenderDispatcher.RenderSection[i];
+ 
+-            for(int j = 0; j < this.sectionGridSizeX; ++j) {
+-                for(int k = 0; k < this.sectionGridSizeY; ++k) {
+-                    for(int l = 0; l < this.sectionGridSizeZ; ++l) {
++            for (int j = 0; j < this.sectionGridSizeX; j++) {
++                for (int k = 0; k < this.sectionGridSizeY; k++) {
++                    for (int l = 0; l < this.sectionGridSizeZ; l++) {
+                         int i1 = this.getSectionIndex(j, k, l);
+                         this.sections[i1] = p_294825_.new RenderSection(i1, j * 16, this.level.getMinBuildHeight() + k * 16, l * 16);
+                     }
+@@ -46,7 +_,7 @@
+     }
+ 
+     public void releaseAllBuffers() {
+-        for(SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : this.sections) {
++        for (SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection : this.sections) {
+             sectionrenderdispatcher$rendersection.releaseBuffers();
+         }
+     }
+@@ -75,17 +_,17 @@
+         int i = Mth.ceil(p_110851_);
+         int j = Mth.ceil(p_110852_);
+ 
+-        for(int k = 0; k < this.sectionGridSizeX; ++k) {
++        for (int k = 0; k < this.sectionGridSizeX; k++) {
+             int l = this.sectionGridSizeX * 16;
+             int i1 = i - 8 - l / 2;
+             int j1 = i1 + Math.floorMod(k * 16 - i1, l);
+ 
+-            for(int k1 = 0; k1 < this.sectionGridSizeZ; ++k1) {
++            for (int k1 = 0; k1 < this.sectionGridSizeZ; k1++) {
+                 int l1 = this.sectionGridSizeZ * 16;
+                 int i2 = j - 8 - l1 / 2;
+                 int j2 = i2 + Math.floorMod(k1 * 16 - i2, l1);
+ 
+-                for(int k2 = 0; k2 < this.sectionGridSizeY; ++k2) {
++                for (int k2 = 0; k2 < this.sectionGridSizeY; k2++) {
+                     int l2 = this.level.getMinBuildHeight() + k2 * 16;
+                     SectionRenderDispatcher.RenderSection sectionrenderdispatcher$rendersection = this.sections[this.getSectionIndex(k, k2, k1)];
+                     BlockPos blockpos = sectionrenderdispatcher$rendersection.getOrigin();

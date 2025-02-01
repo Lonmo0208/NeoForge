@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/level/entity/EntitySectionStorage.java
++++ b/net/minecraft/world/level/entity/EntitySectionStorage.java
+@@ -41,12 +_,12 @@
+         int j1 = SectionPos.posToSectionCoord(p_188363_.maxY + 0.0);
+         int k1 = SectionPos.posToSectionCoord(p_188363_.maxZ + 2.0);
+ 
+-        for(int l1 = j; l1 <= i1; ++l1) {
++        for (int l1 = j; l1 <= i1; l1++) {
+             long i2 = SectionPos.asLong(l1, 0, 0);
+             long j2 = SectionPos.asLong(l1, -1, -1);
+             LongIterator longiterator = this.sectionIds.subSet(i2, j2 + 1L).iterator();
+ 
+-            while(longiterator.hasNext()) {
++            while (longiterator.hasNext()) {
+                 long k2 = longiterator.nextLong();
+                 int l2 = SectionPos.y(k2);
+                 int i3 = SectionPos.z(k2);

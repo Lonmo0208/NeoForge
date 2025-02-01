@@ -1,0 +1,16 @@
+--- a/net/minecraft/client/renderer/entity/LlamaRenderer.java
++++ b/net/minecraft/client/renderer/entity/LlamaRenderer.java
+@@ -21,11 +_,12 @@
+     }
+ 
+     public ResourceLocation getTextureLocation(Llama p_115355_) {
+-        return switch(p_115355_.getVariant()) {
++        return switch (p_115355_.getVariant()) {
+             case CREAMY -> CREAMY;
+             case WHITE -> WHITE;
+             case BROWN -> BROWN;
+             case GRAY -> GRAY;
++            default -> throw new MatchException(null, null);
+         };
+     }
+ }

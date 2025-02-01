@@ -1,0 +1,93 @@
+--- a/net/minecraft/world/level/levelgen/placement/CountOnEveryLayerPlacement.java
++++ b/net/minecraft/world/level/levelgen/placement/CountOnEveryLayerPlacement.java
+@@ -1,8 +_,6 @@
+ package net.minecraft.world.level.levelgen.placement;
+ 
+-import com.mojang.serialization.Codec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
++import com.mojang.serialization.MapCodec;
+ import java.util.stream.Stream;
+ import java.util.stream.Stream.Builder;
+ import net.minecraft.core.BlockPos;
+@@ -15,33 +_,23 @@
+ 
+ @Deprecated
+ public class CountOnEveryLayerPlacement extends PlacementModifier {
+-    public static final Codec<CountOnEveryLayerPlacement> CODEC = RecordCodecBuilder.create(
+-        p_340298_ -> p_340298_.group(
+-                    IntProvider.codec(0, 256).fieldOf("count").forGetter(p_191611_ -> p_191611_.count),
+-                    Codec.INT.fieldOf("start_offset").forGetter(p_340297_ -> p_340297_.start_offset)
+-                )
+-                .apply(p_340298_, CountOnEveryLayerPlacement::new)
+-    );
++    public static final MapCodec<CountOnEveryLayerPlacement> CODEC = IntProvider.codec(0, 256)
++        .fieldOf("count")
++        .xmap(CountOnEveryLayerPlacement::new, p_191611_ -> p_191611_.count);
+     private final IntProvider count;
+-    private final int start_offset;
+ 
+-    private CountOnEveryLayerPlacement(IntProvider p_191603_, int p_341094_) {
+-        this.start_offset = p_341094_;
++    private CountOnEveryLayerPlacement(IntProvider p_191603_) {
+         this.count = p_191603_;
+     }
+ 
+     public static CountOnEveryLayerPlacement of(IntProvider p_191607_) {
+-        return new CountOnEveryLayerPlacement(p_191607_, 0);
++        return new CountOnEveryLayerPlacement(p_191607_);
+     }
+ 
+     public static CountOnEveryLayerPlacement of(int p_191605_) {
+         return of(ConstantInt.of(p_191605_));
+     }
+ 
+-    public static CountOnEveryLayerPlacement of(int p_341059_, int p_341013_) {
+-        return new CountOnEveryLayerPlacement(ConstantInt.of(p_341059_), p_341013_);
+-    }
+-
+     @Override
+     public Stream<BlockPos> getPositions(PlacementContext p_226329_, RandomSource p_226330_, BlockPos p_226331_) {
+         Builder<BlockPos> builder = Stream.builder();
+@@ -51,10 +_,10 @@
+         do {
+             flag = false;
+ 
+-            for(int j = 0; j < this.count.sample(p_226330_); ++j) {
++            for (int j = 0; j < this.count.sample(p_226330_); j++) {
+                 int k = p_226330_.nextInt(16) + p_226331_.getX();
+                 int l = p_226330_.nextInt(16) + p_226331_.getZ();
+-                int i1 = p_226329_.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l) + this.start_offset;
++                int i1 = p_226329_.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l);
+                 int j1 = findOnGroundYPosition(p_226329_, k, i1, l, i);
+                 if (j1 != Integer.MAX_VALUE) {
+                     builder.add(new BlockPos(k, j1, l));
+@@ -62,8 +_,8 @@
+                 }
+             }
+ 
+-            ++i;
+-        } while(flag);
++            i++;
++        } while (flag);
+ 
+         return builder.build();
+     }
+@@ -78,7 +_,7 @@
+         int i = 0;
+         BlockState blockstate = p_191613_.getBlockState(blockpos$mutableblockpos);
+ 
+-        for(int j = p_191615_; j >= p_191613_.getMinBuildHeight() + 1; --j) {
++        for (int j = p_191615_; j >= p_191613_.getMinBuildHeight() + 1; j--) {
+             blockpos$mutableblockpos.setY(j - 1);
+             BlockState blockstate1 = p_191613_.getBlockState(blockpos$mutableblockpos);
+             if (!isEmpty(blockstate1) && isEmpty(blockstate) && !blockstate1.is(Blocks.BEDROCK)) {
+@@ -86,7 +_,7 @@
+                     return blockpos$mutableblockpos.getY() + 1;
+                 }
+ 
+-                ++i;
++                i++;
+             }
+ 
+             blockstate = blockstate1;

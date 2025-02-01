@@ -1,0 +1,32 @@
+--- a/net/minecraft/util/datafix/schemas/V99.java
++++ b/net/minecraft/util/datafix/schemas/V99.java
+@@ -13,7 +_,6 @@
+ import java.util.HashMap;
+ import java.util.Map;
+ import java.util.function.Supplier;
+-import net.minecraft.util.datafix.ExtraDataFixUtils;
+ import net.minecraft.util.datafix.fixes.References;
+ import org.slf4j.Logger;
+ 
+@@ -263,7 +_,11 @@
+                     )
+                 )
+         );
+-        p_18307_.registerType(true, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", DSL.string(), p_18309_));
++        p_18307_.registerType(
++            true,
++            References.BLOCK_ENTITY,
++            () -> DSL.optionalFields("components", References.DATA_COMPONENTS.in(p_18307_), DSL.taggedChoiceLazy("id", DSL.string(), p_18309_))
++        );
+         p_18307_.registerType(
+             true, References.ENTITY_TREE, () -> DSL.optionalFields("Riding", References.ENTITY_TREE.in(p_18307_), References.ENTITY.in(p_18307_))
+         );
+@@ -277,7 +_,7 @@
+                         "id",
+                         DSL.or(DSL.constType(DSL.intType()), References.ITEM_NAME.in(p_18307_)),
+                         "tag",
+-                        ExtraDataFixUtils.optionalFields(
++                        DSL.optionalFields(
+                             Pair.of("EntityTag", References.ENTITY_TREE.in(p_18307_)),
+                             Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(p_18307_)),
+                             Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(p_18307_))),

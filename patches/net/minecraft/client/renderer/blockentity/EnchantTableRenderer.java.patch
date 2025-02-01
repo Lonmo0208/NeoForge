@@ -1,13 +1,28 @@
 --- a/net/minecraft/client/renderer/blockentity/EnchantTableRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/EnchantTableRenderer.java
-@@ -51,4 +_,10 @@
+@@ -31,11 +_,11 @@
+         p_112420_.translate(0.0F, 0.1F + Mth.sin(f * 0.1F) * 0.01F, 0.0F);
+         float f1 = p_112418_.rot - p_112418_.oRot;
+ 
+-        while(f1 >= (float) Math.PI) {
++        while (f1 >= (float) Math.PI) {
+             f1 -= (float) (Math.PI * 2);
+         }
+ 
+-        while(f1 < (float) -Math.PI) {
++        while (f1 < (float) -Math.PI) {
+             f1 += (float) (Math.PI * 2);
+         }
+ 
+@@ -50,5 +_,11 @@
+         VertexConsumer vertexconsumer = BOOK_LOCATION.buffer(p_112421_, RenderType::entitySolid);
          this.bookModel.render(p_112420_, vertexconsumer, p_112422_, p_112423_, 1.0F, 1.0F, 1.0F, 1.0F);
          p_112420_.popPose();
-     }
++    }
 +
 +    @Override
 +    public net.minecraft.world.phys.AABB getRenderBoundingBox(EnchantmentTableBlockEntity blockEntity) {
 +        net.minecraft.core.BlockPos pos = blockEntity.getBlockPos();
 +        return new net.minecraft.world.phys.AABB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1., pos.getY() + 1.5, pos.getZ() + 1.);
-+    }
+     }
  }

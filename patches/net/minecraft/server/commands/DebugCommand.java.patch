@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/commands/DebugCommand.java
++++ b/net/minecraft/server/commands/DebugCommand.java
+@@ -123,7 +_,7 @@
+                     DebugCommand.Tracer debugcommand$tracer = new DebugCommand.Tracer(printwriter);
+                     p_306283_.tracer(debugcommand$tracer);
+ 
+-                    for(final CommandFunction<CommandSourceStack> commandfunction : collection) {
++                    for (final CommandFunction<CommandSourceStack> commandfunction : collection) {
+                         try {
+                             CommandSourceStack commandsourcestack = p_309716_.withSource(debugcommand$tracer).withMaximumPermission(2);
+                             InstantiatedFunction<CommandSourceStack> instantiatedfunction = commandfunction.instantiate(null, commanddispatcher);
+@@ -178,7 +_,7 @@
+         }
+ 
+         private void printIndent(int p_180098_) {
+-            for(int i = 0; i < p_180098_ + 1; ++i) {
++            for (int i = 0; i < p_180098_ + 1; i++) {
+                 this.output.write("    ");
+             }
+         }

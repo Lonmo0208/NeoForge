@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/protocol/game/ClientboundUpdateAttributesPacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundUpdateAttributesPacket.java
+@@ -33,7 +_,7 @@
+         this.entityId = p_133580_;
+         this.attributes = Lists.newArrayList();
+ 
+-        for(AttributeInstance attributeinstance : p_133581_) {
++        for (AttributeInstance attributeinstance : p_133581_) {
+             this.attributes
+                 .add(
+                     new ClientboundUpdateAttributesPacket.AttributeSnapshot(

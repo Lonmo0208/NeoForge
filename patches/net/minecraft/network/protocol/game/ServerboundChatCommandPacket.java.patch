@@ -1,0 +1,35 @@
+--- a/net/minecraft/network/protocol/game/ServerboundChatCommandPacket.java
++++ b/net/minecraft/network/protocol/game/ServerboundChatCommandPacket.java
+@@ -1,30 +_,21 @@
+ package net.minecraft.network.protocol.game;
+ 
+-import java.time.Instant;
+-import net.minecraft.commands.arguments.ArgumentSignatures;
+ import net.minecraft.network.FriendlyByteBuf;
+-import net.minecraft.network.chat.LastSeenMessages;
+ import net.minecraft.network.codec.StreamCodec;
+ import net.minecraft.network.protocol.Packet;
+ import net.minecraft.network.protocol.PacketType;
+ 
+-public record ServerboundChatCommandPacket(
+-    String command, Instant timeStamp, long salt, ArgumentSignatures argumentSignatures, LastSeenMessages.Update lastSeenMessages
+-) implements Packet<ServerGamePacketListener> {
++public record ServerboundChatCommandPacket(String command) implements Packet<ServerGamePacketListener> {
+     public static final StreamCodec<FriendlyByteBuf, ServerboundChatCommandPacket> STREAM_CODEC = Packet.codec(
+         ServerboundChatCommandPacket::write, ServerboundChatCommandPacket::new
+     );
+ 
+     private ServerboundChatCommandPacket(FriendlyByteBuf p_237932_) {
+-        this(p_237932_.readUtf(256), p_237932_.readInstant(), p_237932_.readLong(), new ArgumentSignatures(p_237932_), new LastSeenMessages.Update(p_237932_));
++        this(p_237932_.readUtf(256));
+     }
+ 
+     private void write(FriendlyByteBuf p_237936_) {
+         p_237936_.writeUtf(this.command, 256);
+-        p_237936_.writeInstant(this.timeStamp);
+-        p_237936_.writeLong(this.salt);
+-        this.argumentSignatures.write(p_237936_);
+-        this.lastSeenMessages.write(p_237936_);
+     }
+ 
+     @Override

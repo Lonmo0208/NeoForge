@@ -1,0 +1,18 @@
+--- a/net/minecraft/stats/StatFormatter.java
++++ b/net/minecraft/stats/StatFormatter.java
+@@ -5,7 +_,6 @@
+ import java.text.NumberFormat;
+ import java.util.Locale;
+ import net.minecraft.Util;
+-import org.apache.commons.lang3.time.DurationFormatUtils;
+ 
+ public interface StatFormatter {
+     DecimalFormat DECIMAL_FORMAT = Util.make(
+@@ -38,7 +_,6 @@
+             return d1 > 0.5 ? DECIMAL_FORMAT.format(d1) + " m" : d0 + " s";
+         }
+     };
+-    StatFormatter HUMAN_TIME = p_339857_ -> DurationFormatUtils.formatDurationHMS(Math.round((double)p_339857_ * 50.0));
+ 
+     String format(int p_12887_);
+ }

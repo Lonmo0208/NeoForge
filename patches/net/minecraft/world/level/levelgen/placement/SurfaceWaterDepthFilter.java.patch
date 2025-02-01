@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/placement/SurfaceWaterDepthFilter.java
++++ b/net/minecraft/world/level/levelgen/placement/SurfaceWaterDepthFilter.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.levelgen.placement;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.core.BlockPos;
+@@ -8,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.Heightmap;
+ 
+ public class SurfaceWaterDepthFilter extends PlacementFilter {
+-    public static final Codec<SurfaceWaterDepthFilter> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<SurfaceWaterDepthFilter> CODEC = RecordCodecBuilder.mapCodec(
+         p_191953_ -> p_191953_.group(Codec.INT.fieldOf("max_water_depth").forGetter(p_191959_ -> p_191959_.maxWaterDepth))
+                 .apply(p_191953_, SurfaceWaterDepthFilter::new)
+     );

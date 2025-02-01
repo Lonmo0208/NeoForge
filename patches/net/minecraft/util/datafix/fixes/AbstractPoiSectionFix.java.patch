@@ -1,0 +1,13 @@
+--- a/net/minecraft/util/datafix/fixes/AbstractPoiSectionFix.java
++++ b/net/minecraft/util/datafix/fixes/AbstractPoiSectionFix.java
+@@ -39,7 +_,9 @@
+     }
+ 
+     private <T> Dynamic<T> processSectionRecords(Dynamic<T> p_216553_) {
+-        return DataFixUtils.orElse(p_216553_.asStreamOpt().result().map(p_216544_ -> p_216553_.createList(this.processRecords(p_216544_))), p_216553_);
++        return DataFixUtils.orElse(
++            p_216553_.asStreamOpt().result().map(p_216544_ -> p_216553_.createList(this.processRecords((Stream<Dynamic<T>>)p_216544_))), p_216553_
++        );
+     }
+ 
+     protected abstract <T> Stream<Dynamic<T>> processRecords(Stream<Dynamic<T>> p_216547_);

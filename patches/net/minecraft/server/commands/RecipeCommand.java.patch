@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/commands/RecipeCommand.java
++++ b/net/minecraft/server/commands/RecipeCommand.java
+@@ -83,7 +_,7 @@
+     private static int giveRecipes(CommandSourceStack p_138207_, Collection<ServerPlayer> p_138208_, Collection<RecipeHolder<?>> p_138209_) throws CommandSyntaxException {
+         int i = 0;
+ 
+-        for(ServerPlayer serverplayer : p_138208_) {
++        for (ServerPlayer serverplayer : p_138208_) {
+             i += serverplayer.awardRecipes(p_138209_);
+         }
+ 
+@@ -105,7 +_,7 @@
+     private static int takeRecipes(CommandSourceStack p_138213_, Collection<ServerPlayer> p_138214_, Collection<RecipeHolder<?>> p_138215_) throws CommandSyntaxException {
+         int i = 0;
+ 
+-        for(ServerPlayer serverplayer : p_138214_) {
++        for (ServerPlayer serverplayer : p_138214_) {
+             i += serverplayer.resetRecipes(p_138215_);
+         }
+ 

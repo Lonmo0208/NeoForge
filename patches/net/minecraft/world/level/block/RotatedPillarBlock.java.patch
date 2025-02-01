@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/level/block/RotatedPillarBlock.java
++++ b/net/minecraft/world/level/block/RotatedPillarBlock.java
+@@ -29,10 +_,10 @@
+     }
+ 
+     public static BlockState rotatePillar(BlockState p_154377_, Rotation p_154378_) {
+-        switch(p_154378_) {
++        switch (p_154378_) {
+             case COUNTERCLOCKWISE_90:
+             case CLOCKWISE_90:
+-                switch((Direction.Axis)p_154377_.getValue(AXIS)) {
++                switch ((Direction.Axis)p_154377_.getValue(AXIS)) {
+                     case X:
+                         return p_154377_.setValue(AXIS, Direction.Axis.Z);
+                     case Z:

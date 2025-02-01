@@ -1,5 +1,14 @@
 --- a/net/minecraft/client/multiplayer/chat/ChatListener.java
 +++ b/net/minecraft/client/multiplayer/chat/ChatListener.java
+@@ -39,7 +_,7 @@
+             if (Util.getMillis() >= this.previousMessageTime + this.messageDelay) {
+                 ChatListener.Message chatlistener$message = this.delayedMessageQueue.poll();
+ 
+-                while(chatlistener$message != null && !chatlistener$message.accept()) {
++                while (chatlistener$message != null && !chatlistener$message.accept()) {
+                     chatlistener$message = this.delayedMessageQueue.poll();
+                 }
+             }
 @@ -118,7 +_,9 @@
          Instant instant = Instant.now();
          this.handleMessage(null, () -> {

@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/level/levelgen/carver/CanyonWorldCarver.java
++++ b/net/minecraft/world/level/levelgen/carver/CanyonWorldCarver.java
+@@ -68,7 +_,7 @@
+         float f = 0.0F;
+         float f1 = 0.0F;
+ 
+-        for(int i = p_190606_; i < p_190607_; ++i) {
++        for (int i = p_190606_; i < p_190607_; i++) {
+             double d0 = 1.5 + (double)(Mth.sin((float)i * (float) Math.PI / (float)p_190607_) * p_190603_);
+             double d1 = d0 * p_190608_;
+             d0 *= (double)p_190595_.shape.horizontalRadiusFactor.sample(randomsource);
+@@ -113,7 +_,7 @@
+         float[] afloat = new float[i];
+         float f = 1.0F;
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             if (j == 0 || p_224811_.nextInt(p_224810_.shape.widthSmoothness) == 0) {
+                 f = 1.0F + p_224811_.nextFloat() * p_224811_.nextFloat();
+             }

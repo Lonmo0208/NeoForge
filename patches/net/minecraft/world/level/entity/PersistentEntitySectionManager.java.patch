@@ -37,11 +37,13 @@
      }
  
      void startTicking(T p_157565_) {
-@@ -228,7 +_,10 @@
+@@ -227,8 +_,11 @@
+ 
      private void processPendingLoads() {
          ChunkEntities<T> chunkentities;
-         while((chunkentities = this.loadingInbox.poll()) != null) {
+-        while((chunkentities = this.loadingInbox.poll()) != null) {
 -            chunkentities.getEntities().forEach(p_157593_ -> this.addEntity(p_157593_, true));
++        while ((chunkentities = this.loadingInbox.poll()) != null) {
 +            chunkentities.getEntities().forEach(p_157593_ -> {
 +                this.addEntity(p_157593_, true);
 +                if (p_157593_ instanceof Entity entity) entity.onAddedToWorld();
@@ -49,6 +51,24 @@
              this.chunkLoadStatuses.put(chunkentities.getPos().toLong(), PersistentEntitySectionManager.ChunkLoadStatus.LOADED);
          }
      }
+@@ -241,7 +_,7 @@
+     private LongSet getAllChunksToSave() {
+         LongSet longset = this.sectionStorage.getAllChunksWithExistingSections();
+ 
+-        for(Entry<PersistentEntitySectionManager.ChunkLoadStatus> entry : Long2ObjectMaps.fastIterable(this.chunkLoadStatuses)) {
++        for (Entry<PersistentEntitySectionManager.ChunkLoadStatus> entry : Long2ObjectMaps.fastIterable(this.chunkLoadStatuses)) {
+             if (entry.getValue() == PersistentEntitySectionManager.ChunkLoadStatus.LOADED) {
+                 longset.add(entry.getLongKey());
+             }
+@@ -265,7 +_,7 @@
+     public void saveAll() {
+         LongSet longset = this.getAllChunksToSave();
+ 
+-        while(!longset.isEmpty()) {
++        while (!longset.isEmpty()) {
+             this.permanentStorage.flush(false);
+             this.processPendingLoads();
+             longset.removeIf(p_157574_ -> {
 @@ -367,11 +_,13 @@
  
      class Callback implements EntityInLevelCallback {

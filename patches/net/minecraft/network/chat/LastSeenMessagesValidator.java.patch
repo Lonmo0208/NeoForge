@@ -1,0 +1,20 @@
+--- a/net/minecraft/network/chat/LastSeenMessagesValidator.java
++++ b/net/minecraft/network/chat/LastSeenMessagesValidator.java
+@@ -14,7 +_,7 @@
+     public LastSeenMessagesValidator(int p_249951_) {
+         this.lastSeenCount = p_249951_;
+ 
+-        for(int i = 0; i < p_249951_; ++i) {
++        for (int i = 0; i < p_249951_; i++) {
+             this.trackedMessages.add(null);
+         }
+     }
+@@ -48,7 +_,7 @@
+             if (p_248868_.acknowledged().length() > this.lastSeenCount) {
+                 return Optional.empty();
+             } else {
+-                for(int i = 0; i < this.lastSeenCount; ++i) {
++                for (int i = 0; i < this.lastSeenCount; i++) {
+                     boolean flag = p_248868_.acknowledged().get(i);
+                     LastSeenTrackedEntry lastseentrackedentry = this.trackedMessages.get(i);
+                     if (flag) {

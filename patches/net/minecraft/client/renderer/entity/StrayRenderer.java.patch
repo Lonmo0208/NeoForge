@@ -1,0 +1,10 @@
+--- a/net/minecraft/client/renderer/entity/StrayRenderer.java
++++ b/net/minecraft/client/renderer/entity/StrayRenderer.java
+@@ -18,6 +_,6 @@
+     }
+ 
+     public ResourceLocation getTextureLocation(Stray p_331809_) {
+-        return p_331809_.isPotato() ? SkeletonRenderer.SKELETON_LOCATION : STRAY_SKELETON_LOCATION;
++        return STRAY_SKELETON_LOCATION;
+     }
+ }

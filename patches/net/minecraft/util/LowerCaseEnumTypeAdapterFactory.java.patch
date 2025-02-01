@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/LowerCaseEnumTypeAdapterFactory.java
++++ b/net/minecraft/util/LowerCaseEnumTypeAdapterFactory.java
+@@ -23,7 +_,7 @@
+         } else {
+             final Map<String, T> map = Maps.newHashMap();
+ 
+-            for(T t : oclass.getEnumConstants()) {
++            for (T t : oclass.getEnumConstants()) {
+                 map.put(this.toLowercase(t), t);
+             }
+ 

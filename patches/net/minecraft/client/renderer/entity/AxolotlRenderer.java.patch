@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/entity/AxolotlRenderer.java
++++ b/net/minecraft/client/renderer/entity/AxolotlRenderer.java
+@@ -17,7 +_,7 @@
+     private static final Map<Axolotl.Variant, ResourceLocation> TEXTURE_BY_TYPE = Util.make(
+         Maps.newHashMap(),
+         p_242076_ -> {
+-            for(Axolotl.Variant axolotl$variant : Axolotl.Variant.values()) {
++            for (Axolotl.Variant axolotl$variant : Axolotl.Variant.values()) {
+                 p_242076_.put(
+                     axolotl$variant, new ResourceLocation(String.format(Locale.ROOT, "textures/entity/axolotl/axolotl_%s.png", axolotl$variant.getName()))
+                 );

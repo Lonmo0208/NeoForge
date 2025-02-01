@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/resources/sounds/ElytraOnPlayerSoundInstance.java
++++ b/net/minecraft/client/resources/sounds/ElytraOnPlayerSoundInstance.java
+@@ -23,7 +_,7 @@
+ 
+     @Override
+     public void tick() {
+-        ++this.time;
++        this.time++;
+         if (!this.player.isRemoved() && (this.time <= 20 || this.player.isFallFlying())) {
+             this.x = (double)((float)this.player.getX());
+             this.y = (double)((float)this.player.getY());
+@@ -38,7 +_,7 @@
+             if (this.time < 20) {
+                 this.volume = 0.0F;
+             } else if (this.time < 40) {
+-                this.volume *= (float)(this.time - 20) / 20.0F;
++                this.volume = this.volume * ((float)(this.time - 20) / 20.0F);
+             }
+ 
+             float f1 = 0.8F;

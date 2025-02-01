@@ -1,0 +1,39 @@
+--- a/net/minecraft/world/level/levelgen/feature/trunkplacers/TrunkPlacerType.java
++++ b/net/minecraft/world/level/levelgen/feature/trunkplacers/TrunkPlacerType.java
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.level.levelgen.feature.trunkplacers;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import net.minecraft.core.Registry;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ 
+@@ -16,17 +_,17 @@
+         "upwards_branching_trunk_placer", UpwardsBranchingTrunkPlacer.CODEC
+     );
+     public static final TrunkPlacerType<CherryTrunkPlacer> CHERRY_TRUNK_PLACER = register("cherry_trunk_placer", CherryTrunkPlacer.CODEC);
+-    private final Codec<P> codec;
+-
+-    private static <P extends TrunkPlacer> TrunkPlacerType<P> register(String p_70327_, Codec<P> p_70328_) {
+-        return Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, p_70327_, new TrunkPlacerType<>(p_70328_));
+-    }
+-
+-    public TrunkPlacerType(Codec<P> p_70324_) {
+-        this.codec = p_70324_;
+-    }
+-
+-    public Codec<P> codec() {
++    private final MapCodec<P> codec;
++
++    private static <P extends TrunkPlacer> TrunkPlacerType<P> register(String p_70327_, MapCodec<P> p_338770_) {
++        return Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, p_70327_, new TrunkPlacerType<>(p_338770_));
++    }
++
++    private TrunkPlacerType(MapCodec<P> p_338550_) {
++        this.codec = p_338550_;
++    }
++
++    public MapCodec<P> codec() {
+         return this.codec;
+     }
+ }

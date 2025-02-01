@@ -1,0 +1,15 @@
+--- a/net/minecraft/client/gui/screens/MouseSettingsScreen.java
++++ b/net/minecraft/client/gui/screens/MouseSettingsScreen.java
+@@ -31,11 +_,7 @@
+     protected void init() {
+         this.list = this.addRenderableWidget(new OptionsList(this.minecraft, this.width, this.height, this));
+         if (InputConstants.isRawMouseInputSupported()) {
+-            this.list
+-                .addSmall(
+-                    Stream.concat(Arrays.stream(options(this.options)), Stream.of(this.options.rawMouseInput()))
+-                        .toArray(p_232747_ -> new OptionInstance[p_232747_])
+-                );
++            this.list.addSmall(Stream.concat(Arrays.stream(options(this.options)), Stream.of(this.options.rawMouseInput())).toArray(OptionInstance[]::new));
+         } else {
+             this.list.addSmall(options(this.options));
+         }

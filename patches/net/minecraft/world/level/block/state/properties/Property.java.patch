@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/level/block/state/properties/Property.java
++++ b/net/minecraft/world/level/block/state/properties/Property.java
+@@ -72,11 +_,8 @@
+     public boolean equals(Object p_61707_) {
+         if (this == p_61707_) {
+             return true;
+-        } else if (!(p_61707_ instanceof Property)) {
+-            return false;
+         } else {
+-            Property<?> property = (Property)p_61707_;
+-            return this.clazz.equals(property.clazz) && this.name.equals(property.name);
++            return !(p_61707_ instanceof Property<?> property) ? false : this.clazz.equals(property.clazz) && this.name.equals(property.name);
+         }
+     }
+ 

@@ -1,0 +1,151 @@
+--- a/net/minecraft/world/level/levelgen/NoiseChunk.java
++++ b/net/minecraft/world/level/levelgen/NoiseChunk.java
+@@ -61,7 +_,7 @@
+         @Override
+         public DensityFunction.FunctionContext forIndex(int p_209253_) {
+             NoiseChunk.this.cellStartBlockY = (p_209253_ + NoiseChunk.this.cellNoiseMinY) * NoiseChunk.this.cellHeight;
+-            ++NoiseChunk.this.interpolationCounter;
++            NoiseChunk.this.interpolationCounter++;
+             NoiseChunk.this.inCellY = 0;
+             NoiseChunk.this.arrayIndex = p_209253_;
+             return NoiseChunk.this;
+@@ -69,9 +_,9 @@
+ 
+         @Override
+         public void fillAllDirectly(double[] p_209255_, DensityFunction p_209256_) {
+-            for(int i2 = 0; i2 < NoiseChunk.this.cellCountY + 1; ++i2) {
++            for (int i2 = 0; i2 < NoiseChunk.this.cellCountY + 1; i2++) {
+                 NoiseChunk.this.cellStartBlockY = (i2 + NoiseChunk.this.cellNoiseMinY) * NoiseChunk.this.cellHeight;
+-                ++NoiseChunk.this.interpolationCounter;
++                NoiseChunk.this.interpolationCounter++;
+                 NoiseChunk.this.inCellY = 0;
+                 NoiseChunk.this.arrayIndex = i2;
+                 p_209255_[i2] = p_209256_.compute(NoiseChunk.this);
+@@ -122,11 +_,11 @@
+         this.blendAlpha = new NoiseChunk.FlatCache(new NoiseChunk.BlendAlpha(), false);
+         this.blendOffset = new NoiseChunk.FlatCache(new NoiseChunk.BlendOffset(), false);
+ 
+-        for(int i = 0; i <= this.noiseSizeXZ; ++i) {
++        for (int i = 0; i <= this.noiseSizeXZ; i++) {
+             int j = this.firstNoiseX + i;
+             int k = QuartPos.toBlock(j);
+ 
+-            for(int l = 0; l <= this.noiseSizeXZ; ++l) {
++            for (int l = 0; l <= this.noiseSizeXZ; l++) {
+                 int i1 = this.firstNoiseZ + l;
+                 int j1 = QuartPos.toBlock(i1);
+                 Blender.BlendingOutput blender$blendingoutput = p_224351_.blendOffsetAndFactor(k, j1);
+@@ -202,7 +_,7 @@
+         int j = ColumnPos.getZ(p_198250_);
+         int k = this.noiseSettings.minY();
+ 
+-        for(int l = k + this.noiseSettings.height(); l >= k; l -= this.cellHeight) {
++        for (int l = k + this.noiseSettings.height(); l >= k; l -= this.cellHeight) {
+             if (this.initialDensityNoJaggedness.compute(new DensityFunction.SinglePointContext(i, l, j)) > 0.390625) {
+                 return l;
+             }
+@@ -220,19 +_,19 @@
+         this.cellStartBlockX = p_209222_ * this.cellWidth;
+         this.inCellX = 0;
+ 
+-        for(int i = 0; i < this.cellCountXZ + 1; ++i) {
++        for (int i = 0; i < this.cellCountXZ + 1; i++) {
+             int j = this.firstCellZ + i;
+             this.cellStartBlockZ = j * this.cellWidth;
+             this.inCellZ = 0;
+-            ++this.arrayInterpolationCounter;
++            this.arrayInterpolationCounter++;
+ 
+-            for(NoiseChunk.NoiseInterpolator noisechunk$noiseinterpolator : this.interpolators) {
++            for (NoiseChunk.NoiseInterpolator noisechunk$noiseinterpolator : this.interpolators) {
+                 double[] adouble = (p_209221_ ? noisechunk$noiseinterpolator.slice0 : noisechunk$noiseinterpolator.slice1)[i];
+                 noisechunk$noiseinterpolator.fillArray(adouble, this.sliceFillingContextProvider);
+             }
+         }
+ 
+-        ++this.arrayInterpolationCounter;
++        this.arrayInterpolationCounter++;
+     }
+ 
+     public void initializeForFirstCellX() {
+@@ -266,13 +_,13 @@
+     public void fillAllDirectly(double[] p_209224_, DensityFunction p_209225_) {
+         this.arrayIndex = 0;
+ 
+-        for(int i = this.cellHeight - 1; i >= 0; --i) {
++        for (int i = this.cellHeight - 1; i >= 0; i--) {
+             this.inCellY = i;
+ 
+-            for(int j = 0; j < this.cellWidth; ++j) {
++            for (int j = 0; j < this.cellWidth; j++) {
+                 this.inCellX = j;
+ 
+-                for(int k = 0; k < this.cellWidth; ++k) {
++                for (int k = 0; k < this.cellWidth; k++) {
+                     this.inCellZ = k;
+                     p_209224_[this.arrayIndex++] = p_209225_.compute(this);
+                 }
+@@ -285,13 +_,13 @@
+         this.fillingCell = true;
+         this.cellStartBlockY = (p_188811_ + this.cellNoiseMinY) * this.cellHeight;
+         this.cellStartBlockZ = (this.firstCellZ + p_188812_) * this.cellWidth;
+-        ++this.arrayInterpolationCounter;
++        this.arrayInterpolationCounter++;
+ 
+-        for(NoiseChunk.CacheAllInCell noisechunk$cacheallincell : this.cellCaches) {
++        for (NoiseChunk.CacheAllInCell noisechunk$cacheallincell : this.cellCaches) {
+             noisechunk$cacheallincell.noiseFiller.fillArray(noisechunk$cacheallincell.values, this);
+         }
+ 
+-        ++this.arrayInterpolationCounter;
++        this.arrayInterpolationCounter++;
+         this.fillingCell = false;
+     }
+ 
+@@ -307,7 +_,7 @@
+ 
+     public void updateForZ(int p_209242_, double p_209243_) {
+         this.inCellZ = p_209242_ - this.cellStartBlockZ;
+-        ++this.interpolationCounter;
++        this.interpolationCounter++;
+         this.interpolators.forEach(p_209188_ -> p_209188_.updateForZ(p_209243_));
+     }
+ 
+@@ -353,12 +_,13 @@
+ 
+     private DensityFunction wrapNew(DensityFunction p_209234_) {
+         if (p_209234_ instanceof DensityFunctions.Marker densityfunctions$marker) {
+-            return (DensityFunction)(switch(densityfunctions$marker.type()) {
++            return (DensityFunction)(switch (densityfunctions$marker.type()) {
+                 case Interpolated -> new NoiseChunk.NoiseInterpolator(densityfunctions$marker.wrapped());
+                 case FlatCache -> new NoiseChunk.FlatCache(densityfunctions$marker.wrapped(), true);
+                 case Cache2D -> new NoiseChunk.Cache2D(densityfunctions$marker.wrapped());
+                 case CacheOnce -> new NoiseChunk.CacheOnce(densityfunctions$marker.wrapped());
+                 case CacheAllInCell -> new NoiseChunk.CacheAllInCell(densityfunctions$marker.wrapped());
++                default -> throw new MatchException(null, null);
+             });
+         } else {
+             if (this.blender != Blender.empty()) {
+@@ -606,11 +_,11 @@
+             this.noiseFiller = p_209330_;
+             this.values = new double[NoiseChunk.this.noiseSizeXZ + 1][NoiseChunk.this.noiseSizeXZ + 1];
+             if (p_209331_) {
+-                for(int i = 0; i <= NoiseChunk.this.noiseSizeXZ; ++i) {
++                for (int i = 0; i <= NoiseChunk.this.noiseSizeXZ; i++) {
+                     int j = NoiseChunk.this.firstNoiseX + i;
+                     int k = QuartPos.toBlock(j);
+ 
+-                    for(int l = 0; l <= NoiseChunk.this.noiseSizeXZ; ++l) {
++                    for (int l = 0; l <= NoiseChunk.this.noiseSizeXZ; l++) {
+                         int i1 = NoiseChunk.this.firstNoiseZ + l;
+                         int j1 = QuartPos.toBlock(i1);
+                         this.values[i][l] = p_209330_.compute(new DensityFunction.SinglePointContext(k, 0, j1));
+@@ -691,7 +_,7 @@
+             int j = p_188855_ + 1;
+             double[][] adouble = new double[i][j];
+ 
+-            for(int k = 0; k < i; ++k) {
++            for (int k = 0; k < i; k++) {
+                 adouble[k] = new double[j];
+             }
+ 

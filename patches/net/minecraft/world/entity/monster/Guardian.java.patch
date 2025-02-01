@@ -1,0 +1,482 @@
+--- a/net/minecraft/world/entity/monster/Guardian.java
++++ b/net/minecraft/world/entity/monster/Guardian.java
+@@ -1,8 +_,6 @@
+ package net.minecraft.world.entity.monster;
+ 
+ import java.util.EnumSet;
+-import java.util.List;
+-import java.util.Optional;
+ import java.util.function.Predicate;
+ import javax.annotation.Nullable;
+ import net.minecraft.core.BlockPos;
+@@ -19,17 +_,13 @@
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.damagesource.DamageSource;
+ import net.minecraft.world.damagesource.DamageTypes;
+-import net.minecraft.world.effect.MobEffectInstance;
+-import net.minecraft.world.effect.MobEffects;
+ import net.minecraft.world.entity.Entity;
+-import net.minecraft.world.entity.EntityDimensions;
+ import net.minecraft.world.entity.EntityType;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.MobSpawnType;
+ import net.minecraft.world.entity.MoverType;
+ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+ import net.minecraft.world.entity.ai.attributes.Attributes;
+-import net.minecraft.world.entity.ai.control.BodyRotationControl;
+ import net.minecraft.world.entity.ai.control.LookControl;
+ import net.minecraft.world.entity.ai.control.MoveControl;
+ import net.minecraft.world.entity.ai.goal.Goal;
+@@ -40,7 +_,6 @@
+ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+ import net.minecraft.world.entity.ai.navigation.PathNavigation;
+ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
+-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+ import net.minecraft.world.entity.animal.Squid;
+ import net.minecraft.world.entity.animal.axolotl.Axolotl;
+ import net.minecraft.world.entity.player.Player;
+@@ -48,7 +_,6 @@
+ import net.minecraft.world.level.LevelAccessor;
+ import net.minecraft.world.level.LevelReader;
+ import net.minecraft.world.level.pathfinder.PathType;
+-import net.minecraft.world.phys.AABB;
+ import net.minecraft.world.phys.Vec3;
+ 
+ public class Guardian extends Monster {
+@@ -66,100 +_,26 @@
+     private boolean clientSideTouchedGround;
+     @Nullable
+     protected RandomStrollGoal randomStrollGoal;
+-    final boolean isToxic;
+-    private int tickOutOfWater;
+-    private int jumpTimer;
+ 
+-    public Guardian(EntityType<? extends Guardian> p_32810_, Level p_32811_, boolean p_342099_) {
++    public Guardian(EntityType<? extends Guardian> p_32810_, Level p_32811_) {
+         super(p_32810_, p_32811_);
+-        this.isToxic = p_342099_;
+-        if (p_342099_) {
+-            this.xpReward = 5;
+-        } else {
+-            this.xpReward = 10;
+-        }
+-
++        this.xpReward = 10;
+         this.setPathfindingMalus(PathType.WATER, 0.0F);
+         this.moveControl = new Guardian.GuardianMoveControl(this);
+-        this.lookControl = new Guardian.GuardianLookControl();
+         this.clientSideTailAnimation = this.random.nextFloat();
+         this.clientSideTailAnimationO = this.clientSideTailAnimation;
+     }
+ 
+-    public static Guardian createNormal(EntityType<? extends Guardian> p_340719_, Level p_341807_) {
+-        return new Guardian(p_340719_, p_341807_, false);
+-    }
+-
+-    public static Guardian createToxic(EntityType<? extends Guardian> p_340878_, Level p_340356_) {
+-        return new Guardian(p_340878_, p_340356_, true);
+-    }
+-
+-    public boolean isToxic() {
+-        return this.isToxic;
+-    }
+-
+     @Override
+     protected void registerGoals() {
+         MoveTowardsRestrictionGoal movetowardsrestrictiongoal = new MoveTowardsRestrictionGoal(this, 1.0);
+-        this.randomStrollGoal = new RandomStrollGoal(this, 1.0, 80) {
+-            @Override
+-            public boolean canUse() {
+-                return Guardian.this.isToxic && Guardian.this.isPassenger() ? false : super.canUse();
+-            }
+-        };
++        this.randomStrollGoal = new RandomStrollGoal(this, 1.0, 80);
+         this.goalSelector.addGoal(4, new Guardian.GuardianAttackGoal(this));
+         this.goalSelector.addGoal(5, movetowardsrestrictiongoal);
+         this.goalSelector.addGoal(7, this.randomStrollGoal);
+-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F) {
+-            @Override
+-            public boolean canUse() {
+-                return Guardian.this.isToxic && Guardian.this.isPassenger() ? false : super.canUse();
+-            }
+-        });
+-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Guardian.class, 12.0F, 0.01F) {
+-            @Override
+-            public boolean canUse() {
+-                return Guardian.this.isToxic && Guardian.this.isPassenger() ? false : super.canUse();
+-            }
+-        });
+-        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this) {
+-            @Override
+-            public boolean canUse() {
+-                return Guardian.this.isToxic && Guardian.this.isPassenger() ? false : super.canUse();
+-            }
+-        });
+-        this.goalSelector
+-            .addGoal(
+-                10,
+-                new Goal() {
+-                    private final TargetingConditions RIDE_TARGET = TargetingConditions.forNonCombat()
+-                        .range(3.0)
+-                        .selector(p_340795_ -> !p_340795_.isVehicle() && !p_340795_.isPassenger() && Guardian.this.isBuddy(p_340795_));
+-        
+-                    @Override
+-                    public boolean canUse() {
+-                        return Guardian.this.isToxic
+-                            && Guardian.this.random.nextInt(100) == 0
+-                            && (!Guardian.this.isVehicle() || !(Guardian.this instanceof ElderGuardian));
+-                    }
+-        
+-                    @Override
+-                    public void start() {
+-                        if (Guardian.this.getVehicle() == null) {
+-                            AABB aabb = Guardian.this.getBoundingBox().inflate(2.0, 2.0, 2.0);
+-                            Guardian guardian = Guardian.this.level()
+-                                .getNearestEntity(
+-                                    Guardian.class, this.RIDE_TARGET, Guardian.this, Guardian.this.getX(), Guardian.this.getY(), Guardian.this.getZ(), aabb
+-                                );
+-                            if (guardian != null) {
+-                                Guardian.this.startRiding(guardian);
+-                            }
+-                        } else if (Guardian.this.random.nextInt(10) == 0) {
+-                            Guardian.this.stopRiding();
+-                        }
+-                    }
+-                }
+-            );
++        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
++        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Guardian.class, 12.0F, 0.01F));
++        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+         this.randomStrollGoal.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+         movetowardsrestrictiongoal.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, new Guardian.GuardianAttackSelector(this)));
+@@ -173,27 +_,6 @@
+             .add(Attributes.MAX_HEALTH, 30.0);
+     }
+ 
+-    @Nullable
+-    @Override
+-    public LivingEntity getControllingPassenger() {
+-        LivingEntity livingentity = super.getControllingPassenger();
+-        return this.isBuddy(livingentity) ? null : livingentity;
+-    }
+-
+-    @Override
+-    protected void actuallyHurt(DamageSource p_342170_, float p_340613_) {
+-        super.actuallyHurt(p_342170_, p_340613_);
+-        if (this.isToxic) {
+-            List<Entity> list = this.getPassengers();
+-            list.forEach(Entity::stopRiding);
+-            Entity entity = this.getVehicle();
+-            if (entity != null) {
+-                this.stopRiding();
+-                list.forEach(p_340681_ -> p_340681_.startRiding(entity, true));
+-            }
+-        }
+-    }
+-
+     @Override
+     protected PathNavigation createNavigation(Level p_32846_) {
+         return new WaterBoundPathNavigation(this, p_32846_);
+@@ -263,29 +_,17 @@
+ 
+     @Override
+     protected SoundEvent getAmbientSound() {
+-        if (this.isToxic) {
+-            return this.isInWaterOrBubble() ? SoundEvents.TOXIFIN_AMBIENT : SoundEvents.TOXIFIN_AMBIENT_LAND;
+-        } else {
+-            return this.isInWaterOrBubble() ? SoundEvents.GUARDIAN_AMBIENT : SoundEvents.GUARDIAN_AMBIENT_LAND;
+-        }
++        return this.isInWaterOrBubble() ? SoundEvents.GUARDIAN_AMBIENT : SoundEvents.GUARDIAN_AMBIENT_LAND;
+     }
+ 
+     @Override
+     protected SoundEvent getHurtSound(DamageSource p_32852_) {
+-        if (this.isToxic) {
+-            return this.isInWaterOrBubble() ? SoundEvents.TOXIFIN_HURT : SoundEvents.TOXIFIN_HURT_LAND;
+-        } else {
+-            return this.isInWaterOrBubble() ? SoundEvents.GUARDIAN_HURT : SoundEvents.GUARDIAN_HURT_LAND;
+-        }
++        return this.isInWaterOrBubble() ? SoundEvents.GUARDIAN_HURT : SoundEvents.GUARDIAN_HURT_LAND;
+     }
+ 
+     @Override
+     protected SoundEvent getDeathSound() {
+-        if (this.isToxic) {
+-            return this.isInWaterOrBubble() ? SoundEvents.TOXIFIN_DEATH : SoundEvents.TOXIFIN_DEATH_LAND;
+-        } else {
+-            return this.isInWaterOrBubble() ? SoundEvents.GUARDIAN_DEATH : SoundEvents.GUARDIAN_DEATH_LAND;
+-        }
++        return this.isInWaterOrBubble() ? SoundEvents.GUARDIAN_DEATH : SoundEvents.GUARDIAN_DEATH_LAND;
+     }
+ 
+     @Override
+@@ -301,36 +_,13 @@
+     }
+ 
+     @Override
+-    public boolean checkSpawnRules(LevelAccessor p_340827_, MobSpawnType p_341447_) {
+-        return this.isToxic ? true : super.checkSpawnRules(p_340827_, p_341447_);
+-    }
+-
+-    @Override
+-    protected void applyPoisonFromWaterContact() {
+-        if (!this.isToxic) {
+-            super.applyPoisonFromWaterContact();
+-        }
+-    }
+-
+-    @Override
+     public void aiStep() {
+-        if (!this.isInWaterOrBubble()) {
+-            ++this.tickOutOfWater;
+-        } else {
+-            this.tickOutOfWater = 0;
+-        }
+-
+         if (this.isAlive()) {
+             if (this.level().isClientSide) {
+                 this.clientSideTailAnimationO = this.clientSideTailAnimation;
+                 if (!this.isInWater()) {
++                    this.clientSideTailAnimationSpeed = 2.0F;
+                     Vec3 vec3 = this.getDeltaMovement();
+-                    if (this.isToxic) {
+-                        this.clientSideTailAnimationSpeed = (float)vec3.length() / 0.5F + 0.1F;
+-                    } else {
+-                        this.clientSideTailAnimationSpeed = 2.0F;
+-                    }
+-
+                     if (vec3.y > 0.0 && this.clientSideTouchedGround && !this.isSilent()) {
+                         this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), this.getFlopSound(), this.getSoundSource(), 1.0F, 1.0F, false);
+                     }
+@@ -340,37 +_,26 @@
+                     if (this.clientSideTailAnimationSpeed < 0.5F) {
+                         this.clientSideTailAnimationSpeed = 4.0F;
+                     } else {
+-                        this.clientSideTailAnimationSpeed += (0.5F - this.clientSideTailAnimationSpeed) * 0.1F;
++                        this.clientSideTailAnimationSpeed = this.clientSideTailAnimationSpeed + (0.5F - this.clientSideTailAnimationSpeed) * 0.1F;
+                     }
+                 } else {
+-                    this.clientSideTailAnimationSpeed += (0.125F - this.clientSideTailAnimationSpeed) * 0.2F;
++                    this.clientSideTailAnimationSpeed = this.clientSideTailAnimationSpeed + (0.125F - this.clientSideTailAnimationSpeed) * 0.2F;
+                 }
+ 
+-                this.clientSideTailAnimation += this.clientSideTailAnimationSpeed;
++                this.clientSideTailAnimation = this.clientSideTailAnimation + this.clientSideTailAnimationSpeed;
+                 this.clientSideSpikesAnimationO = this.clientSideSpikesAnimation;
+                 if (!this.isInWaterOrBubble()) {
+-                    if (this.isToxic) {
+-                        this.clientSideSpikesAnimation = 0.5F - (float)Math.cos((double)this.tickOutOfWater * 0.05 * Math.PI / 2.0) / 2.0F;
+-                    } else {
+-                        this.clientSideSpikesAnimation = this.random.nextFloat();
+-                    }
++                    this.clientSideSpikesAnimation = this.random.nextFloat();
+                 } else if (this.isMoving()) {
+-                    this.clientSideSpikesAnimation += (0.0F - this.clientSideSpikesAnimation) * 0.25F;
++                    this.clientSideSpikesAnimation = this.clientSideSpikesAnimation + (0.0F - this.clientSideSpikesAnimation) * 0.25F;
+                 } else {
+-                    this.clientSideSpikesAnimation += (1.0F - this.clientSideSpikesAnimation) * 0.06F;
+-                }
+-
+-                if (this.isPassenger()) {
+-                    Entity $$5 = this.getVehicle();
+-                    if ($$5 instanceof Guardian guardian && guardian.getType() == this.getType()) {
+-                        this.clientSideSpikesAnimation = guardian.clientSideSpikesAnimation;
+-                    }
++                    this.clientSideSpikesAnimation = this.clientSideSpikesAnimation + (1.0F - this.clientSideSpikesAnimation) * 0.06F;
+                 }
+ 
+                 if (this.isMoving() && this.isInWater()) {
+                     Vec3 vec31 = this.getViewVector(0.0F);
+ 
+-                    for(int i = 0; i < 2; ++i) {
++                    for (int i = 0; i < 2; i++) {
+                         this.level()
+                             .addParticle(
+                                 ParticleTypes.BUBBLE,
+@@ -386,7 +_,7 @@
+ 
+                 if (this.hasActiveAttackTarget()) {
+                     if (this.clientSideAttackTime < this.getAttackDuration()) {
+-                        ++this.clientSideAttackTime;
++                        this.clientSideAttackTime++;
+                     }
+ 
+                     LivingEntity livingentity = this.getActiveAttackTarget();
+@@ -403,7 +_,7 @@
+                         d2 /= d3;
+                         double d4 = this.random.nextDouble();
+ 
+-                        while(d4 < d3) {
++                        while (d4 < d3) {
+                             d4 += 1.8 - d5 + this.random.nextDouble() * (1.7 - d5);
+                             this.level()
+                                 .addParticle(ParticleTypes.BUBBLE, this.getX() + d0 * d4, this.getEyeY() + d1 * d4, this.getZ() + d2 * d4, 0.0, 0.0, 0.0);
+@@ -412,16 +_,9 @@
+                 }
+             }
+ 
+-            if (!this.level().isClientSide && this.hasActiveAttackTarget()) {
+-                LivingEntity livingentity1 = this.getActiveAttackTarget();
+-                if (livingentity1 != null && this.isToxic && livingentity1.getEffect(MobEffects.POISON) == null) {
+-                    livingentity1.addEffect(new MobEffectInstance(MobEffects.POISON, 40, 0), this);
+-                }
+-            }
+-
+             if (this.isInWaterOrBubble()) {
+                 this.setAirSupply(300);
+-            } else if (this.canJump()) {
++            } else if (this.onGround()) {
+                 this.setDeltaMovement(
+                     this.getDeltaMovement()
+                         .add((double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.4F), 0.5, (double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.4F))
+@@ -439,32 +_,8 @@
+         super.aiStep();
+     }
+ 
+-    boolean isBuddy(@Nullable Entity p_342276_) {
+-        if (this.isToxic && p_342276_ instanceof Guardian guardian && guardian.getType() == this.getType()) {
+-            return true;
+-        }
+-
+-        return false;
+-    }
+-
+-    private boolean canJump() {
+-        if (!this.onGround()) {
+-            return false;
+-        } else if (!this.isToxic) {
+-            return true;
+-        } else {
+-            --this.jumpTimer;
+-            if (this.jumpTimer < 0) {
+-                this.jumpTimer = this.random.nextInt(40) + 20;
+-                return true;
+-            } else {
+-                return false;
+-            }
+-        }
+-    }
+-
+     protected SoundEvent getFlopSound() {
+-        return this.isToxic ? SoundEvents.TOXIFIN_FLOP : SoundEvents.GUARDIAN_FLOP;
++        return SoundEvents.GUARDIAN_FLOP;
+     }
+ 
+     public float getTailAnimation(float p_32864_) {
+@@ -502,15 +_,11 @@
+         if (this.level().isClientSide) {
+             return false;
+         } else {
+-            if (!this.isMoving() && !p_32820_.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && !p_32820_.is(DamageTypes.THORNS)) {
+-                Entity entity = p_32820_.getDirectEntity();
+-                if (entity instanceof LivingEntity livingentity) {
+-                    if (this.isToxic) {
+-                        livingentity.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 0), this);
+-                    } else {
+-                        livingentity.hurt(this.damageSources().thorns(this), 2.0F);
+-                    }
+-                }
++            if (!this.isMoving()
++                && !p_32820_.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS)
++                && !p_32820_.is(DamageTypes.THORNS)
++                && p_32820_.getDirectEntity() instanceof LivingEntity livingentity) {
++                livingentity.hurt(this.damageSources().thorns(this), 2.0F);
+             }
+ 
+             if (this.randomStrollGoal != null) {
+@@ -540,37 +_,6 @@
+         }
+     }
+ 
+-    @Override
+-    protected BodyRotationControl createBodyControl() {
+-        return new BodyRotationControl(this) {
+-            @Override
+-            public void clientTick() {
+-                if (Guardian.this.isToxic && Guardian.this.isPassenger()) {
+-                    Entity entity = Guardian.this.getVehicle();
+-                    if (entity instanceof LivingEntity livingentity && livingentity.getType() == Guardian.this.getType()) {
+-                        Guardian.this.yBodyRot = livingentity.yBodyRot;
+-                    }
+-                }
+-
+-                super.clientTick();
+-            }
+-        };
+-    }
+-
+-    @Override
+-    protected Vec3 getPassengerAttachmentPoint(Entity p_342360_, EntityDimensions p_340687_, float p_340450_) {
+-        Vec3 vec3 = super.getPassengerAttachmentPoint(p_342360_, p_340687_, p_340450_);
+-        if (p_342360_.getType() == this.getType()) {
+-            vec3 = vec3.add(0.0, this.guardianStackRidingOffset(), 0.0);
+-        }
+-
+-        return vec3;
+-    }
+-
+-    protected double guardianStackRidingOffset() {
+-        return -0.112;
+-    }
+-
+     static class GuardianAttackGoal extends Goal {
+         private final Guardian guardian;
+         private int attackTime;
+@@ -627,7 +_,7 @@
+                 if (!this.guardian.hasLineOfSight(livingentity)) {
+                     this.guardian.setTarget(null);
+                 } else {
+-                    ++this.attackTime;
++                    this.attackTime++;
+                     if (this.attackTime == 0) {
+                         this.guardian.setActiveAttackTarget(livingentity.getId());
+                         if (!this.guardian.isSilent()) {
+@@ -643,15 +_,10 @@
+                             f += 2.0F;
+                         }
+ 
+-                        if (this.guardian.isToxic()) {
+-                            livingentity.addEffect(new MobEffectInstance(MobEffects.WITHER, 40 + (int)f * 10, 0), this.guardian);
+-                        } else {
+-                            livingentity.hurt(this.guardian.damageSources().indirectMagic(this.guardian, this.guardian), f);
+-                            livingentity.hurt(
+-                                this.guardian.damageSources().mobAttack(this.guardian), (float)this.guardian.getAttributeValue(Attributes.ATTACK_DAMAGE)
+-                            );
+-                        }
+-
++                        livingentity.hurt(this.guardian.damageSources().indirectMagic(this.guardian, this.guardian), f);
++                        livingentity.hurt(
++                            this.guardian.damageSources().mobAttack(this.guardian), (float)this.guardian.getAttributeValue(Attributes.ATTACK_DAMAGE)
++                        );
+                         this.guardian.setTarget(null);
+                     }
+ 
+@@ -670,27 +_,6 @@
+ 
+         public boolean test(@Nullable LivingEntity p_32881_) {
+             return (p_32881_ instanceof Player || p_32881_ instanceof Squid || p_32881_ instanceof Axolotl) && p_32881_.distanceToSqr(this.guardian) > 9.0;
+-        }
+-    }
+-
+-    class GuardianLookControl extends LookControl {
+-        GuardianLookControl() {
+-            super(Guardian.this);
+-        }
+-
+-        @Override
+-        protected Optional<Float> getXRotD() {
+-            return !Guardian.this.isToxic || !Guardian.this.isPassenger() && !Guardian.this.isVehicle() ? super.getXRotD() : Optional.empty();
+-        }
+-
+-        @Override
+-        public void tick() {
+-            Entity entity = Guardian.this.getVehicle();
+-            if (entity instanceof Guardian guardian && guardian.getType() == Guardian.this.getType()) {
+-                Guardian.this.yHeadRot = guardian.yHeadRot;
+-            }
+-
+-            super.tick();
+         }
+     }
+ 

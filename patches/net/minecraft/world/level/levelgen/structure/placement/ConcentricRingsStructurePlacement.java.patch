@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/structure/placement/ConcentricRingsStructurePlacement.java
++++ b/net/minecraft/world/level/levelgen/structure/placement/ConcentricRingsStructurePlacement.java
+@@ -4,6 +_,7 @@
+ import com.mojang.datafixers.Products.P5;
+ import com.mojang.datafixers.Products.P9;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
+@@ -18,7 +_,7 @@
+ import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
+ 
+ public class ConcentricRingsStructurePlacement extends StructurePlacement {
+-    public static final Codec<ConcentricRingsStructurePlacement> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<ConcentricRingsStructurePlacement> CODEC = RecordCodecBuilder.mapCodec(
+         p_204960_ -> codec(p_204960_).apply(p_204960_, ConcentricRingsStructurePlacement::new)
+     );
+     private final int distance;

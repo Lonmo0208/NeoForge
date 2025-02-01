@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/GrindstoneBlock.java
++++ b/net/minecraft/world/level/block/GrindstoneBlock.java
+@@ -110,7 +_,7 @@
+ 
+     private VoxelShape getVoxelShape(BlockState p_53856_) {
+         Direction direction = p_53856_.getValue(FACING);
+-        switch((AttachFace)p_53856_.getValue(FACE)) {
++        switch ((AttachFace)p_53856_.getValue(FACE)) {
+             case FLOOR:
+                 if (direction != Direction.NORTH && direction != Direction.SOUTH) {
+                     return FLOOR_EAST_WEST_GRINDSTONE;

@@ -1,0 +1,11 @@
+--- a/net/minecraft/realms/RealmsObjectSelectionList.java
++++ b/net/minecraft/realms/RealmsObjectSelectionList.java
+@@ -14,7 +_,7 @@
+ 
+     public void setSelectedItem(int p_120768_) {
+         if (p_120768_ == -1) {
+-            this.setSelected((E)null);
++            this.setSelected(null);
+         } else if (super.getItemCount() != 0) {
+             this.setSelected(this.getEntry(p_120768_));
+         }

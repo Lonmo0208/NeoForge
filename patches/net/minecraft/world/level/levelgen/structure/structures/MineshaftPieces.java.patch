@@ -1,0 +1,408 @@
+--- a/net/minecraft/world/level/levelgen/structure/structures/MineshaftPieces.java
++++ b/net/minecraft/world/level/levelgen/structure/structures/MineshaftPieces.java
+@@ -26,7 +_,6 @@
+ import net.minecraft.world.level.block.FenceBlock;
+ import net.minecraft.world.level.block.RailBlock;
+ import net.minecraft.world.level.block.WallTorchBlock;
+-import net.minecraft.world.level.block.entity.BlockEntity;
+ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.block.state.properties.RailShape;
+@@ -148,10 +_,10 @@
+         public static BoundingBox findCorridorSize(
+             StructurePieceAccessor p_227799_, RandomSource p_227800_, int p_227801_, int p_227802_, int p_227803_, Direction p_227804_
+         ) {
+-            for(int i = p_227800_.nextInt(3) + 2; i > 0; --i) {
++            for (int i = p_227800_.nextInt(3) + 2; i > 0; i--) {
+                 int j = i * 5;
+ 
+-                BoundingBox $$11 = switch(p_227804_) {
++                BoundingBox $$11 = switch (p_227804_) {
+                     default -> new BoundingBox(0, 0, -(j - 1), 2, 2, 0);
+                     case SOUTH -> new BoundingBox(0, 0, 0, 2, 2, j - 1);
+                     case WEST -> new BoundingBox(-(j - 1), 0, 0, 0, 2, 2);
+@@ -172,7 +_,7 @@
+             int j = p_227797_.nextInt(4);
+             Direction direction = this.getOrientation();
+             if (direction != null) {
+-                switch(direction) {
++                switch (direction) {
+                     case NORTH:
+                     default:
+                         if (j <= 1) {
+@@ -322,7 +_,7 @@
+ 
+             if (i < 8) {
+                 if (direction != Direction.NORTH && direction != Direction.SOUTH) {
+-                    for(int i1 = this.boundingBox.minX() + 3; i1 + 3 <= this.boundingBox.maxX(); i1 += 5) {
++                    for (int i1 = this.boundingBox.minX() + 3; i1 + 3 <= this.boundingBox.maxX(); i1 += 5) {
+                         int j1 = p_227797_.nextInt(5);
+                         if (j1 == 0) {
+                             MineshaftPieces.generateAndAddPiece(
+@@ -335,7 +_,7 @@
+                         }
+                     }
+                 } else {
+-                    for(int k = this.boundingBox.minZ() + 3; k + 3 <= this.boundingBox.maxZ(); k += 5) {
++                    for (int k = this.boundingBox.minZ() + 3; k + 3 <= this.boundingBox.maxZ(); k += 5) {
+                         int l = p_227797_.nextInt(5);
+                         if (l == 0) {
+                             MineshaftPieces.generateAndAddPiece(
+@@ -401,7 +_,7 @@
+                     this.generateMaybeBox(p_227743_, p_227747_, p_227746_, 0.6F, 0, 0, 0, 2, 1, i1, Blocks.COBWEB.defaultBlockState(), CAVE_AIR, false, true);
+                 }
+ 
+-                for(int j1 = 0; j1 < this.numSections; ++j1) {
++                for (int j1 = 0; j1 < this.numSections; j1++) {
+                     int k1 = 2 + j1 * 5;
+                     this.placeSupport(p_227743_, p_227747_, 0, 0, k1, 2, 2, p_227746_);
+                     this.maybePlaceCobWeb(p_227743_, p_227747_, p_227746_, 0.1F, 0, 2, k1 - 1);
+@@ -427,16 +_,15 @@
+                         if (p_227747_.isInside(blockpos) && this.isInterior(p_227743_, 1, 0, i2, p_227747_)) {
+                             this.hasPlacedSpider = true;
+                             p_227743_.setBlock(blockpos, Blocks.SPAWNER.defaultBlockState(), 2);
+-                            BlockEntity blockentity = p_227743_.getBlockEntity(blockpos);
+-                            if (blockentity instanceof SpawnerBlockEntity spawnerblockentity) {
++                            if (p_227743_.getBlockEntity(blockpos) instanceof SpawnerBlockEntity spawnerblockentity) {
+                                 spawnerblockentity.setEntityId(EntityType.CAVE_SPIDER, p_227746_);
+                             }
+                         }
+                     }
+                 }
+ 
+-                for(int j2 = 0; j2 <= 2; ++j2) {
+-                    for(int l2 = 0; l2 <= i1; ++l2) {
++                for (int j2 = 0; j2 <= 2; j2++) {
++                    for (int l2 = 0; l2 <= i1; l2++) {
+                         this.setPlanksBlock(p_227743_, p_227747_, blockstate, j2, -1, l2);
+                     }
+                 }
+@@ -451,7 +_,7 @@
+                 if (this.hasRails) {
+                     BlockState blockstate1 = Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, RailShape.NORTH_SOUTH);
+ 
+-                    for(int j3 = 0; j3 <= i1; ++j3) {
++                    for (int j3 = 0; j3 <= i1; j3++) {
+                         BlockState blockstate2 = this.getBlock(p_227743_, 1, -1, j3, p_227747_);
+                         if (!blockstate2.isAir() && blockstate2.isSolidRender(p_227743_, this.getWorldPos(1, -1, j3))) {
+                             float f = this.isInterior(p_227743_, 1, 0, j3, p_227747_) ? 0.7F : 0.9F;
+@@ -480,7 +_,7 @@
+             if (p_227818_.isInside(blockpos$mutableblockpos)) {
+                 int i = blockpos$mutableblockpos.getY();
+ 
+-                while(
++                while (
+                     this.isReplaceableByStructures(p_227813_.getBlockState(blockpos$mutableblockpos))
+                         && blockpos$mutableblockpos.getY() > p_227813_.getMinBuildHeight() + 1
+                 ) {
+@@ -488,7 +_,7 @@
+                 }
+ 
+                 if (this.canPlaceColumnOnTopOf(p_227813_, blockpos$mutableblockpos, p_227813_.getBlockState(blockpos$mutableblockpos))) {
+-                    while(blockpos$mutableblockpos.getY() < i) {
++                    while (blockpos$mutableblockpos.getY() < i) {
+                         blockpos$mutableblockpos.move(Direction.UP);
+                         p_227813_.setBlock(blockpos$mutableblockpos, p_227814_, 2);
+                     }
+@@ -505,7 +_,7 @@
+                 int j = 1;
+                 boolean flag = true;
+ 
+-                for(boolean flag1 = true; flag || flag1; ++j) {
++                for (boolean flag1 = true; flag || flag1; j++) {
+                     if (flag) {
+                         blockpos$mutableblockpos.setY(i - j);
+                         BlockState blockstate = p_227820_.getBlockState(blockpos$mutableblockpos);
+@@ -524,13 +_,7 @@
+                         boolean flag3 = this.isReplaceableByStructures(blockstate1);
+                         if (!flag3 && this.canHangChainBelow(p_227820_, blockpos$mutableblockpos, blockstate1)) {
+                             p_227820_.setBlock(blockpos$mutableblockpos.setY(i + 1), this.type.getFenceState(), 2);
+-                            fillColumnBetween(
+-                                p_227820_,
+-                                p_227821_.is(Blocks.POTATO_STEM) ? Blocks.POTATO_PEDICULE.defaultBlockState() : Blocks.CHAIN.defaultBlockState(),
+-                                blockpos$mutableblockpos,
+-                                i + 2,
+-                                i + j
+-                            );
++                            fillColumnBetween(p_227820_, Blocks.CHAIN.defaultBlockState(), blockpos$mutableblockpos, i + 2, i + j);
+                             return;
+                         }
+ 
+@@ -541,7 +_,7 @@
+         }
+ 
+         private static void fillColumnBetween(WorldGenLevel p_227751_, BlockState p_227752_, BlockPos.MutableBlockPos p_227753_, int p_227754_, int p_227755_) {
+-            for(int i = p_227754_; i < p_227755_; ++i) {
++            for (int i = p_227754_; i < p_227755_; i++) {
+                 p_227751_.setBlock(p_227753_.setY(i), p_227752_, 2);
+             }
+         }
+@@ -629,7 +_,7 @@
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = this.getWorldPos(p_227765_, p_227766_, p_227767_);
+             int i = 0;
+ 
+-            for(Direction direction : Direction.values()) {
++            for (Direction direction : Direction.values()) {
+                 blockpos$mutableblockpos.move(direction);
+                 if (p_227764_.isInside(blockpos$mutableblockpos)
+                     && p_227763_.getBlockState(blockpos$mutableblockpos).isFaceSturdy(p_227763_, blockpos$mutableblockpos, direction.getOpposite())) {
+@@ -678,7 +_,7 @@
+             } else {
+                 i = 2;
+             }
+-            BoundingBox $$11 = switch(p_227860_) {
++            BoundingBox $$11 = switch (p_227860_) {
+                 default -> new BoundingBox(-1, 0, -4, 3, i, 0);
+                 case SOUTH -> new BoundingBox(-1, 0, 0, 3, i, 4);
+                 case WEST -> new BoundingBox(-4, 0, -1, 0, i, 3);
+@@ -691,7 +_,7 @@
+         @Override
+         public void addChildren(StructurePiece p_227851_, StructurePieceAccessor p_227852_, RandomSource p_227853_) {
+             int i = this.getGenDepth();
+-            switch(this.direction) {
++            switch (this.direction) {
+                 case NORTH:
+                 default:
+                     MineshaftPieces.generateAndAddPiece(
+@@ -914,8 +_,8 @@
+                 );
+                 int i = this.boundingBox.minY() - 1;
+ 
+-                for(int j = this.boundingBox.minX(); j <= this.boundingBox.maxX(); ++j) {
+-                    for(int k = this.boundingBox.minZ(); k <= this.boundingBox.maxZ(); ++k) {
++                for (int j = this.boundingBox.minX(); j <= this.boundingBox.maxX(); j++) {
++                    for (int k = this.boundingBox.minZ(); k <= this.boundingBox.maxZ(); k++) {
+                         this.setPlanksBlock(p_227836_, p_227840_, blockstate, j, i, k);
+                     }
+                 }
+@@ -950,8 +_,7 @@
+             return !blockstate.is(this.type.getPlanksState().getBlock())
+                 && !blockstate.is(this.type.getWoodState().getBlock())
+                 && !blockstate.is(this.type.getFenceState().getBlock())
+-                && !blockstate.is(Blocks.CHAIN)
+-                && !blockstate.is(Blocks.POTATO_PEDICULE);
++                && !blockstate.is(Blocks.CHAIN);
+         }
+ 
+         @Override
+@@ -960,7 +_,7 @@
+         }
+ 
+         protected boolean isSupportingBox(BlockGetter p_227875_, BoundingBox p_227876_, int p_227877_, int p_227878_, int p_227879_, int p_227880_) {
+-            for(int i = p_227877_; i <= p_227878_; ++i) {
++            for (int i = p_227877_; i <= p_227878_; i++) {
+                 if (this.getBlock(p_227875_, i, p_227879_ + 1, p_227880_, p_227876_).isAir()) {
+                     return false;
+                 }
+@@ -980,8 +_,8 @@
+             if (p_227882_.getBiome(blockpos$mutableblockpos).is(BiomeTags.MINESHAFT_BLOCKING)) {
+                 return true;
+             } else {
+-                for(int k1 = i; k1 <= l; ++k1) {
+-                    for(int l1 = k; l1 <= j1; ++l1) {
++                for (int k1 = i; k1 <= l; k1++) {
++                    for (int l1 = k; l1 <= j1; l1++) {
+                         if (p_227882_.getBlockState(blockpos$mutableblockpos.set(k1, j, l1)).liquid()) {
+                             return true;
+                         }
+@@ -992,8 +_,8 @@
+                     }
+                 }
+ 
+-                for(int i2 = i; i2 <= l; ++i2) {
+-                    for(int k2 = j; k2 <= i1; ++k2) {
++                for (int i2 = i; i2 <= l; i2++) {
++                    for (int k2 = j; k2 <= i1; k2++) {
+                         if (p_227882_.getBlockState(blockpos$mutableblockpos.set(i2, k2, k)).liquid()) {
+                             return true;
+                         }
+@@ -1004,8 +_,8 @@
+                     }
+                 }
+ 
+-                for(int j2 = k; j2 <= j1; ++j2) {
+-                    for(int l2 = j; l2 <= i1; ++l2) {
++                for (int j2 = k; j2 <= j1; j2++) {
++                    for (int l2 = j; l2 <= i1; l2++) {
+                         if (p_227882_.getBlockState(blockpos$mutableblockpos.set(i, l2, j2)).liquid()) {
+                             return true;
+                         }
+@@ -1056,15 +_,16 @@
+         @Override
+         public void addChildren(StructurePiece p_227922_, StructurePieceAccessor p_227923_, RandomSource p_227924_) {
+             int i = this.getGenDepth();
+-            int j = this.boundingBox.getYSpan() - 3 - 1;
+-            if (j <= 0) {
+-                j = 1;
++            int k = this.boundingBox.getYSpan() - 3 - 1;
++            if (k <= 0) {
++                k = 1;
+             }
+ 
+-            int k;
+-            for(k = 0; k < this.boundingBox.getXSpan(); k += 4) {
+-                k += p_227924_.nextInt(this.boundingBox.getXSpan());
+-                if (k + 3 > this.boundingBox.getXSpan()) {
++            int j = 0;
++
++            while (j < this.boundingBox.getXSpan()) {
++                j += p_227924_.nextInt(this.boundingBox.getXSpan());
++                if (j + 3 > this.boundingBox.getXSpan()) {
+                     break;
+                 }
+ 
+@@ -1072,8 +_,8 @@
+                     p_227922_,
+                     p_227923_,
+                     p_227924_,
+-                    this.boundingBox.minX() + k,
+-                    this.boundingBox.minY() + p_227924_.nextInt(j) + 1,
++                    this.boundingBox.minX() + j,
++                    this.boundingBox.minY() + p_227924_.nextInt(k) + 1,
+                     this.boundingBox.minZ() - 1,
+                     Direction.NORTH,
+                     i
+@@ -1092,11 +_,15 @@
+                             )
+                         );
+                 }
++
++                j += 4;
+             }
+ 
+-            for(k = 0; k < this.boundingBox.getXSpan(); k += 4) {
+-                k += p_227924_.nextInt(this.boundingBox.getXSpan());
+-                if (k + 3 > this.boundingBox.getXSpan()) {
++            j = 0;
++
++            while (j < this.boundingBox.getXSpan()) {
++                j += p_227924_.nextInt(this.boundingBox.getXSpan());
++                if (j + 3 > this.boundingBox.getXSpan()) {
+                     break;
+                 }
+ 
+@@ -1104,8 +_,8 @@
+                     p_227922_,
+                     p_227923_,
+                     p_227924_,
+-                    this.boundingBox.minX() + k,
+-                    this.boundingBox.minY() + p_227924_.nextInt(j) + 1,
++                    this.boundingBox.minX() + j,
++                    this.boundingBox.minY() + p_227924_.nextInt(k) + 1,
+                     this.boundingBox.maxZ() + 1,
+                     Direction.SOUTH,
+                     i
+@@ -1124,11 +_,15 @@
+                             )
+                         );
+                 }
++
++                j += 4;
+             }
+ 
+-            for(k = 0; k < this.boundingBox.getZSpan(); k += 4) {
+-                k += p_227924_.nextInt(this.boundingBox.getZSpan());
+-                if (k + 3 > this.boundingBox.getZSpan()) {
++            j = 0;
++
++            while (j < this.boundingBox.getZSpan()) {
++                j += p_227924_.nextInt(this.boundingBox.getZSpan());
++                if (j + 3 > this.boundingBox.getZSpan()) {
+                     break;
+                 }
+ 
+@@ -1137,8 +_,8 @@
+                     p_227923_,
+                     p_227924_,
+                     this.boundingBox.minX() - 1,
+-                    this.boundingBox.minY() + p_227924_.nextInt(j) + 1,
+-                    this.boundingBox.minZ() + k,
++                    this.boundingBox.minY() + p_227924_.nextInt(k) + 1,
++                    this.boundingBox.minZ() + j,
+                     Direction.WEST,
+                     i
+                 );
+@@ -1156,11 +_,15 @@
+                             )
+                         );
+                 }
++
++                j += 4;
+             }
+ 
+-            for(k = 0; k < this.boundingBox.getZSpan(); k += 4) {
+-                k += p_227924_.nextInt(this.boundingBox.getZSpan());
+-                if (k + 3 > this.boundingBox.getZSpan()) {
++            j = 0;
++
++            while (j < this.boundingBox.getZSpan()) {
++                j += p_227924_.nextInt(this.boundingBox.getZSpan());
++                if (j + 3 > this.boundingBox.getZSpan()) {
+                     break;
+                 }
+ 
+@@ -1169,8 +_,8 @@
+                     p_227923_,
+                     p_227924_,
+                     this.boundingBox.maxX() + 1,
+-                    this.boundingBox.minY() + p_227924_.nextInt(j) + 1,
+-                    this.boundingBox.minZ() + k,
++                    this.boundingBox.minY() + p_227924_.nextInt(k) + 1,
++                    this.boundingBox.minZ() + j,
+                     Direction.EAST,
+                     i
+                 );
+@@ -1188,6 +_,8 @@
+                             )
+                         );
+                 }
++
++                j += 4;
+             }
+         }
+ 
+@@ -1216,7 +_,7 @@
+                     false
+                 );
+ 
+-                for(BoundingBox boundingbox : this.childEntranceBoxes) {
++                for (BoundingBox boundingbox : this.childEntranceBoxes) {
+                     this.generateBox(
+                         p_227914_,
+                         p_227918_,
+@@ -1251,7 +_,7 @@
+         public void move(int p_227910_, int p_227911_, int p_227912_) {
+             super.move(p_227910_, p_227911_, p_227912_);
+ 
+-            for(BoundingBox boundingbox : this.childEntranceBoxes) {
++            for (BoundingBox boundingbox : this.childEntranceBoxes) {
+                 boundingbox.move(p_227910_, p_227911_, p_227912_);
+             }
+         }
+@@ -1281,7 +_,7 @@
+         public static BoundingBox findStairs(
+             StructurePieceAccessor p_227951_, RandomSource p_227952_, int p_227953_, int p_227954_, int p_227955_, Direction p_227956_
+         ) {
+-            BoundingBox $$9 = switch(p_227956_) {
++            BoundingBox $$9 = switch (p_227956_) {
+                 default -> new BoundingBox(0, -5, -8, 2, 2, 0);
+                 case SOUTH -> new BoundingBox(0, -5, 0, 2, 2, 8);
+                 case WEST -> new BoundingBox(-8, -5, 0, 0, 2, 2);
+@@ -1296,7 +_,7 @@
+             int i = this.getGenDepth();
+             Direction direction = this.getOrientation();
+             if (direction != null) {
+-                switch(direction) {
++                switch (direction) {
+                     case NORTH:
+                     default:
+                         MineshaftPieces.generateAndAddPiece(
+@@ -1335,7 +_,7 @@
+                 this.generateBox(p_227939_, p_227943_, 0, 5, 0, 2, 7, 1, CAVE_AIR, CAVE_AIR, false);
+                 this.generateBox(p_227939_, p_227943_, 0, 0, 7, 2, 2, 8, CAVE_AIR, CAVE_AIR, false);
+ 
+-                for(int i = 0; i < 5; ++i) {
++                for (int i = 0; i < 5; i++) {
+                     this.generateBox(p_227939_, p_227943_, 0, 5 - i - (i < 4 ? 1 : 0), 2 + i, 2, 7 - i, 2 + i, CAVE_AIR, CAVE_AIR, false);
+                 }
+             }

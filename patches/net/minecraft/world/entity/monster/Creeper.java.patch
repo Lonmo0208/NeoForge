@@ -1,0 +1,31 @@
+--- a/net/minecraft/world/entity/monster/Creeper.java
++++ b/net/minecraft/world/entity/monster/Creeper.java
+@@ -56,11 +_,6 @@
+     }
+ 
+     @Override
+-    public boolean hasPotatoVariant() {
+-        return true;
+-    }
+-
+-    @Override
+     protected void registerGoals() {
+         this.goalSelector.addGoal(1, new FloatGoal(this));
+         this.goalSelector.addGoal(2, new SwellGoal(this));
+@@ -256,7 +_,7 @@
+             areaeffectcloud.setDuration(areaeffectcloud.getDuration() / 2);
+             areaeffectcloud.setRadiusPerTick(-areaeffectcloud.getRadius() / (float)areaeffectcloud.getDuration());
+ 
+-            for(MobEffectInstance mobeffectinstance : collection) {
++            for (MobEffectInstance mobeffectinstance : collection) {
+                 areaeffectcloud.addEffect(new MobEffectInstance(mobeffectinstance));
+             }
+ 
+@@ -277,6 +_,6 @@
+     }
+ 
+     public void increaseDroppedSkulls() {
+-        ++this.droppedSkulls;
++        this.droppedSkulls++;
+     }
+ }

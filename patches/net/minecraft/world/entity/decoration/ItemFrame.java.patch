@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/decoration/ItemFrame.java
++++ b/net/minecraft/world/entity/decoration/ItemFrame.java
+@@ -96,7 +_,7 @@
+             double d5 = (double)this.getHeight();
+             double d6 = (double)this.getWidth();
+             Direction.Axis direction$axis = this.direction.getAxis();
+-            switch(direction$axis) {
++            switch (direction$axis) {
+                 case X:
+                     d4 = 1.0;
+                     break;

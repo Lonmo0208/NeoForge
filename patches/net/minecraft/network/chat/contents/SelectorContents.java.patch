@@ -1,0 +1,24 @@
+--- a/net/minecraft/network/chat/contents/SelectorContents.java
++++ b/net/minecraft/network/chat/contents/SelectorContents.java
+@@ -19,18 +_,17 @@
+ import net.minecraft.network.chat.FormattedText;
+ import net.minecraft.network.chat.MutableComponent;
+ import net.minecraft.network.chat.Style;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.Entity;
+ import org.slf4j.Logger;
+ 
+ public class SelectorContents implements ComponentContents {
+     private static final Logger LOGGER = LogUtils.getLogger();
+     public static final MapCodec<SelectorContents> CODEC = RecordCodecBuilder.mapCodec(
+-        p_304565_ -> p_304565_.group(
++        p_337511_ -> p_337511_.group(
+                     Codec.STRING.fieldOf("selector").forGetter(SelectorContents::getPattern),
+-                    ExtraCodecs.strictOptionalField(ComponentSerialization.CODEC, "separator").forGetter(SelectorContents::getSeparator)
++                    ComponentSerialization.CODEC.optionalFieldOf("separator").forGetter(SelectorContents::getSeparator)
+                 )
+-                .apply(p_304565_, SelectorContents::new)
++                .apply(p_337511_, SelectorContents::new)
+     );
+     public static final ComponentContents.Type<SelectorContents> TYPE = new ComponentContents.Type<>(CODEC, "selector");
+     private final String pattern;

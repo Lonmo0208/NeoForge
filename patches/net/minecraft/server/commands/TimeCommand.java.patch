@@ -1,0 +1,35 @@
+--- a/net/minecraft/server/commands/TimeCommand.java
++++ b/net/minecraft/server/commands/TimeCommand.java
+@@ -37,12 +_,12 @@
+                         .then(Commands.literal("daytime").executes(p_139086_ -> queryTime(p_139086_.getSource(), getDayTime(p_139086_.getSource().getLevel()))))
+                         .then(
+                             Commands.literal("gametime")
+-                                .executes(p_339818_ -> queryTime(p_339818_.getSource(), (int)(p_339818_.getSource().getLevel().getGameTime() % 2147483647L)))
++                                .executes(p_329903_ -> queryTime(p_329903_.getSource(), (int)(p_329903_.getSource().getLevel().getGameTime() % 2147483647L)))
+                         )
+                         .then(
+                             Commands.literal("day")
+                                 .executes(
+-                                    p_339817_ -> queryTime(p_339817_.getSource(), (int)(p_339817_.getSource().getLevel().getDayTime() / 24000L % 2147483647L))
++                                    p_329904_ -> queryTime(p_329904_.getSource(), (int)(p_329904_.getSource().getLevel().getDayTime() / 24000L % 2147483647L))
+                                 )
+                         )
+                 )
+@@ -59,7 +_,7 @@
+     }
+ 
+     public static int setTime(CommandSourceStack p_139078_, int p_139079_) {
+-        for(ServerLevel serverlevel : p_139078_.getServer().getAllLevels()) {
++        for (ServerLevel serverlevel : p_139078_.getServer().getAllLevels()) {
+             serverlevel.setDayTime((long)p_139079_);
+         }
+ 
+@@ -68,7 +_,7 @@
+     }
+ 
+     public static int addTime(CommandSourceStack p_139083_, int p_139084_) {
+-        for(ServerLevel serverlevel : p_139083_.getServer().getAllLevels()) {
++        for (ServerLevel serverlevel : p_139083_.getServer().getAllLevels()) {
+             serverlevel.setDayTime(serverlevel.getDayTime() + (long)p_139084_);
+         }
+ 

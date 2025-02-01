@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/ticks/ScheduledTick.java
++++ b/net/minecraft/world/ticks/ScheduledTick.java
+@@ -27,10 +_,8 @@
+         public boolean equals(@Nullable ScheduledTick<?> p_193419_, @Nullable ScheduledTick<?> p_193420_) {
+             if (p_193419_ == p_193420_) {
+                 return true;
+-            } else if (p_193419_ != null && p_193420_ != null) {
+-                return p_193419_.type() == p_193420_.type() && p_193419_.pos().equals(p_193420_.pos());
+             } else {
+-                return false;
++                return p_193419_ != null && p_193420_ != null ? p_193419_.type() == p_193420_.type() && p_193419_.pos().equals(p_193420_.pos()) : false;
+             }
+         }
+     };

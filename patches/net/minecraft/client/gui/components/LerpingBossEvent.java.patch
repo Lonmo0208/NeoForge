@@ -1,0 +1,38 @@
+--- a/net/minecraft/client/gui/components/LerpingBossEvent.java
++++ b/net/minecraft/client/gui/components/LerpingBossEvent.java
+@@ -5,7 +_,6 @@
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.util.Mth;
+ import net.minecraft.world.BossEvent;
+-import net.minecraft.world.phys.Vec3;
+ import net.neoforged.api.distmarker.Dist;
+ import net.neoforged.api.distmarker.OnlyIn;
+ 
+@@ -23,11 +_,9 @@
+         BossEvent.BossBarOverlay p_169025_,
+         boolean p_169026_,
+         boolean p_169027_,
+-        boolean p_169028_,
+-        Vec3 p_341132_,
+-        int p_340622_
++        boolean p_169028_
+     ) {
+-        super(p_169021_, p_169022_, p_169024_, p_169025_, p_341132_, p_340622_);
++        super(p_169021_, p_169022_, p_169024_, p_169025_);
+         this.targetPercent = p_169023_;
+         this.progress = p_169023_;
+         this.setTime = Util.getMillis();
+@@ -48,13 +_,5 @@
+         long i = Util.getMillis() - this.setTime;
+         float f = Mth.clamp((float)i / 100.0F, 0.0F, 1.0F);
+         return Mth.lerp(f, this.progress, this.targetPercent);
+-    }
+-
+-    public boolean isActiveFor(Vec3 p_340677_) {
+-        if (this.radius > 0) {
+-            return this.center.distanceToSqr(p_340677_) < (double)(this.radius * this.radius);
+-        } else {
+-            return this.radius >= 0;
+-        }
+     }
+ }

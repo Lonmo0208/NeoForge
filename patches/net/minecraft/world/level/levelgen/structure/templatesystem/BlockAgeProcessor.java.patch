@@ -1,0 +1,71 @@
+--- a/net/minecraft/world/level/levelgen/structure/templatesystem/BlockAgeProcessor.java
++++ b/net/minecraft/world/level/levelgen/structure/templatesystem/BlockAgeProcessor.java
+@@ -1,8 +_,7 @@
+ package net.minecraft.world.level.levelgen.structure.templatesystem;
+ 
+ import com.mojang.serialization.Codec;
+-import com.mojang.serialization.codecs.RecordCodecBuilder;
+-import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
++import com.mojang.serialization.MapCodec;
+ import javax.annotation.Nullable;
+ import net.minecraft.Util;
+ import net.minecraft.core.BlockPos;
+@@ -17,13 +_,7 @@
+ import net.minecraft.world.level.block.state.properties.Half;
+ 
+ public class BlockAgeProcessor extends StructureProcessor {
+-    public static final Codec<BlockAgeProcessor> CODEC = RecordCodecBuilder.create(
+-        p_340306_ -> p_340306_.group(
+-                    Codec.FLOAT.fieldOf("mossiness").forGetter(p_74023_ -> p_74023_.mossiness),
+-                    Codec.BOOL.optionalFieldOf("potato", Boolean.valueOf(false)).forGetter(p_340305_ -> p_340305_.isPotato)
+-                )
+-                .apply(p_340306_, BlockAgeProcessor::new)
+-    );
++    public static final MapCodec<BlockAgeProcessor> CODEC = Codec.FLOAT.fieldOf("mossiness").xmap(BlockAgeProcessor::new, p_74023_ -> p_74023_.mossiness);
+     private static final float PROBABILITY_OF_REPLACING_FULL_BLOCK = 0.5F;
+     private static final float PROBABILITY_OF_REPLACING_STAIRS = 0.5F;
+     private static final float PROBABILITY_OF_REPLACING_OBSIDIAN = 0.15F;
+@@ -31,11 +_,9 @@
+         Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()
+     };
+     private final float mossiness;
+-    private final boolean isPotato;
+ 
+-    public BlockAgeProcessor(float p_74013_, boolean p_342229_) {
++    public BlockAgeProcessor(float p_74013_) {
+         this.mossiness = p_74013_;
+-        this.isPotato = p_342229_;
+     }
+ 
+     @Nullable
+@@ -52,11 +_,7 @@
+         BlockState blockstate = p_74020_.state();
+         BlockPos blockpos = p_74020_.pos();
+         BlockState blockstate1 = null;
+-        if (this.isPotato) {
+-            if (blockstate.is(Blocks.TATERSTONE) || blockstate.is(Blocks.TERREDEPOMME)) {
+-                blockstate1 = this.maybeReplaceFullPotatoBlock(randomsource);
+-            }
+-        } else if (blockstate.is(Blocks.STONE_BRICKS) || blockstate.is(Blocks.STONE) || blockstate.is(Blocks.CHISELED_STONE_BRICKS)) {
++        if (blockstate.is(Blocks.STONE_BRICKS) || blockstate.is(Blocks.STONE) || blockstate.is(Blocks.CHISELED_STONE_BRICKS)) {
+             blockstate1 = this.maybeReplaceFullStoneBlock(randomsource);
+         } else if (blockstate.is(BlockTags.STAIRS)) {
+             blockstate1 = this.maybeReplaceStairs(randomsource, p_74020_.state());
+@@ -83,17 +_,6 @@
+                 Blocks.MOSSY_STONE_BRICKS.defaultBlockState(), getRandomFacingStairs(p_230256_, Blocks.MOSSY_STONE_BRICK_STAIRS)
+             };
+             return this.getRandomBlock(p_230256_, ablockstate, ablockstate1);
+-        }
+-    }
+-
+-    @Nullable
+-    private BlockState maybeReplaceFullPotatoBlock(RandomSource p_341830_) {
+-        if (p_341830_.nextFloat() >= 0.5F) {
+-            return null;
+-        } else {
+-            BlockState[] ablockstate = new BlockState[]{Blocks.BAKED_POTATO_BRICKS.defaultBlockState()};
+-            BlockState[] ablockstate1 = new BlockState[]{Blocks.EXPIRED_BAKED_POTATO_BRICKS.defaultBlockState()};
+-            return this.getRandomBlock(p_341830_, ablockstate, ablockstate1);
+         }
+     }
+ 

@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/level/levelgen/heightproviders/VeryBiasedToBottomHeight.java
++++ b/net/minecraft/world/level/levelgen/heightproviders/VeryBiasedToBottomHeight.java
+@@ -2,6 +_,7 @@
+ 
+ import com.mojang.logging.LogUtils;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.util.Mth;
+@@ -11,7 +_,7 @@
+ import org.slf4j.Logger;
+ 
+ public class VeryBiasedToBottomHeight extends HeightProvider {
+-    public static final Codec<VeryBiasedToBottomHeight> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<VeryBiasedToBottomHeight> CODEC = RecordCodecBuilder.mapCodec(
+         p_162057_ -> p_162057_.group(
+                     VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter(p_162070_ -> p_162070_.minInclusive),
+                     VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter(p_162068_ -> p_162068_.maxInclusive),

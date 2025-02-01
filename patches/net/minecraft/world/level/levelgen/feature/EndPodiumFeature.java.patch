@@ -1,0 +1,27 @@
+--- a/net/minecraft/world/level/levelgen/feature/EndPodiumFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/EndPodiumFeature.java
+@@ -29,7 +_,7 @@
+         BlockPos blockpos = p_159723_.origin();
+         WorldGenLevel worldgenlevel = p_159723_.level();
+ 
+-        for(BlockPos blockpos1 : BlockPos.betweenClosed(
++        for (BlockPos blockpos1 : BlockPos.betweenClosed(
+             new BlockPos(blockpos.getX() - 4, blockpos.getY() - 1, blockpos.getZ() - 4),
+             new BlockPos(blockpos.getX() + 4, blockpos.getY() + 32, blockpos.getZ() + 4)
+         )) {
+@@ -53,13 +_,13 @@
+             }
+         }
+ 
+-        for(int i = 0; i < 4; ++i) {
++        for (int i = 0; i < 4; i++) {
+             this.setBlock(worldgenlevel, blockpos.above(i), Blocks.BEDROCK.defaultBlockState());
+         }
+ 
+         BlockPos blockpos2 = blockpos.above(2);
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             this.setBlock(worldgenlevel, blockpos2.relative(direction), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, direction));
+         }
+ 

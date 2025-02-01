@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/boss/enderdragon/phases/DragonDeathPhase.java
++++ b/net/minecraft/world/entity/boss/enderdragon/phases/DragonDeathPhase.java
+@@ -39,7 +_,7 @@
+ 
+     @Override
+     public void doServerTick() {
+-        ++this.time;
++        this.time++;
+         if (this.targetLocation == null) {
+             BlockPos blockpos = this.dragon
+                 .level()

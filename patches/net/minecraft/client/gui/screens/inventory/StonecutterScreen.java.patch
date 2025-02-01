@@ -1,0 +1,47 @@
+--- a/net/minecraft/client/gui/screens/inventory/StonecutterScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/StonecutterScreen.java
+@@ -40,7 +_,7 @@
+     public StonecutterScreen(StonecutterMenu p_99310_, Inventory p_99311_, Component p_99312_) {
+         super(p_99310_, p_99311_, p_99312_);
+         p_99310_.registerUpdateListener(this::containerChanged);
+-        --this.titleLabelY;
++        this.titleLabelY--;
+     }
+ 
+     @Override
+@@ -73,7 +_,7 @@
+             int k = this.startIndex + 12;
+             List<RecipeHolder<StonecutterRecipe>> list = this.menu.getRecipes();
+ 
+-            for(int l = this.startIndex; l < k && l < this.menu.getNumRecipes(); ++l) {
++            for (int l = this.startIndex; l < k && l < this.menu.getNumRecipes(); l++) {
+                 int i1 = l - this.startIndex;
+                 int j1 = i + i1 % 4 * 16;
+                 int k1 = j + i1 / 4 * 18 + 2;
+@@ -85,7 +_,7 @@
+     }
+ 
+     private void renderButtons(GuiGraphics p_282733_, int p_282136_, int p_282147_, int p_281987_, int p_281276_, int p_282688_) {
+-        for(int i = this.startIndex; i < p_282688_ && i < this.menu.getNumRecipes(); ++i) {
++        for (int i = this.startIndex; i < p_282688_ && i < this.menu.getNumRecipes(); i++) {
+             int j = i - this.startIndex;
+             int k = p_281987_ + j % 4 * 16;
+             int l = j / 4;
+@@ -106,7 +_,7 @@
+     private void renderRecipes(GuiGraphics p_281999_, int p_282658_, int p_282563_, int p_283352_) {
+         List<RecipeHolder<StonecutterRecipe>> list = this.menu.getRecipes();
+ 
+-        for(int i = this.startIndex; i < p_283352_ && i < this.menu.getNumRecipes(); ++i) {
++        for (int i = this.startIndex; i < p_283352_ && i < this.menu.getNumRecipes(); i++) {
+             int j = i - this.startIndex;
+             int k = p_282658_ + j % 4 * 16;
+             int l = j / 4;
+@@ -123,7 +_,7 @@
+             int j = this.topPos + 14;
+             int k = this.startIndex + 12;
+ 
+-            for(int l = this.startIndex; l < k; ++l) {
++            for (int l = this.startIndex; l < k; l++) {
+                 int i1 = l - this.startIndex;
+                 double d0 = p_99318_ - (double)(i + i1 % 4 * 16);
+                 double d1 = p_99319_ - (double)(j + i1 / 4 * 18);

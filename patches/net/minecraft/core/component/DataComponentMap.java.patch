@@ -1,0 +1,107 @@
+--- a/net/minecraft/core/component/DataComponentMap.java
++++ b/net/minecraft/core/component/DataComponentMap.java
+@@ -2,12 +_,15 @@
+ 
+ import com.google.common.collect.Iterators;
+ import com.google.common.collect.Sets;
++import com.mojang.serialization.Codec;
++import com.mojang.serialization.DataResult;
+ import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+ import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+ import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
+ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+ import java.util.Collections;
+ import java.util.Iterator;
++import java.util.Map;
+ import java.util.Objects;
+ import java.util.Set;
+ import java.util.Spliterators;
+@@ -34,6 +_,22 @@
+             return Collections.emptyIterator();
+         }
+     };
++    Codec<DataComponentMap> CODEC = DataComponentType.VALUE_MAP_CODEC.flatComapMap(DataComponentMap.Builder::buildFromMapTrusted, p_337448_ -> {
++        int i = p_337448_.size();
++        if (i == 0) {
++            return DataResult.success(Reference2ObjectMaps.emptyMap());
++        } else {
++            Reference2ObjectMap<DataComponentType<?>, Object> reference2objectmap = new Reference2ObjectArrayMap<>(i);
++
++            for (TypedDataComponent<?> typeddatacomponent : p_337448_) {
++                if (!typeddatacomponent.type().isTransient()) {
++                    reference2objectmap.put(typeddatacomponent.type(), typeddatacomponent.value());
++                }
++            }
++
++            return DataResult.success(reference2objectmap);
++        }
++    });
+ 
+     static DataComponentMap.Builder builder() {
+         return new DataComponentMap.Builder();
+@@ -50,7 +_,7 @@
+ 
+     default <T> T getOrDefault(DataComponentType<? extends T> p_331896_, T p_331597_) {
+         T t = this.get(p_331896_);
+-        return (T)(t != null ? t : p_331597_);
++        return t != null ? t : p_331597_;
+     }
+ 
+     @Nullable
+@@ -61,7 +_,7 @@
+ 
+     @Override
+     default Iterator<TypedDataComponent<?>> iterator() {
+-        return Iterators.transform(this.keySet().iterator(), p_330954_ -> Objects.requireNonNull(this.getTyped(p_330954_)));
++        return Iterators.transform(this.keySet().iterator(), p_330954_ -> Objects.requireNonNull(this.getTyped((DataComponentType<?>)p_330954_)));
+     }
+ 
+     default Stream<TypedDataComponent<?>> stream() {
+@@ -98,17 +_,20 @@
+         }
+ 
+         public <T> DataComponentMap.Builder set(DataComponentType<T> p_330228_, @Nullable T p_332186_) {
+-            if (p_332186_ != null) {
+-                this.map.put(p_330228_, p_332186_);
++            this.setUnchecked(p_330228_, p_332186_);
++            return this;
++        }
++
++        <T> void setUnchecked(DataComponentType<T> p_338736_, @Nullable Object p_338594_) {
++            if (p_338594_ != null) {
++                this.map.put(p_338736_, p_338594_);
+             } else {
+-                this.map.remove(p_330228_);
++                this.map.remove(p_338736_);
+             }
+-
+-            return this;
+         }
+ 
+         public DataComponentMap.Builder addAll(DataComponentMap p_331194_) {
+-            for(TypedDataComponent<?> typeddatacomponent : p_331194_) {
++            for (TypedDataComponent<?> typeddatacomponent : p_331194_) {
+                 this.map.put(typeddatacomponent.type(), typeddatacomponent.value());
+             }
+ 
+@@ -116,12 +_,16 @@
+         }
+ 
+         public DataComponentMap build() {
+-            if (this.map.isEmpty()) {
++            return buildFromMapTrusted(this.map);
++        }
++
++        private static DataComponentMap buildFromMapTrusted(Map<DataComponentType<?>, Object> p_338248_) {
++            if (p_338248_.isEmpty()) {
+                 return DataComponentMap.EMPTY;
+             } else {
+-                return this.map.size() < 8
+-                    ? new DataComponentMap.Builder.SimpleMap(new Reference2ObjectArrayMap<>(this.map))
+-                    : new DataComponentMap.Builder.SimpleMap(new Reference2ObjectOpenHashMap<>(this.map));
++                return p_338248_.size() < 8
++                    ? new DataComponentMap.Builder.SimpleMap(new Reference2ObjectArrayMap<>(p_338248_))
++                    : new DataComponentMap.Builder.SimpleMap(new Reference2ObjectOpenHashMap<>(p_338248_));
+             }
+         }
+ 

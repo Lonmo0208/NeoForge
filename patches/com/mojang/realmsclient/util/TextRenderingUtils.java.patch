@@ -1,0 +1,34 @@
+--- a/com/mojang/realmsclient/util/TextRenderingUtils.java
++++ b/com/mojang/realmsclient/util/TextRenderingUtils.java
+@@ -32,10 +_,10 @@
+         int i = 0;
+         List<TextRenderingUtils.Line> list = Lists.newArrayList();
+ 
+-        for(String s : p_90260_) {
++        for (String s : p_90260_) {
+             List<TextRenderingUtils.LineSegment> list1 = Lists.newArrayList();
+ 
+-            for(String s1 : split(s, "%link")) {
++            for (String s1 : split(s, "%link")) {
+                 if ("%link".equals(s1)) {
+                     list1.add(p_90261_.get(i++));
+                 } else {
+@@ -54,15 +_,16 @@
+             throw new IllegalArgumentException("Delimiter cannot be the empty string");
+         } else {
+             List<String> list = Lists.newArrayList();
++            int i = 0;
+ 
+-            int i;
+             int j;
+-            for(i = 0; (j = p_90251_.indexOf(p_90252_, i)) != -1; i = j + p_90252_.length()) {
++            while ((j = p_90251_.indexOf(p_90252_, i)) != -1) {
+                 if (j > i) {
+                     list.add(p_90251_.substring(i, j));
+                 }
+ 
+                 list.add(p_90252_);
++                i = j + p_90252_.length();
+             }
+ 
+             if (i < p_90251_.length()) {

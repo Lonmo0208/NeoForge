@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/FormattedCharSequence.java
++++ b/net/minecraft/util/FormattedCharSequence.java
+@@ -53,7 +_,7 @@
+ 
+     static FormattedCharSequence composite(List<FormattedCharSequence> p_13723_) {
+         int i = p_13723_.size();
+-        switch(i) {
++        switch (i) {
+             case 0:
+                 return EMPTY;
+             case 1:
+@@ -71,7 +_,7 @@
+ 
+     static FormattedCharSequence fromList(List<FormattedCharSequence> p_13745_) {
+         return p_13726_ -> {
+-            for(FormattedCharSequence formattedcharsequence : p_13745_) {
++            for (FormattedCharSequence formattedcharsequence : p_13745_) {
+                 if (!formattedcharsequence.accept(p_13726_)) {
+                     return false;
+                 }

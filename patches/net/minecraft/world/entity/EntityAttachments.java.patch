@@ -1,0 +1,37 @@
+--- a/net/minecraft/world/entity/EntityAttachments.java
++++ b/net/minecraft/world/entity/EntityAttachments.java
+@@ -27,7 +_,7 @@
+     public EntityAttachments scale(float p_316378_, float p_316683_, float p_316463_) {
+         Map<EntityAttachment, List<Vec3>> map = new EnumMap<>(EntityAttachment.class);
+ 
+-        for(Entry<EntityAttachment, List<Vec3>> entry : this.attachments.entrySet()) {
++        for (Entry<EntityAttachment, List<Vec3>> entry : this.attachments.entrySet()) {
+             map.put(entry.getKey(), scalePoints(entry.getValue(), p_316378_, p_316683_, p_316463_));
+         }
+ 
+@@ -37,7 +_,7 @@
+     private static List<Vec3> scalePoints(List<Vec3> p_316879_, float p_316759_, float p_316371_, float p_316711_) {
+         List<Vec3> list = new ArrayList<>(p_316879_.size());
+ 
+-        for(Vec3 vec3 : p_316879_) {
++        for (Vec3 vec3 : p_316879_) {
+             list.add(vec3.multiply((double)p_316759_, (double)p_316371_, (double)p_316711_));
+         }
+ 
+@@ -84,14 +_,14 @@
+         }
+ 
+         public EntityAttachments.Builder attach(EntityAttachment p_316903_, Vec3 p_316337_) {
+-            this.attachments.computeIfAbsent(p_316903_, p_316616_ -> new ArrayList(1)).add(p_316337_);
++            this.attachments.computeIfAbsent(p_316903_, p_316616_ -> new ArrayList<>(1)).add(p_316337_);
+             return this;
+         }
+ 
+         public EntityAttachments build(float p_316746_, float p_316254_) {
+             Map<EntityAttachment, List<Vec3>> map = new EnumMap<>(EntityAttachment.class);
+ 
+-            for(EntityAttachment entityattachment : EntityAttachment.values()) {
++            for (EntityAttachment entityattachment : EntityAttachment.values()) {
+                 List<Vec3> list = this.attachments.get(entityattachment);
+                 map.put(entityattachment, list != null ? List.copyOf(list) : entityattachment.createFallbackPoints(p_316746_, p_316254_));
+             }

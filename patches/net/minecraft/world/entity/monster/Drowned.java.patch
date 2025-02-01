@@ -1,0 +1,51 @@
+--- a/net/minecraft/world/entity/monster/Drowned.java
++++ b/net/minecraft/world/entity/monster/Drowned.java
+@@ -109,10 +_,10 @@
+                 && (MobSpawnType.isSpawner(p_218958_) || p_218957_.getFluidState(p_218959_).is(FluidTags.WATER));
+             if (flag && MobSpawnType.isSpawner(p_218958_)) {
+                 return true;
+-            } else if (holder.is(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS)) {
+-                return p_218960_.nextInt(15) == 0 && flag;
+             } else {
+-                return p_218960_.nextInt(40) == 0 && isDeepEnoughToSpawn(p_218957_, p_218959_) && flag;
++                return holder.is(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS)
++                    ? p_218960_.nextInt(15) == 0 && flag
++                    : p_218960_.nextInt(40) == 0 && isDeepEnoughToSpawn(p_218957_, p_218959_) && flag;
+             }
+         }
+     }
+@@ -173,11 +_,7 @@
+         if (p_32365_.is(Items.NAUTILUS_SHELL)) {
+             return false;
+         } else if (p_32365_.is(Items.TRIDENT)) {
+-            if (p_32364_.is(Items.TRIDENT)) {
+-                return p_32364_.getDamageValue() < p_32365_.getDamageValue();
+-            } else {
+-                return false;
+-            }
++            return p_32364_.is(Items.TRIDENT) ? p_32364_.getDamageValue() < p_32365_.getDamageValue() : false;
+         } else {
+             return p_32364_.is(Items.TRIDENT) ? true : super.canReplaceCurrentItem(p_32364_, p_32365_);
+         }
+@@ -194,11 +_,7 @@
+     }
+ 
+     public boolean okTarget(@Nullable LivingEntity p_32396_) {
+-        if (p_32396_ != null) {
+-            return !this.level().isDay() || p_32396_.isInWater();
+-        } else {
+-            return false;
+-        }
++        return p_32396_ != null ? !this.level().isDay() || p_32396_.isInWater() : false;
+     }
+ 
+     @Override
+@@ -385,7 +_,7 @@
+             RandomSource randomsource = this.mob.getRandom();
+             BlockPos blockpos = this.mob.blockPosition();
+ 
+-            for(int i = 0; i < 10; ++i) {
++            for (int i = 0; i < 10; i++) {
+                 BlockPos blockpos1 = blockpos.offset(randomsource.nextInt(20) - 10, 2 - randomsource.nextInt(8), randomsource.nextInt(20) - 10);
+                 if (this.level.getBlockState(blockpos1).is(Blocks.WATER)) {
+                     return Vec3.atBottomCenterOf(blockpos1);

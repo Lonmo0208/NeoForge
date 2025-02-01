@@ -1,12 +1,35 @@
 --- a/net/minecraft/client/resources/language/ClientLanguage.java
 +++ b/net/minecraft/client/resources/language/ClientLanguage.java
-@@ -77,4 +_,9 @@
+@@ -32,10 +_,10 @@
+     public static ClientLanguage loadFrom(ResourceManager p_265765_, List<String> p_265743_, boolean p_265470_) {
+         Map<String, String> map = Maps.newHashMap();
+ 
+-        for(String s : p_265743_) {
++        for (String s : p_265743_) {
+             String s1 = String.format(Locale.ROOT, "lang/%s.json", s);
+ 
+-            for(String s2 : p_265765_.getNamespaces()) {
++            for (String s2 : p_265765_.getNamespaces()) {
+                 try {
+                     ResourceLocation resourcelocation = new ResourceLocation(s2, s1);
+                     appendFrom(s, p_265765_.getResourceStack(resourcelocation), map);
+@@ -49,7 +_,7 @@
+     }
+ 
+     private static void appendFrom(String p_235036_, List<Resource> p_235037_, Map<String, String> p_235038_) {
+-        for(Resource resource : p_235037_) {
++        for (Resource resource : p_235037_) {
+             try (InputStream inputstream = resource.open()) {
+                 Language.loadFromJson(inputstream, p_235038_::put);
+             } catch (IOException ioexception) {
+@@ -76,5 +_,10 @@
+     @Override
      public FormattedCharSequence getVisualOrder(FormattedText p_118925_) {
          return FormattedBidiReorder.reorder(p_118925_, this.defaultRightToLeft);
-     }
++    }
 +
 +    @Override
 +    public Map<String, String> getLanguageData() {
 +        return storage;
-+    }
+     }
  }

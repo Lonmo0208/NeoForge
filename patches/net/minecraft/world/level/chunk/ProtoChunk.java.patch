@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/level/chunk/ProtoChunk.java
++++ b/net/minecraft/world/level/chunk/ProtoChunk.java
+@@ -141,7 +_,7 @@
+                 EnumSet<Heightmap.Types> enumset1 = this.getStatus().heightmapsAfter();
+                 EnumSet<Heightmap.Types> enumset = null;
+ 
+-                for(Heightmap.Types heightmap$types : enumset1) {
++                for (Heightmap.Types heightmap$types : enumset1) {
+                     Heightmap heightmap = this.heightmaps.get(heightmap$types);
+                     if (heightmap == null) {
+                         if (enumset == null) {
+@@ -156,7 +_,7 @@
+                     Heightmap.primeHeightmaps(this, enumset);
+                 }
+ 
+-                for(Heightmap.Types heightmap$types1 : enumset1) {
++                for (Heightmap.Types heightmap$types1 : enumset1) {
+                     this.heightmaps.get(heightmap$types1).update(i1, j, k1, p_63218_);
+                 }
+ 
+@@ -288,7 +_,7 @@
+     }
+ 
+     public CarvingMask getOrCreateCarvingMask(GenerationStep.Carving p_188191_) {
+-        return this.carvingMasks.computeIfAbsent(p_188191_, p_340281_ -> new CarvingMask(this.getHeight(), this.getMinBuildHeight()));
++        return this.carvingMasks.computeIfAbsent(p_188191_, p_325904_ -> new CarvingMask(this.getHeight(), this.getMinBuildHeight()));
+     }
+ 
+     public void setCarvingMask(GenerationStep.Carving p_188187_, CarvingMask p_188188_) {

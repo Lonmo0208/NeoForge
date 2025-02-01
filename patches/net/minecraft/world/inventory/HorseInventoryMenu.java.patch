@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/inventory/HorseInventoryMenu.java
++++ b/net/minecraft/world/inventory/HorseInventoryMenu.java
+@@ -51,20 +_,20 @@
+             }
+         });
+         if (this.hasChest(p_39659_)) {
+-            for(int k = 0; k < 3; ++k) {
+-                for(int l = 0; l < ((AbstractChestedHorse)p_39659_).getInventoryColumns(); ++l) {
++            for (int k = 0; k < 3; k++) {
++                for (int l = 0; l < ((AbstractChestedHorse)p_39659_).getInventoryColumns(); l++) {
+                     this.addSlot(new Slot(p_39658_, 1 + l + k * ((AbstractChestedHorse)p_39659_).getInventoryColumns(), 80 + l * 18, 18 + k * 18));
+                 }
+             }
+         }
+ 
+-        for(int i1 = 0; i1 < 3; ++i1) {
+-            for(int k1 = 0; k1 < 9; ++k1) {
++        for (int i1 = 0; i1 < 3; i1++) {
++            for (int k1 = 0; k1 < 9; k1++) {
+                 this.addSlot(new Slot(p_39657_, k1 + i1 * 9 + 9, 8 + k1 * 18, 102 + i1 * 18 + -18));
+             }
+         }
+ 
+-        for(int j1 = 0; j1 < 9; ++j1) {
++        for (int j1 = 0; j1 < 9; j1++) {
+             this.addSlot(new Slot(p_39657_, j1, 8 + j1 * 18, 142));
+         }
+     }

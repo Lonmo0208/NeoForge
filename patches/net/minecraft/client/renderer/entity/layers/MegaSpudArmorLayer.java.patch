@@ -1,0 +1,41 @@
+--- a/net/minecraft/client/renderer/entity/layers/MegaSpudArmorLayer.java
++++ /dev/null
+@@ -1,38 +_,0 @@
+-package net.minecraft.client.renderer.entity.layers;
+-
+-import net.minecraft.client.model.EntityModel;
+-import net.minecraft.client.model.MegaSpudModel;
+-import net.minecraft.client.model.geom.EntityModelSet;
+-import net.minecraft.client.model.geom.ModelLayers;
+-import net.minecraft.client.renderer.entity.RenderLayerParent;
+-import net.minecraft.resources.ResourceLocation;
+-import net.minecraft.util.Mth;
+-import net.minecraft.world.entity.monster.MegaSpud;
+-import net.neoforged.api.distmarker.Dist;
+-import net.neoforged.api.distmarker.OnlyIn;
+-
+-@OnlyIn(Dist.CLIENT)
+-public class MegaSpudArmorLayer extends EnergySwirlLayer<MegaSpud, MegaSpudModel<MegaSpud>> {
+-    private static final ResourceLocation WITHER_ARMOR_LOCATION = new ResourceLocation("textures/entity/wither/wither_armor.png");
+-    private final MegaSpudModel<MegaSpud> model;
+-
+-    public MegaSpudArmorLayer(RenderLayerParent<MegaSpud, MegaSpudModel<MegaSpud>> p_340348_, EntityModelSet p_340365_) {
+-        super(p_340348_);
+-        this.model = new MegaSpudModel<>(p_340365_.bakeLayer(ModelLayers.MEGA_SPUD_OUTER));
+-    }
+-
+-    @Override
+-    protected float xOffset(float p_340585_) {
+-        return Mth.cos(p_340585_ * 0.02F) * 3.0F;
+-    }
+-
+-    @Override
+-    protected ResourceLocation getTextureLocation() {
+-        return WITHER_ARMOR_LOCATION;
+-    }
+-
+-    @Override
+-    protected EntityModel<MegaSpud> model() {
+-        return this.model;
+-    }
+-}

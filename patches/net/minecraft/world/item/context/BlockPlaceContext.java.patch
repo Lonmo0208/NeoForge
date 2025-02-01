@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/item/context/BlockPlaceContext.java
++++ b/net/minecraft/world/item/context/BlockPlaceContext.java
+@@ -76,8 +_,8 @@
+             Direction direction = this.getClickedFace();
+             int i = 0;
+ 
+-            while(i < adirection.length && adirection[i] != direction.getOpposite()) {
+-                ++i;
++            while (i < adirection.length && adirection[i] != direction.getOpposite()) {
++                i++;
+             }
+ 
+             if (i > 0) {

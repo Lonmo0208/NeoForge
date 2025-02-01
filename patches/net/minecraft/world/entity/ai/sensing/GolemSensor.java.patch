@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/sensing/GolemSensor.java
++++ b/net/minecraft/world/entity/ai/sensing/GolemSensor.java
+@@ -34,7 +_,7 @@
+     public static void checkForNearbyGolem(LivingEntity p_26648_) {
+         Optional<List<LivingEntity>> optional = p_26648_.getBrain().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES);
+         if (!optional.isEmpty()) {
+-            boolean flag = optional.get().stream().anyMatch(p_340073_ -> p_340073_.getType().equals(EntityType.IRON_GOLEM));
++            boolean flag = optional.get().stream().anyMatch(p_337794_ -> p_337794_.getType().equals(EntityType.IRON_GOLEM));
+             if (flag) {
+                 golemDetected(p_26648_);
+             }

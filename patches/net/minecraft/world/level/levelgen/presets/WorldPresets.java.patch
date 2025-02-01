@@ -1,0 +1,33 @@
+--- a/net/minecraft/world/level/levelgen/presets/WorldPresets.java
++++ b/net/minecraft/world/level/levelgen/presets/WorldPresets.java
+@@ -75,7 +_,6 @@
+         private final Holder<DimensionType> overworldDimensionType;
+         private final LevelStem netherStem;
+         private final LevelStem endStem;
+-        private final LevelStem potatoStem;
+ 
+         Bootstrap(BootstrapContext<WorldPreset> p_321480_) {
+             this.context = p_321480_;
+@@ -94,11 +_,6 @@
+             Holder<DimensionType> holder2 = holdergetter.getOrThrow(BuiltinDimensionTypes.END);
+             Holder<NoiseGeneratorSettings> holder3 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.END);
+             this.endStem = new LevelStem(holder2, new NoiseBasedChunkGenerator(TheEndBiomeSource.create(this.biomes), holder3));
+-            Holder<DimensionType> holder4 = holdergetter.getOrThrow(BuiltinDimensionTypes.POTATO);
+-            Holder<NoiseGeneratorSettings> holder5 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.POTATO);
+-            Holder.Reference<MultiNoiseBiomeSourceParameterList> reference1 = this.multiNoiseBiomeSourceParameterLists
+-                .getOrThrow(MultiNoiseBiomeSourceParameterLists.POTATO);
+-            this.potatoStem = new LevelStem(holder4, new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(reference1), holder5));
+         }
+ 
+         private LevelStem makeOverworld(ChunkGenerator p_226488_) {
+@@ -110,9 +_,7 @@
+         }
+ 
+         private WorldPreset createPresetWithCustomOverworld(LevelStem p_226490_) {
+-            return new WorldPreset(
+-                Map.of(LevelStem.OVERWORLD, p_226490_, LevelStem.NETHER, this.netherStem, LevelStem.END, this.endStem, LevelStem.POTATO, this.potatoStem)
+-            );
++            return new WorldPreset(Map.of(LevelStem.OVERWORLD, p_226490_, LevelStem.NETHER, this.netherStem, LevelStem.END, this.endStem));
+         }
+ 
+         private void registerCustomOverworldPreset(ResourceKey<WorldPreset> p_256570_, LevelStem p_256269_) {

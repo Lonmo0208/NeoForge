@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/BonemealableBlock.java
++++ b/net/minecraft/world/level/block/BonemealableBlock.java
+@@ -15,7 +_,7 @@
+     void performBonemeal(ServerLevel p_220874_, RandomSource p_220875_, BlockPos p_220876_, BlockState p_220877_);
+ 
+     default BlockPos getParticlePos(BlockPos p_316301_) {
+-        return switch(this.getType()) {
++        return switch (this.getType()) {
+             case NEIGHBOR_SPREADER -> p_316301_.above();
+             case GROWER -> p_316301_;
+         };

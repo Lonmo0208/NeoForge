@@ -1,0 +1,60 @@
+--- a/net/minecraft/world/level/levelgen/feature/TreeFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/TreeFeature.java
+@@ -93,11 +_,11 @@
+     private int getMaxFreeTreeHeight(LevelSimulatedReader p_67216_, int p_67217_, BlockPos p_67218_, TreeConfiguration p_67219_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(int i = 0; i <= p_67217_ + 1; ++i) {
++        for (int i = 0; i <= p_67217_ + 1; i++) {
+             int j = p_67219_.minimumSize.getSizeAtHeight(p_67217_, i);
+ 
+-            for(int k = -j; k <= j; ++k) {
+-                for(int l = -j; l <= j; ++l) {
++            for (int k = -j; k <= j; k++) {
++                for (int l = -j; l <= j; l++) {
+                     blockpos$mutableblockpos.setWithOffset(p_67218_, k, i, l);
+                     if (!p_67219_.trunkPlacer.isFree(p_67216_, blockpos$mutableblockpos) || !p_67219_.ignoreVines && isVine(p_67216_, blockpos$mutableblockpos)
+                         )
+@@ -174,11 +_,11 @@
+         int i = 7;
+         List<Set<BlockPos>> list = Lists.newArrayList();
+ 
+-        for(int j = 0; j < 7; ++j) {
++        for (int j = 0; j < 7; j++) {
+             list.add(Sets.newHashSet());
+         }
+ 
+-        for(BlockPos blockpos : Lists.newArrayList(Sets.union(p_225255_, p_225256_))) {
++        for (BlockPos blockpos : Lists.newArrayList(Sets.union(p_225255_, p_225256_))) {
+             if (p_225253_.isInside(blockpos)) {
+                 discretevoxelshape.fill(blockpos.getX() - p_225253_.minX(), blockpos.getY() - p_225253_.minY(), blockpos.getZ() - p_225253_.minZ());
+             }
+@@ -188,8 +_,8 @@
+         int k1 = 0;
+         list.get(0).addAll(p_225254_);
+ 
+-        while(true) {
+-            while(k1 >= 7 || !list.get(k1).isEmpty()) {
++        while (true) {
++            while (k1 >= 7 || !list.get(k1).isEmpty()) {
+                 if (k1 >= 7) {
+                     return discretevoxelshape;
+                 }
+@@ -205,7 +_,7 @@
+ 
+                     discretevoxelshape.fill(blockpos1.getX() - p_225253_.minX(), blockpos1.getY() - p_225253_.minY(), blockpos1.getZ() - p_225253_.minZ());
+ 
+-                    for(Direction direction : Direction.values()) {
++                    for (Direction direction : Direction.values()) {
+                         blockpos$mutableblockpos.setWithOffset(blockpos1, direction);
+                         if (p_225253_.isInside(blockpos$mutableblockpos)) {
+                             int k = blockpos$mutableblockpos.getX() - p_225253_.minX();
+@@ -227,7 +_,7 @@
+                 }
+             }
+ 
+-            ++k1;
++            k1++;
+         }
+     }
+ }

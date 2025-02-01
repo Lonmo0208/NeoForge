@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/CreateBuffetWorldScreen.java
++++ b/net/minecraft/client/gui/screens/CreateBuffetWorldScreen.java
+@@ -87,7 +_,7 @@
+             Collator collator = Collator.getInstance(Locale.getDefault());
+             CreateBuffetWorldScreen.this.biomes
+                 .holders()
+-                .map(p_205389_ -> new CreateBuffetWorldScreen.BiomeList.Entry(p_205389_))
++                .map(p_205389_ -> new CreateBuffetWorldScreen.BiomeList.Entry((Holder.Reference<Biome>)p_205389_))
+                 .sorted(Comparator.comparing(p_203142_ -> p_203142_.name.getString(), collator))
+                 .forEach(p_203138_ -> this.addEntry(p_203138_));
+         }

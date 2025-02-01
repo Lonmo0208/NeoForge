@@ -1,0 +1,86 @@
+--- a/net/minecraft/data/advancements/packs/VanillaAdventureAdvancements.java
++++ b/net/minecraft/data/advancements/packs/VanillaAdventureAdvancements.java
+@@ -103,7 +_,6 @@
+         EntityType.PIGLIN,
+         EntityType.PIGLIN_BRUTE,
+         EntityType.PILLAGER,
+-        EntityType.PLAGUEWHALE,
+         EntityType.RAVAGER,
+         EntityType.SHULKER,
+         EntityType.SILVERFISH,
+@@ -111,7 +_,6 @@
+         EntityType.SLIME,
+         EntityType.SPIDER,
+         EntityType.STRAY,
+-        EntityType.TOXIFIN,
+         EntityType.VEX,
+         EntityType.VINDICATOR,
+         EntityType.WITCH,
+@@ -120,8 +_,7 @@
+         EntityType.ZOGLIN,
+         EntityType.ZOMBIE_VILLAGER,
+         EntityType.ZOMBIE,
+-        EntityType.ZOMBIFIED_PIGLIN,
+-        EntityType.POISONOUS_POTATO_ZOMBIE
++        EntityType.ZOMBIFIED_PIGLIN
+     );
+ 
+     private static Criterion<LightningStrikeTrigger.TriggerInstance> fireCountAndBystander(MinMaxBounds.Ints p_252298_, Optional<EntityPredicate> p_299106_) {
+@@ -739,7 +_,7 @@
+                     );
+                 }
+             )
+-            .toArray(p_286188_ -> new LootItemCondition.Builder[p_286188_]);
++            .toArray(LootItemCondition.Builder[]::new);
+         return ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(
+             LootItemBlockStatePropertyCondition.hasBlockStateProperties(p_286401_), AnyOfCondition.anyOf(alootitemcondition$builder)
+         );
+@@ -763,7 +_,7 @@
+                     return AllOfCondition.allOf(lootitemblockstatepropertycondition$builder, lootitemcondition$builder);
+                 }
+             )
+-            .toArray(p_286191_ -> new LootItemCondition.Builder[p_286191_]);
++            .toArray(LootItemCondition.Builder[]::new);
+         return ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(AnyOfCondition.anyOf(alootitemcondition$builder));
+     }
+ 
+@@ -781,7 +_,7 @@
+         );
+         VanillaRecipeProvider.smithingTrims()
+             .filter(p_307140_ -> set.contains(p_307140_.template()))
+-            .forEach(p_307144_ -> p_285368_.addCriterion("armor_trimmed_" + p_307144_.id(), RecipeCraftedTrigger.TriggerInstance.craftedItem(p_307144_.id())));
++            .forEach(p_339360_ -> p_285368_.addCriterion("armor_trimmed_" + p_339360_.id(), RecipeCraftedTrigger.TriggerInstance.craftedItem(p_339360_.id())));
+         return p_285368_;
+     }
+ 
+@@ -789,7 +_,7 @@
+         p_285062_.requirements(AdvancementRequirements.Strategy.OR);
+         VanillaRecipeProvider.smithingTrims()
+             .map(VanillaRecipeProvider.TrimTemplate::id)
+-            .forEach(p_307146_ -> p_285062_.addCriterion("armor_trimmed_" + p_307146_, RecipeCraftedTrigger.TriggerInstance.craftedItem(p_307146_)));
++            .forEach(p_339358_ -> p_285062_.addCriterion("armor_trimmed_" + p_339358_, RecipeCraftedTrigger.TriggerInstance.craftedItem(p_339358_)));
+         return p_285062_;
+     }
+ 
+@@ -834,17 +_,17 @@
+     private static Advancement.Builder addMobsToKill(Advancement.Builder p_248814_, List<EntityType<?>> p_314428_) {
+         p_314428_.forEach(
+             p_314409_ -> p_248814_.addCriterion(
+-                    BuiltInRegistries.ENTITY_TYPE.getKey(p_314409_).toString(),
+-                    KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(p_314409_))
++                    BuiltInRegistries.ENTITY_TYPE.getKey((EntityType<?>)p_314409_).toString(),
++                    KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of((EntityType<?>)p_314409_))
+                 )
+         );
+         return p_248814_;
+     }
+ 
+-    protected static <T extends Advancement.Builder> T addBiomes(T p_249250_, HolderLookup.Provider p_330401_, List<ResourceKey<Biome>> p_251338_) {
++    protected static Advancement.Builder addBiomes(Advancement.Builder p_249250_, HolderLookup.Provider p_330401_, List<ResourceKey<Biome>> p_251338_) {
+         HolderGetter<Biome> holdergetter = p_330401_.lookupOrThrow(Registries.BIOME);
+ 
+-        for(ResourceKey<Biome> resourcekey : p_251338_) {
++        for (ResourceKey<Biome> resourcekey : p_251338_) {
+             p_249250_.addCriterion(
+                 resourcekey.location().toString(),
+                 PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inBiome(holdergetter.getOrThrow(resourcekey)))

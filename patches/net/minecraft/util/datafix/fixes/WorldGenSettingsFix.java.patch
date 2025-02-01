@@ -1,0 +1,107 @@
+--- a/net/minecraft/util/datafix/fixes/WorldGenSettingsFix.java
++++ b/net/minecraft/util/datafix/fixes/WorldGenSettingsFix.java
+@@ -107,7 +_,7 @@
+             dynamic = defaultOverworld(p_17186_, i);
+         } else {
+             String $$28 = optional.get();
+-            switch($$28) {
++            switch ($$28) {
+                 case "flat":
+                     OptionalDynamic<T> optionaldynamic = p_17186_.get("generatorOptions");
+                     Map<Dynamic<T>, Dynamic<T>> map = fixFlatStructures(dynamicops, optionaldynamic);
+@@ -186,7 +_,7 @@
+                             .get("biomes")
+                             .asStream()
+                             .findFirst()
+-                            .flatMap(p_17259_ -> p_17259_.asString().result())
++                            .flatMap(p_337681_ -> p_337681_.asString().result())
+                             .orElse("minecraft:ocean");
+                         dynamic3 = dynamic2.remove("options").set("biome", p_17186_.createString(s1));
+                     } else {
+@@ -196,25 +_,25 @@
+                     dynamic = noise(i, p_17186_, dynamic1, dynamic3);
+                     break;
+                 default:
+-                    boolean flag6 = optional.get().equals("default");
+-                    boolean flag1 = optional.get().equals("default_1_1") || flag6 && p_17186_.get("generatorVersion").asInt(0) == 0;
+-                    boolean flag2 = optional.get().equals("amplified");
+-                    boolean flag3 = optional.get().equals("largebiomes");
++                    boolean flag1 = optional.get().equals("default");
++                    boolean flag2 = optional.get().equals("default_1_1") || flag1 && p_17186_.get("generatorVersion").asInt(0) == 0;
++                    boolean flag3 = optional.get().equals("amplified");
++                    boolean flag4 = optional.get().equals("largebiomes");
+                     dynamic = noise(
+                         i,
+                         p_17186_,
+-                        p_17186_.createString(flag2 ? "minecraft:amplified" : "minecraft:overworld"),
+-                        vanillaBiomeSource(p_17186_, i, flag1, flag3)
++                        p_17186_.createString(flag3 ? "minecraft:amplified" : "minecraft:overworld"),
++                        vanillaBiomeSource(p_17186_, i, flag2, flag4)
+                     );
+             }
+         }
+ 
+-        boolean flag4 = p_17186_.get("MapFeatures").asBoolean(true);
+-        boolean flag5 = p_17186_.get("BonusChest").asBoolean(false);
++        boolean flag5 = p_17186_.get("MapFeatures").asBoolean(true);
++        boolean flag6 = p_17186_.get("BonusChest").asBoolean(false);
+         Builder<T, T> builder = ImmutableMap.builder();
+         builder.put(dynamicops.createString("seed"), dynamicops.createLong(i));
+-        builder.put(dynamicops.createString("generate_features"), dynamicops.createBoolean(flag4));
+-        builder.put(dynamicops.createString("bonus_chest"), dynamicops.createBoolean(flag5));
++        builder.put(dynamicops.createString("generate_features"), dynamicops.createBoolean(flag5));
++        builder.put(dynamicops.createString("bonus_chest"), dynamicops.createBoolean(flag6));
+         builder.put(dynamicops.createString("dimensions"), vanillaLevels(p_17186_, i, dynamic, flag));
+         optional1.ifPresent(p_17182_ -> builder.put(dynamicops.createString("legacy_custom_options"), dynamicops.createString(p_17182_)));
+         return new Dynamic<>(dynamicops, dynamicops.createMap(builder.build()));
+@@ -300,20 +_,19 @@
+ 
+         p_17219_.get("structures")
+             .flatMap(Dynamic::getMapValues)
+-            .result()
+-            .ifPresent(
++            .ifSuccess(
+                 p_17257_ -> p_17257_.forEach(
+-                        (p_145823_, p_145824_) -> p_145824_.getMapValues()
++                        (p_337679_, p_337680_) -> p_337680_.getMapValues()
+                                 .result()
+                                 .ifPresent(
+                                     p_145816_ -> p_145816_.forEach(
+                                             (p_145807_, p_145808_) -> {
+-                                                String s = p_145823_.asString("");
++                                                String s = p_337679_.asString("");
+                                                 String s1 = p_145807_.asString("");
+                                                 String s2 = p_145808_.asString("");
+                                                 if ("stronghold".equals(s)) {
+                                                     mutableboolean.setTrue();
+-                                                    switch(s1) {
++                                                    switch (s1) {
+                                                         case "distance":
+                                                             mutableint.setValue(getInt(s2, mutableint.getValue(), 1));
+                                                             return;
+@@ -325,9 +_,9 @@
+                                                             return;
+                                                     }
+                                                 } else {
+-                                                    switch(s1) {
++                                                    switch (s1) {
+                                                         case "distance":
+-                                                            switch(s) {
++                                                            switch (s) {
+                                                                 case "village":
+                                                                     setSpacing(map, "minecraft:village", s2, 9);
+                                                                     return;
+@@ -383,12 +_,7 @@
+             p_17219_.createMap(
+                 map.entrySet()
+                     .stream()
+-                    .collect(
+-                        Collectors.toMap(
+-                            p_17225_ -> p_17219_.createString((String)p_17225_.getKey()),
+-                            p_17222_ -> ((WorldGenSettingsFix.StructureFeatureConfiguration)p_17222_.getValue()).serialize(p_17218_)
+-                        )
+-                    )
++                    .collect(Collectors.toMap(p_17225_ -> p_17219_.createString(p_17225_.getKey()), p_17222_ -> p_17222_.getValue().serialize(p_17218_)))
+             )
+         );
+         if (mutableboolean.isTrue()) {

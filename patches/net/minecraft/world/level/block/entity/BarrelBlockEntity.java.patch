@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/level/block/entity/BarrelBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/BarrelBlockEntity.java
+@@ -63,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155055_, HolderLookup.Provider p_324230_) {
+-        super.load(p_155055_, p_324230_);
++    protected void loadAdditional(CompoundTag p_155055_, HolderLookup.Provider p_324230_) {
++        super.loadAdditional(p_155055_, p_324230_);
+         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+         if (!this.tryLoadLootTable(p_155055_)) {
+             ContainerHelper.loadAllItems(p_155055_, this.items, p_324230_);

@@ -1,0 +1,59 @@
+--- a/net/minecraft/util/parsing/packrat/commands/Grammar.java
++++ b/net/minecraft/util/parsing/packrat/commands/Grammar.java
+@@ -15,7 +_,6 @@
+ import net.minecraft.util.parsing.packrat.ErrorCollector;
+ import net.minecraft.util.parsing.packrat.ErrorEntry;
+ import net.minecraft.util.parsing.packrat.ParseState;
+-import net.minecraft.util.parsing.packrat.SuggestionSupplier;
+ 
+ public record Grammar<T>(Dictionary<StringReader> rules, Atom<T> top) {
+     public Optional<T> parse(ParseState<StringReader> p_335989_) {
+@@ -30,28 +_,24 @@
+             return optional.get();
+         } else {
+             List<Exception> list = longestonly.entries().stream().<Exception>mapMulti((p_335740_, p_335854_) -> {
+-                Object object1 = p_335740_.reason();
+-                if (object1 instanceof Exception exception1) {
++                if (p_335740_.reason() instanceof Exception exception1) {
+                     p_335854_.accept(exception1);
+                 }
+             }).toList();
+ 
+-            for(Exception exception : list) {
++            for (Exception exception : list) {
+                 if (exception instanceof CommandSyntaxException commandsyntaxexception) {
+                     throw commandsyntaxexception;
+                 }
+             }
+ 
+-            if (list.size() == 1) {
+-                Object object = list.get(0);
+-                if (object instanceof RuntimeException runtimeexception) {
+-                    throw runtimeexception;
+-                }
++            if (list.size() == 1 && list.get(0) instanceof RuntimeException runtimeexception) {
++                throw runtimeexception;
++            } else {
++                throw new IllegalStateException(
++                    "Failed to parse: " + longestonly.entries().stream().map(ErrorEntry::toString).collect(Collectors.joining(", "))
++                );
+             }
+-
+-            throw new IllegalStateException(
+-                "Failed to parse: " + (String)longestonly.entries().stream().map(ErrorEntry::toString).collect(Collectors.joining(", "))
+-            );
+         }
+     }
+ 
+@@ -67,9 +_,8 @@
+         } else {
+             SuggestionsBuilder suggestionsbuilder = p_335783_.createOffset(longestonly.cursor());
+ 
+-            for(ErrorEntry<StringReader> errorentry : list) {
+-                SuggestionSupplier suggestionsupplier = errorentry.suggestions();
+-                if (suggestionsupplier instanceof ResourceSuggestion resourcesuggestion) {
++            for (ErrorEntry<StringReader> errorentry : list) {
++                if (errorentry.suggestions() instanceof ResourceSuggestion resourcesuggestion) {
+                     SharedSuggestionProvider.suggestResource(resourcesuggestion.possibleResources(), suggestionsbuilder);
+                 } else {
+                     SharedSuggestionProvider.suggest(errorentry.suggestions().possibleValues(stringreaderparserstate), suggestionsbuilder);

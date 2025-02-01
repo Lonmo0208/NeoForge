@@ -1,0 +1,65 @@
+--- a/net/minecraft/client/gui/screens/recipebook/OverlayRecipeComponent.java
++++ b/net/minecraft/client/gui/screens/recipebook/OverlayRecipeComponent.java
+@@ -87,7 +_,7 @@
+         this.isVisible = true;
+         this.recipeButtons.clear();
+ 
+-        for(int i1 = 0; i1 < j; ++i1) {
++        for (int i1 = 0; i1 < j; i1++) {
+             boolean flag1 = i1 < i;
+             RecipeHolder<?> recipeholder = flag1 ? list.get(i1) : list1.get(i1 - i);
+             int j1 = this.x + 4 + 25 * (i1 % k);
+@@ -116,7 +_,7 @@
+         if (p_100188_ != 0) {
+             return false;
+         } else {
+-            for(OverlayRecipeComponent.OverlayRecipeButton overlayrecipecomponent$overlayrecipebutton : this.recipeButtons) {
++            for (OverlayRecipeComponent.OverlayRecipeButton overlayrecipecomponent$overlayrecipebutton : this.recipeButtons) {
+                 if (overlayrecipecomponent$overlayrecipebutton.mouseClicked(p_100186_, p_100187_, p_100188_)) {
+                     this.lastRecipeClicked = overlayrecipecomponent$overlayrecipebutton.recipe;
+                     return true;
+@@ -146,7 +_,7 @@
+             p_281618_.blitSprite(OVERLAY_RECIPE_SPRITE, this.x, this.y, j * 25 + 8, k * 25 + 8);
+             RenderSystem.disableBlend();
+ 
+-            for(OverlayRecipeComponent.OverlayRecipeButton overlayrecipecomponent$overlayrecipebutton : this.recipeButtons) {
++            for (OverlayRecipeComponent.OverlayRecipeButton overlayrecipecomponent$overlayrecipebutton : this.recipeButtons) {
+                 overlayrecipecomponent$overlayrecipebutton.render(p_281618_, p_282646_, p_283687_, p_283147_);
+             }
+ 
+@@ -199,7 +_,7 @@
+         public void addItemToSlot(Iterator<Ingredient> p_100240_, int p_100241_, int p_100242_, int p_100243_, int p_100244_) {
+             ItemStack[] aitemstack = p_100240_.next().getItems();
+             if (aitemstack.length != 0) {
+-                this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(3 + p_100244_ * 7, 3 + p_100243_ * 7, aitemstack));
++                this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(this, 3 + p_100244_ * 7, 3 + p_100243_ * 7, aitemstack));
+             }
+         }
+ 
+@@ -230,7 +_,7 @@
+             p_283557_.pose().pushPose();
+             p_283557_.pose().translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
+ 
+-            for(OverlayRecipeComponent.OverlayRecipeButton.Pos overlayrecipecomponent$overlayrecipebutton$pos : this.ingredientPos) {
++            for (OverlayRecipeComponent.OverlayRecipeButton.Pos overlayrecipecomponent$overlayrecipebutton$pos : this.ingredientPos) {
+                 p_283557_.pose().pushPose();
+                 p_283557_.pose()
+                     .translate((double)overlayrecipecomponent$overlayrecipebutton$pos.x, (double)overlayrecipecomponent$overlayrecipebutton$pos.y, 0.0);
+@@ -257,7 +_,7 @@
+             public final int x;
+             public final int y;
+ 
+-            public Pos(int p_100256_, int p_100257_, ItemStack[] p_100258_) {
++            public Pos(OverlayRecipeComponent.OverlayRecipeButton p_100255_, int p_100256_, int p_100257_, ItemStack[] p_100258_) {
+                 this.x = p_100256_;
+                 this.y = p_100257_;
+                 this.ingredients = p_100258_;
+@@ -275,7 +_,7 @@
+         protected void calculateIngredientsPositions(RecipeHolder<?> p_301196_) {
+             Ingredient ingredient = p_301196_.value().getIngredients().get(0);
+             ItemStack[] aitemstack = ingredient.getItems();
+-            this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(10, 10, aitemstack));
++            this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(this, 10, 10, aitemstack));
+         }
+     }
+ }

@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/SequencedPriorityIterator.java
++++ b/net/minecraft/util/SequencedPriorityIterator.java
+@@ -52,7 +_,7 @@
+         int i = Integer.MIN_VALUE;
+         Deque<T> deque = null;
+ 
+-        for(Entry<Deque<T>> entry : Int2ObjectMaps.fastIterable(this.queuesByPriority)) {
++        for (Entry<Deque<T>> entry : Int2ObjectMaps.fastIterable(this.queuesByPriority)) {
+             Deque<T> deque1 = entry.getValue();
+             int j = entry.getIntKey();
+             if (j > i && !deque1.isEmpty()) {

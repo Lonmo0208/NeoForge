@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/block/RespawnAnchorBlock.java
++++ b/net/minecraft/world/level/block/RespawnAnchorBlock.java
+@@ -227,7 +_,7 @@
+     private static Optional<Vec3> findStandUpPosition(EntityType<?> p_55844_, CollisionGetter p_55845_, BlockPos p_55846_, boolean p_55847_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(Vec3i vec3i : RESPAWN_OFFSETS) {
++        for (Vec3i vec3i : RESPAWN_OFFSETS) {
+             blockpos$mutableblockpos.set(p_55846_).move(vec3i);
+             Vec3 vec3 = DismountHelper.findSafeDismountLocation(p_55844_, p_55845_, blockpos$mutableblockpos, p_55847_);
+             if (vec3 != null) {

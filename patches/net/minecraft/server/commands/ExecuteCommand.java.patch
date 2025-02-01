@@ -1,0 +1,196 @@
+--- a/net/minecraft/server/commands/ExecuteCommand.java
++++ b/net/minecraft/server/commands/ExecuteCommand.java
+@@ -153,7 +_,7 @@
+                 .then(Commands.literal("as").then(Commands.argument("targets", EntityArgument.entities()).fork(literalcommandnode, p_137299_ -> {
+                     List<CommandSourceStack> list = Lists.newArrayList();
+         
+-                    for(Entity entity : EntityArgument.getOptionalEntities(p_137299_, "targets")) {
++                    for (Entity entity : EntityArgument.getOptionalEntities(p_137299_, "targets")) {
+                         list.add(p_137299_.getSource().withEntity(entity));
+                     }
+         
+@@ -168,7 +_,7 @@
+                                     p_284653_ -> {
+                                         List<CommandSourceStack> list = Lists.newArrayList();
+                             
+-                                        for(Entity entity : EntityArgument.getOptionalEntities(p_284653_, "targets")) {
++                                        for (Entity entity : EntityArgument.getOptionalEntities(p_284653_, "targets")) {
+                                             list.add(
+                                                 p_284653_.getSource()
+                                                     .withLevel((ServerLevel)entity.level())
+@@ -201,7 +_,7 @@
+                         .then(Commands.literal("as").then(Commands.argument("targets", EntityArgument.entities()).fork(literalcommandnode, p_137293_ -> {
+                             List<CommandSourceStack> list = Lists.newArrayList();
+                 
+-                            for(Entity entity : EntityArgument.getOptionalEntities(p_137293_, "targets")) {
++                            for (Entity entity : EntityArgument.getOptionalEntities(p_137293_, "targets")) {
+                                 list.add(p_137293_.getSource().withPosition(entity.position()));
+                             }
+                 
+@@ -236,7 +_,7 @@
+                         .then(Commands.literal("as").then(Commands.argument("targets", EntityArgument.entities()).fork(literalcommandnode, p_137289_ -> {
+                             List<CommandSourceStack> list = Lists.newArrayList();
+                 
+-                            for(Entity entity : EntityArgument.getOptionalEntities(p_137289_, "targets")) {
++                            for (Entity entity : EntityArgument.getOptionalEntities(p_137289_, "targets")) {
+                                 list.add(p_137289_.getSource().withRotation(entity.getRotationVector()));
+                             }
+                 
+@@ -253,7 +_,7 @@
+                                             List<CommandSourceStack> list = Lists.newArrayList();
+                                             EntityAnchorArgument.Anchor entityanchorargument$anchor = EntityAnchorArgument.getAnchor(p_137287_, "anchor");
+                                 
+-                                            for(Entity entity : EntityArgument.getOptionalEntities(p_137287_, "targets")) {
++                                            for (Entity entity : EntityArgument.getOptionalEntities(p_137287_, "targets")) {
+                                                 list.add(p_137287_.getSource().facing(entity, entityanchorargument$anchor));
+                                             }
+                                 
+@@ -348,7 +_,7 @@
+                 )
+         );
+ 
+-        for(DataCommands.DataProvider datacommands$dataprovider : DataCommands.TARGET_PROVIDERS) {
++        for (DataCommands.DataProvider datacommands$dataprovider : DataCommands.TARGET_PROVIDERS) {
+             datacommands$dataprovider.wrap(
+                 p_137095_,
+                 p_137101_ -> p_137101_.then(
+@@ -467,7 +_,7 @@
+     private static CommandSourceStack storeValue(CommandSourceStack p_137108_, Collection<ScoreHolder> p_137109_, Objective p_137110_, boolean p_137111_) {
+         Scoreboard scoreboard = p_137108_.getServer().getScoreboard();
+         return p_137108_.withCallback((p_137137_, p_137138_) -> {
+-            for(ScoreHolder scoreholder : p_137109_) {
++            for (ScoreHolder scoreholder : p_137109_) {
+                 ScoreAccess scoreaccess = scoreboard.getOrCreatePlayerScore(scoreholder, p_137110_);
+                 int i = p_137111_ ? p_137138_ : (p_137137_ ? 1 : 0);
+                 scoreaccess.set(i);
+@@ -503,11 +_,7 @@
+     private static boolean isChunkLoaded(ServerLevel p_265261_, BlockPos p_265260_) {
+         ChunkPos chunkpos = new ChunkPos(p_265260_);
+         LevelChunk levelchunk = p_265261_.getChunkSource().getChunkNow(chunkpos.x, chunkpos.z);
+-        if (levelchunk == null) {
+-            return false;
+-        } else {
+-            return levelchunk.getFullStatus() == FullChunkStatus.ENTITY_TICKING && p_265261_.areEntitiesLoaded(chunkpos.toLong());
+-        }
++        return levelchunk == null ? false : levelchunk.getFullStatus() == FullChunkStatus.ENTITY_TICKING && p_265261_.areEntitiesLoaded(chunkpos.toLong());
+     }
+ 
+     private static ArgumentBuilder<CommandSourceStack, ?> addConditionals(
+@@ -780,7 +_,7 @@
+                     )
+             );
+ 
+-        for(DataCommands.DataProvider datacommands$dataprovider : DataCommands.SOURCE_PROVIDERS) {
++        for (DataCommands.DataProvider datacommands$dataprovider : DataCommands.SOURCE_PROVIDERS) {
+             p_214439_.then(
+                 datacommands$dataprovider.wrap(
+                     Commands.literal("data"),
+@@ -811,10 +_,10 @@
+     private static int countItems(Iterable<? extends Entity> p_332642_, SlotRange p_332729_, Predicate<ItemStack> p_332803_) {
+         int i = 0;
+ 
+-        for(Entity entity : p_332642_) {
++        for (Entity entity : p_332642_) {
+             IntList intlist = p_332729_.slots();
+ 
+-            for(int j = 0; j < intlist.size(); ++j) {
++            for (int j = 0; j < intlist.size(); j++) {
+                 int k = intlist.getInt(j);
+                 SlotAccess slotaccess = entity.getSlot(k);
+                 ItemStack itemstack = slotaccess.get();
+@@ -833,7 +_,7 @@
+         int j = container.getContainerSize();
+         IntList intlist = p_332656_.slots();
+ 
+-        for(int k = 0; k < intlist.size(); ++k) {
++        for (int k = 0; k < intlist.size(); k++) {
+             int l = intlist.getInt(k);
+             if (l >= 0 && l < j) {
+                 ItemStack itemstack = container.getItem(l);
+@@ -912,7 +_,7 @@
+     ) {
+         return p_137076_.fork(p_137075_, p_137214_ -> expect(p_137214_, p_137077_, p_137078_.test(p_137214_))).executes(p_288396_ -> {
+             if (p_137077_ == p_137078_.test(p_288396_)) {
+-                ((CommandSourceStack)p_288396_.getSource()).sendSuccess(() -> Component.translatable("commands.execute.conditional.pass"), false);
++                p_288396_.getSource().sendSuccess(() -> Component.translatable("commands.execute.conditional.pass"), false);
+                 return 1;
+             } else {
+                 throw ERROR_CONDITIONAL_FAILED.create();
+@@ -970,9 +_,9 @@
+             RegistryAccess registryaccess = p_137037_.registryAccess();
+             int j = 0;
+ 
+-            for(int k = boundingbox.minZ(); k <= boundingbox.maxZ(); ++k) {
+-                for(int l = boundingbox.minY(); l <= boundingbox.maxY(); ++l) {
+-                    for(int i1 = boundingbox.minX(); i1 <= boundingbox.maxX(); ++i1) {
++            for (int k = boundingbox.minZ(); k <= boundingbox.maxZ(); k++) {
++                for (int l = boundingbox.minY(); l <= boundingbox.maxY(); l++) {
++                    for (int i1 = boundingbox.minX(); i1 <= boundingbox.maxX(); i1++) {
+                         BlockPos blockpos1 = new BlockPos(i1, l, k);
+                         BlockPos blockpos2 = blockpos1.offset(blockpos);
+                         BlockState blockstate = p_137037_.getBlockState(blockpos1);
+@@ -992,14 +_,18 @@
+                                     return OptionalInt.empty();
+                                 }
+ 
+-                                CompoundTag compoundtag = blockentity.saveWithoutMetadata(registryaccess);
+-                                CompoundTag compoundtag1 = blockentity1.saveWithoutMetadata(registryaccess);
++                                if (!blockentity.components().equals(blockentity1.components())) {
++                                    return OptionalInt.empty();
++                                }
++
++                                CompoundTag compoundtag = blockentity.saveCustomOnly(registryaccess);
++                                CompoundTag compoundtag1 = blockentity1.saveCustomOnly(registryaccess);
+                                 if (!compoundtag.equals(compoundtag1)) {
+                                     return OptionalInt.empty();
+                                 }
+                             }
+ 
+-                            ++j;
++                            j++;
+                         }
+                     }
+                 }
+@@ -1013,12 +_,12 @@
+         return p_264786_ -> {
+             CommandSourceStack commandsourcestack = p_264786_.getSource();
+             Entity entity = commandsourcestack.getEntity();
+-            return (Collection<CommandSourceStack>)(entity == null
++            return entity == null
+                 ? List.of()
+                 : p_265114_.apply(entity)
+                     .filter(p_264783_ -> !p_264783_.isRemoved())
+                     .map(p_264775_ -> List.of(commandsourcestack.withEntity(p_264775_)))
+-                    .orElse(List.of()));
++                    .orElse(List.of());
+         };
+     }
+ 
+@@ -1119,7 +_,7 @@
+             List<InstantiatedFunction<T>> list1 = new ArrayList<>(i);
+ 
+             try {
+-                for(CommandFunction<T> commandfunction : collection) {
++                for (CommandFunction<T> commandfunction : collection) {
+                     try {
+                         list1.add(commandfunction.instantiate(p_306076_, p_309624_.dispatcher()));
+                     } catch (FunctionInstantiationException functioninstantiationexception) {
+@@ -1130,15 +_,15 @@
+                 p_309624_.handleError(commandsyntaxexception1, p_309703_.isForked(), p_306202_.tracer());
+             }
+ 
+-            for(T t1 : p_306057_) {
+-                T t = p_306045_.apply(t1.clearCallbacks());
++            for (T t1 : p_306057_) {
++                T t = (T)p_306045_.apply(t1.clearCallbacks());
+                 CommandResultCallback commandresultcallback = (p_309685_, p_305691_) -> {
+                     if (p_306343_.test(p_305691_)) {
+                         list.add(t1);
+                     }
+                 };
+                 p_306202_.queueNext(new IsolatedCall<>(p_309456_ -> {
+-                    for(InstantiatedFunction<T> instantiatedfunction : list1) {
++                    for (InstantiatedFunction<T> instantiatedfunction : list1) {
+                         p_309456_.queueNext(new CallFunction<>(instantiatedfunction, p_309456_.currentFrame().returnValueConsumer(), true).bind(t));
+                     }
+ 

@@ -1,0 +1,288 @@
+--- a/net/minecraft/data/worldgen/biome/PotatoBiomes.java
++++ /dev/null
+@@ -1,285 +_,0 @@
+-package net.minecraft.data.worldgen.biome;
+-
+-import javax.annotation.Nullable;
+-import net.minecraft.core.HolderGetter;
+-import net.minecraft.core.particles.ParticleTypes;
+-import net.minecraft.data.worldgen.BiomeDefaultFeatures;
+-import net.minecraft.data.worldgen.placement.CavePlacements;
+-import net.minecraft.data.worldgen.placement.MiscOverworldPlacements;
+-import net.minecraft.data.worldgen.placement.NetherPlacements;
+-import net.minecraft.data.worldgen.placement.OrePlacements;
+-import net.minecraft.data.worldgen.placement.TreePlacements;
+-import net.minecraft.data.worldgen.placement.VegetationPlacements;
+-import net.minecraft.sounds.Music;
+-import net.minecraft.sounds.Musics;
+-import net.minecraft.sounds.SoundEvents;
+-import net.minecraft.util.Mth;
+-import net.minecraft.world.entity.EntityType;
+-import net.minecraft.world.entity.MobCategory;
+-import net.minecraft.world.level.biome.AmbientParticleSettings;
+-import net.minecraft.world.level.biome.Biome;
+-import net.minecraft.world.level.biome.BiomeGenerationSettings;
+-import net.minecraft.world.level.biome.BiomeSpecialEffects;
+-import net.minecraft.world.level.biome.MobSpawnSettings;
+-import net.minecraft.world.level.levelgen.GenerationStep;
+-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+-
+-public class PotatoBiomes {
+-    protected static final int NORMAL_WATER_COLOR = 4187298;
+-    protected static final int NORMAL_WATER_FOG_COLOR = 740644;
+-    private static final int OVERWORLD_FOG_COLOR = 9821879;
+-    private static final int NORMAL_GRASS_COLOR = 6017107;
+-    private static final int NORMAL_FOLIAGE_COLOR = 2199366;
+-    private static final int CORRUPTED_COLOR = 1153876;
+-    private static final int CORRUPTED_COLOR_LIGHT = 1356889;
+-    private static final int CORRUPTED_COLOR_DARK = 1466676;
+-    private static final int POISON_COLOR = 5105159;
+-    private static final int POISON_COLOR_LIGHT = 8157780;
+-    private static final int POISON_COLOR_DARK = 4056583;
+-    @Nullable
+-    private static final Music NORMAL_MUSIC = null;
+-
+-    protected static int calculateSkyColor(float p_341884_) {
+-        float $$1 = p_341884_ / 3.0F;
+-        $$1 = Mth.clamp($$1, -1.0F, 1.0F);
+-        return Mth.hsvToRgb(0.4722222F - $$1 * 0.1F, 0.7F + $$1 * 0.1F, 1.0F);
+-    }
+-
+-    private static void globalPotatoGeneration(BiomeGenerationSettings.Builder p_342268_, boolean p_341910_) {
+-        BiomeDefaultFeatures.addDefaultCarversAndLakes(p_342268_);
+-        BiomeDefaultFeatures.addDefaultCrystalFormations(p_342268_);
+-        BiomeDefaultFeatures.addDefaultMonsterRoom(p_342268_);
+-        p_342268_.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_TATERSTONE);
+-        p_342268_.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_AMBER);
+-        p_342268_.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_GRAVTATER);
+-        BiomeDefaultFeatures.addDefaultSprings(p_342268_);
+-        p_342268_.addFeature(
+-            GenerationStep.Decoration.VEGETAL_DECORATION, p_341910_ ? VegetationPlacements.PATCH_POTATO_SPARSE : VegetationPlacements.PATCH_POTATO
+-        );
+-        p_342268_.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, MiscOverworldPlacements.POTATO_CLOUD);
+-        BiomeDefaultFeatures.addDefaultOres(p_342268_, false, true);
+-    }
+-
+-    public static void farmAnimals(MobSpawnSettings.Builder p_342607_) {
+-        p_342607_.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.SHEEP, 12, 4, 4));
+-        p_342607_.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PIG, 10, 4, 4));
+-        p_342607_.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.CHICKEN, 10, 4, 4));
+-        p_342607_.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.COW, 8, 4, 4));
+-    }
+-
+-    public static void desertSpawns(MobSpawnSettings.Builder p_341804_) {
+-        p_341804_.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.ARMADILLO, 4, 1, 2));
+-        caveSpawns(p_341804_);
+-        monsters(p_341804_, 19, 1, 100);
+-        p_341804_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.HUSK, 80, 4, 4));
+-    }
+-
+-    public static void arboretumSpawns(MobSpawnSettings.Builder p_342542_) {
+-        farmAnimals(p_342542_);
+-        p_342542_.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.HORSE, 5, 2, 6));
+-        p_342542_.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DONKEY, 1, 1, 3));
+-        commonSpawns(p_342542_);
+-    }
+-
+-    public static void commonSpawns(MobSpawnSettings.Builder p_340652_) {
+-        caveSpawns(p_340652_);
+-        monsters(p_340652_, 95, 5, 100);
+-    }
+-
+-    public static void caveSpawns(MobSpawnSettings.Builder p_340751_) {
+-        p_340751_.addSpawn(MobCategory.AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.BAT, 10, 8, 8));
+-        p_340751_.addSpawn(MobCategory.AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.BATATO, 13, 8, 16));
+-        p_340751_.addSpawn(MobCategory.UNDERGROUND_WATER_CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GLOW_SQUID, 10, 4, 6));
+-    }
+-
+-    public static void monsters(MobSpawnSettings.Builder p_340488_, int p_341863_, int p_340849_, int p_340517_) {
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE, p_341863_, 4, 4));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.POISONOUS_POTATO_ZOMBIE, 50, 1, 4));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE_VILLAGER, p_340849_, 1, 1));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SKELETON, p_340517_, 4, 4));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SLIME, 10, 4, 4));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.ENDERMAN, 10, 1, 4));
+-        p_340488_.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.WITCH, 5, 1, 1));
+-    }
+-
+-    public static Biome hash(HolderGetter<PlacedFeature> p_340669_, HolderGetter<ConfiguredWorldCarver<?>> p_341095_) {
+-        MobSpawnSettings.Builder mobspawnsettings$builder = new MobSpawnSettings.Builder();
+-        mobspawnsettings$builder.creatureGenerationProbability(0.01F);
+-        desertSpawns(mobspawnsettings$builder);
+-        BiomeGenerationSettings.Builder biomegenerationsettings$builder = new BiomeGenerationSettings.Builder(p_340669_, p_341095_);
+-        BiomeDefaultFeatures.addFossilDecoration(biomegenerationsettings$builder);
+-        globalPotatoGeneration(biomegenerationsettings$builder, true);
+-        BiomeDefaultFeatures.addDefaultFlowers(biomegenerationsettings$builder);
+-        BiomeDefaultFeatures.addDefaultGrass(biomegenerationsettings$builder);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_DEAD_BUSH_2_ALL_LEVELS);
+-        BiomeDefaultFeatures.addDefaultMushrooms(biomegenerationsettings$builder);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.LEAF_PILE_HASH);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.VENOMOUS_COLUMN_HASH);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, MiscOverworldPlacements.HASH_WELL);
+-        return new Biome.BiomeBuilder()
+-            .hasPrecipitation(false)
+-            .temperature(2.0F)
+-            .downfall(0.0F)
+-            .specialEffects(
+-                new BiomeSpecialEffects.Builder()
+-                    .waterColor(4187298)
+-                    .waterFogColor(740644)
+-                    .fogColor(9821879)
+-                    .skyColor(calculateSkyColor(2.0F))
+-                    .ambientLoopSound(SoundEvents.AMBIENT_HASH_LOOP)
+-                    .backgroundMusic(Musics.createGameMusic(SoundEvents.MUSIC_BIOME_DESERT))
+-                    .grassColorOverride(6017107)
+-                    .foliageColorOverride(2199366)
+-                    .build()
+-            )
+-            .mobSpawnSettings(mobspawnsettings$builder.build())
+-            .generationSettings(biomegenerationsettings$builder.build())
+-            .build();
+-    }
+-
+-    public static Biome fields(HolderGetter<PlacedFeature> p_342193_, HolderGetter<ConfiguredWorldCarver<?>> p_341263_) {
+-        MobSpawnSettings.Builder mobspawnsettings$builder = new MobSpawnSettings.Builder();
+-        farmAnimals(mobspawnsettings$builder);
+-        commonSpawns(mobspawnsettings$builder);
+-        BiomeGenerationSettings.Builder biomegenerationsettings$builder = new BiomeGenerationSettings.Builder(p_342193_, p_341263_);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.STRONGHOLDS, VegetationPlacements.POTATO_FIELD);
+-        globalPotatoGeneration(biomegenerationsettings$builder, false);
+-        BiomeDefaultFeatures.addPlainGrass(biomegenerationsettings$builder);
+-        BiomeDefaultFeatures.addPlainVegetation(biomegenerationsettings$builder);
+-        BiomeDefaultFeatures.addDefaultMushrooms(biomegenerationsettings$builder);
+-        BiomeDefaultFeatures.addDefaultExtraVegetation(biomegenerationsettings$builder);
+-        return new Biome.BiomeBuilder()
+-            .hasPrecipitation(true)
+-            .temperature(0.8F)
+-            .downfall(0.4F)
+-            .specialEffects(
+-                new BiomeSpecialEffects.Builder()
+-                    .waterColor(4187298)
+-                    .waterFogColor(740644)
+-                    .fogColor(9821879)
+-                    .skyColor(calculateSkyColor(0.8F))
+-                    .ambientLoopSound(SoundEvents.AMBIENT_FIELDS_LOOP)
+-                    .backgroundMusic(NORMAL_MUSIC)
+-                    .grassColorOverride(6017107)
+-                    .foliageColorOverride(2199366)
+-                    .build()
+-            )
+-            .mobSpawnSettings(mobspawnsettings$builder.build())
+-            .generationSettings(biomegenerationsettings$builder.build())
+-            .build();
+-    }
+-
+-    public static Biome arboretum(HolderGetter<PlacedFeature> p_340909_, HolderGetter<ConfiguredWorldCarver<?>> p_341421_) {
+-        MobSpawnSettings.Builder mobspawnsettings$builder = new MobSpawnSettings.Builder();
+-        arboretumSpawns(mobspawnsettings$builder);
+-        mobspawnsettings$builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3));
+-        mobspawnsettings$builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 2, 4, 4));
+-        BiomeGenerationSettings.Builder biomegenerationsettings$builder = new BiomeGenerationSettings.Builder(p_340909_, p_341421_);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.STRONGHOLDS, VegetationPlacements.PARK_LANE_SURFACE);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.STRONGHOLDS, VegetationPlacements.PARK_LANE);
+-        globalPotatoGeneration(biomegenerationsettings$builder, false);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.FLOWER_FOREST_FLOWERS);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.ARBORETUM_TREES);
+-        BiomeDefaultFeatures.addDefaultFlowers(biomegenerationsettings$builder);
+-        BiomeDefaultFeatures.addForestGrass(biomegenerationsettings$builder);
+-        BiomeDefaultFeatures.addDefaultMushrooms(biomegenerationsettings$builder);
+-        BiomeDefaultFeatures.addDefaultExtraVegetation(biomegenerationsettings$builder);
+-        return new Biome.BiomeBuilder()
+-            .hasPrecipitation(true)
+-            .temperature(0.9F)
+-            .downfall(0.5F)
+-            .specialEffects(
+-                new BiomeSpecialEffects.Builder()
+-                    .waterColor(4187298)
+-                    .waterFogColor(740644)
+-                    .fogColor(9821879)
+-                    .skyColor(calculateSkyColor(0.7F))
+-                    .ambientLoopSound(SoundEvents.AMBIENT_ARBORETUM_LOOP)
+-                    .backgroundMusic(Musics.createGameMusic(SoundEvents.MUSIC_BIOME_FLOWER_FOREST))
+-                    .grassColorOverride(6017107)
+-                    .build()
+-            )
+-            .mobSpawnSettings(mobspawnsettings$builder.build())
+-            .generationSettings(biomegenerationsettings$builder.build())
+-            .build();
+-    }
+-
+-    public static Biome wasteland(HolderGetter<PlacedFeature> p_341542_, HolderGetter<ConfiguredWorldCarver<?>> p_341989_) {
+-        MobSpawnSettings.Builder mobspawnsettings$builder = new MobSpawnSettings.Builder();
+-        mobspawnsettings$builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SLIME, 5, 1, 2));
+-        mobspawnsettings$builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.GIANT, 10, 1, 4));
+-        mobspawnsettings$builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.WITHER_SKELETON, 5, 1, 1));
+-        mobspawnsettings$builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.TOXIFIN, 25, 1, 4));
+-        BiomeGenerationSettings.Builder biomegenerationsettings$builder = new BiomeGenerationSettings.Builder(p_341542_, p_341989_);
+-        globalPotatoGeneration(biomegenerationsettings$builder, true);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VegetationPlacements.BROWN_MUSHROOM_NETHER)
+-            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VegetationPlacements.RED_MUSHROOM_NETHER)
+-            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, CavePlacements.LARGE_POTATOSTONE)
+-            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, NetherPlacements.LARGE_POTATO_COLUMNS)
+-            .addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, NetherPlacements.SMALL_DEBRIS_COLUMNS)
+-            .addFeature(GenerationStep.Decoration.FLUID_SPRINGS, NetherPlacements.POISON_POOL)
+-            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, CavePlacements.POTATO_LEAF)
+-            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, CavePlacements.TWISTED_POTATO);
+-        return new Biome.BiomeBuilder()
+-            .hasPrecipitation(true)
+-            .temperature(2.0F)
+-            .downfall(0.5F)
+-            .specialEffects(
+-                new BiomeSpecialEffects.Builder()
+-                    .waterColor(5105159)
+-                    .waterFogColor(4056583)
+-                    .fogColor(8157780)
+-                    .grassColorOverride(5105159)
+-                    .foliageColorOverride(4056583)
+-                    .skyColor(calculateSkyColor(1.0F))
+-                    .ambientLoopSound(SoundEvents.AMBIENT_WASTELAND_LOOP)
+-                    .ambientParticle(new AmbientParticleSettings(ParticleTypes.DRIPPING_HONEY, 0.001F))
+-                    .build()
+-            )
+-            .mobSpawnSettings(mobspawnsettings$builder.build())
+-            .generationSettings(biomegenerationsettings$builder.build())
+-            .build();
+-    }
+-
+-    public static Biome corruption(HolderGetter<PlacedFeature> p_342595_, HolderGetter<ConfiguredWorldCarver<?>> p_341363_) {
+-        MobSpawnSettings.Builder mobspawnsettings$builder = new MobSpawnSettings.Builder();
+-        farmAnimals(mobspawnsettings$builder);
+-        mobspawnsettings$builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.CAT, 40, 1, 1));
+-        commonSpawns(mobspawnsettings$builder);
+-        mobspawnsettings$builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.WITCH, 100, 1, 1));
+-        mobspawnsettings$builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.PHANTOM, 100, 1, 1));
+-        BiomeGenerationSettings.Builder biomegenerationsettings$builder = new BiomeGenerationSettings.Builder(p_342595_, p_341363_);
+-        globalPotatoGeneration(biomegenerationsettings$builder, true);
+-        BiomeDefaultFeatures.addDefaultMushrooms(biomegenerationsettings$builder);
+-        biomegenerationsettings$builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VegetationPlacements.BROWN_MUSHROOM_NETHER)
+-            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VegetationPlacements.RED_MUSHROOM_NETHER)
+-            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, NetherPlacements.CORRUPTED_BUDS)
+-            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, NetherPlacements.POTATO_SPROUTS)
+-            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, TreePlacements.MOTHER_POTATO_TREE)
+-            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, TreePlacements.POTATO_TREE_TALL)
+-            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, TreePlacements.POTATO_TREE);
+-        return new Biome.BiomeBuilder()
+-            .hasPrecipitation(true)
+-            .temperature(2.0F)
+-            .downfall(1.0F)
+-            .specialEffects(
+-                new BiomeSpecialEffects.Builder()
+-                    .waterColor(1356889)
+-                    .waterFogColor(1153876)
+-                    .fogColor(1356889)
+-                    .grassColorOverride(1466676)
+-                    .foliageColorOverride(1153876)
+-                    .skyColor(calculateSkyColor(0.0F))
+-                    .ambientParticle(new AmbientParticleSettings(ParticleTypes.WARPED_SPORE, 0.01428F))
+-                    .ambientLoopSound(SoundEvents.AMBIENT_CORRUPTION_LOOP)
+-                    .backgroundMusic(Musics.createGameMusic(SoundEvents.MUSIC_BIOME_WARPED_FOREST))
+-                    .build()
+-            )
+-            .mobSpawnSettings(mobspawnsettings$builder.build())
+-            .generationSettings(biomegenerationsettings$builder.build())
+-            .build();
+-    }
+-}

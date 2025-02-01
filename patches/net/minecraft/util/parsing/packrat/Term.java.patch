@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/parsing/packrat/Term.java
++++ b/net/minecraft/util/parsing/packrat/Term.java
+@@ -65,7 +_,7 @@
+             Control control = mutableboolean::setTrue;
+             int i = p_336147_.mark();
+ 
+-            for(Term<S> term : this.elements) {
++            for (Term<S> term : this.elements) {
+                 if (mutableboolean.isTrue()) {
+                     break;
+                 }
+@@ -121,7 +_,7 @@
+         public boolean parse(ParseState<S> p_336111_, Scope p_335911_, Control p_336188_) {
+             int i = p_336111_.mark();
+ 
+-            for(Term<S> term : this.elements) {
++            for (Term<S> term : this.elements) {
+                 if (!term.parse(p_336111_, p_335911_, p_336188_)) {
+                     p_336111_.restore(i);
+                     return false;

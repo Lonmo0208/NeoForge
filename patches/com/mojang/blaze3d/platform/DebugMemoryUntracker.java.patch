@@ -1,0 +1,11 @@
+--- a/com/mojang/blaze3d/platform/DebugMemoryUntracker.java
++++ b/com/mojang/blaze3d/platform/DebugMemoryUntracker.java
+@@ -17,7 +_,7 @@
+         try {
+             Lookup lookup = MethodHandles.lookup();
+             Class<?> oclass = Class.forName("org.lwjgl.system.MemoryManage$DebugAllocator");
+-            Method method = oclass.getDeclaredMethod("untrack", Long.TYPE);
++            Method method = oclass.getDeclaredMethod("untrack", long.class);
+             method.setAccessible(true);
+             Field field = Class.forName("org.lwjgl.system.MemoryUtil$LazyInit").getDeclaredField("ALLOCATOR");
+             field.setAccessible(true);

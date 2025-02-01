@@ -1,0 +1,40 @@
+--- a/net/minecraft/world/level/storage/loot/functions/SetContainerLootTable.java
++++ b/net/minecraft/world/level/storage/loot/functions/SetContainerLootTable.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.world.level.storage.loot.functions;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+@@ -9,7 +_,6 @@
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.resources.ResourceKey;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.component.SeededContainerLoot;
+ import net.minecraft.world.level.block.entity.BlockEntityType;
+@@ -19,16 +_,16 @@
+ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+ 
+ public class SetContainerLootTable extends LootItemConditionalFunction {
+-    public static final Codec<SetContainerLootTable> CODEC = RecordCodecBuilder.create(
+-        p_335346_ -> commonFields(p_335346_)
++    public static final MapCodec<SetContainerLootTable> CODEC = RecordCodecBuilder.mapCodec(
++        p_338147_ -> commonFields(p_338147_)
+                 .and(
+-                    p_335346_.group(
++                    p_338147_.group(
+                         ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("name").forGetter(p_335347_ -> p_335347_.name),
+-                        ExtraCodecs.strictOptionalField(Codec.LONG, "seed", 0L).forGetter(p_298105_ -> p_298105_.seed),
++                        Codec.LONG.optionalFieldOf("seed", Long.valueOf(0L)).forGetter(p_298105_ -> p_298105_.seed),
+                         BuiltInRegistries.BLOCK_ENTITY_TYPE.holderByNameCodec().fieldOf("type").forGetter(p_298107_ -> p_298107_.type)
+                     )
+                 )
+-                .apply(p_335346_, SetContainerLootTable::new)
++                .apply(p_338147_, SetContainerLootTable::new)
+     );
+     private final ResourceKey<LootTable> name;
+     private final long seed;

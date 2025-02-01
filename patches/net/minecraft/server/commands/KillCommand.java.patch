@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/KillCommand.java
++++ b/net/minecraft/server/commands/KillCommand.java
+@@ -24,7 +_,7 @@
+     }
+ 
+     private static int kill(CommandSourceStack p_137814_, Collection<? extends Entity> p_137815_) {
+-        for(Entity entity : p_137815_) {
++        for (Entity entity : p_137815_) {
+             entity.kill();
+         }
+ 

@@ -1,0 +1,21 @@
+--- a/net/minecraft/server/packs/linkfs/LinkFSProvider.java
++++ b/net/minecraft/server/packs/linkfs/LinkFSProvider.java
+@@ -139,15 +_,15 @@
+             int i = p_248805_.length;
+             int j = 0;
+ 
+-            while(j < i) {
++            while (j < i) {
+                 AccessMode accessmode = aaccessmode[j];
+-                switch(accessmode) {
++                switch (accessmode) {
+                     case READ:
+                         if (!toLinkPath(p_248517_).exists()) {
+                             throw new NoSuchFileException(p_248517_.toString());
+                         }
+                     default:
+-                        ++j;
++                        j++;
+                         break;
+                     case EXECUTE:
+                     case WRITE:

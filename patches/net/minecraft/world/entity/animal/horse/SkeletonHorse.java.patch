@@ -1,0 +1,26 @@
+--- a/net/minecraft/world/entity/animal/horse/SkeletonHorse.java
++++ b/net/minecraft/world/entity/animal/horse/SkeletonHorse.java
+@@ -46,11 +_,9 @@
+     public static boolean checkSkeletonHorseSpawnRules(
+         EntityType<? extends Animal> p_312143_, LevelAccessor p_312574_, MobSpawnType p_312240_, BlockPos p_312362_, RandomSource p_312555_
+     ) {
+-        if (!MobSpawnType.isSpawner(p_312240_)) {
+-            return Animal.checkAnimalSpawnRules(p_312143_, p_312574_, p_312240_, p_312362_, p_312555_);
+-        } else {
+-            return MobSpawnType.ignoresLightRequirements(p_312240_) || isBrightEnoughToSpawn(p_312574_, p_312362_);
+-        }
++        return !MobSpawnType.isSpawner(p_312240_)
++            ? Animal.checkAnimalSpawnRules(p_312143_, p_312574_, p_312240_, p_312362_, p_312555_)
++            : MobSpawnType.ignoresLightRequirements(p_312240_) || isBrightEnoughToSpawn(p_312574_, p_312362_);
+     }
+ 
+     @Override
+@@ -84,7 +_,7 @@
+                 return SoundEvents.SKELETON_HORSE_STEP_WATER;
+             }
+ 
+-            ++this.gallopSoundCounter;
++            this.gallopSoundCounter++;
+             if (this.gallopSoundCounter > 5 && this.gallopSoundCounter % 3 == 0) {
+                 return SoundEvents.SKELETON_HORSE_GALLOP_WATER;
+             }

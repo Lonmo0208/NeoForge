@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/levelgen/feature/stateproviders/RuleBasedBlockStateProvider.java
++++ b/net/minecraft/world/level/levelgen/feature/stateproviders/RuleBasedBlockStateProvider.java
+@@ -29,7 +_,7 @@
+     }
+ 
+     public BlockState getState(WorldGenLevel p_225933_, RandomSource p_225934_, BlockPos p_225935_) {
+-        for(RuleBasedBlockStateProvider.Rule rulebasedblockstateprovider$rule : this.rules) {
++        for (RuleBasedBlockStateProvider.Rule rulebasedblockstateprovider$rule : this.rules) {
+             if (rulebasedblockstateprovider$rule.ifTrue().test(p_225933_, p_225935_)) {
+                 return rulebasedblockstateprovider$rule.then().getState(p_225934_, p_225935_);
+             }

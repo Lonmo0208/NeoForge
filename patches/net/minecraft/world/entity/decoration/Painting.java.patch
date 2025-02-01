@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/entity/decoration/Painting.java
++++ b/net/minecraft/world/entity/decoration/Painting.java
+@@ -78,14 +_,14 @@
+         } else {
+             painting.setDirection(p_218890_);
+             list.removeIf(p_325809_ -> {
+-                painting.setVariant(p_325809_);
++                painting.setVariant((Holder<PaintingVariant>)p_325809_);
+                 return !painting.survives();
+             });
+             if (list.isEmpty()) {
+                 return Optional.empty();
+             } else {
+                 int i = list.stream().mapToInt(Painting::variantArea).max().orElse(0);
+-                list.removeIf(p_218883_ -> variantArea(p_218883_) < i);
++                list.removeIf(p_218883_ -> variantArea((Holder<PaintingVariant>)p_218883_) < i);
+                 Optional<Holder<PaintingVariant>> optional = Util.getRandomSafe(list, painting.random);
+                 if (optional.isEmpty()) {
+                     return Optional.empty();
+@@ -129,7 +_,7 @@
+     }
+ 
+     public static void storeVariant(CompoundTag p_270928_, Holder<PaintingVariant> p_270667_) {
+-        VARIANT_CODEC.encodeStart(NbtOps.INSTANCE, p_270667_).result().ifPresent(p_330061_ -> p_270928_.merge((CompoundTag)p_330061_));
++        VARIANT_CODEC.encodeStart(NbtOps.INSTANCE, p_270667_).ifSuccess(p_330061_ -> p_270928_.merge((CompoundTag)p_330061_));
+     }
+ 
+     @Override

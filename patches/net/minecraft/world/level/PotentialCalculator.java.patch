@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/PotentialCalculator.java
++++ b/net/minecraft/world/level/PotentialCalculator.java
+@@ -19,7 +_,7 @@
+         } else {
+             double d0 = 0.0;
+ 
+-            for(PotentialCalculator.PointCharge potentialcalculator$pointcharge : this.charges) {
++            for (PotentialCalculator.PointCharge potentialcalculator$pointcharge : this.charges) {
+                 d0 += potentialcalculator$pointcharge.getPotentialChange(p_47196_);
+             }
+ 

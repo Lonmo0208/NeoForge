@@ -1,0 +1,38 @@
+--- a/net/minecraft/world/level/levelgen/feature/foliageplacers/FoliagePlacer.java
++++ b/net/minecraft/world/level/levelgen/feature/foliageplacers/FoliagePlacer.java
+@@ -102,8 +_,8 @@
+         int i = p_225636_ ? 1 : 0;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(int j = -p_225634_; j <= p_225634_ + i; ++j) {
+-            for(int k = -p_225634_; k <= p_225634_ + i; ++k) {
++        for (int j = -p_225634_; j <= p_225634_ + i; j++) {
++            for (int k = -p_225634_; k <= p_225634_ + i; k++) {
+                 if (!this.shouldSkipLocationSigned(p_225631_, j, p_225635_, k, p_225634_, p_225636_)) {
+                     blockpos$mutableblockpos.setWithOffset(p_225633_, j, p_225635_, k);
+                     tryPlaceLeaf(p_225629_, p_272772_, p_225631_, p_225632_, blockpos$mutableblockpos);
+@@ -129,13 +_,13 @@
+         BlockPos blockpos = p_273412_.below();
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             Direction direction1 = direction.getClockWise();
+             int j = direction1.getAxisDirection() == Direction.AxisDirection.POSITIVE ? p_272712_ + i : p_272712_;
+             blockpos$mutableblockpos.setWithOffset(p_273412_, 0, p_272656_ - 1, 0).move(direction1, j).move(direction, -p_272712_);
+             int k = -p_272712_;
+ 
+-            while(k < p_272712_ + i) {
++            while (k < p_272712_ + i) {
+                 boolean flag = p_273225_.isSet(blockpos$mutableblockpos.move(Direction.UP));
+                 blockpos$mutableblockpos.move(Direction.DOWN);
+                 if (flag && tryPlaceExtension(p_273087_, p_273225_, p_272629_, p_272885_, p_273464_, blockpos, blockpos$mutableblockpos)) {
+@@ -144,7 +_,7 @@
+                     blockpos$mutableblockpos.move(Direction.UP);
+                 }
+ 
+-                ++k;
++                k++;
+                 blockpos$mutableblockpos.move(direction);
+             }
+         }

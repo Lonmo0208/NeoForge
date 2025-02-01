@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/item/crafting/DecoratedPotRecipe.java
++++ b/net/minecraft/world/item/crafting/DecoratedPotRecipe.java
+@@ -18,9 +_,9 @@
+         if (!this.canCraftInDimensions(p_272882_.getWidth(), p_272882_.getHeight())) {
+             return false;
+         } else {
+-            for(int i = 0; i < p_272882_.getContainerSize(); ++i) {
++            for (int i = 0; i < p_272882_.getContainerSize(); i++) {
+                 ItemStack itemstack = p_272882_.getItem(i);
+-                switch(i) {
++                switch (i) {
+                     case 1:
+                     case 3:
+                     case 5:

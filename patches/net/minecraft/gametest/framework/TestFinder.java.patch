@@ -1,0 +1,11 @@
+--- a/net/minecraft/gametest/framework/TestFinder.java
++++ b/net/minecraft/gametest/framework/TestFinder.java
+@@ -71,7 +_,7 @@
+                 List<Q> list = new LinkedList<>();
+                 List<Q> list1 = ((Stream)p_329860_.get()).toList();
+ 
+-                for(int i = 0; i < p_330804_; ++i) {
++                for (int i = 0; i < p_330804_; i++) {
+                     list.addAll(list1);
+                 }
+ 

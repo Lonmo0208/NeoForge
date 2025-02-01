@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/level/lighting/DynamicGraphMinFixedPoint.java
++++ b/net/minecraft/world/level/lighting/DynamicGraphMinFixedPoint.java
+@@ -126,8 +_,8 @@
+         if (this.priorityQueue.isEmpty()) {
+             return p_75589_;
+         } else {
+-            while(!this.priorityQueue.isEmpty() && p_75589_ > 0) {
+-                --p_75589_;
++            while (!this.priorityQueue.isEmpty() && p_75589_ > 0) {
++                p_75589_--;
+                 long i = this.priorityQueue.removeFirstLong();
+                 int j = Mth.clamp(this.getLevel(i), 0, this.levelCount - 1);
+                 int k = this.computedLevels.remove(i) & 255;

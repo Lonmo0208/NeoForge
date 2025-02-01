@@ -22,6 +22,15 @@
          };
      }
  
+@@ -78,7 +_,7 @@
+     public static void loadFromJson(InputStream p_128109_, BiConsumer<String, String> p_128110_) {
+         JsonObject jsonobject = GSON.fromJson(new InputStreamReader(p_128109_, StandardCharsets.UTF_8), JsonObject.class);
+ 
+-        for(Entry<String, JsonElement> entry : jsonobject.entrySet()) {
++        for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
+             String s = UNSUPPORTED_FORMAT_PATTERN.matcher(GsonHelper.convertToString(entry.getValue(), entry.getKey())).replaceAll("%$1s");
+             p_128110_.accept(entry.getKey(), s);
+         }
 @@ -91,6 +_,9 @@
      public static void inject(Language p_128115_) {
          instance = p_128115_;

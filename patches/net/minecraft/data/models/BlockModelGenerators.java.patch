@@ -1,0 +1,947 @@
+--- a/net/minecraft/data/models/BlockModelGenerators.java
++++ b/net/minecraft/data/models/BlockModelGenerators.java
+@@ -86,7 +_,6 @@
+             
+         )
+         .put(Blocks.STONE, BlockModelGenerators::createMirroredCubeGenerator)
+-        .put(Blocks.POTONE, BlockModelGenerators::createMirroredCubeGenerator)
+         .put(Blocks.DEEPSLATE, BlockModelGenerators::createMirroredColumnGenerator)
+         .put(Blocks.MUD_BRICKS, BlockModelGenerators::createNorthWestMirroredCubeGenerator)
+         .build();
+@@ -1496,10 +_,11 @@
+         Block block = Blocks.PITCHER_CROP;
+         this.createSimpleFlatItemModel(block.asItem());
+         PropertyDispatch propertydispatch = PropertyDispatch.properties(PitcherCropBlock.AGE, BlockStateProperties.DOUBLE_BLOCK_HALF)
+-            .generate((p_277255_, p_277256_) -> {
+-                return switch(p_277256_) {
+-                    case UPPER -> Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_top_stage_" + p_277255_));
+-                    case LOWER -> Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_bottom_stage_" + p_277255_));
++            .generate((p_339371_, p_339372_) -> {
++                return switch (p_339372_) {
++                    case UPPER -> Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_top_stage_" + p_339371_));
++                    case LOWER -> Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_bottom_stage_" + p_339371_));
++                    default -> throw new MatchException(null, null);
+                 };
+             });
+         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(propertydispatch));
+@@ -1633,7 +_,7 @@
+         PropertyDispatch propertydispatch = PropertyDispatch.properties(BlockStateProperties.POWERED, BlockStateProperties.RAIL_SHAPE_STRAIGHT)
+             .generate(
+                 (p_176166_, p_176167_) -> {
+-                    switch(p_176167_) {
++                    switch (p_176167_) {
+                         case NORTH_SOUTH:
+                             return Variant.variant().with(VariantProperties.MODEL, p_176166_ ? resourcelocation3 : resourcelocation);
+                         case EAST_WEST:
+@@ -1766,14 +_,14 @@
+     }
+ 
+     private void createColoredBlockWithRandomRotations(TexturedModel.Provider p_124686_, Block... p_124687_) {
+-        for(Block block : p_124687_) {
++        for (Block block : p_124687_) {
+             ResourceLocation resourcelocation = p_124686_.create(block, this.modelOutput);
+             this.blockStateOutput.accept(createRotatedVariant(block, resourcelocation));
+         }
+     }
+ 
+     private void createColoredBlockWithStateRotations(TexturedModel.Provider p_124778_, Block... p_124779_) {
+-        for(Block block : p_124779_) {
++        for (Block block : p_124779_) {
+             ResourceLocation resourcelocation = p_124778_.create(block, this.modelOutput);
+             this.blockStateOutput
+                 .accept(
+@@ -1839,11 +_,6 @@
+         this.blockStateOutput.accept(createSimpleBlock(p_124981_, resourcelocation).with(createHorizontalFacingDispatchAlt()));
+     }
+ 
+-    private void createBigBrain(Block p_340754_) {
+-        ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(p_340754_);
+-        this.blockStateOutput.accept(createSimpleBlock(p_340754_, resourcelocation).with(createHorizontalFacingDispatch()));
+-    }
+-
+     private List<Variant> createBambooModels(int p_124512_) {
+         String s = "_age" + p_124512_;
+         return IntStream.range(1, 5)
+@@ -2133,10 +_,10 @@
+             );
+     }
+ 
+-    private void createCampfires(Block p_342035_, Block... p_124714_) {
++    private void createCampfires(Block... p_124714_) {
+         ResourceLocation resourcelocation = ModelLocationUtils.decorateBlockModelLocation("campfire_off");
+ 
+-        for(Block block : p_124714_) {
++        for (Block block : p_124714_) {
+             ResourceLocation resourcelocation1 = ModelTemplates.CAMPFIRE.create(block, TextureMapping.campfire(block), this.modelOutput);
+             this.createSimpleFlatItemModel(block.asItem());
+             this.blockStateOutput
+@@ -2146,17 +_,6 @@
+                         .with(createHorizontalFacingDispatchAlt())
+                 );
+         }
+-
+-        ResourceLocation resourcelocation2 = ModelTemplates.FRYING_TABLE
+-            .createWithSuffix(p_342035_, "_lit", TextureMapping.fryingTable(p_342035_), this.modelOutput);
+-        ResourceLocation resourcelocation3 = ModelLocationUtils.getModelLocation(p_342035_);
+-        this.delegateItemModel(p_342035_, resourcelocation3);
+-        this.blockStateOutput
+-            .accept(
+-                MultiVariantGenerator.multiVariant(p_342035_)
+-                    .with(createBooleanModelDispatch(BlockStateProperties.LIT, resourcelocation2, resourcelocation3))
+-                    .with(createHorizontalFacingDispatchAlt())
+-            );
+     }
+ 
+     private void createAzalea(Block p_176248_) {
+@@ -2484,22 +_,6 @@
+         this.createPumpkinVariant(Blocks.JACK_O_LANTERN, texturemapping);
+     }
+ 
+-    private void createZombieHead() {
+-        TextureMapping texturemapping = TextureMapping.column(Blocks.POTATO_ZOMBIE_HEAD_BLOCK);
+-        this.blockStateOutput.accept(createSimpleBlock(Blocks.POTATO_ZOMBIE_HEAD_BLOCK, ModelLocationUtils.getModelLocation(Blocks.POTATO_ZOMBIE_HEAD_BLOCK)));
+-        this.createZombieHeadVariant(Blocks.POTATO_ZOMBIE_HEAD_HAT, texturemapping);
+-    }
+-
+-    private void createZombieHeadVariant(Block p_340552_, TextureMapping p_341466_) {
+-        ResourceLocation resourcelocation = ModelTemplates.CUBE_ORIENTABLE
+-            .create(p_340552_, p_341466_.copyAndUpdate(TextureSlot.FRONT, TextureMapping.getBlockTexture(p_340552_)), this.modelOutput);
+-        this.blockStateOutput
+-            .accept(
+-                MultiVariantGenerator.multiVariant(p_340552_, Variant.variant().with(VariantProperties.MODEL, resourcelocation))
+-                    .with(createHorizontalFacingDispatch())
+-            );
+-    }
+-
+     private void createPumpkinVariant(Block p_124565_, TextureMapping p_124566_) {
+         ResourceLocation resourcelocation = ModelTemplates.CUBE_ORIENTABLE
+             .create(p_124565_, p_124566_.copyAndUpdate(TextureSlot.FRONT, TextureMapping.getBlockTexture(p_124565_)), this.modelOutput);
+@@ -2711,15 +_,15 @@
+             );
+     }
+ 
+-    private void createChorusPlant(Block p_342026_) {
+-        ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(p_342026_, "_side");
+-        ResourceLocation resourcelocation1 = ModelLocationUtils.getModelLocation(p_342026_, "_noside");
+-        ResourceLocation resourcelocation2 = ModelLocationUtils.getModelLocation(p_342026_, "_noside1");
+-        ResourceLocation resourcelocation3 = ModelLocationUtils.getModelLocation(p_342026_, "_noside2");
+-        ResourceLocation resourcelocation4 = ModelLocationUtils.getModelLocation(p_342026_, "_noside3");
++    private void createChorusPlant() {
++        ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(Blocks.CHORUS_PLANT, "_side");
++        ResourceLocation resourcelocation1 = ModelLocationUtils.getModelLocation(Blocks.CHORUS_PLANT, "_noside");
++        ResourceLocation resourcelocation2 = ModelLocationUtils.getModelLocation(Blocks.CHORUS_PLANT, "_noside1");
++        ResourceLocation resourcelocation3 = ModelLocationUtils.getModelLocation(Blocks.CHORUS_PLANT, "_noside2");
++        ResourceLocation resourcelocation4 = ModelLocationUtils.getModelLocation(Blocks.CHORUS_PLANT, "_noside3");
+         this.blockStateOutput
+             .accept(
+-                MultiPartGenerator.multiPart(p_342026_)
++                MultiPartGenerator.multiPart(Blocks.CHORUS_PLANT)
+                     .with(Condition.condition().term(BlockStateProperties.NORTH, true), Variant.variant().with(VariantProperties.MODEL, resourcelocation))
+                     .with(
+                         Condition.condition().term(BlockStateProperties.EAST, true),
+@@ -2866,90 +_,6 @@
+             );
+     }
+ 
+-    private void createChorusPlantButNotReally(Block p_341774_) {
+-        TextureMapping texturemapping = TextureMapping.defaultTexture(p_341774_);
+-        ResourceLocation resourcelocation = ModelTemplates.ROOTS_SIDE.create(p_341774_, texturemapping, this.modelOutput);
+-        ResourceLocation resourcelocation1 = ModelTemplates.ROOTS_NOSIDE.create(p_341774_, texturemapping, this.modelOutput);
+-        ResourceLocation resourcelocation2 = ModelTemplates.ROOTS.create(p_341774_, texturemapping, this.modelOutput);
+-        this.delegateItemModel(p_341774_, resourcelocation2);
+-        this.blockStateOutput
+-            .accept(
+-                MultiPartGenerator.multiPart(p_341774_)
+-                    .with(Condition.condition().term(BlockStateProperties.NORTH, true), Variant.variant().with(VariantProperties.MODEL, resourcelocation))
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.EAST, true),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation)
+-                            .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.SOUTH, true),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation)
+-                            .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.WEST, true),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation)
+-                            .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.UP, true),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation)
+-                            .with(VariantProperties.X_ROT, VariantProperties.Rotation.R270)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.DOWN, true),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation)
+-                            .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(Condition.condition().term(BlockStateProperties.NORTH, false), Variant.variant().with(VariantProperties.MODEL, resourcelocation1))
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.EAST, false),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation1)
+-                            .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.SOUTH, false),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation1)
+-                            .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.WEST, false),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation1)
+-                            .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.UP, false),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation1)
+-                            .with(VariantProperties.X_ROT, VariantProperties.Rotation.R270)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-                    .with(
+-                        Condition.condition().term(BlockStateProperties.DOWN, false),
+-                        Variant.variant()
+-                            .with(VariantProperties.MODEL, resourcelocation1)
+-                            .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+-                            .with(VariantProperties.UV_LOCK, true)
+-                    )
+-            );
+-    }
+-
+     private void createComposter() {
+         this.blockStateOutput
+             .accept(
+@@ -3012,41 +_,6 @@
+             );
+     }
+ 
+-    private void createPotatoBattery(Block p_340639_) {
+-        ResourceLocation resourcelocation = ModelTemplates.CUBE_ALL.create(p_340639_, TextureMapping.cube(p_340639_), this.modelOutput);
+-        ResourceLocation resourcelocation1 = this.createSuffixedVariant(p_340639_, "_powered", ModelTemplates.CUBE_ALL, TextureMapping::cube);
+-        ResourceLocation resourcelocation2 = this.createSuffixedVariant(p_340639_, "_lit", ModelTemplates.CUBE_ALL, TextureMapping::cube);
+-        ResourceLocation resourcelocation3 = this.createSuffixedVariant(p_340639_, "_lit_powered", ModelTemplates.CUBE_ALL, TextureMapping::cube);
+-        this.blockStateOutput.accept(this.createPotatoBattery(p_340639_, resourcelocation, resourcelocation2, resourcelocation1, resourcelocation3));
+-    }
+-
+-    private BlockStateGenerator createPotatoBattery(
+-        Block p_341347_, ResourceLocation p_340611_, ResourceLocation p_342456_, ResourceLocation p_341836_, ResourceLocation p_342066_
+-    ) {
+-        return MultiVariantGenerator.multiVariant(p_341347_)
+-            .with(
+-                PropertyDispatch.properties(BlockStateProperties.LIT, BlockStateProperties.POWERED)
+-                    .generate(
+-                        (p_339738_, p_339739_) -> p_339738_
+-                                ? Variant.variant().with(VariantProperties.MODEL, p_339739_ ? p_342066_ : p_342456_)
+-                                : Variant.variant().with(VariantProperties.MODEL, p_339739_ ? p_341836_ : p_340611_)
+-                    )
+-            );
+-    }
+-
+-    private void createViciousPotato(Block p_342505_) {
+-        ResourceLocation resourcelocation = ModelTemplates.CUBE_ALL.create(p_342505_, TextureMapping.cube(p_342505_), this.modelOutput);
+-        ResourceLocation resourcelocation1 = this.createSuffixedVariant(p_342505_, "_enabled", ModelTemplates.CUBE_ALL, TextureMapping::cube);
+-        this.blockStateOutput
+-            .accept(
+-                MultiVariantGenerator.multiVariant(p_342505_)
+-                    .with(
+-                        PropertyDispatch.property(BlockStateProperties.ENABLED)
+-                            .generate(p_339727_ -> Variant.variant().with(VariantProperties.MODEL, p_339727_ ? resourcelocation1 : resourcelocation))
+-                    )
+-            );
+-    }
+-
+     private void copyCopperBulbModel(Block p_309045_, Block p_309092_) {
+         ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(p_309045_);
+         ResourceLocation resourcelocation1 = ModelLocationUtils.getModelLocation(p_309045_, "_powered");
+@@ -3076,55 +_,58 @@
+         this.createAmethystCluster(Blocks.AMETHYST_CLUSTER);
+     }
+ 
+-    private void createPointedDripstone(Block p_342411_) {
+-        this.skipAutoItemBlock(p_342411_);
++    private void createPointedDripstone() {
++        this.skipAutoItemBlock(Blocks.POINTED_DRIPSTONE);
+         PropertyDispatch.C2<Direction, DripstoneThickness> c2 = PropertyDispatch.properties(
+             BlockStateProperties.VERTICAL_DIRECTION, BlockStateProperties.DRIPSTONE_THICKNESS
+         );
+ 
+-        for(DripstoneThickness dripstonethickness : DripstoneThickness.values()) {
+-            c2.select(Direction.UP, dripstonethickness, this.createPointedDripstoneVariant(p_342411_, Direction.UP, dripstonethickness));
+-        }
+-
+-        for(DripstoneThickness dripstonethickness1 : DripstoneThickness.values()) {
+-            c2.select(Direction.DOWN, dripstonethickness1, this.createPointedDripstoneVariant(p_342411_, Direction.DOWN, dripstonethickness1));
+-        }
+-
+-        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(p_342411_).with(c2));
++        for (DripstoneThickness dripstonethickness : DripstoneThickness.values()) {
++            c2.select(Direction.UP, dripstonethickness, this.createPointedDripstoneVariant(Direction.UP, dripstonethickness));
++        }
++
++        for (DripstoneThickness dripstonethickness1 : DripstoneThickness.values()) {
++            c2.select(Direction.DOWN, dripstonethickness1, this.createPointedDripstoneVariant(Direction.DOWN, dripstonethickness1));
++        }
++
++        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.POINTED_DRIPSTONE).with(c2));
+     }
+ 
+-    private Variant createPointedDripstoneVariant(Block p_342345_, Direction p_176117_, DripstoneThickness p_176118_) {
++    private Variant createPointedDripstoneVariant(Direction p_176117_, DripstoneThickness p_176118_) {
+         String s = "_" + p_176117_.getSerializedName() + "_" + p_176118_.getSerializedName();
+-        TextureMapping texturemapping = TextureMapping.cross(TextureMapping.getBlockTexture(p_342345_, s));
++        TextureMapping texturemapping = TextureMapping.cross(TextureMapping.getBlockTexture(Blocks.POINTED_DRIPSTONE, s));
+         return Variant.variant()
+-            .with(VariantProperties.MODEL, ModelTemplates.POINTED_DRIPSTONE.createWithSuffix(p_342345_, s, texturemapping, this.modelOutput));
++            .with(VariantProperties.MODEL, ModelTemplates.POINTED_DRIPSTONE.createWithSuffix(Blocks.POINTED_DRIPSTONE, s, texturemapping, this.modelOutput));
+     }
+ 
+-    private void createNyliumBlock(Block p_124990_, Block p_342006_) {
++    private void createNyliumBlock(Block p_124990_) {
+         TextureMapping texturemapping = new TextureMapping()
+-            .put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(p_342006_))
++            .put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(Blocks.NETHERRACK))
+             .put(TextureSlot.TOP, TextureMapping.getBlockTexture(p_124990_))
+             .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(p_124990_, "_side"));
+         this.blockStateOutput.accept(createSimpleBlock(p_124990_, ModelTemplates.CUBE_BOTTOM_TOP.create(p_124990_, texturemapping, this.modelOutput)));
+     }
+ 
+-    private void createDaylightDetector(Block p_342264_) {
+-        ResourceLocation resourcelocation = TextureMapping.getBlockTexture(p_342264_, "_side");
++    private void createDaylightDetector() {
++        ResourceLocation resourcelocation = TextureMapping.getBlockTexture(Blocks.DAYLIGHT_DETECTOR, "_side");
+         TextureMapping texturemapping = new TextureMapping()
+-            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(p_342264_, "_top"))
++            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.DAYLIGHT_DETECTOR, "_top"))
+             .put(TextureSlot.SIDE, resourcelocation);
+         TextureMapping texturemapping1 = new TextureMapping()
+-            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(p_342264_, "_inverted_top"))
++            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.DAYLIGHT_DETECTOR, "_inverted_top"))
+             .put(TextureSlot.SIDE, resourcelocation);
+         this.blockStateOutput
+             .accept(
+-                MultiVariantGenerator.multiVariant(p_342264_)
++                MultiVariantGenerator.multiVariant(Blocks.DAYLIGHT_DETECTOR)
+                     .with(
+                         PropertyDispatch.property(BlockStateProperties.INVERTED)
+                             .select(
+                                 false,
+                                 Variant.variant()
+-                                    .with(VariantProperties.MODEL, ModelTemplates.DAYLIGHT_DETECTOR.create(p_342264_, texturemapping, this.modelOutput))
++                                    .with(
++                                        VariantProperties.MODEL,
++                                        ModelTemplates.DAYLIGHT_DETECTOR.create(Blocks.DAYLIGHT_DETECTOR, texturemapping, this.modelOutput)
++                                    )
+                             )
+                             .select(
+                                 true,
+@@ -3132,7 +_,9 @@
+                                     .with(
+                                         VariantProperties.MODEL,
+                                         ModelTemplates.DAYLIGHT_DETECTOR
+-                                            .create(ModelLocationUtils.getModelLocation(p_342264_, "_inverted"), texturemapping1, this.modelOutput)
++                                            .create(
++                                                ModelLocationUtils.getModelLocation(Blocks.DAYLIGHT_DETECTOR, "_inverted"), texturemapping1, this.modelOutput
++                                            )
+                                     )
+                             )
+                     )
+@@ -3159,19 +_,19 @@
+             );
+     }
+ 
+-    private void createFarmland(Block p_341257_, Block p_340970_) {
++    private void createFarmland() {
+         TextureMapping texturemapping = new TextureMapping()
+-            .put(TextureSlot.DIRT, TextureMapping.getBlockTexture(p_341257_))
+-            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(p_340970_));
++            .put(TextureSlot.DIRT, TextureMapping.getBlockTexture(Blocks.DIRT))
++            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.FARMLAND));
+         TextureMapping texturemapping1 = new TextureMapping()
+-            .put(TextureSlot.DIRT, TextureMapping.getBlockTexture(p_341257_))
+-            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(p_340970_, "_moist"));
+-        ResourceLocation resourcelocation = ModelTemplates.FARMLAND.create(p_340970_, texturemapping, this.modelOutput);
++            .put(TextureSlot.DIRT, TextureMapping.getBlockTexture(Blocks.DIRT))
++            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.FARMLAND, "_moist"));
++        ResourceLocation resourcelocation = ModelTemplates.FARMLAND.create(Blocks.FARMLAND, texturemapping, this.modelOutput);
+         ResourceLocation resourcelocation1 = ModelTemplates.FARMLAND
+-            .create(TextureMapping.getBlockTexture(p_340970_, "_moist"), texturemapping1, this.modelOutput);
++            .create(TextureMapping.getBlockTexture(Blocks.FARMLAND, "_moist"), texturemapping1, this.modelOutput);
+         this.blockStateOutput
+             .accept(
+-                MultiVariantGenerator.multiVariant(p_340970_)
++                MultiVariantGenerator.multiVariant(Blocks.FARMLAND)
+                     .with(createEmptyOrFullDispatch(BlockStateProperties.MOISTURE, 7, resourcelocation1, resourcelocation))
+             );
+     }
+@@ -3282,7 +_,7 @@
+         PropertyDispatch.C2<Boolean, Integer> c2 = PropertyDispatch.properties(MangrovePropaguleBlock.HANGING, MangrovePropaguleBlock.AGE);
+         ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(block);
+ 
+-        for(int i = 0; i <= 4; ++i) {
++        for (int i = 0; i <= 4; i++) {
+             ResourceLocation resourcelocation1 = ModelLocationUtils.getModelLocation(block, "_hanging_" + i);
+             c2.select(true, i, Variant.variant().with(VariantProperties.MODEL, resourcelocation1));
+             c2.select(false, i, Variant.variant().with(VariantProperties.MODEL, resourcelocation));
+@@ -3335,37 +_,24 @@
+ 
+     private void createGrassBlocks() {
+         ResourceLocation resourcelocation = TextureMapping.getBlockTexture(Blocks.DIRT);
+-        ResourceLocation resourcelocation1 = TextureMapping.getBlockTexture(Blocks.TERREDEPOMME);
+         TextureMapping texturemapping = new TextureMapping()
+             .put(TextureSlot.BOTTOM, resourcelocation)
+             .copyForced(TextureSlot.BOTTOM, TextureSlot.PARTICLE)
+             .put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.GRASS_BLOCK, "_top"))
+             .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.GRASS_BLOCK, "_snow"));
+-        TextureMapping texturemapping1 = new TextureMapping()
+-            .put(TextureSlot.BOTTOM, resourcelocation1)
+-            .copyForced(TextureSlot.BOTTOM, TextureSlot.PARTICLE)
+-            .put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.PEELGRASS_BLOCK, "_top"))
+-            .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.PEELGRASS_BLOCK, "_snow"));
+         Variant variant = Variant.variant()
+             .with(VariantProperties.MODEL, ModelTemplates.CUBE_BOTTOM_TOP.createWithSuffix(Blocks.GRASS_BLOCK, "_snow", texturemapping, this.modelOutput));
+-        Variant variant1 = Variant.variant()
+-            .with(VariantProperties.MODEL, ModelTemplates.CUBE_BOTTOM_TOP.createWithSuffix(Blocks.PEELGRASS_BLOCK, "_snow", texturemapping1, this.modelOutput));
+         this.createGrassLikeBlock(Blocks.GRASS_BLOCK, ModelLocationUtils.getModelLocation(Blocks.GRASS_BLOCK), variant);
+-        ResourceLocation resourcelocation2 = TexturedModel.CUBE_TOP_BOTTOM
++        ResourceLocation resourcelocation1 = TexturedModel.CUBE_TOP_BOTTOM
+             .get(Blocks.MYCELIUM)
+             .updateTextures(p_176198_ -> p_176198_.put(TextureSlot.BOTTOM, resourcelocation))
+             .create(Blocks.MYCELIUM, this.modelOutput);
+-        this.createGrassLikeBlock(Blocks.MYCELIUM, resourcelocation2, variant);
+-        ResourceLocation resourcelocation3 = TexturedModel.CUBE_TOP_BOTTOM
++        this.createGrassLikeBlock(Blocks.MYCELIUM, resourcelocation1, variant);
++        ResourceLocation resourcelocation2 = TexturedModel.CUBE_TOP_BOTTOM
+             .get(Blocks.PODZOL)
+             .updateTextures(p_176154_ -> p_176154_.put(TextureSlot.BOTTOM, resourcelocation))
+             .create(Blocks.PODZOL, this.modelOutput);
+-        this.createGrassLikeBlock(Blocks.PODZOL, resourcelocation3, variant);
+-        ResourceLocation resourcelocation4 = TexturedModel.CUBE_TOP_BOTTOM
+-            .get(Blocks.PEELGRASS_BLOCK)
+-            .updateTextures(p_339723_ -> p_339723_.put(TextureSlot.BOTTOM, resourcelocation1))
+-            .create(Blocks.PEELGRASS_BLOCK, this.modelOutput);
+-        this.createGrassLikeBlock(Blocks.PEELGRASS_BLOCK, resourcelocation4, variant1);
++        this.createGrassLikeBlock(Blocks.PODZOL, resourcelocation2, variant);
+     }
+ 
+     private void createGrassLikeBlock(Block p_124600_, ResourceLocation p_124601_, Variant p_124602_) {
+@@ -3392,8 +_,8 @@
+             );
+     }
+ 
+-    private void createDirtPath(Block p_340377_) {
+-        this.blockStateOutput.accept(createRotatedVariant(p_340377_, ModelLocationUtils.getModelLocation(p_340377_)));
++    private void createDirtPath() {
++        this.blockStateOutput.accept(createRotatedVariant(Blocks.DIRT_PATH, ModelLocationUtils.getModelLocation(Blocks.DIRT_PATH)));
+     }
+ 
+     private void createWeightedPressurePlate(Block p_124919_, Block p_124920_) {
+@@ -3609,14 +_,6 @@
+             );
+     }
+ 
+-    private void createCustomModelSimpleBlock(Block p_340501_) {
+-        this.blockStateOutput
+-            .accept(
+-                MultiVariantGenerator.multiVariant(p_340501_, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(p_340501_)))
+-            );
+-        this.delegateItemModel(p_340501_, ModelLocationUtils.getModelLocation(p_340501_));
+-    }
+-
+     private void createNetherrack() {
+         ResourceLocation resourcelocation = TexturedModel.CUBE.create(Blocks.NETHERRACK, this.modelOutput);
+         this.blockStateOutput
+@@ -3681,32 +_,6 @@
+             );
+     }
+ 
+-    private void createFloatater() {
+-        ResourceLocation resourcelocation = TextureMapping.getBlockTexture(Blocks.FLOATATER, "_side");
+-        ResourceLocation resourcelocation1 = TextureMapping.getBlockTexture(Blocks.FLOATATER, "_front");
+-        ResourceLocation resourcelocation2 = TextureMapping.getBlockTexture(Blocks.FLOATATER, "_back");
+-        ResourceLocation resourcelocation3 = TextureMapping.getBlockTexture(Blocks.FLOATATER, "_back_triggered");
+-        TextureMapping texturemapping = new TextureMapping()
+-            .put(TextureSlot.DOWN, resourcelocation)
+-            .put(TextureSlot.WEST, resourcelocation)
+-            .put(TextureSlot.EAST, resourcelocation)
+-            .put(TextureSlot.PARTICLE, resourcelocation1)
+-            .put(TextureSlot.NORTH, resourcelocation1)
+-            .put(TextureSlot.SOUTH, resourcelocation2)
+-            .put(TextureSlot.UP, resourcelocation);
+-        TextureMapping texturemapping1 = texturemapping.copyAndUpdate(TextureSlot.SOUTH, resourcelocation3);
+-        ResourceLocation resourcelocation4 = ModelTemplates.CUBE_DIRECTIONAL.create(Blocks.FLOATATER, texturemapping, this.modelOutput);
+-        ResourceLocation resourcelocation5 = ModelTemplates.CUBE_DIRECTIONAL
+-            .createWithSuffix(Blocks.FLOATATER, "_triggered", texturemapping1, this.modelOutput);
+-        this.blockStateOutput
+-            .accept(
+-                MultiVariantGenerator.multiVariant(Blocks.FLOATATER)
+-                    .with(createBooleanModelDispatch(BlockStateProperties.TRIGGERED, resourcelocation5, resourcelocation4))
+-                    .with(createFacingDispatch())
+-            );
+-        this.delegateItemModel(Blocks.FLOATATER, resourcelocation4);
+-    }
+-
+     private void createPistons() {
+         TextureMapping texturemapping = new TextureMapping()
+             .put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(Blocks.PISTON, "_bottom"))
+@@ -3794,19 +_,40 @@
+         TextureMapping texturemapping = TextureMapping.trialSpawner(block, "_side_inactive", "_top_inactive");
+         TextureMapping texturemapping1 = TextureMapping.trialSpawner(block, "_side_active", "_top_active");
+         TextureMapping texturemapping2 = TextureMapping.trialSpawner(block, "_side_active", "_top_ejecting_reward");
++        TextureMapping texturemapping3 = TextureMapping.trialSpawner(block, "_side_inactive_ominous", "_top_inactive_ominous");
++        TextureMapping texturemapping4 = TextureMapping.trialSpawner(block, "_side_active_ominous", "_top_active_ominous");
++        TextureMapping texturemapping5 = TextureMapping.trialSpawner(block, "_side_active_ominous", "_top_ejecting_reward_ominous");
+         ResourceLocation resourcelocation = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES.create(block, texturemapping, this.modelOutput);
+         ResourceLocation resourcelocation1 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES.createWithSuffix(block, "_active", texturemapping1, this.modelOutput);
+         ResourceLocation resourcelocation2 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES
+             .createWithSuffix(block, "_ejecting_reward", texturemapping2, this.modelOutput);
++        ResourceLocation resourcelocation3 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES
++            .createWithSuffix(block, "_inactive_ominous", texturemapping3, this.modelOutput);
++        ResourceLocation resourcelocation4 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES
++            .createWithSuffix(block, "_active_ominous", texturemapping4, this.modelOutput);
++        ResourceLocation resourcelocation5 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES
++            .createWithSuffix(block, "_ejecting_reward_ominous", texturemapping5, this.modelOutput);
+         this.delegateItemModel(block, resourcelocation);
+         this.blockStateOutput
+-            .accept(MultiVariantGenerator.multiVariant(block).with(PropertyDispatch.property(BlockStateProperties.TRIAL_SPAWNER_STATE).generate(p_311520_ -> {
+-                return switch(p_311520_) {
+-                    case INACTIVE, COOLDOWN -> Variant.variant().with(VariantProperties.MODEL, resourcelocation);
+-                    case WAITING_FOR_PLAYERS, ACTIVE, WAITING_FOR_REWARD_EJECTION -> Variant.variant().with(VariantProperties.MODEL, resourcelocation1);
+-                    case EJECTING_REWARD -> Variant.variant().with(VariantProperties.MODEL, resourcelocation2);
+-                };
+-            })));
++            .accept(
++                MultiVariantGenerator.multiVariant(block)
++                    .with(
++                        PropertyDispatch.properties(BlockStateProperties.TRIAL_SPAWNER_STATE, BlockStateProperties.OMINOUS)
++                            .generate(
++                                (p_337483_, p_337484_) -> {
++                                    return switch (p_337483_) {
++                                        case INACTIVE, COOLDOWN -> Variant.variant()
++                                        .with(VariantProperties.MODEL, p_337484_ ? resourcelocation3 : resourcelocation);
++                                        case WAITING_FOR_PLAYERS, ACTIVE, WAITING_FOR_REWARD_EJECTION -> Variant.variant()
++                                        .with(VariantProperties.MODEL, p_337484_ ? resourcelocation4 : resourcelocation1);
++                                        case EJECTING_REWARD -> Variant.variant()
++                                        .with(VariantProperties.MODEL, p_337484_ ? resourcelocation5 : resourcelocation2);
++                                        default -> throw new MatchException(null, null);
++                                    };
++                                }
++                            )
++                    )
++            );
+     }
+ 
+     private void createVault() {
+@@ -3819,17 +_,26 @@
+         ResourceLocation resourcelocation1 = ModelTemplates.VAULT.createWithSuffix(block, "_active", texturemapping1, this.modelOutput);
+         ResourceLocation resourcelocation2 = ModelTemplates.VAULT.createWithSuffix(block, "_unlocking", texturemapping2, this.modelOutput);
+         ResourceLocation resourcelocation3 = ModelTemplates.VAULT.createWithSuffix(block, "_ejecting_reward", texturemapping3, this.modelOutput);
++        TextureMapping texturemapping4 = TextureMapping.vault(block, "_front_off_ominous", "_side_off_ominous", "_top_ominous", "_bottom_ominous");
++        TextureMapping texturemapping5 = TextureMapping.vault(block, "_front_on_ominous", "_side_on_ominous", "_top_ominous", "_bottom_ominous");
++        TextureMapping texturemapping6 = TextureMapping.vault(block, "_front_ejecting_ominous", "_side_on_ominous", "_top_ominous", "_bottom_ominous");
++        TextureMapping texturemapping7 = TextureMapping.vault(block, "_front_ejecting_ominous", "_side_on_ominous", "_top_ejecting_ominous", "_bottom_ominous");
++        ResourceLocation resourcelocation4 = ModelTemplates.VAULT.createWithSuffix(block, "_ominous", texturemapping4, this.modelOutput);
++        ResourceLocation resourcelocation5 = ModelTemplates.VAULT.createWithSuffix(block, "_active_ominous", texturemapping5, this.modelOutput);
++        ResourceLocation resourcelocation6 = ModelTemplates.VAULT.createWithSuffix(block, "_unlocking_ominous", texturemapping6, this.modelOutput);
++        ResourceLocation resourcelocation7 = ModelTemplates.VAULT.createWithSuffix(block, "_ejecting_reward_ominous", texturemapping7, this.modelOutput);
+         this.delegateItemModel(block, resourcelocation);
+         this.blockStateOutput
+             .accept(
+                 MultiVariantGenerator.multiVariant(block)
+                     .with(createHorizontalFacingDispatch())
+-                    .with(PropertyDispatch.property(VaultBlock.STATE).generate(p_323125_ -> {
+-                        return switch(p_323125_) {
+-                            case INACTIVE -> Variant.variant().with(VariantProperties.MODEL, resourcelocation);
+-                            case ACTIVE -> Variant.variant().with(VariantProperties.MODEL, resourcelocation1);
+-                            case UNLOCKING -> Variant.variant().with(VariantProperties.MODEL, resourcelocation2);
+-                            case EJECTING -> Variant.variant().with(VariantProperties.MODEL, resourcelocation3);
++                    .with(PropertyDispatch.properties(VaultBlock.STATE, VaultBlock.OMINOUS).generate((p_337475_, p_337476_) -> {
++                        return switch (p_337475_) {
++                            case INACTIVE -> Variant.variant().with(VariantProperties.MODEL, p_337476_ ? resourcelocation4 : resourcelocation);
++                            case ACTIVE -> Variant.variant().with(VariantProperties.MODEL, p_337476_ ? resourcelocation5 : resourcelocation1);
++                            case UNLOCKING -> Variant.variant().with(VariantProperties.MODEL, p_337476_ ? resourcelocation6 : resourcelocation2);
++                            case EJECTING -> Variant.variant().with(VariantProperties.MODEL, p_337476_ ? resourcelocation7 : resourcelocation3);
++                            default -> throw new MatchException(null, null);
+                         };
+                     }))
+             );
+@@ -3974,14 +_,14 @@
+                 MultiVariantGenerator.multiVariant(Blocks.REPEATER)
+                     .with(
+                         PropertyDispatch.properties(BlockStateProperties.DELAY, BlockStateProperties.LOCKED, BlockStateProperties.POWERED)
+-                            .generate((p_339728_, p_339729_, p_339730_) -> {
++                            .generate((p_337485_, p_337486_, p_337487_) -> {
+                                 StringBuilder stringbuilder = new StringBuilder();
+-                                stringbuilder.append('_').append(p_339728_).append("tick");
+-                                if (p_339730_) {
++                                stringbuilder.append('_').append(p_337485_).append("tick");
++                                if (p_337487_) {
+                                     stringbuilder.append("_on");
+                                 }
+                     
+-                                if (p_339729_) {
++                                if (p_337486_) {
+                                     stringbuilder.append("_locked");
+                                 }
+                     
+@@ -4013,35 +_,24 @@
+     }
+ 
+     private void createSnowBlocks() {
+-        ResourceLocation resourcelocation = this.createLayeredBlock(Blocks.SNOW, Blocks.SNOW, Blocks.SNOW_BLOCK);
+-        this.blockStateOutput.accept(createSimpleBlock(Blocks.SNOW_BLOCK, resourcelocation));
+-    }
+-
+-    private ResourceLocation createLayeredBlock(Block p_341413_, Block p_341524_, Block p_341487_) {
+-        TextureMapping texturemapping = TextureMapping.defaultTexture(p_341524_);
+-        ResourceLocation resourcelocation = ModelTemplates.CUBE_ALL.create(p_341487_, TextureMapping.cube(p_341524_), this.modelOutput);
+-        ResourceLocation[] aresourcelocation = IntStream.range(0, ModelTemplates.LAYERED_BY_LEVEL.length)
+-            .mapToObj(
+-                p_339733_ -> ModelTemplates.LAYERED_BY_LEVEL[p_339733_]
+-                        .createWithSuffix(p_341413_, "_height" + (p_339733_ + 1) * 2, texturemapping, this.modelOutput)
+-            )
+-            .toArray(p_339724_ -> new ResourceLocation[p_339724_]);
++        TextureMapping texturemapping = TextureMapping.cube(Blocks.SNOW);
++        ResourceLocation resourcelocation = ModelTemplates.CUBE_ALL.create(Blocks.SNOW_BLOCK, texturemapping, this.modelOutput);
+         this.blockStateOutput
+             .accept(
+-                MultiVariantGenerator.multiVariant(p_341413_)
++                MultiVariantGenerator.multiVariant(Blocks.SNOW)
+                     .with(
+                         PropertyDispatch.property(BlockStateProperties.LAYERS)
+                             .generate(
+-                                p_339742_ -> Variant.variant()
++                                p_176151_ -> Variant.variant()
+                                         .with(
+                                             VariantProperties.MODEL,
+-                                            p_339742_ - 1 < aresourcelocation.length ? aresourcelocation[p_339742_ - 1] : resourcelocation
++                                            p_176151_ < 8 ? ModelLocationUtils.getModelLocation(Blocks.SNOW, "_height" + p_176151_ * 2) : resourcelocation
+                                         )
+                             )
+                     )
+             );
+-        this.delegateItemModel(p_341413_, aresourcelocation[0]);
+-        return resourcelocation;
++        this.delegateItemModel(Blocks.SNOW, ModelLocationUtils.getModelLocation(Blocks.SNOW, "_height2"));
++        this.blockStateOutput.accept(createSimpleBlock(Blocks.SNOW_BLOCK, resourcelocation));
+     }
+ 
+     private void createStonecutter() {
+@@ -4054,17 +_,6 @@
+             );
+     }
+ 
+-    private void createPoisonousPotatoCutter() {
+-        this.blockStateOutput
+-            .accept(
+-                MultiVariantGenerator.multiVariant(
+-                        Blocks.POISONOUS_POTATO_CUTTER,
+-                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.POISONOUS_POTATO_CUTTER))
+-                    )
+-                    .with(createHorizontalFacingDispatch())
+-            );
+-    }
+-
+     private void createStructureBlock() {
+         ResourceLocation resourcelocation = TexturedModel.CUBE.create(Blocks.STRUCTURE_BLOCK, this.modelOutput);
+         this.delegateItemModel(Blocks.STRUCTURE_BLOCK, resourcelocation);
+@@ -4439,7 +_,7 @@
+     }
+ 
+     private ResourceLocation createTurtleEggModel(int p_124514_, String p_124515_, TextureMapping p_124516_) {
+-        switch(p_124514_) {
++        switch (p_124514_) {
+             case 1:
+                 return ModelTemplates.TURTLE_EGG.create(ModelLocationUtils.decorateBlockModelLocation(p_124515_ + "turtle_egg"), p_124516_, this.modelOutput);
+             case 2:
+@@ -4457,7 +_,7 @@
+     }
+ 
+     private ResourceLocation createTurtleEggModel(Integer p_124677_, Integer p_124678_) {
+-        switch(p_124678_) {
++        switch (p_124678_) {
+             case 0:
+                 return this.createTurtleEggModel(p_124677_, "", TextureMapping.cube(TextureMapping.getBlockTexture(Blocks.TURTLE_EGG)));
+             case 1:
+@@ -4488,7 +_,7 @@
+     private void createSnifferEgg() {
+         this.createSimpleFlatItemModel(Items.SNIFFER_EGG);
+         Function<Integer, ResourceLocation> function = p_278206_ -> {
+-            String s = switch(p_278206_) {
++            String s = switch (p_278206_) {
+                 case 1 -> "_slightly_cracked";
+                 case 2 -> "_very_cracked";
+                 default -> "_not_cracked";
+@@ -4518,7 +_,7 @@
+                 })
+         );
+ 
+-        for(Pair<BooleanProperty, Function<ResourceLocation, Variant>> pair : MULTIFACE_GENERATOR) {
++        for (Pair<BooleanProperty, Function<ResourceLocation, Variant>> pair : MULTIFACE_GENERATOR) {
+             BooleanProperty booleanproperty = pair.getFirst();
+             Function<ResourceLocation, Variant> function = pair.getSecond();
+             if (p_176086_.defaultBlockState().hasProperty(booleanproperty)) {
+@@ -4674,7 +_,7 @@
+         ResourceLocation resourcelocation2 = TextureMapping.getBlockTexture(Blocks.RESPAWN_ANCHOR, "_top");
+         ResourceLocation[] aresourcelocation = new ResourceLocation[5];
+ 
+-        for(int i = 0; i < 5; ++i) {
++        for (int i = 0; i < 5; i++) {
+             TextureMapping texturemapping = new TextureMapping()
+                 .put(TextureSlot.BOTTOM, resourcelocation)
+                 .put(TextureSlot.TOP, i == 0 ? resourcelocation1 : resourcelocation2)
+@@ -4694,7 +_,7 @@
+     }
+ 
+     private Variant applyRotation(FrontAndTop p_124636_, Variant p_124637_) {
+-        switch(p_124636_) {
++        switch (p_124636_) {
+             case DOWN_NORTH:
+                 return p_124637_.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90);
+             case DOWN_SOUTH:
+@@ -4846,35 +_,23 @@
+         this.createTrivialCube(Blocks.EMERALD_ORE);
+         this.createTrivialCube(Blocks.DEEPSLATE_EMERALD_ORE);
+         this.createTrivialCube(Blocks.EMERALD_BLOCK);
+-        this.createTrivialCube(Blocks.AMBER_BLOCK);
+         this.createTrivialCube(Blocks.GOLD_ORE);
+         this.createTrivialCube(Blocks.NETHER_GOLD_ORE);
+         this.createTrivialCube(Blocks.DEEPSLATE_GOLD_ORE);
+         this.createTrivialCube(Blocks.GOLD_BLOCK);
+         this.createTrivialCube(Blocks.IRON_ORE);
+         this.createTrivialCube(Blocks.DEEPSLATE_IRON_ORE);
+-        this.createTrivialCube(Blocks.POISONOUS_POTATO_ORE);
+-        this.createTrivialCube(Blocks.DEEPSLATE_POISONOUS_POTATO_ORE);
+         this.createTrivialCube(Blocks.IRON_BLOCK);
+         this.createTrivialBlock(Blocks.ANCIENT_DEBRIS, TexturedModel.COLUMN);
+         this.createTrivialCube(Blocks.NETHERITE_BLOCK);
+         this.createTrivialCube(Blocks.LAPIS_ORE);
+-        this.createTrivialCube(Blocks.RESIN_ORE);
+         this.createTrivialCube(Blocks.DEEPSLATE_LAPIS_ORE);
+         this.createTrivialCube(Blocks.LAPIS_BLOCK);
+         this.createTrivialCube(Blocks.NETHER_QUARTZ_ORE);
+         this.createTrivialCube(Blocks.REDSTONE_ORE);
+         this.createTrivialCube(Blocks.DEEPSLATE_REDSTONE_ORE);
+-        this.createTrivialCube(Blocks.POTONE_REDSTONE_ORE);
+-        this.createTrivialCube(Blocks.POTONE_LAPIS_ORE);
+-        this.createTrivialCube(Blocks.POTONE_DIAMOND_ORE);
+-        this.createTrivialCube(Blocks.POTONE_GOLD_ORE);
+-        this.createTrivialCube(Blocks.POTONE_IRON_ORE);
+-        this.createTrivialCube(Blocks.POTONE_COPPER_ORE);
+         this.createTrivialCube(Blocks.REDSTONE_BLOCK);
+         this.createTrivialCube(Blocks.GILDED_BLACKSTONE);
+-        this.createBigBrain(Blocks.BIG_BRAIN);
+-        this.createViciousPotato(Blocks.VICIOUS_POTATO);
+         this.createTrivialCube(Blocks.BLUE_ICE);
+         this.createTrivialCube(Blocks.CLAY);
+         this.createTrivialCube(Blocks.COARSE_DIRT);
+@@ -4915,13 +_,7 @@
+         this.createTrivialCube(Blocks.RAW_GOLD_BLOCK);
+         this.createRotatedMirroredVariantBlock(Blocks.SCULK);
+         this.createNonTemplateModelBlock(Blocks.HEAVY_CORE);
+-        this.createTrivialCube(Blocks.POISONOUS_POTATO_BLOCK);
+-        this.createTrivialCube(Blocks.COMPRESSED_POISONOUS_POTATO_BLOCK);
+-        this.createTrivialCube(Blocks.DOUBLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+-        this.createTrivialCube(Blocks.TRIPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+-        this.createTrivialCube(Blocks.QUADRUPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+         this.createPetrifiedOakSlab();
+-        this.createTrivialCube(Blocks.POWERFUL_POTATO);
+         this.createTrivialCube(Blocks.COPPER_ORE);
+         this.createTrivialCube(Blocks.DEEPSLATE_COPPER_ORE);
+         this.createTrivialCube(Blocks.COPPER_BLOCK);
+@@ -4963,40 +_,31 @@
+         this.createChiseledBookshelf();
+         this.createBrewingStand();
+         this.createCakeBlock();
+-        this.createCampfires(Blocks.FRYING_TABLE, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE);
++        this.createCampfires(Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE);
+         this.createCartographyTable();
+         this.createCauldrons();
+         this.createChorusFlower();
+-        this.createChorusPlant(Blocks.CHORUS_PLANT);
+-        this.createChorusPlantButNotReally(Blocks.STRONG_ROOTS);
+-        this.createChorusPlantButNotReally(Blocks.WEAK_ROOTS);
++        this.createChorusPlant();
+         this.createComposter();
+-        this.createDaylightDetector(Blocks.DAYLIGHT_DETECTOR);
+-        this.createDaylightDetector(Blocks.POTATO_BATTERY);
++        this.createDaylightDetector();
+         this.createEndPortalFrame();
+         this.createRotatableColumn(Blocks.END_ROD);
+         this.createLightningRod();
+-        this.createFarmland(Blocks.DIRT, Blocks.FARMLAND);
+-        this.createFarmland(Blocks.TERREDEPOMME, Blocks.POISON_FARMLAND);
++        this.createFarmland();
+         this.createFire();
+         this.createSoulFire();
+         this.createFrostedIce();
+         this.createGrassBlocks();
+         this.createCocoa();
+-        this.createDirtPath(Blocks.DIRT_PATH);
+-        this.createDirtPath(Blocks.POISON_PATH);
++        this.createDirtPath();
+         this.createGrindstone();
+         this.createHopper();
+         this.createIronBars();
+         this.createLever();
+         this.createLilyPad();
+         this.createNetherPortalBlock();
+-        this.createCustomModelSimpleBlock(Blocks.POTATO_PORTAL);
+-        this.createCustomModelSimpleBlock(Blocks.PEDESTAL);
+         this.createNetherrack();
+         this.createObserver();
+-        this.createTrivialCube(Blocks.FLOATATO);
+-        this.createFloatater();
+         this.createPistons();
+         this.createPistonHeads();
+         this.createScaffolding();
+@@ -5006,9 +_,7 @@
+         this.createSeaPickle();
+         this.createSmithingTable();
+         this.createSnowBlocks();
+-        this.createLayeredBlock(Blocks.POISONOUS_MASHED_POTATO, Blocks.POISONOUS_MASHED_POTATO, Blocks.POISONOUS_MASHED_POTATO);
+         this.createStonecutter();
+-        this.createPoisonousPotatoCutter();
+         this.createStructureBlock();
+         this.createSweetBerryBush();
+         this.createTripwire();
+@@ -5037,25 +_,21 @@
+         this.createNormalTorch(Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH);
+         this.createCraftingTableLike(Blocks.CRAFTING_TABLE, Blocks.OAK_PLANKS, TextureMapping::craftingTable);
+         this.createCraftingTableLike(Blocks.FLETCHING_TABLE, Blocks.BIRCH_PLANKS, TextureMapping::fletchingTable);
+-        this.createNyliumBlock(Blocks.CRIMSON_NYLIUM, Blocks.NETHERRACK);
+-        this.createNyliumBlock(Blocks.WARPED_NYLIUM, Blocks.NETHERRACK);
+-        this.createNyliumBlock(Blocks.CORRUPTED_PEELGRASS_BLOCK, Blocks.TERREDEPOMME);
++        this.createNyliumBlock(Blocks.CRIMSON_NYLIUM);
++        this.createNyliumBlock(Blocks.WARPED_NYLIUM);
+         this.createDispenserBlock(Blocks.DISPENSER);
+         this.createDispenserBlock(Blocks.DROPPER);
+         this.createCrafterBlock();
+         this.createLantern(Blocks.LANTERN);
+         this.createLantern(Blocks.SOUL_LANTERN);
+         this.createAxisAlignedPillarBlockCustomModel(Blocks.CHAIN, ModelLocationUtils.getModelLocation(Blocks.CHAIN));
+-        this.createAxisAlignedPillarBlockCustomModel(Blocks.POTATO_PEDICULE, ModelLocationUtils.getModelLocation(Blocks.POTATO_PEDICULE));
+         this.createAxisAlignedPillarBlock(Blocks.BASALT, TexturedModel.COLUMN);
+         this.createAxisAlignedPillarBlock(Blocks.POLISHED_BASALT, TexturedModel.COLUMN);
+         this.createTrivialCube(Blocks.SMOOTH_BASALT);
+         this.createAxisAlignedPillarBlock(Blocks.BONE_BLOCK, TexturedModel.COLUMN);
+         this.createRotatedVariantBlock(Blocks.DIRT);
+-        this.createRotatedVariantBlock(Blocks.TERREDEPOMME);
+         this.createRotatedVariantBlock(Blocks.ROOTED_DIRT);
+         this.createRotatedVariantBlock(Blocks.SAND);
+-        this.createRotatedVariantBlock(Blocks.GRAVTATER);
+         this.createBrushableBlock(Blocks.SUSPICIOUS_SAND);
+         this.createBrushableBlock(Blocks.SUSPICIOUS_GRAVEL);
+         this.createRotatedVariantBlock(Blocks.RED_SAND);
+@@ -5069,7 +_,6 @@
+         this.createRotatedPillarWithHorizontalVariant(Blocks.PEARLESCENT_FROGLIGHT, TexturedModel.COLUMN, TexturedModel.COLUMN_HORIZONTAL);
+         this.createHorizontallyRotatedBlock(Blocks.LOOM, TexturedModel.ORIENTABLE);
+         this.createPumpkins();
+-        this.createZombieHead();
+         this.createBeeNest(Blocks.BEE_NEST, TextureMapping::orientableCube);
+         this.createBeeNest(Blocks.BEEHIVE, TextureMapping::orientableCubeSameEnds);
+         this.createCropBlock(Blocks.BEETROOTS, BlockStateProperties.AGE_3, 0, 1, 2, 3);
+@@ -5319,19 +_,12 @@
+         this.createPlant(Blocks.OXEYE_DAISY, Blocks.POTTED_OXEYE_DAISY, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createPlant(Blocks.CORNFLOWER, Blocks.POTTED_CORNFLOWER, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createPlant(Blocks.LILY_OF_THE_VALLEY, Blocks.POTTED_LILY_OF_THE_VALLEY, BlockModelGenerators.TintState.NOT_TINTED);
+-        this.createPlant(Blocks.POTATO_FLOWER, Blocks.POTTED_POTATO_FLOWER, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createPlant(Blocks.WITHER_ROSE, Blocks.POTTED_WITHER_ROSE, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createPlant(Blocks.RED_MUSHROOM, Blocks.POTTED_RED_MUSHROOM, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createPlant(Blocks.BROWN_MUSHROOM, Blocks.POTTED_BROWN_MUSHROOM, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createPlant(Blocks.DEAD_BUSH, Blocks.POTTED_DEAD_BUSH, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createPlant(Blocks.TORCHFLOWER, Blocks.POTTED_TORCHFLOWER, BlockModelGenerators.TintState.NOT_TINTED);
+-        this.createPointedDripstone(Blocks.POINTED_DRIPSTONE);
+-        this.createPointedDripstone(Blocks.POTATO_BUD);
+-        this.createCrossBlockWithDefaultItem(Blocks.POTATO_SPROUTS, BlockModelGenerators.TintState.NOT_TINTED);
+-        this.woodProvider(Blocks.POTATO_STEM).log(Blocks.POTATO_STEM);
+-        this.createTrivialBlock(Blocks.POTATO_FRUIT, TexturedModel.CUBE_TOP_BOTTOM);
+-        this.createTrivialBlock(Blocks.POTATO_LEAVES, TexturedModel.LEAVES);
+-        this.createSimpleFlatItemModel(Items.POTATO_PEDICULE);
++        this.createPointedDripstone();
+         this.createMushroomBlock(Blocks.BROWN_MUSHROOM_BLOCK);
+         this.createMushroomBlock(Blocks.RED_MUSHROOM_BLOCK);
+         this.createMushroomBlock(Blocks.MUSHROOM_STEM);
+@@ -5462,7 +_,6 @@
+         this.woodProvider(Blocks.WARPED_STEM).log(Blocks.WARPED_STEM).wood(Blocks.WARPED_HYPHAE);
+         this.woodProvider(Blocks.STRIPPED_WARPED_STEM).log(Blocks.STRIPPED_WARPED_STEM).wood(Blocks.STRIPPED_WARPED_HYPHAE);
+         this.createHangingSign(Blocks.STRIPPED_WARPED_STEM, Blocks.WARPED_HANGING_SIGN, Blocks.WARPED_WALL_HANGING_SIGN);
+-        this.createHangingSign(Blocks.POTATO_STEM, Blocks.POTATO_HANGING_SIGN, Blocks.POTATO_WALL_HANGING_SIGN);
+         this.createPlant(Blocks.WARPED_FUNGUS, Blocks.POTTED_WARPED_FUNGUS, BlockModelGenerators.TintState.NOT_TINTED);
+         this.createNetherRoots(Blocks.WARPED_ROOTS, Blocks.POTTED_WARPED_ROOTS);
+         this.woodProvider(Blocks.BAMBOO_BLOCK).logUVLocked(Blocks.BAMBOO_BLOCK);
+@@ -5489,7 +_,6 @@
+         this.createFurnace(Blocks.FURNACE, TexturedModel.ORIENTABLE_ONLY_TOP);
+         this.createFurnace(Blocks.BLAST_FURNACE, TexturedModel.ORIENTABLE_ONLY_TOP);
+         this.createFurnace(Blocks.SMOKER, TexturedModel.ORIENTABLE);
+-        this.createFurnace(Blocks.POTATO_REFINERY, TexturedModel.ORIENTABLE_ONLY_TOP);
+         this.createRedstoneWire();
+         this.createRespawnAnchor();
+         this.createSculkCatalyst();
+@@ -5500,12 +_,6 @@
+         this.createInfestedStone();
+         this.copyModel(Blocks.STONE_BRICKS, Blocks.INFESTED_STONE_BRICKS);
+         this.createInfestedDeepslate();
+-
+-        for(Block block : Blocks.POTATO_PEELS_BLOCK_MAP.values()) {
+-            this.createTrivialCube(block);
+-        }
+-
+-        this.createTrivialCube(Blocks.CORRUPTED_POTATO_PEELS_BLOCK);
+         SpawnEggItem.eggs().forEach(p_236282_ -> this.delegateItemModel(p_236282_, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg")));
+     }
+ 
+@@ -5513,7 +_,7 @@
+         this.skipAutoItemBlock(Blocks.LIGHT);
+         PropertyDispatch.C1<Integer> c1 = PropertyDispatch.property(BlockStateProperties.LEVEL);
+ 
+-        for(int i = 0; i < 16; ++i) {
++        for (int i = 0; i < 16; i++) {
+             String s = String.format(Locale.ROOT, "_%02d", i);
+             ResourceLocation resourcelocation = TextureMapping.getItemTexture(Items.LIGHT, s);
+             c1.select(
+@@ -5574,7 +_,7 @@
+         }
+ 
+         public BlockModelGenerators.BlockEntityModelGenerator create(Block... p_125026_) {
+-            for(Block block : p_125026_) {
++            for (Block block : p_125026_) {
+                 BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, this.baseModel));
+             }
+ 
+@@ -5582,7 +_,7 @@
+         }
+ 
+         public BlockModelGenerators.BlockEntityModelGenerator createWithoutBlockItem(Block... p_125028_) {
+-            for(Block block : p_125028_) {
++            for (Block block : p_125028_) {
+                 BlockModelGenerators.this.skipAutoItemBlock(block);
+             }
+ 
+@@ -5590,7 +_,7 @@
+         }
+ 
+         public BlockModelGenerators.BlockEntityModelGenerator createWithCustomBlockItemModel(ModelTemplate p_125023_, Block... p_125024_) {
+-            for(Block block : p_125024_) {
++            for (Block block : p_125024_) {
+                 p_125023_.create(ModelLocationUtils.getModelLocation(block.asItem()), TextureMapping.particle(block), BlockModelGenerators.this.modelOutput);
+             }
+ 

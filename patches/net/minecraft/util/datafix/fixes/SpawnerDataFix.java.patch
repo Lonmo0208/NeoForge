@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/datafix/fixes/SpawnerDataFix.java
++++ b/net/minecraft/util/datafix/fixes/SpawnerDataFix.java
+@@ -35,14 +_,14 @@
+ 
+     private <T> Typed<T> wrapEntityToSpawnData(Type<T> p_185141_, Typed<?> p_185142_) {
+         DynamicOps<?> dynamicops = p_185142_.getOps();
+-        return new Typed<>(p_185141_, dynamicops, (T)Pair.<Object, Dynamic>of(p_185142_.getValue(), new Dynamic<>(dynamicops)));
++        return new Typed<>(p_185141_, dynamicops, (T)Pair.<Object, Dynamic<?>>of(p_185142_.getValue(), new Dynamic<>(dynamicops)));
+     }
+ 
+     private <T> Typed<T> wrapSpawnPotentialsToWeightedEntries(Type<T> p_185147_, Typed<?> p_185148_) {
+         DynamicOps<?> dynamicops = p_185148_.getOps();
+-        List<?> list = (List)p_185148_.getValue();
++        List<?> list = (List<?>)p_185148_.getValue();
+         List<?> list1 = list.stream().map(p_185145_ -> {
+-            Pair<Object, Dynamic<?>> pair = (Pair)p_185145_;
++            Pair<Object, Dynamic<?>> pair = (Pair<Object, Dynamic<?>>)p_185145_;
+             int i = pair.getSecond().get("Weight").asNumber().result().orElse(1).intValue();
+             Dynamic<?> dynamic = new Dynamic<>(dynamicops);
+             dynamic = dynamic.set("weight", dynamic.createInt(i));

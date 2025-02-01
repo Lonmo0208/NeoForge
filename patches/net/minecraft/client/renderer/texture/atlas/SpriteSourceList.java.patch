@@ -1,0 +1,27 @@
+--- a/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java
++++ b/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java
+@@ -51,7 +_,7 @@
+             public void removeAll(Predicate<ResourceLocation> p_296294_) {
+                 Iterator<Entry<ResourceLocation, SpriteSource.SpriteSupplier>> iterator = map.entrySet().iterator();
+ 
+-                while(iterator.hasNext()) {
++                while (iterator.hasNext()) {
+                     Entry<ResourceLocation, SpriteSource.SpriteSupplier> entry = iterator.next();
+                     if (p_296294_.test(entry.getKey())) {
+                         entry.getValue().discard();
+@@ -71,12 +_,12 @@
+         ResourceLocation resourcelocation = ATLAS_INFO_CONVERTER.idToFile(p_295617_);
+         List<SpriteSource> list = new ArrayList<>();
+ 
+-        for(Resource resource : p_295606_.getResourceStack(resourcelocation)) {
++        for (Resource resource : p_295606_.getResourceStack(resourcelocation)) {
+             try (BufferedReader bufferedreader = resource.openAsReader()) {
+                 Dynamic<JsonElement> dynamic = new Dynamic<>(JsonOps.INSTANCE, JsonParser.parseReader(bufferedreader));
+-                list.addAll(SpriteSources.FILE_CODEC.parse(dynamic).getOrThrow(false, LOGGER::error));
++                list.addAll(SpriteSources.FILE_CODEC.parse(dynamic).getOrThrow());
+             } catch (Exception exception) {
+-                LOGGER.warn("Failed to parse atlas definition {} in pack {}", resourcelocation, resource.sourcePackId(), exception);
++                LOGGER.error("Failed to parse atlas definition {} in pack {}", resourcelocation, resource.sourcePackId(), exception);
+             }
+         }
+ 

@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/item/EnderEyeItem.java
++++ b/net/minecraft/world/item/EnderEyeItem.java
+@@ -50,8 +_,8 @@
+             if (blockpattern$blockpatternmatch != null) {
+                 BlockPos blockpos1 = blockpattern$blockpatternmatch.getFrontTopLeft().offset(-3, 0, -3);
+ 
+-                for(int i = 0; i < 3; ++i) {
+-                    for(int j = 0; j < 3; ++j) {
++                for (int i = 0; i < 3; i++) {
++                    for (int j = 0; j < 3; j++) {
+                         level.setBlock(blockpos1.offset(i, 0, j), Blocks.END_PORTAL.defaultBlockState(), 2);
+                     }
+                 }

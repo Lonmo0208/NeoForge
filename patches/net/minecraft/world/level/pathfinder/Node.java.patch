@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/level/pathfinder/Node.java
++++ b/net/minecraft/world/level/pathfinder/Node.java
+@@ -105,12 +_,7 @@
+ 
+     @Override
+     public boolean equals(Object p_77309_) {
+-        if (!(p_77309_ instanceof Node)) {
+-            return false;
+-        } else {
+-            Node node = (Node)p_77309_;
+-            return this.hash == node.hash && this.x == node.x && this.y == node.y && this.z == node.z;
+-        }
++        return !(p_77309_ instanceof Node node) ? false : this.hash == node.hash && this.x == node.x && this.y == node.y && this.z == node.z;
+     }
+ 
+     @Override

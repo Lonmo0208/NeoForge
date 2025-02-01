@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/model/AllayModel.java
++++ b/net/minecraft/client/model/AllayModel.java
+@@ -116,7 +_,7 @@
+         this.left_wing.yRot = (float) (Math.PI / 4) - f1;
+         this.body.xRot = f4 * (float) (Math.PI / 4);
+         float f12 = f6 * Mth.lerp(f4, (float) (-Math.PI / 3), -1.134464F);
+-        this.root.y += (float)Math.cos((double)f3) * 0.25F * f5;
++        this.root.y = this.root.y + (float)Math.cos((double)f3) * 0.25F * f5;
+         this.right_arm.xRot = f12;
+         this.left_arm.xRot = f12;
+         float f13 = f5 * (1.0F - f6);

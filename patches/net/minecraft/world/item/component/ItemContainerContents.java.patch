@@ -1,0 +1,72 @@
+--- a/net/minecraft/world/item/component/ItemContainerContents.java
++++ b/net/minecraft/world/item/component/ItemContainerContents.java
+@@ -12,13 +_,13 @@
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+ import net.minecraft.network.codec.ByteBufCodecs;
+ import net.minecraft.network.codec.StreamCodec;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.item.ItemStack;
+ 
+ public final class ItemContainerContents implements Iterable<ItemStack> {
+     private static final int MAX_SIZE = 256;
+     public static final ItemContainerContents EMPTY = new ItemContainerContents(NonNullList.create());
+-    public static final Codec<ItemContainerContents> CODEC = ExtraCodecs.sizeLimitedList(ItemContainerContents.Slot.CODEC.listOf(), 256)
++    public static final Codec<ItemContainerContents> CODEC = ItemContainerContents.Slot.CODEC
++        .sizeLimitedListOf(256)
+         .xmap(ItemContainerContents::fromSlots, ItemContainerContents::asSlots);
+     public static final StreamCodec<RegistryFriendlyByteBuf, ItemContainerContents> STREAM_CODEC = ItemStack.OPTIONAL_STREAM_CODEC
+         .apply(ByteBufCodecs.list(256))
+@@ -36,7 +_,7 @@
+     private ItemContainerContents(List<ItemStack> p_331046_) {
+         this(p_331046_.size());
+ 
+-        for(int i = 0; i < p_331046_.size(); ++i) {
++        for (int i = 0; i < p_331046_.size(); i++) {
+             this.items.set(i, p_331046_.get(i));
+         }
+     }
+@@ -45,7 +_,7 @@
+         int i = p_331424_.stream().mapToInt(ItemContainerContents.Slot::index).max().orElse(-1);
+         ItemContainerContents itemcontainercontents = new ItemContainerContents(i + 1);
+ 
+-        for(ItemContainerContents.Slot itemcontainercontents$slot : p_331424_) {
++        for (ItemContainerContents.Slot itemcontainercontents$slot : p_331424_) {
+             itemcontainercontents.items.set(itemcontainercontents$slot.index(), itemcontainercontents$slot.item());
+         }
+ 
+@@ -59,7 +_,7 @@
+         } else {
+             ItemContainerContents itemcontainercontents = new ItemContainerContents(i);
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 itemcontainercontents.items.set(j, p_331291_.get(j).copy());
+             }
+ 
+@@ -68,7 +_,7 @@
+     }
+ 
+     private static int getFilledSize(List<ItemStack> p_330223_) {
+-        for(int i = p_330223_.size() - 1; i >= 0; --i) {
++        for (int i = p_330223_.size() - 1; i >= 0; i--) {
+             if (!p_330223_.get(i).isEmpty()) {
+                 return i + 1;
+             }
+@@ -80,7 +_,7 @@
+     private List<ItemContainerContents.Slot> asSlots() {
+         List<ItemContainerContents.Slot> list = new ArrayList<>();
+ 
+-        for(int i = 0; i < this.items.size(); ++i) {
++        for (int i = 0; i < this.items.size(); i++) {
+             ItemStack itemstack = this.items.get(i);
+             if (!itemstack.isEmpty()) {
+                 list.add(new ItemContainerContents.Slot(i, itemstack));
+@@ -91,7 +_,7 @@
+     }
+ 
+     public void copyInto(NonNullList<ItemStack> p_330513_) {
+-        for(int i = 0; i < p_330513_.size(); ++i) {
++        for (int i = 0; i < p_330513_.size(); i++) {
+             ItemStack itemstack = i < this.items.size() ? this.items.get(i) : ItemStack.EMPTY;
+             p_330513_.set(i, itemstack.copy());
+         }

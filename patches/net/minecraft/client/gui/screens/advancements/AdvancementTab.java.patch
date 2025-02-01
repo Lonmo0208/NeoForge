@@ -24,14 +24,45 @@
      public AdvancementTabType getType() {
          return this.type;
      }
-@@ -146,8 +_,8 @@
+@@ -97,8 +_,8 @@
+         int k = i % 16;
+         int l = j % 16;
+ 
+-        for(int i1 = -1; i1 <= 15; ++i1) {
+-            for(int j1 = -1; j1 <= 8; ++j1) {
++        for (int i1 = -1; i1 <= 15; i1++) {
++            for (int j1 = -1; j1 <= 8; j1++) {
+                 p_282728_.blit(resourcelocation, k + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
+             }
+         }
+@@ -118,7 +_,7 @@
+         int i = Mth.floor(this.scrollX);
+         int j = Mth.floor(this.scrollY);
+         if (p_283658_ > 0 && p_283658_ < 234 && p_282602_ > 0 && p_282602_ < 113) {
+-            for(AdvancementWidget advancementwidget : this.widgets.values()) {
++            for (AdvancementWidget advancementwidget : this.widgets.values()) {
+                 if (advancementwidget.isMouseOver(i, j, p_283658_, p_282602_)) {
+                     flag = true;
+                     advancementwidget.drawHover(p_282892_, i, j, this.fade, p_282652_, p_283595_);
+@@ -145,9 +_,9 @@
+         if (optional.isEmpty()) {
              return null;
          } else {
-             for(AdvancementTabType advancementtabtype : AdvancementTabType.values()) {
+-            for(AdvancementTabType advancementtabtype : AdvancementTabType.values()) {
 -                if (p_97173_ < advancementtabtype.getMax()) {
 -                    return new AdvancementTab(p_97171_, p_97172_, advancementtabtype, p_97173_, p_301072_, optional.get());
++            for (AdvancementTabType advancementtabtype : AdvancementTabType.values()) {
 +                if ((p_97173_ % AdvancementTabType.MAX_TABS) < advancementtabtype.getMax()) {
 +                    return new AdvancementTab(p_97171_, p_97172_, advancementtabtype, p_97173_ % AdvancementTabType.MAX_TABS, p_97173_ / AdvancementTabType.MAX_TABS, p_301072_, optional.get());
                  }
  
                  p_97173_ -= advancementtabtype.getMax();
+@@ -186,7 +_,7 @@
+         this.minY = Math.min(this.minY, k);
+         this.maxY = Math.max(this.maxY, l);
+ 
+-        for(AdvancementWidget advancementwidget : this.widgets.values()) {
++        for (AdvancementWidget advancementwidget : this.widgets.values()) {
+             advancementwidget.attachToParent();
+         }
+     }

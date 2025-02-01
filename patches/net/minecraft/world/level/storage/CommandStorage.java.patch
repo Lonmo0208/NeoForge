@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/storage/CommandStorage.java
++++ b/net/minecraft/world/level/storage/CommandStorage.java
+@@ -57,7 +_,7 @@
+         CommandStorage.Container load(CompoundTag p_164850_) {
+             CompoundTag compoundtag = p_164850_.getCompound("contents");
+ 
+-            for(String s : compoundtag.getAllKeys()) {
++            for (String s : compoundtag.getAllKeys()) {
+                 this.storage.put(s, compoundtag.getCompound(s));
+             }
+ 

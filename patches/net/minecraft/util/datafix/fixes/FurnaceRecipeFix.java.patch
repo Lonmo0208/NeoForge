@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/datafix/fixes/FurnaceRecipeFix.java
++++ b/net/minecraft/util/datafix/fixes/FurnaceRecipeFix.java
+@@ -57,14 +_,14 @@
+         dynamic = dynamic.remove("RecipesUsedSize");
+         List<Pair<R, Integer>> list = Lists.newArrayList();
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             String s = "RecipeLocation" + j;
+             String s1 = "RecipeAmount" + j;
+             Optional<? extends Dynamic<?>> optional = dynamic.get(s).result();
+             int k = dynamic.get(s1).asInt(0);
+             if (k > 0) {
+-                optional.ifPresent(p_15859_ -> {
+-                    Optional<? extends Pair<R, ? extends Dynamic<?>>> optional1 = p_15852_.read(p_15859_).result();
++                optional.ifPresent(p_337634_ -> {
++                    Optional<? extends Pair<R, ? extends Dynamic<?>>> optional1 = p_15852_.read((Dynamic<?>)p_337634_).result();
+                     optional1.ifPresent(p_145360_ -> list.add(Pair.of(p_145360_.getFirst(), k)));
+                 });
+             }

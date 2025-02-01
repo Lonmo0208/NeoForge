@@ -1,6 +1,52 @@
 --- a/net/minecraft/client/gui/Gui.java
 +++ b/net/minecraft/client/gui/Gui.java
-@@ -69,6 +_,9 @@
+@@ -5,8 +_,6 @@
+ import com.mojang.blaze3d.platform.GlStateManager;
+ import com.mojang.blaze3d.platform.Window;
+ import com.mojang.blaze3d.systems.RenderSystem;
+-import com.mojang.blaze3d.vertex.PoseStack;
+-import com.mojang.math.Axis;
+ import java.util.Collection;
+ import java.util.Comparator;
+ import java.util.List;
+@@ -23,13 +_,11 @@
+ import net.minecraft.client.gui.components.PlayerTabOverlay;
+ import net.minecraft.client.gui.components.SubtitleOverlay;
+ import net.minecraft.client.gui.components.spectator.SpectatorGui;
+-import net.minecraft.client.gui.screens.Screen;
+ import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+ import net.minecraft.client.renderer.LightTexture;
+ import net.minecraft.client.renderer.RenderType;
+ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+ import net.minecraft.client.resources.MobEffectTextureManager;
+-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.component.DataComponents;
+@@ -37,11 +_,8 @@
+ import net.minecraft.network.chat.MutableComponent;
+ import net.minecraft.network.chat.numbers.NumberFormat;
+ import net.minecraft.network.chat.numbers.StyledFormat;
+-import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+ import net.minecraft.resources.ResourceLocation;
+ import net.minecraft.server.MinecraftServer;
+-import net.minecraft.sounds.SoundEvents;
+-import net.minecraft.stats.Stats;
+ import net.minecraft.tags.FluidTags;
+ import net.minecraft.util.FastColor;
+ import net.minecraft.util.Mth;
+@@ -59,10 +_,8 @@
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.food.FoodData;
+ import net.minecraft.world.item.ItemStack;
+-import net.minecraft.world.item.Items;
+ import net.minecraft.world.level.GameType;
+ import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.border.WorldBorder;
+ import net.minecraft.world.phys.BlockHitResult;
+@@ -77,6 +_,9 @@
  import net.neoforged.api.distmarker.OnlyIn;
  import org.joml.Matrix4fStack;
  
@@ -10,7 +56,7 @@
  @OnlyIn(Dist.CLIENT)
  public class Gui {
      protected static final ResourceLocation CROSSHAIR_SPRITE = new ResourceLocation("hud/crosshair");
-@@ -151,9 +_,21 @@
+@@ -159,11 +_,20 @@
      protected long healthBlinkTime;
      protected float autosaveIndicatorValue;
      protected float lastAutosaveIndicatorValue;
@@ -19,7 +65,10 @@
      private final LayeredDraw layers = new LayeredDraw();
 +    private final net.neoforged.neoforge.client.gui.GuiLayerManager layerManager = new net.neoforged.neoforge.client.gui.GuiLayerManager();
      protected float scopeScale;
- 
+-    @Nullable
+-    private GuiGraphics.DrawString dialogue = null;
+-    private String questKey = "";
++
 +    /**
 +     * Neo: This variable controls the height of overlays on the left of the hotbar (e.g. health, armor).
 +     */
@@ -28,16 +77,16 @@
 +     * Neo: This variable controls the height of overlays on the right of the hotbar (e.g. food, vehicle health, air).
 +     */
 +    public int rightHeight;
-+
+ 
      public Gui(Minecraft p_232355_) {
          this.minecraft = p_232355_;
-         this.debugOverlay = new DebugScreenOverlay(p_232355_);
-@@ -163,27 +_,40 @@
+@@ -174,28 +_,40 @@
          this.bossOverlay = new BossHealthOverlay(p_232355_);
          this.subtitleOverlay = new SubtitleOverlay(p_232355_);
          this.resetTitleTimes();
 -        LayeredDraw layereddraw = new LayeredDraw()
 -            .add(this::renderCameraOverlays)
+-            .add(this::renderMissionDialogue)
 -            .add(this::renderCrosshair)
 -            .add(this::renderHotbarAndDecorations)
 -            .add(this::renderExperienceLevel)
@@ -90,7 +139,7 @@
      }
  
      public void resetTitleTimes() {
-@@ -194,7 +_,9 @@
+@@ -206,7 +_,9 @@
  
      public void render(GuiGraphics p_282884_, float p_282611_) {
          RenderSystem.enableDepthTest();
@@ -101,7 +150,7 @@
          RenderSystem.disableDepthTest();
      }
  
-@@ -253,8 +_,12 @@
+@@ -265,8 +_,12 @@
              }
  
              if (i > 8) {
@@ -115,24 +164,126 @@
                  int j = 16777215;
                  if (this.animateOverlayMessageColor) {
                      j = Mth.hsvToRgb(f / 50.0F, 0.7F, 0.6F) & 16777215;
-@@ -442,6 +_,8 @@
+@@ -283,66 +_,6 @@
+         }
+     }
+ 
+-    private void renderMissionDialogue(GuiGraphics p_340548_, float p_342017_) {
+-        ItemStack itemstack = this.minecraft.player.getInventory().getArmor(3);
+-        if (!itemstack.is(Items.POISONOUS_POTATO_PLANT)) {
+-            this.dialogue = null;
+-        } else {
+-            float f = (float)this.getGuiTicks() + p_342017_;
+-            PoseStack posestack = p_340548_.pose();
+-            Font font = this.getFont();
+-            ItemStack itemstack1 = new ItemStack(Items.POISONOUS_POTATO_PLANT);
+-            itemstack1.set(DataComponents.HOVERED, true);
+-            if (this.dialogue == null || !this.questKey.equals(this.minecraft.player.getQuestKey())) {
+-                this.questKey = this.minecraft.player.getQuestKey();
+-                Component component = Component.translatable(
+-                    this.questKey,
+-                    this.minecraft.player.getDisplayName(),
+-                    this.minecraft.options.keyJump.getTranslatedKeyMessage(),
+-                    this.minecraft.options.keyUse.getTranslatedKeyMessage()
+-                );
+-                this.dialogue = p_340548_.beginString((double)f, 2.0, font, component.getString(), 16777215, p_340548_.guiWidth() - 72);
+-            }
+-
+-            if (this.minecraft.player.getEntityData().get(Player.DATA_POTATO_QUEST_COMPLETED)) {
+-                this.minecraft.getConnection().send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.REQUEST_STATS));
+-                String s = Stats.CUSTOM
+-                    .get(Stats.POTATO_QUEST_TIME)
+-                    .format(this.minecraft.player.getStats().getValue(Stats.CUSTOM.get(Stats.POTATO_QUEST_TIME)));
+-                RenderSystem.disableDepthTest();
+-                RenderSystem.depthMask(false);
+-                posestack.pushPose();
+-                p_340548_.drawCenteredString(font, Component.translatable("stat.minecraft.potato_quest_time_format", s), p_340548_.guiWidth() / 2, 48, 16777215);
+-                posestack.popPose();
+-                RenderSystem.enableDepthTest();
+-                RenderSystem.depthMask(true);
+-            }
+-
+-            if (!((double)f - this.dialogue.getLastTick() > 200.0)) {
+-                RenderSystem.disableDepthTest();
+-                RenderSystem.depthMask(false);
+-                p_340548_.fill(0, 0, p_340548_.guiWidth(), 32, 0, 1073741824);
+-                p_340548_.fillGradient(0, 32, p_340548_.guiWidth(), 64, 1073741824, 0);
+-                posestack.pushPose();
+-                posestack.translate(-4.0F, -12.0F, 0.0F);
+-                posestack.scale(4.0F, 4.0F, 1.0F);
+-                posestack.rotateAround(Axis.ZP.rotationDegrees(Mth.sin(((float)this.tickCount + p_342017_) / 5.0F) * 20.0F), 8.0F, 8.0F, 0.0F);
+-                p_340548_.renderItem(itemstack1, 0, 0);
+-                posestack.popPose();
+-                posestack.pushPose();
+-                if (this.dialogue.draw((double)f, 72, 16)) {
+-                    this.minecraft
+-                        .getSoundManager()
+-                        .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_FLUTE, Mth.randomBetween(this.minecraft.player.getRandom(), 1.25F, 1.75F)));
+-                }
+-
+-                posestack.popPose();
+-                RenderSystem.enableDepthTest();
+-                RenderSystem.depthMask(true);
+-            }
+-        }
+-    }
+-
+     private void renderTitle(GuiGraphics p_316629_, float p_316206_) {
+         if (this.title != null && this.titleTime > 0) {
+             Font font = this.getFont();
+@@ -502,8 +_,8 @@
+     private void renderEffects(GuiGraphics p_282812_, float p_316418_) {
+         Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
+         if (!collection.isEmpty()) {
+-            Screen $$5 = this.minecraft.screen;
+-            if ($$5 instanceof EffectRenderingInventoryScreen effectrenderinginventoryscreen && effectrenderinginventoryscreen.canSeeEffects()) {
++            if (this.minecraft.screen instanceof EffectRenderingInventoryScreen effectrenderinginventoryscreen
++                && effectrenderinginventoryscreen.canSeeEffects()) {
+                 return;
+             }
+ 
+@@ -513,7 +_,9 @@
+             MobEffectTextureManager mobeffecttexturemanager = this.minecraft.getMobEffectTextures();
              List<Runnable> list = Lists.newArrayListWithExpectedSize(collection.size());
  
-             for(MobEffectInstance mobeffectinstance : Ordering.natural().reverse().sortedCopy(collection)) {
+-            for(MobEffectInstance mobeffectinstance : Ordering.natural().reverse().sortedCopy(collection)) {
++            for (MobEffectInstance mobeffectinstance : Ordering.natural().reverse().sortedCopy(collection)) {
 +                var renderer = net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions.of(mobeffectinstance);
 +                if (!renderer.isVisibleInGui(mobeffectinstance)) continue;
                  Holder<MobEffect> holder = mobeffectinstance.getEffect();
                  if (mobeffectinstance.showIcon()) {
                      int i = p_282812_.guiWidth();
-@@ -472,6 +_,7 @@
+@@ -523,10 +_,10 @@
+                     }
+ 
+                     if (holder.value().isBeneficial()) {
+-                        ++j1;
++                        j1++;
+                         i -= 25 * j1;
+                     } else {
+-                        ++k1;
++                        k1++;
+                         i -= 25 * k1;
+                         j += 26;
+                     }
+@@ -544,13 +_,14 @@
                          }
                      }
  
 +                    if (renderer.renderGuiIcon(mobeffectinstance, this, p_282812_, i, j, 0, f)) continue;
                      TextureAtlasSprite textureatlassprite = mobeffecttexturemanager.get(holder);
++                    int l1 = i;
                      int i1 = j;
                      float f1 = f;
-@@ -489,29 +_,59 @@
+-                    int i_f = i;
+                     list.add(() -> {
+                         p_282812_.setColor(1.0F, 1.0F, 1.0F, f1);
+-                        p_282812_.blit(i_f + 3, i1 + 3, 0, 18, 18, textureatlassprite);
++                        p_282812_.blit(l1 + 3, i1 + 3, 0, 18, 18, textureatlassprite);
+                         p_282812_.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+                     });
+                 }
+@@ -561,29 +_,59 @@
          }
      }
  
@@ -195,7 +346,57 @@
              this.spectatorGui.renderTooltip(p_316628_);
          }
      }
-@@ -634,18 +_,23 @@
+@@ -613,23 +_,18 @@
+             RenderSystem.disableBlend();
+             int l = 1;
+ 
+-            for(int i1 = 0; i1 < 9; ++i1) {
++            for (int i1 = 0; i1 < 9; i1++) {
+                 int j1 = i - 90 + i1 * 20 + 2;
+                 int k1 = p_316896_.guiHeight() - 16 - 3;
+-                ItemStack itemstack1 = player.getInventory().items.get(i1);
+-                if (itemstack1.has(DataComponents.HOVERED)) {
+-                    itemstack1.set(DataComponents.HOVERED, player.getInventory().selected == i1);
+-                }
+-
+                 this.renderSlot(p_316896_, j1, k1, p_316621_, player, player.getInventory().items.get(i1), l++);
+             }
+ 
+             if (!itemstack.isEmpty()) {
+-                int l1 = p_316896_.guiHeight() - 16 - 3;
++                int i2 = p_316896_.guiHeight() - 16 - 3;
+                 if (humanoidarm == HumanoidArm.LEFT) {
+-                    this.renderSlot(p_316896_, i - 91 - 26, l1, p_316621_, player, itemstack, l++);
++                    this.renderSlot(p_316896_, i - 91 - 26, i2, p_316621_, player, itemstack, l++);
+                 } else {
+-                    this.renderSlot(p_316896_, i + 91 + 10, l1, p_316621_, player, itemstack, l++);
++                    this.renderSlot(p_316896_, i + 91 + 10, i2, p_316621_, player, itemstack, l++);
+                 }
+             }
+ 
+@@ -637,15 +_,15 @@
+                 RenderSystem.enableBlend();
+                 float f = this.minecraft.player.getAttackStrengthScale(0.0F);
+                 if (f < 1.0F) {
+-                    int i2 = p_316896_.guiHeight() - 20;
+-                    int j2 = i + 91 + 6;
++                    int j2 = p_316896_.guiHeight() - 20;
++                    int k2 = i + 91 + 6;
+                     if (humanoidarm == HumanoidArm.RIGHT) {
+-                        j2 = i - 91 - 22;
++                        k2 = i - 91 - 22;
+                     }
+ 
+-                    int k2 = (int)(f * 19.0F);
+-                    p_316896_.blitSprite(HOTBAR_ATTACK_INDICATOR_BACKGROUND_SPRITE, j2, i2, 18, 18);
+-                    p_316896_.blitSprite(HOTBAR_ATTACK_INDICATOR_PROGRESS_SPRITE, 18, 18, 0, 18 - k2, j2, i2 + 18 - k2, 18, k2);
++                    int l1 = (int)(f * 19.0F);
++                    p_316896_.blitSprite(HOTBAR_ATTACK_INDICATOR_BACKGROUND_SPRITE, k2, j2, 18, 18);
++                    p_316896_.blitSprite(HOTBAR_ATTACK_INDICATOR_PROGRESS_SPRITE, 18, 18, 0, 18 - l1, k2, j2 + 18 - l1, 18, l1);
+                 }
+ 
+                 RenderSystem.disableBlend();
+@@ -711,18 +_,23 @@
      }
  
      private void renderSelectedItemName(GuiGraphics p_283501_) {
@@ -222,7 +423,7 @@
              if (!this.minecraft.gameMode.canHurtPlayer()) {
                  k += 14;
              }
-@@ -657,7 +_,13 @@
+@@ -734,7 +_,13 @@
  
              if (l > 0) {
                  p_283501_.fill(j - 2, k - 2, j + i + 2, k + 9 + 2, this.minecraft.options.getBackgroundColor(0));
@@ -237,7 +438,42 @@
              }
          }
  
-@@ -779,7 +_,15 @@
+@@ -781,13 +_,13 @@
+                 int i1 = this.getFont().width(component3);
+                 return new DisplayEntry(component2, component3, i1);
+             })
+-            .toArray(p_313425_ -> new DisplayEntry[p_313425_]);
++            .toArray(DisplayEntry[]::new);
+         Component component = p_283455_.getDisplayName();
+         int i = this.getFont().width(component);
+         int j = i;
+         int k = this.getFont().width(": ");
+ 
+-        for(DisplayEntry gui$1displayentry : agui$1displayentry) {
++        for (DisplayEntry gui$1displayentry : agui$1displayentry) {
+             j = Math.max(j, this.getFont().width(gui$1displayentry.name) + (gui$1displayentry.scoreWidth > 0 ? k + gui$1displayentry.scoreWidth : 0));
+         }
+ 
+@@ -806,7 +_,7 @@
+             p_282008_.fill(i2 - 2, i3 - 1, j2, k1, k2);
+             p_282008_.drawString(this.getFont(), component, i2 + l / 2 - i / 2, i3 - 9, -1, false);
+ 
+-            for(int j3 = 0; j3 < i1; ++j3) {
++            for (int j3 = 0; j3 < i1; j3++) {
+                 DisplayEntry gui$1displayentry1 = agui$1displayentry[j3];
+                 int k3 = k1 - (i1 - j3) * 9;
+                 p_282008_.drawString(this.getFont(), gui$1displayentry1.name, i2, k3, -1, false);
+@@ -817,8 +_,7 @@
+ 
+     @Nullable
+     private Player getCameraPlayer() {
+-        Entity entity = this.minecraft.getCameraEntity();
+-        return entity instanceof Player player ? player : null;
++        return this.minecraft.getCameraEntity() instanceof Player player ? player : null;
+     }
+ 
+     @Nullable
+@@ -856,7 +_,15 @@
          return (int)Math.ceil((double)p_93013_ / 10.0);
      }
  
@@ -253,7 +489,7 @@
          Player player = this.getCameraPlayer();
          if (player != null) {
              int i = Mth.ceil(player.getHealth());
-@@ -804,35 +_,62 @@
+@@ -881,40 +_,67 @@
              this.random.setSeed((long)(this.tickCount * 312871));
              int l = p_283143_.guiWidth() / 2 - 91;
              int i1 = p_283143_.guiWidth() / 2 + 91;
@@ -327,7 +563,13 @@
                  int l3 = Mth.ceil((double)(j3 - 2) * 10.0 / (double)i3);
                  int i4 = Mth.ceil((double)j3 * 10.0 / (double)i3) - l3;
                  RenderSystem.enableBlend();
-@@ -846,6 +_,7 @@
+ 
+-                for(int j4 = 0; j4 < l3 + i4; ++j4) {
++                for (int j4 = 0; j4 < l3 + i4; j4++) {
+                     if (j4 < l3) {
+                         p_283143_.blitSprite(AIR_SPRITE, i1 - j4 * 8 - 9, j2, 9, 9);
+                     } else {
+@@ -923,6 +_,7 @@
                  }
  
                  RenderSystem.disableBlend();
@@ -335,7 +577,34 @@
              }
  
              this.minecraft.getProfiler().pop();
-@@ -985,7 +_,7 @@
+@@ -935,7 +_,7 @@
+             RenderSystem.enableBlend();
+             int j = p_335452_ - (p_335846_ - 1) * p_335778_ - 10;
+ 
+-            for(int k = 0; k < 10; ++k) {
++            for (int k = 0; k < 10; k++) {
+                 int l = p_335859_ + k * 8;
+                 if (k * 2 + 1 < i) {
+                     p_335393_.blitSprite(ARMOR_FULL_SPRITE, l, j, 9, 9);
+@@ -973,7 +_,7 @@
+         int j = Mth.ceil((double)p_168698_ / 2.0);
+         int k = i * 2;
+ 
+-        for(int l = i + j - 1; l >= 0; --l) {
++        for (int l = i + j - 1; l >= 0; l--) {
+             int i1 = l / 10;
+             int j1 = l % 10;
+             int k1 = p_168691_ + j1 * 8;
+@@ -1022,7 +_,7 @@
+         int i = fooddata.getFoodLevel();
+         RenderSystem.enableBlend();
+ 
+-        for(int j = 0; j < 10; ++j) {
++        for (int j = 0; j < 10; j++) {
+             int k = p_335399_;
+             ResourceLocation resourcelocation;
+             ResourceLocation resourcelocation1;
+@@ -1062,17 +_,17 @@
              if (i != 0) {
                  int j = (int)Math.ceil((double)livingentity.getHealth());
                  this.minecraft.getProfiler().popPush("mountHealth");
@@ -344,7 +613,19 @@
                  int l = p_283368_.guiWidth() / 2 + 91;
                  int i1 = k;
                  int j1 = 0;
-@@ -1008,6 +_,7 @@
+                 RenderSystem.enableBlend();
+ 
+-                while(i > 0) {
++                while (i > 0) {
+                     int k1 = Math.min(i, 10);
+                     i -= k1;
+ 
+-                    for(int l1 = 0; l1 < k1; ++l1) {
++                    for (int l1 = 0; l1 < k1; l1++) {
+                         int i2 = l - l1 * 8 - 9;
+                         p_283368_.blitSprite(HEART_VEHICLE_CONTAINER_SPRITE, i2, i1, 9, 9);
+                         if (l1 * 2 + 1 + j1 < j) {
+@@ -1085,6 +_,7 @@
                      }
  
                      i1 -= 10;
@@ -352,16 +633,68 @@
                      j1 += 20;
                  }
  
-@@ -1164,7 +_,7 @@
+@@ -1127,7 +_,7 @@
+         BlockPos blockpos = BlockPos.containing(p_93021_.getX(), p_93021_.getEyeY(), p_93021_.getZ());
+         float f = LightTexture.getBrightness(p_93021_.level().dimensionType(), p_93021_.level().getMaxLocalRawBrightness(blockpos));
+         float f1 = Mth.clamp(1.0F - f, 0.0F, 1.0F);
+-        this.vignetteBrightness += (f1 - this.vignetteBrightness) * 0.01F;
++        this.vignetteBrightness = this.vignetteBrightness + (f1 - this.vignetteBrightness) * 0.01F;
+     }
+ 
+     public void renderVignette(GuiGraphics p_283063_, @Nullable Entity p_283439_) {
+@@ -1178,12 +_,10 @@
+         RenderSystem.depthMask(false);
+         RenderSystem.enableBlend();
+         p_283375_.setColor(1.0F, 1.0F, 1.0F, p_283296_);
+-        Block block = Blocks.NETHER_PORTAL;
+-        if (this.minecraft.level.isPotato() || this.minecraft.player.level().getBlockState(this.minecraft.player.blockPosition()).is(Blocks.POTATO_PORTAL)) {
+-            block = Blocks.POTATO_PORTAL;
+-        }
+-
+-        TextureAtlasSprite textureatlassprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(block.defaultBlockState());
++        TextureAtlasSprite textureatlassprite = this.minecraft
++            .getBlockRenderer()
++            .getBlockModelShaper()
++            .getParticleIcon(Blocks.NETHER_PORTAL.defaultBlockState());
+         p_283375_.blit(0, 0, -90, p_283375_.guiWidth(), p_283375_.guiHeight(), textureatlassprite);
+         RenderSystem.disableBlend();
+         RenderSystem.depthMask(true);
+@@ -1220,18 +_,18 @@
+ 
+     private void tick() {
+         if (this.overlayMessageTime > 0) {
+-            --this.overlayMessageTime;
++            this.overlayMessageTime--;
+         }
+ 
+         if (this.titleTime > 0) {
+-            --this.titleTime;
++            this.titleTime--;
+             if (this.titleTime <= 0) {
+                 this.title = null;
+                 this.subtitle = null;
+             }
+         }
+ 
+-        ++this.tickCount;
++        this.tickCount++;
+         Entity entity = this.minecraft.getCameraEntity();
+         if (entity != null) {
+             this.updateVignetteBrightness(entity);
+@@ -1243,10 +_,10 @@
                  this.toolHighlightTimer = 0;
              } else if (this.lastToolHighlight.isEmpty()
                  || !itemstack.is(this.lastToolHighlight.getItem())
 -                || !itemstack.getHoverName().equals(this.lastToolHighlight.getHoverName())) {
-+                || (!itemstack.getHoverName().equals(this.lastToolHighlight.getHoverName()) || !itemstack.getHighlightTip(itemstack.getHoverName()).equals(lastToolHighlight.getHighlightTip(lastToolHighlight.getHoverName())))) {
++                || (!itemstack.getHoverName().equals(this.lastToolHighlight.getHoverName()) || !itemstack.getHighlightTip(itemstack.getHoverName()).equals(this.lastToolHighlight.getHighlightTip(this.lastToolHighlight.getHoverName())))) {
                  this.toolHighlightTimer = (int)(40.0 * this.minecraft.options.notificationDisplayTime().get());
              } else if (this.toolHighlightTimer > 0) {
-                 --this.toolHighlightTimer;
-@@ -1289,6 +_,11 @@
+-                --this.toolHighlightTimer;
++                this.toolHighlightTimer--;
+             }
+ 
+             this.lastToolHighlight = itemstack;
+@@ -1368,6 +_,11 @@
                  p_282761_.drawString(font, SAVING_TEXT, p_282761_.guiWidth() - j - 10, p_282761_.guiHeight() - 15, k);
              }
          }

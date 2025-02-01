@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/goal/BreathAirGoal.java
++++ b/net/minecraft/world/entity/ai/goal/BreathAirGoal.java
+@@ -50,7 +_,7 @@
+         );
+         BlockPos blockpos = null;
+ 
+-        for(BlockPos blockpos1 : iterable) {
++        for (BlockPos blockpos1 : iterable) {
+             if (this.givesAir(this.mob.level(), blockpos1)) {
+                 blockpos = blockpos1;
+                 break;

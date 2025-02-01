@@ -1,0 +1,47 @@
+--- a/net/minecraft/world/level/dimension/end/DragonRespawnAnimation.java
++++ b/net/minecraft/world/level/dimension/end/DragonRespawnAnimation.java
+@@ -17,7 +_,7 @@
+         public void tick(ServerLevel p_64017_, EndDragonFight p_64018_, List<EndCrystal> p_64019_, int p_64020_, BlockPos p_64021_) {
+             BlockPos blockpos = new BlockPos(0, 128, 0);
+ 
+-            for(EndCrystal endcrystal : p_64019_) {
++            for (EndCrystal endcrystal : p_64019_) {
+                 endcrystal.setBeamTarget(blockpos);
+             }
+ 
+@@ -48,7 +_,7 @@
+                 if (j < list.size()) {
+                     SpikeFeature.EndSpike spikefeature$endspike = list.get(j);
+                     if (flag) {
+-                        for(EndCrystal endcrystal : p_64037_) {
++                        for (EndCrystal endcrystal : p_64037_) {
+                             endcrystal.setBeamTarget(
+                                 new BlockPos(spikefeature$endspike.getCenterX(), spikefeature$endspike.getHeight() + 1, spikefeature$endspike.getCenterZ())
+                             );
+@@ -56,7 +_,7 @@
+                     } else {
+                         int k = 10;
+ 
+-                        for(BlockPos blockpos : BlockPos.betweenClosed(
++                        for (BlockPos blockpos : BlockPos.betweenClosed(
+                             new BlockPos(
+                                 spikefeature$endspike.getCenterX() - 10, spikefeature$endspike.getHeight() - 10, spikefeature$endspike.getCenterZ() - 10
+                             ),
+@@ -98,7 +_,7 @@
+                 p_64045_.setRespawnStage(END);
+                 p_64045_.resetSpikeCrystals();
+ 
+-                for(EndCrystal endcrystal : p_64046_) {
++                for (EndCrystal endcrystal : p_64046_) {
+                     endcrystal.setBeamTarget(null);
+                     p_64044_.explode(endcrystal, endcrystal.getX(), endcrystal.getY(), endcrystal.getZ(), 6.0F, Level.ExplosionInteraction.NONE);
+                     endcrystal.discard();
+@@ -106,7 +_,7 @@
+             } else if (p_64047_ >= 80) {
+                 p_64044_.levelEvent(3001, new BlockPos(0, 128, 0), 0);
+             } else if (p_64047_ == 0) {
+-                for(EndCrystal endcrystal1 : p_64046_) {
++                for (EndCrystal endcrystal1 : p_64046_) {
+                     endcrystal1.setBeamTarget(new BlockPos(0, 128, 0));
+                 }
+             } else if (p_64047_ < 5) {

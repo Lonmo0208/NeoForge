@@ -9,7 +9,7 @@
  
      public CompressionEncoder(int p_129448_) {
          this.threshold = p_129448_;
-@@ -21,6 +_,12 @@
+@@ -21,13 +_,19 @@
              VarInt.write(p_129454_, 0);
              p_129454_.writeBytes(p_129453_);
          } else {
@@ -22,3 +22,11 @@
              byte[] abyte = new byte[i];
              p_129453_.readBytes(abyte);
              VarInt.write(p_129454_, abyte.length);
+             this.deflater.setInput(abyte, 0, i);
+             this.deflater.finish();
+ 
+-            while(!this.deflater.finished()) {
++            while (!this.deflater.finished()) {
+                 int j = this.deflater.deflate(this.encodeBuf);
+                 p_129454_.writeBytes(this.encodeBuf, 0, j);
+             }

@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/datafix/fixes/ItemStackComponentRemainderFix.java
++++ b/net/minecraft/util/datafix/fixes/ItemStackComponentRemainderFix.java
+@@ -8,7 +_,6 @@
+ import com.mojang.datafixers.schemas.Schema;
+ import com.mojang.datafixers.types.Type;
+ import com.mojang.serialization.Dynamic;
+-import net.minecraft.util.datafix.ExtraDataFixUtils;
+ 
+ public abstract class ItemStackComponentRemainderFix extends DataFix {
+     private final String name;
+@@ -36,8 +_,7 @@
+             p_332673_ -> p_332673_.updateTyped(
+                     opticfinder,
+                     p_332698_ -> p_332698_.update(
+-                            DSL.remainderFinder(),
+-                            p_332733_ -> ExtraDataFixUtils.renameAndFixField(p_332733_, this.componentId, this.newComponentId, this::fixComponent)
++                            DSL.remainderFinder(), p_337637_ -> p_337637_.renameAndFixField(this.componentId, this.newComponentId, this::fixComponent)
+                         )
+                 )
+         );

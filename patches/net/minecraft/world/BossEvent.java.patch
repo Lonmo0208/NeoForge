@@ -1,0 +1,69 @@
+--- a/net/minecraft/world/BossEvent.java
++++ b/net/minecraft/world/BossEvent.java
+@@ -3,7 +_,6 @@
+ import java.util.UUID;
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.network.chat.Component;
+-import net.minecraft.world.phys.Vec3;
+ 
+ public abstract class BossEvent {
+     private final UUID id;
+@@ -11,19 +_,15 @@
+     protected float progress;
+     protected BossEvent.BossBarColor color;
+     protected BossEvent.BossBarOverlay overlay;
+-    protected Vec3 center;
+-    protected int radius;
+     protected boolean darkenScreen;
+     protected boolean playBossMusic;
+     protected boolean createWorldFog;
+ 
+-    public BossEvent(UUID p_18849_, Component p_18850_, BossEvent.BossBarColor p_18851_, BossEvent.BossBarOverlay p_18852_, Vec3 p_341517_, int p_340837_) {
++    public BossEvent(UUID p_18849_, Component p_18850_, BossEvent.BossBarColor p_18851_, BossEvent.BossBarOverlay p_18852_) {
+         this.id = p_18849_;
+         this.name = p_18850_;
+         this.color = p_18851_;
+         this.overlay = p_18852_;
+-        this.center = p_341517_;
+-        this.radius = p_340837_;
+         this.progress = 1.0F;
+     }
+ 
+@@ -90,19 +_,6 @@
+         return this.createWorldFog;
+     }
+ 
+-    public void setLocation(Vec3 p_342087_, int p_340690_) {
+-        this.center = p_342087_;
+-        this.radius = p_340690_;
+-    }
+-
+-    public Vec3 getCenter() {
+-        return this.center;
+-    }
+-
+-    public int getRadius() {
+-        return this.radius;
+-    }
+-
+     public static enum BossBarColor {
+         PINK("pink", ChatFormatting.RED),
+         BLUE("blue", ChatFormatting.BLUE),
+@@ -129,7 +_,7 @@
+         }
+ 
+         public static BossEvent.BossBarColor byName(String p_18885_) {
+-            for(BossEvent.BossBarColor bossevent$bossbarcolor : values()) {
++            for (BossEvent.BossBarColor bossevent$bossbarcolor : values()) {
+                 if (bossevent$bossbarcolor.name.equals(p_18885_)) {
+                     return bossevent$bossbarcolor;
+                 }
+@@ -157,7 +_,7 @@
+         }
+ 
+         public static BossEvent.BossBarOverlay byName(String p_18904_) {
+-            for(BossEvent.BossBarOverlay bossevent$bossbaroverlay : values()) {
++            for (BossEvent.BossBarOverlay bossevent$bossbaroverlay : values()) {
+                 if (bossevent$bossbaroverlay.name.equals(p_18904_)) {
+                     return bossevent$bossbaroverlay;
+                 }

@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/entity/boss/enderdragon/phases/DragonHoldingPatternPhase.java
++++ b/net/minecraft/world/entity/boss/enderdragon/phases/DragonHoldingPatternPhase.java
+@@ -86,9 +_,9 @@
+             }
+ 
+             if (this.clockwise) {
+-                ++k;
++                k++;
+             } else {
+-                --k;
++                k--;
+             }
+ 
+             if (this.dragon.getDragonFight() != null && this.dragon.getDragonFight().getCrystalsAlive() >= 0) {
+@@ -126,7 +_,7 @@
+             double d2;
+             do {
+                 d2 = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+-            } while(d2 < (double)vec3i.getY());
++            } while (d2 < (double)vec3i.getY());
+ 
+             this.targetLocation = new Vec3(d0, d2, d1);
+         }

@@ -4,7 +4,7 @@
      public static void openFresh(Minecraft p_232897_, @Nullable Screen p_232898_) {
          queueLoadScreen(p_232897_, PREPARING_WORLD_DATA);
          PackRepository packrepository = new PackRepository(new ServerPacksSource(p_232897_.directoryValidator()));
-+        net.neoforged.fml.ModLoader.get().postEvent(new net.neoforged.neoforge.event.AddPackFindersEvent(net.minecraft.server.packs.PackType.SERVER_DATA, packrepository::addPackFinder));
++        net.neoforged.neoforge.resource.ResourcePackLoader.populatePackRepository(packrepository, net.minecraft.server.packs.PackType.SERVER_DATA);
          WorldLoader.InitConfig worldloader$initconfig = createDefaultLoadConfig(packrepository, WorldDataConfiguration.DEFAULT);
          CompletableFuture<WorldCreationContext> completablefuture = WorldLoader.load(
              worldloader$initconfig,
@@ -19,6 +19,15 @@
              this.minecraft
                  .createWorldOpenFlows()
                  .createLevelFromExistingSettings(optional.get(), worldcreationcontext.dataPackResources(), p_249152_, worlddata);
+@@ -399,7 +_,7 @@
+                         WorldGenSettings worldgensettings = dataresult.<WorldGenSettings>flatMap(
+                                 p_232895_ -> WorldGenSettings.CODEC.parse(dynamicops1, p_232895_)
+                             )
+-                            .getOrThrow(false, Util.prefix("Error parsing worldgen settings after loading data packs: ", LOGGER::error));
++                            .getOrThrow(p_337413_ -> new IllegalStateException("Error parsing worldgen settings after loading data packs: " + p_337413_));
+                         return new WorldLoader.DataLoadOutput<>(
+                             new CreateWorldScreen.DataPackReloadCookie(worldgensettings, p_326721_.dataConfiguration()), p_326721_.datapackDimensions()
+                         );
 @@ -424,7 +_,7 @@
                                          if (p_269627_) {
                                              p_270552_.accept(this.uiState.getSettings().dataConfiguration());
@@ -32,7 +41,7 @@
          if (path != null) {
              if (this.tempDataPackRepository == null) {
                  this.tempDataPackRepository = ServerPacksSource.createPackRepository(path, this.packValidator);
-+                net.neoforged.neoforge.resource.ResourcePackLoader.loadResourcePacks(this.tempDataPackRepository, map -> net.neoforged.neoforge.resource.ResourcePackLoader.buildPackFinder(map, net.minecraft.server.packs.PackType.SERVER_DATA));
++                net.neoforged.neoforge.resource.ResourcePackLoader.populatePackRepository(this.tempDataPackRepository, net.minecraft.server.packs.PackType.SERVER_DATA);
                  this.tempDataPackRepository.reload();
              }
  

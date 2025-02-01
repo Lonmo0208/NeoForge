@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/projectile/Snowball.java
++++ b/net/minecraft/world/entity/projectile/Snowball.java
+@@ -44,7 +_,7 @@
+         if (p_37402_ == 3) {
+             ParticleOptions particleoptions = this.getParticle();
+ 
+-            for(int i = 0; i < 8; ++i) {
++            for (int i = 0; i < 8; i++) {
+                 this.level().addParticle(particleoptions, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
+             }
+         }

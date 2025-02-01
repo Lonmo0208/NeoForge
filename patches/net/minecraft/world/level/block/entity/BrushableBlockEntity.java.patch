@@ -1,0 +1,60 @@
+--- a/net/minecraft/world/level/block/entity/BrushableBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/BrushableBlockEntity.java
+@@ -97,7 +_,7 @@
+                 .create(LootContextParamSets.CHEST);
+             ObjectArrayList<ItemStack> objectarraylist = loottable.getRandomItems(lootparams, this.lootTableSeed);
+ 
+-            this.item = switch(objectarraylist.size()) {
++            this.item = switch (objectarraylist.size()) {
+                 case 0 -> ItemStack.EMPTY;
+                 case 1 -> (ItemStack)objectarraylist.get(0);
+                 default -> {
+@@ -115,15 +_,14 @@
+             this.dropContent(p_277549_);
+             BlockState blockstate = this.getBlockState();
+             this.level.levelEvent(3008, this.getBlockPos(), Block.getId(blockstate));
+-            Block block = this.getBlockState().getBlock();
+-            Block block1;
+-            if (block instanceof BrushableBlock brushableblock) {
+-                block1 = brushableblock.getTurnsInto();
++            Block block;
++            if (this.getBlockState().getBlock() instanceof BrushableBlock brushableblock) {
++                block = brushableblock.getTurnsInto();
+             } else {
+-                block1 = Blocks.AIR;
++                block = Blocks.AIR;
+             }
+ 
+-            this.level.setBlock(this.worldPosition, block1.defaultBlockState(), 3);
++            this.level.setBlock(this.worldPosition, block.defaultBlockState(), 3);
+         }
+     }
+ 
+@@ -213,20 +_,22 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_277597_, HolderLookup.Provider p_324103_) {
+-        if (!this.tryLoadLootTable(p_277597_) && p_277597_.contains("item")) {
+-            this.item = ItemStack.parse(p_324103_, p_277597_.getCompound("item")).orElse(ItemStack.EMPTY);
++    protected void loadAdditional(CompoundTag p_338786_, HolderLookup.Provider p_338480_) {
++        super.loadAdditional(p_338786_, p_338480_);
++        if (!this.tryLoadLootTable(p_338786_) && p_338786_.contains("item")) {
++            this.item = ItemStack.parse(p_338480_, p_338786_.getCompound("item")).orElse(ItemStack.EMPTY);
+         } else {
+             this.item = ItemStack.EMPTY;
+         }
+ 
+-        if (p_277597_.contains("hit_direction")) {
+-            this.hitDirection = Direction.values()[p_277597_.getInt("hit_direction")];
++        if (p_338786_.contains("hit_direction")) {
++            this.hitDirection = Direction.values()[p_338786_.getInt("hit_direction")];
+         }
+     }
+ 
+     @Override
+     protected void saveAdditional(CompoundTag p_277339_, HolderLookup.Provider p_323885_) {
++        super.saveAdditional(p_277339_, p_323885_);
+         if (!this.trySaveLootTable(p_277339_) && !this.item.isEmpty()) {
+             p_277339_.put("item", this.item.save(p_323885_));
+         }

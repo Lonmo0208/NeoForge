@@ -1,0 +1,71 @@
+--- a/net/minecraft/server/commands/AdvancementCommands.java
++++ b/net/minecraft/server/commands/AdvancementCommands.java
+@@ -274,7 +_,7 @@
+     ) throws CommandSyntaxException {
+         int i = 0;
+ 
+-        for(ServerPlayer serverplayer : p_136321_) {
++        for (ServerPlayer serverplayer : p_136321_) {
+             i += p_136322_.perform(serverplayer, p_136323_);
+         }
+ 
+@@ -340,9 +_,9 @@
+         if (!advancement.criteria().containsKey(p_136329_)) {
+             throw ERROR_CRITERION_NOT_FOUND.create(Advancement.name(p_301324_), p_136329_);
+         } else {
+-            for(ServerPlayer serverplayer : p_136326_) {
++            for (ServerPlayer serverplayer : p_136326_) {
+                 if (p_136327_.performCriterion(serverplayer, p_301324_, p_136329_)) {
+-                    ++i;
++                    i++;
+                 }
+             }
+ 
+@@ -396,7 +_,7 @@
+         } else {
+             List<AdvancementHolder> list = new ArrayList<>();
+             if (p_136335_.parents) {
+-                for(AdvancementNode advancementnode1 = advancementnode.parent(); advancementnode1 != null; advancementnode1 = advancementnode1.parent()) {
++                for (AdvancementNode advancementnode1 = advancementnode.parent(); advancementnode1 != null; advancementnode1 = advancementnode1.parent()) {
+                     list.add(advancementnode1.holder());
+                 }
+             }
+@@ -411,7 +_,7 @@
+     }
+ 
+     private static void addChildren(AdvancementNode p_300871_, List<AdvancementHolder> p_136332_) {
+-        for(AdvancementNode advancementnode : p_300871_.children()) {
++        for (AdvancementNode advancementnode : p_300871_.children()) {
+             p_136332_.add(advancementnode.holder());
+             addChildren(advancementnode, p_136332_);
+         }
+@@ -425,7 +_,7 @@
+                 if (advancementprogress.isDone()) {
+                     return false;
+                 } else {
+-                    for(String s : advancementprogress.getRemainingCriteria()) {
++                    for (String s : advancementprogress.getRemainingCriteria()) {
+                         p_136395_.getAdvancements().award(p_301029_, s);
+                     }
+ 
+@@ -445,7 +_,7 @@
+                 if (!advancementprogress.hasProgress()) {
+                     return false;
+                 } else {
+-                    for(String s : advancementprogress.getCompletedCriteria()) {
++                    for (String s : advancementprogress.getCompletedCriteria()) {
+                         p_136406_.getAdvancements().revoke(p_301273_, s);
+                     }
+ 
+@@ -468,9 +_,9 @@
+         public int perform(ServerPlayer p_136380_, Iterable<AdvancementHolder> p_136381_) {
+             int i = 0;
+ 
+-            for(AdvancementHolder advancementholder : p_136381_) {
++            for (AdvancementHolder advancementholder : p_136381_) {
+                 if (this.perform(p_136380_, advancementholder)) {
+-                    ++i;
++                    i++;
+                 }
+             }
+ 

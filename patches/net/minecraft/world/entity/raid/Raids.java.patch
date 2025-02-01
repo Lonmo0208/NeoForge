@@ -1,0 +1,148 @@
+--- a/net/minecraft/world/entity/raid/Raids.java
++++ b/net/minecraft/world/entity/raid/Raids.java
+@@ -5,20 +_,16 @@
+ import java.util.List;
+ import java.util.Map;
+ import javax.annotation.Nullable;
+-import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.HolderLookup;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.nbt.ListTag;
+-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+ import net.minecraft.network.protocol.game.DebugPackets;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.stats.Stats;
+ import net.minecraft.tags.PoiTypeTags;
+ import net.minecraft.util.datafix.DataFixTypes;
+-import net.minecraft.world.effect.MobEffects;
+ import net.minecraft.world.entity.ai.village.poi.PoiManager;
+ import net.minecraft.world.entity.ai.village.poi.PoiRecord;
+ import net.minecraft.world.level.GameRules;
+@@ -49,10 +_,10 @@
+     }
+ 
+     public void tick() {
+-        ++this.tick;
++        this.tick++;
+         Iterator<Raid> iterator = this.raidMap.values().iterator();
+ 
+-        while(iterator.hasNext()) {
++        while (iterator.hasNext()) {
+             Raid raid = iterator.next();
+             if (this.level.getGameRules().getBoolean(GameRules.RULE_DISABLE_RAIDS)) {
+                 raid.stop();
+@@ -74,18 +_,16 @@
+     }
+ 
+     public static boolean canJoinRaid(Raider p_37966_, Raid p_37967_) {
+-        if (p_37966_ != null && p_37967_ != null && p_37967_.getLevel() != null) {
+-            return p_37966_.isAlive()
++        return p_37966_ != null && p_37967_ != null && p_37967_.getLevel() != null
++            ? p_37966_.isAlive()
+                 && p_37966_.canJoinRaid()
+                 && p_37966_.getNoActionTime() <= 2400
+-                && p_37966_.level().dimensionType() == p_37967_.getLevel().dimensionType();
+-        } else {
+-            return false;
+-        }
++                && p_37966_.level().dimensionType() == p_37967_.getLevel().dimensionType()
++            : false;
+     }
+ 
+     @Nullable
+-    public Raid createOrExtendRaid(ServerPlayer p_37964_) {
++    public Raid createOrExtendRaid(ServerPlayer p_37964_, BlockPos p_338602_) {
+         if (p_37964_.isSpectator()) {
+             return null;
+         } else if (this.level.getGameRules().getBoolean(GameRules.RULE_DISABLE_RAIDS)) {
+@@ -95,18 +_,17 @@
+             if (!dimensiontype.hasRaids()) {
+                 return null;
+             } else {
+-                BlockPos blockpos = p_37964_.blockPosition();
+                 List<PoiRecord> list = this.level
+                     .getPoiManager()
+-                    .getInRange(p_219845_ -> p_219845_.is(PoiTypeTags.VILLAGE), blockpos, 64, PoiManager.Occupancy.IS_OCCUPIED)
++                    .getInRange(p_219845_ -> p_219845_.is(PoiTypeTags.VILLAGE), p_338602_, 64, PoiManager.Occupancy.IS_OCCUPIED)
+                     .toList();
+                 int i = 0;
+                 Vec3 vec3 = Vec3.ZERO;
+ 
+-                for(PoiRecord poirecord : list) {
+-                    BlockPos blockpos2 = poirecord.getPos();
+-                    vec3 = vec3.add((double)blockpos2.getX(), (double)blockpos2.getY(), (double)blockpos2.getZ());
+-                    ++i;
++                for (PoiRecord poirecord : list) {
++                    BlockPos blockpos = poirecord.getPos();
++                    vec3 = vec3.add((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
++                    i++;
+                 }
+ 
+                 BlockPos blockpos1;
+@@ -114,31 +_,16 @@
+                     vec3 = vec3.scale(1.0 / (double)i);
+                     blockpos1 = BlockPos.containing(vec3);
+                 } else {
+-                    blockpos1 = blockpos;
++                    blockpos1 = p_338602_;
+                 }
+ 
+                 Raid raid = this.getOrCreateRaid(p_37964_.serverLevel(), blockpos1);
+-                boolean flag = false;
+-                if (!raid.isStarted()) {
+-                    if (!this.raidMap.containsKey(raid.getId())) {
+-                        this.raidMap.put(raid.getId(), raid);
+-                    }
+-
+-                    flag = true;
+-                } else if (raid.getBadOmenLevel() < raid.getMaxBadOmenLevel()) {
+-                    flag = true;
+-                } else {
+-                    p_37964_.removeEffect(MobEffects.BAD_OMEN);
+-                    p_37964_.connection.send(new ClientboundEntityEventPacket(p_37964_, (byte)43));
++                if (!raid.isStarted() && !this.raidMap.containsKey(raid.getId())) {
++                    this.raidMap.put(raid.getId(), raid);
+                 }
+ 
+-                if (flag) {
+-                    raid.absorbBadOmen(p_37964_);
+-                    p_37964_.connection.send(new ClientboundEntityEventPacket(p_37964_, (byte)43));
+-                    if (!raid.hasFirstWaveSpawned()) {
+-                        p_37964_.awardStat(Stats.RAID_TRIGGER);
+-                        CriteriaTriggers.BAD_OMEN.trigger(p_37964_);
+-                    }
++                if (!raid.isStarted() || raid.getRaidOmenLevel() < raid.getMaxRaidOmenLevel()) {
++                    raid.absorbRaidOmen(p_37964_);
+                 }
+ 
+                 this.setDirty();
+@@ -158,7 +_,7 @@
+         raids.tick = p_150237_.getInt("Tick");
+         ListTag listtag = p_150237_.getList("Raids", 10);
+ 
+-        for(int i = 0; i < listtag.size(); ++i) {
++        for (int i = 0; i < listtag.size(); i++) {
+             CompoundTag compoundtag = listtag.getCompound(i);
+             Raid raid = new Raid(p_150236_, compoundtag);
+             raids.raidMap.put(raid.getId(), raid);
+@@ -173,7 +_,7 @@
+         p_37976_.putInt("Tick", this.tick);
+         ListTag listtag = new ListTag();
+ 
+-        for(Raid raid : this.raidMap.values()) {
++        for (Raid raid : this.raidMap.values()) {
+             CompoundTag compoundtag = new CompoundTag();
+             raid.save(compoundtag);
+             listtag.add(compoundtag);
+@@ -196,7 +_,7 @@
+         Raid raid = null;
+         double d0 = (double)p_37972_;
+ 
+-        for(Raid raid1 : this.raidMap.values()) {
++        for (Raid raid1 : this.raidMap.values()) {
+             double d1 = raid1.getCenter().distSqr(p_37971_);
+             if (raid1.isActive() && d1 < d0) {
+                 raid = raid1;

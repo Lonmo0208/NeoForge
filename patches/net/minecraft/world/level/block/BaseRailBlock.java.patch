@@ -26,6 +26,15 @@
              if (shouldBeRemoved(p_49379_, p_49378_, railshape)) {
                  dropResources(p_49377_, p_49378_, p_49379_);
                  p_49378_.removeBlock(p_49379_, p_49382_);
+@@ -90,7 +_,7 @@
+         if (!canSupportRigidBlock(p_49400_, p_49399_.below())) {
+             return true;
+         } else {
+-            switch(p_49401_) {
++            switch (p_49401_) {
+                 case ASCENDING_EAST:
+                     return !canSupportRigidBlock(p_49400_, p_49399_.east());
+                 case ASCENDING_WEST:
 @@ -121,7 +_,7 @@
      protected void onRemove(BlockState p_49384_, Level p_49385_, BlockPos p_49386_, BlockState p_49387_, boolean p_49388_) {
          if (!p_49388_) {

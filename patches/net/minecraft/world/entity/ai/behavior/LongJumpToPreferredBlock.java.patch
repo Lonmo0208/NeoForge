@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/behavior/LongJumpToPreferredBlock.java
++++ b/net/minecraft/world/entity/ai/behavior/LongJumpToPreferredBlock.java
+@@ -49,7 +_,7 @@
+         } else {
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-            while(!this.jumpCandidates.isEmpty()) {
++            while (!this.jumpCandidates.isEmpty()) {
+                 Optional<LongJumpToRandomPos.PossibleJump> optional = super.getJumpCandidate(p_217273_);
+                 if (optional.isPresent()) {
+                     LongJumpToRandomPos.PossibleJump longjumptorandompos$possiblejump = optional.get();

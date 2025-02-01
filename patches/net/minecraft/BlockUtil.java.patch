@@ -1,0 +1,64 @@
+--- a/net/minecraft/BlockUtil.java
++++ b/net/minecraft/BlockUtil.java
+@@ -31,7 +_,7 @@
+         );
+         int l = ablockutil$intbounds[i].min;
+ 
+-        for(int i1 = 1; i1 <= i; ++i1) {
++        for (int i1 = 1; i1 <= i; i1++) {
+             BlockUtil.IntBounds blockutil$intbounds = ablockutil$intbounds[k - (i1 - 1)];
+             ablockutil$intbounds[k - i1] = new BlockUtil.IntBounds(
+                 getLimit(p_124340_, blockpos$mutableblockpos.set(p_124335_).move(direction, i1), direction2, blockutil$intbounds.min),
+@@ -39,7 +_,7 @@
+             );
+         }
+ 
+-        for(int l2 = 1; l2 <= j; ++l2) {
++        for (int l2 = 1; l2 <= j; l2++) {
+             BlockUtil.IntBounds blockutil$intbounds2 = ablockutil$intbounds[k + l2 - 1];
+             ablockutil$intbounds[k + l2] = new BlockUtil.IntBounds(
+                 getLimit(p_124340_, blockpos$mutableblockpos.set(p_124335_).move(direction1, l2), direction2, blockutil$intbounds2.min),
+@@ -53,8 +_,8 @@
+         int k1 = 0;
+         int[] aint = new int[ablockutil$intbounds.length];
+ 
+-        for(int l1 = l; l1 >= 0; --l1) {
+-            for(int i2 = 0; i2 < ablockutil$intbounds.length; ++i2) {
++        for (int l1 = l; l1 >= 0; l1--) {
++            for (int i2 = 0; i2 < ablockutil$intbounds.length; i2++) {
+                 BlockUtil.IntBounds blockutil$intbounds1 = ablockutil$intbounds[i2];
+                 int j2 = l - blockutil$intbounds1.min;
+                 int k2 = l + blockutil$intbounds1.max;
+@@ -79,8 +_,8 @@
+     private static int getLimit(Predicate<BlockPos> p_124342_, BlockPos.MutableBlockPos p_124343_, Direction p_124344_, int p_124345_) {
+         int i = 0;
+ 
+-        while(i < p_124345_ && p_124342_.test(p_124343_.move(p_124344_))) {
+-            ++i;
++        while (i < p_124345_ && p_124342_.test(p_124343_.move(p_124344_))) {
++            i++;
+         }
+ 
+         return i;
+@@ -94,10 +_,10 @@
+         IntStack intstack = new IntArrayList();
+         intstack.push(0);
+ 
+-        for(int l = 1; l <= p_124347_.length; ++l) {
++        for (int l = 1; l <= p_124347_.length; l++) {
+             int i1 = l == p_124347_.length ? 0 : p_124347_[l];
+ 
+-            while(!intstack.isEmpty()) {
++            while (!intstack.isEmpty()) {
+                 int j1 = p_124347_[intstack.topInt()];
+                 if (i1 >= j1) {
+                     intstack.push(l);
+@@ -128,7 +_,7 @@
+         do {
+             blockpos$mutableblockpos.move(p_177849_);
+             blockstate = p_177846_.getBlockState(blockpos$mutableblockpos);
+-        } while(blockstate.is(p_177848_));
++        } while (blockstate.is(p_177848_));
+ 
+         return blockstate.is(p_177850_) ? Optional.of(blockpos$mutableblockpos) : Optional.empty();
+     }

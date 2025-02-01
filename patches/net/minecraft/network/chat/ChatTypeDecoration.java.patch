@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/chat/ChatTypeDecoration.java
++++ b/net/minecraft/network/chat/ChatTypeDecoration.java
+@@ -45,7 +_,7 @@
+     private Component[] resolveParameters(Component p_241365_, ChatType.Bound p_241559_) {
+         Component[] acomponent = new Component[this.parameters.size()];
+ 
+-        for(int i = 0; i < acomponent.length; ++i) {
++        for (int i = 0; i < acomponent.length; i++) {
+             ChatTypeDecoration.Parameter chattypedecoration$parameter = this.parameters.get(i);
+             acomponent[i] = chattypedecoration$parameter.select(p_241365_, p_241559_);
+         }

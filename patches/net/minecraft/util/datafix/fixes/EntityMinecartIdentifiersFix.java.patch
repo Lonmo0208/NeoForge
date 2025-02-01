@@ -1,0 +1,13 @@
+--- a/net/minecraft/util/datafix/fixes/EntityMinecartIdentifiersFix.java
++++ b/net/minecraft/util/datafix/fixes/EntityMinecartIdentifiersFix.java
+@@ -45,8 +_,8 @@
+     
+                         return Pair.of(
+                             s,
+-                            ((com.mojang.serialization.DataResult<com.mojang.serialization.Dynamic<Pair<String, ?>>>)typed.write())
+-                                .map(p_145294_ -> taggedchoicetype1.types().get(s).read(p_145294_))
++                            typed.write()
++                                .map(p_145294_ -> taggedchoicetype1.types().get(s).read((Dynamic<?>)p_145294_))
+                                 .result()
+                                 .orElseThrow(() -> new IllegalStateException("Could not read the new minecart."))
+                         );

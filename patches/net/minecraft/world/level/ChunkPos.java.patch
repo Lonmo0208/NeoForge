@@ -1,0 +1,15 @@
+--- a/net/minecraft/world/level/ChunkPos.java
++++ b/net/minecraft/world/level/ChunkPos.java
+@@ -82,11 +_,8 @@
+     public boolean equals(Object p_45607_) {
+         if (this == p_45607_) {
+             return true;
+-        } else if (!(p_45607_ instanceof ChunkPos)) {
+-            return false;
+         } else {
+-            ChunkPos chunkpos = (ChunkPos)p_45607_;
+-            return this.x == chunkpos.x && this.z == chunkpos.z;
++            return !(p_45607_ instanceof ChunkPos chunkpos) ? false : this.x == chunkpos.x && this.z == chunkpos.z;
+         }
+     }
+ 

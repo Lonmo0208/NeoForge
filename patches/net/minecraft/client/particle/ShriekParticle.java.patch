@@ -1,0 +1,20 @@
+--- a/net/minecraft/client/particle/ShriekParticle.java
++++ b/net/minecraft/client/particle/ShriekParticle.java
+@@ -59,7 +_,7 @@
+         };
+         float f3 = this.getQuadSize(p_233991_);
+ 
+-        for(int i = 0; i < 4; ++i) {
++        for (int i = 0; i < 4; i++) {
+             Vector3f vector3f = avector3f[i];
+             vector3f.rotate(quaternionf);
+             vector3f.mul(f3);
+@@ -94,7 +_,7 @@
+     @Override
+     public void tick() {
+         if (this.delay > 0) {
+-            --this.delay;
++            this.delay--;
+         } else {
+             super.tick();
+         }

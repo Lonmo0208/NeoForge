@@ -1,0 +1,20 @@
+--- a/net/minecraft/util/datafix/fixes/EntityBlockStateFix.java
++++ b/net/minecraft/util/datafix/fixes/EntityBlockStateFix.java
+@@ -335,7 +_,7 @@
+         );
+         Dynamic<?> dynamic = p_15336_.get(DSL.remainderFinder());
+         return p_15336_.update(type.finder(), type1, p_15355_ -> {
+-            int i = p_15355_.map(p_145262_ -> p_145262_.getSecond().map(p_145273_ -> p_145273_, EntityBlockStateFix::getBlockId), p_145267_ -> {
++            int i = p_15355_.map(p_145262_ -> p_145262_.getSecond().map(p_145273_ -> (Integer)p_145273_, EntityBlockStateFix::getBlockId), p_337617_ -> {
+                 Optional<Number> optional = dynamic.get("TileID").asNumber().result();
+                 return optional.map(Number::intValue).orElseGet(() -> dynamic.get("Tile").asByte((byte)0) & 0xFF);
+             });
+@@ -351,7 +_,7 @@
+         Type<Pair<String, Dynamic<?>>> type1 = DSL.field(p_15341_, DSL.named(References.BLOCK_STATE.typeName(), DSL.remainderType()));
+         Dynamic<?> dynamic = p_15338_.getOrCreate(DSL.remainderFinder());
+         return p_15338_.update(type.finder(), type1, p_15362_ -> {
+-            int i = p_15362_.getSecond().map(p_145269_ -> p_145269_, EntityBlockStateFix::getBlockId);
++            int i = p_15362_.getSecond().map(p_145269_ -> (Integer)p_145269_, EntityBlockStateFix::getBlockId);
+             int j = dynamic.get(p_15340_).asInt(0) & 15;
+             return Pair.of(References.BLOCK_STATE.typeName(), BlockStateData.getTag(i << 4 | j));
+         }).set(DSL.remainderFinder(), dynamic.remove(p_15340_));
