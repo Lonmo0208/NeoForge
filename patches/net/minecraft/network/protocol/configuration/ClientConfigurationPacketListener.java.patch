@@ -1,9 +1,0 @@
---- a/net/minecraft/network/protocol/configuration/ClientConfigurationPacketListener.java
-+++ b/net/minecraft/network/protocol/configuration/ClientConfigurationPacketListener.java
-@@ -16,4 +_,6 @@
-     void handleEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket p_296241_);
- 
-     void handleSelectKnownPacks(ClientboundSelectKnownPacks p_326313_);
-+
-+    void handleResetChat(ClientboundResetChatPacket p_338667_);
- }

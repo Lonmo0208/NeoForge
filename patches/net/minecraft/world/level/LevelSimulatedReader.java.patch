@@ -1,9 +1,0 @@
---- a/net/minecraft/world/level/LevelSimulatedReader.java
-+++ b/net/minecraft/world/level/LevelSimulatedReader.java
-@@ -17,6 +_,4 @@
-     <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos p_151582_, BlockEntityType<T> p_151583_);
- 
-     BlockPos getHeightmapPos(Heightmap.Types p_46936_, BlockPos p_46937_);
--
--    boolean isPotato();
- }
