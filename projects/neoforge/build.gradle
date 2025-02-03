@@ -53,8 +53,8 @@ dependencies {
         exclude group: 'org.slf4j'
         exclude group: 'net.fabricmc'
     }
-    installer "cpw.mods:securejarhandler:${project.securejarhandler_version}"
     installer "com.mojang:datafixerupper:${project.mojang_datafixerupper_version}"
+    installer "cpw.mods:securejarhandler:${project.securejarhandler_version}"
     installer "org.ow2.asm:asm:${project.asm_version}"
     installer "org.ow2.asm:asm-commons:${project.asm_version}"
     installer "org.ow2.asm:asm-tree:${project.asm_version}"
