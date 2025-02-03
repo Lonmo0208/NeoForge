@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/item/ShearsItem.java
 +++ b/net/minecraft/world/item/ShearsItem.java
-@@ -59,6 +_,27 @@
+@@ -14,7 +_,6 @@
+ import net.minecraft.world.item.component.Tool;
+ import net.minecraft.world.item.context.UseOnContext;
+ import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.block.GrowingPlantHeadBlock;
+ import net.minecraft.world.level.block.state.BlockState;
+@@ -56,12 +_,32 @@
      }
  
      @Override
@@ -9,10 +17,10 @@
 +            if (entity.level().isClientSide) return InteractionResult.CONSUME;
 +            BlockPos pos = entity.blockPosition();
 +            if (target.isShearable(stack, entity.level(), pos)) {
-+                target.onSheared(player, stack, entity.level(), pos, stack.getEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_FORTUNE))
++                target.onSheared(player, stack, entity.level(), pos, stack.getEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.FORTUNE))
 +                      .forEach(drop -> target.spawnShearedDrop(entity.level(), pos, drop));
 +                entity.gameEvent(GameEvent.SHEAR, player);
-+                stack.hurtAndBreak(1, player, e -> e.broadcastBreakEvent(hand));
++                stack.hurtAndBreak(1, player, hand == net.minecraft.world.InteractionHand.MAIN_HAND ? net.minecraft.world.entity.EquipmentSlot.MAINHAND : net.minecraft.world.entity.EquipmentSlot.OFFHAND);
 +            }
 +            return InteractionResult.SUCCESS;
 +        }
@@ -28,3 +36,10 @@
      public InteractionResult useOn(UseOnContext p_186371_) {
          Level level = p_186371_.getLevel();
          BlockPos blockpos = p_186371_.getClickedPos();
+         BlockState blockstate = level.getBlockState(blockpos);
+-        Block block = blockstate.getBlock();
+-        if (block instanceof GrowingPlantHeadBlock growingplantheadblock && !growingplantheadblock.isMaxAge(blockstate)) {
++        if (blockstate.getBlock() instanceof GrowingPlantHeadBlock growingplantheadblock && !growingplantheadblock.isMaxAge(blockstate)) {
+             Player player = p_186371_.getPlayer();
+             ItemStack itemstack = p_186371_.getItemInHand();
+             if (player instanceof ServerPlayer) {

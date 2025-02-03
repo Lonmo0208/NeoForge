@@ -1,7 +1,44 @@
 --- a/net/minecraft/core/HolderLookup.java
 +++ b/net/minecraft/core/HolderLookup.java
-@@ -117,6 +_,11 @@
-                 : this);
+@@ -4,7 +_,6 @@
+ import com.mojang.serialization.Lifecycle;
+ import java.util.Map;
+ import java.util.Optional;
+-import java.util.function.Function;
+ import java.util.function.Predicate;
+ import java.util.stream.Collectors;
+ import java.util.stream.Stream;
+@@ -33,7 +_,7 @@
+         <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_256285_);
+ 
+         default <T> HolderLookup.RegistryLookup<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> p_255957_) {
+-            return this.<T>lookup(p_255957_).orElseThrow(() -> new IllegalStateException("Registry " + p_255957_.location() + " not found"));
++            return this.lookup(p_255957_).orElseThrow(() -> new IllegalStateException("Registry " + p_255957_.location() + " not found"));
+         }
+ 
+         default <V> RegistryOps<V> createSerializationContext(DynamicOps<V> p_326817_) {
+@@ -44,17 +_,14 @@
+             return new HolderGetter.Provider() {
+                 @Override
+                 public <T> Optional<HolderGetter<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_256379_) {
+-                    return Provider.this.lookup(p_256379_).map(p_255952_ -> p_255952_);
++                    return Provider.this.lookup(p_256379_).map(p_255952_ -> (HolderGetter<T>)p_255952_);
+                 }
+             };
+         }
+ 
+         static HolderLookup.Provider create(Stream<HolderLookup.RegistryLookup<?>> p_256054_) {
+             final Map<ResourceKey<? extends Registry<?>>, HolderLookup.RegistryLookup<?>> map = p_256054_.collect(
+-                Collectors.toUnmodifiableMap(
+-                    HolderLookup.RegistryLookup::key,
+-                    (p_256335_ -> p_256335_)
+-                )
++                Collectors.toUnmodifiableMap(HolderLookup.RegistryLookup::key, p_256335_ -> p_256335_)
+             );
+             return new HolderLookup.Provider() {
+                 @Override
+@@ -100,6 +_,11 @@
+             };
          }
  
 +        @org.jetbrains.annotations.Nullable
@@ -9,18 +46,18 @@
 +            return null;
 +        }
 +
-         public abstract static class Delegate<T> implements HolderLookup.RegistryLookup<T> {
-             protected abstract HolderLookup.RegistryLookup<T> parent();
+         public interface Delegate<T> extends HolderLookup.RegistryLookup<T> {
+             HolderLookup.RegistryLookup<T> parent();
  
-@@ -148,6 +_,12 @@
+@@ -131,6 +_,12 @@
              @Override
-             public Stream<HolderSet.Named<T>> listTags() {
+             default Stream<HolderSet.Named<T>> listTags() {
                  return this.parent().listTags();
 +            }
 +
 +            @Override
 +            @org.jetbrains.annotations.Nullable
-+            public <A> A getData(net.neoforged.neoforge.registries.datamaps.DataMapType<T, A> attachment, ResourceKey<T> key) {
++            default <A> A getData(net.neoforged.neoforge.registries.datamaps.DataMapType<T, A> attachment, ResourceKey<T> key) {
 +                return parent().getData(attachment, key);
              }
          }

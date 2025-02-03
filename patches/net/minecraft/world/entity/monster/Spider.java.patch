@@ -1,10 +1,22 @@
 --- a/net/minecraft/world/entity/monster/Spider.java
 +++ b/net/minecraft/world/entity/monster/Spider.java
-@@ -132,7 +_,12 @@
+@@ -51,11 +_,6 @@
+     }
+ 
+     @Override
+-    public boolean hasPotatoVariant() {
+-        return true;
+-    }
+-
+-    @Override
+     protected void registerGoals() {
+         this.goalSelector.addGoal(1, new FloatGoal(this));
+         this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Armadillo.class, 6.0F, 1.0, 1.2, p_320185_ -> !((Armadillo)p_320185_).isScared()));
+@@ -126,7 +_,12 @@
  
      @Override
      public boolean canBeAffected(MobEffectInstance p_33809_) {
--        return p_33809_.getEffect() == MobEffects.POISON ? false : super.canBeAffected(p_33809_);
+-        return p_33809_.is(MobEffects.POISON) ? false : super.canBeAffected(p_33809_);
 +        if (p_33809_.getEffect() == MobEffects.POISON) {
 +            net.neoforged.neoforge.event.entity.living.MobEffectEvent.Applicable event = new net.neoforged.neoforge.event.entity.living.MobEffectEvent.Applicable(this, p_33809_);
 +            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);

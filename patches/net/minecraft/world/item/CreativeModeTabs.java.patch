@@ -1,20 +1,1782 @@
 --- a/net/minecraft/world/item/CreativeModeTabs.java
 +++ b/net/minecraft/world/item/CreativeModeTabs.java
-@@ -1800,7 +_,7 @@
+@@ -10,7 +_,6 @@
+ import java.util.stream.IntStream;
+ import java.util.stream.Stream;
+ import javax.annotation.Nullable;
+-import net.minecraft.Util;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.HolderSet;
+@@ -35,7 +_,6 @@
+ import net.minecraft.world.item.alchemy.PotionContents;
+ import net.minecraft.world.item.component.CustomData;
+ import net.minecraft.world.item.component.Fireworks;
+-import net.minecraft.world.item.component.XpComponent;
+ import net.minecraft.world.item.enchantment.Enchantment;
+ import net.minecraft.world.item.enchantment.EnchantmentInstance;
+ import net.minecraft.world.level.block.Blocks;
+@@ -56,7 +_,6 @@
+     public static final ResourceKey<CreativeModeTab> INGREDIENTS = createKey("ingredients");
+     public static final ResourceKey<CreativeModeTab> SPAWN_EGGS = createKey("spawn_eggs");
+     public static final ResourceKey<CreativeModeTab> OP_BLOCKS = createKey("op_blocks");
+-    private static final ResourceKey<CreativeModeTab> POTATOES = createKey("potatoes");
+     public static final ResourceKey<CreativeModeTab> INVENTORY = createKey("inventory");
+     private static final Comparator<Holder<PaintingVariant>> PAINTING_COMPARATOR = Comparator.comparing(
+         Holder::value,
+@@ -696,236 +_,233 @@
+             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 2)
+                 .title(Component.translatable("itemGroup.natural"))
+                 .icon(() -> new ItemStack(Blocks.GRASS_BLOCK))
+-                .displayItems((p_340184_, p_340185_) -> {
+-                    p_340185_.accept(Items.GRASS_BLOCK);
+-                    p_340185_.accept(Items.PODZOL);
+-                    p_340185_.accept(Items.MYCELIUM);
+-                    p_340185_.accept(Items.DIRT_PATH);
+-                    p_340185_.accept(Items.DIRT);
+-                    p_340185_.accept(Items.COARSE_DIRT);
+-                    p_340185_.accept(Items.ROOTED_DIRT);
+-                    p_340185_.accept(Items.FARMLAND);
+-                    p_340185_.accept(Items.MUD);
+-                    p_340185_.accept(Items.CLAY);
+-                    p_340185_.accept(Items.GRAVEL);
+-                    p_340185_.accept(Items.SAND);
+-                    p_340185_.accept(Items.SANDSTONE);
+-                    p_340185_.accept(Items.RED_SAND);
+-                    p_340185_.accept(Items.RED_SANDSTONE);
+-                    p_340185_.accept(Items.ICE);
+-                    p_340185_.accept(Items.PACKED_ICE);
+-                    p_340185_.accept(Items.BLUE_ICE);
+-                    p_340185_.accept(Items.SNOW_BLOCK);
+-                    p_340185_.accept(Items.SNOW);
+-                    p_340185_.accept(Items.MOSS_BLOCK);
+-                    p_340185_.accept(Items.MOSS_CARPET);
+-                    p_340185_.accept(Items.STONE);
+-                    p_340185_.accept(Items.DEEPSLATE);
+-                    p_340185_.accept(Items.GRANITE);
+-                    p_340185_.accept(Items.DIORITE);
+-                    p_340185_.accept(Items.ANDESITE);
+-                    p_340185_.accept(Items.CALCITE);
+-                    p_340185_.accept(Items.TUFF);
+-                    p_340185_.accept(Items.DRIPSTONE_BLOCK);
+-                    p_340185_.accept(Items.POINTED_DRIPSTONE);
+-                    p_340185_.accept(Items.PRISMARINE);
+-                    p_340185_.accept(Items.MAGMA_BLOCK);
+-                    p_340185_.accept(Items.OBSIDIAN);
+-                    p_340185_.accept(Items.CRYING_OBSIDIAN);
+-                    p_340185_.accept(Items.NETHERRACK);
+-                    p_340185_.accept(Items.CRIMSON_NYLIUM);
+-                    p_340185_.accept(Items.WARPED_NYLIUM);
+-                    p_340185_.accept(Items.SOUL_SAND);
+-                    p_340185_.accept(Items.SOUL_SOIL);
+-                    p_340185_.accept(Items.BONE_BLOCK);
+-                    p_340185_.accept(Items.BLACKSTONE);
+-                    p_340185_.accept(Items.BASALT);
+-                    p_340185_.accept(Items.SMOOTH_BASALT);
+-                    p_340185_.accept(Items.END_STONE);
+-                    p_340185_.accept(Items.COAL_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_COAL_ORE);
+-                    p_340185_.accept(Items.IRON_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_IRON_ORE);
+-                    p_340185_.accept(Items.COPPER_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_COPPER_ORE);
+-                    p_340185_.accept(Items.GOLD_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_GOLD_ORE);
+-                    p_340185_.accept(Items.REDSTONE_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_REDSTONE_ORE);
+-                    p_340185_.accept(Items.EMERALD_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_EMERALD_ORE);
+-                    p_340185_.accept(Items.LAPIS_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_LAPIS_ORE);
+-                    p_340185_.accept(Items.DIAMOND_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_DIAMOND_ORE);
+-                    p_340185_.accept(Items.POISONOUS_POTATO_ORE);
+-                    p_340185_.accept(Items.DEEPSLATE_POISONOUS_POTATO_ORE);
+-                    p_340185_.accept(Items.NETHER_GOLD_ORE);
+-                    p_340185_.accept(Items.NETHER_QUARTZ_ORE);
+-                    p_340185_.accept(Items.ANCIENT_DEBRIS);
+-                    p_340185_.accept(Items.RAW_IRON_BLOCK);
+-                    p_340185_.accept(Items.RAW_COPPER_BLOCK);
+-                    p_340185_.accept(Items.RAW_GOLD_BLOCK);
+-                    p_340185_.accept(Items.GLOWSTONE);
+-                    p_340185_.accept(Items.AMETHYST_BLOCK);
+-                    p_340185_.accept(Items.BUDDING_AMETHYST);
+-                    p_340185_.accept(Items.SMALL_AMETHYST_BUD);
+-                    p_340185_.accept(Items.MEDIUM_AMETHYST_BUD);
+-                    p_340185_.accept(Items.LARGE_AMETHYST_BUD);
+-                    p_340185_.accept(Items.AMETHYST_CLUSTER);
+-                    p_340185_.accept(Items.OAK_LOG);
+-                    p_340185_.accept(Items.SPRUCE_LOG);
+-                    p_340185_.accept(Items.BIRCH_LOG);
+-                    p_340185_.accept(Items.JUNGLE_LOG);
+-                    p_340185_.accept(Items.ACACIA_LOG);
+-                    p_340185_.accept(Items.DARK_OAK_LOG);
+-                    p_340185_.accept(Items.MANGROVE_LOG);
+-                    p_340185_.accept(Items.MANGROVE_ROOTS);
+-                    p_340185_.accept(Items.MUDDY_MANGROVE_ROOTS);
+-                    p_340185_.accept(Items.CHERRY_LOG);
+-                    p_340185_.accept(Items.MUSHROOM_STEM);
+-                    p_340185_.accept(Items.CRIMSON_STEM);
+-                    p_340185_.accept(Items.WARPED_STEM);
+-                    p_340185_.accept(Items.OAK_LEAVES);
+-                    p_340185_.accept(Items.SPRUCE_LEAVES);
+-                    p_340185_.accept(Items.BIRCH_LEAVES);
+-                    p_340185_.accept(Items.JUNGLE_LEAVES);
+-                    p_340185_.accept(Items.ACACIA_LEAVES);
+-                    p_340185_.accept(Items.DARK_OAK_LEAVES);
+-                    p_340185_.accept(Items.MANGROVE_LEAVES);
+-                    p_340185_.accept(Items.CHERRY_LEAVES);
+-                    p_340185_.accept(Items.AZALEA_LEAVES);
+-                    p_340185_.accept(Items.FLOWERING_AZALEA_LEAVES);
+-                    p_340185_.accept(Items.BROWN_MUSHROOM_BLOCK);
+-                    p_340185_.accept(Items.RED_MUSHROOM_BLOCK);
+-                    p_340185_.accept(Items.NETHER_WART_BLOCK);
+-                    p_340185_.accept(Items.WARPED_WART_BLOCK);
+-                    p_340185_.accept(Items.SHROOMLIGHT);
+-                    p_340185_.accept(Items.OAK_SAPLING);
+-                    p_340185_.accept(Items.SPRUCE_SAPLING);
+-                    p_340185_.accept(Items.BIRCH_SAPLING);
+-                    p_340185_.accept(Items.JUNGLE_SAPLING);
+-                    p_340185_.accept(Items.ACACIA_SAPLING);
+-                    p_340185_.accept(Items.DARK_OAK_SAPLING);
+-                    p_340185_.accept(Items.MANGROVE_PROPAGULE);
+-                    p_340185_.accept(Items.CHERRY_SAPLING);
+-                    p_340185_.accept(Items.AZALEA);
+-                    p_340185_.accept(Items.FLOWERING_AZALEA);
+-                    p_340185_.accept(Items.BROWN_MUSHROOM);
+-                    p_340185_.accept(Items.RED_MUSHROOM);
+-                    p_340185_.accept(Items.CRIMSON_FUNGUS);
+-                    p_340185_.accept(Items.WARPED_FUNGUS);
+-                    p_340185_.accept(Items.SHORT_GRASS);
+-                    p_340185_.accept(Items.FERN);
+-                    p_340185_.accept(Items.DEAD_BUSH);
+-                    p_340185_.accept(Items.DANDELION);
+-                    p_340185_.accept(Items.POPPY);
+-                    p_340185_.accept(Items.BLUE_ORCHID);
+-                    p_340185_.accept(Items.ALLIUM);
+-                    p_340185_.accept(Items.AZURE_BLUET);
+-                    p_340185_.accept(Items.RED_TULIP);
+-                    p_340185_.accept(Items.ORANGE_TULIP);
+-                    p_340185_.accept(Items.WHITE_TULIP);
+-                    p_340185_.accept(Items.PINK_TULIP);
+-                    p_340185_.accept(Items.OXEYE_DAISY);
+-                    p_340185_.accept(Items.CORNFLOWER);
+-                    p_340185_.accept(Items.LILY_OF_THE_VALLEY);
+-                    p_340185_.accept(Items.POTATO_FLOWER);
+-                    p_340185_.accept(Items.TORCHFLOWER);
+-                    p_340185_.accept(Items.WITHER_ROSE);
+-                    p_340185_.accept(Items.PINK_PETALS);
+-                    p_340185_.accept(Items.SPORE_BLOSSOM);
+-                    p_340185_.accept(Items.BAMBOO);
+-                    p_340185_.accept(Items.SUGAR_CANE);
+-                    p_340185_.accept(Items.CACTUS);
+-                    p_340185_.accept(Items.CRIMSON_ROOTS);
+-                    p_340185_.accept(Items.WARPED_ROOTS);
+-                    p_340185_.accept(Items.NETHER_SPROUTS);
+-                    p_340185_.accept(Items.WEEPING_VINES);
+-                    p_340185_.accept(Items.TWISTING_VINES);
+-                    p_340185_.accept(Items.VINE);
+-                    p_340185_.accept(Items.TALL_GRASS);
+-                    p_340185_.accept(Items.LARGE_FERN);
+-                    p_340185_.accept(Items.SUNFLOWER);
+-                    p_340185_.accept(Items.LILAC);
+-                    p_340185_.accept(Items.ROSE_BUSH);
+-                    p_340185_.accept(Items.PEONY);
+-                    p_340185_.accept(Items.PITCHER_PLANT);
+-                    p_340185_.accept(Items.BIG_DRIPLEAF);
+-                    p_340185_.accept(Items.SMALL_DRIPLEAF);
+-                    p_340185_.accept(Items.CHORUS_PLANT);
+-                    p_340185_.accept(Items.CHORUS_FLOWER);
+-                    p_340185_.accept(Items.GLOW_LICHEN);
+-                    p_340185_.accept(Items.HANGING_ROOTS);
+-                    p_340185_.accept(Items.FROGSPAWN);
+-                    p_340185_.accept(Items.TURTLE_EGG);
+-                    p_340185_.accept(Items.SNIFFER_EGG);
+-                    p_340185_.accept(Items.WHEAT_SEEDS);
+-                    p_340185_.accept(Items.COCOA_BEANS);
+-                    p_340185_.accept(Items.PUMPKIN_SEEDS);
+-                    p_340185_.accept(Items.MELON_SEEDS);
+-                    p_340185_.accept(Items.BEETROOT_SEEDS);
+-                    p_340185_.accept(Items.TORCHFLOWER_SEEDS);
+-                    p_340185_.accept(Items.PITCHER_POD);
+-                    p_340185_.accept(Items.GLOW_BERRIES);
+-                    p_340185_.accept(Items.SWEET_BERRIES);
+-                    p_340185_.accept(Items.NETHER_WART);
+-                    p_340185_.accept(Items.LILY_PAD);
+-                    p_340185_.accept(Items.SEAGRASS);
+-                    p_340185_.accept(Items.SEA_PICKLE);
+-                    p_340185_.accept(Items.KELP);
+-                    p_340185_.accept(Items.DRIED_KELP_BLOCK);
+-                    p_340185_.accept(Items.TUBE_CORAL_BLOCK);
+-                    p_340185_.accept(Items.BRAIN_CORAL_BLOCK);
+-                    p_340185_.accept(Items.BUBBLE_CORAL_BLOCK);
+-                    p_340185_.accept(Items.FIRE_CORAL_BLOCK);
+-                    p_340185_.accept(Items.HORN_CORAL_BLOCK);
+-                    p_340185_.accept(Items.DEAD_TUBE_CORAL_BLOCK);
+-                    p_340185_.accept(Items.DEAD_BRAIN_CORAL_BLOCK);
+-                    p_340185_.accept(Items.DEAD_BUBBLE_CORAL_BLOCK);
+-                    p_340185_.accept(Items.DEAD_FIRE_CORAL_BLOCK);
+-                    p_340185_.accept(Items.DEAD_HORN_CORAL_BLOCK);
+-                    p_340185_.accept(Items.TUBE_CORAL);
+-                    p_340185_.accept(Items.BRAIN_CORAL);
+-                    p_340185_.accept(Items.BUBBLE_CORAL);
+-                    p_340185_.accept(Items.FIRE_CORAL);
+-                    p_340185_.accept(Items.HORN_CORAL);
+-                    p_340185_.accept(Items.DEAD_TUBE_CORAL);
+-                    p_340185_.accept(Items.DEAD_BRAIN_CORAL);
+-                    p_340185_.accept(Items.DEAD_BUBBLE_CORAL);
+-                    p_340185_.accept(Items.DEAD_FIRE_CORAL);
+-                    p_340185_.accept(Items.DEAD_HORN_CORAL);
+-                    p_340185_.accept(Items.TUBE_CORAL_FAN);
+-                    p_340185_.accept(Items.BRAIN_CORAL_FAN);
+-                    p_340185_.accept(Items.BUBBLE_CORAL_FAN);
+-                    p_340185_.accept(Items.FIRE_CORAL_FAN);
+-                    p_340185_.accept(Items.HORN_CORAL_FAN);
+-                    p_340185_.accept(Items.DEAD_TUBE_CORAL_FAN);
+-                    p_340185_.accept(Items.DEAD_BRAIN_CORAL_FAN);
+-                    p_340185_.accept(Items.DEAD_BUBBLE_CORAL_FAN);
+-                    p_340185_.accept(Items.DEAD_FIRE_CORAL_FAN);
+-                    p_340185_.accept(Items.DEAD_HORN_CORAL_FAN);
+-                    p_340185_.accept(Items.SPONGE);
+-                    p_340185_.accept(Items.WET_SPONGE);
+-                    p_340185_.accept(Items.MELON);
+-                    p_340185_.accept(Items.PUMPKIN);
+-                    p_340185_.accept(Items.CARVED_PUMPKIN);
+-                    p_340185_.accept(Items.JACK_O_LANTERN);
+-                    p_340185_.accept(Items.HAY_BLOCK);
+-                    p_340185_.accept(Items.BEE_NEST);
+-                    p_340185_.accept(Items.HONEYCOMB_BLOCK);
+-                    p_340185_.accept(Items.SLIME_BLOCK);
+-                    p_340185_.accept(Items.HONEY_BLOCK);
+-                    p_340185_.accept(Items.OCHRE_FROGLIGHT);
+-                    p_340185_.accept(Items.VERDANT_FROGLIGHT);
+-                    p_340185_.accept(Items.PEARLESCENT_FROGLIGHT);
+-                    p_340185_.accept(Items.SCULK);
+-                    p_340185_.accept(Items.SCULK_VEIN);
+-                    p_340185_.accept(Items.SCULK_CATALYST);
+-                    p_340185_.accept(Items.SCULK_SHRIEKER);
+-                    p_340185_.accept(Items.SCULK_SENSOR);
+-                    p_340185_.accept(Items.COBWEB);
+-                    p_340185_.accept(Items.BEDROCK);
++                .displayItems((p_288945_, p_288946_) -> {
++                    p_288946_.accept(Items.GRASS_BLOCK);
++                    p_288946_.accept(Items.PODZOL);
++                    p_288946_.accept(Items.MYCELIUM);
++                    p_288946_.accept(Items.DIRT_PATH);
++                    p_288946_.accept(Items.DIRT);
++                    p_288946_.accept(Items.COARSE_DIRT);
++                    p_288946_.accept(Items.ROOTED_DIRT);
++                    p_288946_.accept(Items.FARMLAND);
++                    p_288946_.accept(Items.MUD);
++                    p_288946_.accept(Items.CLAY);
++                    p_288946_.accept(Items.GRAVEL);
++                    p_288946_.accept(Items.SAND);
++                    p_288946_.accept(Items.SANDSTONE);
++                    p_288946_.accept(Items.RED_SAND);
++                    p_288946_.accept(Items.RED_SANDSTONE);
++                    p_288946_.accept(Items.ICE);
++                    p_288946_.accept(Items.PACKED_ICE);
++                    p_288946_.accept(Items.BLUE_ICE);
++                    p_288946_.accept(Items.SNOW_BLOCK);
++                    p_288946_.accept(Items.SNOW);
++                    p_288946_.accept(Items.MOSS_BLOCK);
++                    p_288946_.accept(Items.MOSS_CARPET);
++                    p_288946_.accept(Items.STONE);
++                    p_288946_.accept(Items.DEEPSLATE);
++                    p_288946_.accept(Items.GRANITE);
++                    p_288946_.accept(Items.DIORITE);
++                    p_288946_.accept(Items.ANDESITE);
++                    p_288946_.accept(Items.CALCITE);
++                    p_288946_.accept(Items.TUFF);
++                    p_288946_.accept(Items.DRIPSTONE_BLOCK);
++                    p_288946_.accept(Items.POINTED_DRIPSTONE);
++                    p_288946_.accept(Items.PRISMARINE);
++                    p_288946_.accept(Items.MAGMA_BLOCK);
++                    p_288946_.accept(Items.OBSIDIAN);
++                    p_288946_.accept(Items.CRYING_OBSIDIAN);
++                    p_288946_.accept(Items.NETHERRACK);
++                    p_288946_.accept(Items.CRIMSON_NYLIUM);
++                    p_288946_.accept(Items.WARPED_NYLIUM);
++                    p_288946_.accept(Items.SOUL_SAND);
++                    p_288946_.accept(Items.SOUL_SOIL);
++                    p_288946_.accept(Items.BONE_BLOCK);
++                    p_288946_.accept(Items.BLACKSTONE);
++                    p_288946_.accept(Items.BASALT);
++                    p_288946_.accept(Items.SMOOTH_BASALT);
++                    p_288946_.accept(Items.END_STONE);
++                    p_288946_.accept(Items.COAL_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_COAL_ORE);
++                    p_288946_.accept(Items.IRON_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_IRON_ORE);
++                    p_288946_.accept(Items.COPPER_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_COPPER_ORE);
++                    p_288946_.accept(Items.GOLD_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_GOLD_ORE);
++                    p_288946_.accept(Items.REDSTONE_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_REDSTONE_ORE);
++                    p_288946_.accept(Items.EMERALD_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_EMERALD_ORE);
++                    p_288946_.accept(Items.LAPIS_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_LAPIS_ORE);
++                    p_288946_.accept(Items.DIAMOND_ORE);
++                    p_288946_.accept(Items.DEEPSLATE_DIAMOND_ORE);
++                    p_288946_.accept(Items.NETHER_GOLD_ORE);
++                    p_288946_.accept(Items.NETHER_QUARTZ_ORE);
++                    p_288946_.accept(Items.ANCIENT_DEBRIS);
++                    p_288946_.accept(Items.RAW_IRON_BLOCK);
++                    p_288946_.accept(Items.RAW_COPPER_BLOCK);
++                    p_288946_.accept(Items.RAW_GOLD_BLOCK);
++                    p_288946_.accept(Items.GLOWSTONE);
++                    p_288946_.accept(Items.AMETHYST_BLOCK);
++                    p_288946_.accept(Items.BUDDING_AMETHYST);
++                    p_288946_.accept(Items.SMALL_AMETHYST_BUD);
++                    p_288946_.accept(Items.MEDIUM_AMETHYST_BUD);
++                    p_288946_.accept(Items.LARGE_AMETHYST_BUD);
++                    p_288946_.accept(Items.AMETHYST_CLUSTER);
++                    p_288946_.accept(Items.OAK_LOG);
++                    p_288946_.accept(Items.SPRUCE_LOG);
++                    p_288946_.accept(Items.BIRCH_LOG);
++                    p_288946_.accept(Items.JUNGLE_LOG);
++                    p_288946_.accept(Items.ACACIA_LOG);
++                    p_288946_.accept(Items.DARK_OAK_LOG);
++                    p_288946_.accept(Items.MANGROVE_LOG);
++                    p_288946_.accept(Items.MANGROVE_ROOTS);
++                    p_288946_.accept(Items.MUDDY_MANGROVE_ROOTS);
++                    p_288946_.accept(Items.CHERRY_LOG);
++                    p_288946_.accept(Items.MUSHROOM_STEM);
++                    p_288946_.accept(Items.CRIMSON_STEM);
++                    p_288946_.accept(Items.WARPED_STEM);
++                    p_288946_.accept(Items.OAK_LEAVES);
++                    p_288946_.accept(Items.SPRUCE_LEAVES);
++                    p_288946_.accept(Items.BIRCH_LEAVES);
++                    p_288946_.accept(Items.JUNGLE_LEAVES);
++                    p_288946_.accept(Items.ACACIA_LEAVES);
++                    p_288946_.accept(Items.DARK_OAK_LEAVES);
++                    p_288946_.accept(Items.MANGROVE_LEAVES);
++                    p_288946_.accept(Items.CHERRY_LEAVES);
++                    p_288946_.accept(Items.AZALEA_LEAVES);
++                    p_288946_.accept(Items.FLOWERING_AZALEA_LEAVES);
++                    p_288946_.accept(Items.BROWN_MUSHROOM_BLOCK);
++                    p_288946_.accept(Items.RED_MUSHROOM_BLOCK);
++                    p_288946_.accept(Items.NETHER_WART_BLOCK);
++                    p_288946_.accept(Items.WARPED_WART_BLOCK);
++                    p_288946_.accept(Items.SHROOMLIGHT);
++                    p_288946_.accept(Items.OAK_SAPLING);
++                    p_288946_.accept(Items.SPRUCE_SAPLING);
++                    p_288946_.accept(Items.BIRCH_SAPLING);
++                    p_288946_.accept(Items.JUNGLE_SAPLING);
++                    p_288946_.accept(Items.ACACIA_SAPLING);
++                    p_288946_.accept(Items.DARK_OAK_SAPLING);
++                    p_288946_.accept(Items.MANGROVE_PROPAGULE);
++                    p_288946_.accept(Items.CHERRY_SAPLING);
++                    p_288946_.accept(Items.AZALEA);
++                    p_288946_.accept(Items.FLOWERING_AZALEA);
++                    p_288946_.accept(Items.BROWN_MUSHROOM);
++                    p_288946_.accept(Items.RED_MUSHROOM);
++                    p_288946_.accept(Items.CRIMSON_FUNGUS);
++                    p_288946_.accept(Items.WARPED_FUNGUS);
++                    p_288946_.accept(Items.SHORT_GRASS);
++                    p_288946_.accept(Items.FERN);
++                    p_288946_.accept(Items.DEAD_BUSH);
++                    p_288946_.accept(Items.DANDELION);
++                    p_288946_.accept(Items.POPPY);
++                    p_288946_.accept(Items.BLUE_ORCHID);
++                    p_288946_.accept(Items.ALLIUM);
++                    p_288946_.accept(Items.AZURE_BLUET);
++                    p_288946_.accept(Items.RED_TULIP);
++                    p_288946_.accept(Items.ORANGE_TULIP);
++                    p_288946_.accept(Items.WHITE_TULIP);
++                    p_288946_.accept(Items.PINK_TULIP);
++                    p_288946_.accept(Items.OXEYE_DAISY);
++                    p_288946_.accept(Items.CORNFLOWER);
++                    p_288946_.accept(Items.LILY_OF_THE_VALLEY);
++                    p_288946_.accept(Items.TORCHFLOWER);
++                    p_288946_.accept(Items.WITHER_ROSE);
++                    p_288946_.accept(Items.PINK_PETALS);
++                    p_288946_.accept(Items.SPORE_BLOSSOM);
++                    p_288946_.accept(Items.BAMBOO);
++                    p_288946_.accept(Items.SUGAR_CANE);
++                    p_288946_.accept(Items.CACTUS);
++                    p_288946_.accept(Items.CRIMSON_ROOTS);
++                    p_288946_.accept(Items.WARPED_ROOTS);
++                    p_288946_.accept(Items.NETHER_SPROUTS);
++                    p_288946_.accept(Items.WEEPING_VINES);
++                    p_288946_.accept(Items.TWISTING_VINES);
++                    p_288946_.accept(Items.VINE);
++                    p_288946_.accept(Items.TALL_GRASS);
++                    p_288946_.accept(Items.LARGE_FERN);
++                    p_288946_.accept(Items.SUNFLOWER);
++                    p_288946_.accept(Items.LILAC);
++                    p_288946_.accept(Items.ROSE_BUSH);
++                    p_288946_.accept(Items.PEONY);
++                    p_288946_.accept(Items.PITCHER_PLANT);
++                    p_288946_.accept(Items.BIG_DRIPLEAF);
++                    p_288946_.accept(Items.SMALL_DRIPLEAF);
++                    p_288946_.accept(Items.CHORUS_PLANT);
++                    p_288946_.accept(Items.CHORUS_FLOWER);
++                    p_288946_.accept(Items.GLOW_LICHEN);
++                    p_288946_.accept(Items.HANGING_ROOTS);
++                    p_288946_.accept(Items.FROGSPAWN);
++                    p_288946_.accept(Items.TURTLE_EGG);
++                    p_288946_.accept(Items.SNIFFER_EGG);
++                    p_288946_.accept(Items.WHEAT_SEEDS);
++                    p_288946_.accept(Items.COCOA_BEANS);
++                    p_288946_.accept(Items.PUMPKIN_SEEDS);
++                    p_288946_.accept(Items.MELON_SEEDS);
++                    p_288946_.accept(Items.BEETROOT_SEEDS);
++                    p_288946_.accept(Items.TORCHFLOWER_SEEDS);
++                    p_288946_.accept(Items.PITCHER_POD);
++                    p_288946_.accept(Items.GLOW_BERRIES);
++                    p_288946_.accept(Items.SWEET_BERRIES);
++                    p_288946_.accept(Items.NETHER_WART);
++                    p_288946_.accept(Items.LILY_PAD);
++                    p_288946_.accept(Items.SEAGRASS);
++                    p_288946_.accept(Items.SEA_PICKLE);
++                    p_288946_.accept(Items.KELP);
++                    p_288946_.accept(Items.DRIED_KELP_BLOCK);
++                    p_288946_.accept(Items.TUBE_CORAL_BLOCK);
++                    p_288946_.accept(Items.BRAIN_CORAL_BLOCK);
++                    p_288946_.accept(Items.BUBBLE_CORAL_BLOCK);
++                    p_288946_.accept(Items.FIRE_CORAL_BLOCK);
++                    p_288946_.accept(Items.HORN_CORAL_BLOCK);
++                    p_288946_.accept(Items.DEAD_TUBE_CORAL_BLOCK);
++                    p_288946_.accept(Items.DEAD_BRAIN_CORAL_BLOCK);
++                    p_288946_.accept(Items.DEAD_BUBBLE_CORAL_BLOCK);
++                    p_288946_.accept(Items.DEAD_FIRE_CORAL_BLOCK);
++                    p_288946_.accept(Items.DEAD_HORN_CORAL_BLOCK);
++                    p_288946_.accept(Items.TUBE_CORAL);
++                    p_288946_.accept(Items.BRAIN_CORAL);
++                    p_288946_.accept(Items.BUBBLE_CORAL);
++                    p_288946_.accept(Items.FIRE_CORAL);
++                    p_288946_.accept(Items.HORN_CORAL);
++                    p_288946_.accept(Items.DEAD_TUBE_CORAL);
++                    p_288946_.accept(Items.DEAD_BRAIN_CORAL);
++                    p_288946_.accept(Items.DEAD_BUBBLE_CORAL);
++                    p_288946_.accept(Items.DEAD_FIRE_CORAL);
++                    p_288946_.accept(Items.DEAD_HORN_CORAL);
++                    p_288946_.accept(Items.TUBE_CORAL_FAN);
++                    p_288946_.accept(Items.BRAIN_CORAL_FAN);
++                    p_288946_.accept(Items.BUBBLE_CORAL_FAN);
++                    p_288946_.accept(Items.FIRE_CORAL_FAN);
++                    p_288946_.accept(Items.HORN_CORAL_FAN);
++                    p_288946_.accept(Items.DEAD_TUBE_CORAL_FAN);
++                    p_288946_.accept(Items.DEAD_BRAIN_CORAL_FAN);
++                    p_288946_.accept(Items.DEAD_BUBBLE_CORAL_FAN);
++                    p_288946_.accept(Items.DEAD_FIRE_CORAL_FAN);
++                    p_288946_.accept(Items.DEAD_HORN_CORAL_FAN);
++                    p_288946_.accept(Items.SPONGE);
++                    p_288946_.accept(Items.WET_SPONGE);
++                    p_288946_.accept(Items.MELON);
++                    p_288946_.accept(Items.PUMPKIN);
++                    p_288946_.accept(Items.CARVED_PUMPKIN);
++                    p_288946_.accept(Items.JACK_O_LANTERN);
++                    p_288946_.accept(Items.HAY_BLOCK);
++                    p_288946_.accept(Items.BEE_NEST);
++                    p_288946_.accept(Items.HONEYCOMB_BLOCK);
++                    p_288946_.accept(Items.SLIME_BLOCK);
++                    p_288946_.accept(Items.HONEY_BLOCK);
++                    p_288946_.accept(Items.OCHRE_FROGLIGHT);
++                    p_288946_.accept(Items.VERDANT_FROGLIGHT);
++                    p_288946_.accept(Items.PEARLESCENT_FROGLIGHT);
++                    p_288946_.accept(Items.SCULK);
++                    p_288946_.accept(Items.SCULK_VEIN);
++                    p_288946_.accept(Items.SCULK_CATALYST);
++                    p_288946_.accept(Items.SCULK_SHRIEKER);
++                    p_288946_.accept(Items.SCULK_SENSOR);
++                    p_288946_.accept(Items.COBWEB);
++                    p_288946_.accept(Items.BEDROCK);
+                 })
+                 .build()
+         );
+@@ -1000,9 +_,9 @@
+                         p_323386_.holders()
+                             .lookup(Registries.PAINTING_VARIANT)
+                             .ifPresent(
+-                                p_340188_ -> generatePresetPaintings(
++                                p_270026_ -> generatePresetPaintings(
+                                         p_323387_,
+-                                        p_340188_,
++                                        (HolderLookup.RegistryLookup<PaintingVariant>)p_270026_,
+                                         p_270037_ -> p_270037_.is(PaintingVariantTags.PLACEABLE),
+                                         CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+                                     )
+@@ -1223,7 +_,7 @@
+                 .displayItems((p_330080_, p_330081_) -> {
+                     Set<ItemStack> set = ItemStackLinkedSet.createTypeAndComponentsSet();
+         
+-                    for(CreativeModeTab creativemodetab : p_283144_) {
++                    for (CreativeModeTab creativemodetab : p_283144_) {
+                         if (creativemodetab.getType() != CreativeModeTab.Type.SEARCH) {
+                             set.addAll(creativemodetab.getSearchTabDisplayItems());
+                         }
+@@ -1238,265 +_,123 @@
+         );
+         Registry.register(
+             p_283144_,
+-            POTATOES,
+-            CreativeModeTab.builder(CreativeModeTab.Row.TOP, 7)
+-                .title(Component.translatable("itemGroup.potatoes"))
+-                .icon(() -> new ItemStack(Items.POISONOUS_POTATO))
+-                .displayItems(
+-                    (p_340180_, p_340181_) -> {
+-                        p_340181_.accept(Items.POISONOUS_POTATO);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_PLANT);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_FRIES);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_SLICES);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_STICKS);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_CHIPS);
+-                        p_340181_.accept(Items.HASH_BROWNS);
+-                        p_340181_.accept(Items.PEDESTAL);
+-                        p_340181_.accept(Items.POTATO_PORTAL);
+-                        p_340181_.accept(Items.POTATO_EYE);
+-                        p_340181_.accept(Items.POTATO_STAFF);
+-                        p_340181_.accept(Items.BIG_BRAIN);
+-                        p_340181_.accept(createXpItem(Items.POTATO_OF_KNOWLEDGE, 10));
+-                        p_340181_.accept(createXpItem(Items.POTATO_OF_KNOWLEDGE, 50));
+-                        p_340181_.accept(createXpItem(Items.POTATO_OF_KNOWLEDGE, 100));
+-                        p_340181_.accept(Items.VENOMOUS_POTATO);
+-                        p_340181_.accept(Items.HOT_POTATO);
+-                        p_340181_.accept(Items.GOLDEN_POISONOUS_POTATO);
+-                        p_340181_.accept(Items.ENCHANTED_GOLDEN_POISONOUS_POTATO);
+-                        p_340181_.accept(Items.POTATO_HAMMER);
+-                        p_340181_.accept(Items.POISONOUS_POTA_TOES);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_CHESTPLATE);
+-                        p_340181_.accept(Items.POISONOUS_POLYTRA);
+-                        p_340181_.accept(Items.POTATO_BATTERY);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_CUTTER);
+-                        p_340181_.accept(Items.FRYING_TABLE);
+-                        p_340181_.accept(Items.POTATO_REFINERY);
+-                        p_340181_.accept(Items.POTATO_OIL);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_OIL);
+-                        p_340181_.accept(Items.TOXIC_BEAM);
+-                        p_340181_.accept(Items.LASHING_POTATO);
+-                        p_340181_.accept(Items.POTATO_PEELER);
+-                        p_340181_.accept(Items.DENT);
+-                        p_340181_.accept(Items.FLOATATO);
+-                        p_340181_.accept(Items.FLOATATER);
+-                        p_340181_.accept(Items.POWERFUL_POTATO);
+-                        p_340181_.accept(Items.STRONG_ROOTS);
+-                        p_340181_.accept(Items.WEAK_ROOTS);
+-                        p_340181_.accept(Items.TOXIC_RESIN);
+-                        p_340181_.accept(Items.AMBER_GEM);
+-                        p_340181_.accept(Items.AMBER_BLOCK);
+-                        p_340181_.accept(Items.POTATO_FLOWER);
+-                        p_340181_.accept(Items.POTATO_BUD);
+-                        p_340181_.accept(Items.POTATO_STEM);
+-                        p_340181_.accept(Items.POTATO_PLANKS);
+-                        p_340181_.accept(Items.POTATO_SLAB);
+-                        p_340181_.accept(Items.POTATO_STAIRS);
+-                        p_340181_.accept(Items.POTATO_FENCE);
+-                        p_340181_.accept(Items.POTATO_FENCE_GATE);
+-                        p_340181_.accept(Items.POTATO_DOOR);
+-                        p_340181_.accept(Items.POTATO_TRAPDOOR);
+-                        p_340181_.accept(Items.POTATO_BUTTON);
+-                        p_340181_.accept(Items.POTATO_PRESSURE_PLATE);
+-                        p_340181_.accept(Items.POTATO_SIGN);
+-                        p_340181_.accept(Items.POTATO_HANGING_SIGN);
+-                        p_340181_.accept(Items.POTATO_LEAVES);
+-                        p_340181_.accept(Items.POTATO_FRUIT);
+-                        p_340181_.accept(Items.POTATO_PEDICULE);
+-                        p_340181_.accept(Items.POTATO_SPROUTS);
+-                        p_340181_.accept(Items.TERREDEPOMME);
+-                        p_340181_.accept(Items.PEELGRASS_BLOCK);
+-                        p_340181_.accept(Items.CORRUPTED_PEELGRASS_BLOCK);
+-                        p_340181_.accept(Items.POISON_FARMLAND);
+-                        p_340181_.accept(Items.POISON_PATH);
+-                        p_340181_.accept(Items.GRAVTATER);
+-                        p_340181_.accept(Items.VICIOUS_POTATO);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_ORE);
+-                        p_340181_.accept(Items.DEEPSLATE_POISONOUS_POTATO_ORE);
+-                        p_340181_.accept(Items.RESIN_ORE);
+-                        p_340181_.accept(Items.POTONE_COPPER_ORE);
+-                        p_340181_.accept(Items.POTONE_IRON_ORE);
+-                        p_340181_.accept(Items.POTONE_GOLD_ORE);
+-                        p_340181_.accept(Items.POTONE_REDSTONE_ORE);
+-                        p_340181_.accept(Items.POTONE_LAPIS_ORE);
+-                        p_340181_.accept(Items.POTONE_DIAMOND_ORE);
+-                        p_340181_.accept(Items.POTONE);
+-                        p_340181_.accept(Items.POTONE_SLAB);
+-                        p_340181_.accept(Items.POTONE_STAIRS);
+-                        p_340181_.accept(Items.POTONE_WALL);
+-                        p_340181_.accept(Items.TATERSTONE);
+-                        p_340181_.accept(Items.TATERSTONE_SLAB);
+-                        p_340181_.accept(Items.TATERSTONE_STAIRS);
+-                        p_340181_.accept(Items.TATERSTONE_WALL);
+-                        p_340181_.accept(Items.BAKED_POTATO_BRICKS);
+-                        p_340181_.accept(Items.BAKED_POTATO_BRICK_SLAB);
+-                        p_340181_.accept(Items.BAKED_POTATO_BRICK_STAIRS);
+-                        p_340181_.accept(Items.BAKED_POTATO_BRICK_WALL);
+-                        p_340181_.accept(Items.EXPIRED_BAKED_POTATO_BRICKS);
+-                        p_340181_.accept(Items.EXPIRED_BAKED_POTATO_BRICK_SLAB);
+-                        p_340181_.accept(Items.EXPIRED_BAKED_POTATO_BRICK_STAIRS);
+-                        p_340181_.accept(Items.EXPIRED_BAKED_POTATO_BRICK_WALL);
+-                        p_340181_.accept(Items.CHARRED_BAKED_POTATO_BRICKS);
+-                        p_340181_.accept(Items.CHARRED_BAKED_POTATO_BRICK_SLAB);
+-                        p_340181_.accept(Items.CHARRED_BAKED_POTATO_BRICK_STAIRS);
+-                        p_340181_.accept(Items.CHARRED_BAKED_POTATO_BRICK_WALL);
+-                        p_340181_.accept(Items.POISONOUS_MASHED_POTATO);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_BLOCK);
+-                        p_340181_.accept(Items.COMPRESSED_POISONOUS_POTATO_BLOCK);
+-                        p_340181_.accept(Items.DOUBLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+-                        p_340181_.accept(Items.TRIPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+-                        p_340181_.accept(Items.QUADRUPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+-                        p_340181_.accept(Items.POTATO_ZOMBIE_HEAD_HAT);
+-                        p_340181_.accept(Items.POTATO_ZOMBIE_HEAD_BLOCK);
+-                        p_340181_.accept(Items.BATATO_SPAWN_EGG);
+-                        p_340181_.accept(Items.POISONOUS_POTATO_ZOMBIE_SPAWN_EGG);
+-                        p_340181_.accept(Items.TOXIFIN_SPAWN_EGG);
+-                        p_340181_.accept(Items.PLAGUEWHALE_SPAWN_EGG);
+-                        p_340181_.accept(Items.MEGA_SPUD_SPAWN_EGG);
+-                        p_340181_.accept(Items.CORRUPTED_POTATO_PEELS);
+-            
+-                        for(Item item : Items.POTATO_PEELS_MAP.values()) {
+-                            p_340181_.accept(item);
+-                        }
+-            
+-                        for(Item item1 : Items.POTATO_PEELS_BLOCK_MAP.values()) {
+-                            p_340181_.accept(item1);
+-                        }
+-            
+-                        p_340181_.accept(Blocks.CORRUPTED_POTATO_PEELS_BLOCK);
+-                        p_340180_.holders()
+-                            .lookup(Registries.PAINTING_VARIANT)
+-                            .ifPresent(
+-                                p_270014_ -> generatePresetPaintings(
+-                                        p_340181_,
+-                                        p_270014_,
+-                                        p_340186_ -> p_340186_.is(PaintingVariantTags.POTATO),
+-                                        CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+-                                    )
+-                            );
+-                    }
+-                )
+-                .build()
+-        );
+-        Registry.register(
+-            p_283144_,
+             TOOLS_AND_UTILITIES,
+             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 0)
+                 .title(Component.translatable("itemGroup.tools"))
+                 .icon(() -> new ItemStack(Items.DIAMOND_PICKAXE))
+                 .displayItems(
+-                    (p_340182_, p_340183_) -> {
+-                        p_340183_.accept(Items.WOODEN_SHOVEL);
+-                        p_340183_.accept(Items.WOODEN_PICKAXE);
+-                        p_340183_.accept(Items.WOODEN_AXE);
+-                        p_340183_.accept(Items.WOODEN_HOE);
+-                        p_340183_.accept(Items.STONE_SHOVEL);
+-                        p_340183_.accept(Items.STONE_PICKAXE);
+-                        p_340183_.accept(Items.STONE_AXE);
+-                        p_340183_.accept(Items.STONE_HOE);
+-                        p_340183_.accept(Items.IRON_SHOVEL);
+-                        p_340183_.accept(Items.IRON_PICKAXE);
+-                        p_340183_.accept(Items.IRON_AXE);
+-                        p_340183_.accept(Items.IRON_HOE);
+-                        p_340183_.accept(Items.GOLDEN_SHOVEL);
+-                        p_340183_.accept(Items.GOLDEN_PICKAXE);
+-                        p_340183_.accept(Items.GOLDEN_AXE);
+-                        p_340183_.accept(Items.GOLDEN_HOE);
+-                        p_340183_.accept(Items.DIAMOND_SHOVEL);
+-                        p_340183_.accept(Items.DIAMOND_PICKAXE);
+-                        p_340183_.accept(Items.DIAMOND_AXE);
+-                        p_340183_.accept(Items.DIAMOND_HOE);
+-                        p_340183_.accept(Items.NETHERITE_SHOVEL);
+-                        p_340183_.accept(Items.NETHERITE_PICKAXE);
+-                        p_340183_.accept(Items.NETHERITE_AXE);
+-                        p_340183_.accept(Items.NETHERITE_HOE);
+-                        p_340183_.accept(Items.BUCKET);
+-                        p_340183_.accept(Items.WATER_BUCKET);
+-                        p_340183_.accept(Items.COD_BUCKET);
+-                        p_340183_.accept(Items.SALMON_BUCKET);
+-                        p_340183_.accept(Items.TROPICAL_FISH_BUCKET);
+-                        p_340183_.accept(Items.PUFFERFISH_BUCKET);
+-                        p_340183_.accept(Items.AXOLOTL_BUCKET);
+-                        p_340183_.accept(Items.TADPOLE_BUCKET);
+-                        p_340183_.accept(Items.LAVA_BUCKET);
+-                        p_340183_.accept(Items.POWDER_SNOW_BUCKET);
+-                        p_340183_.accept(Items.MILK_BUCKET);
+-                        p_340183_.accept(Items.FISHING_ROD);
+-                        p_340183_.accept(Items.FLINT_AND_STEEL);
+-                        p_340183_.accept(Items.FIRE_CHARGE);
+-                        p_340183_.accept(Items.BONE_MEAL);
+-                        p_340183_.accept(Items.SHEARS);
+-                        p_340183_.accept(Items.BRUSH);
+-                        p_340183_.accept(Items.NAME_TAG);
+-                        p_340183_.accept(Items.LEAD);
+-                        if (p_340182_.enabledFeatures().contains(FeatureFlags.BUNDLE)) {
+-                            p_340183_.accept(Items.BUNDLE);
++                    (p_325852_, p_325853_) -> {
++                        p_325853_.accept(Items.WOODEN_SHOVEL);
++                        p_325853_.accept(Items.WOODEN_PICKAXE);
++                        p_325853_.accept(Items.WOODEN_AXE);
++                        p_325853_.accept(Items.WOODEN_HOE);
++                        p_325853_.accept(Items.STONE_SHOVEL);
++                        p_325853_.accept(Items.STONE_PICKAXE);
++                        p_325853_.accept(Items.STONE_AXE);
++                        p_325853_.accept(Items.STONE_HOE);
++                        p_325853_.accept(Items.IRON_SHOVEL);
++                        p_325853_.accept(Items.IRON_PICKAXE);
++                        p_325853_.accept(Items.IRON_AXE);
++                        p_325853_.accept(Items.IRON_HOE);
++                        p_325853_.accept(Items.GOLDEN_SHOVEL);
++                        p_325853_.accept(Items.GOLDEN_PICKAXE);
++                        p_325853_.accept(Items.GOLDEN_AXE);
++                        p_325853_.accept(Items.GOLDEN_HOE);
++                        p_325853_.accept(Items.DIAMOND_SHOVEL);
++                        p_325853_.accept(Items.DIAMOND_PICKAXE);
++                        p_325853_.accept(Items.DIAMOND_AXE);
++                        p_325853_.accept(Items.DIAMOND_HOE);
++                        p_325853_.accept(Items.NETHERITE_SHOVEL);
++                        p_325853_.accept(Items.NETHERITE_PICKAXE);
++                        p_325853_.accept(Items.NETHERITE_AXE);
++                        p_325853_.accept(Items.NETHERITE_HOE);
++                        p_325853_.accept(Items.BUCKET);
++                        p_325853_.accept(Items.WATER_BUCKET);
++                        p_325853_.accept(Items.COD_BUCKET);
++                        p_325853_.accept(Items.SALMON_BUCKET);
++                        p_325853_.accept(Items.TROPICAL_FISH_BUCKET);
++                        p_325853_.accept(Items.PUFFERFISH_BUCKET);
++                        p_325853_.accept(Items.AXOLOTL_BUCKET);
++                        p_325853_.accept(Items.TADPOLE_BUCKET);
++                        p_325853_.accept(Items.LAVA_BUCKET);
++                        p_325853_.accept(Items.POWDER_SNOW_BUCKET);
++                        p_325853_.accept(Items.MILK_BUCKET);
++                        p_325853_.accept(Items.FISHING_ROD);
++                        p_325853_.accept(Items.FLINT_AND_STEEL);
++                        p_325853_.accept(Items.FIRE_CHARGE);
++                        p_325853_.accept(Items.BONE_MEAL);
++                        p_325853_.accept(Items.SHEARS);
++                        p_325853_.accept(Items.BRUSH);
++                        p_325853_.accept(Items.NAME_TAG);
++                        p_325853_.accept(Items.LEAD);
++                        if (p_325852_.enabledFeatures().contains(FeatureFlags.BUNDLE)) {
++                            p_325853_.accept(Items.BUNDLE);
+                         }
+             
+-                        p_340183_.accept(Items.COMPASS);
+-                        p_340183_.accept(Items.RECOVERY_COMPASS);
+-                        p_340183_.accept(Items.CLOCK);
+-                        p_340183_.accept(Items.SPYGLASS);
+-                        p_340183_.accept(Items.MAP);
+-                        p_340183_.accept(Items.WRITABLE_BOOK);
+-                        p_340183_.accept(Items.WIND_CHARGE);
+-                        p_340183_.accept(Items.ENDER_PEARL);
+-                        p_340183_.accept(Items.ENDER_EYE);
+-                        p_340183_.accept(Items.ELYTRA);
+-                        p_340183_.accept(Items.POISONOUS_POLYTRA);
+-                        generateFireworksAllDurations(p_340183_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+-                        p_340183_.accept(Items.SADDLE);
+-                        p_340183_.accept(Items.CARROT_ON_A_STICK);
+-                        p_340183_.accept(Items.WARPED_FUNGUS_ON_A_STICK);
+-                        p_340183_.accept(Items.OAK_BOAT);
+-                        p_340183_.accept(Items.OAK_CHEST_BOAT);
+-                        p_340183_.accept(Items.SPRUCE_BOAT);
+-                        p_340183_.accept(Items.SPRUCE_CHEST_BOAT);
+-                        p_340183_.accept(Items.BIRCH_BOAT);
+-                        p_340183_.accept(Items.BIRCH_CHEST_BOAT);
+-                        p_340183_.accept(Items.JUNGLE_BOAT);
+-                        p_340183_.accept(Items.JUNGLE_CHEST_BOAT);
+-                        p_340183_.accept(Items.ACACIA_BOAT);
+-                        p_340183_.accept(Items.ACACIA_CHEST_BOAT);
+-                        p_340183_.accept(Items.DARK_OAK_BOAT);
+-                        p_340183_.accept(Items.DARK_OAK_CHEST_BOAT);
+-                        p_340183_.accept(Items.MANGROVE_BOAT);
+-                        p_340183_.accept(Items.MANGROVE_CHEST_BOAT);
+-                        p_340183_.accept(Items.CHERRY_BOAT);
+-                        p_340183_.accept(Items.CHERRY_CHEST_BOAT);
+-                        p_340183_.accept(Items.BAMBOO_RAFT);
+-                        p_340183_.accept(Items.BAMBOO_CHEST_RAFT);
+-                        p_340183_.accept(Items.RAIL);
+-                        p_340183_.accept(Items.POWERED_RAIL);
+-                        p_340183_.accept(Items.DETECTOR_RAIL);
+-                        p_340183_.accept(Items.ACTIVATOR_RAIL);
+-                        p_340183_.accept(Items.MINECART);
+-                        p_340183_.accept(Items.HOPPER_MINECART);
+-                        p_340183_.accept(Items.CHEST_MINECART);
+-                        p_340183_.accept(Items.FURNACE_MINECART);
+-                        p_340183_.accept(Items.TNT_MINECART);
+-                        p_340182_.holders()
++                        p_325853_.accept(Items.COMPASS);
++                        p_325853_.accept(Items.RECOVERY_COMPASS);
++                        p_325853_.accept(Items.CLOCK);
++                        p_325853_.accept(Items.SPYGLASS);
++                        p_325853_.accept(Items.MAP);
++                        p_325853_.accept(Items.WRITABLE_BOOK);
++                        p_325853_.accept(Items.WIND_CHARGE);
++                        p_325853_.accept(Items.ENDER_PEARL);
++                        p_325853_.accept(Items.ENDER_EYE);
++                        p_325853_.accept(Items.ELYTRA);
++                        generateFireworksAllDurations(p_325853_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
++                        p_325853_.accept(Items.SADDLE);
++                        p_325853_.accept(Items.CARROT_ON_A_STICK);
++                        p_325853_.accept(Items.WARPED_FUNGUS_ON_A_STICK);
++                        p_325853_.accept(Items.OAK_BOAT);
++                        p_325853_.accept(Items.OAK_CHEST_BOAT);
++                        p_325853_.accept(Items.SPRUCE_BOAT);
++                        p_325853_.accept(Items.SPRUCE_CHEST_BOAT);
++                        p_325853_.accept(Items.BIRCH_BOAT);
++                        p_325853_.accept(Items.BIRCH_CHEST_BOAT);
++                        p_325853_.accept(Items.JUNGLE_BOAT);
++                        p_325853_.accept(Items.JUNGLE_CHEST_BOAT);
++                        p_325853_.accept(Items.ACACIA_BOAT);
++                        p_325853_.accept(Items.ACACIA_CHEST_BOAT);
++                        p_325853_.accept(Items.DARK_OAK_BOAT);
++                        p_325853_.accept(Items.DARK_OAK_CHEST_BOAT);
++                        p_325853_.accept(Items.MANGROVE_BOAT);
++                        p_325853_.accept(Items.MANGROVE_CHEST_BOAT);
++                        p_325853_.accept(Items.CHERRY_BOAT);
++                        p_325853_.accept(Items.CHERRY_CHEST_BOAT);
++                        p_325853_.accept(Items.BAMBOO_RAFT);
++                        p_325853_.accept(Items.BAMBOO_CHEST_RAFT);
++                        p_325853_.accept(Items.RAIL);
++                        p_325853_.accept(Items.POWERED_RAIL);
++                        p_325853_.accept(Items.DETECTOR_RAIL);
++                        p_325853_.accept(Items.ACTIVATOR_RAIL);
++                        p_325853_.accept(Items.MINECART);
++                        p_325853_.accept(Items.HOPPER_MINECART);
++                        p_325853_.accept(Items.CHEST_MINECART);
++                        p_325853_.accept(Items.FURNACE_MINECART);
++                        p_325853_.accept(Items.TNT_MINECART);
++                        p_325852_.holders()
+                             .lookup(Registries.INSTRUMENT)
+                             .ifPresent(
+                                 p_270036_ -> generateInstrumentTypes(
+-                                        p_340183_, p_270036_, Items.GOAT_HORN, InstrumentTags.GOAT_HORNS, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
++                                        p_325853_, p_270036_, Items.GOAT_HORN, InstrumentTags.GOAT_HORNS, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+                                     )
+                             );
+-                        p_340183_.accept(Items.MUSIC_DISC_13);
+-                        p_340183_.accept(Items.MUSIC_DISC_CAT);
+-                        p_340183_.accept(Items.MUSIC_DISC_BLOCKS);
+-                        p_340183_.accept(Items.MUSIC_DISC_CHIRP);
+-                        p_340183_.accept(Items.MUSIC_DISC_FAR);
+-                        p_340183_.accept(Items.MUSIC_DISC_MALL);
+-                        p_340183_.accept(Items.MUSIC_DISC_MELLOHI);
+-                        p_340183_.accept(Items.MUSIC_DISC_STAL);
+-                        p_340183_.accept(Items.MUSIC_DISC_STRAD);
+-                        p_340183_.accept(Items.MUSIC_DISC_WARD);
+-                        p_340183_.accept(Items.MUSIC_DISC_11);
+-                        p_340183_.accept(Items.MUSIC_DISC_WAIT);
+-                        p_340183_.accept(Items.MUSIC_DISC_OTHERSIDE);
+-                        p_340183_.accept(Items.MUSIC_DISC_RELIC);
+-                        p_340183_.accept(Items.MUSIC_DISC_5);
+-                        p_340183_.accept(Items.MUSIC_DISC_PIGSTEP);
++                        p_325853_.accept(Items.MUSIC_DISC_13);
++                        p_325853_.accept(Items.MUSIC_DISC_CAT);
++                        p_325853_.accept(Items.MUSIC_DISC_BLOCKS);
++                        p_325853_.accept(Items.MUSIC_DISC_CHIRP);
++                        p_325853_.accept(Items.MUSIC_DISC_FAR);
++                        p_325853_.accept(Items.MUSIC_DISC_MALL);
++                        p_325853_.accept(Items.MUSIC_DISC_MELLOHI);
++                        p_325853_.accept(Items.MUSIC_DISC_STAL);
++                        p_325853_.accept(Items.MUSIC_DISC_STRAD);
++                        p_325853_.accept(Items.MUSIC_DISC_WARD);
++                        p_325853_.accept(Items.MUSIC_DISC_11);
++                        p_325853_.accept(Items.MUSIC_DISC_WAIT);
++                        p_325853_.accept(Items.MUSIC_DISC_OTHERSIDE);
++                        p_325853_.accept(Items.MUSIC_DISC_RELIC);
++                        p_325853_.accept(Items.MUSIC_DISC_5);
++                        p_325853_.accept(Items.MUSIC_DISC_PIGSTEP);
+                     }
+                 )
+                 .build()
+@@ -1508,68 +_,72 @@
+                 .title(Component.translatable("itemGroup.combat"))
+                 .icon(() -> new ItemStack(Items.NETHERITE_SWORD))
+                 .displayItems(
+-                    (p_326768_, p_326769_) -> {
+-                        p_326769_.accept(Items.WOODEN_SWORD);
+-                        p_326769_.accept(Items.STONE_SWORD);
+-                        p_326769_.accept(Items.IRON_SWORD);
+-                        p_326769_.accept(Items.GOLDEN_SWORD);
+-                        p_326769_.accept(Items.DIAMOND_SWORD);
+-                        p_326769_.accept(Items.NETHERITE_SWORD);
+-                        p_326769_.accept(Items.WOODEN_AXE);
+-                        p_326769_.accept(Items.STONE_AXE);
+-                        p_326769_.accept(Items.IRON_AXE);
+-                        p_326769_.accept(Items.GOLDEN_AXE);
+-                        p_326769_.accept(Items.DIAMOND_AXE);
+-                        p_326769_.accept(Items.NETHERITE_AXE);
+-                        p_326769_.accept(Items.TRIDENT);
+-                        p_326769_.accept(Items.MACE);
+-                        p_326769_.accept(Items.SHIELD);
+-                        p_326769_.accept(Items.LEATHER_HELMET);
+-                        p_326769_.accept(Items.LEATHER_CHESTPLATE);
+-                        p_326769_.accept(Items.LEATHER_LEGGINGS);
+-                        p_326769_.accept(Items.LEATHER_BOOTS);
+-                        p_326769_.accept(Items.CHAINMAIL_HELMET);
+-                        p_326769_.accept(Items.CHAINMAIL_CHESTPLATE);
+-                        p_326769_.accept(Items.CHAINMAIL_LEGGINGS);
+-                        p_326769_.accept(Items.CHAINMAIL_BOOTS);
+-                        p_326769_.accept(Items.IRON_HELMET);
+-                        p_326769_.accept(Items.IRON_CHESTPLATE);
+-                        p_326769_.accept(Items.IRON_LEGGINGS);
+-                        p_326769_.accept(Items.IRON_BOOTS);
+-                        p_326769_.accept(Items.GOLDEN_HELMET);
+-                        p_326769_.accept(Items.GOLDEN_CHESTPLATE);
+-                        p_326769_.accept(Items.GOLDEN_LEGGINGS);
+-                        p_326769_.accept(Items.GOLDEN_BOOTS);
+-                        p_326769_.accept(Items.DIAMOND_HELMET);
+-                        p_326769_.accept(Items.DIAMOND_CHESTPLATE);
+-                        p_326769_.accept(Items.DIAMOND_LEGGINGS);
+-                        p_326769_.accept(Items.DIAMOND_BOOTS);
+-                        p_326769_.accept(Items.NETHERITE_HELMET);
+-                        p_326769_.accept(Items.NETHERITE_CHESTPLATE);
+-                        p_326769_.accept(Items.NETHERITE_LEGGINGS);
+-                        p_326769_.accept(Items.NETHERITE_BOOTS);
+-                        p_326769_.accept(Items.TURTLE_HELMET);
+-                        p_326769_.accept(Items.LEATHER_HORSE_ARMOR);
+-                        p_326769_.accept(Items.IRON_HORSE_ARMOR);
+-                        p_326769_.accept(Items.GOLDEN_HORSE_ARMOR);
+-                        p_326769_.accept(Items.DIAMOND_HORSE_ARMOR);
+-                        p_326769_.accept(Items.WOLF_ARMOR);
+-                        p_326769_.accept(Items.TOTEM_OF_UNDYING);
+-                        p_326769_.accept(Items.TNT);
+-                        p_326769_.accept(Items.END_CRYSTAL);
+-                        p_326769_.accept(Items.SNOWBALL);
+-                        p_326769_.accept(Items.EGG);
+-                        p_326769_.accept(Items.WIND_CHARGE);
+-                        p_326769_.accept(Items.BOW);
+-                        p_326769_.accept(Items.CROSSBOW);
+-                        generateFireworksAllDurations(p_326769_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+-                        p_326769_.accept(Items.ARROW);
+-                        p_326769_.accept(Items.SPECTRAL_ARROW);
+-                        p_326768_.holders()
++                    (p_337923_, p_337924_) -> {
++                        p_337924_.accept(Items.WOODEN_SWORD);
++                        p_337924_.accept(Items.STONE_SWORD);
++                        p_337924_.accept(Items.IRON_SWORD);
++                        p_337924_.accept(Items.GOLDEN_SWORD);
++                        p_337924_.accept(Items.DIAMOND_SWORD);
++                        p_337924_.accept(Items.NETHERITE_SWORD);
++                        p_337924_.accept(Items.WOODEN_AXE);
++                        p_337924_.accept(Items.STONE_AXE);
++                        p_337924_.accept(Items.IRON_AXE);
++                        p_337924_.accept(Items.GOLDEN_AXE);
++                        p_337924_.accept(Items.DIAMOND_AXE);
++                        p_337924_.accept(Items.NETHERITE_AXE);
++                        p_337924_.accept(Items.TRIDENT);
++                        p_337924_.accept(Items.MACE);
++                        p_337924_.accept(Items.SHIELD);
++                        p_337924_.accept(Items.LEATHER_HELMET);
++                        p_337924_.accept(Items.LEATHER_CHESTPLATE);
++                        p_337924_.accept(Items.LEATHER_LEGGINGS);
++                        p_337924_.accept(Items.LEATHER_BOOTS);
++                        p_337924_.accept(Items.CHAINMAIL_HELMET);
++                        p_337924_.accept(Items.CHAINMAIL_CHESTPLATE);
++                        p_337924_.accept(Items.CHAINMAIL_LEGGINGS);
++                        p_337924_.accept(Items.CHAINMAIL_BOOTS);
++                        p_337924_.accept(Items.IRON_HELMET);
++                        p_337924_.accept(Items.IRON_CHESTPLATE);
++                        p_337924_.accept(Items.IRON_LEGGINGS);
++                        p_337924_.accept(Items.IRON_BOOTS);
++                        p_337924_.accept(Items.GOLDEN_HELMET);
++                        p_337924_.accept(Items.GOLDEN_CHESTPLATE);
++                        p_337924_.accept(Items.GOLDEN_LEGGINGS);
++                        p_337924_.accept(Items.GOLDEN_BOOTS);
++                        p_337924_.accept(Items.DIAMOND_HELMET);
++                        p_337924_.accept(Items.DIAMOND_CHESTPLATE);
++                        p_337924_.accept(Items.DIAMOND_LEGGINGS);
++                        p_337924_.accept(Items.DIAMOND_BOOTS);
++                        p_337924_.accept(Items.NETHERITE_HELMET);
++                        p_337924_.accept(Items.NETHERITE_CHESTPLATE);
++                        p_337924_.accept(Items.NETHERITE_LEGGINGS);
++                        p_337924_.accept(Items.NETHERITE_BOOTS);
++                        p_337924_.accept(Items.TURTLE_HELMET);
++                        p_337924_.accept(Items.LEATHER_HORSE_ARMOR);
++                        p_337924_.accept(Items.IRON_HORSE_ARMOR);
++                        p_337924_.accept(Items.GOLDEN_HORSE_ARMOR);
++                        p_337924_.accept(Items.DIAMOND_HORSE_ARMOR);
++                        p_337924_.accept(Items.WOLF_ARMOR);
++                        p_337924_.accept(Items.TOTEM_OF_UNDYING);
++                        p_337924_.accept(Items.TNT);
++                        p_337924_.accept(Items.END_CRYSTAL);
++                        p_337924_.accept(Items.SNOWBALL);
++                        p_337924_.accept(Items.EGG);
++                        p_337924_.accept(Items.WIND_CHARGE);
++                        p_337924_.accept(Items.BOW);
++                        p_337924_.accept(Items.CROSSBOW);
++                        generateFireworksAllDurations(p_337924_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
++                        p_337924_.accept(Items.ARROW);
++                        p_337924_.accept(Items.SPECTRAL_ARROW);
++                        p_337923_.holders()
+                             .lookup(Registries.POTION)
+                             .ifPresent(
+-                                p_270032_ -> generatePotionEffectTypes(
+-                                        p_326769_, p_270032_, Items.TIPPED_ARROW, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
++                                p_337917_ -> generatePotionEffectTypes(
++                                        p_337924_,
++                                        p_337917_,
++                                        Items.TIPPED_ARROW,
++                                        CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS,
++                                        p_337923_.enabledFeatures()
+                                     )
+                             );
+                     }
+@@ -1582,62 +_,76 @@
+             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 2)
+                 .title(Component.translatable("itemGroup.foodAndDrink"))
+                 .icon(() -> new ItemStack(Items.GOLDEN_APPLE))
+-                .displayItems((p_270425_, p_260158_) -> {
+-                    p_260158_.accept(Items.APPLE);
+-                    p_260158_.accept(Items.GOLDEN_APPLE);
+-                    p_260158_.accept(Items.ENCHANTED_GOLDEN_APPLE);
+-                    p_260158_.accept(Items.GOLDEN_POISONOUS_POTATO);
+-                    p_260158_.accept(Items.ENCHANTED_GOLDEN_POISONOUS_POTATO);
+-                    p_260158_.accept(Items.MELON_SLICE);
+-                    p_260158_.accept(Items.SWEET_BERRIES);
+-                    p_260158_.accept(Items.GLOW_BERRIES);
+-                    p_260158_.accept(Items.CHORUS_FRUIT);
+-                    p_260158_.accept(Items.CARROT);
+-                    p_260158_.accept(Items.GOLDEN_CARROT);
+-                    p_260158_.accept(Items.POTATO);
+-                    p_260158_.accept(Items.BAKED_POTATO);
+-                    p_260158_.accept(Items.HOT_POTATO);
+-                    p_260158_.accept(Items.POISONOUS_POTATO);
+-                    p_260158_.accept(Items.POISONOUS_POTATO_STICKS);
+-                    p_260158_.accept(Items.POISONOUS_POTATO_SLICES);
+-                    p_260158_.accept(Items.POISONOUS_POTATO_FRIES);
+-                    p_260158_.accept(Items.POISONOUS_POTATO_CHIPS);
+-                    p_260158_.accept(Items.BEETROOT);
+-                    p_260158_.accept(Items.DRIED_KELP);
+-                    p_260158_.accept(Items.BEEF);
+-                    p_260158_.accept(Items.COOKED_BEEF);
+-                    p_260158_.accept(Items.PORKCHOP);
+-                    p_260158_.accept(Items.COOKED_PORKCHOP);
+-                    p_260158_.accept(Items.MUTTON);
+-                    p_260158_.accept(Items.COOKED_MUTTON);
+-                    p_260158_.accept(Items.CHICKEN);
+-                    p_260158_.accept(Items.COOKED_CHICKEN);
+-                    p_260158_.accept(Items.RABBIT);
+-                    p_260158_.accept(Items.COOKED_RABBIT);
+-                    p_260158_.accept(Items.COD);
+-                    p_260158_.accept(Items.COOKED_COD);
+-                    p_260158_.accept(Items.SALMON);
+-                    p_260158_.accept(Items.COOKED_SALMON);
+-                    p_260158_.accept(Items.TROPICAL_FISH);
+-                    p_260158_.accept(Items.PUFFERFISH);
+-                    p_260158_.accept(Items.BREAD);
+-                    p_260158_.accept(Items.COOKIE);
+-                    p_260158_.accept(Items.CAKE);
+-                    p_260158_.accept(Items.PUMPKIN_PIE);
+-                    p_260158_.accept(Items.ROTTEN_FLESH);
+-                    p_260158_.accept(Items.SPIDER_EYE);
+-                    p_260158_.accept(Items.MUSHROOM_STEW);
+-                    p_260158_.accept(Items.BEETROOT_SOUP);
+-                    p_260158_.accept(Items.RABBIT_STEW);
+-                    generateSuspiciousStews(p_260158_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+-                    p_260158_.accept(Items.MILK_BUCKET);
+-                    p_260158_.accept(Items.HONEY_BOTTLE);
+-                    p_270425_.holders().lookup(Registries.POTION).ifPresent(p_269993_ -> {
+-                        generatePotionEffectTypes(p_260158_, p_269993_, Items.POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+-                        generatePotionEffectTypes(p_260158_, p_269993_, Items.SPLASH_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+-                        generatePotionEffectTypes(p_260158_, p_269993_, Items.LINGERING_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+-                    });
+-                })
++                .displayItems(
++                    (p_337921_, p_337922_) -> {
++                        p_337922_.accept(Items.APPLE);
++                        p_337922_.accept(Items.GOLDEN_APPLE);
++                        p_337922_.accept(Items.ENCHANTED_GOLDEN_APPLE);
++                        p_337922_.accept(Items.MELON_SLICE);
++                        p_337922_.accept(Items.SWEET_BERRIES);
++                        p_337922_.accept(Items.GLOW_BERRIES);
++                        p_337922_.accept(Items.CHORUS_FRUIT);
++                        p_337922_.accept(Items.CARROT);
++                        p_337922_.accept(Items.GOLDEN_CARROT);
++                        p_337922_.accept(Items.POTATO);
++                        p_337922_.accept(Items.BAKED_POTATO);
++                        p_337922_.accept(Items.POISONOUS_POTATO);
++                        p_337922_.accept(Items.BEETROOT);
++                        p_337922_.accept(Items.DRIED_KELP);
++                        p_337922_.accept(Items.BEEF);
++                        p_337922_.accept(Items.COOKED_BEEF);
++                        p_337922_.accept(Items.PORKCHOP);
++                        p_337922_.accept(Items.COOKED_PORKCHOP);
++                        p_337922_.accept(Items.MUTTON);
++                        p_337922_.accept(Items.COOKED_MUTTON);
++                        p_337922_.accept(Items.CHICKEN);
++                        p_337922_.accept(Items.COOKED_CHICKEN);
++                        p_337922_.accept(Items.RABBIT);
++                        p_337922_.accept(Items.COOKED_RABBIT);
++                        p_337922_.accept(Items.COD);
++                        p_337922_.accept(Items.COOKED_COD);
++                        p_337922_.accept(Items.SALMON);
++                        p_337922_.accept(Items.COOKED_SALMON);
++                        p_337922_.accept(Items.TROPICAL_FISH);
++                        p_337922_.accept(Items.PUFFERFISH);
++                        p_337922_.accept(Items.BREAD);
++                        p_337922_.accept(Items.COOKIE);
++                        p_337922_.accept(Items.CAKE);
++                        p_337922_.accept(Items.PUMPKIN_PIE);
++                        p_337922_.accept(Items.ROTTEN_FLESH);
++                        p_337922_.accept(Items.SPIDER_EYE);
++                        p_337922_.accept(Items.MUSHROOM_STEW);
++                        p_337922_.accept(Items.BEETROOT_SOUP);
++                        p_337922_.accept(Items.RABBIT_STEW);
++                        generateSuspiciousStews(p_337922_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
++                        p_337922_.accept(Items.MILK_BUCKET);
++                        p_337922_.accept(Items.HONEY_BOTTLE);
++                        generateOminousVials(p_337922_, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
++                        p_337921_.holders()
++                            .lookup(Registries.POTION)
++                            .ifPresent(
++                                p_337908_ -> {
++                                    generatePotionEffectTypes(
++                                        p_337922_, p_337908_, Items.POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS, p_337921_.enabledFeatures()
++                                    );
++                                    generatePotionEffectTypes(
++                                        p_337922_,
++                                        p_337908_,
++                                        Items.SPLASH_POTION,
++                                        CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS,
++                                        p_337921_.enabledFeatures()
++                                    );
++                                    generatePotionEffectTypes(
++                                        p_337922_,
++                                        p_337908_,
++                                        Items.LINGERING_POTION,
++                                        CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS,
++                                        p_337921_.enabledFeatures()
++                                    );
++                                }
++                            );
++                    }
++                )
+                 .build()
+         );
+         Registry.register(
+@@ -1647,150 +_,151 @@
+                 .title(Component.translatable("itemGroup.ingredients"))
+                 .icon(() -> new ItemStack(Items.IRON_INGOT))
+                 .displayItems(
+-                    (p_335277_, p_335278_) -> {
+-                        p_335278_.accept(Items.COAL);
+-                        p_335278_.accept(Items.CHARCOAL);
+-                        p_335278_.accept(Items.RAW_IRON);
+-                        p_335278_.accept(Items.RAW_COPPER);
+-                        p_335278_.accept(Items.RAW_GOLD);
+-                        p_335278_.accept(Items.EMERALD);
+-                        p_335278_.accept(Items.LAPIS_LAZULI);
+-                        p_335278_.accept(Items.DIAMOND);
+-                        p_335278_.accept(Items.ANCIENT_DEBRIS);
+-                        p_335278_.accept(Items.QUARTZ);
+-                        p_335278_.accept(Items.AMETHYST_SHARD);
+-                        p_335278_.accept(Items.IRON_NUGGET);
+-                        p_335278_.accept(Items.GOLD_NUGGET);
+-                        p_335278_.accept(Items.IRON_INGOT);
+-                        p_335278_.accept(Items.COPPER_INGOT);
+-                        p_335278_.accept(Items.GOLD_INGOT);
+-                        p_335278_.accept(Items.NETHERITE_SCRAP);
+-                        p_335278_.accept(Items.NETHERITE_INGOT);
+-                        p_335278_.accept(Items.STICK);
+-                        p_335278_.accept(Items.FLINT);
+-                        p_335278_.accept(Items.WHEAT);
+-                        p_335278_.accept(Items.BONE);
+-                        p_335278_.accept(Items.BONE_MEAL);
+-                        p_335278_.accept(Items.STRING);
+-                        p_335278_.accept(Items.FEATHER);
+-                        p_335278_.accept(Items.SNOWBALL);
+-                        p_335278_.accept(Items.EGG);
+-                        p_335278_.accept(Items.LEATHER);
+-                        p_335278_.accept(Items.RABBIT_HIDE);
+-                        p_335278_.accept(Items.HONEYCOMB);
+-                        p_335278_.accept(Items.INK_SAC);
+-                        p_335278_.accept(Items.GLOW_INK_SAC);
+-                        p_335278_.accept(Items.TURTLE_SCUTE);
+-                        p_335278_.accept(Items.ARMADILLO_SCUTE);
+-                        p_335278_.accept(Items.SLIME_BALL);
+-                        p_335278_.accept(Items.CLAY_BALL);
+-                        p_335278_.accept(Items.PRISMARINE_SHARD);
+-                        p_335278_.accept(Items.PRISMARINE_CRYSTALS);
+-                        p_335278_.accept(Items.NAUTILUS_SHELL);
+-                        p_335278_.accept(Items.HEART_OF_THE_SEA);
+-                        p_335278_.accept(Items.FIRE_CHARGE);
+-                        p_335278_.accept(Items.BLAZE_ROD);
+-                        p_335278_.accept(Items.BREEZE_ROD);
+-                        p_335278_.accept(Items.HEAVY_CORE);
+-                        p_335278_.accept(Items.NETHER_STAR);
+-                        p_335278_.accept(Items.ENDER_PEARL);
+-                        p_335278_.accept(Items.ENDER_EYE);
+-                        p_335278_.accept(Items.SHULKER_SHELL);
+-                        p_335278_.accept(Items.POPPED_CHORUS_FRUIT);
+-                        p_335278_.accept(Items.ECHO_SHARD);
+-                        p_335278_.accept(Items.DISC_FRAGMENT_5);
+-                        p_335278_.accept(Items.WHITE_DYE);
+-                        p_335278_.accept(Items.LIGHT_GRAY_DYE);
+-                        p_335278_.accept(Items.GRAY_DYE);
+-                        p_335278_.accept(Items.BLACK_DYE);
+-                        p_335278_.accept(Items.BROWN_DYE);
+-                        p_335278_.accept(Items.RED_DYE);
+-                        p_335278_.accept(Items.ORANGE_DYE);
+-                        p_335278_.accept(Items.YELLOW_DYE);
+-                        p_335278_.accept(Items.LIME_DYE);
+-                        p_335278_.accept(Items.GREEN_DYE);
+-                        p_335278_.accept(Items.CYAN_DYE);
+-                        p_335278_.accept(Items.LIGHT_BLUE_DYE);
+-                        p_335278_.accept(Items.BLUE_DYE);
+-                        p_335278_.accept(Items.PURPLE_DYE);
+-                        p_335278_.accept(Items.MAGENTA_DYE);
+-                        p_335278_.accept(Items.PINK_DYE);
+-                        p_335278_.accept(Items.BOWL);
+-                        p_335278_.accept(Items.BRICK);
+-                        p_335278_.accept(Items.NETHER_BRICK);
+-                        p_335278_.accept(Items.PAPER);
+-                        p_335278_.accept(Items.BOOK);
+-                        p_335278_.accept(Items.FIREWORK_STAR);
+-                        p_335278_.accept(Items.GLASS_BOTTLE);
+-                        p_335278_.accept(Items.NETHER_WART);
+-                        p_335278_.accept(Items.REDSTONE);
+-                        p_335278_.accept(Items.GLOWSTONE_DUST);
+-                        p_335278_.accept(Items.GUNPOWDER);
+-                        p_335278_.accept(Items.DRAGON_BREATH);
+-                        p_335278_.accept(Items.FERMENTED_SPIDER_EYE);
+-                        p_335278_.accept(Items.BLAZE_POWDER);
+-                        p_335278_.accept(Items.SUGAR);
+-                        p_335278_.accept(Items.RABBIT_FOOT);
+-                        p_335278_.accept(Items.GLISTERING_MELON_SLICE);
+-                        p_335278_.accept(Items.SPIDER_EYE);
+-                        p_335278_.accept(Items.PUFFERFISH);
+-                        p_335278_.accept(Items.MAGMA_CREAM);
+-                        p_335278_.accept(Items.GOLDEN_CARROT);
+-                        p_335278_.accept(Items.GHAST_TEAR);
+-                        p_335278_.accept(Items.TURTLE_HELMET);
+-                        p_335278_.accept(Items.PHANTOM_MEMBRANE);
+-                        p_335278_.accept(Items.FLOWER_BANNER_PATTERN);
+-                        p_335278_.accept(Items.CREEPER_BANNER_PATTERN);
+-                        p_335278_.accept(Items.SKULL_BANNER_PATTERN);
+-                        p_335278_.accept(Items.MOJANG_BANNER_PATTERN);
+-                        p_335278_.accept(Items.GLOBE_BANNER_PATTERN);
+-                        p_335278_.accept(Items.PIGLIN_BANNER_PATTERN);
+-                        p_335278_.accept(Items.FLOW_BANNER_PATTERN);
+-                        p_335278_.accept(Items.GUSTER_BANNER_PATTERN);
+-                        p_335278_.accept(Items.ANGLER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.ARCHER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.ARMS_UP_POTTERY_SHERD);
+-                        p_335278_.accept(Items.BLADE_POTTERY_SHERD);
+-                        p_335278_.accept(Items.BREWER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.BURN_POTTERY_SHERD);
+-                        p_335278_.accept(Items.DANGER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.FLOW_POTTERY_SHERD);
+-                        p_335278_.accept(Items.EXPLORER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.FRIEND_POTTERY_SHERD);
+-                        p_335278_.accept(Items.GUSTER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.HEART_POTTERY_SHERD);
+-                        p_335278_.accept(Items.HEARTBREAK_POTTERY_SHERD);
+-                        p_335278_.accept(Items.HOWL_POTTERY_SHERD);
+-                        p_335278_.accept(Items.MINER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.MOURNER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.PLENTY_POTTERY_SHERD);
+-                        p_335278_.accept(Items.PRIZE_POTTERY_SHERD);
+-                        p_335278_.accept(Items.SCRAPE_POTTERY_SHERD);
+-                        p_335278_.accept(Items.SHEAF_POTTERY_SHERD);
+-                        p_335278_.accept(Items.SHELTER_POTTERY_SHERD);
+-                        p_335278_.accept(Items.SKULL_POTTERY_SHERD);
+-                        p_335278_.accept(Items.SNORT_POTTERY_SHERD);
+-                        p_335278_.accept(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
+-                        p_335278_.accept(Items.EXPERIENCE_BOTTLE);
+-                        p_335278_.accept(Items.TRIAL_KEY);
++                    (p_337927_, p_337928_) -> {
++                        p_337928_.accept(Items.COAL);
++                        p_337928_.accept(Items.CHARCOAL);
++                        p_337928_.accept(Items.RAW_IRON);
++                        p_337928_.accept(Items.RAW_COPPER);
++                        p_337928_.accept(Items.RAW_GOLD);
++                        p_337928_.accept(Items.EMERALD);
++                        p_337928_.accept(Items.LAPIS_LAZULI);
++                        p_337928_.accept(Items.DIAMOND);
++                        p_337928_.accept(Items.ANCIENT_DEBRIS);
++                        p_337928_.accept(Items.QUARTZ);
++                        p_337928_.accept(Items.AMETHYST_SHARD);
++                        p_337928_.accept(Items.IRON_NUGGET);
++                        p_337928_.accept(Items.GOLD_NUGGET);
++                        p_337928_.accept(Items.IRON_INGOT);
++                        p_337928_.accept(Items.COPPER_INGOT);
++                        p_337928_.accept(Items.GOLD_INGOT);
++                        p_337928_.accept(Items.NETHERITE_SCRAP);
++                        p_337928_.accept(Items.NETHERITE_INGOT);
++                        p_337928_.accept(Items.STICK);
++                        p_337928_.accept(Items.FLINT);
++                        p_337928_.accept(Items.WHEAT);
++                        p_337928_.accept(Items.BONE);
++                        p_337928_.accept(Items.BONE_MEAL);
++                        p_337928_.accept(Items.STRING);
++                        p_337928_.accept(Items.FEATHER);
++                        p_337928_.accept(Items.SNOWBALL);
++                        p_337928_.accept(Items.EGG);
++                        p_337928_.accept(Items.LEATHER);
++                        p_337928_.accept(Items.RABBIT_HIDE);
++                        p_337928_.accept(Items.HONEYCOMB);
++                        p_337928_.accept(Items.INK_SAC);
++                        p_337928_.accept(Items.GLOW_INK_SAC);
++                        p_337928_.accept(Items.TURTLE_SCUTE);
++                        p_337928_.accept(Items.ARMADILLO_SCUTE);
++                        p_337928_.accept(Items.SLIME_BALL);
++                        p_337928_.accept(Items.CLAY_BALL);
++                        p_337928_.accept(Items.PRISMARINE_SHARD);
++                        p_337928_.accept(Items.PRISMARINE_CRYSTALS);
++                        p_337928_.accept(Items.NAUTILUS_SHELL);
++                        p_337928_.accept(Items.HEART_OF_THE_SEA);
++                        p_337928_.accept(Items.FIRE_CHARGE);
++                        p_337928_.accept(Items.BLAZE_ROD);
++                        p_337928_.accept(Items.BREEZE_ROD);
++                        p_337928_.accept(Items.HEAVY_CORE);
++                        p_337928_.accept(Items.NETHER_STAR);
++                        p_337928_.accept(Items.ENDER_PEARL);
++                        p_337928_.accept(Items.ENDER_EYE);
++                        p_337928_.accept(Items.SHULKER_SHELL);
++                        p_337928_.accept(Items.POPPED_CHORUS_FRUIT);
++                        p_337928_.accept(Items.ECHO_SHARD);
++                        p_337928_.accept(Items.DISC_FRAGMENT_5);
++                        p_337928_.accept(Items.WHITE_DYE);
++                        p_337928_.accept(Items.LIGHT_GRAY_DYE);
++                        p_337928_.accept(Items.GRAY_DYE);
++                        p_337928_.accept(Items.BLACK_DYE);
++                        p_337928_.accept(Items.BROWN_DYE);
++                        p_337928_.accept(Items.RED_DYE);
++                        p_337928_.accept(Items.ORANGE_DYE);
++                        p_337928_.accept(Items.YELLOW_DYE);
++                        p_337928_.accept(Items.LIME_DYE);
++                        p_337928_.accept(Items.GREEN_DYE);
++                        p_337928_.accept(Items.CYAN_DYE);
++                        p_337928_.accept(Items.LIGHT_BLUE_DYE);
++                        p_337928_.accept(Items.BLUE_DYE);
++                        p_337928_.accept(Items.PURPLE_DYE);
++                        p_337928_.accept(Items.MAGENTA_DYE);
++                        p_337928_.accept(Items.PINK_DYE);
++                        p_337928_.accept(Items.BOWL);
++                        p_337928_.accept(Items.BRICK);
++                        p_337928_.accept(Items.NETHER_BRICK);
++                        p_337928_.accept(Items.PAPER);
++                        p_337928_.accept(Items.BOOK);
++                        p_337928_.accept(Items.FIREWORK_STAR);
++                        p_337928_.accept(Items.GLASS_BOTTLE);
++                        p_337928_.accept(Items.NETHER_WART);
++                        p_337928_.accept(Items.REDSTONE);
++                        p_337928_.accept(Items.GLOWSTONE_DUST);
++                        p_337928_.accept(Items.GUNPOWDER);
++                        p_337928_.accept(Items.DRAGON_BREATH);
++                        p_337928_.accept(Items.FERMENTED_SPIDER_EYE);
++                        p_337928_.accept(Items.BLAZE_POWDER);
++                        p_337928_.accept(Items.SUGAR);
++                        p_337928_.accept(Items.RABBIT_FOOT);
++                        p_337928_.accept(Items.GLISTERING_MELON_SLICE);
++                        p_337928_.accept(Items.SPIDER_EYE);
++                        p_337928_.accept(Items.PUFFERFISH);
++                        p_337928_.accept(Items.MAGMA_CREAM);
++                        p_337928_.accept(Items.GOLDEN_CARROT);
++                        p_337928_.accept(Items.GHAST_TEAR);
++                        p_337928_.accept(Items.TURTLE_HELMET);
++                        p_337928_.accept(Items.PHANTOM_MEMBRANE);
++                        p_337928_.accept(Items.FLOWER_BANNER_PATTERN);
++                        p_337928_.accept(Items.CREEPER_BANNER_PATTERN);
++                        p_337928_.accept(Items.SKULL_BANNER_PATTERN);
++                        p_337928_.accept(Items.MOJANG_BANNER_PATTERN);
++                        p_337928_.accept(Items.GLOBE_BANNER_PATTERN);
++                        p_337928_.accept(Items.PIGLIN_BANNER_PATTERN);
++                        p_337928_.accept(Items.FLOW_BANNER_PATTERN);
++                        p_337928_.accept(Items.GUSTER_BANNER_PATTERN);
++                        p_337928_.accept(Items.ANGLER_POTTERY_SHERD);
++                        p_337928_.accept(Items.ARCHER_POTTERY_SHERD);
++                        p_337928_.accept(Items.ARMS_UP_POTTERY_SHERD);
++                        p_337928_.accept(Items.BLADE_POTTERY_SHERD);
++                        p_337928_.accept(Items.BREWER_POTTERY_SHERD);
++                        p_337928_.accept(Items.BURN_POTTERY_SHERD);
++                        p_337928_.accept(Items.DANGER_POTTERY_SHERD);
++                        p_337928_.accept(Items.FLOW_POTTERY_SHERD);
++                        p_337928_.accept(Items.EXPLORER_POTTERY_SHERD);
++                        p_337928_.accept(Items.FRIEND_POTTERY_SHERD);
++                        p_337928_.accept(Items.GUSTER_POTTERY_SHERD);
++                        p_337928_.accept(Items.HEART_POTTERY_SHERD);
++                        p_337928_.accept(Items.HEARTBREAK_POTTERY_SHERD);
++                        p_337928_.accept(Items.HOWL_POTTERY_SHERD);
++                        p_337928_.accept(Items.MINER_POTTERY_SHERD);
++                        p_337928_.accept(Items.MOURNER_POTTERY_SHERD);
++                        p_337928_.accept(Items.PLENTY_POTTERY_SHERD);
++                        p_337928_.accept(Items.PRIZE_POTTERY_SHERD);
++                        p_337928_.accept(Items.SCRAPE_POTTERY_SHERD);
++                        p_337928_.accept(Items.SHEAF_POTTERY_SHERD);
++                        p_337928_.accept(Items.SHELTER_POTTERY_SHERD);
++                        p_337928_.accept(Items.SKULL_POTTERY_SHERD);
++                        p_337928_.accept(Items.SNORT_POTTERY_SHERD);
++                        p_337928_.accept(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
++                        p_337928_.accept(Items.EXPERIENCE_BOTTLE);
++                        p_337928_.accept(Items.TRIAL_KEY);
++                        p_337928_.accept(Items.OMINOUS_TRIAL_KEY);
+                         Set<TagKey<Item>> set = Set.of(
+                             ItemTags.FOOT_ARMOR_ENCHANTABLE,
+                             ItemTags.LEG_ARMOR_ENCHANTABLE,
+@@ -1798,6 +_,9 @@
+                             ItemTags.HEAD_ARMOR_ENCHANTABLE,
+                             ItemTags.ARMOR_ENCHANTABLE,
+                             ItemTags.SWORD_ENCHANTABLE,
++                            ItemTags.SHARP_WEAPON_ENCHANTABLE,
++                            ItemTags.MACE_ENCHANTABLE,
++                            ItemTags.FIRE_ASPECT_ENCHANTABLE,
+                             ItemTags.WEAPON_ENCHANTABLE,
+                             ItemTags.MINING_ENCHANTABLE,
+                             ItemTags.MINING_LOOT_ENCHANTABLE,
+@@ -1809,10 +_,18 @@
+                             ItemTags.CROSSBOW_ENCHANTABLE,
+                             ItemTags.VANISHING_ENCHANTABLE
+                         );
+-                        p_335277_.holders().lookup(Registries.ENCHANTMENT).ifPresent(p_269984_ -> {
+-                            generateEnchantmentBookTypesOnlyMaxLevel(p_335278_, p_269984_, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+-                            generateEnchantmentBookTypesAllLevels(p_335278_, p_269984_, set, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
+-                        });
++                        p_337927_.holders()
++                            .lookup(Registries.ENCHANTMENT)
++                            .ifPresent(
++                                p_337912_ -> {
++                                    generateEnchantmentBookTypesOnlyMaxLevel(
++                                        p_337928_, p_337912_, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY, p_337927_.enabledFeatures()
++                                    );
++                                    generateEnchantmentBookTypesAllLevels(
++                                        p_337928_, p_337912_, set, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY, p_337927_.enabledFeatures()
++                                    );
++                                }
++                            );
+                     }
+                 )
+                 .build()
+@@ -1823,90 +_,87 @@
+             CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 4)
+                 .title(Component.translatable("itemGroup.spawnEggs"))
+                 .icon(() -> new ItemStack(Items.PIG_SPAWN_EGG))
+-                .displayItems((p_340189_, p_340190_) -> {
+-                    p_340190_.accept(Items.SPAWNER);
+-                    p_340190_.accept(Items.TRIAL_SPAWNER);
+-                    p_340190_.accept(Items.ALLAY_SPAWN_EGG);
+-                    p_340190_.accept(Items.ARMADILLO_SPAWN_EGG);
+-                    p_340190_.accept(Items.AXOLOTL_SPAWN_EGG);
+-                    p_340190_.accept(Items.BAT_SPAWN_EGG);
+-                    p_340190_.accept(Items.BEE_SPAWN_EGG);
+-                    p_340190_.accept(Items.BLAZE_SPAWN_EGG);
+-                    p_340190_.accept(Items.BOGGED_SPAWN_EGG);
+-                    p_340190_.accept(Items.BREEZE_SPAWN_EGG);
+-                    p_340190_.accept(Items.CAMEL_SPAWN_EGG);
+-                    p_340190_.accept(Items.CAT_SPAWN_EGG);
+-                    p_340190_.accept(Items.CAVE_SPIDER_SPAWN_EGG);
+-                    p_340190_.accept(Items.CHICKEN_SPAWN_EGG);
+-                    p_340190_.accept(Items.COD_SPAWN_EGG);
+-                    p_340190_.accept(Items.COW_SPAWN_EGG);
+-                    p_340190_.accept(Items.CREEPER_SPAWN_EGG);
+-                    p_340190_.accept(Items.DOLPHIN_SPAWN_EGG);
+-                    p_340190_.accept(Items.DONKEY_SPAWN_EGG);
+-                    p_340190_.accept(Items.DROWNED_SPAWN_EGG);
+-                    p_340190_.accept(Items.ELDER_GUARDIAN_SPAWN_EGG);
+-                    p_340190_.accept(Items.ENDERMAN_SPAWN_EGG);
+-                    p_340190_.accept(Items.ENDERMITE_SPAWN_EGG);
+-                    p_340190_.accept(Items.EVOKER_SPAWN_EGG);
+-                    p_340190_.accept(Items.FOX_SPAWN_EGG);
+-                    p_340190_.accept(Items.FROG_SPAWN_EGG);
+-                    p_340190_.accept(Items.GHAST_SPAWN_EGG);
+-                    p_340190_.accept(Items.GLOW_SQUID_SPAWN_EGG);
+-                    p_340190_.accept(Items.GOAT_SPAWN_EGG);
+-                    p_340190_.accept(Items.GUARDIAN_SPAWN_EGG);
+-                    p_340190_.accept(Items.HOGLIN_SPAWN_EGG);
+-                    p_340190_.accept(Items.HORSE_SPAWN_EGG);
+-                    p_340190_.accept(Items.HUSK_SPAWN_EGG);
+-                    p_340190_.accept(Items.IRON_GOLEM_SPAWN_EGG);
+-                    p_340190_.accept(Items.LLAMA_SPAWN_EGG);
+-                    p_340190_.accept(Items.MAGMA_CUBE_SPAWN_EGG);
+-                    p_340190_.accept(Items.MOOSHROOM_SPAWN_EGG);
+-                    p_340190_.accept(Items.MULE_SPAWN_EGG);
+-                    p_340190_.accept(Items.OCELOT_SPAWN_EGG);
+-                    p_340190_.accept(Items.PANDA_SPAWN_EGG);
+-                    p_340190_.accept(Items.PARROT_SPAWN_EGG);
+-                    p_340190_.accept(Items.PHANTOM_SPAWN_EGG);
+-                    p_340190_.accept(Items.PIG_SPAWN_EGG);
+-                    p_340190_.accept(Items.PIGLIN_SPAWN_EGG);
+-                    p_340190_.accept(Items.PIGLIN_BRUTE_SPAWN_EGG);
+-                    p_340190_.accept(Items.PILLAGER_SPAWN_EGG);
+-                    p_340190_.accept(Items.PLAGUEWHALE_SPAWN_EGG);
+-                    p_340190_.accept(Items.POLAR_BEAR_SPAWN_EGG);
+-                    p_340190_.accept(Items.POISONOUS_POTATO_ZOMBIE_SPAWN_EGG);
+-                    p_340190_.accept(Items.PUFFERFISH_SPAWN_EGG);
+-                    p_340190_.accept(Items.RABBIT_SPAWN_EGG);
+-                    p_340190_.accept(Items.RAVAGER_SPAWN_EGG);
+-                    p_340190_.accept(Items.SALMON_SPAWN_EGG);
+-                    p_340190_.accept(Items.SHEEP_SPAWN_EGG);
+-                    p_340190_.accept(Items.SHULKER_SPAWN_EGG);
+-                    p_340190_.accept(Items.SILVERFISH_SPAWN_EGG);
+-                    p_340190_.accept(Items.SKELETON_SPAWN_EGG);
+-                    p_340190_.accept(Items.SKELETON_HORSE_SPAWN_EGG);
+-                    p_340190_.accept(Items.SLIME_SPAWN_EGG);
+-                    p_340190_.accept(Items.SNIFFER_SPAWN_EGG);
+-                    p_340190_.accept(Items.SNOW_GOLEM_SPAWN_EGG);
+-                    p_340190_.accept(Items.SPIDER_SPAWN_EGG);
+-                    p_340190_.accept(Items.SQUID_SPAWN_EGG);
+-                    p_340190_.accept(Items.STRAY_SPAWN_EGG);
+-                    p_340190_.accept(Items.STRIDER_SPAWN_EGG);
+-                    p_340190_.accept(Items.TADPOLE_SPAWN_EGG);
+-                    p_340190_.accept(Items.TOXIFIN_SPAWN_EGG);
+-                    p_340190_.accept(Items.TRADER_LLAMA_SPAWN_EGG);
+-                    p_340190_.accept(Items.TROPICAL_FISH_SPAWN_EGG);
+-                    p_340190_.accept(Items.TURTLE_SPAWN_EGG);
+-                    p_340190_.accept(Items.VEX_SPAWN_EGG);
+-                    p_340190_.accept(Items.VILLAGER_SPAWN_EGG);
+-                    p_340190_.accept(Items.VINDICATOR_SPAWN_EGG);
+-                    p_340190_.accept(Items.WANDERING_TRADER_SPAWN_EGG);
+-                    p_340190_.accept(Items.WARDEN_SPAWN_EGG);
+-                    p_340190_.accept(Items.WITCH_SPAWN_EGG);
+-                    p_340190_.accept(Items.WITHER_SKELETON_SPAWN_EGG);
+-                    p_340190_.accept(Items.WOLF_SPAWN_EGG);
+-                    p_340190_.accept(Items.ZOGLIN_SPAWN_EGG);
+-                    p_340190_.accept(Items.ZOMBIE_SPAWN_EGG);
+-                    p_340190_.accept(Items.ZOMBIE_HORSE_SPAWN_EGG);
+-                    p_340190_.accept(Items.ZOMBIE_VILLAGER_SPAWN_EGG);
+-                    p_340190_.accept(Items.ZOMBIFIED_PIGLIN_SPAWN_EGG);
++                .displayItems((p_326768_, p_326769_) -> {
++                    p_326769_.accept(Items.SPAWNER);
++                    p_326769_.accept(Items.TRIAL_SPAWNER);
++                    p_326769_.accept(Items.ALLAY_SPAWN_EGG);
++                    p_326769_.accept(Items.ARMADILLO_SPAWN_EGG);
++                    p_326769_.accept(Items.AXOLOTL_SPAWN_EGG);
++                    p_326769_.accept(Items.BAT_SPAWN_EGG);
++                    p_326769_.accept(Items.BEE_SPAWN_EGG);
++                    p_326769_.accept(Items.BLAZE_SPAWN_EGG);
++                    p_326769_.accept(Items.BOGGED_SPAWN_EGG);
++                    p_326769_.accept(Items.BREEZE_SPAWN_EGG);
++                    p_326769_.accept(Items.CAMEL_SPAWN_EGG);
++                    p_326769_.accept(Items.CAT_SPAWN_EGG);
++                    p_326769_.accept(Items.CAVE_SPIDER_SPAWN_EGG);
++                    p_326769_.accept(Items.CHICKEN_SPAWN_EGG);
++                    p_326769_.accept(Items.COD_SPAWN_EGG);
++                    p_326769_.accept(Items.COW_SPAWN_EGG);
++                    p_326769_.accept(Items.CREEPER_SPAWN_EGG);
++                    p_326769_.accept(Items.DOLPHIN_SPAWN_EGG);
++                    p_326769_.accept(Items.DONKEY_SPAWN_EGG);
++                    p_326769_.accept(Items.DROWNED_SPAWN_EGG);
++                    p_326769_.accept(Items.ELDER_GUARDIAN_SPAWN_EGG);
++                    p_326769_.accept(Items.ENDERMAN_SPAWN_EGG);
++                    p_326769_.accept(Items.ENDERMITE_SPAWN_EGG);
++                    p_326769_.accept(Items.EVOKER_SPAWN_EGG);
++                    p_326769_.accept(Items.FOX_SPAWN_EGG);
++                    p_326769_.accept(Items.FROG_SPAWN_EGG);
++                    p_326769_.accept(Items.GHAST_SPAWN_EGG);
++                    p_326769_.accept(Items.GLOW_SQUID_SPAWN_EGG);
++                    p_326769_.accept(Items.GOAT_SPAWN_EGG);
++                    p_326769_.accept(Items.GUARDIAN_SPAWN_EGG);
++                    p_326769_.accept(Items.HOGLIN_SPAWN_EGG);
++                    p_326769_.accept(Items.HORSE_SPAWN_EGG);
++                    p_326769_.accept(Items.HUSK_SPAWN_EGG);
++                    p_326769_.accept(Items.IRON_GOLEM_SPAWN_EGG);
++                    p_326769_.accept(Items.LLAMA_SPAWN_EGG);
++                    p_326769_.accept(Items.MAGMA_CUBE_SPAWN_EGG);
++                    p_326769_.accept(Items.MOOSHROOM_SPAWN_EGG);
++                    p_326769_.accept(Items.MULE_SPAWN_EGG);
++                    p_326769_.accept(Items.OCELOT_SPAWN_EGG);
++                    p_326769_.accept(Items.PANDA_SPAWN_EGG);
++                    p_326769_.accept(Items.PARROT_SPAWN_EGG);
++                    p_326769_.accept(Items.PHANTOM_SPAWN_EGG);
++                    p_326769_.accept(Items.PIG_SPAWN_EGG);
++                    p_326769_.accept(Items.PIGLIN_SPAWN_EGG);
++                    p_326769_.accept(Items.PIGLIN_BRUTE_SPAWN_EGG);
++                    p_326769_.accept(Items.PILLAGER_SPAWN_EGG);
++                    p_326769_.accept(Items.POLAR_BEAR_SPAWN_EGG);
++                    p_326769_.accept(Items.PUFFERFISH_SPAWN_EGG);
++                    p_326769_.accept(Items.RABBIT_SPAWN_EGG);
++                    p_326769_.accept(Items.RAVAGER_SPAWN_EGG);
++                    p_326769_.accept(Items.SALMON_SPAWN_EGG);
++                    p_326769_.accept(Items.SHEEP_SPAWN_EGG);
++                    p_326769_.accept(Items.SHULKER_SPAWN_EGG);
++                    p_326769_.accept(Items.SILVERFISH_SPAWN_EGG);
++                    p_326769_.accept(Items.SKELETON_SPAWN_EGG);
++                    p_326769_.accept(Items.SKELETON_HORSE_SPAWN_EGG);
++                    p_326769_.accept(Items.SLIME_SPAWN_EGG);
++                    p_326769_.accept(Items.SNIFFER_SPAWN_EGG);
++                    p_326769_.accept(Items.SNOW_GOLEM_SPAWN_EGG);
++                    p_326769_.accept(Items.SPIDER_SPAWN_EGG);
++                    p_326769_.accept(Items.SQUID_SPAWN_EGG);
++                    p_326769_.accept(Items.STRAY_SPAWN_EGG);
++                    p_326769_.accept(Items.STRIDER_SPAWN_EGG);
++                    p_326769_.accept(Items.TADPOLE_SPAWN_EGG);
++                    p_326769_.accept(Items.TRADER_LLAMA_SPAWN_EGG);
++                    p_326769_.accept(Items.TROPICAL_FISH_SPAWN_EGG);
++                    p_326769_.accept(Items.TURTLE_SPAWN_EGG);
++                    p_326769_.accept(Items.VEX_SPAWN_EGG);
++                    p_326769_.accept(Items.VILLAGER_SPAWN_EGG);
++                    p_326769_.accept(Items.VINDICATOR_SPAWN_EGG);
++                    p_326769_.accept(Items.WANDERING_TRADER_SPAWN_EGG);
++                    p_326769_.accept(Items.WARDEN_SPAWN_EGG);
++                    p_326769_.accept(Items.WITCH_SPAWN_EGG);
++                    p_326769_.accept(Items.WITHER_SKELETON_SPAWN_EGG);
++                    p_326769_.accept(Items.WOLF_SPAWN_EGG);
++                    p_326769_.accept(Items.ZOGLIN_SPAWN_EGG);
++                    p_326769_.accept(Items.ZOMBIE_SPAWN_EGG);
++                    p_326769_.accept(Items.ZOMBIE_HORSE_SPAWN_EGG);
++                    p_326769_.accept(Items.ZOMBIE_VILLAGER_SPAWN_EGG);
++                    p_326769_.accept(Items.ZOMBIFIED_PIGLIN_SPAWN_EGG);
+                 })
+                 .build()
+         );
+@@ -1930,16 +_,16 @@
+                             p_269981_.accept(Items.BARRIER);
+                             p_269981_.accept(Items.DEBUG_STICK);
+             
+-                            for(int i = 15; i >= 0; --i) {
++                            for (int i = 15; i >= 0; i--) {
+                                 p_269981_.accept(LightBlock.setLightOnStack(new ItemStack(Items.LIGHT), i));
+                             }
+             
+                             p_269980_.holders()
+                                 .lookup(Registries.PAINTING_VARIANT)
+                                 .ifPresent(
+-                                    p_270026_ -> generatePresetPaintings(
++                                    p_270014_ -> generatePresetPaintings(
+                                             p_269981_,
+-                                            p_270026_,
++                                            (HolderLookup.RegistryLookup<PaintingVariant>)p_270014_,
+                                             p_270003_ -> !p_270003_.is(PaintingVariantTags.PLACEABLE),
+                                             CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+                                         )
+@@ -1964,16 +_,10 @@
+         );
+     }
+ 
+-    private static ItemStack createXpItem(Item p_341239_, int p_341713_) {
+-        ItemStack itemstack = new ItemStack(p_341239_);
+-        itemstack.set(DataComponents.XP, new XpComponent(p_341713_));
+-        return itemstack;
+-    }
+-
+     public static void validate() {
+         Map<Pair<CreativeModeTab.Row, Integer>, String> map = new HashMap<>();
+ 
+-        for(ResourceKey<CreativeModeTab> resourcekey : BuiltInRegistries.CREATIVE_MODE_TAB.registryKeySet()) {
++        for (ResourceKey<CreativeModeTab> resourcekey : BuiltInRegistries.CREATIVE_MODE_TAB.registryKeySet()) {
+             CreativeModeTab creativemodetab = BuiltInRegistries.CREATIVE_MODE_TAB.getOrThrow(resourcekey);
+             String s = creativemodetab.getDisplayName().getString();
+             String s1 = map.put(Pair.of(creativemodetab.row(), creativemodetab.column()), s);
+@@ -1988,29 +_,40 @@
+     }
+ 
+     private static void generatePotionEffectTypes(
+-        CreativeModeTab.Output p_270129_, HolderLookup<Potion> p_270334_, Item p_270968_, CreativeModeTab.TabVisibility p_270778_
++        CreativeModeTab.Output p_270129_, HolderLookup<Potion> p_270334_, Item p_270968_, CreativeModeTab.TabVisibility p_270778_, FeatureFlagSet p_338372_
+     ) {
+         p_270334_.listElements()
++            .filter(p_337926_ -> p_337926_.value().isEnabled(p_338372_))
+             .map(p_330083_ -> PotionContents.createItemStack(p_270968_, p_330083_))
+             .forEach(p_270000_ -> p_270129_.accept(p_270000_, p_270778_));
+     }
+ 
+     private static void generateEnchantmentBookTypesOnlyMaxLevel(
+-        CreativeModeTab.Output p_270868_, HolderLookup<Enchantment> p_270903_, Set<TagKey<Item>> p_270380_, CreativeModeTab.TabVisibility p_270407_
++        CreativeModeTab.Output p_270868_,
++        HolderLookup<Enchantment> p_270903_,
++        Set<TagKey<Item>> p_270380_,
++        CreativeModeTab.TabVisibility p_270407_,
++        FeatureFlagSet p_338678_
      ) {
          p_270903_.listElements()
              .map(Holder::value)
--            .filter(p_270008_ -> p_270380_.contains(p_270008_.category))
+-            .filter(p_335280_ -> p_270380_.contains(p_335280_.getSupportedItems()))
++            .filter(p_337914_ -> p_337914_.isEnabled(p_338678_))
 +            .filter(p_270008_ -> p_270008_.allowedInCreativeTab(Items.ENCHANTED_BOOK, p_270380_))
              .map(p_270038_ -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(p_270038_, p_270038_.getMaxLevel())))
              .forEach(p_269989_ -> p_270868_.accept(p_269989_, p_270407_));
      }
-@@ -1810,7 +_,7 @@
+ 
+     private static void generateEnchantmentBookTypesAllLevels(
+-        CreativeModeTab.Output p_270961_, HolderLookup<Enchantment> p_270628_, Set<TagKey<Item>> p_271024_, CreativeModeTab.TabVisibility p_270805_
++        CreativeModeTab.Output p_270961_,
++        HolderLookup<Enchantment> p_270628_,
++        Set<TagKey<Item>> p_271024_,
++        CreativeModeTab.TabVisibility p_270805_,
++        FeatureFlagSet p_338625_
      ) {
          p_270628_.listElements()
              .map(Holder::value)
--            .filter(p_269991_ -> p_271024_.contains(p_269991_.category))
+-            .filter(p_335276_ -> p_271024_.contains(p_335276_.getSupportedItems()))
++            .filter(p_337930_ -> p_337930_.isEnabled(p_338625_))
 +            .filter(p_269991_ -> p_269991_.allowedInCreativeTab(Items.ENCHANTED_BOOK, p_271024_))
              .flatMap(
                  p_270024_ -> IntStream.rangeClosed(p_270024_.getMinLevel(), p_270024_.getMaxLevel())
                          .mapToObj(p_270006_ -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(p_270024_, p_270006_)))
+@@ -2028,7 +_,7 @@
+         p_270948_.get(p_270798_)
+             .ifPresent(
+                 p_270021_ -> p_270021_.stream()
+-                        .map(p_269995_ -> InstrumentItem.create(p_270421_, p_269995_))
++                        .map(p_269995_ -> InstrumentItem.create(p_270421_, (Holder<Instrument>)p_269995_))
+                         .forEach(p_270011_ -> p_270699_.accept(p_270011_, p_270817_))
+             );
+     }
+@@ -2037,7 +_,7 @@
+         List<SuspiciousEffectHolder> list = SuspiciousEffectHolder.getAllEffectHolders();
+         Set<ItemStack> set = ItemStackLinkedSet.createTypeAndComponentsSet();
+ 
+-        for(SuspiciousEffectHolder suspiciouseffectholder : list) {
++        for (SuspiciousEffectHolder suspiciouseffectholder : list) {
+             ItemStack itemstack = new ItemStack(Items.SUSPICIOUS_STEW);
+             itemstack.set(DataComponents.SUSPICIOUS_STEW_EFFECTS, suspiciouseffectholder.getSuspiciousEffects());
+             set.add(itemstack);
+@@ -2046,8 +_,16 @@
+         p_259484_.acceptAll(set, p_260051_);
+     }
+ 
++    private static void generateOminousVials(CreativeModeTab.Output p_338748_, CreativeModeTab.TabVisibility p_338797_) {
++        for (int i = 0; i <= 4; i++) {
++            ItemStack itemstack = new ItemStack(Items.OMINOUS_BOTTLE);
++            itemstack.set(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, i);
++            p_338748_.accept(itemstack, p_338797_);
++        }
++    }
++
+     private static void generateFireworksAllDurations(CreativeModeTab.Output p_259586_, CreativeModeTab.TabVisibility p_259372_) {
+-        for(byte b0 : FireworkRocketItem.CRAFTABLE_DURATIONS) {
++        for (byte b0 : FireworkRocketItem.CRAFTABLE_DURATIONS) {
+             ItemStack itemstack = new ItemStack(Items.FIREWORK_ROCKET);
+             itemstack.set(DataComponents.FIREWORKS, new Fireworks(b0, List.of()));
+             p_259586_.accept(itemstack, p_259372_);
+@@ -2064,8 +_,10 @@
+             .filter(p_270878_)
+             .sorted(PAINTING_COMPARATOR)
+             .forEach(
+-                p_332612_ -> {
+-                    CustomData customdata = Util.getOrThrow(CustomData.EMPTY.update(Painting.VARIANT_MAP_CODEC, p_332612_), IllegalStateException::new)
++                p_337920_ -> {
++                    CustomData customdata = CustomData.EMPTY
++                        .update(Painting.VARIANT_MAP_CODEC, p_337920_)
++                        .getOrThrow()
+                         .update(p_332613_ -> p_332613_.putString("id", "minecraft:painting"));
+                     ItemStack itemstack = new ItemStack(Items.PAINTING);
+                     itemstack.set(DataComponents.ENTITY_DATA, customdata);

@@ -1,0 +1,29 @@
+--- a/net/minecraft/client/multiplayer/TagCollector.java
++++ b/net/minecraft/client/multiplayer/TagCollector.java
+@@ -23,7 +_,7 @@
+     }
+ 
+     private static void refreshCommonTagDependentData() {
+-        CreativeModeTabs.searchTab().rebuildSearchTree();
++        CreativeModeTabs.allTabs().stream().filter(net.minecraft.world.item.CreativeModeTab::hasSearchBar).forEach(net.minecraft.world.item.CreativeModeTab::rebuildSearchTree);
+     }
+ 
+     private static void refreshBuiltInTagDependentData() {
+@@ -33,8 +_,8 @@
+ 
+     private void applyTags(RegistryAccess p_326395_, Predicate<ResourceKey<? extends Registry<?>>> p_326512_) {
+         this.tags.forEach((p_326303_, p_326438_) -> {
+-            if (p_326512_.test(p_326303_)) {
+-                p_326438_.applyToRegistry(p_326395_.registryOrThrow(p_326303_));
++            if (p_326512_.test((ResourceKey<? extends Registry<?>>)p_326303_)) {
++                p_326438_.applyToRegistry(p_326395_.registryOrThrow((ResourceKey<? extends Registry<?>>)p_326303_));
+             }
+         });
+     }
+@@ -51,5 +_,6 @@
+         }
+ 
+         refreshCommonTagDependentData();
++        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.TagsUpdatedEvent(p_326147_, true, p_326486_));
+     }
+ }

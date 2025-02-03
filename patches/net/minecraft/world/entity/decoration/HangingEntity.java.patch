@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/entity/decoration/HangingEntity.java
 +++ b/net/minecraft/world/entity/decoration/HangingEntity.java
-@@ -120,6 +_,8 @@
+@@ -115,12 +_,14 @@
+             Direction direction = this.direction.getCounterClockWise();
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-            for(int k = 0; k < i; ++k) {
+-                for(int l = 0; l < j; ++l) {
++            for (int k = 0; k < i; k++) {
++                for (int l = 0; l < j; l++) {
+                     int i1 = (i - 1) / -2;
                      int j1 = (j - 1) / -2;
                      blockpos$mutableblockpos.set(blockpos).move(direction, k + i1).move(Direction.UP, l + j1);
                      BlockState blockstate = this.level().getBlockState(blockpos$mutableblockpos);
@@ -9,3 +17,21 @@
                      if (!blockstate.isSolid() && !DiodeBlock.isDiode(blockstate)) {
                          return false;
                      }
+@@ -240,7 +_,7 @@
+     @Override
+     public float rotate(Rotation p_31727_) {
+         if (this.direction.getAxis() != Direction.Axis.Y) {
+-            switch(p_31727_) {
++            switch (p_31727_) {
+                 case CLOCKWISE_180:
+                     this.direction = this.direction.getOpposite();
+                     break;
+@@ -253,7 +_,7 @@
+         }
+ 
+         float f = Mth.wrapDegrees(this.getYRot());
+-        switch(p_31727_) {
++        switch (p_31727_) {
+             case CLOCKWISE_180:
+                 return f + 180.0F;
+             case COUNTERCLOCKWISE_90:

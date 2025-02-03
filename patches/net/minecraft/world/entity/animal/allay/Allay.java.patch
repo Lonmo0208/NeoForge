@@ -1,6 +1,41 @@
 --- a/net/minecraft/world/entity/animal/allay/Allay.java
 +++ b/net/minecraft/world/entity/animal/allay/Allay.java
-@@ -370,9 +_,9 @@
+@@ -190,8 +_,7 @@
+ 
+     @Override
+     public boolean hurt(DamageSource p_218339_, float p_218340_) {
+-        Entity $$3 = p_218339_.getEntity();
+-        if ($$3 instanceof Player player) {
++        if (p_218339_.getEntity() instanceof Player player) {
+             Optional<UUID> optional = this.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
+             if (optional.isPresent() && player.getUUID().equals(optional.get())) {
+                 return false;
+@@ -267,12 +_,12 @@
+             }
+ 
+             if (this.isDancing()) {
+-                ++this.dancingAnimationTicks;
++                this.dancingAnimationTicks++;
+                 this.spinningAnimationTicks0 = this.spinningAnimationTicks;
+                 if (this.isSpinning()) {
+-                    ++this.spinningAnimationTicks;
++                    this.spinningAnimationTicks++;
+                 } else {
+-                    --this.spinningAnimationTicks;
++                    this.spinningAnimationTicks--;
+                 }
+ 
+                 this.spinningAnimationTicks = Mth.clamp(this.spinningAnimationTicks, 0.0F, 15.0F);
+@@ -329,7 +_,7 @@
+             this.level().playSound(p_218361_, this, SoundEvents.ALLAY_ITEM_TAKEN, SoundSource.NEUTRAL, 2.0F, 1.0F);
+             this.swing(InteractionHand.MAIN_HAND);
+ 
+-            for(ItemStack itemstack2 : this.getInventory().removeAllItems()) {
++            for (ItemStack itemstack2 : this.getInventory().removeAllItems()) {
+                 BehaviorUtils.throwItem(this, itemstack2, this.position());
+             }
+ 
+@@ -367,9 +_,9 @@
      public boolean wantsToPickUp(ItemStack p_218387_) {
          ItemStack itemstack = this.getItemInHand(InteractionHand.MAIN_HAND);
          return !itemstack.isEmpty()
@@ -12,3 +47,31 @@
      }
  
      private boolean allayConsidersItemEqual(ItemStack p_252278_, ItemStack p_250405_) {
+@@ -400,8 +_,7 @@
+ 
+     @Override
+     public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener<?>, ServerLevel> p_218348_) {
+-        Level level = this.level();
+-        if (level instanceof ServerLevel serverlevel) {
++        if (this.level() instanceof ServerLevel serverlevel) {
+             p_218348_.accept(this.dynamicVibrationListener, serverlevel);
+             p_218348_.accept(this.dynamicJukeboxListener, serverlevel);
+         }
+@@ -491,7 +_,7 @@
+ 
+     private void updateDuplicationCooldown() {
+         if (this.duplicationCooldown > 0L) {
+-            --this.duplicationCooldown;
++            this.duplicationCooldown--;
+         }
+ 
+         if (!this.level().isClientSide() && this.duplicationCooldown == 0L && !this.canDuplicate()) {
+@@ -535,7 +_,7 @@
+     @Override
+     public void handleEntityEvent(byte p_239347_) {
+         if (p_239347_ == 18) {
+-            for(int i = 0; i < 3; ++i) {
++            for (int i = 0; i < 3; i++) {
+                 this.spawnHeartParticle();
+             }
+         } else {

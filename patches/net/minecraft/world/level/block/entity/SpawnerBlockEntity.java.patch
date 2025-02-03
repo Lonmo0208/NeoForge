@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/entity/SpawnerBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/SpawnerBlockEntity.java
-@@ -29,6 +_,8 @@
+@@ -30,6 +_,8 @@
                  p_155771_.sendBlockUpdated(p_155772_, blockstate, blockstate, 4);
              }
          }
@@ -9,3 +9,25 @@
      };
  
      public SpawnerBlockEntity(BlockPos p_155752_, BlockState p_155753_) {
+@@ -37,9 +_,9 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155760_, HolderLookup.Provider p_324275_) {
+-        super.load(p_155760_, p_324275_);
+-        this.spawner.load(this.level, this.worldPosition, p_155760_);
++    protected void loadAdditional(CompoundTag p_338334_, HolderLookup.Provider p_338853_) {
++        super.loadAdditional(p_338334_, p_338853_);
++        this.spawner.load(this.level, this.worldPosition, p_338334_);
+     }
+ 
+     @Override
+@@ -62,7 +_,7 @@
+ 
+     @Override
+     public CompoundTag getUpdateTag(HolderLookup.Provider p_324015_) {
+-        CompoundTag compoundtag = this.saveWithoutMetadata(p_324015_);
++        CompoundTag compoundtag = this.saveCustomOnly(p_324015_);
+         compoundtag.remove("SpawnPotentials");
+         return compoundtag;
+     }

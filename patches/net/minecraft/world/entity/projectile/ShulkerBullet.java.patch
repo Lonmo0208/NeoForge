@@ -1,11 +1,31 @@
 --- a/net/minecraft/world/entity/projectile/ShulkerBullet.java
 +++ b/net/minecraft/world/entity/projectile/ShulkerBullet.java
-@@ -216,7 +_,7 @@
+@@ -155,7 +_,7 @@
+ 
+             direction = Direction.getRandom(this.random);
+             if (list.isEmpty()) {
+-                for(int i = 5; !this.level().isEmptyBlock(blockpos1.relative(direction)) && i > 0; --i) {
++                for (int i = 5; !this.level().isEmptyBlock(blockpos1.relative(direction)) && i > 0; i--) {
+                     direction = Direction.getRandom(this.random);
+                 }
+             } else {
+@@ -220,8 +_,8 @@
              }
  
              HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
 -            if (hitresult.getType() != HitResult.Type.MISS) {
+-                this.onHit(hitresult);
 +            if (hitresult.getType() != HitResult.Type.MISS && !net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hitresult)) {
-                 this.onHit(hitresult);
++                this.hitOrDeflect(hitresult);
              }
          }
+ 
+@@ -233,7 +_,7 @@
+             this.level().addParticle(ParticleTypes.END_ROD, this.getX() - vec31.x, this.getY() - vec31.y + 0.15, this.getZ() - vec31.z, 0.0, 0.0, 0.0);
+         } else if (this.finalTarget != null && !this.finalTarget.isRemoved()) {
+             if (this.flightSteps > 0) {
+-                --this.flightSteps;
++                this.flightSteps--;
+                 if (this.flightSteps == 0) {
+                     this.selectNextMoveDirection(this.currentMoveDirection == null ? null : this.currentMoveDirection.getAxis());
+                 }

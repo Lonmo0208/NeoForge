@@ -9,12 +9,100 @@
      public static final MapCodec<VineBlock> CODEC = simpleCodec(VineBlock::new);
      public static final BooleanProperty UP = PipeBlock.UP;
      public static final BooleanProperty NORTH = PipeBlock.NORTH;
+@@ -113,9 +_,9 @@
+     private int countFaces(BlockState p_57910_) {
+         int i = 0;
+ 
+-        for(BooleanProperty booleanproperty : PROPERTY_BY_DIRECTION.values()) {
++        for (BooleanProperty booleanproperty : PROPERTY_BY_DIRECTION.values()) {
+             if (p_57910_.getValue(booleanproperty)) {
+-                ++i;
++                i++;
+             }
+         }
+ 
+@@ -151,7 +_,7 @@
+ 
+         BlockState blockstate = null;
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             BooleanProperty booleanproperty = getPropertyForFace(direction);
+             if (p_57902_.getValue(booleanproperty)) {
+                 boolean flag = this.canSupportAtFace(p_57903_, p_57904_, direction);
 @@ -183,7 +_,7 @@
      @Override
-     public void randomTick(BlockState p_222655_, ServerLevel p_222656_, BlockPos p_222657_, RandomSource p_222658_) {
+     protected void randomTick(BlockState p_222655_, ServerLevel p_222656_, BlockPos p_222657_, RandomSource p_222658_) {
          if (p_222656_.getGameRules().getBoolean(GameRules.RULE_DO_VINES_SPREAD)) {
 -            if (p_222658_.nextInt(4) == 0) {
 +            if (p_222656_.random.nextInt(4) == 0 && p_222656_.isAreaLoaded(p_222657_, 4)) { // Forge: check area to prevent loading unloaded chunks
                  Direction direction = Direction.getRandom(p_222658_);
                  BlockPos blockpos = p_222657_.above();
                  if (direction.getAxis().isHorizontal() && !p_222655_.getValue(getPropertyForFace(direction))) {
+@@ -231,7 +_,7 @@
+ 
+                             BlockState blockstate3 = p_222655_;
+ 
+-                            for(Direction direction2 : Direction.Plane.HORIZONTAL) {
++                            for (Direction direction2 : Direction.Plane.HORIZONTAL) {
+                                 if (p_222658_.nextBoolean() || !isAcceptableNeighbour(p_222656_, blockpos.relative(direction2), direction2)) {
+                                     blockstate3 = blockstate3.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
+                                 }
+@@ -262,7 +_,7 @@
+     }
+ 
+     private BlockState copyRandomFaces(BlockState p_222651_, BlockState p_222652_, RandomSource p_222653_) {
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             if (p_222653_.nextBoolean()) {
+                 BooleanProperty booleanproperty = getPropertyForFace(direction);
+                 if (p_222651_.getValue(booleanproperty)) {
+@@ -285,7 +_,7 @@
+         );
+         int j = 5;
+ 
+-        for(BlockPos blockpos : iterable) {
++        for (BlockPos blockpos : iterable) {
+             if (p_57851_.getBlockState(blockpos).is(this)) {
+                 if (--j <= 0) {
+                     return false;
+@@ -299,11 +_,7 @@
+     @Override
+     protected boolean canBeReplaced(BlockState p_57858_, BlockPlaceContext p_57859_) {
+         BlockState blockstate = p_57859_.getLevel().getBlockState(p_57859_.getClickedPos());
+-        if (blockstate.is(this)) {
+-            return this.countFaces(blockstate) < PROPERTY_BY_DIRECTION.size();
+-        } else {
+-            return super.canBeReplaced(p_57858_, p_57859_);
+-        }
++        return blockstate.is(this) ? this.countFaces(blockstate) < PROPERTY_BY_DIRECTION.size() : super.canBeReplaced(p_57858_, p_57859_);
+     }
+ 
+     @Nullable
+@@ -313,7 +_,7 @@
+         boolean flag = blockstate.is(this);
+         BlockState blockstate1 = flag ? blockstate : this.defaultBlockState();
+ 
+-        for(Direction direction : p_57849_.getNearestLookingDirections()) {
++        for (Direction direction : p_57849_.getNearestLookingDirections()) {
+             if (direction != Direction.DOWN) {
+                 BooleanProperty booleanproperty = getPropertyForFace(direction);
+                 boolean flag1 = flag && blockstate.getValue(booleanproperty);
+@@ -333,7 +_,7 @@
+ 
+     @Override
+     protected BlockState rotate(BlockState p_57868_, Rotation p_57869_) {
+-        switch(p_57869_) {
++        switch (p_57869_) {
+             case CLOCKWISE_180:
+                 return p_57868_.setValue(NORTH, p_57868_.getValue(SOUTH))
+                     .setValue(EAST, p_57868_.getValue(WEST))
+@@ -356,7 +_,7 @@
+ 
+     @Override
+     protected BlockState mirror(BlockState p_57865_, Mirror p_57866_) {
+-        switch(p_57866_) {
++        switch (p_57866_) {
+             case LEFT_RIGHT:
+                 return p_57865_.setValue(NORTH, p_57865_.getValue(SOUTH)).setValue(SOUTH, p_57865_.getValue(NORTH));
+             case FRONT_BACK:

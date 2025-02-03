@@ -1,6 +1,27 @@
 --- a/net/minecraft/server/level/WorldGenRegion.java
 +++ b/net/minecraft/server/level/WorldGenRegion.java
-@@ -328,6 +_,7 @@
+@@ -121,11 +_,6 @@
+         return this.getChunk(p_9507_, p_9508_, ChunkStatus.EMPTY);
+     }
+ 
+-    @Override
+-    public boolean isPotato() {
+-        return this.level.isPotato();
+-    }
+-
+     @Nullable
+     @Override
+     public ChunkAccess getChunk(int p_9514_, int p_9515_, ChunkStatus p_331853_, boolean p_9517_) {
+@@ -279,7 +_,7 @@
+                     + p_181031_
+                     + ", status: "
+                     + this.generatingStatus
+-                    + (this.currentlyGenerating == null ? "" : ", currently generating: " + (String)this.currentlyGenerating.get())
++                    + (this.currentlyGenerating == null ? "" : ", currently generating: " + this.currentlyGenerating.get())
+             );
+             return false;
+         }
+@@ -330,6 +_,7 @@
  
      @Override
      public boolean addFreshEntity(Entity p_9580_) {

@@ -1,5 +1,12 @@
 --- a/net/minecraft/client/particle/TerrainParticle.java
 +++ b/net/minecraft/client/particle/TerrainParticle.java
+@@ -1,5 +_,6 @@
+ package net.minecraft.client.particle;
+ 
++import javax.annotation.Nullable;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.multiplayer.ClientLevel;
+ import net.minecraft.client.renderer.LevelRenderer;
 @@ -40,7 +_,7 @@
          this.rCol = 0.6F;
          this.gCol = 0.6F;
@@ -9,19 +16,73 @@
              int i = Minecraft.getInstance().getBlockColors().getColor(p_172458_, p_172451_, p_172459_, 0);
              this.rCol *= (float)(i >> 16 & 0xFF) / 255.0F;
              this.gCol *= (float)(i >> 8 & 0xFF) / 255.0F;
-@@ -97,8 +_,14 @@
-         ) {
-             BlockState blockstate = p_108304_.getState();
-             return !blockstate.isAir() && !blockstate.is(Blocks.MOVING_PISTON) && blockstate.shouldSpawnTerrainParticles()
--                ? new TerrainParticle(p_108305_, p_108306_, p_108307_, p_108308_, p_108309_, p_108310_, p_108311_, blockstate)
-+                ? new TerrainParticle(p_108305_, p_108306_, p_108307_, p_108308_, p_108309_, p_108310_, p_108311_, blockstate).updateSprite(blockstate, p_108304_.getPos())
-                 : null;
-         }
+@@ -83,8 +_,57 @@
+         return i == 0 && this.level.hasChunkAt(this.pos) ? LevelRenderer.getLightColor(this.level, this.pos) : i;
+     }
+ 
++    @Nullable
++    static TerrainParticle createTerrainParticle(
++        BlockParticleOption p_338588_,
++        ClientLevel p_338858_,
++        double p_338212_,
++        double p_338420_,
++        double p_338623_,
++        double p_338262_,
++        double p_338289_,
++        double p_338400_
++    ) {
++        BlockState blockstate = p_338588_.getState();
++        return !blockstate.isAir() && !blockstate.is(Blocks.MOVING_PISTON) && blockstate.shouldSpawnTerrainParticles()
++            ? new TerrainParticle(p_338858_, p_338212_, p_338420_, p_338623_, p_338262_, p_338289_, p_338400_, blockstate).updateSprite(blockstate, p_338588_.getPos())
++            : null;
 +    }
 +
-+    public Particle updateSprite(BlockState state, BlockPos pos) { //FORGE: we cannot assume that the x y z of the particles match the block pos of the block.
++    public TerrainParticle updateSprite(BlockState state, BlockPos pos) { //FORGE: we cannot assume that the x y z of the particles match the block pos of the block.
 +        if (pos != null) // There are cases where we are not able to obtain the correct source pos, and need to fallback to the non-model data version
 +            this.setSprite(Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getTexture(state, level, pos));
 +        return this;
++    }
++
++    @OnlyIn(Dist.CLIENT)
++    public static class DustPillarProvider implements ParticleProvider<BlockParticleOption> {
++        @Nullable
++        public Particle createParticle(
++            BlockParticleOption p_338199_,
++            ClientLevel p_338462_,
++            double p_338552_,
++            double p_338714_,
++            double p_338211_,
++            double p_338881_,
++            double p_338238_,
++            double p_338376_
++        ) {
++            Particle particle = TerrainParticle.createTerrainParticle(p_338199_, p_338462_, p_338552_, p_338714_, p_338211_, p_338881_, p_338238_, p_338376_);
++            if (particle != null) {
++                particle.setParticleSpeed(
++                    p_338462_.random.nextGaussian() / 30.0, p_338238_ + p_338462_.random.nextGaussian() / 2.0, p_338462_.random.nextGaussian() / 30.0
++                );
++                particle.setLifetime(p_338462_.random.nextInt(20) + 20);
++            }
++
++            return particle;
++        }
++    }
++
+     @OnlyIn(Dist.CLIENT)
+     public static class Provider implements ParticleProvider<BlockParticleOption> {
++        @Nullable
+         public Particle createParticle(
+             BlockParticleOption p_108304_,
+             ClientLevel p_108305_,
+@@ -95,10 +_,7 @@
+             double p_108310_,
+             double p_108311_
+         ) {
+-            BlockState blockstate = p_108304_.getState();
+-            return !blockstate.isAir() && !blockstate.is(Blocks.MOVING_PISTON) && blockstate.shouldSpawnTerrainParticles()
+-                ? new TerrainParticle(p_108305_, p_108306_, p_108307_, p_108308_, p_108309_, p_108310_, p_108311_, blockstate)
+-                : null;
++            return TerrainParticle.createTerrainParticle(p_108304_, p_108305_, p_108306_, p_108307_, p_108308_, p_108309_, p_108310_, p_108311_);
+         }
      }
  }

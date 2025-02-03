@@ -1,11 +1,29 @@
 --- a/net/minecraft/world/level/levelgen/feature/trunkplacers/TrunkPlacer.java
 +++ b/net/minecraft/world/level/levelgen/feature/trunkplacers/TrunkPlacer.java
-@@ -64,7 +_,7 @@
+@@ -58,23 +_,14 @@
+     }
+ 
+     private static boolean isDirt(LevelSimulatedReader p_70296_, BlockPos p_70297_) {
+-        return p_70296_.isStateAtPosition(
+-            p_70297_,
+-            p_340294_ -> Feature.isDirt(p_340294_)
+-                    && !p_340294_.is(Blocks.GRASS_BLOCK)
+-                    && !p_340294_.is(Blocks.PEELGRASS_BLOCK)
+-                    && !p_340294_.is(Blocks.CORRUPTED_PEELGRASS_BLOCK)
+-                    && !p_340294_.is(Blocks.MYCELIUM)
+-        );
++        return p_70296_.isStateAtPosition(p_70297_, p_70304_ -> Feature.isDirt(p_70304_) && !p_70304_.is(Blocks.GRASS_BLOCK) && !p_70304_.is(Blocks.MYCELIUM));
+     }
+ 
      protected static void setDirtAt(
          LevelSimulatedReader p_226170_, BiConsumer<BlockPos, BlockState> p_226171_, RandomSource p_226172_, BlockPos p_226173_, TreeConfiguration p_226174_
      ) {
--        if (p_226174_.forceDirt || !isDirt(p_226170_, p_226173_)) {
+-        if (!p_226170_.isPotato()) {
+-            if (p_226174_.forceDirt || !isDirt(p_226170_, p_226173_)) {
+-                p_226171_.accept(p_226173_, p_226174_.dirtProvider.getState(p_226172_, p_226173_));
+-            }
 +        if (!(((net.minecraft.world.level.LevelReader) p_226170_).getBlockState(p_226173_).onTreeGrow((net.minecraft.world.level.LevelReader) p_226170_, p_226171_, p_226172_, p_226173_, p_226174_)) && (p_226174_.forceDirt || !isDirt(p_226170_, p_226173_))) {
-             p_226171_.accept(p_226173_, p_226174_.dirtProvider.getState(p_226172_, p_226173_));
++            p_226171_.accept(p_226173_, p_226174_.dirtProvider.getState(p_226172_, p_226173_));
          }
      }
+ 

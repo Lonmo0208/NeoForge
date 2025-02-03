@@ -1,6 +1,70 @@
 --- a/net/minecraft/client/model/geom/LayerDefinitions.java
 +++ b/net/minecraft/client/model/geom/LayerDefinitions.java
-@@ -322,6 +_,7 @@
+@@ -11,7 +_,6 @@
+ import net.minecraft.client.model.ArmorStandModel;
+ import net.minecraft.client.model.AxolotlModel;
+ import net.minecraft.client.model.BatModel;
+-import net.minecraft.client.model.BatatoModel;
+ import net.minecraft.client.model.BeeModel;
+ import net.minecraft.client.model.BlazeModel;
+ import net.minecraft.client.model.BoatModel;
+@@ -47,7 +_,6 @@
+ import net.minecraft.client.model.LeashKnotModel;
+ import net.minecraft.client.model.LlamaModel;
+ import net.minecraft.client.model.LlamaSpitModel;
+-import net.minecraft.client.model.MegaSpudModel;
+ import net.minecraft.client.model.MinecartModel;
+ import net.minecraft.client.model.OcelotModel;
+ import net.minecraft.client.model.PandaModel;
+@@ -147,7 +_,6 @@
+         builder.put(ModelLayers.AXOLOTL, AxolotlModel.createBodyLayer());
+         builder.put(ModelLayers.BANNER, BannerRenderer.createBodyLayer());
+         builder.put(ModelLayers.BAT, BatModel.createBodyLayer());
+-        builder.put(ModelLayers.BATATO, BatatoModel.createBodyLayer());
+         builder.put(ModelLayers.BED_FOOT, BedRenderer.createFootLayer());
+         builder.put(ModelLayers.BED_HEAD, BedRenderer.createHeadLayer());
+         builder.put(ModelLayers.BEE, BeeModel.createBodyLayer());
+@@ -187,10 +_,8 @@
+         builder.put(ModelLayers.DROWNED_INNER_ARMOR, layerdefinition3);
+         builder.put(ModelLayers.DROWNED_OUTER_ARMOR, layerdefinition3);
+         builder.put(ModelLayers.DROWNED_OUTER_LAYER, DrownedModel.createBodyLayer(new CubeDeformation(0.25F)));
+-        builder.put(ModelLayers.ELDER_GUARDIAN, GuardianModel.createBodyLayer(false));
+-        builder.put(ModelLayers.ELDER_GUARDIAN_SLAB, GuardianModel.createBodyLayer(true));
++        builder.put(ModelLayers.ELDER_GUARDIAN, GuardianModel.createBodyLayer());
+         builder.put(ModelLayers.ELYTRA, ElytraModel.createLayer());
+-        builder.put(ModelLayers.POISONOUS_POLYTRA, ElytraModel.createLayer());
+         builder.put(ModelLayers.ENDERMAN, EndermanModel.createBodyLayer());
+         builder.put(ModelLayers.ENDERMITE, EndermiteModel.createBodyLayer());
+         builder.put(ModelLayers.ENDER_DRAGON, EnderDragonRenderer.createBodyLayer());
+@@ -206,8 +_,7 @@
+         builder.put(ModelLayers.GIANT_OUTER_ARMOR, layerdefinition1);
+         builder.put(ModelLayers.GLOW_SQUID, SquidModel.createBodyLayer());
+         builder.put(ModelLayers.GOAT, GoatModel.createBodyLayer());
+-        builder.put(ModelLayers.GUARDIAN, GuardianModel.createBodyLayer(false));
+-        builder.put(ModelLayers.GUARDIAN_SLAB, GuardianModel.createBodyLayer(true));
++        builder.put(ModelLayers.GUARDIAN, GuardianModel.createBodyLayer());
+         builder.put(ModelLayers.HOGLIN, layerdefinition15);
+         builder.put(ModelLayers.HOPPER_MINECART, layerdefinition4);
+         builder.put(ModelLayers.HORSE, layerdefinition6);
+@@ -267,8 +_,6 @@
+         builder.put(ModelLayers.SKELETON_SKULL, layerdefinition5);
+         builder.put(ModelLayers.SLIME, SlimeModel.createInnerBodyLayer());
+         builder.put(ModelLayers.SLIME_OUTER, SlimeModel.createOuterBodyLayer());
+-        builder.put(ModelLayers.MEGA_SPUD, MegaSpudModel.createInnerBodyLayer());
+-        builder.put(ModelLayers.MEGA_SPUD_OUTER, MegaSpudModel.createOuterBodyLayer());
+         builder.put(ModelLayers.SNIFFER, SnifferModel.createBodyLayer());
+         builder.put(ModelLayers.SNOW_GOLEM, SnowGolemModel.createBodyLayer());
+         builder.put(ModelLayers.SPAWNER_MINECART, layerdefinition4);
+@@ -322,7 +_,7 @@
+         LayerDefinition layerdefinition21 = RaftModel.createBodyModel();
+         LayerDefinition layerdefinition22 = ChestRaftModel.createBodyModel();
+ 
+-        for(Boat.Type boat$type : Boat.Type.values()) {
++        for (Boat.Type boat$type : Boat.Type.values()) {
+             if (boat$type == Boat.Type.BAMBOO) {
+                 builder.put(ModelLayers.createBoatModelName(boat$type), layerdefinition21);
+                 builder.put(ModelLayers.createChestBoatModelName(boat$type), layerdefinition22);
+@@ -336,6 +_,7 @@
          WoodType.values().forEach(p_171114_ -> builder.put(ModelLayers.createSignModelName(p_171114_), layerdefinition23));
          LayerDefinition layerdefinition24 = HangingSignRenderer.createHangingSignLayer();
          WoodType.values().forEach(p_247864_ -> builder.put(ModelLayers.createHangingSignModelName(p_247864_), layerdefinition24));

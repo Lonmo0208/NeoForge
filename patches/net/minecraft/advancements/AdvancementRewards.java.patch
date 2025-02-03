@@ -1,10 +1,63 @@
 --- a/net/minecraft/advancements/AdvancementRewards.java
 +++ b/net/minecraft/advancements/AdvancementRewards.java
-@@ -37,6 +_,7 @@
+@@ -7,6 +_,7 @@
+ import java.util.List;
+ import java.util.Optional;
+ import net.minecraft.commands.CacheableFunction;
++import net.minecraft.commands.CommandSourceStack;
+ import net.minecraft.commands.functions.CommandFunction;
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.resources.ResourceKey;
+@@ -15,7 +_,6 @@
+ import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.sounds.SoundSource;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.storage.loot.LootParams;
+@@ -25,13 +_,13 @@
+ 
+ public record AdvancementRewards(int experience, List<ResourceKey<LootTable>> loot, List<ResourceLocation> recipes, Optional<CacheableFunction> function) {
+     public static final Codec<AdvancementRewards> CODEC = RecordCodecBuilder.create(
+-        p_335155_ -> p_335155_.group(
+-                    ExtraCodecs.strictOptionalField(Codec.INT, "experience", 0).forGetter(AdvancementRewards::experience),
+-                    ExtraCodecs.strictOptionalField(ResourceKey.codec(Registries.LOOT_TABLE).listOf(), "loot", List.of()).forGetter(AdvancementRewards::loot),
+-                    ExtraCodecs.strictOptionalField(ResourceLocation.CODEC.listOf(), "recipes", List.of()).forGetter(AdvancementRewards::recipes),
+-                    ExtraCodecs.strictOptionalField(CacheableFunction.CODEC, "function").forGetter(AdvancementRewards::function)
++        p_337339_ -> p_337339_.group(
++                    Codec.INT.optionalFieldOf("experience", Integer.valueOf(0)).forGetter(AdvancementRewards::experience),
++                    ResourceKey.codec(Registries.LOOT_TABLE).listOf().optionalFieldOf("loot", List.of()).forGetter(AdvancementRewards::loot),
++                    ResourceLocation.CODEC.listOf().optionalFieldOf("recipes", List.of()).forGetter(AdvancementRewards::recipes),
++                    CacheableFunction.CODEC.optionalFieldOf("function").forGetter(AdvancementRewards::function)
+                 )
+-                .apply(p_335155_, AdvancementRewards::new)
++                .apply(p_337339_, AdvancementRewards::new)
+     );
+     public static final AdvancementRewards EMPTY = new AdvancementRewards(0, List.of(), List.of(), Optional.empty());
+ 
+@@ -40,11 +_,12 @@
          LootParams lootparams = new LootParams.Builder(p_9990_.serverLevel())
              .withParameter(LootContextParams.THIS_ENTITY, p_9990_)
              .withParameter(LootContextParams.ORIGIN, p_9990_.position())
 +            .withLuck(p_9990_.getLuck()) // Forge: Add luck to LootContext
              .create(LootContextParamSets.ADVANCEMENT_REWARD);
          boolean flag = false;
+ 
+-        for(ResourceKey<LootTable> resourcekey : this.loot) {
+-            for(ItemStack itemstack : p_9990_.server.reloadableRegistries().getLootTable(resourcekey).getRandomItems(lootparams)) {
++        for (ResourceKey<LootTable> resourcekey : this.loot) {
++            for (ItemStack itemstack : p_9990_.server.reloadableRegistries().getLootTable(resourcekey).getRandomItems(lootparams)) {
+                 if (p_9990_.addItem(itemstack)) {
+                     p_9990_.level()
+                         .playSound(
+@@ -80,7 +_,8 @@
+         this.function
+             .flatMap(p_311397_ -> p_311397_.get(minecraftserver.getFunctions()))
+             .ifPresent(
+-                p_339470_ -> minecraftserver.getFunctions().execute(p_339470_, p_9990_.createCommandSourceStack().withSuppressedOutput().withPermission(2))
++                p_337338_ -> minecraftserver.getFunctions()
++                        .execute((CommandFunction<CommandSourceStack>)p_337338_, p_9990_.createCommandSourceStack().withSuppressedOutput().withPermission(2))
+             );
+     }
  

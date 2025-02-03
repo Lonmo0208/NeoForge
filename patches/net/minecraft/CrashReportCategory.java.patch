@@ -13,6 +13,15 @@
              return this.stackTrace.length;
          }
      }
+@@ -156,7 +_,7 @@
+         p_128169_.append("-- ").append(this.title).append(" --\n");
+         p_128169_.append("Details:");
+ 
+-        for(CrashReportCategory.Entry crashreportcategory$entry : this.entries) {
++        for (CrashReportCategory.Entry crashreportcategory$entry : this.entries) {
+             p_128169_.append("\n\t");
+             p_128169_.append(crashreportcategory$entry.getKey());
+             p_128169_.append(": ");
 @@ -165,16 +_,16 @@
  
          if (this.stackTrace != null && this.stackTrace.length > 0) {

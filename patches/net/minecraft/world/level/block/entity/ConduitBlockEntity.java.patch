@@ -1,6 +1,76 @@
 --- a/net/minecraft/world/level/block/entity/ConduitBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/ConduitBlockEntity.java
-@@ -151,10 +_,8 @@
+@@ -51,10 +_,10 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155437_, HolderLookup.Provider p_323909_) {
+-        super.load(p_155437_, p_323909_);
+-        if (p_155437_.hasUUID("Target")) {
+-            this.destroyTargetUUID = p_155437_.getUUID("Target");
++    protected void loadAdditional(CompoundTag p_338591_, HolderLookup.Provider p_338280_) {
++        super.loadAdditional(p_338591_, p_338280_);
++        if (p_338591_.hasUUID("Target")) {
++            this.destroyTargetUUID = p_338591_.getUUID("Target");
+         } else {
+             this.destroyTargetUUID = null;
+         }
+@@ -74,11 +_,11 @@
+ 
+     @Override
+     public CompoundTag getUpdateTag(HolderLookup.Provider p_324390_) {
+-        return this.saveWithoutMetadata(p_324390_);
++        return this.saveCustomOnly(p_324390_);
+     }
+ 
+     public static void clientTick(Level p_155404_, BlockPos p_155405_, BlockState p_155406_, ConduitBlockEntity p_155407_) {
+-        ++p_155407_.tickCount;
++        p_155407_.tickCount++;
+         long i = p_155404_.getGameTime();
+         List<BlockPos> list = p_155407_.effectBlocks;
+         if (i % 40L == 0L) {
+@@ -89,12 +_,12 @@
+         updateClientTarget(p_155404_, p_155405_, p_155407_);
+         animationTick(p_155404_, p_155405_, list, p_155407_.destroyTarget, p_155407_.tickCount);
+         if (p_155407_.isActive()) {
+-            ++p_155407_.activeRotation;
++            p_155407_.activeRotation++;
+         }
+     }
+ 
+     public static void serverTick(Level p_155439_, BlockPos p_155440_, BlockState p_155441_, ConduitBlockEntity p_155442_) {
+-        ++p_155442_.tickCount;
++        p_155442_.tickCount++;
+         long i = p_155439_.getGameTime();
+         List<BlockPos> list = p_155442_.effectBlocks;
+         if (i % 40L == 0L) {
+@@ -131,9 +_,9 @@
+     private static boolean updateShape(Level p_155415_, BlockPos p_155416_, List<BlockPos> p_155417_) {
+         p_155417_.clear();
+ 
+-        for(int i = -1; i <= 1; ++i) {
+-            for(int j = -1; j <= 1; ++j) {
+-                for(int k = -1; k <= 1; ++k) {
++        for (int i = -1; i <= 1; i++) {
++            for (int j = -1; j <= 1; j++) {
++                for (int k = -1; k <= 1; k++) {
+                     BlockPos blockpos = p_155416_.offset(i, j, k);
+                     if (!p_155415_.isWaterAt(blockpos)) {
+                         return false;
+@@ -142,9 +_,9 @@
+             }
+         }
+ 
+-        for(int j1 = -2; j1 <= 2; ++j1) {
+-            for(int k1 = -2; k1 <= 2; ++k1) {
+-                for(int l1 = -2; l1 <= 2; ++l1) {
++        for (int j1 = -2; j1 <= 2; j1++) {
++            for (int k1 = -2; k1 <= 2; k1++) {
++                for (int l1 = -2; l1 <= 2; l1++) {
+                     int i2 = Math.abs(j1);
+                     int l = Math.abs(k1);
+                     int i1 = Math.abs(l1);
+@@ -152,10 +_,8 @@
                          BlockPos blockpos1 = p_155416_.offset(j1, k1, l1);
                          BlockState blockstate = p_155415_.getBlockState(blockpos1);
  
@@ -13,3 +83,39 @@
                          }
                      }
                  }
+@@ -176,7 +_,7 @@
+             .expandTowards(0.0, (double)p_155444_.getHeight(), 0.0);
+         List<Player> list = p_155444_.getEntitiesOfClass(Player.class, aabb);
+         if (!list.isEmpty()) {
+-            for(Player player : list) {
++            for (Player player : list) {
+                 if (p_155445_.closerThan(player.blockPosition(), (double)j) && player.isInWaterOrRain()) {
+                     player.addEffect(new MobEffectInstance(MobEffects.CONDUIT_POWER, 260, 0, true, true));
+                 }
+@@ -194,7 +_,7 @@
+             p_155413_.destroyTargetUUID = null;
+         } else if (p_155413_.destroyTarget == null) {
+             List<LivingEntity> list = p_155409_.getEntitiesOfClass(
+-                LivingEntity.class, getDestroyRangeAABB(p_155410_), p_340258_ -> p_340258_ instanceof Enemy && p_340258_.isInWaterOrRain()
++                LivingEntity.class, getDestroyRangeAABB(p_155410_), p_337996_ -> p_337996_ instanceof Enemy && p_337996_.isInWaterOrRain()
+             );
+             if (!list.isEmpty()) {
+                 p_155413_.destroyTarget = list.get(p_155409_.random.nextInt(list.size()));
+@@ -243,7 +_,7 @@
+     @Nullable
+     private static LivingEntity findDestroyTarget(Level p_155425_, BlockPos p_155426_, UUID p_155427_) {
+         List<LivingEntity> list = p_155425_.getEntitiesOfClass(
+-            LivingEntity.class, getDestroyRangeAABB(p_155426_), p_340257_ -> p_340257_.getUUID().equals(p_155427_)
++            LivingEntity.class, getDestroyRangeAABB(p_155426_), p_337998_ -> p_337998_.getUUID().equals(p_155427_)
+         );
+         return list.size() == 1 ? list.get(0) : null;
+     }
+@@ -254,7 +_,7 @@
+         d0 = (d0 * d0 + d0) * 0.3F;
+         Vec3 vec3 = new Vec3((double)p_155420_.getX() + 0.5, (double)p_155420_.getY() + 1.5 + d0, (double)p_155420_.getZ() + 0.5);
+ 
+-        for(BlockPos blockpos : p_155421_) {
++        for (BlockPos blockpos : p_155421_) {
+             if (randomsource.nextInt(50) == 0) {
+                 BlockPos blockpos1 = blockpos.subtract(p_155420_);
+                 float f = -0.5F + randomsource.nextFloat() + (float)blockpos1.getX();

@@ -1,24 +1,81 @@
 --- a/net/minecraft/world/entity/boss/wither/WitherBoss.java
 +++ b/net/minecraft/world/entity/boss/wither/WitherBoss.java
-@@ -315,7 +_,7 @@
+@@ -73,8 +_,8 @@
+             this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS
+         )
+         .setDarkenScreen(true);
+-    private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = p_340129_ -> !p_340129_.getType().is(EntityTypeTags.WITHER_FRIENDS)
+-            && p_340129_.attackable();
++    private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = p_337847_ -> !p_337847_.getType().is(EntityTypeTags.WITHER_FRIENDS)
++            && p_337847_.attackable();
+     private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0).selector(LIVING_ENTITY_SELECTOR);
+ 
+     public WitherBoss(EntityType<? extends WitherBoss> p_31437_, Level p_31438_) {
+@@ -177,12 +_,12 @@
+ 
+         super.aiStep();
+ 
+-        for(int i = 0; i < 2; ++i) {
++        for (int i = 0; i < 2; i++) {
+             this.yRotOHeads[i] = this.yRotHeads[i];
+             this.xRotOHeads[i] = this.xRotHeads[i];
+         }
+ 
+-        for(int j = 0; j < 2; ++j) {
++        for (int j = 0; j < 2; j++) {
+             int k = this.getAlternativeTarget(j + 1);
+             Entity entity1 = null;
+             if (k > 0) {
+@@ -208,7 +_,7 @@
+ 
+         boolean flag = this.isPowered();
+ 
+-        for(int l = 0; l < 3; ++l) {
++        for (int l = 0; l < 3; l++) {
+             double d8 = this.getHeadX(l);
+             double d10 = this.getHeadY(l);
+             double d2 = this.getHeadZ(l);
+@@ -240,7 +_,7 @@
+         if (this.getInvulnerableTicks() > 0) {
+             float f3 = 3.3F * this.getScale();
+ 
+-            for(int i1 = 0; i1 < 3; ++i1) {
++            for (int i1 = 0; i1 < 3; i1++) {
+                 this.level()
+                     .addParticle(
+                         ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0.7F, 0.7F, 0.9F),
+@@ -274,7 +_,7 @@
+         } else {
+             super.customServerAiStep();
+ 
+-            for(int i = 1; i < 3; ++i) {
++            for (int i = 1; i < 3; i++) {
+                 if (this.tickCount >= this.nextHeadUpdate[i - 1]) {
+                     this.nextHeadUpdate[i - 1] = this.tickCount + 10 + this.random.nextInt(10);
+                     if ((this.level().getDifficulty() == Difficulty.NORMAL || this.level().getDifficulty() == Difficulty.HARD)
+@@ -319,17 +_,17 @@
+             }
  
              if (this.destroyBlocksTick > 0) {
-                 --this.destroyBlocksTick;
+-                --this.destroyBlocksTick;
 -                if (this.destroyBlocksTick == 0 && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
++                this.destroyBlocksTick--;
 +                if (this.destroyBlocksTick == 0 && net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.level(), this)) {
-                     int j1 = Mth.floor(this.getY());
-                     int i2 = Mth.floor(this.getX());
-                     int j2 = Mth.floor(this.getZ());
-@@ -329,7 +_,7 @@
-                                 int i1 = j2 + k2;
-                                 BlockPos blockpos = new BlockPos(l2, l, i1);
-                                 BlockState blockstate = this.level().getBlockState(blockpos);
--                                if (canDestroy(blockstate)) {
-+                                if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockpos, blockstate)) {
-                                     flag = this.level().destroyBlock(blockpos, true, this) || flag;
-                                 }
-                             }
-@@ -350,6 +_,10 @@
+                     boolean flag = false;
+                     int l = Mth.floor(this.getBbWidth() / 2.0F + 1.0F);
+                     int i1 = Mth.floor(this.getBbHeight());
+ 
+-                    for(BlockPos blockpos : BlockPos.betweenClosed(
++                    for (BlockPos blockpos : BlockPos.betweenClosed(
+                         this.getBlockX() - l, this.getBlockY(), this.getBlockZ() - l, this.getBlockX() + l, this.getBlockY() + i1, this.getBlockZ() + l
+                     )) {
+                         BlockState blockstate = this.level().getBlockState(blockpos);
+-                        if (canDestroy(blockstate)) {
++                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockpos, blockstate)) {
+                             flag = this.level().destroyBlock(blockpos, true, this) || flag;
+                         }
+                     }
+@@ -348,6 +_,10 @@
          }
      }
  
@@ -29,3 +86,14 @@
      public static boolean canDestroy(BlockState p_31492_) {
          return !p_31492_.isAir() && !p_31492_.is(BlockTags.WITHER_IMMUNE);
      }
+@@ -472,8 +_,8 @@
+                     this.destroyBlocksTick = 20;
+                 }
+ 
+-                for(int i = 0; i < this.idleHeadUpdates.length; ++i) {
+-                    this.idleHeadUpdates[i] += 3;
++                for (int i = 0; i < this.idleHeadUpdates.length; i++) {
++                    this.idleHeadUpdates[i] = this.idleHeadUpdates[i] + 3;
+                 }
+ 
+                 return super.hurt(p_31461_, p_31462_);

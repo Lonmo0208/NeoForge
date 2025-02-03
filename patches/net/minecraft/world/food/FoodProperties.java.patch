@@ -1,73 +1,108 @@
 --- a/net/minecraft/world/food/FoodProperties.java
 +++ b/net/minecraft/world/food/FoodProperties.java
-@@ -11,15 +_,26 @@
-     private final boolean isMeat;
-     private final boolean canAlwaysEat;
-     private final boolean fastFood;
--    private final List<Pair<MobEffectInstance, Float>> effects;
--
-+    private final List<Pair<java.util.function.Supplier<MobEffectInstance>, Float>> effects;
-+
-+    private FoodProperties(FoodProperties.Builder builder) {
-+        this.nutrition = builder.nutrition;
-+        this.saturationModifier = builder.saturationModifier;
-+        this.isMeat = builder.isMeat;
-+        this.canAlwaysEat = builder.canAlwaysEat;
-+        this.fastFood = builder.fastFood;
-+        this.effects = builder.effects;
-+    }
-+
-+    // Forge: Use builder method instead
-+    @Deprecated
-     FoodProperties(int p_38730_, float p_38731_, boolean p_38732_, boolean p_38733_, boolean p_38734_, List<Pair<MobEffectInstance, Float>> p_38735_) {
-         this.nutrition = p_38730_;
-         this.saturationModifier = p_38731_;
-         this.isMeat = p_38732_;
-         this.canAlwaysEat = p_38733_;
-         this.fastFood = p_38734_;
--        this.effects = p_38735_;
-+        this.effects = p_38735_.stream().map(pair -> Pair.<java.util.function.Supplier<MobEffectInstance>, Float>of(pair::getFirst, pair.getSecond())).collect(java.util.stream.Collectors.toList());
-     }
+@@ -5,29 +_,23 @@
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.List;
+-import net.minecraft.core.Holder;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+ import net.minecraft.network.codec.ByteBufCodecs;
+ import net.minecraft.network.codec.StreamCodec;
+-import net.minecraft.sounds.SoundEvent;
+-import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.effect.MobEffectInstance;
  
-     public int getNutrition() {
-@@ -43,7 +_,7 @@
-     }
- 
-     public List<Pair<MobEffectInstance, Float>> getEffects() {
--        return this.effects;
-+        return this.effects.stream().map(pair -> Pair.of(pair.getFirst() != null ? pair.getFirst().get() : null, pair.getSecond())).collect(java.util.stream.Collectors.toList());
-     }
- 
-     public static class Builder {
-@@ -52,7 +_,7 @@
-         private boolean isMeat;
+-public record FoodProperties(
+-    int nutrition, float saturationModifier, boolean canAlwaysEat, float eatSeconds, Holder<SoundEvent> eatSound, List<FoodProperties.PossibleEffect> effects
+-) {
++public record FoodProperties(int nutrition, float saturationModifier, boolean canAlwaysEat, float eatSeconds, List<FoodProperties.PossibleEffect> effects) {
+     private static final float DEFAULT_EAT_SECONDS = 1.6F;
+     public static final Codec<FoodProperties> DIRECT_CODEC = RecordCodecBuilder.create(
+-        p_340175_ -> p_340175_.group(
++        p_337892_ -> p_337892_.group(
+                     ExtraCodecs.NON_NEGATIVE_INT.fieldOf("nutrition").forGetter(FoodProperties::nutrition),
+                     Codec.FLOAT.fieldOf("saturation_modifier").forGetter(FoodProperties::saturationModifier),
+-                    ExtraCodecs.strictOptionalField(Codec.BOOL, "can_always_eat", false).forGetter(FoodProperties::canAlwaysEat),
+-                    ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_FLOAT, "eat_seconds", 1.6F).forGetter(FoodProperties::eatSeconds),
+-                    SoundEvent.CODEC.fieldOf("eat_sound").forGetter(FoodProperties::eatSound),
+-                    ExtraCodecs.strictOptionalField(FoodProperties.PossibleEffect.CODEC.listOf(), "effects", List.of()).forGetter(FoodProperties::effects)
++                    Codec.BOOL.optionalFieldOf("can_always_eat", Boolean.valueOf(false)).forGetter(FoodProperties::canAlwaysEat),
++                    ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("eat_seconds", 1.6F).forGetter(FoodProperties::eatSeconds),
++                    FoodProperties.PossibleEffect.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(FoodProperties::effects)
+                 )
+-                .apply(p_340175_, FoodProperties::new)
++                .apply(p_337892_, FoodProperties::new)
+     );
+     public static final StreamCodec<RegistryFriendlyByteBuf, FoodProperties> DIRECT_STREAM_CODEC = StreamCodec.composite(
+         ByteBufCodecs.VAR_INT,
+@@ -38,8 +_,6 @@
+         FoodProperties::canAlwaysEat,
+         ByteBufCodecs.FLOAT,
+         FoodProperties::eatSeconds,
+-        SoundEvent.STREAM_CODEC,
+-        FoodProperties::eatSound,
+         FoodProperties.PossibleEffect.STREAM_CODEC.apply(ByteBufCodecs.list()),
+         FoodProperties::effects,
+         FoodProperties::new
+@@ -54,7 +_,6 @@
+         private float saturationModifier;
          private boolean canAlwaysEat;
-         private boolean fastFood;
--        private final List<Pair<MobEffectInstance, Float>> effects = Lists.newArrayList();
-+        private final List<Pair<java.util.function.Supplier<MobEffectInstance>, Float>> effects = Lists.newArrayList();
+         private float eatSeconds = 1.6F;
+-        private Holder<SoundEvent> eatSound = SoundEvents.GENERIC_EAT;
+         private final ImmutableList.Builder<FoodProperties.PossibleEffect> effects = ImmutableList.builder();
  
          public FoodProperties.Builder nutrition(int p_38761_) {
-             this.nutrition = p_38761_;
-@@ -79,13 +_,20 @@
+@@ -77,29 +_,30 @@
              return this;
          }
  
-+        public FoodProperties.Builder effect(java.util.function.Supplier<MobEffectInstance> effectIn, float probability) {
-+             this.effects.add(Pair.of(effectIn, probability));
-+             return this;
-+         }
-+
-+        // Forge: Use supplier method instead
++        // Neo: Use supplier method instead
 +        @Deprecated
          public FoodProperties.Builder effect(MobEffectInstance p_38763_, float p_38764_) {
--            this.effects.add(Pair.of(p_38763_, p_38764_));
-+            this.effects.add(Pair.of(() -> p_38763_, p_38764_));
+             this.effects.add(new FoodProperties.PossibleEffect(p_38763_, p_38764_));
+             return this;
+         }
+ 
+-        public FoodProperties.Builder eatSound(Holder<SoundEvent> p_340737_) {
+-            this.eatSound = p_340737_;
++        public FoodProperties.Builder effect(java.util.function.Supplier<MobEffectInstance> effectIn, float probability) {
++            this.effects.add(new FoodProperties.PossibleEffect(effectIn, probability));
              return this;
          }
  
          public FoodProperties build() {
--            return new FoodProperties(this.nutrition, this.saturationModifier, this.isMeat, this.canAlwaysEat, this.fastFood, this.effects);
-+            return new FoodProperties(this);
+-            return new FoodProperties(this.nutrition, this.saturationModifier, this.canAlwaysEat, this.eatSeconds, this.eatSound, this.effects.build());
++            return new FoodProperties(this.nutrition, this.saturationModifier, this.canAlwaysEat, this.eatSeconds, this.effects.build());
+         }
+     }
+ 
+-    public static record PossibleEffect(MobEffectInstance effect, float probability) {
++    public static record PossibleEffect(java.util.function.Supplier<MobEffectInstance> effectSupplier, float probability) {
+         public static final Codec<FoodProperties.PossibleEffect> CODEC = RecordCodecBuilder.create(
+-            p_336029_ -> p_336029_.group(
++            p_337893_ -> p_337893_.group(
+                         MobEffectInstance.CODEC.fieldOf("effect").forGetter(FoodProperties.PossibleEffect::effect),
+-                        ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "probability", 1.0F)
+-                            .forGetter(FoodProperties.PossibleEffect::probability)
++                        Codec.floatRange(0.0F, 1.0F).optionalFieldOf("probability", 1.0F).forGetter(FoodProperties.PossibleEffect::probability)
+                     )
+-                    .apply(p_336029_, FoodProperties.PossibleEffect::new)
++                    .apply(p_337893_, FoodProperties.PossibleEffect::new)
+         );
+         public static final StreamCodec<RegistryFriendlyByteBuf, FoodProperties.PossibleEffect> STREAM_CODEC = StreamCodec.composite(
+             MobEffectInstance.STREAM_CODEC,
+@@ -109,8 +_,12 @@
+             FoodProperties.PossibleEffect::new
+         );
+ 
++        private PossibleEffect(MobEffectInstance effect, float probability) {
++            this(() -> effect, probability);
++        }
++
+         public MobEffectInstance effect() {
+-            return new MobEffectInstance(this.effect);
++            return new MobEffectInstance(this.effectSupplier.get());
          }
      }
  }

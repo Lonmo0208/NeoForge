@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/packs/FilePackResources.java
++++ b/net/minecraft/server/packs/FilePackResources.java
+@@ -26,7 +_,7 @@
+     private final FilePackResources.SharedZipFileAccess zipFileAccess;
+     private final String prefix;
+ 
+-    FilePackResources(PackLocationInfo p_326506_, FilePackResources.SharedZipFileAccess p_296014_, String p_256076_) {
++    public FilePackResources(PackLocationInfo p_326506_, FilePackResources.SharedZipFileAccess p_296014_, String p_256076_) {
+         super(p_326506_);
+         this.zipFileAccess = p_296014_;
+         this.prefix = p_256076_;

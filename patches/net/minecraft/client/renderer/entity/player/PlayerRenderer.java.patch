@@ -1,6 +1,22 @@
 --- a/net/minecraft/client/renderer/entity/player/PlayerRenderer.java
 +++ b/net/minecraft/client/renderer/entity/player/PlayerRenderer.java
-@@ -68,7 +_,9 @@
+@@ -21,7 +_,6 @@
+ import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+ import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
+ import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
+-import net.minecraft.client.renderer.entity.layers.PoisonousPolytraLayer;
+ import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
+ import net.minecraft.client.renderer.texture.OverlayTexture;
+ import net.minecraft.network.chat.CommonComponents;
+@@ -62,7 +_,6 @@
+         this.addLayer(new CapeLayer(this));
+         this.addLayer(new CustomHeadLayer<>(this, p_174557_.getModelSet(), p_174557_.getItemInHandRenderer()));
+         this.addLayer(new ElytraLayer<>(this, p_174557_.getModelSet()));
+-        this.addLayer(new PoisonousPolytraLayer<>(this, p_174557_.getModelSet()));
+         this.addLayer(new ParrotOnShoulderLayer<>(this, p_174557_.getModelSet()));
+         this.addLayer(new SpinAttackEffectLayer<>(this, p_174557_.getModelSet()));
+         this.addLayer(new BeeStingerLayer<>(this));
+@@ -70,7 +_,9 @@
  
      public void render(AbstractClientPlayer p_117788_, float p_117789_, float p_117790_, PoseStack p_117791_, MultiBufferSource p_117792_, int p_117793_) {
          this.setModelProperties(p_117788_);
@@ -10,7 +26,7 @@
      }
  
      public Vec3 getRenderOffset(AbstractClientPlayer p_117785_, float p_117786_) {
-@@ -140,9 +_,11 @@
+@@ -142,9 +_,11 @@
                  if (useanim == UseAnim.BRUSH) {
                      return HumanoidModel.ArmPose.BRUSH;
                  }
@@ -23,7 +39,7 @@
  
              return HumanoidModel.ArmPose.ITEM;
          }
-@@ -182,10 +_,12 @@
+@@ -187,10 +_,12 @@
      }
  
      public void renderRightHand(PoseStack p_117771_, MultiBufferSource p_117772_, int p_117773_, AbstractClientPlayer p_117774_) {
@@ -36,10 +52,10 @@
          this.renderHand(p_117814_, p_117815_, p_117816_, p_117817_, this.model.leftArm, this.model.leftSleeve);
      }
  
-@@ -227,7 +_,7 @@
+@@ -232,7 +_,7 @@
              }
          } else if (f > 0.0F) {
-             super.setupRotations(p_117802_, p_117803_, p_117804_, p_117805_, p_117806_);
+             super.setupRotations(p_117802_, p_117803_, p_117804_, p_117805_, p_117806_, p_320048_);
 -            float f4 = p_117802_.isInWater() ? -90.0F - f1 : -90.0F;
 +            float f4 = p_117802_.isInWater() || p_117802_.isInFluidType((fluidType, height) -> p_117802_.canSwimInFluidType(fluidType)) ? -90.0F - p_117802_.getXRot() : -90.0F;
              float f5 = Mth.lerp(f, 0.0F, f4);

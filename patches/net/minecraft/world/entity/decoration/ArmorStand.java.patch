@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/decoration/ArmorStand.java
 +++ b/net/minecraft/world/entity/decoration/ArmorStand.java
-@@ -71,7 +_,7 @@
+@@ -74,7 +_,7 @@
      public static final EntityDataAccessor<Rotations> DATA_LEFT_LEG_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
      public static final EntityDataAccessor<Rotations> DATA_RIGHT_LEG_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
      private static final Predicate<Entity> RIDABLE_MINECARTS = p_31582_ -> p_31582_ instanceof AbstractMinecart
@@ -9,3 +9,111 @@
      private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
      private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
      private boolean invisible;
+@@ -142,7 +_,7 @@
+ 
+     @Override
+     public ItemStack getItemBySlot(EquipmentSlot p_31612_) {
+-        switch(p_31612_.getType()) {
++        switch (p_31612_.getType()) {
+             case HAND:
+                 return this.handItems.get(p_31612_.getIndex());
+             case ARMOR:
+@@ -160,7 +_,7 @@
+     @Override
+     public void setItemSlot(EquipmentSlot p_31584_, ItemStack p_31585_) {
+         this.verifyEquippedItem(p_31585_);
+-        switch(p_31584_.getType()) {
++        switch (p_31584_.getType()) {
+             case HAND:
+                 this.onEquipItem(p_31584_, this.handItems.set(p_31584_.getIndex(), p_31585_), p_31585_);
+                 break;
+@@ -180,14 +_,14 @@
+         super.addAdditionalSaveData(p_31619_);
+         ListTag listtag = new ListTag();
+ 
+-        for(ItemStack itemstack : this.armorItems) {
++        for (ItemStack itemstack : this.armorItems) {
+             listtag.add(itemstack.saveOptional(this.registryAccess()));
+         }
+ 
+         p_31619_.put("ArmorItems", listtag);
+         ListTag listtag1 = new ListTag();
+ 
+-        for(ItemStack itemstack1 : this.handItems) {
++        for (ItemStack itemstack1 : this.handItems) {
+             listtag1.add(itemstack1.saveOptional(this.registryAccess()));
+         }
+ 
+@@ -210,7 +_,7 @@
+         if (p_31600_.contains("ArmorItems", 9)) {
+             ListTag listtag = p_31600_.getList("ArmorItems", 10);
+ 
+-            for(int i = 0; i < this.armorItems.size(); ++i) {
++            for (int i = 0; i < this.armorItems.size(); i++) {
+                 CompoundTag compoundtag = listtag.getCompound(i);
+                 this.armorItems.set(i, ItemStack.parseOptional(this.registryAccess(), compoundtag));
+             }
+@@ -219,7 +_,7 @@
+         if (p_31600_.contains("HandItems", 9)) {
+             ListTag listtag1 = p_31600_.getList("HandItems", 10);
+ 
+-            for(int j = 0; j < this.handItems.size(); ++j) {
++            for (int j = 0; j < this.handItems.size(); j++) {
+                 CompoundTag compoundtag2 = listtag1.getCompound(j);
+                 this.handItems.set(j, ItemStack.parseOptional(this.registryAccess(), compoundtag2));
+             }
+@@ -291,7 +_,7 @@
+ 
+     @Override
+     protected void pushEntities() {
+-        for(Entity entity : this.level().getEntities(this, this.getBoundingBox(), RIDABLE_MINECARTS)) {
++        for (Entity entity : this.level().getEntities(this, this.getBoundingBox(), RIDABLE_MINECARTS)) {
+             if (this.distanceToSqr(entity) <= 0.2) {
+                 entity.push(this);
+             }
+@@ -305,8 +_,6 @@
+             return InteractionResult.PASS;
+         } else if (p_31594_.isSpectator()) {
+             return InteractionResult.SUCCESS;
+-        } else if (itemstack.is(Items.POTATO_PEELER)) {
+-            return InteractionResult.PASS;
+         } else if (p_31594_.level().isClientSide) {
+             return InteractionResult.CONSUME;
+         } else {
+@@ -410,8 +_,7 @@
+             if (!flag && !flag1) {
+                 return false;
+             } else {
+-                Entity entity = p_31579_.getEntity();
+-                if (entity instanceof Player player && !player.getAbilities().mayBuild) {
++                if (p_31579_.getEntity() instanceof Player player && !player.getAbilities().mayBuild) {
+                     return false;
+                 }
+ 
+@@ -501,7 +_,7 @@
+         this.playBrokenSound();
+         this.dropAllDeathLoot(p_31654_);
+ 
+-        for(int i = 0; i < this.handItems.size(); ++i) {
++        for (int i = 0; i < this.handItems.size(); i++) {
+             ItemStack itemstack = this.handItems.get(i);
+             if (!itemstack.isEmpty()) {
+                 Block.popResource(this.level(), this.blockPosition().above(), itemstack);
+@@ -509,7 +_,7 @@
+             }
+         }
+ 
+-        for(int j = 0; j < this.armorItems.size(); ++j) {
++        for (int j = 0; j < this.armorItems.size(); j++) {
+             ItemStack itemstack1 = this.armorItems.get(j);
+             if (!itemstack1.isEmpty()) {
+                 Block.popResource(this.level(), this.blockPosition().above(), itemstack1);
+@@ -791,7 +_,7 @@
+             BlockPos blockpos = this.blockPosition();
+             int i = Integer.MIN_VALUE;
+ 
+-            for(BlockPos blockpos1 : BlockPos.betweenClosed(
++            for (BlockPos blockpos1 : BlockPos.betweenClosed(
+                 BlockPos.containing(aabb.minX, aabb.minY, aabb.minZ), BlockPos.containing(aabb.maxX, aabb.maxY, aabb.maxZ)
+             )) {
+                 int j = Math.max(this.level().getBrightness(LightLayer.BLOCK, blockpos1), this.level().getBrightness(LightLayer.SKY, blockpos1));

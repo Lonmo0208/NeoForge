@@ -1,16 +1,36 @@
 --- a/net/minecraft/world/level/storage/loot/LootPool.java
 +++ b/net/minecraft/world/level/storage/loot/LootPool.java
-@@ -34,7 +_,8 @@
-                     ExtraCodecs.strictOptionalField(LootItemConditions.CODEC.listOf(), "conditions", List.of()).forGetter(p_297992_ -> p_297992_.conditions),
-                     ExtraCodecs.strictOptionalField(LootItemFunctions.CODEC.listOf(), "functions", List.of()).forGetter(p_297994_ -> p_297994_.functions),
+@@ -10,7 +_,6 @@
+ import java.util.function.Consumer;
+ import java.util.function.Predicate;
+ import net.minecraft.Util;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.util.Mth;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.item.ItemStack;
+@@ -30,15 +_,15 @@
+ 
+ public class LootPool {
+     public static final Codec<LootPool> CODEC = RecordCodecBuilder.create(
+-        p_335321_ -> p_335321_.group(
++        p_338122_ -> p_338122_.group(
+                     LootPoolEntries.CODEC.listOf().fieldOf("entries").forGetter(p_297995_ -> p_297995_.entries),
+-                    ExtraCodecs.strictOptionalField(LootItemConditions.DIRECT_CODEC.listOf(), "conditions", List.of())
+-                        .forGetter(p_297992_ -> p_297992_.conditions),
+-                    ExtraCodecs.strictOptionalField(LootItemFunctions.ROOT_CODEC.listOf(), "functions", List.of()).forGetter(p_297994_ -> p_297994_.functions),
++                    LootItemConditions.DIRECT_CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(p_297992_ -> p_297992_.conditions),
++                    LootItemFunctions.ROOT_CODEC.listOf().optionalFieldOf("functions", List.of()).forGetter(p_297994_ -> p_297994_.functions),
                      NumberProviders.CODEC.fieldOf("rolls").forGetter(p_297993_ -> p_297993_.rolls),
 -                    NumberProviders.CODEC.fieldOf("bonus_rolls").orElse(ConstantValue.exactly(0.0F)).forGetter(p_297997_ -> p_297997_.bonusRolls)
 +                    NumberProviders.CODEC.fieldOf("bonus_rolls").orElse(ConstantValue.exactly(0.0F)).forGetter(p_297997_ -> p_297997_.bonusRolls),
 +                    Codec.STRING.optionalFieldOf("name").forGetter(pool -> java.util.Optional.ofNullable(pool.name).filter(name -> !name.startsWith("custom#")))
                  )
-                 .apply(p_297996_, LootPool::new)
+-                .apply(p_335321_, LootPool::new)
++                .apply(p_338122_, LootPool::new)
      );
-@@ -51,7 +_,8 @@
+     private final List<LootPoolEntryContainer> entries;
+     private final List<LootItemCondition> conditions;
+@@ -53,7 +_,8 @@
          List<LootItemCondition> p_299316_,
          List<LootItemFunction> p_298954_,
          NumberProvider p_165131_,
@@ -20,7 +40,7 @@
      ) {
          this.entries = p_298764_;
          this.conditions = p_299316_;
-@@ -60,6 +_,7 @@
+@@ -62,6 +_,7 @@
          this.compositeFunction = LootItemFunctions.compose(p_298954_);
          this.rolls = p_165131_;
          this.bonusRolls = p_165132_;
@@ -28,7 +48,51 @@
      }
  
      private void addRandomItem(Consumer<ItemStack> p_79059_, LootContext p_79060_) {
-@@ -122,6 +_,29 @@
+@@ -69,7 +_,7 @@
+         List<LootPoolEntry> list = Lists.newArrayList();
+         MutableInt mutableint = new MutableInt();
+ 
+-        for(LootPoolEntryContainer lootpoolentrycontainer : this.entries) {
++        for (LootPoolEntryContainer lootpoolentrycontainer : this.entries) {
+             lootpoolentrycontainer.expand(p_79060_, p_79048_ -> {
+                 int k = p_79048_.getWeight(p_79060_.getLuck());
+                 if (k > 0) {
+@@ -86,7 +_,7 @@
+             } else {
+                 int j = randomsource.nextInt(mutableint.intValue());
+ 
+-                for(LootPoolEntry lootpoolentry : list) {
++                for (LootPoolEntry lootpoolentry : list) {
+                     j -= lootpoolentry.getWeight(p_79060_.getLuck());
+                     if (j < 0) {
+                         lootpoolentry.createItemStack(p_79059_, p_79060_);
+@@ -102,28 +_,51 @@
+             Consumer<ItemStack> consumer = LootItemFunction.decorate(this.compositeFunction, p_79054_, p_79055_);
+             int i = this.rolls.getInt(p_79055_) + Mth.floor(this.bonusRolls.getFloat(p_79055_) * p_79055_.getLuck());
+ 
+-            for(int j = 0; j < i; ++j) {
++            for (int j = 0; j < i; j++) {
+                 this.addRandomItem(consumer, p_79055_);
+             }
+         }
+     }
+ 
+     public void validate(ValidationContext p_79052_) {
+-        for(int i = 0; i < this.conditions.size(); ++i) {
++        for (int i = 0; i < this.conditions.size(); i++) {
+             this.conditions.get(i).validate(p_79052_.forChild(".condition[" + i + "]"));
+         }
+ 
+-        for(int j = 0; j < this.functions.size(); ++j) {
++        for (int j = 0; j < this.functions.size(); j++) {
+             this.functions.get(j).validate(p_79052_.forChild(".functions[" + j + "]"));
+         }
+ 
+-        for(int k = 0; k < this.entries.size(); ++k) {
++        for (int k = 0; k < this.entries.size(); k++) {
+             this.entries.get(k).validate(p_79052_.forChild(".entries[" + k + "]"));
+         }
+ 
          this.rolls.validate(p_79052_.forChild(".rolls"));
          this.bonusRolls.validate(p_79052_.forChild(".bonusRolls"));
      }
@@ -58,7 +122,7 @@
  
      public static LootPool.Builder lootPool() {
          return new LootPool.Builder();
-@@ -133,6 +_,8 @@
+@@ -135,6 +_,8 @@
          private final ImmutableList.Builder<LootItemFunction> functions = ImmutableList.builder();
          private NumberProvider rolls = ConstantValue.exactly(1.0F);
          private NumberProvider bonusRolls = ConstantValue.exactly(0.0F);
@@ -67,7 +131,7 @@
  
          public LootPool.Builder setRolls(NumberProvider p_165134_) {
              this.rolls = p_165134_;
-@@ -163,8 +_,13 @@
+@@ -165,8 +_,13 @@
              return this;
          }
  

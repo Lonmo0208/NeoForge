@@ -1,12 +1,40 @@
 --- a/net/minecraft/client/renderer/blockentity/StructureBlockRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/StructureBlockRenderer.java
-@@ -134,4 +_,9 @@
+@@ -33,7 +_,7 @@
+                     double d8 = d5 + (double)vec3i.getY();
+                     double d2;
+                     double d3;
+-                    switch(p_112583_.getMirror()) {
++                    switch (p_112583_.getMirror()) {
+                         case LEFT_RIGHT:
+                             d2 = (double)vec3i.getX();
+                             d3 = (double)(-vec3i.getZ());
+@@ -51,7 +_,7 @@
+                     double d6;
+                     double d7;
+                     double d9;
+-                    switch(p_112583_.getRotation()) {
++                    switch (p_112583_.getRotation()) {
+                         case CLOCKWISE_90:
+                             d4 = d3 < 0.0 ? d0 : d0 + 1.0;
+                             d6 = d2 < 0.0 ? d1 + 1.0 : d1;
+@@ -98,7 +_,7 @@
+         BlockPos blockpos = p_173677_.getBlockPos();
+         BlockPos blockpos1 = blockpos.offset(p_173679_);
+ 
+-        for(BlockPos blockpos2 : BlockPos.betweenClosed(blockpos1, blockpos1.offset(p_173677_.getStructureSize()).offset(-1, -1, -1))) {
++        for (BlockPos blockpos2 : BlockPos.betweenClosed(blockpos1, blockpos1.offset(p_173677_.getStructureSize()).offset(-1, -1, -1))) {
+             BlockState blockstate = blockgetter.getBlockState(blockpos2);
+             boolean flag = blockstate.isAir();
+             boolean flag1 = blockstate.is(Blocks.STRUCTURE_VOID);
+@@ -133,5 +_,10 @@
+     @Override
      public int getViewDistance() {
          return 96;
-     }
++    }
 +
 +    @Override
 +    public net.minecraft.world.phys.AABB getRenderBoundingBox(StructureBlockEntity blockEntity) {
 +        return INFINITE_EXTENT_AABB;
-+    }
+     }
  }

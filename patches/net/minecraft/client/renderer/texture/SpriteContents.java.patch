@@ -11,10 +11,29 @@
      public void increaseMipLevel(int p_248864_) {
          try {
              this.byMipLevel = MipmapGenerator.generateMipLevels(this.byMipLevel, p_248864_);
-@@ -120,6 +_,10 @@
+@@ -82,14 +_,14 @@
+         List<SpriteContents.FrameInfo> list = new ArrayList<>();
+         p_250947_.forEachFrame((p_251291_, p_251837_) -> list.add(new SpriteContents.FrameInfo(p_251291_, p_251837_)));
+         if (list.isEmpty()) {
+-            for(int l = 0; l < k; ++l) {
++            for (int l = 0; l < k; l++) {
+                 list.add(new SpriteContents.FrameInfo(l, p_250947_.getDefaultFrameTime()));
+             }
+         } else {
+             int i1 = 0;
+             IntSet intset = new IntOpenHashSet();
+ 
+-            for(Iterator<SpriteContents.FrameInfo> iterator = list.iterator(); iterator.hasNext(); ++i1) {
++            for (Iterator<SpriteContents.FrameInfo> iterator = list.iterator(); iterator.hasNext(); i1++) {
+                 SpriteContents.FrameInfo spritecontents$frameinfo = iterator.next();
+                 boolean flag = true;
+                 if (spritecontents$frameinfo.time <= 0) {
+@@ -119,7 +_,11 @@
+     }
  
      void upload(int p_248895_, int p_250245_, int p_250458_, int p_251337_, NativeImage[] p_248825_) {
-         for(int i = 0; i < this.byMipLevel.length; ++i) {
+-        for(int i = 0; i < this.byMipLevel.length; ++i) {
++        for (int i = 0; i < this.byMipLevel.length; i++) {
 +            // Forge: Skip uploading if the texture would be made invalid by mip level
 +            if ((this.width >> i) <= 0 || (this.height >> i) <= 0)
 +                break;
@@ -22,8 +41,21 @@
              p_248825_[i]
                  .upload(i, p_248895_ >> i, p_250245_ >> i, p_250458_ >> i, p_251337_ >> i, this.width >> i, this.height >> i, this.byMipLevel.length > 1, false);
          }
-@@ -242,7 +_,8 @@
-             for(int i = 0; i < this.activeFrame.length; ++i) {
+@@ -155,7 +_,7 @@
+ 
+     @Override
+     public void close() {
+-        for(NativeImage nativeimage : this.byMipLevel) {
++        for (NativeImage nativeimage : this.byMipLevel) {
+             nativeimage.close();
+         }
+     }
+@@ -239,10 +_,11 @@
+         private final NativeImage[] activeFrame = new NativeImage[SpriteContents.this.byMipLevel.length];
+ 
+         InterpolationData() {
+-            for(int i = 0; i < this.activeFrame.length; ++i) {
++            for (int i = 0; i < this.activeFrame.length; i++) {
                  int j = SpriteContents.this.width >> i;
                  int k = SpriteContents.this.height >> i;
 -                this.activeFrame[i] = new NativeImage(j, k, false);
@@ -32,13 +64,51 @@
              }
          }
  
-@@ -257,6 +_,9 @@
-                 for(int k = 0; k < this.activeFrame.length; ++k) {
+@@ -254,19 +_,21 @@
+             int i = spritecontents$frameinfo.index;
+             int j = list.get((p_248626_.frame + 1) % list.size()).index;
+             if (i != j) {
+-                for(int k = 0; k < this.activeFrame.length; ++k) {
++                for (int k = 0; k < this.activeFrame.length; k++) {
                      int l = SpriteContents.this.width >> k;
                      int i1 = SpriteContents.this.height >> k;
 +                    // Forge: Guard against invalid texture size, because we allow generating mipmaps regardless of texture sizes
 +                    if (l < 1 || i1 < 1)
 +                        continue;
  
-                     for(int j1 = 0; j1 < i1; ++j1) {
-                         for(int k1 = 0; k1 < l; ++k1) {
+-                    for(int j1 = 0; j1 < i1; ++j1) {
+-                        for(int k1 = 0; k1 < l; ++k1) {
++                    for (int j1 = 0; j1 < i1; j1++) {
++                        for (int k1 = 0; k1 < l; k1++) {
+                             int l1 = this.getPixel(spritecontents$animatedtexture, i, k, k1, j1);
+                             int i2 = this.getPixel(spritecontents$animatedtexture, j, k, k1, j1);
+-                            int j2 = this.mix(d0, l1 >> 24 & 0xFF, i2 >> 24 & 0xFF);
+-                            int k2 = this.mix(d0, l1 >> 16 & 0xFF, i2 >> 16 & 0xFF);
+-                            int l2 = this.mix(d0, l1 >> 8 & 0xFF, i2 >> 8 & 0xFF);
+-                            int i3 = this.mix(d0, l1 & 0xFF, i2 & 0xFF);
+-                            this.activeFrame[k].setPixelRGBA(k1, j1, j2 << 24 | k2 << 16 | l2 << 8 | i3);
++                            int j2 = this.mix(d0, l1 >> 16 & 0xFF, i2 >> 16 & 0xFF);
++                            int k2 = this.mix(d0, l1 >> 8 & 0xFF, i2 >> 8 & 0xFF);
++                            int l2 = this.mix(d0, l1 & 0xFF, i2 & 0xFF);
++                            this.activeFrame[k].setPixelRGBA(k1, j1, l1 & 0xFF000000 | j2 << 16 | k2 << 8 | l2);
+                         }
+                     }
+                 }
+@@ -289,7 +_,7 @@
+ 
+         @Override
+         public void close() {
+-            for(NativeImage nativeimage : this.activeFrame) {
++            for (NativeImage nativeimage : this.activeFrame) {
+                 nativeimage.close();
+             }
+         }
+@@ -310,7 +_,7 @@
+ 
+         @Override
+         public void tickAndUpload(int p_249105_, int p_249676_) {
+-            ++this.subFrame;
++            this.subFrame++;
+             SpriteContents.FrameInfo spritecontents$frameinfo = this.animationInfo.frames.get(this.frame);
+             if (this.subFrame >= spritecontents$frameinfo.time) {
+                 int i = spritecontents$frameinfo.index;

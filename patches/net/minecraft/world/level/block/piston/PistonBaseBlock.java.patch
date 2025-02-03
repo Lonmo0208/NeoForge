@@ -1,5 +1,60 @@
 --- a/net/minecraft/world/level/block/piston/PistonBaseBlock.java
 +++ b/net/minecraft/world/level/block/piston/PistonBaseBlock.java
+@@ -72,7 +_,7 @@
+     @Override
+     protected VoxelShape getShape(BlockState p_60220_, BlockGetter p_60221_, BlockPos p_60222_, CollisionContext p_60223_) {
+         if (p_60220_.getValue(EXTENDED)) {
+-            switch((Direction)p_60220_.getValue(FACING)) {
++            switch ((Direction)p_60220_.getValue(FACING)) {
+                 case DOWN:
+                     return DOWN_AABB;
+                 case UP:
+@@ -131,17 +_,16 @@
+             BlockPos blockpos = p_60169_.relative(direction, 2);
+             BlockState blockstate = p_60168_.getBlockState(blockpos);
+             int i = 1;
+-            if (blockstate.is(Blocks.MOVING_PISTON) && blockstate.getValue(FACING) == direction) {
+-                BlockEntity blockentity = p_60168_.getBlockEntity(blockpos);
+-                if (blockentity instanceof PistonMovingBlockEntity pistonmovingblockentity
+-                    && pistonmovingblockentity.isExtending()
+-                    && (
+-                        pistonmovingblockentity.getProgress(0.0F) < 0.5F
+-                            || p_60168_.getGameTime() == pistonmovingblockentity.getLastTicked()
+-                            || ((ServerLevel)p_60168_).isHandlingTick()
+-                    )) {
+-                    i = 2;
+-                }
++            if (blockstate.is(Blocks.MOVING_PISTON)
++                && blockstate.getValue(FACING) == direction
++                && p_60168_.getBlockEntity(blockpos) instanceof PistonMovingBlockEntity pistonmovingblockentity
++                && pistonmovingblockentity.isExtending()
++                && (
++                    pistonmovingblockentity.getProgress(0.0F) < 0.5F
++                        || p_60168_.getGameTime() == pistonmovingblockentity.getLastTicked()
++                        || ((ServerLevel)p_60168_).isHandlingTick()
++                )) {
++                i = 2;
+             }
+ 
+             p_60168_.blockEvent(p_60169_, this, i, direction.get3DDataValue());
+@@ -149,7 +_,7 @@
+     }
+ 
+     private boolean getNeighborSignal(SignalGetter p_277378_, BlockPos p_60179_, Direction p_60180_) {
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
+             if (direction != p_60180_ && p_277378_.hasSignal(p_60179_.relative(direction), direction)) {
+                 return true;
+             }
+@@ -160,7 +_,7 @@
+         } else {
+             BlockPos blockpos = p_60179_.above();
+ 
+-            for(Direction direction1 : Direction.values()) {
++            for (Direction direction1 : Direction.values()) {
+                 if (direction1 != Direction.DOWN && p_277378_.hasSignal(blockpos.relative(direction1), direction1)) {
+                     return true;
+                 }
 @@ -187,6 +_,7 @@
          }
  
@@ -8,14 +63,41 @@
              if (!this.moveBlocks(p_60193_, p_60194_, direction, true)) {
                  return false;
              }
-@@ -195,6 +_,7 @@
+@@ -195,9 +_,10 @@
              p_60193_.playSound(null, p_60194_, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5F, p_60193_.random.nextFloat() * 0.25F + 0.6F);
              p_60193_.gameEvent(GameEvent.BLOCK_ACTIVATE, p_60194_, GameEvent.Context.of(blockstate));
          } else if (p_60195_ == 1 || p_60195_ == 2) {
+-            BlockEntity blockentity1 = p_60193_.getBlockEntity(p_60194_.relative(direction));
+-            if (blockentity1 instanceof PistonMovingBlockEntity) {
+-                ((PistonMovingBlockEntity)blockentity1).finalTick();
 +            if (net.neoforged.neoforge.event.EventHooks.onPistonMovePre(p_60193_, p_60194_, direction, false)) return false;
-             BlockEntity blockentity1 = p_60193_.getBlockEntity(p_60194_.relative(direction));
-             if (blockentity1 instanceof PistonMovingBlockEntity) {
-                 ((PistonMovingBlockEntity)blockentity1).finalTick();
++            BlockEntity blockentity = p_60193_.getBlockEntity(p_60194_.relative(direction));
++            if (blockentity instanceof PistonMovingBlockEntity) {
++                ((PistonMovingBlockEntity)blockentity).finalTick();
+             }
+ 
+             BlockState blockstate1 = Blocks.MOVING_PISTON
+@@ -216,14 +_,12 @@
+                 BlockPos blockpos = p_60194_.offset(direction.getStepX() * 2, direction.getStepY() * 2, direction.getStepZ() * 2);
+                 BlockState blockstate2 = p_60193_.getBlockState(blockpos);
+                 boolean flag1 = false;
+-                if (blockstate2.is(Blocks.MOVING_PISTON)) {
+-                    BlockEntity blockentity = p_60193_.getBlockEntity(blockpos);
+-                    if (blockentity instanceof PistonMovingBlockEntity pistonmovingblockentity
+-                        && pistonmovingblockentity.getDirection() == direction
+-                        && pistonmovingblockentity.isExtending()) {
+-                        pistonmovingblockentity.finalTick();
+-                        flag1 = true;
+-                    }
++                if (blockstate2.is(Blocks.MOVING_PISTON)
++                    && p_60193_.getBlockEntity(blockpos) instanceof PistonMovingBlockEntity pistonmovingblockentity
++                    && pistonmovingblockentity.getDirection() == direction
++                    && pistonmovingblockentity.isExtending()) {
++                    pistonmovingblockentity.finalTick();
++                    flag1 = true;
+                 }
+ 
+                 if (!flag1) {
 @@ -246,6 +_,7 @@
              p_60193_.gameEvent(GameEvent.BLOCK_DEACTIVATE, p_60194_, GameEvent.Context.of(blockstate1));
          }
@@ -24,7 +106,31 @@
          return true;
      }
  
-@@ -317,8 +_,7 @@
+@@ -271,7 +_,7 @@
+                     return false;
+                 }
+ 
+-                switch(p_60205_.getPistonPushReaction()) {
++                switch (p_60205_.getPistonPushReaction()) {
+                     case BLOCK:
+                         return false;
+                     case DESTROY:
+@@ -301,7 +_,7 @@
+             List<BlockPos> list = pistonstructureresolver.getToPush();
+             List<BlockState> list1 = Lists.newArrayList();
+ 
+-            for(BlockPos blockpos1 : list) {
++            for (BlockPos blockpos1 : list) {
+                 BlockState blockstate = p_60182_.getBlockState(blockpos1);
+                 list1.add(blockstate);
+                 map.put(blockpos1, blockstate);
+@@ -312,13 +_,12 @@
+             Direction direction = p_60185_ ? p_60184_ : p_60184_.getOpposite();
+             int i = 0;
+ 
+-            for(int j = list2.size() - 1; j >= 0; --j) {
++            for (int j = list2.size() - 1; j >= 0; j--) {
+                 BlockPos blockpos2 = list2.get(j);
                  BlockState blockstate1 = p_60182_.getBlockState(blockpos2);
                  BlockEntity blockentity = blockstate1.hasBlockEntity() ? p_60182_.getBlockEntity(blockpos2) : null;
                  dropResources(blockstate1, p_60182_, blockpos2, blockentity);
@@ -34,9 +140,49 @@
                  if (!blockstate1.is(BlockTags.FIRE)) {
                      p_60182_.addDestroyBlockEffect(blockpos2, blockstate1);
                  }
+@@ -326,7 +_,7 @@
+                 ablockstate[i++] = blockstate1;
+             }
+ 
+-            for(int k = list.size() - 1; k >= 0; --k) {
++            for (int k = list.size() - 1; k >= 0; k--) {
+                 BlockPos blockpos3 = list.get(k);
+                 BlockState blockstate5 = p_60182_.getBlockState(blockpos3);
+                 blockpos3 = blockpos3.relative(direction);
+@@ -354,11 +_,11 @@
+ 
+             BlockState blockstate3 = Blocks.AIR.defaultBlockState();
+ 
+-            for(BlockPos blockpos4 : map.keySet()) {
++            for (BlockPos blockpos4 : map.keySet()) {
+                 p_60182_.setBlock(blockpos4, blockstate3, 82);
+             }
+ 
+-            for(Entry<BlockPos, BlockState> entry : map.entrySet()) {
++            for (Entry<BlockPos, BlockState> entry : map.entrySet()) {
+                 BlockPos blockpos5 = entry.getKey();
+                 BlockState blockstate2 = entry.getValue();
+                 blockstate2.updateIndirectNeighbourShapes(p_60182_, blockpos5, 2);
+@@ -368,14 +_,14 @@
+ 
+             i = 0;
+ 
+-            for(int l = list2.size() - 1; l >= 0; --l) {
++            for (int l = list2.size() - 1; l >= 0; l--) {
+                 BlockState blockstate7 = ablockstate[i++];
+                 BlockPos blockpos6 = list2.get(l);
+                 blockstate7.updateIndirectNeighbourShapes(p_60182_, blockpos6, 2);
+                 p_60182_.updateNeighborsAt(blockpos6, blockstate7.getBlock());
+             }
+ 
+-            for(int i1 = list.size() - 1; i1 >= 0; --i1) {
++            for (int i1 = list.size() - 1; i1 >= 0; i1--) {
+                 p_60182_.updateNeighborsAt(list.get(i1), ablockstate[i++].getBlock());
+             }
+ 
 @@ -390,6 +_,10 @@
      @Override
-     public BlockState rotate(BlockState p_60215_, Rotation p_60216_) {
+     protected BlockState rotate(BlockState p_60215_, Rotation p_60216_) {
          return p_60215_.setValue(FACING, p_60216_.rotate(p_60215_.getValue(FACING)));
 +    }
 +

@@ -1,6 +1,21 @@
 --- a/net/minecraft/resources/ResourceLocation.java
 +++ b/net/minecraft/resources/ResourceLocation.java
-@@ -146,6 +_,12 @@
+@@ -128,11 +_,10 @@
+     public boolean equals(Object p_135846_) {
+         if (this == p_135846_) {
+             return true;
+-        } else if (!(p_135846_ instanceof ResourceLocation)) {
+-            return false;
+         } else {
+-            ResourceLocation resourcelocation = (ResourceLocation)p_135846_;
+-            return this.namespace.equals(resourcelocation.namespace) && this.path.equals(resourcelocation.path);
++            return !(p_135846_ instanceof ResourceLocation resourcelocation)
++                ? false
++                : this.namespace.equals(resourcelocation.namespace) && this.path.equals(resourcelocation.path);
+         }
+     }
+ 
+@@ -150,6 +_,12 @@
          return i;
      }
  
@@ -13,3 +28,30 @@
      public String toDebugFileName() {
          return this.toString().replace('/', '_').replace(':', '_');
      }
+@@ -173,7 +_,7 @@
+     private static String readGreedy(StringReader p_335690_) {
+         int i = p_335690_.getCursor();
+ 
+-        while(p_335690_.canRead() && isAllowedInResourceLocation(p_335690_.peek())) {
++        while (p_335690_.canRead() && isAllowedInResourceLocation(p_335690_.peek())) {
+             p_335690_.skip();
+         }
+ 
+@@ -218,7 +_,7 @@
+     }
+ 
+     public static boolean isValidPath(String p_135842_) {
+-        for(int i = 0; i < p_135842_.length(); ++i) {
++        for (int i = 0; i < p_135842_.length(); i++) {
+             if (!validPathChar(p_135842_.charAt(i))) {
+                 return false;
+             }
+@@ -228,7 +_,7 @@
+     }
+ 
+     public static boolean isValidNamespace(String p_135844_) {
+-        for(int i = 0; i < p_135844_.length(); ++i) {
++        for (int i = 0; i < p_135844_.length(); i++) {
+             if (!validNamespaceChar(p_135844_.charAt(i))) {
+                 return false;
+             }

@@ -1,14 +1,21 @@
 --- a/net/minecraft/network/Connection.java
 +++ b/net/minecraft/network/Connection.java
-@@ -110,6 +_,7 @@
+@@ -104,6 +_,8 @@
+     private volatile Component delayedDisconnect;
+     @Nullable
+     BandwidthDebugMonitor bandwidthDebugMonitor;
++    @Nullable
++    private ProtocolInfo<?> inboundProtocol;
+ 
+     public Connection(PacketFlow p_129482_) {
+         this.receiving = p_129482_;
+@@ -117,11 +_,13 @@
          if (this.delayedDisconnect != null) {
              this.disconnect(this.delayedDisconnect);
          }
 +        net.neoforged.neoforge.network.connection.ConnectionUtils.setConnection(p_129525_, this);
      }
  
-     public static void setInitialProtocolAttributes(Channel p_294962_) {
-@@ -120,6 +_,7 @@
      @Override
      public void channelInactive(ChannelHandlerContext p_129527_) {
          this.disconnect(Component.translatable("disconnect.endOfStream"));
@@ -16,7 +23,7 @@
      }
  
      @Override
-@@ -135,6 +_,14 @@
+@@ -137,6 +_,14 @@
                      this.disconnect(Component.translatable("disconnect.timeout"));
                  } else {
                      Component component = Component.translatable("disconnect.genericReason", "Internal Exception: " + p_129534_);
@@ -31,7 +38,67 @@
                      if (flag) {
                          LOGGER.debug("Failed to sent packet", p_129534_);
                          if (this.getSending() == PacketFlow.CLIENTBOUND) {
-@@ -380,7 +_,7 @@
+@@ -175,7 +_,7 @@
+                         this.disconnect(Component.translatable("multiplayer.disconnect.invalid_packet"));
+                     }
+ 
+-                    ++this.receivedPackets;
++                    this.receivedPackets++;
+                 }
+             }
+         }
+@@ -203,6 +_,7 @@
+         if (p_320903_.flow() != this.getReceiving()) {
+             throw new IllegalStateException("Invalid inbound protocol: " + p_320903_.id());
+         } else {
++            this.inboundProtocol = p_320903_;
+             this.packetListener = p_320940_;
+             this.disconnectListener = null;
+             UnconfiguredPipelineHandler.InboundConfigurationTask unconfiguredpipelinehandler$inboundconfigurationtask = UnconfiguredPipelineHandler.setupInboundProtocol(
+@@ -231,7 +_,10 @@
+             if (bundlerinfo != null) {
+                 PacketBundleUnpacker packetbundleunpacker = new PacketBundleUnpacker(bundlerinfo);
+                 unconfiguredpipelinehandler$outboundconfigurationtask = unconfiguredpipelinehandler$outboundconfigurationtask.andThen(
+-                    p_319516_ -> p_319516_.pipeline().addAfter("encoder", "unbundler", packetbundleunpacker)
++                    p_319516_ -> {
++                        p_319516_.pipeline().addAfter("encoder", "unbundler", packetbundleunpacker);
++                        net.neoforged.neoforge.network.filters.NetworkFilters.injectIfNecessary(this); // Neo: our handlers must be between the encoder and the unbundler, so re-inject them
++                    }
+                 );
+             }
+ 
+@@ -312,7 +_,7 @@
+     }
+ 
+     private void sendPacket(Packet<?> p_129521_, @Nullable PacketSendListener p_243246_, boolean p_294510_) {
+-        ++this.sentPackets;
++        this.sentPackets++;
+         if (this.channel.eventLoop().inEventLoop()) {
+             this.doSendPacket(p_129521_, p_243246_, p_294510_);
+         } else {
+@@ -357,9 +_,9 @@
+ 
+     private void flushQueue() {
+         if (this.channel != null && this.channel.isOpen()) {
+-            synchronized(this.pendingActions) {
++            synchronized (this.pendingActions) {
+                 Consumer<Connection> consumer;
+-                while((consumer = this.pendingActions.poll()) != null) {
++                while ((consumer = this.pendingActions.poll()) != null) {
+                     consumer.accept(this);
+                 }
+             }
+@@ -368,8 +_,7 @@
+ 
+     public void tick() {
+         this.flushQueue();
+-        PacketListener packetlistener = this.packetListener;
+-        if (packetlistener instanceof TickablePacketListener tickablepacketlistener) {
++        if (this.packetListener instanceof TickablePacketListener tickablepacketlistener) {
+             tickablepacketlistener.tick();
+         }
+ 
+@@ -405,7 +_,7 @@
          if (this.address == null) {
              return "local";
          } else {
@@ -40,7 +107,7 @@
          }
      }
  
-@@ -419,6 +_,7 @@
+@@ -444,6 +_,7 @@
      }
  
      public static ChannelFuture connect(InetSocketAddress p_290034_, boolean p_290035_, final Connection p_290031_) {
@@ -48,10 +115,28 @@
          Class<? extends SocketChannel> oclass;
          EventLoopGroup eventloopgroup;
          if (Epoll.isAvailable() && p_290035_) {
-@@ -569,6 +_,14 @@
+@@ -550,15 +_,13 @@
  
-     public float getAverageSentPackets() {
-         return this.averageSentPackets;
+     public void setupCompression(int p_129485_, boolean p_182682_) {
+         if (p_129485_ >= 0) {
+-            ChannelHandler channelhandler = this.channel.pipeline().get("decompress");
+-            if (channelhandler instanceof CompressionDecoder compressiondecoder) {
++            if (this.channel.pipeline().get("decompress") instanceof CompressionDecoder compressiondecoder) {
+                 compressiondecoder.setThreshold(p_129485_, p_182682_);
+             } else {
+                 this.channel.pipeline().addAfter("splitter", "decompress", new CompressionDecoder(p_129485_, p_182682_));
+             }
+ 
+-            channelhandler = this.channel.pipeline().get("compress");
+-            if (channelhandler instanceof CompressionEncoder compressionencoder) {
++            if (this.channel.pipeline().get("compress") instanceof CompressionEncoder compressionencoder) {
+                 compressionencoder.setThreshold(p_129485_);
+             } else {
+                 this.channel.pipeline().addAfter("prepender", "compress", new CompressionEncoder(p_129485_));
+@@ -602,5 +_,17 @@
+ 
+     public void setBandwidthLogger(LocalSampleLogger p_323799_) {
+         this.bandwidthDebugMonitor = new BandwidthDebugMonitor(p_323799_);
 +    }
 +
 +    public Channel channel() {
@@ -60,6 +145,9 @@
 +
 +    public PacketFlow getDirection() {
 +        return this.receiving;
++    }
++
++    public ProtocolInfo<?> getInboundProtocol() {
++        return Objects.requireNonNull(this.inboundProtocol, "Inbound protocol not set?");
      }
- 
-     public void setBandwidthLogger(SampleLogger p_299187_) {
+ }

@@ -1,0 +1,108 @@
+--- a/net/minecraft/world/item/alchemy/PotionBrewing.java
++++ b/net/minecraft/world/item/alchemy/PotionBrewing.java
+@@ -19,7 +_,7 @@
+     private static final List<PotionBrewing.Mix<Item>> CONTAINER_MIXES = Lists.newArrayList();
+     private static final List<Ingredient> ALLOWED_CONTAINERS = Lists.newArrayList();
+     private static final Predicate<ItemStack> ALLOWED_CONTAINER = p_43528_ -> {
+-        for(Ingredient ingredient : ALLOWED_CONTAINERS) {
++        for (Ingredient ingredient : ALLOWED_CONTAINERS) {
+             if (ingredient.test(p_43528_)) {
+                 return true;
+             }
+@@ -33,7 +_,7 @@
+     }
+ 
+     protected static boolean isContainerIngredient(ItemStack p_43518_) {
+-        for(PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
++        for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
+             if (mix.ingredient.test(p_43518_)) {
+                 return true;
+             }
+@@ -43,7 +_,7 @@
+     }
+ 
+     protected static boolean isPotionIngredient(ItemStack p_43523_) {
+-        for(PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
++        for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
+             if (mix.ingredient.test(p_43523_)) {
+                 return true;
+             }
+@@ -53,7 +_,7 @@
+     }
+ 
+     public static boolean isBrewablePotion(Holder<Potion> p_316354_) {
+-        for(PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
++        for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
+             if (mix.to.is(p_316354_)) {
+                 return true;
+             }
+@@ -63,15 +_,11 @@
+     }
+ 
+     public static boolean hasMix(ItemStack p_43509_, ItemStack p_43510_) {
+-        if (!ALLOWED_CONTAINER.test(p_43509_)) {
+-            return false;
+-        } else {
+-            return hasContainerMix(p_43509_, p_43510_) || hasPotionMix(p_43509_, p_43510_);
+-        }
++        return !ALLOWED_CONTAINER.test(p_43509_) ? false : hasContainerMix(p_43509_, p_43510_) || hasPotionMix(p_43509_, p_43510_);
+     }
+ 
+     protected static boolean hasContainerMix(ItemStack p_43520_, ItemStack p_43521_) {
+-        for(PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
++        for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
+             if (p_43520_.is(mix.from) && mix.ingredient.test(p_43521_)) {
+                 return true;
+             }
+@@ -85,7 +_,7 @@
+         if (optional.isEmpty()) {
+             return false;
+         } else {
+-            for(PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
++            for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
+                 if (mix.from.is(optional.get()) && mix.ingredient.test(p_43526_)) {
+                     return true;
+                 }
+@@ -103,13 +_,13 @@
+             if (optional.isEmpty()) {
+                 return p_43531_;
+             } else {
+-                for(PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
++                for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
+                     if (p_43531_.is(mix.from) && mix.ingredient.test(p_43530_)) {
+                         return PotionContents.createItemStack(mix.to.value(), optional.get());
+                     }
+                 }
+ 
+-                for(PotionBrewing.Mix<Potion> mix1 : POTION_MIXES) {
++                for (PotionBrewing.Mix<Potion> mix1 : POTION_MIXES) {
+                     if (mix1.from.is(optional.get()) && mix1.ingredient.test(p_43530_)) {
+                         return PotionContents.createItemStack(p_43531_.getItem(), mix1.to);
+                     }
+@@ -133,9 +_,17 @@
+         addMix(Potions.WATER, Items.SPIDER_EYE, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.SUGAR, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.MAGMA_CREAM, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.BREEZE_ROD, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.SLIME_BLOCK, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.STONE, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.COBWEB, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.GLOWSTONE_DUST, Potions.THICK);
+         addMix(Potions.WATER, Items.REDSTONE, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.NETHER_WART, Potions.AWKWARD);
++        addMix(Potions.AWKWARD, Items.BREEZE_ROD, Potions.WIND_CHARGED);
++        addMix(Potions.AWKWARD, Items.SLIME_BLOCK, Potions.OOZING);
++        addMix(Potions.AWKWARD, Items.STONE, Potions.INFESTED);
++        addMix(Potions.AWKWARD, Items.COBWEB, Potions.WEAVING);
+         addMix(Potions.AWKWARD, Items.GOLDEN_CARROT, Potions.NIGHT_VISION);
+         addMix(Potions.NIGHT_VISION, Items.REDSTONE, Potions.LONG_NIGHT_VISION);
+         addMix(Potions.NIGHT_VISION, Items.FERMENTED_SPIDER_EYE, Potions.INVISIBILITY);
+@@ -206,8 +_,5 @@
+     }
+ 
+     public static record Mix<T>(Holder<T> from, Ingredient ingredient, Holder<T> to) {
+-        public final Holder<T> from;
+-        public final Ingredient ingredient;
+-        public final Holder<T> to;
+     }
+ }

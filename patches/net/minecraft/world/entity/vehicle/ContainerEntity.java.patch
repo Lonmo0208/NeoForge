@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/vehicle/ContainerEntity.java
 +++ b/net/minecraft/world/entity/vehicle/ContainerEntity.java
-@@ -101,6 +_,9 @@
+@@ -107,6 +_,9 @@
  
              this.setLootTable(null);
              LootParams.Builder lootparams$builder = new LootParams.Builder((ServerLevel)this.level()).withParameter(LootContextParams.ORIGIN, this.position());
@@ -9,4 +9,13 @@
 +                lootparams$builder.withParameter(LootContextParams.KILLER_ENTITY, entityContainer);
              if (p_219950_ != null) {
                  lootparams$builder.withLuck(p_219950_.getLuck()).withParameter(LootContextParams.THIS_ENTITY, p_219950_);
+             }
+@@ -121,7 +_,7 @@
+     }
+ 
+     default boolean isChestVehicleEmpty() {
+-        for(ItemStack itemstack : this.getItemStacks()) {
++        for (ItemStack itemstack : this.getItemStacks()) {
+             if (!itemstack.isEmpty()) {
+                 return false;
              }

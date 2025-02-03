@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/monster/Ravager.java
 +++ b/net/minecraft/world/entity/monster/Ravager.java
-@@ -139,7 +_,7 @@
+@@ -133,11 +_,11 @@
                  this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(Mth.lerp(0.1, d1, d0));
              }
  
@@ -9,3 +9,48 @@
                  boolean flag = false;
                  AABB aabb = this.getBoundingBox().inflate(0.2);
  
+-                for(BlockPos blockpos : BlockPos.betweenClosed(
++                for (BlockPos blockpos : BlockPos.betweenClosed(
+                     Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)
+                 )) {
+                     BlockState blockstate = this.level().getBlockState(blockpos);
+@@ -153,18 +_,18 @@
+             }
+ 
+             if (this.roarTick > 0) {
+-                --this.roarTick;
++                this.roarTick--;
+                 if (this.roarTick == 10) {
+                     this.roar();
+                 }
+             }
+ 
+             if (this.attackTick > 0) {
+-                --this.attackTick;
++                this.attackTick--;
+             }
+ 
+             if (this.stunnedTick > 0) {
+-                --this.stunnedTick;
++                this.stunnedTick--;
+                 this.stunEffect();
+                 if (this.stunnedTick == 0) {
+                     this.playSound(SoundEvents.RAVAGER_ROAR, 1.0F, 1.0F);
+@@ -215,7 +_,7 @@
+ 
+     private void roar() {
+         if (this.isAlive()) {
+-            for(LivingEntity livingentity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE)) {
++            for (LivingEntity livingentity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE)) {
+                 if (!(livingentity instanceof AbstractIllager)) {
+                     livingentity.hurt(this.damageSources().mobAttack(this), 6.0F);
+                 }
+@@ -225,7 +_,7 @@
+ 
+             Vec3 vec3 = this.getBoundingBox().getCenter();
+ 
+-            for(int i = 0; i < 40; ++i) {
++            for (int i = 0; i < 40; i++) {
+                 double d0 = this.random.nextGaussian() * 0.2;
+                 double d1 = this.random.nextGaussian() * 0.2;
+                 double d2 = this.random.nextGaussian() * 0.2;

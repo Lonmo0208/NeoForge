@@ -1,6 +1,23 @@
 --- a/net/minecraft/world/inventory/BeaconMenu.java
 +++ b/net/minecraft/world/inventory/BeaconMenu.java
-@@ -97,10 +_,8 @@
+@@ -52,13 +_,13 @@
+         int i = 36;
+         int j = 137;
+ 
+-        for(int k = 0; k < 3; ++k) {
+-            for(int l = 0; l < 9; ++l) {
++        for (int k = 0; k < 3; k++) {
++            for (int l = 0; l < 9; l++) {
+                 this.addSlot(new Slot(p_39040_, l + k * 9 + 9, 36 + l * 18, 137 + k * 18));
+             }
+         }
+ 
+-        for(int i1 = 0; i1 < 9; ++i1) {
++        for (int i1 = 0; i1 < 9; i1++) {
+             this.addSlot(new Slot(p_39040_, i1, 36 + i1 * 18, 195));
+         }
+     }
+@@ -98,10 +_,8 @@
                  }
  
                  slot.onQuickCraft(itemstack1, itemstack);

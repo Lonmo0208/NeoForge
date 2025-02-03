@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/damagesource/CombatTracker.java
 +++ b/net/minecraft/world/damagesource/CombatTracker.java
-@@ -90,6 +_,11 @@
+@@ -91,6 +_,11 @@
              DamageSource damagesource = combatentry.source();
              CombatEntry combatentry1 = this.getMostSignificantFall();
              DeathMessageType deathmessagetype = damagesource.type().deathMessageType();
@@ -12,3 +12,12 @@
              if (deathmessagetype == DeathMessageType.FALL_VARIANTS && combatentry1 != null) {
                  return this.getFallMessage(combatentry1, damagesource.getEntity());
              } else if (deathmessagetype == DeathMessageType.INTENTIONAL_GAME_DESIGN) {
+@@ -110,7 +_,7 @@
+         float f = 0.0F;
+         float f1 = 0.0F;
+ 
+-        for(int i = 0; i < this.entries.size(); ++i) {
++        for (int i = 0; i < this.entries.size(); i++) {
+             CombatEntry combatentry2 = this.entries.get(i);
+             CombatEntry combatentry3 = i > 0 ? this.entries.get(i - 1) : null;
+             DamageSource damagesource = combatentry2.source();

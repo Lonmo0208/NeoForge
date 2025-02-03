@@ -1,6 +1,43 @@
 --- a/net/minecraft/world/level/storage/LevelStorageSource.java
 +++ b/net/minecraft/world/level/storage/LevelStorageSource.java
-@@ -475,6 +_,18 @@
+@@ -137,7 +_,7 @@
+     ) {
+         Dynamic<?> dynamic = RegistryOps.injectRegistryContext(p_307313_, p_307648_);
+         Dynamic<?> dynamic1 = dynamic.get("WorldGenSettings").orElseEmptyMap();
+-        WorldGenSettings worldgensettings = WorldGenSettings.CODEC.parse(dynamic1).getOrThrow(false, Util.prefix("WorldGenSettings: ", LOGGER::error));
++        WorldGenSettings worldgensettings = WorldGenSettings.CODEC.parse(dynamic1).getOrThrow();
+         LevelSettings levelsettings = LevelSettings.parse(dynamic, p_307486_);
+         WorldDimensions.Complete worlddimensions$complete = worldgensettings.dimensions().bake(p_307597_);
+         Lifecycle lifecycle = worlddimensions$complete.lifecycle().add(p_307648_.allRegistriesLifecycle());
+@@ -175,7 +_,7 @@
+     public CompletableFuture<List<LevelSummary>> loadLevelSummaries(LevelStorageSource.LevelCandidates p_230814_) {
+         List<CompletableFuture<LevelSummary>> list = new ArrayList<>(p_230814_.levels.size());
+ 
+-        for(LevelStorageSource.LevelDirectory levelstoragesource$leveldirectory : p_230814_.levels) {
++        for (LevelStorageSource.LevelDirectory levelstoragesource$leveldirectory : p_230814_.levels) {
+             list.add(CompletableFuture.supplyAsync(() -> {
+                 boolean flag;
+                 try {
+@@ -246,8 +_,7 @@
+                     }
+                 }
+ 
+-                Tag tag = readLightweightData(path);
+-                if (tag instanceof CompoundTag compoundtag) {
++                if (readLightweightData(path) instanceof CompoundTag compoundtag) {
+                     CompoundTag compoundtag1 = compoundtag.getCompound("Data");
+                     int i = NbtUtils.getDataVersion(compoundtag1, -1);
+                     Dynamic<?> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion(this.fixerUpper, new Dynamic<>(NbtOps.INSTANCE, compoundtag1), i);
+@@ -300,7 +_,7 @@
+     private static FeatureFlagSet parseFeatureFlagsFromSummary(Dynamic<?> p_249466_) {
+         Set<ResourceLocation> set = p_249466_.get("enabled_features")
+             .asStream()
+-            .flatMap(p_248492_ -> p_248492_.asString().result().map(ResourceLocation::tryParse).stream())
++            .flatMap(p_338115_ -> p_338115_.asString().result().map(ResourceLocation::tryParse).stream())
+             .collect(Collectors.toSet());
+         return FeatureFlags.REGISTRY.fromNames(set, p_248503_ -> {
+         });
+@@ -468,6 +_,18 @@
              }
          }
  
@@ -19,7 +56,7 @@
          public PlayerDataStorage createPlayerStorage() {
              this.checkLock();
              return new PlayerDataStorage(this, LevelStorageSource.this.fixerUpper);
-@@ -508,6 +_,7 @@
+@@ -501,6 +_,7 @@
              CompoundTag compoundtag = p_78292_.createTag(p_78291_, p_78293_);
              CompoundTag compoundtag1 = new CompoundTag();
              compoundtag1.put("Data", compoundtag);
@@ -27,14 +64,21 @@
              this.saveLevelData(compoundtag1);
          }
  
-@@ -527,6 +_,10 @@
- 
-         public Optional<Path> getIconFile() {
+@@ -522,12 +_,16 @@
              return !this.lock.isValid() ? Optional.empty() : Optional.of(this.levelDirectory.iconFile());
-+        }
-+
-+        public Path getWorldDir() {
-+            return baseDir;
          }
  
++        public Path getWorldDir() {
++            return baseDir;
++        }
++
          public void deleteLevel() throws IOException {
+             this.checkLock();
+             final Path path = this.levelDirectory.lockFile();
+             LevelStorageSource.LOGGER.info("Deleting level {}", this.levelId);
+ 
+-            for(int i = 1; i <= 5; ++i) {
++            for (int i = 1; i <= 5; i++) {
+                 LevelStorageSource.LOGGER.info("Attempt {}...", i);
+ 
+                 try {

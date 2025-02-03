@@ -28,7 +28,7 @@
      public boolean hasAmbientOcclusion() {
          if (this.hasAmbientOcclusion != null) {
              return this.hasAmbientOcclusion;
-@@ -136,6 +_,10 @@
+@@ -136,11 +_,15 @@
          return this.overrides.isEmpty() ? ItemOverrides.EMPTY : new ItemOverrides(p_250138_, p_251800_, this.overrides);
      }
  
@@ -39,6 +39,21 @@
      @Override
      public Collection<ResourceLocation> getDependencies() {
          Set<ResourceLocation> set = Sets.newHashSet();
+ 
+-        for(ItemOverride itemoverride : this.overrides) {
++        for (ItemOverride itemoverride : this.overrides) {
+             set.add(itemoverride.getModel());
+         }
+ 
+@@ -155,7 +_,7 @@
+     public void resolveParents(Function<ResourceLocation, UnbakedModel> p_249059_) {
+         Set<UnbakedModel> set = Sets.newLinkedHashSet();
+ 
+-        for(BlockModel blockmodel = this; blockmodel.parentLocation != null && blockmodel.parent == null; blockmodel = blockmodel.parent) {
++        for (BlockModel blockmodel = this; blockmodel.parentLocation != null && blockmodel.parent == null; blockmodel = blockmodel.parent) {
+             set.add(blockmodel);
+             UnbakedModel unbakedmodel = p_249059_.apply(blockmodel.parentLocation);
+             if (unbakedmodel == null) {
 @@ -184,6 +_,10 @@
              blockmodel.parent = (BlockModel)unbakedmodel;
          }
@@ -80,6 +95,35 @@
      ) {
          TextureAtlasSprite textureatlassprite = p_111452_.apply(this.getMaterial("particle"));
          if (this.getRootModel() == ModelBakery.BLOCK_ENTITY_MARKER) {
+@@ -212,8 +_,8 @@
+             SimpleBakedModel.Builder simplebakedmodel$builder = new SimpleBakedModel.Builder(this, this.getItemOverrides(p_249720_, p_111451_), p_111455_)
+                 .particle(textureatlassprite);
+ 
+-            for(BlockElement blockelement : this.getElements()) {
+-                for(Direction direction : blockelement.faces.keySet()) {
++            for (BlockElement blockelement : this.getElements()) {
++                for (Direction direction : blockelement.faces.keySet()) {
+                     BlockElementFace blockelementface = blockelement.faces.get(direction);
+                     TextureAtlasSprite textureatlassprite1 = p_111452_.apply(this.getMaterial(blockelementface.texture));
+                     if (blockelementface.cullForDirection == null) {
+@@ -248,7 +_,7 @@
+ 
+         List<String> list = Lists.newArrayList();
+ 
+-        while(true) {
++        while (true) {
+             Either<Material, String> either = this.findTextureEntry(p_111481_);
+             Optional<Material> optional = either.left();
+             if (optional.isPresent()) {
+@@ -266,7 +_,7 @@
+     }
+ 
+     private Either<Material, String> findTextureEntry(String p_111486_) {
+-        for(BlockModel blockmodel = this; blockmodel != null; blockmodel = blockmodel.parent) {
++        for (BlockModel blockmodel = this; blockmodel != null; blockmodel = blockmodel.parent) {
+             Either<Material, String> either = blockmodel.textureMap.get(p_111486_);
+             if (either != null) {
+                 return either;
 @@ -293,7 +_,18 @@
          ItemTransform itemtransform5 = this.getTransform(ItemDisplayContext.GUI);
          ItemTransform itemtransform6 = this.getTransform(ItemDisplayContext.GROUND);
@@ -100,6 +144,42 @@
      }
  
      private ItemTransform getTransform(ItemDisplayContext p_270662_) {
+@@ -332,7 +_,7 @@
+         protected List<ItemOverride> getOverrides(JsonDeserializationContext p_111495_, JsonObject p_111496_) {
+             List<ItemOverride> list = Lists.newArrayList();
+             if (p_111496_.has("overrides")) {
+-                for(JsonElement jsonelement : GsonHelper.getAsJsonArray(p_111496_, "overrides")) {
++                for (JsonElement jsonelement : GsonHelper.getAsJsonArray(p_111496_, "overrides")) {
+                     list.add(p_111495_.deserialize(jsonelement, ItemOverride.class));
+                 }
+             }
+@@ -346,7 +_,7 @@
+             if (p_111510_.has("textures")) {
+                 JsonObject jsonobject = GsonHelper.getAsJsonObject(p_111510_, "textures");
+ 
+-                for(Entry<String, JsonElement> entry : jsonobject.entrySet()) {
++                for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
+                     map.put(entry.getKey(), parseTextureLocationOrReference(resourcelocation, entry.getValue().getAsString()));
+                 }
+             }
+@@ -379,7 +_,7 @@
+         protected List<BlockElement> getElements(JsonDeserializationContext p_111507_, JsonObject p_111508_) {
+             List<BlockElement> list = Lists.newArrayList();
+             if (p_111508_.has("elements")) {
+-                for(JsonElement jsonelement : GsonHelper.getAsJsonArray(p_111508_, "elements")) {
++                for (JsonElement jsonelement : GsonHelper.getAsJsonArray(p_111508_, "elements")) {
+                     list.add(p_111507_.deserialize(jsonelement, BlockElement.class));
+                 }
+             }
+@@ -400,7 +_,7 @@
+         }
+ 
+         public static BlockModel.GuiLight getByName(String p_111528_) {
+-            for(BlockModel.GuiLight blockmodel$guilight : values()) {
++            for (BlockModel.GuiLight blockmodel$guilight : values()) {
+                 if (blockmodel$guilight.name.equals(p_111528_)) {
+                     return blockmodel$guilight;
+                 }
 @@ -412,6 +_,8 @@
          public boolean lightLikeBlock() {
              return this == SIDE;

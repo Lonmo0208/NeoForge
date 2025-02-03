@@ -1,15 +1,48 @@
 --- a/net/minecraft/world/entity/ai/village/poi/PoiTypes.java
 +++ b/net/minecraft/world/entity/ai/village/poi/PoiTypes.java
-@@ -66,7 +_,7 @@
+@@ -3,7 +_,6 @@
+ import com.google.common.collect.ImmutableList;
+ import com.google.common.collect.ImmutableSet;
+ import com.google.common.collect.Maps;
+-import java.util.Arrays;
+ import java.util.Locale;
+ import java.util.Map;
+ import java.util.Optional;
+@@ -41,8 +_,6 @@
+     public static final ResourceKey<PoiType> NETHER_PORTAL = createKey("nether_portal");
+     public static final ResourceKey<PoiType> LODESTONE = createKey("lodestone");
+     public static final ResourceKey<PoiType> LIGHTNING_ROD = createKey("lightning_rod");
+-    public static final ResourceKey<PoiType> POTATO_PORTAL = createKey("potato_portal");
+-    public static final ResourceKey<PoiType> PEDESTAL = createKey("pedestal");
+     private static final Set<BlockState> BEDS = ImmutableList.of(
+             Blocks.RED_BED,
+             Blocks.BLACK_BED,
+@@ -62,19 +_,17 @@
+             Blocks.YELLOW_BED
+         )
          .stream()
-         .flatMap(p_218093_ -> p_218093_.getStateDefinition().getPossibleStates().stream())
+-        .flatMap(p_218093_ -> p_218093_.getStateDefinition().getPossibleStates().stream())
++        .flatMap(p_218097_ -> p_218097_.getStateDefinition().getPossibleStates().stream())
+         .filter(p_218095_ -> p_218095_.getValue(BedBlock.PART) == BedPart.HEAD)
+         .collect(ImmutableSet.toImmutableSet());
+     private static final Set<BlockState> CAULDRONS = ImmutableList.of(Blocks.CAULDRON, Blocks.LAVA_CAULDRON, Blocks.WATER_CAULDRON, Blocks.POWDER_SNOW_CAULDRON)
+         .stream()
+-        .flatMap(p_340106_ -> p_340106_.getStateDefinition().getPossibleStates().stream())
++        .flatMap(p_218093_ -> p_218093_.getStateDefinition().getPossibleStates().stream())
          .collect(ImmutableSet.toImmutableSet());
 -    private static final Map<BlockState, Holder<PoiType>> TYPE_BY_STATE = Maps.newHashMap();
 +    private static final Map<BlockState, Holder<PoiType>> TYPE_BY_STATE = net.neoforged.neoforge.registries.GameData.getBlockStatePointOfInterestTypeMap();
  
-     private static Set<BlockState> getBlockStates(Block p_218074_) {
-         return ImmutableSet.copyOf(p_218074_.getStateDefinition().getPossibleStates());
-@@ -84,6 +_,7 @@
+-    private static Set<BlockState> getBlockStates(Block... p_340614_) {
+-        return (Set<BlockState>)(p_340614_.length == 1
+-            ? ImmutableSet.copyOf(p_340614_[0].getStateDefinition().getPossibleStates())
+-            : Arrays.stream(p_340614_).flatMap(p_218097_ -> p_218097_.getStateDefinition().getPossibleStates().stream()).collect(ImmutableSet.toImmutableSet()));
++    private static Set<BlockState> getBlockStates(Block p_218074_) {
++        return ImmutableSet.copyOf(p_218074_.getStateDefinition().getPossibleStates());
+     }
+ 
+     private static ResourceKey<PoiType> createKey(String p_218091_) {
+@@ -89,6 +_,7 @@
      }
  
      private static void registerBlockStates(Holder<PoiType> p_250815_, Set<BlockState> p_250679_) {
@@ -17,3 +50,13 @@
          p_250679_.forEach(
              p_218081_ -> {
                  Holder<PoiType> holder = TYPE_BY_STATE.put(p_218081_, p_250815_);
+@@ -128,9 +_,7 @@
+         register(p_218083_, BEEHIVE, getBlockStates(Blocks.BEEHIVE), 0, 1);
+         register(p_218083_, BEE_NEST, getBlockStates(Blocks.BEE_NEST), 0, 1);
+         register(p_218083_, NETHER_PORTAL, getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
+-        register(p_218083_, POTATO_PORTAL, getBlockStates(Blocks.POTATO_PORTAL), 0, 1);
+         register(p_218083_, LODESTONE, getBlockStates(Blocks.LODESTONE), 0, 1);
+-        register(p_218083_, PEDESTAL, getBlockStates(Blocks.PEDESTAL), 0, 1);
+         return register(p_218083_, LIGHTNING_ROD, getBlockStates(Blocks.LIGHTNING_ROD), 0, 1);
+     }
+ }

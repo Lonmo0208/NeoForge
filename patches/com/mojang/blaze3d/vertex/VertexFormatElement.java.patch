@@ -1,5 +1,17 @@
 --- a/com/mojang/blaze3d/vertex/VertexFormatElement.java
 +++ b/com/mojang/blaze3d/vertex/VertexFormatElement.java
+@@ -67,10 +_,8 @@
+                 return false;
+             } else if (this.index != vertexformatelement.index) {
+                 return false;
+-            } else if (this.type != vertexformatelement.type) {
+-                return false;
+             } else {
+-                return this.usage == vertexformatelement.usage;
++                return this.type != vertexformatelement.type ? false : this.usage == vertexformatelement.usage;
+             }
+         } else {
+             return false;
 @@ -93,6 +_,10 @@
          this.usage.clearBufferState(this.index, p_166964_);
      }

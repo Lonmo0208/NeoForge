@@ -1,11 +1,20 @@
 --- a/net/minecraft/world/entity/npc/CatSpawner.java
 +++ b/net/minecraft/world/entity/npc/CatSpawner.java
-@@ -84,8 +_,8 @@
+@@ -24,7 +_,7 @@
+     @Override
+     public int tick(ServerLevel p_35330_, boolean p_35331_, boolean p_35332_) {
+         if (p_35332_ && p_35330_.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
+-            --this.nextTick;
++            this.nextTick--;
+             if (this.nextTick > 0) {
+                 return 0;
+             } else {
+@@ -83,8 +_,8 @@
          if (cat == null) {
              return 0;
          } else {
 +            cat.moveTo(p_35334_, 0.0F, 0.0F); // Fix MC-147659: Some witch huts spawn the incorrect cat
-             cat.finalizeSpawn(p_35335_, p_35335_.getCurrentDifficultyAt(p_35334_), MobSpawnType.NATURAL, null, null);
+             cat.finalizeSpawn(p_35335_, p_35335_.getCurrentDifficultyAt(p_35334_), MobSpawnType.NATURAL, null);
 -            cat.moveTo(p_35334_, 0.0F, 0.0F);
              p_35335_.addFreshEntityWithPassengers(cat);
              return 1;

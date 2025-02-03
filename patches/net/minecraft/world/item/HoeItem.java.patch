@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/HoeItem.java
 +++ b/net/minecraft/world/item/HoeItem.java
-@@ -22,6 +_,12 @@
+@@ -23,16 +_,14 @@
  import net.minecraft.world.level.gameevent.GameEvent;
  
  public class HoeItem extends DiggerItem {
@@ -12,8 +12,18 @@
 +    @Deprecated
      protected static final Map<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> TILLABLES = Maps.newHashMap(
          ImmutableMap.of(
+-            Blocks.CORRUPTED_PEELGRASS_BLOCK,
+-            Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
+-            Blocks.PEELGRASS_BLOCK,
+-            Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
+-            Blocks.TERREDEPOMME,
+-            Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
+-            Blocks.POISON_PATH,
+-            Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
              Blocks.GRASS_BLOCK,
-@@ -45,7 +_,8 @@
+             Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.FARMLAND.defaultBlockState())),
+             Blocks.DIRT_PATH,
+@@ -54,7 +_,8 @@
      public InteractionResult useOn(UseOnContext p_41341_) {
          Level level = p_41341_.getLevel();
          BlockPos blockpos = p_41341_.getClickedPos();
@@ -23,7 +33,7 @@
          if (pair == null) {
              return InteractionResult.PASS;
          } else {
-@@ -85,5 +_,10 @@
+@@ -94,5 +_,10 @@
  
      public static boolean onlyIfAirAbove(UseOnContext p_150857_) {
          return p_150857_.getClickedFace() != Direction.DOWN && p_150857_.getLevel().getBlockState(p_150857_.getClickedPos().above()).isAir();

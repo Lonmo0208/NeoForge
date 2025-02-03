@@ -1,5 +1,24 @@
 --- a/net/minecraft/server/network/PlayerChunkSender.java
 +++ b/net/minecraft/server/network/PlayerChunkSender.java
+@@ -58,15 +_,15 @@
+                     List<LevelChunk> list = this.collectChunksToSend(chunkmap, p_296009_.chunkPosition());
+                     if (!list.isEmpty()) {
+                         ServerGamePacketListenerImpl servergamepacketlistenerimpl = p_296009_.connection;
+-                        ++this.unacknowledgedBatches;
++                        this.unacknowledgedBatches++;
+                         servergamepacketlistenerimpl.send(ClientboundChunkBatchStartPacket.INSTANCE);
+ 
+-                        for(LevelChunk levelchunk : list) {
++                        for (LevelChunk levelchunk : list) {
+                             sendChunk(servergamepacketlistenerimpl, serverlevel, levelchunk);
+                         }
+ 
+                         servergamepacketlistenerimpl.send(new ClientboundChunkBatchFinishedPacket(list.size()));
+-                        this.batchQuota -= (float)list.size();
++                        this.batchQuota = this.batchQuota - (float)list.size();
+                     }
+                 }
+             }
 @@ -74,9 +_,12 @@
      }
  
@@ -14,3 +33,26 @@
      }
  
      private List<LevelChunk> collectChunksToSend(ChunkMap p_296053_, ChunkPos p_295659_) {
+@@ -96,11 +_,11 @@
+                 .longStream()
+                 .mapToObj(p_296053_::getChunkToSend)
+                 .filter(Objects::nonNull)
+-                .sorted(Comparator.comparingInt(p_339851_ -> p_295659_.distanceSquared(p_339851_.getPos())))
++                .sorted(Comparator.comparingInt(p_294268_ -> p_295659_.distanceSquared(p_294268_.getPos())))
+                 .toList();
+         }
+ 
+-        for(LevelChunk levelchunk : list) {
++        for (LevelChunk levelchunk : list) {
+             this.pendingChunks.remove(levelchunk.getPos().toLong());
+         }
+ 
+@@ -108,7 +_,7 @@
+     }
+ 
+     public void onChunkBatchReceivedByClient(float p_294462_) {
+-        --this.unacknowledgedBatches;
++        this.unacknowledgedBatches--;
+         this.desiredChunksPerTick = Double.isNaN((double)p_294462_) ? 0.01F : Mth.clamp(p_294462_, 0.01F, 64.0F);
+         if (this.unacknowledgedBatches == 0) {
+             this.batchQuota = 1.0F;

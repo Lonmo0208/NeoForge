@@ -1,6 +1,24 @@
 --- a/net/minecraft/world/item/BundleItem.java
 +++ b/net/minecraft/world/item/BundleItem.java
-@@ -40,7 +_,7 @@
+@@ -21,9 +_,11 @@
+ import net.minecraft.world.inventory.tooltip.TooltipComponent;
+ import net.minecraft.world.item.component.BundleContents;
+ import net.minecraft.world.level.Level;
++import org.apache.commons.lang3.math.Fraction;
+ 
+ public class BundleItem extends Item {
+     private static final int BAR_COLOR = Mth.color(0.4F, 0.4F, 1.0F);
++    private static final int TOOLTIP_MAX_WEIGHT = 64;
+ 
+     public BundleItem(Item.Properties p_150726_) {
+         super(p_150726_);
+@@ -31,12 +_,12 @@
+ 
+     public static float getFullnessDisplay(ItemStack p_150767_) {
+         BundleContents bundlecontents = p_150767_.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+-        return (float)bundlecontents.weight() / 64.0F;
++        return bundlecontents.weight().floatValue();
+     }
  
      @Override
      public boolean overrideStackedOnOther(ItemStack p_150733_, Slot p_150734_, ClickAction p_150735_, Player p_150736_) {
@@ -8,12 +26,58 @@
 +        if (p_150733_.getCount() != 1 || p_150735_ != ClickAction.SECONDARY) {
              return false;
          } else {
-             ItemStack itemstack = p_150734_.getItem();
-@@ -63,6 +_,7 @@
+             BundleContents bundlecontents = p_150733_.get(DataComponents.BUNDLE_CONTENTS);
+@@ -69,6 +_,7 @@
      public boolean overrideOtherStackedOnMe(
          ItemStack p_150742_, ItemStack p_150743_, Slot p_150744_, ClickAction p_150745_, Player p_150746_, SlotAccess p_150747_
      ) {
 +        if (p_150742_.getCount() != 1) return false;
          if (p_150745_ == ClickAction.SECONDARY && p_150744_.allowModification(p_150746_)) {
-             if (p_150743_.isEmpty()) {
-                 removeOne(p_150742_).ifPresent(p_186347_ -> {
+             BundleContents bundlecontents = p_150742_.get(DataComponents.BUNDLE_CONTENTS);
+             if (bundlecontents == null) {
+@@ -111,13 +_,13 @@
+     @Override
+     public boolean isBarVisible(ItemStack p_150769_) {
+         BundleContents bundlecontents = p_150769_.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+-        return bundlecontents.weight() > 0;
++        return bundlecontents.weight().compareTo(Fraction.ZERO) > 0;
+     }
+ 
+     @Override
+     public int getBarWidth(ItemStack p_150771_) {
+         BundleContents bundlecontents = p_150771_.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+-        return Math.min(1 + 12 * bundlecontents.weight() / 64, 13);
++        return Math.min(1 + Mth.mulAndTruncate(bundlecontents.weight(), 12), 13);
+     }
+ 
+     @Override
+@@ -130,7 +_,7 @@
+         if (bundlecontents != null && !bundlecontents.isEmpty()) {
+             p_150730_.set(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+             if (p_150731_ instanceof ServerPlayer) {
+-                bundlecontents.items().forEach(p_340179_ -> p_150731_.drop(p_340179_, true));
++                bundlecontents.items().forEach(p_330078_ -> p_150731_.drop(p_330078_, true));
+             }
+ 
+             return true;
+@@ -141,14 +_,17 @@
+ 
+     @Override
+     public Optional<TooltipComponent> getTooltipImage(ItemStack p_150775_) {
+-        return Optional.ofNullable(p_150775_.get(DataComponents.BUNDLE_CONTENTS)).map(BundleTooltip::new);
++        return !p_150775_.has(DataComponents.HIDE_TOOLTIP) && !p_150775_.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP)
++            ? Optional.ofNullable(p_150775_.get(DataComponents.BUNDLE_CONTENTS)).map(BundleTooltip::new)
++            : Optional.empty();
+     }
+ 
+     @Override
+-    public void appendHoverText(ItemStack p_150749_, Level p_150750_, List<Component> p_150751_, TooltipFlag p_150752_) {
++    public void appendHoverText(ItemStack p_150749_, Item.TooltipContext p_339687_, List<Component> p_150751_, TooltipFlag p_150752_) {
+         BundleContents bundlecontents = p_150749_.get(DataComponents.BUNDLE_CONTENTS);
+         if (bundlecontents != null) {
+-            p_150751_.add(Component.translatable("item.minecraft.bundle.fullness", bundlecontents.weight(), 64).withStyle(ChatFormatting.GRAY));
++            int i = Mth.mulAndTruncate(bundlecontents.weight(), 64);
++            p_150751_.add(Component.translatable("item.minecraft.bundle.fullness", i, 64).withStyle(ChatFormatting.GRAY));
+         }
+     }
+ 

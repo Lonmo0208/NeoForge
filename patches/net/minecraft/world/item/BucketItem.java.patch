@@ -34,7 +34,13 @@
          if (blockhitresult.getType() == HitResult.Type.MISS) {
              return InteractionResultHolder.pass(itemstack);
          } else if (blockhitresult.getType() != HitResult.Type.BLOCK) {
-@@ -59,7 +_,7 @@
+@@ -54,12 +_,11 @@
+                 return InteractionResultHolder.fail(itemstack);
+             } else if (this.content == Fluids.EMPTY) {
+                 BlockState blockstate1 = p_40703_.getBlockState(blockpos);
+-                Block $$10 = blockstate1.getBlock();
+-                if ($$10 instanceof BucketPickup bucketpickup) {
++                if (blockstate1.getBlock() instanceof BucketPickup bucketpickup) {
                      ItemStack itemstack2 = bucketpickup.pickupBlock(p_40704_, p_40703_, blockpos, blockstate1);
                      if (!itemstack2.isEmpty()) {
                          p_40704_.awardStat(Stats.ITEM_USED.get(this));
@@ -54,28 +60,28 @@
                      this.checkExtraContent(p_40704_, p_40703_, itemstack, blockpos2);
                      if (p_40704_ instanceof ServerPlayer) {
                          CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)p_40704_, blockpos2, itemstack);
-@@ -98,9 +_,14 @@
+@@ -98,18 +_,19 @@
      }
  
      @Override
-+    @Deprecated //Forge: use the ItemStack sensitive version
++    @Deprecated // Neo: use the ItemStack sensitive version
      public boolean emptyContents(@Nullable Player p_150716_, Level p_150717_, BlockPos p_150718_, @Nullable BlockHitResult p_150719_) {
-         Fluid $$6 = this.content;
+-        Fluid $$6 = this.content;
 -        if (!($$6 instanceof FlowingFluid)) {
 +        return this.emptyContents(p_150716_, p_150717_, p_150718_, p_150719_, null);
 +    }
-+
 +    public boolean emptyContents(@Nullable Player p_150716_, Level p_150717_, BlockPos p_150718_, @Nullable BlockHitResult p_150719_, @Nullable ItemStack container) {
-+        if (!(this.content instanceof FlowingFluid)) {
++        if (!(this.content instanceof FlowingFluid flowingfluid)) {
              return false;
          } else {
-             FlowingFluid flowingfluid;
-@@ -109,7 +_,7 @@
-             boolean flag2;
+-            FlowingFluid flowingfluid;
+             Block $$7;
+             boolean $$8;
+-            boolean flag2;
              BlockState blockstate;
++            boolean flag2;
              label82: {
 -                flowingfluid = (FlowingFluid)$$6;
-+                flowingfluid = (FlowingFluid)this.content;
                  blockstate = p_150717_.getBlockState(p_150718_);
                  $$7 = blockstate.getBlock();
                  $$8 = blockstate.canBeReplaced(this.content);
@@ -93,6 +99,15 @@
              } else if (p_150717_.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
                  int l = p_150718_.getX();
                  int i = p_150718_.getY();
+@@ -143,7 +_,7 @@
+                     2.6F + (p_150717_.random.nextFloat() - p_150717_.random.nextFloat()) * 0.8F
+                 );
+ 
+-                for(int k = 0; k < 8; ++k) {
++                for (int k = 0; k < 8; k++) {
+                     p_150717_.addParticle(
+                         ParticleTypes.LARGE_SMOKE, (double)l + Math.random(), (double)i + Math.random(), (double)j + Math.random(), 0.0, 0.0, 0.0
+                     );
 @@ -151,7 +_,7 @@
  
                  return true;

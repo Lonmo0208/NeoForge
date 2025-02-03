@@ -1,6 +1,22 @@
 --- a/net/minecraft/data/loot/EntityLootSubProvider.java
 +++ b/net/minecraft/data/loot/EntityLootSubProvider.java
-@@ -59,12 +_,16 @@
+@@ -13,7 +_,6 @@
+ import net.minecraft.advancements.critereon.EntityFlagsPredicate;
+ import net.minecraft.advancements.critereon.EntityPredicate;
+ import net.minecraft.advancements.critereon.EntitySubPredicates;
+-import net.minecraft.advancements.critereon.PotatoPredicate;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.registries.BuiltInRegistries;
+@@ -38,7 +_,6 @@
+     private static final Set<EntityType<?>> SPECIAL_LOOT_TABLE_TYPES = ImmutableSet.of(
+         EntityType.PLAYER, EntityType.ARMOR_STAND, EntityType.IRON_GOLEM, EntityType.SNOW_GOLEM, EntityType.VILLAGER
+     );
+-    protected static final EntityPredicate.Builder ENTITY_IS_POTATO = EntityPredicate.Builder.entity().subPredicate(new PotatoPredicate(true));
+     private final FeatureFlagSet allowed;
+     private final FeatureFlagSet required;
+     private final Map<EntityType<?>, Map<ResourceKey<LootTable>, LootTable.Builder>> map = Maps.newHashMap();
+@@ -60,12 +_,16 @@
  
      public abstract void generate();
  
@@ -9,9 +25,9 @@
 +    }
 +
      @Override
-     public void generate(BiConsumer<ResourceLocation, LootTable.Builder> p_251751_) {
+     public void generate(HolderLookup.Provider p_331660_, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> p_251751_) {
          this.generate();
-         Set<ResourceLocation> set = Sets.newHashSet();
+         Set<ResourceKey<LootTable>> set = new HashSet<>();
 -        BuiltInRegistries.ENTITY_TYPE
 -            .holders()
 +        this.getKnownEntityTypes()
@@ -19,7 +35,22 @@
              .forEach(
                  p_266624_ -> {
                      EntityType<?> entitytype = p_266624_.value();
-@@ -114,7 +_,7 @@
+@@ -84,12 +_,12 @@
+                             if (map != null) {
+                                 map.forEach(
+                                     (p_335546_, p_250972_) -> {
+-                                        if (!set.add(p_335546_)) {
++                                        if (!set.add((ResourceKey<LootTable>)p_335546_)) {
+                                             throw new IllegalStateException(
+                                                 String.format(Locale.ROOT, "Duplicate loottable '%s' for '%s'", p_335546_, p_266624_.key().location())
+                                             );
+                                         } else {
+-                                            p_251751_.accept(p_335546_, p_250972_);
++                                            p_251751_.accept((ResourceKey<LootTable>)p_335546_, p_250972_);
+                                         }
+                                     }
+                                 );
+@@ -115,7 +_,7 @@
          }
      }
  
@@ -28,3 +59,11 @@
          return SPECIAL_LOOT_TABLE_TYPES.contains(p_249029_) || p_249029_.getCategory() != MobCategory.MISC;
      }
  
+@@ -139,6 +_,6 @@
+     }
+ 
+     protected void add(EntityType<?> p_252130_, ResourceKey<LootTable> p_335943_, LootTable.Builder p_249357_) {
+-        this.map.computeIfAbsent(p_252130_, p_251466_ -> new HashMap()).put(p_335943_, p_249357_);
++        this.map.computeIfAbsent(p_252130_, p_251466_ -> new HashMap<>()).put(p_335943_, p_249357_);
+     }
+ }

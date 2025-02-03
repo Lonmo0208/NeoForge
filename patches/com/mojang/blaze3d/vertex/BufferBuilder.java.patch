@@ -1,9 +1,74 @@
 --- a/com/mojang/blaze3d/vertex/BufferBuilder.java
 +++ b/com/mojang/blaze3d/vertex/BufferBuilder.java
-@@ -495,4 +_,14 @@
+@@ -117,9 +_,10 @@
+     private IntConsumer intConsumer(int p_231159_, VertexFormat.IndexType p_231160_) {
+         MutableInt mutableint = new MutableInt(p_231159_);
+ 
+-        return switch(p_231160_) {
++        return switch (p_231160_) {
+             case SHORT -> p_231167_ -> this.buffer.putShort(mutableint.getAndAdd(2), (short)p_231167_);
+             case INT -> p_231163_ -> this.buffer.putInt(mutableint.getAndAdd(4), p_231163_);
++            default -> throw new MatchException(null, null);
+         };
+     }
+ 
+@@ -131,7 +_,7 @@
+         int l = this.vertices / this.mode.primitiveStride;
+         Vector3f[] avector3f = new Vector3f[l];
+ 
+-        for(int i1 = 0; i1 < l; ++i1) {
++        for (int i1 = 0; i1 < l; i1++) {
+             float f = floatbuffer.get(i + i1 * k + 0);
+             float f1 = floatbuffer.get(i + i1 * k + 1);
+             float f2 = floatbuffer.get(i + i1 * k + 2);
+@@ -152,7 +_,7 @@
+             int[] aint = this.sorting.sort(this.sortingPoints);
+             IntConsumer intconsumer = this.intConsumer(this.nextElementByte, p_166787_);
+ 
+-            for(int i : aint) {
++            for (int i : aint) {
+                 intconsumer.accept(i * this.mode.primitiveStride + 0);
+                 intconsumer.accept(i * this.mode.primitiveStride + 1);
+                 intconsumer.accept(i * this.mode.primitiveStride + 2);
+@@ -215,7 +_,7 @@
+ 
+         int i1 = this.renderedBufferPointer;
+         this.renderedBufferPointer += k;
+-        ++this.renderedBufferCount;
++        this.renderedBufferCount++;
+         BufferBuilder.DrawState bufferbuilder$drawstate = new BufferBuilder.DrawState(
+             this.format, this.vertices, i, this.mode, vertexformat$indextype, this.indexOnly, flag
+         );
+@@ -252,13 +_,13 @@
+         if (this.elementIndex != 0) {
+             throw new IllegalStateException("Not filled all elements of the vertex");
+         } else {
+-            ++this.vertices;
++            this.vertices++;
+             this.ensureVertexCapacity();
+             if (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP) {
+                 int i = this.format.getVertexSize();
+                 this.buffer.put(this.nextElementByte, this.buffer, this.nextElementByte - i, i);
+                 this.nextElementByte += i;
+-                ++this.vertices;
++                this.vertices++;
+                 this.ensureVertexCapacity();
+             }
+         }
+@@ -268,7 +_,7 @@
+     public void nextElement() {
+         ImmutableList<VertexFormatElement> immutablelist = this.format.getElements();
+         this.elementIndex = (this.elementIndex + 1) % immutablelist.size();
+-        this.nextElementByte += this.currentElement.getByteSize();
++        this.nextElementByte = this.nextElementByte + this.currentElement.getByteSize();
+         VertexFormatElement vertexformatelement = immutablelist.get(this.elementIndex);
+         this.currentElement = vertexformatelement;
+         if (vertexformatelement.getUsage() == VertexFormatElement.Usage.PADDING) {
+@@ -494,5 +_,15 @@
+             this.sortingPoints = p_278102_;
              this.sorting = p_277855_;
          }
-     }
++    }
 +
 +    // Forge start
 +    public void putBulkData(ByteBuffer buffer) {
@@ -13,5 +78,5 @@
 +        this.buffer.position(0);
 +        this.vertices += buffer.limit() / this.format.getVertexSize();
 +        this.nextElementByte += buffer.limit();
-+    }
+     }
  }

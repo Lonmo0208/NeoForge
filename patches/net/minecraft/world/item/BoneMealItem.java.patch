@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/item/BoneMealItem.java
 +++ b/net/minecraft/world/item/BoneMealItem.java
+@@ -17,7 +_,6 @@
+ import net.minecraft.world.level.LevelAccessor;
+ import net.minecraft.world.level.biome.Biome;
+ import net.minecraft.world.level.block.BaseCoralWallFanBlock;
+-import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.block.BonemealableBlock;
+ import net.minecraft.world.level.block.state.BlockBehaviour;
 @@ -38,7 +_,7 @@
          Level level = p_40637_.getLevel();
          BlockPos blockpos = p_40637_.getClickedPos();
@@ -8,8 +16,8 @@
 +        if (applyBonemeal(p_40637_.getItemInHand(), level, blockpos, p_40637_.getPlayer())) {
              if (!level.isClientSide) {
                  p_40637_.getPlayer().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-                 level.levelEvent(1505, blockpos, 0);
-@@ -61,8 +_,17 @@
+                 level.levelEvent(1505, blockpos, 15);
+@@ -61,10 +_,18 @@
          }
      }
  
@@ -22,8 +30,47 @@
 +
 +    public static boolean applyBonemeal(ItemStack p_40628_, Level p_40629_, BlockPos p_40630_, net.minecraft.world.entity.player.Player player) {
          BlockState blockstate = p_40629_.getBlockState(p_40630_);
+-        Block block = blockstate.getBlock();
+-        if (block instanceof BonemealableBlock bonemealableblock && bonemealableblock.isValidBonemealTarget(p_40629_, p_40630_, blockstate)) {
 +        int hook = net.neoforged.neoforge.event.EventHooks.onApplyBonemeal(player, p_40629_, p_40630_, blockstate, p_40628_);
 +        if (hook != 0) return hook > 0;
-         Block block = blockstate.getBlock();
-         if (block instanceof BonemealableBlock bonemealableblock && bonemealableblock.isValidBonemealTarget(p_40629_, p_40630_, blockstate)) {
++        if (blockstate.getBlock() instanceof BonemealableBlock bonemealableblock && bonemealableblock.isValidBonemealTarget(p_40629_, p_40630_, blockstate)) {
              if (p_40629_ instanceof ServerLevel) {
+                 if (bonemealableblock.isBonemealSuccess(p_40629_, p_40629_.random, p_40630_, blockstate)) {
+                     bonemealableblock.performBonemeal((ServerLevel)p_40629_, p_40629_.random, p_40630_, blockstate);
+@@ -87,11 +_,11 @@
+                 RandomSource randomsource = p_40633_.getRandom();
+ 
+                 label78:
+-                for(int i = 0; i < 128; ++i) {
++                for (int i = 0; i < 128; i++) {
+                     BlockPos blockpos = p_40634_;
+                     BlockState blockstate = Blocks.SEAGRASS.defaultBlockState();
+ 
+-                    for(int j = 0; j < i / 16; ++j) {
++                    for (int j = 0; j < i / 16; j++) {
+                         blockpos = blockpos.offset(
+                             randomsource.nextInt(3) - 1, (randomsource.nextInt(3) - 1) * randomsource.nextInt(3) / 2, randomsource.nextInt(3) - 1
+                         );
+@@ -119,7 +_,7 @@
+                     }
+ 
+                     if (blockstate.is(BlockTags.WALL_CORALS, p_204093_ -> p_204093_.hasProperty(BaseCoralWallFanBlock.FACING))) {
+-                        for(int k = 0; !blockstate.canSurvive(p_40633_, blockpos) && k < 4; ++k) {
++                        for (int k = 0; !blockstate.canSurvive(p_40633_, blockpos) && k < 4; k++) {
+                             blockstate = blockstate.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(randomsource));
+                         }
+                     }
+@@ -144,10 +_,9 @@
+ 
+     public static void addGrowthParticles(LevelAccessor p_40639_, BlockPos p_40640_, int p_40641_) {
+         BlockState blockstate = p_40639_.getBlockState(p_40640_);
+-        Block $$5 = blockstate.getBlock();
+-        if ($$5 instanceof BonemealableBlock bonemealableblock) {
++        if (blockstate.getBlock() instanceof BonemealableBlock bonemealableblock) {
+             BlockPos blockpos = bonemealableblock.getParticlePos(p_40640_);
+-            switch(bonemealableblock.getType()) {
++            switch (bonemealableblock.getType()) {
+                 case NEIGHBOR_SPREADER:
+                     ParticleUtils.spawnParticles(p_40639_, blockpos, p_40641_ * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
+                     break;

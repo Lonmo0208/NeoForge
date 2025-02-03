@@ -1,9 +1,22 @@
 --- a/net/minecraft/world/level/block/entity/ChestBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/ChestBlockEntity.java
-@@ -172,6 +_,17 @@
-         return ChestMenu.threeRows(p_59082_, p_59083_, this);
+@@ -75,8 +_,8 @@
      }
  
+     @Override
+-    public void load(CompoundTag p_155349_, HolderLookup.Provider p_324564_) {
+-        super.load(p_155349_, p_324564_);
++    protected void loadAdditional(CompoundTag p_155349_, HolderLookup.Provider p_324564_) {
++        super.loadAdditional(p_155349_, p_324564_);
+         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+         if (!this.tryLoadLootTable(p_155349_)) {
+             ContainerHelper.loadAllItems(p_155349_, this.items, p_324564_);
+@@ -171,6 +_,17 @@
+     @Override
+     protected AbstractContainerMenu createMenu(int p_59082_, Inventory p_59083_) {
+         return ChestMenu.threeRows(p_59082_, p_59083_, this);
++    }
++
 +    @Override
 +    public void setBlockState(BlockState p_155251_) {
 +        var oldState = getBlockState();
@@ -13,8 +26,6 @@
 +                || (oldState.getValue(ChestBlock.TYPE) != p_155251_.getValue(ChestBlock.TYPE))) {
 +            this.invalidateCapabilities();
 +        }
-+    }
-+
+     }
+ 
      public void recheckOpen() {
-         if (!this.remove) {
-             this.openersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());

@@ -1,6 +1,15 @@
 --- a/net/minecraft/world/entity/ai/navigation/PathNavigation.java
 +++ b/net/minecraft/world/entity/ai/navigation/PathNavigation.java
-@@ -228,10 +_,10 @@
+@@ -199,7 +_,7 @@
+     }
+ 
+     public void tick() {
+-        ++this.tick;
++        this.tick++;
+         if (this.hasDelayedRecomputation) {
+             this.recomputePath();
+         }
+@@ -232,10 +_,10 @@
          Vec3 vec3 = this.getTempMobPos();
          this.maxDistanceToWaypoint = this.mob.getBbWidth() > 0.75F ? this.mob.getBbWidth() / 2.0F : 0.75F - this.mob.getBbWidth() / 2.0F;
          Vec3i vec3i = this.path.getNextNodePos();
@@ -14,3 +23,21 @@
          if (flag || this.canCutCorner(this.path.getNextNode().type) && this.shouldTargetNextNodeInDirection(vec3)) {
              this.path.advance();
          }
+@@ -290,7 +_,7 @@
+             Vec3i vec3i = this.path.getNextNodePos();
+             long i = this.level.getGameTime();
+             if (vec3i.equals(this.timeoutCachedNode)) {
+-                this.timeoutTimer += i - this.lastTimeoutCheck;
++                this.timeoutTimer = this.timeoutTimer + (i - this.lastTimeoutCheck);
+             } else {
+                 this.timeoutCachedNode = vec3i;
+                 double d0 = p_26539_.distanceTo(Vec3.atBottomCenterOf(this.timeoutCachedNode));
+@@ -335,7 +_,7 @@
+ 
+     protected void trimPath() {
+         if (this.path != null) {
+-            for(int i = 0; i < this.path.getNodeCount(); ++i) {
++            for (int i = 0; i < this.path.getNodeCount(); i++) {
+                 Node node = this.path.getNode(i);
+                 Node node1 = i + 1 < this.path.getNodeCount() ? this.path.getNode(i + 1) : null;
+                 BlockState blockstate = this.level.getBlockState(new BlockPos(node.x, node.y, node.z));

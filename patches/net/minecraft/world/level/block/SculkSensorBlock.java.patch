@@ -1,8 +1,57 @@
 --- a/net/minecraft/world/level/block/SculkSensorBlock.java
 +++ b/net/minecraft/world/level/block/SculkSensorBlock.java
+@@ -51,7 +_,7 @@
+     private static final float[] RESONANCE_PITCH_BEND = Util.make(new float[16], p_277301_ -> {
+         int[] aint = new int[]{0, 0, 2, 4, 6, 7, 9, 10, 12, 14, 15, 18, 19, 21, 22, 24};
+ 
+-        for(int i = 0; i < 16; ++i) {
++        for (int i = 0; i < 16; i++) {
+             p_277301_[i] = NoteBlock.getPitchFromNote(aint[i]);
+         }
+     });
+@@ -101,13 +_,13 @@
+ 
+     @Override
+     public void stepOn(Level p_222132_, BlockPos p_222133_, BlockState p_222134_, Entity p_222135_) {
+-        if (!p_222132_.isClientSide() && canActivate(p_222134_) && p_222135_.getType() != EntityType.WARDEN) {
+-            BlockEntity blockentity = p_222132_.getBlockEntity(p_222133_);
+-            if (blockentity instanceof SculkSensorBlockEntity sculksensorblockentity
+-                && p_222132_ instanceof ServerLevel serverlevel
+-                && sculksensorblockentity.getVibrationUser().canReceiveVibration(serverlevel, p_222133_, GameEvent.STEP, GameEvent.Context.of(p_222134_))) {
+-                sculksensorblockentity.getListener().forceScheduleVibration(serverlevel, GameEvent.STEP, GameEvent.Context.of(p_222135_), p_222135_.position());
+-            }
++        if (!p_222132_.isClientSide()
++            && canActivate(p_222134_)
++            && p_222135_.getType() != EntityType.WARDEN
++            && p_222132_.getBlockEntity(p_222133_) instanceof SculkSensorBlockEntity sculksensorblockentity
++            && p_222132_ instanceof ServerLevel serverlevel
++            && sculksensorblockentity.getVibrationUser().canReceiveVibration(serverlevel, p_222133_, GameEvent.STEP, GameEvent.Context.of(p_222134_))) {
++            sculksensorblockentity.getListener().forceScheduleVibration(serverlevel, GameEvent.STEP, GameEvent.Context.of(p_222135_), p_222135_.position());
+         }
+ 
+         super.stepOn(p_222132_, p_222133_, p_222134_, p_222135_);
+@@ -235,7 +_,7 @@
+     }
+ 
+     public static void tryResonateVibration(@Nullable Entity p_279315_, Level p_277804_, BlockPos p_277458_, int p_277347_) {
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
+             BlockPos blockpos = p_277458_.relative(direction);
+             BlockState blockstate = p_277804_.getBlockState(blockpos);
+             if (blockstate.is(BlockTags.VIBRATION_RESONATORS)) {
+@@ -272,8 +_,7 @@
+ 
+     @Override
+     protected int getAnalogOutputSignal(BlockState p_154442_, Level p_154443_, BlockPos p_154444_) {
+-        BlockEntity blockentity = p_154443_.getBlockEntity(p_154444_);
+-        if (blockentity instanceof SculkSensorBlockEntity sculksensorblockentity) {
++        if (p_154443_.getBlockEntity(p_154444_) instanceof SculkSensorBlockEntity sculksensorblockentity) {
+             return getPhase(p_154442_) == SculkSensorPhase.ACTIVE ? sculksensorblockentity.getLastVibrationFrequency() : 0;
+         } else {
+             return 0;
 @@ -293,8 +_,11 @@
      @Override
-     public void spawnAfterBreak(BlockState p_222142_, ServerLevel p_222143_, BlockPos p_222144_, ItemStack p_222145_, boolean p_222146_) {
+     protected void spawnAfterBreak(BlockState p_222142_, ServerLevel p_222143_, BlockPos p_222144_, ItemStack p_222145_, boolean p_222146_) {
          super.spawnAfterBreak(p_222142_, p_222143_, p_222144_, p_222145_, p_222146_);
 -        if (p_222146_) {
 -            this.tryDropExperience(p_222143_, p_222144_, p_222145_, ConstantInt.of(5));

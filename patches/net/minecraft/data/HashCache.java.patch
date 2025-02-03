@@ -1,14 +1,23 @@
 --- a/net/minecraft/data/HashCache.java
 +++ b/net/minecraft/data/HashCache.java
-@@ -37,6 +_,7 @@
+@@ -39,6 +_,7 @@
      private final Path cacheDir;
      private final String versionId;
      private final Map<String, HashCache.ProviderCache> caches;
 +    private final Map<String, HashCache.ProviderCache> originalCaches;
      private final Set<String> cachesToWrite = new HashSet<>();
-     private final Set<Path> cachePaths = new HashSet<>();
+     final Set<Path> cachePaths = new HashSet<>();
      private final int initialCount;
-@@ -63,6 +_,7 @@
+@@ -56,7 +_,7 @@
+         Map<String, HashCache.ProviderCache> map = new HashMap<>();
+         int i = 0;
+ 
+-        for(String s : p_253748_) {
++        for (String s : p_253748_) {
+             Path path = this.getProviderCachePath(s);
+             this.cachePaths.add(path);
+             HashCache.ProviderCache hashcache$providercache = readCache(p_236087_, path);
+@@ -65,6 +_,7 @@
          }
  
          this.caches = map;
@@ -16,7 +25,16 @@
          this.initialCount = i;
      }
  
-@@ -104,6 +_,8 @@
+@@ -98,7 +_,7 @@
+     public void applyUpdate(HashCache.UpdateResult p_253725_) {
+         this.caches.put(p_253725_.providerId(), p_253725_.cache());
+         this.cachesToWrite.add(p_253725_.providerId());
+-        this.writes += p_253725_.writes();
++        this.writes = this.writes + p_253725_.writes();
+     }
+ 
+     public void purgeStaleAndWrite() throws IOException {
+@@ -106,6 +_,8 @@
          this.caches.forEach((p_253378_, p_253379_) -> {
              if (this.cachesToWrite.contains(p_253378_)) {
                  Path path = this.getProviderCachePath(p_253378_);
@@ -25,7 +43,7 @@
                  p_253379_.save(this.rootDir, path, DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) + "\t" + p_253378_);
              }
  
-@@ -219,10 +_,11 @@
+@@ -222,10 +_,11 @@
                  bufferedwriter.write(p_236145_);
                  bufferedwriter.newLine();
  

@@ -1,9 +1,22 @@
 --- a/net/minecraft/world/level/block/AbstractCauldronBlock.java
 +++ b/net/minecraft/world/level/block/AbstractCauldronBlock.java
-@@ -102,4 +_,22 @@
+@@ -86,9 +_,9 @@
+ 
+     @Override
+     protected void tick(BlockState p_220702_, ServerLevel p_220703_, BlockPos p_220704_, RandomSource p_220705_) {
+-        BlockPos blockpos = PointedDripstoneBlock.findStalactiteTipAboveCauldron(Blocks.POINTED_DRIPSTONE, p_220703_, p_220704_);
++        BlockPos blockpos = PointedDripstoneBlock.findStalactiteTipAboveCauldron(p_220703_, p_220704_);
+         if (blockpos != null) {
+-            Fluid fluid = ((PointedDripstoneBlock)p_220703_.getBlockState(blockpos).getBlock()).getCauldronFillFluidType(p_220703_, blockpos);
++            Fluid fluid = PointedDripstoneBlock.getCauldronFillFluidType(p_220703_, blockpos);
+             if (fluid != Fluids.EMPTY && this.canReceiveStalactiteDrip(fluid)) {
+                 this.receiveStalactiteDrip(p_220702_, p_220703_, p_220704_, fluid);
+             }
+@@ -100,5 +_,23 @@
+     }
  
      protected void receiveStalactiteDrip(BlockState p_151975_, Level p_151976_, BlockPos p_151977_, Fluid p_151978_) {
-     }
++    }
 +
 +    @Override
 +    public void onPlace(BlockState p_51978_, Level p_51979_, BlockPos p_51980_, BlockState p_51981_, boolean p_51982_) {
@@ -21,5 +34,5 @@
 +        if (net.neoforged.neoforge.fluids.CauldronFluidContent.getForBlock(p_60518_.getBlock()) == null) {
 +            p_60516_.invalidateCapabilities(p_60517_);
 +        }
-+    }
+     }
  }

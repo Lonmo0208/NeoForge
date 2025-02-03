@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/particle/ParticleEngine.java
 +++ b/net/minecraft/client/particle/ParticleEngine.java
-@@ -81,11 +_,11 @@
+@@ -79,11 +_,11 @@
          ParticleRenderType.CUSTOM
      );
      protected ClientLevel level;
@@ -14,8 +14,71 @@
      private final Queue<Particle> particlesToAdd = Queues.newArrayDeque();
      private final Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets = Maps.newHashMap();
      private final TextureAtlas textureAtlas;
-@@ -208,10 +_,14 @@
-         this.register(ParticleTypes.TRIAL_SPAWNER_DETECTION, TrialSpawnerDetectionParticle.Provider::new);
+@@ -131,11 +_,13 @@
+         this.register(ParticleTypes.SONIC_BOOM, SonicBoomParticle.Provider::new);
+         this.register(ParticleTypes.FALLING_DUST, FallingDustParticle.Provider::new);
+         this.register(ParticleTypes.GUST, GustParticle.Provider::new);
++        this.register(ParticleTypes.SMALL_GUST, GustParticle.SmallProvider::new);
+         this.register(ParticleTypes.GUST_EMITTER_LARGE, new GustSeedParticle.Provider(3.0, 7, 0));
+         this.register(ParticleTypes.GUST_EMITTER_SMALL, new GustSeedParticle.Provider(1.0, 3, 2));
+         this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
+         this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
+         this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);
++        this.register(ParticleTypes.INFESTED, SpellParticle.Provider::new);
+         this.register(ParticleTypes.SCULK_SOUL, SoulParticle.EmissiveProvider::new);
+         this.register(ParticleTypes.SCULK_CHARGE, SculkChargeParticle.Provider::new);
+         this.register(ParticleTypes.SCULK_CHARGE_POP, SculkChargePopParticle.Provider::new);
+@@ -147,6 +_,7 @@
+         this.register(ParticleTypes.INSTANT_EFFECT, SpellParticle.InstantProvider::new);
+         this.register(ParticleTypes.ITEM, new BreakingItemParticle.Provider());
+         this.register(ParticleTypes.ITEM_SLIME, new BreakingItemParticle.SlimeProvider());
++        this.register(ParticleTypes.ITEM_COBWEB, new BreakingItemParticle.CobwebProvider());
+         this.register(ParticleTypes.ITEM_SNOWBALL, new BreakingItemParticle.SnowballProvider());
+         this.register(ParticleTypes.LARGE_SMOKE, LargeSmokeParticle.Provider::new);
+         this.register(ParticleTypes.LAVA, LavaParticle.Provider::new);
+@@ -154,7 +_,7 @@
+         this.register(ParticleTypes.NAUTILUS, FlyTowardsPositionParticle.NautilusProvider::new);
+         this.register(ParticleTypes.NOTE, NoteParticle.Provider::new);
+         this.register(ParticleTypes.POOF, ExplodeParticle.Provider::new);
+-        this.register(ParticleTypes.PORTAL, p_339499_ -> new PortalParticle.Provider(p_339499_, 0.9F, 0.3F, 1.0F));
++        this.register(ParticleTypes.PORTAL, PortalParticle.Provider::new);
+         this.register(ParticleTypes.RAIN, WaterDropParticle.Provider::new);
+         this.register(ParticleTypes.SMOKE, SmokeParticle.Provider::new);
+         this.register(ParticleTypes.WHITE_SMOKE, WhiteSmokeParticle.Provider::new);
+@@ -171,7 +_,6 @@
+         this.register(ParticleTypes.FALLING_HONEY, DripParticle::createHoneyFallParticle);
+         this.register(ParticleTypes.LANDING_HONEY, DripParticle::createHoneyLandParticle);
+         this.register(ParticleTypes.FALLING_NECTAR, DripParticle::createNectarFallParticle);
+-        this.register(ParticleTypes.FALLING_POISON, DripParticle::createPoisonFallParticle);
+         this.register(ParticleTypes.FALLING_SPORE_BLOSSOM, DripParticle::createSporeBlossomFallParticle);
+         this.register(ParticleTypes.SPORE_BLOSSOM_AIR, SuspendedParticle.SporeBlossomAirProvider::new);
+         this.register(ParticleTypes.ASH, AshParticle.Provider::new);
+@@ -180,9 +_,7 @@
+         this.register(ParticleTypes.DRIPPING_OBSIDIAN_TEAR, DripParticle::createObsidianTearHangParticle);
+         this.register(ParticleTypes.FALLING_OBSIDIAN_TEAR, DripParticle::createObsidianTearFallParticle);
+         this.register(ParticleTypes.LANDING_OBSIDIAN_TEAR, DripParticle::createObsidianTearLandParticle);
+-        this.register(ParticleTypes.REVERSE_PORTAL, p_339501_ -> new ReversePortalParticle.ReversePortalProvider(p_339501_, 0.9F, 0.3F, 1.0F));
+-        this.register(ParticleTypes.REVERSE_POTATO_LIGHTNING, p_339500_ -> new ReversePortalParticle.ReversePortalProvider(p_339500_, 0.6F, 1.0F, 0.2F));
+-        this.register(ParticleTypes.POTATO_LIGHTNING, p_339502_ -> new PortalParticle.Provider(p_339502_, 0.6F, 1.0F, 0.2F));
++        this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
+         this.register(ParticleTypes.WHITE_ASH, WhiteAshParticle.Provider::new);
+         this.register(ParticleTypes.SMALL_FLAME, FlameParticle.SmallFlameProvider::new);
+         this.register(ParticleTypes.DRIPPING_DRIPSTONE_WATER, DripParticle::createDripstoneWaterHangParticle);
+@@ -203,17 +_,25 @@
+         this.register(ParticleTypes.ELECTRIC_SPARK, GlowParticle.ElectricSparkProvider::new);
+         this.register(ParticleTypes.SCRAPE, GlowParticle.ScrapeProvider::new);
+         this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
+-        this.register(ParticleTypes.FOOTSTEP, FootprintParticle.Provider::new);
+         this.register(ParticleTypes.EGG_CRACK, SuspendedTownParticle.EggCrackProvider::new);
+         this.register(ParticleTypes.DUST_PLUME, DustPlumeParticle.Provider::new);
+-        this.register(ParticleTypes.TRIAL_SPAWNER_DETECTION, TrialSpawnerDetectionParticle.Provider::new);
++        this.register(ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER, TrialSpawnerDetectionParticle.Provider::new);
++        this.register(ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS, TrialSpawnerDetectionParticle.Provider::new);
+         this.register(ParticleTypes.VAULT_CONNECTION, FlyTowardsPositionParticle.VaultConnectionProvider::new);
++        this.register(ParticleTypes.DUST_PILLAR, new TerrainParticle.DustPillarProvider());
++        this.register(ParticleTypes.RAID_OMEN, SpellParticle.Provider::new);
++        this.register(ParticleTypes.TRIAL_OMEN, SpellParticle.Provider::new);
++        this.register(ParticleTypes.OMINOUS_SPAWNING, FlyStraightTowardsParticle.OminousSpawnProvider::new);
      }
  
 +    /** @deprecated Register via {@link net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent} */
@@ -30,7 +93,7 @@
      public <T extends ParticleOptions> void register(ParticleType<T> p_273423_, ParticleProvider.Sprite<T> p_273134_) {
          this.register(
              p_273423_,
-@@ -228,10 +_,12 @@
+@@ -230,10 +_,12 @@
          );
      }
  
@@ -44,7 +107,16 @@
      }
  
      @Override
-@@ -357,7 +_,7 @@
+@@ -285,7 +_,7 @@
+                 if (!optional.isEmpty()) {
+                     List<TextureAtlasSprite> list = new ArrayList<>();
+ 
+-                    for(ResourceLocation resourcelocation : optional.get()) {
++                    for (ResourceLocation resourcelocation : optional.get()) {
+                         TextureAtlasSprite textureatlassprite1 = spriteloader$preparations.regions().get(resourcelocation);
+                         if (textureatlassprite1 == null) {
+                             set.add(resourcelocation);
+@@ -359,7 +_,7 @@
      private <T extends ParticleOptions> Particle makeParticle(
          T p_107396_, double p_107397_, double p_107398_, double p_107399_, double p_107400_, double p_107401_, double p_107402_
      ) {
@@ -53,25 +125,60 @@
          return particleprovider == null
              ? null
              : particleprovider.createParticle(p_107396_, this.level, p_107397_, p_107398_, p_107399_, p_107400_, p_107401_, p_107402_);
-@@ -433,15 +_,24 @@
+@@ -378,15 +_,15 @@
+     }
+ 
+     public void tick() {
+-        this.particles.forEach((p_339497_, p_339498_) -> {
+-            this.level.getProfiler().push(p_339497_.toString());
+-            this.tickParticleList(p_339498_);
++        this.particles.forEach((p_339289_, p_339290_) -> {
++            this.level.getProfiler().push(p_339289_.toString());
++            this.tickParticleList(p_339290_);
+             this.level.getProfiler().pop();
+         });
+         if (!this.trackingEmitters.isEmpty()) {
+             List<TrackingEmitter> list = Lists.newArrayList();
+ 
+-            for(TrackingEmitter trackingemitter : this.trackingEmitters) {
++            for (TrackingEmitter trackingemitter : this.trackingEmitters) {
+                 trackingemitter.tick();
+                 if (!trackingemitter.isAlive()) {
+                     list.add(trackingemitter);
+@@ -398,7 +_,7 @@
+ 
+         Particle particle;
+         if (!this.particlesToAdd.isEmpty()) {
+-            while((particle = this.particlesToAdd.poll()) != null) {
++            while ((particle = this.particlesToAdd.poll()) != null) {
+                 this.particles.computeIfAbsent(particle.getRenderType(), p_107347_ -> EvictingQueue.create(16384)).add(particle);
+             }
+         }
+@@ -408,7 +_,7 @@
+         if (!p_107385_.isEmpty()) {
+             Iterator<Particle> iterator = p_107385_.iterator();
+ 
+-            while(iterator.hasNext()) {
++            while (iterator.hasNext()) {
+                 Particle particle = iterator.next();
+                 this.tickParticle(particle);
+                 if (!particle.isAlive()) {
+@@ -435,11 +_,21 @@
          }
      }
  
-+    /**@deprecated Forge: use {@link #render(PoseStack, MultiBufferSource.BufferSource, LightTexture, Camera, float, net.minecraft.client.renderer.culling.Frustum)} with Frustum as additional parameter*/
++    /** @deprecated Neo: use {@link #render(LightTexture, Camera, float, net.minecraft.client.renderer.culling.Frustum)}  with Frustum as additional parameter */
 +    @Deprecated
-     public void render(PoseStack p_107337_, MultiBufferSource.BufferSource p_107338_, LightTexture p_107339_, Camera p_107340_, float p_107341_) {
-+         render(p_107337_, p_107338_, p_107339_, p_107340_, p_107341_, null);
+     public void render(LightTexture p_107339_, Camera p_107340_, float p_107341_) {
++        render(p_107339_, p_107340_, p_107341_, null);
 +    }
 +
-+    public void render(PoseStack p_107337_, MultiBufferSource.BufferSource p_107338_, LightTexture p_107339_, Camera p_107340_, float p_107341_, @Nullable net.minecraft.client.renderer.culling.Frustum clippingHelper) {
++    public void render(LightTexture p_107339_, Camera p_107340_, float p_107341_, @Nullable net.minecraft.client.renderer.culling.Frustum frustum) {
          p_107339_.turnOnLightLayer();
          RenderSystem.enableDepthTest();
++        //TODO porting: is this even needed with the particle render order fix???
 +        RenderSystem.activeTexture(org.lwjgl.opengl.GL13.GL_TEXTURE2);
 +        RenderSystem.activeTexture(org.lwjgl.opengl.GL13.GL_TEXTURE0);
-         PoseStack posestack = RenderSystem.getModelViewStack();
-         posestack.pushPose();
-         posestack.mulPoseMatrix(p_107337_.last().pose());
-         RenderSystem.applyModelViewMatrix();
  
 -        for(ParticleRenderType particlerendertype : RENDER_ORDER) {
 +        for(ParticleRenderType particlerendertype : this.particles.keySet()) { // Forge: allow custom IParticleRenderType's
@@ -79,15 +186,17 @@
              Iterable<Particle> iterable = this.particles.get(particlerendertype);
              if (iterable != null) {
                  RenderSystem.setShader(GameRenderer::getParticleShader);
-@@ -450,6 +_,7 @@
+@@ -447,7 +_,8 @@
+                 BufferBuilder bufferbuilder = tesselator.getBuilder();
                  particlerendertype.begin(bufferbuilder, this.textureManager);
  
-                 for(Particle particle : iterable) {
-+                    if (clippingHelper != null && particle.shouldCull() && !clippingHelper.isVisible(particle.getBoundingBox().inflate(1.0))) continue;
+-                for(Particle particle : iterable) {
++                for (Particle particle : iterable) {
++                    if (frustum != null && particle.shouldCull() && !frustum.isVisible(particle.getBoundingBox().inflate(1.0))) continue;
                      try {
                          particle.render(bufferbuilder, p_107340_, p_107341_);
                      } catch (Throwable throwable) {
-@@ -479,7 +_,7 @@
+@@ -475,7 +_,7 @@
      }
  
      public void destroy(BlockPos p_107356_, BlockState p_107357_) {
@@ -96,7 +205,20 @@
              VoxelShape voxelshape = p_107357_.getShape(this.level, p_107356_);
              double d0 = 0.25;
              voxelshape.forAllBoxes(
-@@ -511,7 +_,7 @@
+@@ -487,9 +_,9 @@
+                     int j = Math.max(2, Mth.ceil(d2 / 0.25));
+                     int k = Math.max(2, Mth.ceil(d3 / 0.25));
+     
+-                    for(int l = 0; l < i; ++l) {
+-                        for(int i1 = 0; i1 < j; ++i1) {
+-                            for(int j1 = 0; j1 < k; ++j1) {
++                    for (int l = 0; l < i; l++) {
++                        for (int i1 = 0; i1 < j; i1++) {
++                            for (int j1 = 0; j1 < k; j1++) {
+                                 double d4 = ((double)l + 0.5) / (double)i;
+                                 double d5 = ((double)i1 + 0.5) / (double)j;
+                                 double d6 = ((double)j1 + 0.5) / (double)k;
+@@ -507,7 +_,7 @@
                                          d6 - 0.5,
                                          p_107357_,
                                          p_107356_
@@ -105,7 +227,7 @@
                                  );
                              }
                          }
-@@ -556,12 +_,18 @@
+@@ -552,12 +_,18 @@
                  d0 = (double)i + aabb.maxX + 0.1F;
              }
  

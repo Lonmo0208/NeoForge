@@ -1,0 +1,47 @@
+--- a/net/minecraft/world/level/levelgen/NoiseGeneratorSettings.java
++++ b/net/minecraft/world/level/levelgen/NoiseGeneratorSettings.java
+@@ -78,7 +_,7 @@
+         p_321686_.register(POTATO, potato(p_321686_));
+     }
+ 
+-    private static NoiseGeneratorSettings end(BootstrapContext<?> p_321661_) {
++    public static NoiseGeneratorSettings end(BootstrapContext<?> p_321661_) {
+         return new NoiseGeneratorSettings(
+             NoiseSettings.END_NOISE_SETTINGS,
+             Blocks.END_STONE.defaultBlockState(),
+@@ -95,7 +_,7 @@
+         );
+     }
+ 
+-    private static NoiseGeneratorSettings nether(BootstrapContext<?> p_321619_) {
++    public static NoiseGeneratorSettings nether(BootstrapContext<?> p_321619_) {
+         return new NoiseGeneratorSettings(
+             NoiseSettings.NETHER_NOISE_SETTINGS,
+             Blocks.NETHERRACK.defaultBlockState(),
+@@ -112,7 +_,7 @@
+         );
+     }
+ 
+-    private static NoiseGeneratorSettings overworld(BootstrapContext<?> p_321795_, boolean p_256427_, boolean p_256318_) {
++    public static NoiseGeneratorSettings overworld(BootstrapContext<?> p_321795_, boolean p_256427_, boolean p_256318_) {
+         return new NoiseGeneratorSettings(
+             NoiseSettings.OVERWORLD_NOISE_SETTINGS,
+             Blocks.STONE.defaultBlockState(),
+@@ -129,7 +_,7 @@
+         );
+     }
+ 
+-    private static NoiseGeneratorSettings caves(BootstrapContext<?> p_321694_) {
++    public static NoiseGeneratorSettings caves(BootstrapContext<?> p_321694_) {
+         return new NoiseGeneratorSettings(
+             NoiseSettings.CAVES_NOISE_SETTINGS,
+             Blocks.STONE.defaultBlockState(),
+@@ -146,7 +_,7 @@
+         );
+     }
+ 
+-    private static NoiseGeneratorSettings floatingIslands(BootstrapContext<?> p_321614_) {
++    public static NoiseGeneratorSettings floatingIslands(BootstrapContext<?> p_321614_) {
+         return new NoiseGeneratorSettings(
+             NoiseSettings.FLOATING_ISLANDS_NOISE_SETTINGS,
+             Blocks.STONE.defaultBlockState(),

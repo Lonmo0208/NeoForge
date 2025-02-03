@@ -1,6 +1,42 @@
 --- a/net/minecraft/world/entity/monster/Shulker.java
 +++ b/net/minecraft/world/entity/monster/Shulker.java
-@@ -391,6 +_,12 @@
+@@ -178,7 +_,7 @@
+ 
+         if (this.level().isClientSide) {
+             if (this.clientSideTeleportInterpolation > 0) {
+-                --this.clientSideTeleportInterpolation;
++                this.clientSideTeleportInterpolation--;
+             } else {
+                 this.clientOldAttachPosition = null;
+             }
+@@ -229,7 +_,7 @@
+         Direction direction = this.getAttachFace().getOpposite();
+         float f2 = (f - f1) * this.getScale();
+         if (!(f2 <= 0.0F)) {
+-            for(Entity entity : this.level()
++            for (Entity entity : this.level()
+                 .getEntities(
+                     this,
+                     getProgressDeltaAabb(this.getScale(), direction, f1, f).move(this.getX() - 0.5, this.getY(), this.getZ() - 0.5),
+@@ -343,7 +_,7 @@
+ 
+     @Nullable
+     protected Direction findAttachableSurface(BlockPos p_149811_) {
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
+             if (this.canStayAt(p_149811_, direction)) {
+                 return direction;
+             }
+@@ -380,7 +_,7 @@
+         if (!this.isNoAi() && this.isAlive()) {
+             BlockPos blockpos = this.blockPosition();
+ 
+-            for(int i = 0; i < 5; ++i) {
++            for (int i = 0; i < 5; i++) {
+                 BlockPos blockpos1 = blockpos.offset(
+                     Mth.randomBetweenInclusive(this.random, -8, 8),
+                     Mth.randomBetweenInclusive(this.random, -8, 8),
+@@ -392,6 +_,12 @@
                      && this.level().noCollision(this, new AABB(blockpos1).deflate(1.0E-6))) {
                      Direction direction = this.findAttachableSurface(blockpos1);
                      if (direction != null) {
@@ -13,3 +49,34 @@
                          this.unRide();
                          this.setAttachFace(direction);
                          this.playSound(SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
+@@ -573,11 +_,7 @@
+         @Override
+         public boolean canUse() {
+             LivingEntity livingentity = Shulker.this.getTarget();
+-            if (livingentity != null && livingentity.isAlive()) {
+-                return Shulker.this.level().getDifficulty() != Difficulty.PEACEFUL;
+-            } else {
+-                return false;
+-            }
++            return livingentity != null && livingentity.isAlive() ? Shulker.this.level().getDifficulty() != Difficulty.PEACEFUL : false;
+         }
+ 
+         @Override
+@@ -599,7 +_,7 @@
+         @Override
+         public void tick() {
+             if (Shulker.this.level().getDifficulty() != Difficulty.PEACEFUL) {
+-                --this.attackTime;
++                this.attackTime--;
+                 LivingEntity livingentity = Shulker.this.getTarget();
+                 if (livingentity != null) {
+                     Shulker.this.getLookControl().setLookAt(livingentity, 180.0F, 180.0F);
+@@ -742,7 +_,7 @@
+ 
+         @Override
+         public void tick() {
+-            --this.peekTime;
++            this.peekTime--;
+         }
+     }
+ }

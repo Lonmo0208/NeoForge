@@ -1,6 +1,42 @@
 --- a/net/minecraft/world/entity/animal/Animal.java
 +++ b/net/minecraft/world/entity/animal/Animal.java
-@@ -212,6 +_,17 @@
+@@ -26,6 +_,7 @@
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.LevelAccessor;
+ import net.minecraft.world.level.LevelReader;
++import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.pathfinder.PathType;
+ 
+ public abstract class Animal extends AgeableMob {
+@@ -57,7 +_,7 @@
+         }
+ 
+         if (this.inLove > 0) {
+-            --this.inLove;
++            this.inLove--;
+             if (this.inLove % 10 == 0) {
+                 double d0 = this.random.nextGaussian() * 0.02;
+                 double d1 = this.random.nextGaussian() * 0.02;
+@@ -79,7 +_,7 @@
+ 
+     @Override
+     public float getWalkTargetValue(BlockPos p_27573_, LevelReader p_27574_) {
+-        return p_27574_.getBlockState(p_27573_.below()).is(BlockTags.ANIMALS_SPAWNABLE_ON) ? 10.0F : p_27574_.getPathfindingCostFromLightLevels(p_27573_);
++        return p_27574_.getBlockState(p_27573_.below()).is(Blocks.GRASS_BLOCK) ? 10.0F : p_27574_.getPathfindingCostFromLightLevels(p_27573_);
+     }
+ 
+     @Override
+@@ -197,15 +_,24 @@
+     public boolean canMate(Animal p_27569_) {
+         if (p_27569_ == this) {
+             return false;
+-        } else if (p_27569_.getClass() != this.getClass()) {
+-            return false;
+         } else {
+-            return this.isInLove() && p_27569_.isInLove();
++            return p_27569_.getClass() != this.getClass() ? false : this.isInLove() && p_27569_.isInLove();
+         }
+     }
  
      public void spawnChildFromBreeding(ServerLevel p_27564_, Animal p_27565_) {
          AgeableMob ageablemob = this.getBreedOffspring(p_27564_, p_27565_);
@@ -18,3 +54,12 @@
          if (ageablemob != null) {
              ageablemob.setBaby(true);
              ageablemob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
+@@ -232,7 +_,7 @@
+     @Override
+     public void handleEntityEvent(byte p_27562_) {
+         if (p_27562_ == 18) {
+-            for(int i = 0; i < 7; ++i) {
++            for (int i = 0; i < 7; i++) {
+                 double d0 = this.random.nextGaussian() * 0.02;
+                 double d1 = this.random.nextGaussian() * 0.02;
+                 double d2 = this.random.nextGaussian() * 0.02;

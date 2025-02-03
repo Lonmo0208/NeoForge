@@ -1,13 +1,35 @@
 --- a/net/minecraft/world/item/crafting/BannerDuplicateRecipe.java
 +++ b/net/minecraft/world/item/crafting/BannerDuplicateRecipe.java
-@@ -79,8 +_,8 @@
-         for(int i = 0; i < nonnulllist.size(); ++i) {
+@@ -21,7 +_,7 @@
+         ItemStack itemstack = null;
+         ItemStack itemstack1 = null;
+ 
+-        for(int i = 0; i < p_43785_.getContainerSize(); ++i) {
++        for (int i = 0; i < p_43785_.getContainerSize(); i++) {
+             ItemStack itemstack2 = p_43785_.getItem(i);
+             if (!itemstack2.isEmpty()) {
+                 Item item = itemstack2.getItem();
+@@ -61,7 +_,7 @@
+     }
+ 
+     public ItemStack assemble(CraftingContainer p_43783_, HolderLookup.Provider p_335574_) {
+-        for(int i = 0; i < p_43783_.getContainerSize(); ++i) {
++        for (int i = 0; i < p_43783_.getContainerSize(); i++) {
+             ItemStack itemstack = p_43783_.getItem(i);
+             if (!itemstack.isEmpty()) {
+                 int j = itemstack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().size();
+@@ -77,11 +_,11 @@
+     public NonNullList<ItemStack> getRemainingItems(CraftingContainer p_43791_) {
+         NonNullList<ItemStack> nonnulllist = NonNullList.withSize(p_43791_.getContainerSize(), ItemStack.EMPTY);
+ 
+-        for(int i = 0; i < nonnulllist.size(); ++i) {
++        for (int i = 0; i < nonnulllist.size(); i++) {
              ItemStack itemstack = p_43791_.getItem(i);
              if (!itemstack.isEmpty()) {
 -                if (itemstack.getItem().hasCraftingRemainingItem()) {
 -                    nonnulllist.set(i, new ItemStack(itemstack.getItem().getCraftingRemainingItem()));
 +                if (itemstack.hasCraftingRemainingItem()) {
 +                    nonnulllist.set(i, itemstack.getCraftingRemainingItem());
-                 } else if (itemstack.hasTag() && BannerBlockEntity.getPatternCount(itemstack) > 0) {
+                 } else if (!itemstack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().isEmpty()) {
                      nonnulllist.set(i, itemstack.copyWithCount(1));
                  }

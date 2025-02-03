@@ -22,6 +22,72 @@
                  Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b0), s, p_302338_, p_302362_);
                  if (map.put(s, tag) == null) {
                      p_302362_.accountBytes(36L);
+@@ -81,9 +_,9 @@
+ 
+             byte b0;
+             label35:
+-            while((b0 = p_302325_.readByte()) != 0) {
++            while ((b0 = p_302325_.readByte()) != 0) {
+                 TagType<?> tagtype = TagTypes.getType(b0);
+-                switch(p_302352_.visitEntry(tagtype)) {
++                switch (p_302352_.visitEntry(tagtype)) {
+                     case HALT:
+                         return StreamTagVisitor.ValueResult.HALT;
+                     case BREAK:
+@@ -96,7 +_,7 @@
+                         break;
+                     default:
+                         String s = readString(p_302325_, p_302355_);
+-                        switch(p_302352_.visitEntry(tagtype, s)) {
++                        switch (p_302352_.visitEntry(tagtype, s)) {
+                             case HALT:
+                                 return StreamTagVisitor.ValueResult.HALT;
+                             case BREAK:
+@@ -107,7 +_,7 @@
+                                 break;
+                             default:
+                                 p_302355_.accountBytes(36L);
+-                                switch(tagtype.parse(p_302325_, p_302352_, p_302355_)) {
++                                switch (tagtype.parse(p_302325_, p_302352_, p_302355_)) {
+                                     case HALT:
+                                         return StreamTagVisitor.ValueResult.HALT;
+                                     case BREAK:
+@@ -117,7 +_,7 @@
+             }
+ 
+             if (b0 != 0) {
+-                while((b0 = p_302325_.readByte()) != 0) {
++                while ((b0 = p_302325_.readByte()) != 0) {
+                     StringTag.skipString(p_302325_);
+                     TagTypes.getType(b0).skip(p_302325_, p_302355_);
+                 }
+@@ -139,7 +_,7 @@
+ 
+             byte b0;
+             try {
+-                while((b0 = p_197444_.readByte()) != 0) {
++                while ((b0 = p_197444_.readByte()) != 0) {
+                     StringTag.skipString(p_197444_);
+                     TagTypes.getType(b0).skip(p_197444_, p_302358_);
+                 }
+@@ -170,7 +_,7 @@
+ 
+     @Override
+     public void write(DataOutput p_128341_) throws IOException {
+-        for(String s : this.tags.keySet()) {
++        for (String s : this.tags.keySet()) {
+             Tag tag = this.tags.get(s);
+             writeNamedTag(s, tag, p_128341_);
+         }
+@@ -182,7 +_,7 @@
+     public int sizeInBytes() {
+         int i = 48;
+ 
+-        for(Entry<String, Tag> entry : this.tags.entrySet()) {
++        for (Entry<String, Tag> entry : this.tags.entrySet()) {
+             i += 28 + 2 * entry.getKey().length();
+             i += 36;
+             i += entry.getValue().sizeInBytes();
 @@ -211,6 +_,7 @@
  
      @Nullable
@@ -30,3 +96,69 @@
          return this.tags.put(p_128366_, p_128367_);
      }
  
+@@ -301,10 +_,8 @@
+         int i = this.getTagType(p_128426_);
+         if (i == p_128427_) {
+             return true;
+-        } else if (p_128427_ != 99) {
+-            return false;
+         } else {
+-            return i == 1 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6;
++            return p_128427_ != 99 ? false : i == 1 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6;
+         }
+     }
+ 
+@@ -483,11 +_,7 @@
+ 
+     @Override
+     public boolean equals(Object p_128444_) {
+-        if (this == p_128444_) {
+-            return true;
+-        } else {
+-            return p_128444_ instanceof CompoundTag && Objects.equals(this.tags, ((CompoundTag)p_128444_).tags);
+-        }
++        return this == p_128444_ ? true : p_128444_ instanceof CompoundTag && Objects.equals(this.tags, ((CompoundTag)p_128444_).tags);
+     }
+ 
+     @Override
+@@ -516,7 +_,7 @@
+     }
+ 
+     public CompoundTag merge(CompoundTag p_128392_) {
+-        for(String s : p_128392_.tags.keySet()) {
++        for (String s : p_128392_.tags.keySet()) {
+             Tag tag = p_128392_.tags.get(s);
+             if (tag.getId() == 10) {
+                 if (this.contains(s, 10)) {
+@@ -544,11 +_,11 @@
+ 
+     @Override
+     public StreamTagVisitor.ValueResult accept(StreamTagVisitor p_197442_) {
+-        for(Entry<String, Tag> entry : this.tags.entrySet()) {
++        for (Entry<String, Tag> entry : this.tags.entrySet()) {
+             Tag tag = entry.getValue();
+             TagType<?> tagtype = tag.getType();
+             StreamTagVisitor.EntryResult streamtagvisitor$entryresult = p_197442_.visitEntry(tagtype);
+-            switch(streamtagvisitor$entryresult) {
++            switch (streamtagvisitor$entryresult) {
+                 case HALT:
+                     return StreamTagVisitor.ValueResult.HALT;
+                 case BREAK:
+@@ -557,7 +_,7 @@
+                     break;
+                 default:
+                     streamtagvisitor$entryresult = p_197442_.visitEntry(tagtype, entry.getKey());
+-                    switch(streamtagvisitor$entryresult) {
++                    switch (streamtagvisitor$entryresult) {
+                         case HALT:
+                             return StreamTagVisitor.ValueResult.HALT;
+                         case BREAK:
+@@ -566,7 +_,7 @@
+                             break;
+                         default:
+                             StreamTagVisitor.ValueResult streamtagvisitor$valueresult = tag.accept(p_197442_);
+-                            switch(streamtagvisitor$valueresult) {
++                            switch (streamtagvisitor$valueresult) {
+                                 case HALT:
+                                     return StreamTagVisitor.ValueResult.HALT;
+                                 case BREAK:

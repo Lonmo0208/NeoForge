@@ -1,14 +1,14 @@
 --- a/net/minecraft/world/item/crafting/SmithingTransformRecipe.java
 +++ b/net/minecraft/world/item/crafting/SmithingTransformRecipe.java
-@@ -36,6 +_,7 @@
-         if (compoundtag != null) {
-             itemstack.setTag(compoundtag.copy());
-         }
-+        net.neoforged.neoforge.attachment.AttachmentUtils.copyStackAttachments(p_267036_.getItem(1), itemstack);
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.item.crafting;
  
-         return itemstack;
-     }
-@@ -67,7 +_,7 @@
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.stream.Stream;
+@@ -63,11 +_,11 @@
  
      @Override
      public boolean isIncomplete() {
@@ -17,3 +17,17 @@
      }
  
      public static class Serializer implements RecipeSerializer<SmithingTransformRecipe> {
+-        private static final Codec<SmithingTransformRecipe> CODEC = RecordCodecBuilder.create(
++        private static final MapCodec<SmithingTransformRecipe> CODEC = RecordCodecBuilder.mapCodec(
+             p_332628_ -> p_332628_.group(
+                         Ingredient.CODEC.fieldOf("template").forGetter(p_301310_ -> p_301310_.template),
+                         Ingredient.CODEC.fieldOf("base").forGetter(p_300938_ -> p_300938_.base),
+@@ -81,7 +_,7 @@
+         );
+ 
+         @Override
+-        public Codec<SmithingTransformRecipe> codec() {
++        public MapCodec<SmithingTransformRecipe> codec() {
+             return CODEC;
+         }
+ 

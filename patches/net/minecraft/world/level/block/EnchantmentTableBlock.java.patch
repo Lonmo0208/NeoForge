@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/EnchantmentTableBlock.java
 +++ b/net/minecraft/world/level/block/EnchantmentTableBlock.java
-@@ -50,7 +_,7 @@
+@@ -47,7 +_,7 @@
      }
  
      public static boolean isValidBookShelf(Level p_207910_, BlockPos p_207911_, BlockPos p_207912_) {
@@ -9,3 +9,12 @@
              && p_207910_.getBlockState(p_207911_.offset(p_207912_.getX() / 2, p_207912_.getY(), p_207912_.getZ() / 2))
                  .is(BlockTags.ENCHANTMENT_POWER_TRANSMITTER);
      }
+@@ -66,7 +_,7 @@
+     public void animateTick(BlockState p_221092_, Level p_221093_, BlockPos p_221094_, RandomSource p_221095_) {
+         super.animateTick(p_221092_, p_221093_, p_221094_, p_221095_);
+ 
+-        for(BlockPos blockpos : BOOKSHELF_OFFSETS) {
++        for (BlockPos blockpos : BOOKSHELF_OFFSETS) {
+             if (p_221095_.nextInt(16) == 0 && isValidBookShelf(p_221093_, p_221094_, blockpos)) {
+                 p_221093_.addParticle(
+                     ParticleTypes.ENCHANT,

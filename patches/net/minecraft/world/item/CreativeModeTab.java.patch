@@ -274,3 +274,12 @@
                  return creativemodetab;
              }
          }
+@@ -239,7 +_,7 @@
+                     );
+                 } else {
+                     if (p_250391_.getItem().isEnabled(this.featureFlagSet)) {
+-                        switch(p_251472_) {
++                        switch (p_251472_) {
+                             case PARENT_AND_SEARCH_TABS:
+                                 this.tabContents.add(p_250391_);
+                                 this.searchTabContents.add(p_250391_);

@@ -1,6 +1,18 @@
 --- a/net/minecraft/world/entity/animal/MushroomCow.java
 +++ b/net/minecraft/world/entity/animal/MushroomCow.java
-@@ -108,7 +_,7 @@
+@@ -56,11 +_,6 @@
+     }
+ 
+     @Override
+-    public boolean hasPotatoVariant() {
+-        return false;
+-    }
+-
+-    @Override
+     public float getWalkTargetValue(BlockPos p_28933_, LevelReader p_28934_) {
+         return p_28934_.getBlockState(p_28933_.below()).is(Blocks.MYCELIUM) ? 10.0F : p_28934_.getPathfindingCostFromLightLevels(p_28933_);
+     }
+@@ -113,7 +_,7 @@
  
              this.playSound(soundevent, 1.0F, 1.0F);
              return InteractionResult.sidedSuccess(this.level().isClientSide);
@@ -9,7 +21,25 @@
              this.shear(SoundSource.PLAYERS);
              this.gameEvent(GameEvent.SHEAR, p_28941_);
              if (!this.level().isClientSide) {
-@@ -167,8 +_,10 @@
+@@ -123,7 +_,7 @@
+             return InteractionResult.sidedSuccess(this.level().isClientSide);
+         } else if (this.getVariant() == MushroomCow.MushroomType.BROWN && itemstack.is(ItemTags.SMALL_FLOWERS)) {
+             if (this.stewEffects != null) {
+-                for(int i = 0; i < 2; ++i) {
++                for (int i = 0; i < 2; i++) {
+                     this.level()
+                         .addParticle(
+                             ParticleTypes.SMOKE,
+@@ -143,7 +_,7 @@
+ 
+                 itemstack.consume(1, p_28941_);
+ 
+-                for(int j = 0; j < 4; ++j) {
++                for (int j = 0; j < 4; j++) {
+                     this.level()
+                         .addParticle(
+                             ParticleTypes.EFFECT,
+@@ -170,8 +_,10 @@
      public void shear(SoundSource p_28924_) {
          this.level().playSound(null, this, SoundEvents.MOOSHROOM_SHEAR, p_28924_, 1.0F, 1.0F);
          if (!this.level().isClientSide()) {
@@ -20,17 +50,37 @@
                  ((ServerLevel)this.level()).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
                  this.discard();
                  cow.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-@@ -187,10 +_,9 @@
+@@ -189,11 +_,10 @@
+                 cow.setInvulnerable(this.isInvulnerable());
                  this.level().addFreshEntity(cow);
  
-                 for(int i = 0; i < 5; ++i) {
+-                for(int i = 0; i < 5; ++i) {
 -                    this.level()
 -                        .addFreshEntity(
 -                            new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), new ItemStack(this.getVariant().blockState.getBlock()))
 -                        );
++                for (int i = 0; i < 5; i++) {
 +                    //Neo: Change from addFreshEntity to spawnAtLocation to ensure captureDrops can capture this, we also need to unset the default pickup delay from the item
 +                    ItemEntity item = spawnAtLocation(new ItemStack(this.getVariant().blockState.getBlock()), getBbHeight());
 +                    if (item != null) item.setNoPickUpDelay();
                  }
              }
          }
+@@ -209,7 +_,7 @@
+         super.addAdditionalSaveData(p_28944_);
+         p_28944_.putString("Type", this.getVariant().getSerializedName());
+         if (this.stewEffects != null) {
+-            SuspiciousStewEffects.CODEC.encodeStart(NbtOps.INSTANCE, this.stewEffects).result().ifPresent(p_297973_ -> p_28944_.put("stew_effects", p_297973_));
++            SuspiciousStewEffects.CODEC.encodeStart(NbtOps.INSTANCE, this.stewEffects).ifSuccess(p_297973_ -> p_28944_.put("stew_effects", p_297973_));
+         }
+     }
+ 
+@@ -218,7 +_,7 @@
+         super.readAdditionalSaveData(p_28936_);
+         this.setVariant(MushroomCow.MushroomType.byType(p_28936_.getString("Type")));
+         if (p_28936_.contains("stew_effects", 9)) {
+-            SuspiciousStewEffects.CODEC.parse(NbtOps.INSTANCE, p_28936_.get("stew_effects")).result().ifPresent(p_330058_ -> this.stewEffects = p_330058_);
++            SuspiciousStewEffects.CODEC.parse(NbtOps.INSTANCE, p_28936_.get("stew_effects")).ifSuccess(p_330058_ -> this.stewEffects = p_330058_);
+         }
+     }
+ 

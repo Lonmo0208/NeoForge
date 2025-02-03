@@ -1,6 +1,109 @@
 --- a/net/minecraft/world/entity/animal/Fox.java
 +++ b/net/minecraft/world/entity/animal/Fox.java
-@@ -693,13 +_,16 @@
+@@ -104,15 +_,10 @@
+     private static final int FLAG_DEFENDING = 128;
+     private static final EntityDataAccessor<Optional<UUID>> DATA_TRUSTED_ID_0 = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.OPTIONAL_UUID);
+     private static final EntityDataAccessor<Optional<UUID>> DATA_TRUSTED_ID_1 = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.OPTIONAL_UUID);
+-    static final Predicate<ItemEntity> ALLOWED_ITEMS = p_340110_ -> !p_340110_.hasPickUpDelay() && p_340110_.isAlive();
+-    private static final Predicate<Entity> TRUSTED_TARGET_SELECTOR = p_287481_ -> {
+-        if (!(p_287481_ instanceof LivingEntity)) {
+-            return false;
+-        } else {
+-            LivingEntity livingentity = (LivingEntity)p_287481_;
+-            return livingentity.getLastHurtMob() != null && livingentity.getLastHurtMobTimestamp() < livingentity.tickCount + 600;
+-        }
+-    };
++    static final Predicate<ItemEntity> ALLOWED_ITEMS = p_337830_ -> !p_337830_.hasPickUpDelay() && p_337830_.isAlive();
++    private static final Predicate<Entity> TRUSTED_TARGET_SELECTOR = p_287481_ -> !(p_287481_ instanceof LivingEntity livingentity)
++            ? false
++            : livingentity.getLastHurtMob() != null && livingentity.getLastHurtMobTimestamp() < livingentity.tickCount + 600;
+     static final Predicate<Entity> STALKABLE_PREY = p_28498_ -> p_28498_ instanceof Chicken || p_28498_ instanceof Rabbit;
+     private static final Predicate<Entity> AVOID_PLAYERS = p_28463_ -> !p_28463_.isDiscrete() && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(p_28463_);
+     private static final int MIN_TICKS_BEFORE_EAT = 600;
+@@ -162,10 +_,10 @@
+             .addGoal(
+                 4,
+                 new AvoidEntityGoal<>(
+-                    this, Player.class, 16.0F, 1.6, 1.4, p_340109_ -> AVOID_PLAYERS.test(p_340109_) && !this.trusts(p_340109_.getUUID()) && !this.isDefending()
++                    this, Player.class, 16.0F, 1.6, 1.4, p_337827_ -> AVOID_PLAYERS.test(p_337827_) && !this.trusts(p_337827_.getUUID()) && !this.isDefending()
+                 )
+             );
+-        this.goalSelector.addGoal(4, new AvoidEntityGoal<>(this, Wolf.class, 8.0F, 1.6, 1.4, p_325791_ -> !((Wolf)p_325791_).isTame() && !this.isDefending()));
++        this.goalSelector.addGoal(4, new AvoidEntityGoal<>(this, Wolf.class, 8.0F, 1.6, 1.4, p_337829_ -> !((Wolf)p_337829_).isTame() && !this.isDefending()));
+         this.goalSelector.addGoal(4, new AvoidEntityGoal<>(this, PolarBear.class, 8.0F, 1.6, 1.4, p_28585_ -> !this.isDefending()));
+         this.goalSelector.addGoal(5, new Fox.StalkPreyGoal());
+         this.goalSelector.addGoal(6, new Fox.FoxPounceGoal());
+@@ -184,7 +_,7 @@
+             .addGoal(
+                 3,
+                 new Fox.DefendTrustedTargetGoal(
+-                    LivingEntity.class, false, false, p_340108_ -> TRUSTED_TARGET_SELECTOR.test(p_340108_) && !this.trusts(p_340108_.getUUID())
++                    LivingEntity.class, false, false, p_337828_ -> TRUSTED_TARGET_SELECTOR.test(p_337828_) && !this.trusts(p_337828_.getUUID())
+                 )
+             );
+     }
+@@ -197,7 +_,7 @@
+     @Override
+     public void aiStep() {
+         if (!this.level().isClientSide && this.isAlive() && this.isEffectiveAi()) {
+-            ++this.ticksSinceEaten;
++            this.ticksSinceEaten++;
+             ItemStack itemstack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+             if (this.canEat(itemstack)) {
+                 if (this.ticksSinceEaten > 600) {
+@@ -269,7 +_,7 @@
+         if (p_28456_ == 45) {
+             ItemStack itemstack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+             if (!itemstack.isEmpty()) {
+-                for(int i = 0; i < 8; ++i) {
++                for (int i = 0; i < 8; i++) {
+                     Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0)
+                         .xRot(-this.getXRot() * (float) (Math.PI / 180.0))
+                         .yRot(-this.getYRot() * (float) (Math.PI / 180.0));
+@@ -397,7 +_,7 @@
+         List<UUID> list = this.getTrustedUUIDs();
+         ListTag listtag = new ListTag();
+ 
+-        for(UUID uuid : list) {
++        for (UUID uuid : list) {
+             if (uuid != null) {
+                 listtag.add(NbtUtils.createUUID(uuid));
+             }
+@@ -414,7 +_,7 @@
+     public void readAdditionalSaveData(CompoundTag p_28493_) {
+         super.readAdditionalSaveData(p_28493_);
+ 
+-        for(Tag tag : p_28493_.getList("Trusted", 11)) {
++        for (Tag tag : p_28493_.getList("Trusted", 11)) {
+             this.addTrustedUUID(NbtUtils.loadUUID(tag));
+         }
+ 
+@@ -475,11 +_,7 @@
+     @Override
+     public boolean canTakeItem(ItemStack p_28552_) {
+         EquipmentSlot equipmentslot = Mob.getEquipmentSlotForItem(p_28552_);
+-        if (!this.getItemBySlot(equipmentslot).isEmpty()) {
+-            return false;
+-        } else {
+-            return equipmentslot == EquipmentSlot.MAINHAND && super.canTakeItem(p_28552_);
+-        }
++        return !this.getItemBySlot(equipmentslot).isEmpty() ? false : equipmentslot == EquipmentSlot.MAINHAND && super.canTakeItem(p_28552_);
+     }
+ 
+     @Override
+@@ -546,9 +_,9 @@
+ 
+         this.interestedAngleO = this.interestedAngle;
+         if (this.isInterested()) {
+-            this.interestedAngle += (1.0F - this.interestedAngle) * 0.4F;
++            this.interestedAngle = this.interestedAngle + (1.0F - this.interestedAngle) * 0.4F;
+         } else {
+-            this.interestedAngle += (0.0F - this.interestedAngle) * 0.4F;
++            this.interestedAngle = this.interestedAngle + (0.0F - this.interestedAngle) * 0.4F;
+         }
+ 
+         this.crouchAmountO = this.crouchAmount;
+@@ -690,13 +_,16 @@
  
      @Override
      protected void dropAllDeathLoot(DamageSource p_28536_) {
@@ -17,8 +120,68 @@
 -        super.dropAllDeathLoot(p_28536_);
      }
  
-     @Override
-@@ -868,6 +_,17 @@
+     public static boolean isPathClear(Fox p_28472_, LivingEntity p_28473_) {
+@@ -705,11 +_,11 @@
+         double d2 = d0 / d1;
+         int i = 6;
+ 
+-        for(int j = 0; j < 6; ++j) {
++        for (int j = 0; j < 6; j++) {
+             double d3 = d2 == 0.0 ? 0.0 : d0 * (double)((float)j / 6.0F);
+             double d4 = d2 == 0.0 ? d1 * (double)((float)j / 6.0F) : d3 / d2;
+ 
+-            for(int k = 1; k < 4; ++k) {
++            for (int k = 1; k < 4; k++) {
+                 if (!p_28472_.level()
+                     .getBlockState(BlockPos.containing(p_28472_.getX() + d4, p_28472_.getY() + (double)k, p_28472_.getZ() + d3))
+                     .canBeReplaced()) {
+@@ -742,15 +_,14 @@
+             if (this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {
+                 return false;
+             } else {
+-                for(UUID uuid : Fox.this.getTrustedUUIDs()) {
+-                    if (uuid != null && Fox.this.level() instanceof ServerLevel) {
+-                        Entity entity = ((ServerLevel)Fox.this.level()).getEntity(uuid);
+-                        if (entity instanceof LivingEntity livingentity) {
+-                            this.trustedLastHurt = livingentity;
+-                            this.trustedLastHurtBy = livingentity.getLastHurtByMob();
+-                            int i = livingentity.getLastHurtByMobTimestamp();
+-                            return i != this.timestamp && this.canAttack(this.trustedLastHurtBy, this.targetConditions);
+-                        }
++                for (UUID uuid : Fox.this.getTrustedUUIDs()) {
++                    if (uuid != null
++                        && Fox.this.level() instanceof ServerLevel
++                        && ((ServerLevel)Fox.this.level()).getEntity(uuid) instanceof LivingEntity livingentity) {
++                        this.trustedLastHurt = livingentity;
++                        this.trustedLastHurtBy = livingentity.getLastHurtByMob();
++                        int i = livingentity.getLastHurtByMobTimestamp();
++                        return i != this.timestamp && this.canAttack(this.trustedLastHurtBy, this.targetConditions);
+                     }
+                 }
+ 
+@@ -802,7 +_,7 @@
+ 
+         @Override
+         public void tick() {
+-            --this.countdown;
++            this.countdown--;
+         }
+     }
+ 
+@@ -815,11 +_,7 @@
+             } else if (p_28653_ instanceof TamableAnimal) {
+                 return !((TamableAnimal)p_28653_).isTame();
+             } else if (!(p_28653_ instanceof Player) || !p_28653_.isSpectator() && !((Player)p_28653_).isCreative()) {
+-                if (Fox.this.trusts(p_28653_.getUUID())) {
+-                    return false;
+-                } else {
+-                    return !p_28653_.isSleeping() && !p_28653_.isDiscrete();
+-                }
++                return Fox.this.trusts(p_28653_.getUUID()) ? false : !p_28653_.isSleeping() && !p_28653_.isDiscrete();
+             } else {
+                 return false;
+             }
+@@ -860,6 +_,17 @@
          protected void breed() {
              ServerLevel serverlevel = (ServerLevel)this.level;
              Fox fox = (Fox)this.animal.getBreedOffspring(serverlevel, this.partner);
@@ -36,7 +199,16 @@
              if (fox != null) {
                  ServerPlayer serverplayer = this.animal.getLoveCause();
                  ServerPlayer serverplayer1 = this.partner.getLoveCause();
-@@ -945,7 +_,7 @@
+@@ -927,7 +_,7 @@
+                 if (this.ticksWaited >= 40) {
+                     this.onReachedTarget();
+                 } else {
+-                    ++this.ticksWaited;
++                    this.ticksWaited++;
+                 }
+             } else if (!this.isReachedTarget() && Fox.this.random.nextFloat() < 0.05F) {
+                 Fox.this.playSound(SoundEvents.FOX_SNIFF, 1.0F, 1.0F);
+@@ -937,7 +_,7 @@
          }
  
          protected void onReachedTarget() {
@@ -45,7 +217,16 @@
                  BlockState blockstate = Fox.this.level().getBlockState(this.blockPos);
                  if (blockstate.is(Blocks.SWEET_BERRY_BUSH)) {
                      this.pickSweetBerries(blockstate);
-@@ -1004,7 +_,7 @@
+@@ -958,7 +_,7 @@
+             ItemStack itemstack = Fox.this.getItemBySlot(EquipmentSlot.MAINHAND);
+             if (itemstack.isEmpty()) {
+                 Fox.this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.SWEET_BERRIES));
+-                --j;
++                j--;
+             }
+ 
+             if (j > 0) {
+@@ -996,7 +_,7 @@
  
          @Override
          public boolean canUse() {
@@ -54,3 +235,46 @@
          }
      }
  
+@@ -1324,9 +_,9 @@
+ 
+         @Override
+         public void tick() {
+-            --this.lookTime;
++            this.lookTime--;
+             if (this.lookTime <= 0) {
+-                --this.looksRemaining;
++                this.looksRemaining--;
+                 this.resetLook();
+             }
+ 
+@@ -1361,7 +_,7 @@
+                 if (Fox.this.level().isThundering() && Fox.this.level().canSeeSky(this.mob.blockPosition())) {
+                     return this.setWantedPos();
+                 } else if (this.interval > 0) {
+-                    --this.interval;
++                    this.interval--;
+                     return false;
+                 } else {
+                     this.interval = 100;
+@@ -1393,11 +_,7 @@
+ 
+         @Override
+         public boolean canUse() {
+-            if (Fox.this.xxa == 0.0F && Fox.this.yya == 0.0F && Fox.this.zza == 0.0F) {
+-                return this.canSleep() || Fox.this.isSleeping();
+-            } else {
+-                return false;
+-            }
++            return Fox.this.xxa == 0.0F && Fox.this.yya == 0.0F && Fox.this.zza == 0.0F ? this.canSleep() || Fox.this.isSleeping() : false;
+         }
+ 
+         @Override
+@@ -1407,7 +_,7 @@
+ 
+         private boolean canSleep() {
+             if (this.countdown > 0) {
+-                --this.countdown;
++                this.countdown--;
+                 return false;
+             } else {
+                 return Fox.this.level().isDay() && this.hasShelter() && !this.alertable() && !Fox.this.isInPowderSnow;

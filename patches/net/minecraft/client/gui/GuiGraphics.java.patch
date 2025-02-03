@@ -1,6 +1,22 @@
 --- a/net/minecraft/client/gui/GuiGraphics.java
 +++ b/net/minecraft/client/gui/GuiGraphics.java
-@@ -55,7 +_,7 @@
+@@ -11,7 +_,6 @@
+ import com.mojang.blaze3d.vertex.Tesselator;
+ import com.mojang.blaze3d.vertex.VertexConsumer;
+ import com.mojang.blaze3d.vertex.VertexFormat;
+-import com.mojang.math.Axis;
+ import java.util.ArrayDeque;
+ import java.util.Deque;
+ import java.util.List;
+@@ -22,6 +_,7 @@
+ import net.minecraft.CrashReport;
+ import net.minecraft.CrashReportCategory;
+ import net.minecraft.ReportedException;
++import net.minecraft.Util;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.gui.navigation.ScreenRectangle;
+ import net.minecraft.client.gui.screens.Screen;
+@@ -56,7 +_,7 @@
  import org.joml.Vector2ic;
  
  @OnlyIn(Dist.CLIENT)
@@ -9,7 +25,28 @@
      public static final float MAX_GUI_Z = 10000.0F;
      public static final float MIN_GUI_Z = -10000.0F;
      private static final int EXTRA_SPACE_AFTER_FIRST_TOOLTIP_LINE = 2;
-@@ -265,6 +_,11 @@
+@@ -262,20 +_,6 @@
+         this.flushIfUnmanaged();
+     }
+ 
+-    public GuiGraphics.DrawString beginString(double p_341860_, double p_340371_, Font p_341215_, String p_342395_, int p_340333_, int p_341997_) {
+-        List<FormattedText> list = p_341215_.getSplitter().splitLines(p_342395_, p_341997_, Style.EMPTY);
+-        String s = list.stream().map(FormattedText::getString).collect(Collectors.joining("\n"));
+-        return new GuiGraphics.DrawString(p_341860_, p_340371_, s, (p_339473_, p_339474_, p_339475_) -> {
+-            String[] astring = p_339473_.split("\\r?\\n");
+-            int i = p_339475_;
+-
+-            for(String s1 : astring) {
+-                this.drawString(p_341215_, s1, p_339474_, i, p_340333_);
+-                i += 9 + 4;
+-            }
+-        });
+-    }
+-
+     public void drawCenteredString(Font p_282122_, String p_282898_, int p_281490_, int p_282853_, int p_281258_) {
+         this.drawString(p_282122_, p_282898_, p_281490_ - p_282122_.width(p_282898_) / 2, p_282853_, p_281258_);
+     }
+@@ -294,6 +_,11 @@
      }
  
      public int drawString(Font p_283343_, @Nullable String p_281896_, int p_283569_, int p_283418_, int p_281560_, boolean p_282130_) {
@@ -21,7 +58,7 @@
          if (p_281896_ == null) {
              return 0;
          } else {
-@@ -291,6 +_,11 @@
+@@ -320,6 +_,11 @@
      }
  
      public int drawString(Font p_282636_, FormattedCharSequence p_281596_, int p_281586_, int p_282816_, int p_281743_, boolean p_282394_) {
@@ -33,16 +70,80 @@
          int i = p_282636_.drawInBatch(
              p_281596_,
              (float)p_281586_,
-@@ -824,7 +_,7 @@
-             } catch (Throwable throwable) {
-                 CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering item");
-                 CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
--                crashreportcategory.setDetail("Item Type", () -> String.valueOf(p_281675_.getItem()));
-+                crashreportcategory.setDetail("Item Type / Registry Name", () -> String.valueOf(p_281675_.getItem()));
-                 crashreportcategory.setDetail("Item Damage", () -> String.valueOf(p_281675_.getDamageValue()));
-                 crashreportcategory.setDetail("Item NBT", () -> String.valueOf(p_281675_.getTag()));
-                 crashreportcategory.setDetail("Item Foil", () -> String.valueOf(p_281675_.hasFoil()));
-@@ -866,19 +_,26 @@
+@@ -345,7 +_,7 @@
+     }
+ 
+     public void drawWordWrap(Font p_281494_, FormattedText p_283463_, int p_282183_, int p_283250_, int p_282564_, int p_282629_) {
+-        for(FormattedCharSequence formattedcharsequence : p_281494_.split(p_283463_, p_282564_)) {
++        for (FormattedCharSequence formattedcharsequence : p_281494_.split(p_283463_, p_282564_)) {
+             this.drawString(p_281494_, formattedcharsequence, p_282183_, p_283250_, p_282629_, false);
+             p_283250_ += 9;
+         }
+@@ -785,10 +_,10 @@
+     ) {
+         if (p_295203_ > 0 && p_296398_ > 0) {
+             if (p_296256_ > 0 && p_294814_ > 0) {
+-                for(int i = 0; i < p_295203_; i += p_296256_) {
++                for (int i = 0; i < p_295203_; i += p_296256_) {
+                     int j = Math.min(p_296256_, p_295203_ - i);
+ 
+-                    for(int k = 0; k < p_296398_; k += p_294814_) {
++                    for (int k = 0; k < p_296398_; k += p_294814_) {
+                         int l = Math.min(p_294814_, p_296398_ - k);
+                         this.blitSprite(p_294349_, p_296352_, p_296203_, p_295542_, p_296165_, p_295093_ + i, p_296434_ + k, p_295268_, j, l);
+                     }
+@@ -862,50 +_,6 @@
+         }
+     }
+ 
+-    public void renderItem(
+-        @Nullable LivingEntity p_340540_,
+-        @Nullable Level p_341914_,
+-        ItemStack p_342021_,
+-        float p_340482_,
+-        float p_342136_,
+-        float p_340958_,
+-        int p_341166_,
+-        int p_340332_
+-    ) {
+-        if (!p_342021_.isEmpty()) {
+-            BakedModel bakedmodel = this.minecraft.getItemRenderer().getModel(p_342021_, p_341914_, p_340540_, p_341166_);
+-            this.pose.pushPose();
+-            this.pose.translate(p_340482_ + 8.0F, p_342136_ + 8.0F, (float)(150 + (bakedmodel.isGui3d() ? p_340332_ : 0)));
+-            this.pose.rotateAround(Axis.XP.rotation(p_340958_), 0.0F, 0.0F, 0.0F);
+-            this.pose.rotateAround(Axis.YP.rotation(2.0F * p_340958_), 0.0F, 0.0F, 0.0F);
+-
+-            try {
+-                this.pose.scale(16.0F, -16.0F, 16.0F);
+-                boolean flag = !bakedmodel.usesBlockLight();
+-                if (flag) {
+-                    Lighting.setupForFlatItems();
+-                }
+-
+-                this.minecraft
+-                    .getItemRenderer()
+-                    .render(p_342021_, ItemDisplayContext.GUI, false, this.pose, this.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, bakedmodel);
+-                this.flush();
+-                if (flag) {
+-                    Lighting.setupFor3DItems();
+-                }
+-            } catch (Throwable throwable) {
+-                CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering item");
+-                CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
+-                crashreportcategory.setDetail("Item Type", () -> String.valueOf(p_342021_.getItem()));
+-                crashreportcategory.setDetail("Item Components", () -> String.valueOf(p_342021_.getComponents()));
+-                crashreportcategory.setDetail("Item Foil", () -> String.valueOf(p_342021_.hasFoil()));
+-                throw new ReportedException(crashreport);
+-            }
+-
+-            this.pose.popPose();
+-        }
+-    }
+-
+     public void renderItemDecorations(Font p_281721_, ItemStack p_281514_, int p_282056_, int p_282683_) {
+         this.renderItemDecorations(p_281721_, p_281514_, p_282056_, p_282683_, null);
+     }
+@@ -937,19 +_,26 @@
              }
  
              this.pose.popPose();
@@ -74,7 +175,7 @@
          this.renderTooltipInternal(p_283128_, list, p_283678_, p_281696_, DefaultTooltipPositioner.INSTANCE);
      }
  
-@@ -887,7 +_,15 @@
+@@ -958,7 +_,15 @@
      }
  
      public void renderComponentTooltip(Font p_282739_, List<Component> p_281832_, int p_282191_, int p_282446_) {
@@ -91,7 +192,7 @@
      }
  
      public void renderTooltip(Font p_282192_, List<? extends FormattedCharSequence> p_282297_, int p_281680_, int p_283325_) {
-@@ -908,11 +_,13 @@
+@@ -979,11 +_,13 @@
  
      private void renderTooltipInternal(Font p_282675_, List<ClientTooltipComponent> p_282615_, int p_283230_, int p_283417_, ClientTooltipPositioner p_282442_) {
          if (!p_282615_.isEmpty()) {
@@ -100,13 +201,14 @@
              int i = 0;
              int j = p_282615_.size() == 1 ? -2 : 0;
  
-             for(ClientTooltipComponent clienttooltipcomponent : p_282615_) {
+-            for(ClientTooltipComponent clienttooltipcomponent : p_282615_) {
 -                int k = clienttooltipcomponent.getWidth(p_282675_);
++            for (ClientTooltipComponent clienttooltipcomponent : p_282615_) {
 +                int k = clienttooltipcomponent.getWidth(preEvent.getFont());
                  if (k > i) {
                      i = k;
                  }
-@@ -922,18 +_,19 @@
+@@ -993,26 +_,27 @@
  
              int i2 = i;
              int j2 = j;
@@ -122,19 +224,77 @@
              this.pose.translate(0.0F, 0.0F, 400.0F);
              int k1 = i1;
  
-             for(int l1 = 0; l1 < p_282615_.size(); ++l1) {
+-            for(int l1 = 0; l1 < p_282615_.size(); ++l1) {
++            for (int l1 = 0; l1 < p_282615_.size(); l1++) {
                  ClientTooltipComponent clienttooltipcomponent1 = p_282615_.get(l1);
 -                clienttooltipcomponent1.renderText(p_282675_, l, k1, this.pose.last().pose(), this.bufferSource);
 +                clienttooltipcomponent1.renderText(preEvent.getFont(), l, k1, this.pose.last().pose(), this.bufferSource);
                  k1 += clienttooltipcomponent1.getHeight() + (l1 == 0 ? 2 : 0);
              }
  
-@@ -941,7 +_,7 @@
+             k1 = i1;
  
-             for(int k2 = 0; k2 < p_282615_.size(); ++k2) {
+-            for(int k2 = 0; k2 < p_282615_.size(); ++k2) {
++            for (int k2 = 0; k2 < p_282615_.size(); k2++) {
                  ClientTooltipComponent clienttooltipcomponent2 = p_282615_.get(k2);
 -                clienttooltipcomponent2.renderImage(p_282675_, l, k1, this);
 +                clienttooltipcomponent2.renderImage(preEvent.getFont(), l, k1, this);
                  k1 += clienttooltipcomponent2.getHeight() + (k2 == 0 ? 2 : 0);
              }
+ 
+@@ -1039,55 +_,6 @@
+                     }
+                 }
+             }
+-        }
+-    }
+-
+-    @OnlyIn(Dist.CLIENT)
+-    public static class DrawString {
+-        private final double charsPerTick;
+-        private final String targetString;
+-        private final GuiGraphics.DrawString.DrawFunction drawFunction;
+-        private double lastTick;
+-        private String subString = "";
+-
+-        DrawString(double p_341300_, double p_341176_, String p_341691_, GuiGraphics.DrawString.DrawFunction p_340590_) {
+-            this.lastTick = p_341300_;
+-            this.charsPerTick = p_341176_;
+-            this.targetString = p_341691_;
+-            this.drawFunction = p_340590_;
+-        }
+-
+-        public boolean draw(double p_340913_, int p_341732_, int p_341060_) {
+-            if (this.targetString.equals(this.subString)) {
+-                this.drawFunction.apply(this.targetString, p_341732_, p_341060_);
+-                return false;
+-            } else {
+-                int i = Mth.floor((p_340913_ - this.lastTick) * this.charsPerTick);
+-                if (i == 0) {
+-                    this.drawFunction.apply(this.subString, p_341732_, p_341060_);
+-                    return false;
+-                } else {
+-                    int j = Math.min(this.subString.length() + i, this.targetString.length());
+-
+-                    while(j < this.targetString.length() && Character.isWhitespace(this.targetString.charAt(j - 1))) {
+-                        ++j;
+-                    }
+-
+-                    this.subString = this.targetString.substring(0, j);
+-                    this.drawFunction.apply(this.subString, p_341732_, p_341060_);
+-                    this.lastTick = p_340913_;
+-                    return true;
+-                }
+-            }
+-        }
+-
+-        public double getLastTick() {
+-            return this.lastTick;
+-        }
+-
+-        @OnlyIn(Dist.CLIENT)
+-        public interface DrawFunction {
+-            void apply(String p_342173_, int p_342328_, int p_341897_);
+         }
+     }
  

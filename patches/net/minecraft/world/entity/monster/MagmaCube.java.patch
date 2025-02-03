@@ -1,5 +1,25 @@
 --- a/net/minecraft/world/entity/monster/MagmaCube.java
 +++ b/net/minecraft/world/entity/monster/MagmaCube.java
+@@ -16,7 +_,6 @@
+ import net.minecraft.world.entity.ai.attributes.Attributes;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.LevelAccessor;
+-import net.minecraft.world.level.LevelReader;
+ import net.minecraft.world.level.material.Fluid;
+ import net.minecraft.world.phys.Vec3;
+ 
+@@ -36,11 +_,6 @@
+     }
+ 
+     @Override
+-    public boolean checkSpawnObstruction(LevelReader p_32975_) {
+-        return p_32975_.isUnobstructed(this) && !p_32975_.containsAnyLiquid(this.getBoundingBox());
+-    }
+-
+-    @Override
+     public void setSize(int p_32972_, boolean p_32973_) {
+         super.setSize(p_32972_, p_32973_);
+         this.getAttribute(Attributes.ARMOR).setBaseValue((double)(p_32972_ * 3));
 @@ -77,17 +_,28 @@
          float f = (float)this.getSize() * 0.1F;
          this.setDeltaMovement(vec3.x, (double)(this.getJumpPower() + f), vec3.z);

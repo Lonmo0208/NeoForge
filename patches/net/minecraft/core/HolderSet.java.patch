@@ -9,7 +9,16 @@
      Stream<Holder<T>> stream();
  
      int size();
-@@ -146,6 +_,9 @@
+@@ -109,7 +_,7 @@
+             if (this == p_332659_) {
+                 return true;
+             } else {
+-                if (p_332659_ instanceof HolderSet.Direct direct && this.contents.equals(direct.contents)) {
++                if (p_332659_ instanceof HolderSet.Direct<?> direct && this.contents.equals(direct.contents)) {
+                     return true;
+                 }
+ 
+@@ -174,6 +_,9 @@
  
          public void bind(List<Holder<T>> p_205836_) {
              this.contents = List.copyOf(p_205836_);
@@ -19,7 +28,7 @@
          }
  
          public TagKey<T> key() {
-@@ -180,6 +_,11 @@
+@@ -208,6 +_,11 @@
          @Override
          public boolean canSerializeIn(HolderOwner<T> p_256542_) {
              return this.owner.canSerializeIn(p_256542_);

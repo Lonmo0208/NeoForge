@@ -1,15 +1,17 @@
 --- a/net/minecraft/world/level/storage/loot/parameters/LootContextParamSets.java
 +++ b/net/minecraft/world/level/storage/loot/parameters/LootContextParamSets.java
-@@ -20,7 +_,7 @@
+@@ -20,16 +_,16 @@
      public static final LootContextParamSet EMPTY = register("empty", p_81454_ -> {
      });
      public static final LootContextParamSet CHEST = register(
--        "chest", p_81452_ -> p_81452_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
+-        "chest", p_272589_ -> p_272589_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
 +        "chest", p_81452_ -> p_81452_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY).optional(LootContextParams.KILLER_ENTITY) //Forge: Chest minecarts can have killer entities
      );
      public static final LootContextParamSet COMMAND = register(
-         "command", p_81450_ -> p_81450_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
-@@ -29,7 +_,7 @@
+-        "command", p_323464_ -> p_323464_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
++        "command", p_330195_ -> p_330195_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
+     );
+     public static final LootContextParamSet SELECTOR = register(
          "selector", p_81442_ -> p_81442_.required(LootContextParams.ORIGIN).required(LootContextParams.THIS_ENTITY)
      );
      public static final LootContextParamSet FISHING = register(
@@ -18,3 +20,33 @@
      );
      public static final LootContextParamSet ENTITY = register(
          "entity",
+@@ -40,15 +_,18 @@
+                 .optional(LootContextParams.DIRECT_KILLER_ENTITY)
+                 .optional(LootContextParams.LAST_DAMAGE_PLAYER)
+     );
++    public static final LootContextParamSet EQUIPMENT = register(
++        "equipment", p_338166_ -> p_338166_.required(LootContextParams.ORIGIN).required(LootContextParams.THIS_ENTITY)
++    );
+     public static final LootContextParamSet ARCHAEOLOGY = register(
+-        "archaeology", p_330195_ -> p_330195_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
++        "archaeology", p_81452_ -> p_81452_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
+     );
+     public static final LootContextParamSet GIFT = register(
+         "gift", p_81448_ -> p_81448_.required(LootContextParams.ORIGIN).required(LootContextParams.THIS_ENTITY)
+     );
+     public static final LootContextParamSet PIGLIN_BARTER = register("barter", p_81440_ -> p_81440_.required(LootContextParams.THIS_ENTITY));
+     public static final LootContextParamSet VAULT = register(
+-        "vault", p_81452_ -> p_81452_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
++        "vault", p_81450_ -> p_81450_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
+     );
+     public static final LootContextParamSet ADVANCEMENT_REWARD = register(
+         "advancement_reward", p_81438_ -> p_81438_.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ORIGIN)
+@@ -89,7 +_,7 @@
+                 .optional(LootContextParams.EXPLOSION_RADIUS)
+     );
+     public static final LootContextParamSet SHEARING = register(
+-        "shearing", p_81450_ -> p_81450_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
++        "shearing", p_272589_ -> p_272589_.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
+     );
+ 
+     private static LootContextParamSet register(String p_81429_, Consumer<LootContextParamSet.Builder> p_81430_) {

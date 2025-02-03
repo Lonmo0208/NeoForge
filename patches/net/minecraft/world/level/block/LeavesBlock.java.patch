@@ -9,3 +9,12 @@
      public static final MapCodec<LeavesBlock> CODEC = simpleCodec(LeavesBlock::new);
      public static final int DECAY_DISTANCE = 7;
      public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
+@@ -98,7 +_,7 @@
+         int i = 7;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
+             blockpos$mutableblockpos.setWithOffset(p_54438_, direction);
+             i = Math.min(i, getDistanceAt(p_54437_.getBlockState(blockpos$mutableblockpos)) + 1);
+             if (i == 1) {

@@ -1,19 +1,51 @@
 --- a/net/minecraft/client/particle/Particle.java
 +++ b/net/minecraft/client/particle/Particle.java
-@@ -244,4 +_,16 @@
+@@ -115,16 +_,16 @@
+         if (this.age++ >= this.lifetime) {
+             this.remove();
+         } else {
+-            this.yd -= 0.04 * (double)this.gravity;
++            this.yd = this.yd - 0.04 * (double)this.gravity;
+             this.move(this.xd, this.yd, this.zd);
+             if (this.speedUpWhenYMotionIsBlocked && this.y == this.yo) {
+                 this.xd *= 1.1;
+                 this.zd *= 1.1;
+             }
+ 
+-            this.xd *= (double)this.friction;
+-            this.yd *= (double)this.friction;
+-            this.zd *= (double)this.friction;
++            this.xd = this.xd * (double)this.friction;
++            this.yd = this.yd * (double)this.friction;
++            this.zd = this.zd * (double)this.friction;
+             if (this.onGround) {
+                 this.xd *= 0.7F;
+                 this.zd *= 0.7F;
+@@ -191,7 +_,7 @@
+             if (this.hasPhysics
+                 && (p_107246_ != 0.0 || p_107247_ != 0.0 || p_107248_ != 0.0)
+                 && p_107246_ * p_107246_ + p_107247_ * p_107247_ + p_107248_ * p_107248_ < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
+-                Vec3 vec3 = Entity.collideBoundingBox(null, new Vec3(p_107246_, p_107247_, p_107248_), this.getBoundingBox(), this.level, List.of()).movement();
++                Vec3 vec3 = Entity.collideBoundingBox(null, new Vec3(p_107246_, p_107247_, p_107248_), this.getBoundingBox(), this.level, List.of());
+                 p_107246_ = vec3.x;
+                 p_107247_ = vec3.y;
+                 p_107248_ = vec3.z;
+@@ -243,6 +_,18 @@
+ 
      public Optional<ParticleGroup> getParticleGroup() {
          return Optional.empty();
++    }
++
++    /**
++     * Forge added method that controls if a particle should be culled to it's bounding box.
++     * Default behaviour is culling enabled
++     */
++    public boolean shouldCull() {
++        return true;
++    }
++
++    public Vec3 getPos() {
++        return new Vec3(this.x, this.y, this.z);
      }
-+
-+     /**
-+      * Forge added method that controls if a particle should be culled to it's bounding box.
-+      * Default behaviour is culling enabled
-+      */
-+     public boolean shouldCull() {
-+         return true;
-+     }
-+
-+     public net.minecraft.world.phys.Vec3 getPos() {
-+         return new net.minecraft.world.phys.Vec3(this.x, this.y, this.z);
-+     }
- }
+ 
+     @OnlyIn(Dist.CLIENT)

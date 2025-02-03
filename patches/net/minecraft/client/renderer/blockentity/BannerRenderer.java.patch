@@ -1,14 +1,24 @@
 --- a/net/minecraft/client/renderer/blockentity/BannerRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/BannerRenderer.java
-@@ -139,4 +_,11 @@
-                 );
-         }
-     }
+@@ -124,7 +_,7 @@
+         p_112079_.render(p_112075_, p_112080_.buffer(p_112076_, RenderType::entitySolid, p_332823_), p_112077_, p_112078_);
+         renderPatternLayer(p_112075_, p_112076_, p_112077_, p_112078_, p_112079_, p_112081_ ? Sheets.BANNER_BASE : Sheets.SHIELD_BASE, p_332652_);
+ 
+-        for(int i = 0; i < 16 && i < p_331851_.layers().size(); ++i) {
++        for (int i = 0; i < 16 && i < p_331851_.layers().size(); i++) {
+             BannerPatternLayers.Layer bannerpatternlayers$layer = p_331851_.layers().get(i);
+             Material material = p_112081_
+                 ? Sheets.getBannerMaterial(bannerpatternlayers$layer.pattern())
+@@ -138,5 +_,12 @@
+     ) {
+         float[] afloat = p_332728_.getTextureDiffuseColors();
+         p_332732_.render(p_332737_, p_332704_.buffer(p_332758_, RenderType::entityNoOutline), p_332821_, p_332828_, afloat[0], afloat[1], afloat[2], 1.0F);
++    }
 +
 +    @Override
 +    public net.minecraft.world.phys.AABB getRenderBoundingBox(BannerBlockEntity blockEntity) {
 +        net.minecraft.core.BlockPos pos = blockEntity.getBlockPos();
 +        boolean standing = blockEntity.getBlockState().getBlock() instanceof BannerBlock;
 +        return net.minecraft.world.phys.AABB.encapsulatingFullBlocks(pos, standing ? pos.above() : pos.below());
-+    }
+     }
  }

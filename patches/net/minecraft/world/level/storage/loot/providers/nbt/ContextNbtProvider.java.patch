@@ -1,5 +1,22 @@
 --- a/net/minecraft/world/level/storage/loot/providers/nbt/ContextNbtProvider.java
 +++ b/net/minecraft/world/level/storage/loot/providers/nbt/ContextNbtProvider.java
+@@ -2,6 +_,7 @@
+ 
+ import com.google.common.collect.ImmutableSet;
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Set;
+@@ -42,7 +_,7 @@
+             return forEntity(lootcontext$entitytarget);
+         }
+     }, ContextNbtProvider.Getter::getId);
+-    public static final Codec<ContextNbtProvider> CODEC = RecordCodecBuilder.create(
++    public static final MapCodec<ContextNbtProvider> CODEC = RecordCodecBuilder.mapCodec(
+         p_298866_ -> p_298866_.group(GETTER_CODEC.fieldOf("target").forGetter(p_298514_ -> p_298514_.getter)).apply(p_298866_, ContextNbtProvider::new)
+     );
+     public static final Codec<ContextNbtProvider> INLINE_CODEC = GETTER_CODEC.xmap(ContextNbtProvider::new, p_298731_ -> p_298731_.getter);
 @@ -59,7 +_,7 @@
  
              @Override

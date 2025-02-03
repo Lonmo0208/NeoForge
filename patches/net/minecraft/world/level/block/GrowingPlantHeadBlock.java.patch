@@ -3,7 +3,7 @@
 @@ -42,10 +_,11 @@
  
      @Override
-     public void randomTick(BlockState p_221350_, ServerLevel p_221351_, BlockPos p_221352_, RandomSource p_221353_) {
+     protected void randomTick(BlockState p_221350_, ServerLevel p_221351_, BlockPos p_221352_, RandomSource p_221353_) {
 -        if (p_221350_.getValue(AGE) < 25 && p_221353_.nextDouble() < this.growPerTickProbability) {
 +        if (p_221350_.getValue(AGE) < 25 && net.neoforged.neoforge.common.CommonHooks.onCropsGrowPre(p_221351_, p_221352_.relative(this.growthDirection), p_221351_.getBlockState(p_221352_.relative(this.growthDirection)), p_221353_.nextDouble() < this.growPerTickProbability)) {
              BlockPos blockpos = p_221352_.relative(this.growthDirection);
@@ -13,3 +13,12 @@
              }
          }
      }
+@@ -104,7 +_,7 @@
+         int i = Math.min(p_221340_.getValue(AGE) + 1, 25);
+         int j = this.getBlocksToGrowWhenBonemealed(p_221338_);
+ 
+-        for(int k = 0; k < j && this.canGrowInto(p_221337_.getBlockState(blockpos)); ++k) {
++        for (int k = 0; k < j && this.canGrowInto(p_221337_.getBlockState(blockpos)); k++) {
+             p_221337_.setBlockAndUpdate(blockpos, p_221340_.setValue(AGE, Integer.valueOf(i)));
+             blockpos = blockpos.relative(this.growthDirection);
+             i = Math.min(i + 1, 25);

@@ -1,6 +1,45 @@
 --- a/net/minecraft/world/entity/monster/Evoker.java
 +++ b/net/minecraft/world/entity/monster/Evoker.java
-@@ -309,7 +_,7 @@
+@@ -160,17 +_,17 @@
+             double d1 = Math.max(livingentity.getY(), Evoker.this.getY()) + 1.0;
+             float f = (float)Mth.atan2(livingentity.getZ() - Evoker.this.getZ(), livingentity.getX() - Evoker.this.getX());
+             if (Evoker.this.distanceToSqr(livingentity) < 9.0) {
+-                for(int i = 0; i < 5; ++i) {
++                for (int i = 0; i < 5; i++) {
+                     float f1 = f + (float)i * (float) Math.PI * 0.4F;
+                     this.createSpellEntity(Evoker.this.getX() + (double)Mth.cos(f1) * 1.5, Evoker.this.getZ() + (double)Mth.sin(f1) * 1.5, d0, d1, f1, 0);
+                 }
+ 
+-                for(int k = 0; k < 8; ++k) {
++                for (int k = 0; k < 8; k++) {
+                     float f2 = f + (float)k * (float) Math.PI * 2.0F / 8.0F + (float) (Math.PI * 2.0 / 5.0);
+                     this.createSpellEntity(Evoker.this.getX() + (double)Mth.cos(f2) * 2.5, Evoker.this.getZ() + (double)Mth.sin(f2) * 2.5, d0, d1, f2, 3);
+                 }
+             } else {
+-                for(int l = 0; l < 16; ++l) {
++                for (int l = 0; l < 16; l++) {
+                     double d2 = 1.25 * (double)(l + 1);
+                     int j = 1 * l;
+                     this.createSpellEntity(Evoker.this.getX() + (double)Mth.cos(f) * d2, Evoker.this.getZ() + (double)Mth.sin(f) * d2, d0, d1, f, j);
+@@ -200,7 +_,7 @@
+                 }
+ 
+                 blockpos = blockpos.below();
+-            } while(blockpos.getY() >= Mth.floor(p_32675_) - 1);
++            } while (blockpos.getY() >= Mth.floor(p_32675_) - 1);
+ 
+             if (flag) {
+                 Evoker.this.level()
+@@ -262,7 +_,7 @@
+             ServerLevel serverlevel = (ServerLevel)Evoker.this.level();
+             PlayerTeam playerteam = Evoker.this.getTeam();
+ 
+-            for(int i = 0; i < 3; ++i) {
++            for (int i = 0; i < 3; i++) {
+                 BlockPos blockpos = Evoker.this.blockPosition().offset(-2 + Evoker.this.random.nextInt(5), 1, -2 + Evoker.this.random.nextInt(5));
+                 Vex vex = EntityType.VEX.create(Evoker.this.level());
+                 if (vex != null) {
+@@ -305,7 +_,7 @@
                  return false;
              } else if (Evoker.this.tickCount < this.nextAttackTickCount) {
                  return false;

@@ -1,6 +1,18 @@
 --- a/net/minecraft/world/item/crafting/ShapedRecipe.java
 +++ b/net/minecraft/world/item/crafting/ShapedRecipe.java
-@@ -11,7 +_,7 @@
+@@ -1,18 +_,18 @@
+ package net.minecraft.world.item.crafting;
+ 
+ import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.NonNullList;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+ import net.minecraft.network.codec.StreamCodec;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.inventory.CraftingContainer;
  import net.minecraft.world.item.ItemStack;
  import net.minecraft.world.level.Level;
  
@@ -9,29 +21,7 @@
      final ShapedRecipePattern pattern;
      final ItemStack result;
      final String group;
-@@ -41,11 +_,21 @@
-     }
- 
-     @Override
-+    public int getRecipeWidth() {
-+        return getWidth();
-+    }
-+
-+    @Override
-     public CraftingBookCategory category() {
-         return this.category;
-     }
- 
-     @Override
-+    public int getRecipeHeight() {
-+        return getHeight();
-+    }
-+
-+    @Override
-     public ItemStack getResultItem(RegistryAccess p_266881_) {
-         return this.result;
-     }
-@@ -84,7 +_,7 @@
+@@ -85,26 +_,26 @@
      @Override
      public boolean isIncomplete() {
          NonNullList<Ingredient> nonnulllist = this.getIngredients();
@@ -40,3 +30,28 @@
      }
  
      public static class Serializer implements RecipeSerializer<ShapedRecipe> {
+-        public static final Codec<ShapedRecipe> CODEC = RecordCodecBuilder.create(
+-            p_332624_ -> p_332624_.group(
+-                        ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(p_311729_ -> p_311729_.group),
++        public static final MapCodec<ShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(
++            p_337957_ -> p_337957_.group(
++                        Codec.STRING.optionalFieldOf("group", "").forGetter(p_311729_ -> p_311729_.group),
+                         CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(p_311732_ -> p_311732_.category),
+                         ShapedRecipePattern.MAP_CODEC.forGetter(p_311733_ -> p_311733_.pattern),
+                         ItemStack.CODEC.fieldOf("result").forGetter(p_311730_ -> p_311730_.result),
+-                        ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(p_311731_ -> p_311731_.showNotification)
++                        Codec.BOOL.optionalFieldOf("show_notification", Boolean.valueOf(true)).forGetter(p_311731_ -> p_311731_.showNotification)
+                     )
+-                    .apply(p_332624_, ShapedRecipe::new)
++                    .apply(p_337957_, ShapedRecipe::new)
+         );
+         public static final StreamCodec<RegistryFriendlyByteBuf, ShapedRecipe> STREAM_CODEC = StreamCodec.of(
+             ShapedRecipe.Serializer::toNetwork, ShapedRecipe.Serializer::fromNetwork
+         );
+ 
+         @Override
+-        public Codec<ShapedRecipe> codec() {
++        public MapCodec<ShapedRecipe> codec() {
+             return CODEC;
+         }
+ 

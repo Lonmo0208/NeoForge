@@ -1,6 +1,15 @@
 --- a/net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java
 +++ b/net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java
-@@ -114,7 +_,7 @@
+@@ -57,7 +_,7 @@
+ 
+     @Override
+     public CompoundTag getUpdateTag(HolderLookup.Provider p_324521_) {
+-        return this.saveWithoutMetadata(p_324521_);
++        return this.saveCustomOnly(p_324521_);
+     }
+ 
+     public boolean isExtending() {
+@@ -115,12 +_,12 @@
              List<Entity> list = p_155911_.getEntities(null, PistonMath.getMovementArea(aabb, direction, d0).minmax(aabb));
              if (!list.isEmpty()) {
                  List<AABB> list1 = voxelshape.toAabbs();
@@ -8,4 +17,67 @@
 +                boolean flag = p_155914_.movedState.isSlimeBlock(); //TODO: is this patch really needed the logic of the original seems sound revisit later
                  Iterator iterator = list.iterator();
  
-                 while(true) {
+-                while(true) {
++                while (true) {
+                     Entity entity;
+-                    while(true) {
++                    while (true) {
+                         if (!iterator.hasNext()) {
+                             return;
+                         }
+@@ -136,7 +_,7 @@
+                                 double d1 = vec3.x;
+                                 double d2 = vec3.y;
+                                 double d3 = vec3.z;
+-                                switch(direction.getAxis()) {
++                                switch (direction.getAxis()) {
+                                     case X:
+                                         d1 = (double)direction.getStepX();
+                                         break;
+@@ -155,7 +_,7 @@
+ 
+                     double d4 = 0.0;
+ 
+-                    for(AABB aabb2 : list1) {
++                    for (AABB aabb2 : list1) {
+                         AABB aabb1 = PistonMath.getMovementArea(moveByPositionAndProgress(p_155912_, aabb2, p_155914_), direction, d0);
+                         AABB aabb3 = entity.getBoundingBox();
+                         if (aabb1.intersects(aabb3)) {
+@@ -194,7 +_,7 @@
+                 AABB aabb = moveByPositionAndProgress(p_155933_, new AABB(0.0, d0, 0.0, 1.0, 1.5000010000000001, 1.0), p_155935_);
+                 double d1 = (double)(p_155934_ - p_155935_.progress);
+ 
+-                for(Entity entity : p_155932_.getEntities((Entity)null, aabb, p_287552_ -> matchesStickyCritera(aabb, p_287552_, p_155933_))) {
++                for (Entity entity : p_155932_.getEntities((Entity)null, aabb, p_287552_ -> matchesStickyCritera(aabb, p_287552_, p_155933_))) {
+                     moveEntityByPiston(direction, entity, d1, direction);
+                 }
+             }
+@@ -222,7 +_,7 @@
+     }
+ 
+     private static double getMovement(AABB p_60368_, Direction p_60369_, AABB p_60370_) {
+-        switch(p_60369_) {
++        switch (p_60369_) {
+             case EAST:
+                 return p_60368_.maxX - p_60370_.minX;
+             case WEST:
+@@ -291,7 +_,7 @@
+         p_155919_.progressO = p_155919_.progress;
+         if (p_155919_.progressO >= 1.0F) {
+             if (p_155916_.isClientSide && p_155919_.deathTicks < 5) {
+-                ++p_155919_.deathTicks;
++                p_155919_.deathTicks++;
+             } else {
+                 p_155916_.removeBlockEntity(p_155917_);
+                 p_155919_.setRemoved();
+@@ -322,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155930_, HolderLookup.Provider p_324214_) {
+-        super.load(p_155930_, p_324214_);
++    protected void loadAdditional(CompoundTag p_155930_, HolderLookup.Provider p_324214_) {
++        super.loadAdditional(p_155930_, p_324214_);
+         HolderGetter<Block> holdergetter = (HolderGetter<Block>)(this.level != null
+             ? this.level.holderLookup(Registries.BLOCK)
+             : BuiltInRegistries.BLOCK.asLookup());

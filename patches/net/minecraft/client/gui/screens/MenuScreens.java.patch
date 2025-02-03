@@ -1,29 +1,42 @@
 --- a/net/minecraft/client/gui/screens/MenuScreens.java
 +++ b/net/minecraft/client/gui/screens/MenuScreens.java
-@@ -41,6 +_,10 @@
+@@ -15,7 +_,6 @@
+ import net.minecraft.client.gui.screens.inventory.CraftingScreen;
+ import net.minecraft.client.gui.screens.inventory.DispenserScreen;
+ import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
+-import net.minecraft.client.gui.screens.inventory.FletchingScreen;
+ import net.minecraft.client.gui.screens.inventory.FurnaceScreen;
+ import net.minecraft.client.gui.screens.inventory.GrindstoneScreen;
+ import net.minecraft.client.gui.screens.inventory.HopperScreen;
+@@ -23,8 +_,6 @@
+ import net.minecraft.client.gui.screens.inventory.LoomScreen;
+ import net.minecraft.client.gui.screens.inventory.MenuAccess;
+ import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+-import net.minecraft.client.gui.screens.inventory.PoisonousPotatoCutterScreen;
+-import net.minecraft.client.gui.screens.inventory.PotatoRefineryScreen;
+ import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
+ import net.minecraft.client.gui.screens.inventory.SmithingScreen;
+ import net.minecraft.client.gui.screens.inventory.SmokerScreen;
+@@ -44,12 +_,17 @@
      private static final Map<MenuType<?>, MenuScreens.ScreenConstructor<?, ?>> SCREENS = Maps.newHashMap();
  
-     public static <T extends AbstractContainerMenu> void create(@Nullable MenuType<T> p_96202_, Minecraft p_96203_, int p_96204_, Component p_96205_) {
-+        getScreenFactory(p_96202_, p_96203_, p_96204_, p_96205_).ifPresent(f -> f.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_));
+     public static <T extends AbstractContainerMenu> void create(MenuType<T> p_96202_, Minecraft p_96203_, int p_96204_, Component p_96205_) {
++        getScreenFactory(p_96202_).ifPresent(f -> f.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_));
 +    }
 +
-+    public static <T extends AbstractContainerMenu> java.util.Optional<ScreenConstructor<T, ?>> getScreenFactory(@Nullable MenuType<T> p_96202_, Minecraft p_96203_, int p_96204_, Component p_96205_) {
-         if (p_96202_ == null) {
-             LOGGER.warn("Trying to open invalid screen with name: {}", p_96205_.getString());
++    public static <T extends AbstractContainerMenu> java.util.Optional<ScreenConstructor<T, ?>> getScreenFactory(MenuType<T> p_96202_) {
+         MenuScreens.ScreenConstructor<T, ?> screenconstructor = getConstructor(p_96202_);
+         if (screenconstructor == null) {
+             LOGGER.warn("Failed to create screen for menu type: {}", BuiltInRegistries.MENU.getKey(p_96202_));
          } else {
-@@ -48,9 +_,10 @@
-             if (screenconstructor == null) {
-                 LOGGER.warn("Failed to create screen for menu type: {}", BuiltInRegistries.MENU.getKey(p_96202_));
-             } else {
--                screenconstructor.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_);
-+                return java.util.Optional.of(screenconstructor);
-             }
+-            screenconstructor.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_);
++            return java.util.Optional.of(screenconstructor);
          }
 +        return java.util.Optional.empty();
      }
  
      @Nullable
-@@ -58,6 +_,11 @@
+@@ -57,6 +_,11 @@
          return (MenuScreens.ScreenConstructor<T, ?>)SCREENS.get(p_96200_);
      }
  
@@ -35,16 +48,38 @@
      public static <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void register(
          MenuType<? extends M> p_96207_, MenuScreens.ScreenConstructor<M, U> p_96208_
      ) {
-@@ -65,6 +_,12 @@
-         if (screenconstructor != null) {
-             throw new IllegalStateException("Duplicate registration for " + BuiltInRegistries.MENU.getKey(p_96207_));
+@@ -66,10 +_,16 @@
          }
-+    }
-+
+     }
+ 
 +    @org.jetbrains.annotations.ApiStatus.Internal
 +    public static void init() {
 +        var event = new net.neoforged.neoforge.client.event.RegisterMenuScreensEvent(SCREENS);
 +        net.neoforged.fml.ModLoader.get().postEvent(event);
++    }
++
+     public static boolean selfTest() {
+         boolean flag = false;
+ 
+-        for(MenuType<?> menutype : BuiltInRegistries.MENU) {
++        for (MenuType<?> menutype : BuiltInRegistries.MENU) {
+             if (!SCREENS.containsKey(menutype)) {
+                 LOGGER.debug("Menu {} has no matching screen", BuiltInRegistries.MENU.getKey(menutype));
+                 flag = true;
+@@ -92,7 +_,6 @@
+         register(MenuType.BEACON, BeaconScreen::new);
+         register(MenuType.BLAST_FURNACE, BlastFurnaceScreen::new);
+         register(MenuType.BREWING_STAND, BrewingStandScreen::new);
+-        register(MenuType.FLETCHING, FletchingScreen::new);
+         register(MenuType.CRAFTING, CraftingScreen::new);
+         register(MenuType.ENCHANTMENT, EnchantmentScreen::new);
+         register(MenuType.FURNACE, FurnaceScreen::new);
+@@ -106,8 +_,6 @@
+         register(MenuType.SMOKER, SmokerScreen::new);
+         register(MenuType.CARTOGRAPHY_TABLE, CartographyTableScreen::new);
+         register(MenuType.STONECUTTER, StonecutterScreen::new);
+-        register(MenuType.POISONOUS_POTATO_CUTTER, PoisonousPotatoCutterScreen::new);
+-        register(MenuType.POTATO_REFINERY, PotatoRefineryScreen::new);
      }
  
-     public static boolean selfTest() {
+     @OnlyIn(Dist.CLIENT)

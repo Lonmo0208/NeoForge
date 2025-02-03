@@ -1,5 +1,27 @@
 --- a/net/minecraft/world/level/LevelReader.java
 +++ b/net/minecraft/world/level/LevelReader.java
+@@ -95,7 +_,7 @@
+             if (!this.canSeeSky(blockpos)) {
+                 return false;
+             } else {
+-                for(BlockPos blockpos1 = blockpos.below(); blockpos1.getY() > p_46862_.getY(); blockpos1 = blockpos1.below()) {
++                for (BlockPos blockpos1 = blockpos.below(); blockpos1.getY() > p_46862_.getY(); blockpos1 = blockpos1.below()) {
+                     BlockState blockstate = this.getBlockState(blockpos1);
+                     if (blockstate.getLightBlock(this, blockpos1) > 0 && !blockstate.liquid()) {
+                         return false;
+@@ -149,9 +_,9 @@
+         int j1 = Mth.ceil(p_46856_.maxZ);
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(int k1 = i; k1 < j; ++k1) {
+-            for(int l1 = k; l1 < l; ++l1) {
+-                for(int i2 = i1; i2 < j1; ++i2) {
++        for (int k1 = i; k1 < j; k1++) {
++            for (int l1 = k; l1 < l; l1++) {
++                for (int i2 = i1; i2 < j1; i2++) {
+                     BlockState blockstate = this.getBlockState(blockpos$mutableblockpos.set(k1, l1, i2));
+                     if (!blockstate.getFluidState().isEmpty()) {
+                         return true;
 @@ -183,6 +_,10 @@
          return this.hasChunkAt(p_46806_.getX(), p_46806_.getZ());
      }
@@ -11,3 +33,14 @@
      @Deprecated
      default boolean hasChunksAt(BlockPos p_46833_, BlockPos p_46834_) {
          return this.hasChunksAt(p_46833_.getX(), p_46833_.getY(), p_46833_.getZ(), p_46834_.getX(), p_46834_.getY(), p_46834_.getZ());
+@@ -200,8 +_,8 @@
+         int k = SectionPos.blockToSectionCoord(p_151574_);
+         int l = SectionPos.blockToSectionCoord(p_151576_);
+ 
+-        for(int i1 = i; i1 <= j; ++i1) {
+-            for(int j1 = k; j1 <= l; ++j1) {
++        for (int i1 = i; i1 <= j; i1++) {
++            for (int j1 = k; j1 <= l; j1++) {
+                 if (!this.hasChunk(i1, j1)) {
+                     return false;
+                 }

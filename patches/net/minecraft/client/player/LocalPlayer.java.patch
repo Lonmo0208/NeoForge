@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/player/LocalPlayer.java
 +++ b/net/minecraft/client/player/LocalPlayer.java
-@@ -158,6 +_,7 @@
+@@ -159,6 +_,7 @@
  
      @Override
      public boolean hurt(DamageSource p_108662_, float p_108663_) {
@@ -8,7 +8,33 @@
          return false;
      }
  
-@@ -294,6 +_,7 @@
+@@ -212,14 +_,14 @@
+                 this.sendPosition();
+             }
+ 
+-            for(AmbientSoundHandler ambientsoundhandler : this.ambientSoundHandlers) {
++            for (AmbientSoundHandler ambientsoundhandler : this.ambientSoundHandlers) {
+                 ambientsoundhandler.tick();
+             }
+         }
+     }
+ 
+     public float getCurrentMood() {
+-        for(AmbientSoundHandler ambientsoundhandler : this.ambientSoundHandlers) {
++        for (AmbientSoundHandler ambientsoundhandler : this.ambientSoundHandlers) {
+             if (ambientsoundhandler instanceof BiomeAmbientSoundsHandler) {
+                 return ((BiomeAmbientSoundsHandler)ambientsoundhandler).getMoodiness();
+             }
+@@ -245,7 +_,7 @@
+             double d1 = this.getZ() - this.zLast;
+             double d2 = (double)(this.getYRot() - this.yRotLast);
+             double d3 = (double)(this.getXRot() - this.xRotLast);
+-            ++this.positionReminder;
++            this.positionReminder++;
+             boolean flag1 = Mth.lengthSquared(d4, d0, d1) > Mth.square(2.0E-4) || this.positionReminder >= 20;
+             boolean flag2 = d2 != 0.0 || d3 != 0.0;
+             if (this.isPassenger()) {
+@@ -295,6 +_,7 @@
          ServerboundPlayerActionPacket.Action serverboundplayeractionpacket$action = p_108701_
              ? ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS
              : ServerboundPlayerActionPacket.Action.DROP_ITEM;
@@ -16,7 +42,16 @@
          ItemStack itemstack = this.getInventory().removeFromSelected(p_108701_);
          this.connection.send(new ServerboundPlayerActionPacket(serverboundplayeractionpacket$action, BlockPos.ZERO, Direction.DOWN));
          return !itemstack.isEmpty();
-@@ -491,7 +_,14 @@
+@@ -425,7 +_,7 @@
+             double d2 = Double.MAX_VALUE;
+             Direction[] adirection = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH};
+ 
+-            for(Direction direction1 : adirection) {
++            for (Direction direction1 : adirection) {
+                 double d3 = direction1.getAxis().choose(d0, 0.0, d1);
+                 double d4 = direction1.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0 - d3 : d3;
+                 if (d4 < d2 && !this.suffocatesAt(blockpos.relative(direction1))) {
+@@ -492,7 +_,14 @@
  
      @Override
      public void playSound(SoundEvent p_108651_, float p_108652_, float p_108653_) {
@@ -32,7 +67,46 @@
      }
  
      @Override
-@@ -683,6 +_,7 @@
+@@ -551,8 +_,7 @@
+ 
+     @Nullable
+     public PlayerRideableJumping jumpableVehicle() {
+-        Entity entity = this.getControlledVehicle();
+-        if (entity instanceof PlayerRideableJumping playerrideablejumping && playerrideablejumping.canJump()) {
++        if (this.getControlledVehicle() instanceof PlayerRideableJumping playerrideablejumping && playerrideablejumping.canJump()) {
+             return playerrideablejumping;
+         }
+ 
+@@ -637,8 +_,8 @@
+             this.jumping = this.input.jumping;
+             this.yBobO = this.yBob;
+             this.xBobO = this.xBob;
+-            this.xBob += (this.getXRot() - this.xBob) * 0.5F;
+-            this.yBob += (this.getYRot() - this.yBob) * 0.5F;
++            this.xBob = this.xBob + (this.getXRot() - this.xBob) * 0.5F;
++            this.yBob = this.yBob + (this.getYRot() - this.yBob) * 0.5F;
+         }
+     }
+ 
+@@ -649,7 +_,7 @@
+     public void resetPos() {
+         this.setPose(Pose.STANDING);
+         if (this.level() != null) {
+-            for(double d0 = this.getY(); d0 > (double)this.level().getMinBuildHeight() && d0 < (double)this.level().getMaxBuildHeight(); ++d0) {
++            for (double d0 = this.getY(); d0 > (double)this.level().getMinBuildHeight() && d0 < (double)this.level().getMaxBuildHeight(); d0++) {
+                 this.setPos(this.getX(), d0, this.getZ());
+                 if (this.level().noCollision(this)) {
+                     break;
+@@ -667,7 +_,7 @@
+     @Override
+     public void aiStep() {
+         if (this.sprintTriggerTime > 0) {
+-            --this.sprintTriggerTime;
++            this.sprintTriggerTime--;
+         }
+ 
+         if (!(this.minecraft.screen instanceof ReceivingLevelScreen)) {
+@@ -684,6 +_,7 @@
              && (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
          float f = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(this), 0.0F, 1.0F);
          this.input.tick(this.isMovingSlowly(), f);
@@ -40,7 +114,16 @@
          this.minecraft.getTutorial().onInput(this.input);
          if (this.isUsingItem() && !this.isPassenger()) {
              this.input.leftImpulse *= 0.2F;
-@@ -711,7 +_,7 @@
+@@ -693,7 +_,7 @@
+ 
+         boolean flag3 = false;
+         if (this.autoJumpTime > 0) {
+-            --this.autoJumpTime;
++            this.autoJumpTime--;
+             flag3 = true;
+             this.input.jumping = true;
+         }
+@@ -712,7 +_,7 @@
          boolean flag4 = this.canStartSprinting();
          boolean flag5 = this.isPassenger() ? this.getVehicle().onGround() : this.onGround();
          boolean flag6 = !flag1 && !flag2;
@@ -49,7 +132,7 @@
              if (this.sprintTriggerTime <= 0 && !this.minecraft.options.keySprint.isDown()) {
                  this.sprintTriggerTime = 7;
              } else {
-@@ -719,15 +_,15 @@
+@@ -720,15 +_,15 @@
              }
          }
  
@@ -68,7 +151,7 @@
                      this.setSprinting(false);
                  }
              } else if (flag8) {
-@@ -736,7 +_,7 @@
+@@ -737,7 +_,7 @@
          }
  
          boolean flag9 = false;
@@ -77,11 +160,11 @@
              if (this.minecraft.gameMode.isAlwaysFlying()) {
                  if (!this.getAbilities().flying) {
                      this.getAbilities().flying = true;
-@@ -757,14 +_,15 @@
+@@ -758,14 +_,15 @@
  
          if (this.input.jumping && !flag9 && !flag && !this.getAbilities().flying && !this.isPassenger() && !this.onClimbable()) {
              ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
--            if (itemstack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemstack) && this.tryToStartFallFlying()) {
+-            if ((itemstack.is(Items.ELYTRA) || itemstack.is(Items.POISONOUS_POLYTRA)) && ElytraItem.isFlyEnabled(itemstack) && this.tryToStartFallFlying()) {
 +            if (itemstack.canElytraFly(this) && this.tryToStartFallFlying()) {
                  this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
              }
@@ -96,15 +179,80 @@
          }
  
          if (this.isEyeInFluid(FluidTags.WATER)) {
-@@ -866,6 +_,7 @@
+@@ -779,11 +_,11 @@
+         if (this.getAbilities().flying && this.isControlledCamera()) {
+             int j = 0;
+             if (this.input.shiftKeyDown) {
+-                --j;
++                j--;
+             }
+ 
+             if (this.input.jumping) {
+-                ++j;
++                j++;
+             }
+ 
+             if (j != 0) {
+@@ -794,7 +_,7 @@
+         PlayerRideableJumping playerrideablejumping = this.jumpableVehicle();
+         if (playerrideablejumping != null && playerrideablejumping.getJumpCooldown() == 0) {
+             if (this.jumpRidingTicks < 0) {
+-                ++this.jumpRidingTicks;
++                this.jumpRidingTicks++;
+                 if (this.jumpRidingTicks == 0) {
+                     this.jumpRidingScale = 0.0F;
+                 }
+@@ -808,7 +_,7 @@
+                 this.jumpRidingTicks = 0;
+                 this.jumpRidingScale = 0.0F;
+             } else if (flag) {
+-                ++this.jumpRidingTicks;
++                this.jumpRidingTicks++;
+                 if (this.jumpRidingTicks < 10) {
+                     this.jumpRidingScale = (float)this.jumpRidingTicks * 0.1F;
+                 } else {
+@@ -828,7 +_,7 @@
+ 
+     @Override
+     protected void tickDeath() {
+-        ++this.deathTime;
++        this.deathTime++;
+         if (this.deathTime == 20) {
+             this.remove(Entity.RemovalReason.KILLED);
+         }
+@@ -867,11 +_,11 @@
      @Override
      public void rideTick() {
          super.rideTick();
 +        if (this.wantsToStopRiding() && this.isPassenger()) this.input.shiftKeyDown = false;
          this.handsBusy = false;
-         Entity entity = this.getControlledVehicle();
-         if (entity instanceof Boat boat) {
-@@ -1053,7 +_,7 @@
+-        Entity entity = this.getControlledVehicle();
+-        if (entity instanceof Boat boat) {
++        if (this.getControlledVehicle() instanceof Boat boat) {
+             boat.setInput(this.input.left, this.input.right, this.input.up, this.input.down);
+-            this.handsBusy |= this.input.left || this.input.right || this.input.up || this.input.down;
++            this.handsBusy = this.handsBusy | (this.input.left || this.input.right || this.input.up || this.input.down);
+         }
+     }
+ 
+@@ -959,14 +_,14 @@
+                             .iterator();
+                         float f11 = Float.MIN_VALUE;
+ 
+-                        while(iterator.hasNext()) {
++                        while (iterator.hasNext()) {
+                             AABB aabb1 = iterator.next();
+                             if (aabb1.intersects(vec37, vec38) || aabb1.intersects(vec39, vec310)) {
+                                 f11 = (float)aabb1.maxY;
+                                 Vec3 vec311 = aabb1.getCenter();
+                                 BlockPos blockpos1 = BlockPos.containing(vec311);
+ 
+-                                for(int i = 1; (float)i < f7; ++i) {
++                                for (int i = 1; (float)i < f7; i++) {
+                                     BlockPos blockpos2 = blockpos1.above(i);
+                                     BlockState blockstate2 = this.level().getBlockState(blockpos2);
+                                     VoxelShape voxelshape;
+@@ -1054,7 +_,7 @@
      }
  
      private boolean hasEnoughFoodToStartSprinting() {
@@ -113,3 +261,13 @@
      }
  
      public float getWaterVision() {
+@@ -1126,9 +_,5 @@
+     @Override
+     public float getVisualRotationYInDegrees() {
+         return this.getYRot();
+-    }
+-
+-    public String getQuestKey() {
+-        return this.entityData.get(DATA_POTATO_QUEST);
+     }
+ }
