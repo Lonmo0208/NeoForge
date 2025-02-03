@@ -1,5 +1,27 @@
 --- a/net/minecraft/commands/arguments/selector/EntitySelectorParser.java
 +++ b/net/minecraft/commands/arguments/selector/EntitySelectorParser.java
+@@ -196,11 +_,7 @@
+         double d1 = (double)Mth.wrapDegrees(p_121255_.max() == null ? 359.0F : p_121255_.max());
+         return p_175137_ -> {
+             double d2 = Mth.wrapDegrees(p_121256_.applyAsDouble(p_175137_));
+-            if (d0 > d1) {
+-                return d2 >= d0 || d2 <= d1;
+-            } else {
+-                return d2 >= d0 && d2 <= d1;
+-            }
++            return d0 > d1 ? d2 >= d0 || d2 <= d1 : d2 >= d0 && d2 <= d1;
+         };
+     }
+ 
+@@ -280,7 +_,7 @@
+         this.suggestions = this::suggestOptionsKey;
+         this.reader.skipWhitespace();
+ 
+-        while(this.reader.canRead() && this.reader.peek() != ']') {
++        while (this.reader.canRead() && this.reader.peek() != ']') {
+             this.reader.skipWhitespace();
+             int i = this.reader.getCursor();
+             String s = this.reader.readString();
 @@ -463,6 +_,9 @@
              }
  

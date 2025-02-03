@@ -24,14 +24,18 @@
                  boolean flag1 = CrossbowItem.isCharged(p_109377_);
                  boolean flag2 = humanoidarm == HumanoidArm.RIGHT;
                  int i = flag2 ? 1 : -1;
-@@ -452,6 +_,7 @@
+@@ -452,9 +_,10 @@
                  );
              } else {
                  boolean flag3 = humanoidarm == HumanoidArm.RIGHT;
 +                if (!net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(p_109377_).applyForgeHandTransform(p_109379_, minecraft.player, humanoidarm, p_109377_, p_109373_, p_109378_, p_109376_)) // FORGE: Allow items to define custom arm animation
                  if (p_109372_.isUsingItem() && p_109372_.getUseItemRemainingTicks() > 0 && p_109372_.getUsedItemHand() == p_109375_) {
                      int k = flag3 ? 1 : -1;
-                     switch(p_109377_.getUseAnimation()) {
+-                    switch(p_109377_.getUseAnimation()) {
++                    switch (p_109377_.getUseAnimation()) {
+                         case NONE:
+                             this.applyItemArmTransform(p_109379_, humanoidarm, p_109378_);
+                             break;
 @@ -566,8 +_,16 @@
              this.offHandHeight = Mth.clamp(this.offHandHeight - 0.4F, 0.0F, 1.0F);
          } else {

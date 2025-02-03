@@ -144,3 +144,12 @@
                  }
              };
              thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
+@@ -321,7 +_,7 @@
+         WorldUpgrader worldupgrader = new WorldUpgrader(p_195489_, p_195490_, p_323503_, p_195491_, p_321704_);
+         Component component = null;
+ 
+-        while(!worldupgrader.isFinished()) {
++        while (!worldupgrader.isFinished()) {
+             Component component1 = worldupgrader.getStatus();
+             if (component != component1) {
+                 component = component1;

@@ -1,6 +1,22 @@
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
-@@ -133,7 +_,7 @@
+@@ -48,7 +_,7 @@
+ 
+ public class FallingBlockEntity extends Entity {
+     private static final Logger LOGGER = LogUtils.getLogger();
+-    private BlockState blockState = Blocks.GRAVTATER.defaultBlockState();
++    private BlockState blockState = Blocks.SAND.defaultBlockState();
+     public int time;
+     public boolean dropItem = true;
+     private boolean cancelDrop;
+@@ -127,13 +_,13 @@
+             this.discard();
+         } else {
+             Block block = this.blockState.getBlock();
+-            ++this.time;
++            this.time++;
+             this.applyGravity();
+             this.move(MoverType.SELF, this.getDeltaMovement());
              if (!this.level().isClientSide) {
                  BlockPos blockpos = this.blockPosition();
                  boolean flag = this.blockState.getBlock() instanceof ConcretePowderBlock;
@@ -18,3 +34,39 @@
                          blockpos = blockhitresult.getBlockPos();
                          flag1 = true;
                      }
+@@ -179,12 +_,12 @@
+                                         if (blockentity != null) {
+                                             CompoundTag compoundtag = blockentity.saveWithoutMetadata(this.level().registryAccess());
+ 
+-                                            for(String s : this.blockData.getAllKeys()) {
++                                            for (String s : this.blockData.getAllKeys()) {
+                                                 compoundtag.put(s, this.blockData.get(s).copy());
+                                             }
+ 
+                                             try {
+-                                                blockentity.load(compoundtag, this.level().registryAccess());
++                                                blockentity.loadWithComponents(compoundtag, this.level().registryAccess());
+                                             } catch (Exception exception) {
+                                                 LOGGER.error("Failed to load block entity from falling block", (Throwable)exception);
+                                             }
+@@ -242,8 +_,9 @@
+                 return false;
+             } else {
+                 Predicate<Entity> predicate = EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(EntitySelector.LIVING_ENTITY_STILL_ALIVE);
+-                Block $$8 = this.blockState.getBlock();
+-                DamageSource damagesource = $$8 instanceof Fallable fallable ? fallable.getFallDamageSource(this) : this.damageSources().fallingBlock(this);
++                DamageSource damagesource = this.blockState.getBlock() instanceof Fallable fallable
++                    ? fallable.getFallDamageSource(this)
++                    : this.damageSources().fallingBlock(this);
+                 float f = (float)Math.min(Mth.floor((float)i * this.fallDamagePerDistance), this.fallDamageMax);
+                 this.level().getEntities(this, this.getBoundingBox(), predicate).forEach(p_149649_ -> p_149649_.hurt(damagesource, f));
+                 boolean flag = this.blockState.is(BlockTags.ANVIL);
+@@ -298,7 +_,7 @@
+ 
+         this.cancelDrop = p_31964_.getBoolean("CancelDrop");
+         if (this.blockState.isAir()) {
+-            this.blockState = Blocks.GRAVTATER.defaultBlockState();
++            this.blockState = Blocks.SAND.defaultBlockState();
+         }
+     }
+ 

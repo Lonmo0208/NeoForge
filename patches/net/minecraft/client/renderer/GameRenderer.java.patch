@@ -17,7 +17,41 @@
          } catch (IOException ioexception) {
              list1.forEach(p_172729_ -> p_172729_.getFirst().close());
              throw new RuntimeException("could not reload shaders", ioexception);
-@@ -890,7 +_,7 @@
+@@ -764,7 +_,7 @@
+ 
+         this.mainCamera.tick();
+         this.itemInHandRenderer.tick();
+-        ++this.confusionAnimationTick;
++        this.confusionAnimationTick++;
+         if (this.minecraft.level.tickRateManager().runsNormally()) {
+             this.minecraft.levelRenderer.tickRain(this.mainCamera);
+             this.darkenWorldAmountO = this.darkenWorldAmount;
+@@ -778,7 +_,7 @@
+             }
+ 
+             if (this.itemActivationTicks > 0) {
+-                --this.itemActivationTicks;
++                this.itemActivationTicks--;
+                 if (this.itemActivationTicks == 0) {
+                     this.itemActivationItem = null;
+                 }
+@@ -854,13 +_,12 @@
+ 
+     private void tickFov() {
+         float f = 1.0F;
+-        Entity entity = this.minecraft.getCameraEntity();
+-        if (entity instanceof AbstractClientPlayer abstractclientplayer) {
++        if (this.minecraft.getCameraEntity() instanceof AbstractClientPlayer abstractclientplayer) {
+             f = abstractclientplayer.getFieldOfViewModifier();
+         }
+ 
+         this.oldFov = this.fov;
+-        this.fov += (f - this.fov) * 0.5F;
++        this.fov = this.fov + (f - this.fov) * 0.5F;
+         if (this.fov > 1.5F) {
+             this.fov = 1.5F;
+         }
+@@ -890,13 +_,12 @@
                  d0 *= Mth.lerp(this.minecraft.options.fovEffectScale().get(), 1.0, 0.85714287F);
              }
  
@@ -26,18 +60,63 @@
          }
      }
  
-@@ -907,6 +_,10 @@
+     private void bobHurt(PoseStack p_109118_, float p_109119_) {
+-        Entity $$3 = this.minecraft.getCameraEntity();
+-        if ($$3 instanceof LivingEntity livingentity) {
++        if (this.minecraft.getCameraEntity() instanceof LivingEntity livingentity) {
+             float f2 = (float)livingentity.hurtTime - p_109119_;
+             if (livingentity.isDeadOrDying()) {
+                 float f = Math.min((float)livingentity.deathTime + p_109119_, 20.0F);
+@@ -907,30 +_,29 @@
                  return;
              }
  
+-            float f3 = f2 / (float)livingentity.hurtDuration;
+-            float f4 = Mth.sin(f3 * f3 * f3 * f3 * (float) Math.PI);
+-            float f5 = livingentity.getHurtDir();
+-            p_109118_.mulPose(Axis.YP.rotationDegrees(-f5));
+-            float f1 = (float)((double)(-f4) * 14.0 * this.minecraft.options.damageTiltStrength().get());
 +            // Neo: Prevent screen shake if the damage type is marked as "forge:no_flinch"
 +            var lastSrc = livingentity.getLastDamageSource();
 +            if (lastSrc != null && lastSrc.is(net.neoforged.neoforge.common.Tags.DamageTypes.NO_FLINCH)) return;
 +
-             float f3 = f2 / (float)livingentity.hurtDuration;
-             float f4 = Mth.sin(f3 * f3 * f3 * f3 * (float) Math.PI);
-             float f5 = livingentity.getHurtDir();
-@@ -1056,12 +_,12 @@
++            f2 /= (float)livingentity.hurtDuration;
++            f2 = Mth.sin(f2 * f2 * f2 * f2 * (float) Math.PI);
++            float f3 = livingentity.getHurtDir();
++            p_109118_.mulPose(Axis.YP.rotationDegrees(-f3));
++            float f1 = (float)((double)(-f2) * 14.0 * this.minecraft.options.damageTiltStrength().get());
+             p_109118_.mulPose(Axis.ZP.rotationDegrees(f1));
+-            p_109118_.mulPose(Axis.YP.rotationDegrees(f5));
++            p_109118_.mulPose(Axis.YP.rotationDegrees(f3));
+         }
+     }
+ 
+     private void bobView(PoseStack p_109139_, float p_109140_) {
+-        Entity entity = this.minecraft.getCameraEntity();
+-        if (entity != null) {
+-            Vec3 vec3 = entity.lastScreenShakeOffset.lerp(entity.screenShakeOffset, (double)p_109140_);
+-            p_109139_.translate(vec3.x, vec3.y, vec3.z);
+-            if (entity instanceof Player) {
+-                Player player = (Player)entity;
+-                float f = player.walkDist - player.walkDistO;
+-                float f1 = -(player.walkDist + f * p_109140_);
+-                float f2 = Mth.lerp(p_109140_, player.oBob, player.bob);
+-                p_109139_.translate(Mth.sin(f1 * (float) Math.PI) * f2 * 0.5F, -Math.abs(Mth.cos(f1 * (float) Math.PI) * f2), 0.0F);
+-                p_109139_.mulPose(Axis.ZP.rotationDegrees(Mth.sin(f1 * (float) Math.PI) * f2 * 3.0F));
+-                p_109139_.mulPose(Axis.XP.rotationDegrees(Math.abs(Mth.cos(f1 * (float) Math.PI - 0.2F) * f2) * 5.0F));
+-            }
++        if (this.minecraft.getCameraEntity() instanceof Player) {
++            Player player = (Player)this.minecraft.getCameraEntity();
++            float f = player.walkDist - player.walkDistO;
++            float f1 = -(player.walkDist + f * p_109140_);
++            float f2 = Mth.lerp(p_109140_, player.oBob, player.bob);
++            p_109139_.translate(Mth.sin(f1 * (float) Math.PI) * f2 * 0.5F, -Math.abs(Mth.cos(f1 * (float) Math.PI) * f2), 0.0F);
++            p_109139_.mulPose(Axis.ZP.rotationDegrees(Mth.sin(f1 * (float) Math.PI) * f2 * 3.0F));
++            p_109139_.mulPose(Axis.XP.rotationDegrees(Math.abs(Mth.cos(f1 * (float) Math.PI - 0.2F) * f2) * 5.0F));
+         }
+     }
+ 
+@@ -1061,12 +_,12 @@
                      (float)((double)window.getHeight() / window.getGuiScale()),
                      0.0F,
                      1000.0F,
@@ -52,7 +131,7 @@
              RenderSystem.applyModelViewMatrix();
              Lighting.setupFor3DItems();
              GuiGraphics guigraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
-@@ -1095,7 +_,7 @@
+@@ -1100,7 +_,7 @@
                  }
              } else if (flag && this.minecraft.screen != null) {
                  try {
@@ -61,7 +140,7 @@
                  } catch (Throwable throwable1) {
                      CrashReport crashreport1 = CrashReport.forThrowable(throwable1, "Rendering screen");
                      CrashReportCategory crashreportcategory1 = crashreport1.addCategory("Screen render details");
-@@ -1271,12 +_,16 @@
+@@ -1276,12 +_,16 @@
          }
  
          this.resetProjectionMatrix(matrix4f);

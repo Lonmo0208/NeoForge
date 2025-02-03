@@ -1,5 +1,23 @@
 --- a/net/minecraft/world/level/lighting/BlockLightEngine.java
 +++ b/net/minecraft/world/level/lighting/BlockLightEngine.java
+@@ -46,7 +_,7 @@
+     protected void propagateIncrease(long p_285500_, long p_285410_, int p_285492_) {
+         BlockState blockstate = null;
+ 
+-        for(Direction direction : PROPAGATION_DIRECTIONS) {
++        for (Direction direction : PROPAGATION_DIRECTIONS) {
+             if (LightEngine.QueueEntry.shouldPropagateInDirection(p_285410_, direction)) {
+                 long i = BlockPos.offset(p_285500_, direction);
+                 if (this.storage.storingLightForSection(SectionPos.blockToSection(i))) {
+@@ -82,7 +_,7 @@
+     protected void propagateDecrease(long p_285435_, long p_285230_) {
+         int i = LightEngine.QueueEntry.getFromLevel(p_285230_);
+ 
+-        for(Direction direction : PROPAGATION_DIRECTIONS) {
++        for (Direction direction : PROPAGATION_DIRECTIONS) {
+             if (LightEngine.QueueEntry.shouldPropagateInDirection(p_285230_, direction)) {
+                 long j = BlockPos.offset(p_285435_, direction);
+                 if (this.storage.storingLightForSection(SectionPos.blockToSection(j))) {
 @@ -109,7 +_,7 @@
      }
  

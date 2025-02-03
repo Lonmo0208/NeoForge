@@ -1,9 +1,35 @@
 --- a/net/minecraft/server/advancements/AdvancementVisibilityEvaluator.java
 +++ b/net/minecraft/server/advancements/AdvancementVisibilityEvaluator.java
-@@ -69,6 +_,15 @@
-         evaluateVisibility(advancementnode, stack, p_265561_, p_265381_);
+@@ -23,7 +_,7 @@
      }
  
+     private static boolean evaluateVisiblityForUnfinishedNode(Stack<AdvancementVisibilityEvaluator.VisibilityRule> p_265343_) {
+-        for(int i = 0; i <= 2; ++i) {
++        for (int i = 0; i <= 2; i++) {
+             AdvancementVisibilityEvaluator.VisibilityRule advancementvisibilityevaluator$visibilityrule = p_265343_.peek(i);
+             if (advancementvisibilityevaluator$visibilityrule == AdvancementVisibilityEvaluator.VisibilityRule.SHOW) {
+                 return true;
+@@ -48,7 +_,7 @@
+         boolean flag1 = flag;
+         p_301009_.push(advancementvisibilityevaluator$visibilityrule);
+ 
+-        for(AdvancementNode advancementnode : p_301282_.children()) {
++        for (AdvancementNode advancementnode : p_301282_.children()) {
+             flag1 |= evaluateVisibility(advancementnode, p_301009_, p_265359_, p_265303_);
+         }
+ 
+@@ -62,11 +_,20 @@
+         AdvancementNode advancementnode = p_301203_.root();
+         Stack<AdvancementVisibilityEvaluator.VisibilityRule> stack = new ObjectArrayList<>();
+ 
+-        for(int i = 0; i <= 2; ++i) {
++        for (int i = 0; i <= 2; i++) {
+             stack.push(AdvancementVisibilityEvaluator.VisibilityRule.NO_CHANGE);
+         }
+ 
+         evaluateVisibility(advancementnode, stack, p_265561_, p_265381_);
++    }
++
 +    public static boolean isVisible(AdvancementNode advancement, Predicate<AdvancementNode> test) {
 +        Stack<AdvancementVisibilityEvaluator.VisibilityRule> stack = new ObjectArrayList<>();
 +
@@ -11,8 +37,6 @@
 +            stack.push(AdvancementVisibilityEvaluator.VisibilityRule.NO_CHANGE);
 +        }
 +        return evaluateVisibility(advancement.root(), stack, test, (adv, visible) -> {});
-+    }
-+
+     }
+ 
      @FunctionalInterface
-     public interface Output {
-         void accept(AdvancementNode p_300909_, boolean p_265580_);

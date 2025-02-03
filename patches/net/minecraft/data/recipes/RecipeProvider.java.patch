@@ -1,6 +1,26 @@
 --- a/net/minecraft/data/recipes/RecipeProvider.java
 +++ b/net/minecraft/data/recipes/RecipeProvider.java
-@@ -85,18 +_,18 @@
+@@ -20,7 +_,6 @@
+ import net.minecraft.advancements.critereon.ItemPredicate;
+ import net.minecraft.advancements.critereon.MinMaxBounds;
+ import net.minecraft.core.HolderLookup;
+-import net.minecraft.core.component.DataComponents;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.data.BlockFamilies;
+ import net.minecraft.data.BlockFamily;
+@@ -35,11 +_,9 @@
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.Items;
+-import net.minecraft.world.item.alchemy.PotionContents;
+ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+ import net.minecraft.world.item.crafting.BlastingRecipe;
+ import net.minecraft.world.item.crafting.Ingredient;
+-import net.minecraft.world.item.crafting.PotatoRefinementRecipe;
+ import net.minecraft.world.item.crafting.Recipe;
+ import net.minecraft.world.item.crafting.RecipeSerializer;
+ import net.minecraft.world.item.crafting.SmeltingRecipe;
+@@ -88,18 +_,18 @@
          this.buildRecipes(
              new RecipeOutput() {
                  @Override
@@ -23,7 +43,12 @@
                                      RecipeProvider.this.advancementPathProvider.json(p_311794_.id())
                                  )
                              );
-@@ -114,12 +_,16 @@
+@@ -113,16 +_,20 @@
+                 }
+             }
+         );
+-        return CompletableFuture.allOf(list.toArray(p_253414_ -> new CompletableFuture[p_253414_]));
++        return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new));
      }
  
      protected CompletableFuture<?> buildAdvancement(CachedOutput p_253674_, HolderLookup.Provider p_323646_, AdvancementHolder p_301116_) {
@@ -42,3 +67,127 @@
          BlockFamilies.getAllFamilies().filter(BlockFamily::shouldGenerateRecipe).forEach(p_313461_ -> generateRecipes(p_301146_, p_313461_, p_251836_));
      }
  
+@@ -184,7 +_,7 @@
+         String p_251450_,
+         String p_249236_
+     ) {
+-        for(ItemLike itemlike : p_249619_) {
++        for (ItemLike itemlike : p_249619_) {
+             SimpleCookingRecipeBuilder.generic(Ingredient.of(itemlike), p_251154_, p_250066_, p_251871_, p_251316_, p_251817_, p_312707_)
+                 .group(p_251450_)
+                 .unlockedBy(getHasName(itemlike), has(itemlike))
+@@ -241,14 +_,6 @@
+             .save(p_301221_);
+     }
+ 
+-    protected static void planksFromLogs(RecipeOutput p_341651_, ItemLike p_342311_, ItemLike p_341458_, int p_341091_) {
+-        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_342311_, p_341091_)
+-            .requires(p_341458_)
+-            .group("planks")
+-            .unlockedBy("has_logs", has(p_341458_))
+-            .save(p_341651_);
+-    }
+-
+     protected static void woodFromLogs(RecipeOutput p_301095_, ItemLike p_126004_, ItemLike p_126005_) {
+         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, p_126004_, 3)
+             .define('#', p_126005_)
+@@ -343,7 +_,7 @@
+     }
+ 
+     protected static void colorBlockWithDye(RecipeOutput p_301260_, List<Item> p_289675_, List<Item> p_289672_, String p_289641_) {
+-        for(int i = 0; i < p_289675_.size(); ++i) {
++        for (int i = 0; i < p_289675_.size(); i++) {
+             Item item = p_289675_.get(i);
+             Item item1 = p_289672_.get(i);
+             ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, item1)
+@@ -505,30 +_,6 @@
+             .save(p_301195_, getConversionRecipeName(p_251254_, p_249666_) + "_stonecutting");
+     }
+ 
+-    protected static void poisonousPotatoCutterResultFromBase(
+-        RecipeOutput p_342222_, RecipeCategory p_340396_, ItemLike p_341967_, ItemLike p_342042_, int p_342585_
+-    ) {
+-        SingleItemRecipeBuilder.poisonous_potato_cutting(Ingredient.of(p_342042_), p_340396_, p_341967_, p_342585_)
+-            .unlockedBy(getHasName(p_342042_), has(p_342042_))
+-            .save(p_342222_, getConversionRecipeName(p_341967_, p_342042_) + "_poisonous_potato_cutting");
+-    }
+-
+-    protected static void potatoRefinement(RecipeOutput p_340577_, ItemStack p_342399_, ItemLike p_341689_, ItemStack p_341537_, float p_342499_) {
+-        potatoRefinement(p_340577_, p_342399_, p_341689_, Ingredient.of(p_341537_), p_342499_);
+-    }
+-
+-    protected static void potatoRefinement(RecipeOutput p_342469_, ItemStack p_340772_, ItemLike p_341093_, ItemLike p_341922_, float p_341565_) {
+-        potatoRefinement(p_342469_, p_340772_, p_341093_, Ingredient.of(p_341922_), p_341565_);
+-    }
+-
+-    protected static void potatoRefinement(RecipeOutput p_342515_, ItemStack p_341879_, ItemLike p_342514_, Ingredient p_340673_, float p_342364_) {
+-        p_342515_.accept(
+-            new ResourceLocation(getPotatoRefinementRecipeName(p_341879_)),
+-            new PotatoRefinementRecipe(Ingredient.of(p_342514_), p_340673_, p_341879_, 0.1F, (int)(p_342364_ * 100.0F)),
+-            null
+-        );
+-    }
+-
+     protected static void smeltingResultFromBase(RecipeOutput p_300916_, ItemLike p_176741_, ItemLike p_176742_) {
+         SimpleCookingRecipeBuilder.smelting(Ingredient.of(p_176742_), RecipeCategory.BUILDING_BLOCKS, p_176741_, 0.1F, 200)
+             .unlockedBy(getHasName(p_176742_), has(p_176742_))
+@@ -616,8 +_,6 @@
+         simpleCookingRecipe(p_301054_, p_126008_, p_250529_, p_312449_, p_126010_, Items.MUTTON, Items.COOKED_MUTTON, 0.35F);
+         simpleCookingRecipe(p_301054_, p_126008_, p_250529_, p_312449_, p_126010_, Items.PORKCHOP, Items.COOKED_PORKCHOP, 0.35F);
+         simpleCookingRecipe(p_301054_, p_126008_, p_250529_, p_312449_, p_126010_, Items.POTATO, Items.BAKED_POTATO, 0.35F);
+-        simpleCookingRecipe(p_301054_, p_126008_, p_250529_, p_312449_, p_126010_, Items.POISONOUS_POTATO_STICKS, Items.POISONOUS_POTATO_FRIES, 0.35F);
+-        simpleCookingRecipe(p_301054_, p_126008_, p_250529_, p_312449_, p_126010_, Items.POISONOUS_POTATO_SLICES, Items.POISONOUS_POTATO_CHIPS, 0.35F);
+         simpleCookingRecipe(p_301054_, p_126008_, p_250529_, p_312449_, p_126010_, Items.RABBIT, Items.COOKED_RABBIT, 0.35F);
+     }
+ 
+@@ -640,14 +_,14 @@
+         HoneycombItem.WAXABLES
+             .get()
+             .forEach(
+-                (p_313464_, p_313465_) -> {
+-                    if (p_313465_.requiredFeatures().isSubsetOf(p_313879_)) {
+-                        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_313465_)
+-                            .requires(p_313464_)
++                (p_337490_, p_337491_) -> {
++                    if (p_337491_.requiredFeatures().isSubsetOf(p_313879_)) {
++                        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, p_337491_)
++                            .requires(p_337490_)
+                             .requires(Items.HONEYCOMB)
+-                            .group(getItemName(p_313465_))
+-                            .unlockedBy(getHasName(p_313464_), has(p_313464_))
+-                            .save(p_301254_, getConversionRecipeName(p_313465_, Items.HONEYCOMB));
++                            .group(getItemName(p_337491_))
++                            .unlockedBy(getHasName(p_337490_), has(p_337490_))
++                            .save(p_301254_, getConversionRecipeName(p_337491_, Items.HONEYCOMB));
+                     }
+                 }
+             );
+@@ -730,7 +_,7 @@
+     }
+ 
+     protected static Criterion<InventoryChangeTrigger.TriggerInstance> inventoryTrigger(ItemPredicate.Builder... p_299111_) {
+-        return inventoryTrigger(Arrays.stream(p_299111_).map(ItemPredicate.Builder::build).<ItemPredicate>toArray(p_297943_ -> new ItemPredicate[p_297943_]));
++        return inventoryTrigger(Arrays.stream(p_299111_).map(ItemPredicate.Builder::build).toArray(ItemPredicate[]::new));
+     }
+ 
+     protected static Criterion<InventoryChangeTrigger.TriggerInstance> inventoryTrigger(ItemPredicate... p_126012_) {
+@@ -760,19 +_,6 @@
+ 
+     protected static String getBlastingRecipeName(ItemLike p_176669_) {
+         return getItemName(p_176669_) + "_from_blasting";
+-    }
+-
+-    protected static String getPotatoRefinementRecipeName(ItemStack p_340736_) {
+-        Item item = p_340736_.getItem();
+-        PotionContents potioncontents = p_340736_.get(DataComponents.POTION_CONTENTS);
+-        String s = "_from_potato_refinement";
+-        return potioncontents != null
+-            ? getItemName(item) + "_with_" + getPotionName(potioncontents) + "_from_potato_refinement"
+-            : getItemName(item) + "_from_potato_refinement";
+-    }
+-
+-    private static String getPotionName(PotionContents p_341185_) {
+-        return new ResourceLocation(p_341185_.potion().get().getRegisteredName()).getPath();
+     }
+ 
+     @Override

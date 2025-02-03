@@ -1,6 +1,38 @@
 --- a/net/minecraft/world/entity/animal/Cat.java
 +++ b/net/minecraft/world/entity/animal/Cat.java
-@@ -382,9 +_,9 @@
+@@ -66,7 +_,6 @@
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.ServerLevelAccessor;
+-import net.minecraft.world.level.biome.Biomes;
+ import net.minecraft.world.level.block.BedBlock;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+@@ -340,11 +_,8 @@
+     public boolean canMate(Animal p_28127_) {
+         if (!this.isTame()) {
+             return false;
+-        } else if (!(p_28127_ instanceof Cat)) {
+-            return false;
+         } else {
+-            Cat cat = (Cat)p_28127_;
+-            return cat.isTame() && super.canMate(p_28127_);
++            return !(p_28127_ instanceof Cat cat) ? false : cat.isTame() && super.canMate(p_28127_);
+         }
+     }
+ 
+@@ -356,9 +_,7 @@
+         TagKey<CatVariant> tagkey = flag ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
+         BuiltInRegistries.CAT_VARIANT.getRandomElementOf(tagkey, p_28134_.getRandom()).ifPresent(this::setVariant);
+         ServerLevel serverlevel = p_28134_.getLevel();
+-        boolean flag1 = serverlevel.getBiome(this.blockPosition()).is(Biomes.CORRUPTION);
+-        boolean flag2 = serverlevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid();
+-        if (flag1 || flag2) {
++        if (serverlevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
+             this.setVariant(BuiltInRegistries.CAT_VARIANT.getHolderOrThrow(CatVariant.ALL_BLACK));
+             this.setPersistenceRequired();
+         }
+@@ -385,9 +_,9 @@
                      }
                  } else if (this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
                      if (!this.level().isClientSide()) {
@@ -12,7 +44,7 @@
                      }
  
                      return InteractionResult.sidedSuccess(this.level().isClientSide());
-@@ -444,7 +_,7 @@
+@@ -447,7 +_,7 @@
      }
  
      private void tryToTame(Player p_333858_) {
@@ -21,3 +53,30 @@
              this.tame(p_333858_);
              this.setOrderedToSit(true);
              this.level().broadcastEntityEvent(this, (byte)7);
+@@ -525,7 +_,7 @@
+         }
+ 
+         private boolean spaceIsOccupied() {
+-            for(Cat cat : this.cat.level().getEntitiesOfClass(Cat.class, new AABB(this.goalPos).inflate(2.0))) {
++            for (Cat cat : this.cat.level().getEntitiesOfClass(Cat.class, new AABB(this.goalPos).inflate(2.0))) {
+                 if (cat != this.cat && (cat.isLying() || cat.isRelaxStateOne())) {
+                     return true;
+                 }
+@@ -583,7 +_,7 @@
+                 .withParameter(LootContextParams.THIS_ENTITY, this.cat)
+                 .create(LootContextParamSets.GIFT);
+ 
+-            for(ItemStack itemstack : loottable.getRandomItems(lootparams)) {
++            for (ItemStack itemstack : loottable.getRandomItems(lootparams)) {
+                 this.cat
+                     .level()
+                     .addFreshEntity(
+@@ -604,7 +_,7 @@
+                 this.cat.setInSittingPose(false);
+                 this.cat.getNavigation().moveTo((double)this.goalPos.getX(), (double)this.goalPos.getY(), (double)this.goalPos.getZ(), 1.1F);
+                 if (this.cat.distanceToSqr(this.ownerPlayer) < 2.5) {
+-                    ++this.onBedTicks;
++                    this.onBedTicks++;
+                     if (this.onBedTicks > this.adjustedTickDelay(16)) {
+                         this.cat.setLying(true);
+                         this.cat.setRelaxStateOne(false);

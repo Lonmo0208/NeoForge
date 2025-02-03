@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/level/block/FlowerPotBlock.java
 +++ b/net/minecraft/world/level/block/FlowerPotBlock.java
+@@ -14,7 +_,6 @@
+ import net.minecraft.world.ItemInteractionResult;
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.item.BlockItem;
+-import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.BlockGetter;
+ import net.minecraft.world.level.Level;
 @@ -36,6 +_,7 @@
      private static final Map<Block, Block> POTTED_BY_CONTENT = Maps.newHashMap();
      public static final float AABB_SIZE = 3.0F;
@@ -43,12 +51,15 @@
      }
  
      @Override
-@@ -59,7 +_,7 @@
+@@ -58,8 +_,9 @@
+     protected ItemInteractionResult useItemOn(
          ItemStack p_316610_, BlockState p_316240_, Level p_316456_, BlockPos p_316502_, Player p_316491_, InteractionHand p_316444_, BlockHitResult p_316826_
      ) {
-         Item item = p_316610_.getItem();
+-        Item item = p_316610_.getItem();
 -        BlockState blockstate = (item instanceof BlockItem blockitem ? POTTED_BY_CONTENT.getOrDefault(blockitem.getBlock(), Blocks.AIR) : Blocks.AIR)
-+        BlockState blockstate = (item instanceof BlockItem blockitem ? getEmptyPot().fullPots.getOrDefault(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(blockitem.getBlock()), () -> Blocks.AIR).get() : Blocks.AIR)
++        BlockState blockstate = (p_316610_.getItem() instanceof BlockItem blockitem
++                ? getEmptyPot().fullPots.getOrDefault(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(blockitem.getBlock()), () -> Blocks.AIR).get()
++                : Blocks.AIR)
              .defaultBlockState();
          if (blockstate.isAir()) {
              return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;

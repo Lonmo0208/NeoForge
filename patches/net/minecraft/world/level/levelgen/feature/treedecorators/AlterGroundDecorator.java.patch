@@ -1,5 +1,26 @@
 --- a/net/minecraft/world/level/levelgen/feature/treedecorators/AlterGroundDecorator.java
 +++ b/net/minecraft/world/level/levelgen/feature/treedecorators/AlterGroundDecorator.java
+@@ -1,17 +_,16 @@
+ package net.minecraft.world.level.levelgen.feature.treedecorators;
+ 
+ import com.google.common.collect.Lists;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import java.util.List;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.world.level.levelgen.feature.Feature;
+ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+ 
+ public class AlterGroundDecorator extends TreeDecorator {
+-    public static final Codec<AlterGroundDecorator> CODEC = BlockStateProvider.CODEC
++    public static final MapCodec<AlterGroundDecorator> CODEC = BlockStateProvider.CODEC
+         .fieldOf("provider")
+-        .xmap(AlterGroundDecorator::new, p_69327_ -> p_69327_.provider)
+-        .codec();
++        .xmap(AlterGroundDecorator::new, p_69327_ -> p_69327_.provider);
+     private final BlockStateProvider provider;
+ 
+     public AlterGroundDecorator(BlockStateProvider p_69306_) {
 @@ -38,19 +_,20 @@
          }
  
@@ -16,7 +37,8 @@
 +                this.placeCircle(p_225969_, p_225978_.west().south(2), eventProvider);
 +                this.placeCircle(p_225969_, p_225978_.east(2).south(2), eventProvider);
  
-                 for(int j = 0; j < 5; ++j) {
+-                for(int j = 0; j < 5; ++j) {
++                for (int j = 0; j < 5; j++) {
                      int k = p_225969_.random().nextInt(64);
                      int l = k % 8;
                      int i1 = k / 8;
@@ -30,12 +52,14 @@
      }
  
      private void placeCircle(TreeDecorator.Context p_225971_, BlockPos p_225972_) {
+-        for(int i = -2; i <= 2; ++i) {
+-            for(int j = -2; j <= 2; ++j) {
 +        placeCircle(p_225971_, p_225972_, this.provider::getState);
 +    }
 +
 +    private void placeCircle(TreeDecorator.Context p_225971_, BlockPos p_225972_, net.neoforged.neoforge.event.level.AlterGroundEvent.StateProvider eventProvider) {
-         for(int i = -2; i <= 2; ++i) {
-             for(int j = -2; j <= 2; ++j) {
++        for (int i = -2; i <= 2; i++) {
++            for (int j = -2; j <= 2; j++) {
                  if (Math.abs(i) != 2 || Math.abs(j) != 2) {
 -                    this.placeBlockAt(p_225971_, p_225972_.offset(i, 0, j));
 +                    this.placeBlockAt(p_225971_, p_225972_.offset(i, 0, j), eventProvider);
@@ -45,11 +69,12 @@
      }
  
      private void placeBlockAt(TreeDecorator.Context p_225974_, BlockPos p_225975_) {
+-        for(int i = 2; i >= -3; --i) {
 +        placeCircle(p_225974_, p_225975_, this.provider::getState);
 +    }
 +
 +    private void placeBlockAt(TreeDecorator.Context p_225974_, BlockPos p_225975_, net.neoforged.neoforge.event.level.AlterGroundEvent.StateProvider eventProvider) {
-         for(int i = 2; i >= -3; --i) {
++        for (int i = 2; i >= -3; i--) {
              BlockPos blockpos = p_225975_.above(i);
              if (Feature.isGrassOrDirt(p_225974_.level(), blockpos)) {
 -                p_225974_.setBlock(blockpos, this.provider.getState(p_225974_.random(), p_225975_));

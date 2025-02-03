@@ -9,6 +9,33 @@
              this.tabButtons.add(new RecipeBookTabButton(recipebookcategories));
          }
  
+@@ -218,7 +_,7 @@
+         int k = 27;
+         int l = 0;
+ 
+-        for(RecipeBookTabButton recipebooktabbutton : this.tabButtons) {
++        for (RecipeBookTabButton recipebooktabbutton : this.tabButtons) {
+             RecipeBookCategories recipebookcategories = recipebooktabbutton.getCategory();
+             if (recipebookcategories == RecipeBookCategories.CRAFTING_SEARCH || recipebookcategories == RecipeBookCategories.FURNACE_SEARCH) {
+                 recipebooktabbutton.visible = true;
+@@ -261,7 +_,7 @@
+             p_283597_.blit(RECIPE_BOOK_LOCATION, i, j, 1, 1, 147, 166);
+             this.searchBox.render(p_283597_, p_282668_, p_283506_, p_282813_);
+ 
+-            for(RecipeBookTabButton recipebooktabbutton : this.tabButtons) {
++            for (RecipeBookTabButton recipebooktabbutton : this.tabButtons) {
+                 recipebooktabbutton.render(p_283597_, p_282668_, p_283506_, p_282813_);
+             }
+ 
+@@ -285,7 +_,7 @@
+     private void renderGhostRecipeTooltip(GuiGraphics p_282776_, int p_282886_, int p_281571_, int p_282948_, int p_283050_) {
+         ItemStack itemstack = null;
+ 
+-        for(int i = 0; i < this.ghostRecipe.size(); ++i) {
++        for (int i = 0; i < this.ghostRecipe.size(); i++) {
+             GhostRecipe.GhostIngredient ghostrecipe$ghostingredient = this.ghostRecipe.get(i);
+             int j = ghostrecipe$ghostingredient.getX() + p_282886_;
+             int k = ghostrecipe$ghostingredient.getY() + p_281571_;
 @@ -295,7 +_,7 @@
          }
  
@@ -18,3 +45,21 @@
          }
      }
  
+@@ -335,7 +_,7 @@
+                     this.updateCollections(false);
+                     return true;
+                 } else {
+-                    for(RecipeBookTabButton recipebooktabbutton : this.tabButtons) {
++                    for (RecipeBookTabButton recipebooktabbutton : this.tabButtons) {
+                         if (recipebooktabbutton.mouseClicked(p_100294_, p_100295_, p_100296_)) {
+                             if (this.selectedTab != recipebooktabbutton) {
+                                 if (this.selectedTab != null) {
+@@ -476,7 +_,7 @@
+ 
+     @Override
+     public void recipesShown(List<RecipeHolder<?>> p_100344_) {
+-        for(RecipeHolder<?> recipeholder : p_100344_) {
++        for (RecipeHolder<?> recipeholder : p_100344_) {
+             this.minecraft.player.removeRecipeHighlight(recipeholder);
+         }
+     }

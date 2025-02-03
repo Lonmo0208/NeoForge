@@ -1,5 +1,72 @@
 --- a/net/minecraft/world/level/block/entity/ShulkerBoxBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/ShulkerBoxBlockEntity.java
+@@ -65,7 +_,7 @@
+ 
+     private void updateAnimation(Level p_155680_, BlockPos p_155681_, BlockState p_155682_) {
+         this.progressOld = this.progress;
+-        switch(this.animationStatus) {
++        switch (this.animationStatus) {
+             case CLOSED:
+                 this.progress = 0.0F;
+                 break;
+@@ -83,6 +_,9 @@
+ 
+                 this.moveCollidedEntities(p_155680_, p_155681_, p_155682_);
+                 break;
++            case OPENED:
++                this.progress = 1.0F;
++                break;
+             case CLOSING:
+                 this.progress -= 0.1F;
+                 if (this.progressOld == 1.0F) {
+@@ -94,9 +_,6 @@
+                     this.progress = 0.0F;
+                     doNeighborUpdates(p_155680_, p_155681_, p_155682_);
+                 }
+-                break;
+-            case OPENED:
+-                this.progress = 1.0F;
+         }
+     }
+ 
+@@ -114,7 +_,7 @@
+             AABB aabb = Shulker.getProgressDeltaAabb(1.0F, direction, this.progressOld, this.progress).move(p_155685_);
+             List<Entity> list = p_155684_.getEntities(null, aabb);
+             if (!list.isEmpty()) {
+-                for(Entity entity : list) {
++                for (Entity entity : list) {
+                     if (entity.getPistonPushReaction() != PushReaction.IGNORE) {
+                         entity.move(
+                             MoverType.SHULKER_BOX,
+@@ -165,7 +_,7 @@
+                 this.openCount = 0;
+             }
+ 
+-            ++this.openCount;
++            this.openCount++;
+             this.level.blockEvent(this.worldPosition, this.getBlockState().getBlock(), 1, this.openCount);
+             if (this.openCount == 1) {
+                 this.level.gameEvent(p_59692_, GameEvent.CONTAINER_OPEN, this.worldPosition);
+@@ -178,7 +_,7 @@
+     @Override
+     public void stopOpen(Player p_59688_) {
+         if (!this.remove && !p_59688_.isSpectator()) {
+-            --this.openCount;
++            this.openCount--;
+             this.level.blockEvent(this.worldPosition, this.getBlockState().getBlock(), 1, this.openCount);
+             if (this.openCount <= 0) {
+                 this.level.gameEvent(p_59688_, GameEvent.CONTAINER_CLOSE, this.worldPosition);
+@@ -194,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155678_, HolderLookup.Provider p_324114_) {
+-        super.load(p_155678_, p_324114_);
++    protected void loadAdditional(CompoundTag p_155678_, HolderLookup.Provider p_324114_) {
++        super.loadAdditional(p_155678_, p_324114_);
+         this.loadFromTag(p_155678_, p_324114_);
+     }
+ 
 @@ -231,7 +_,7 @@
  
      @Override

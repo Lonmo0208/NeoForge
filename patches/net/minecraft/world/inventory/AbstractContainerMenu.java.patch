@@ -1,6 +1,137 @@
 --- a/net/minecraft/world/inventory/AbstractContainerMenu.java
 +++ b/net/minecraft/world/inventory/AbstractContainerMenu.java
-@@ -404,6 +_,7 @@
+@@ -19,7 +_,6 @@
+ import net.minecraft.ReportedException;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.NonNullList;
+-import net.minecraft.core.component.DataComponents;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.util.Mth;
+@@ -70,10 +_,7 @@
+ 
+     protected static boolean stillValid(ContainerLevelAccess p_38890_, Player p_38891_, Block p_38892_) {
+         return p_38890_.evaluate(
+-            (p_38916_, p_38917_) -> !p_38916_.getBlockState(p_38917_).is(p_38892_)
+-                    ? false
+-                    : p_38891_.distanceToSqr((double)p_38917_.getX() + 0.5, (double)p_38917_.getY() + 0.5, (double)p_38917_.getZ() + 0.5) <= 64.0,
+-            true
++            (p_339522_, p_339523_) -> !p_339522_.getBlockState(p_339523_).is(p_38892_) ? false : p_38891_.canInteractWithBlock(p_339523_, 4.0), true
+         );
+     }
+ 
+@@ -118,7 +_,7 @@
+     }
+ 
+     protected void addDataSlots(ContainerData p_38885_) {
+-        for(int i = 0; i < p_38885_.getCount(); ++i) {
++        for (int i = 0; i < p_38885_.getCount(); i++) {
+             this.addDataSlot(DataSlot.forContainer(p_38885_, i));
+         }
+     }
+@@ -138,14 +_,14 @@
+     public void sendAllDataToRemote() {
+         int i = 0;
+ 
+-        for(int j = this.slots.size(); i < j; ++i) {
++        for (int j = this.slots.size(); i < j; i++) {
+             this.remoteSlots.set(i, this.slots.get(i).getItem().copy());
+         }
+ 
+         this.remoteCarried = this.getCarried().copy();
+         i = 0;
+ 
+-        for(int k = this.dataSlots.size(); i < k; ++i) {
++        for (int k = this.dataSlots.size(); i < k; i++) {
+             this.remoteDataSlots.set(i, this.dataSlots.get(i).get());
+         }
+ 
+@@ -161,7 +_,7 @@
+     public NonNullList<ItemStack> getItems() {
+         NonNullList<ItemStack> nonnulllist = NonNullList.create();
+ 
+-        for(Slot slot : this.slots) {
++        for (Slot slot : this.slots) {
+             nonnulllist.add(slot.getItem());
+         }
+ 
+@@ -169,7 +_,7 @@
+     }
+ 
+     public void broadcastChanges() {
+-        for(int i = 0; i < this.slots.size(); ++i) {
++        for (int i = 0; i < this.slots.size(); i++) {
+             ItemStack itemstack = this.slots.get(i).getItem();
+             Supplier<ItemStack> supplier = Suppliers.memoize(itemstack::copy);
+             this.triggerSlotListeners(i, itemstack, supplier);
+@@ -178,7 +_,7 @@
+ 
+         this.synchronizeCarriedToRemote();
+ 
+-        for(int j = 0; j < this.dataSlots.size(); ++j) {
++        for (int j = 0; j < this.dataSlots.size(); j++) {
+             DataSlot dataslot = this.dataSlots.get(j);
+             int k = dataslot.get();
+             if (dataslot.checkAndClearUpdateFlag()) {
+@@ -190,12 +_,12 @@
+     }
+ 
+     public void broadcastFullState() {
+-        for(int i = 0; i < this.slots.size(); ++i) {
++        for (int i = 0; i < this.slots.size(); i++) {
+             ItemStack itemstack = this.slots.get(i).getItem();
+             this.triggerSlotListeners(i, itemstack, itemstack::copy);
+         }
+ 
+-        for(int j = 0; j < this.dataSlots.size(); ++j) {
++        for (int j = 0; j < this.dataSlots.size(); j++) {
+             DataSlot dataslot = this.dataSlots.get(j);
+             if (dataslot.checkAndClearUpdateFlag()) {
+                 this.updateDataSlotListeners(j, dataslot.get());
+@@ -206,7 +_,7 @@
+     }
+ 
+     private void updateDataSlotListeners(int p_182421_, int p_182422_) {
+-        for(ContainerListener containerlistener : this.containerListeners) {
++        for (ContainerListener containerlistener : this.containerListeners) {
+             containerlistener.dataChanged(this, p_182421_, p_182422_);
+         }
+     }
+@@ -217,7 +_,7 @@
+             ItemStack itemstack1 = p_150410_.get();
+             this.lastSlots.set(p_150408_, itemstack1);
+ 
+-            for(ContainerListener containerlistener : this.containerListeners) {
++            for (ContainerListener containerlistener : this.containerListeners) {
+                 containerlistener.slotChanged(this, p_150408_, itemstack1);
+             }
+         }
+@@ -344,7 +_,7 @@
+ 
+                     int k1 = this.getCarried().getCount();
+ 
+-                    for(Slot slot1 : this.quickcraftSlots) {
++                    for (Slot slot1 : this.quickcraftSlots) {
+                         ItemStack itemstack1 = this.getCarried();
+                         if (slot1 != null
+                             && canItemQuickReplace(slot1, itemstack1, true)
+@@ -392,7 +_,7 @@
+ 
+                 ItemStack itemstack8 = this.quickMoveStack(p_150434_, p_150431_);
+ 
+-                while(!itemstack8.isEmpty() && ItemStack.isSameItem(slot6.getItem(), itemstack8)) {
++                while (!itemstack8.isEmpty() && ItemStack.isSameItem(slot6.getItem(), itemstack8)) {
+                     itemstack8 = this.quickMoveStack(p_150434_, p_150431_);
+                 }
+             } else {
+@@ -402,13 +_,10 @@
+ 
+                 Slot slot7 = this.slots.get(p_150431_);
+                 ItemStack itemstack9 = slot7.getItem();
+-                if (itemstack9.has(DataComponents.CLICKS)) {
+-                    itemstack9.set(DataComponents.CLICKS, itemstack9.getOrDefault(DataComponents.CLICKS, Integer.valueOf(0)) + 1);
+-                }
+-
                  ItemStack itemstack10 = this.getCarried();
                  p_150434_.updateTutorialInventoryAction(itemstack10, slot7.getItem(), clickaction);
                  if (!this.tryItemClickBehaviourOverride(p_150434_, clickaction, slot7, itemstack9, itemstack10)) {
@@ -8,18 +139,75 @@
                      if (itemstack9.isEmpty()) {
                          if (!itemstack10.isEmpty()) {
                              int i3 = clickaction == ClickAction.PRIMARY ? itemstack10.getCount() : 1;
-@@ -609,14 +_,15 @@
+@@ -499,8 +_,8 @@
+                 int l1 = p_150432_ == 0 ? 0 : this.slots.size() - 1;
+                 int i2 = p_150432_ == 0 ? 1 : -1;
+ 
+-                for(int l2 = 0; l2 < 2; ++l2) {
+-                    for(int l3 = l1; l3 >= 0 && l3 < this.slots.size() && itemstack4.getCount() < itemstack4.getMaxStackSize(); l3 += i2) {
++                for (int l2 = 0; l2 < 2; l2++) {
++                    for (int l3 = l1; l3 >= 0 && l3 < this.slots.size() && itemstack4.getCount() < itemstack4.getMaxStackSize(); l3 += i2) {
+                         Slot slot8 = this.slots.get(l3);
+                         if (slot8.hasItem()
+                             && canItemQuickReplace(slot8, itemstack4, true)
+@@ -520,12 +_,10 @@
+ 
+     private boolean tryItemClickBehaviourOverride(Player p_249615_, ClickAction p_250300_, Slot p_249384_, ItemStack p_251073_, ItemStack p_252026_) {
+         FeatureFlagSet featureflagset = p_249615_.level().enabledFeatures();
+-        if (p_252026_.isItemEnabled(featureflagset) && p_252026_.overrideStackedOnOther(p_249384_, p_250300_, p_249615_)) {
+-            return true;
+-        } else {
+-            return p_251073_.isItemEnabled(featureflagset)
++        return p_252026_.isItemEnabled(featureflagset) && p_252026_.overrideStackedOnOther(p_249384_, p_250300_, p_249615_)
++            ? true
++            : p_251073_.isItemEnabled(featureflagset)
+                 && p_251073_.overrideOtherStackedOnMe(p_252026_, p_249384_, p_250300_, p_249615_, this.createCarriedSlotAccess());
+-        }
+     }
+ 
+     private SlotAccess createCarriedSlotAccess() {
+@@ -564,11 +_,11 @@
+ 
+     protected void clearContainer(Player p_150412_, Container p_150413_) {
+         if (!p_150412_.isAlive() || p_150412_ instanceof ServerPlayer && ((ServerPlayer)p_150412_).hasDisconnected()) {
+-            for(int j = 0; j < p_150413_.getContainerSize(); ++j) {
++            for (int j = 0; j < p_150413_.getContainerSize(); j++) {
+                 p_150412_.drop(p_150413_.removeItemNoUpdate(j), false);
+             }
+         } else {
+-            for(int i = 0; i < p_150413_.getContainerSize(); ++i) {
++            for (int i = 0; i < p_150413_.getContainerSize(); i++) {
+                 Inventory inventory = p_150412_.getInventory();
+                 if (inventory.player instanceof ServerPlayer) {
+                     inventory.placeItemBackInInventory(p_150413_.removeItemNoUpdate(i));
+@@ -587,7 +_,7 @@
+     }
+ 
+     public void initializeContents(int p_182411_, List<ItemStack> p_182412_, ItemStack p_182413_) {
+-        for(int i = 0; i < p_182412_.size(); ++i) {
++        for (int i = 0; i < p_182412_.size(); i++) {
+             this.getSlot(i).set(p_182412_.get(i));
+         }
+ 
+@@ -609,29 +_,29 @@
+         }
+ 
+         if (p_38904_.isStackable()) {
+-            while(!p_38904_.isEmpty() && (p_38907_ ? i >= p_38905_ : i < p_38906_)) {
++            while (!p_38904_.isEmpty() && (p_38907_ ? i >= p_38905_ : i < p_38906_)) {
+                 Slot slot = this.slots.get(i);
                  ItemStack itemstack = slot.getItem();
                  if (!itemstack.isEmpty() && ItemStack.isSameItemSameComponents(p_38904_, itemstack)) {
                      int j = itemstack.getCount() + p_38904_.getCount();
--                    if (j <= p_38904_.getMaxStackSize()) {
+-                    int k = slot.getMaxStackSize(p_38904_);
+-                    if (j <= k) {
 +                    int maxSize = Math.min(slot.getMaxStackSize(), p_38904_.getMaxStackSize());
 +                    if (j <= maxSize) {
                          p_38904_.setCount(0);
                          itemstack.setCount(j);
                          slot.setChanged();
                          flag = true;
--                    } else if (itemstack.getCount() < p_38904_.getMaxStackSize()) {
+-                    } else if (itemstack.getCount() < k) {
 -                        p_38904_.shrink(p_38904_.getMaxStackSize() - itemstack.getCount());
 -                        itemstack.setCount(p_38904_.getMaxStackSize());
 +                    } else if (itemstack.getCount() < maxSize) {
@@ -28,3 +216,106 @@
                          slot.setChanged();
                          flag = true;
                      }
+                 }
+ 
+                 if (p_38907_) {
+-                    --i;
++                    i--;
+                 } else {
+-                    ++i;
++                    i++;
+                 }
+             }
+         }
+@@ -643,21 +_,21 @@
+                 i = p_38905_;
+             }
+ 
+-            while(p_38907_ ? i >= p_38905_ : i < p_38906_) {
++            while (p_38907_ ? i >= p_38905_ : i < p_38906_) {
+                 Slot slot1 = this.slots.get(i);
+                 ItemStack itemstack1 = slot1.getItem();
+                 if (itemstack1.isEmpty() && slot1.mayPlace(p_38904_)) {
+-                    int l = slot1.getMaxStackSize(p_38904_);
+-                    slot1.setByPlayer(p_38904_.split(Math.min(p_38904_.getCount(), l)));
++                    int k = slot1.getMaxStackSize(p_38904_);
++                    slot1.setByPlayer(p_38904_.split(Math.min(p_38904_.getCount(), k)));
+                     slot1.setChanged();
+                     flag = true;
+                     break;
+                 }
+ 
+                 if (p_38907_) {
+-                    --i;
++                    i--;
+                 } else {
+-                    ++i;
++                    i++;
+                 }
+             }
+         }
+@@ -680,10 +_,8 @@
+     public static boolean isValidQuickcraftType(int p_38863_, Player p_38864_) {
+         if (p_38863_ == 0) {
+             return true;
+-        } else if (p_38863_ == 1) {
+-            return true;
+         } else {
+-            return p_38863_ == 2 && p_38864_.hasInfiniteMaterials();
++            return p_38863_ == 1 ? true : p_38863_ == 2 && p_38864_.hasInfiniteMaterials();
+         }
+     }
+ 
+@@ -694,15 +_,13 @@
+ 
+     public static boolean canItemQuickReplace(@Nullable Slot p_38900_, ItemStack p_38901_, boolean p_38902_) {
+         boolean flag = p_38900_ == null || !p_38900_.hasItem();
+-        if (!flag && ItemStack.isSameItemSameComponents(p_38901_, p_38900_.getItem())) {
+-            return p_38900_.getItem().getCount() + (p_38902_ ? 0 : p_38901_.getCount()) <= p_38901_.getMaxStackSize();
+-        } else {
+-            return flag;
+-        }
++        return !flag && ItemStack.isSameItemSameComponents(p_38901_, p_38900_.getItem())
++            ? p_38900_.getItem().getCount() + (p_38902_ ? 0 : p_38901_.getCount()) <= p_38901_.getMaxStackSize()
++            : flag;
+     }
+ 
+     public static int getQuickCraftPlaceCount(Set<Slot> p_279393_, int p_279288_, ItemStack p_279172_) {
+-        return switch(p_279288_) {
++        return switch (p_279288_) {
+             case 0 -> Mth.floor((float)p_279172_.getCount() / (float)p_279393_.size());
+             case 1 -> 1;
+             case 2 -> p_279172_.getMaxStackSize();
+@@ -724,7 +_,7 @@
+         } else {
+             float f = 0.0F;
+ 
+-            for(int i = 0; i < p_38939_.getContainerSize(); ++i) {
++            for (int i = 0; i < p_38939_.getContainerSize(); i++) {
+                 ItemStack itemstack = p_38939_.getItem(i);
+                 if (!itemstack.isEmpty()) {
+                     f += (float)itemstack.getCount() / (float)p_38939_.getMaxStackSize(itemstack);
+@@ -755,12 +_,12 @@
+     public void transferState(AbstractContainerMenu p_150415_) {
+         Table<Container, Integer, Integer> table = HashBasedTable.create();
+ 
+-        for(int i = 0; i < p_150415_.slots.size(); ++i) {
++        for (int i = 0; i < p_150415_.slots.size(); i++) {
+             Slot slot = p_150415_.slots.get(i);
+             table.put(slot.container, slot.getContainerSlot(), i);
+         }
+ 
+-        for(int j = 0; j < this.slots.size(); ++j) {
++        for (int j = 0; j < this.slots.size(); j++) {
+             Slot slot1 = this.slots.get(j);
+             Integer integer = table.get(slot1.container, slot1.getContainerSlot());
+             if (integer != null) {
+@@ -771,7 +_,7 @@
+     }
+ 
+     public OptionalInt findSlot(Container p_182418_, int p_182419_) {
+-        for(int i = 0; i < this.slots.size(); ++i) {
++        for (int i = 0; i < this.slots.size(); i++) {
+             Slot slot = this.slots.get(i);
+             if (slot.container == p_182418_ && p_182419_ == slot.getContainerSlot()) {
+                 return OptionalInt.of(i);

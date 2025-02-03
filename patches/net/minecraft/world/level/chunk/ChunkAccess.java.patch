@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/level/chunk/ChunkAccess.java
 +++ b/net/minecraft/world/level/chunk/ChunkAccess.java
-@@ -57,7 +_,7 @@
+@@ -34,7 +_,6 @@
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.level.BlockGetter;
+ import net.minecraft.world.level.ChunkPos;
+-import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.LevelHeightAccessor;
+ import net.minecraft.world.level.biome.Biome;
+ import net.minecraft.world.level.biome.BiomeGenerationSettings;
+@@ -58,7 +_,7 @@
  import net.minecraft.world.ticks.TickContainerAccess;
  import org.slf4j.Logger;
  
@@ -9,7 +17,61 @@
      public static final int NO_FILLED_SECTION = -1;
      private static final Logger LOGGER = LogUtils.getLogger();
      private static final LongSet EMPTY_REFERENCE_SET = new LongOpenHashSet();
-@@ -311,23 +_,28 @@
+@@ -83,7 +_,6 @@
+     protected final Map<BlockPos, BlockEntity> blockEntities = new Object2ObjectOpenHashMap<>();
+     protected final LevelHeightAccessor levelHeightAccessor;
+     protected final LevelChunkSection[] sections;
+-    private final boolean certainPotato;
+ 
+     public ChunkAccess(
+         ChunkPos p_187621_,
+@@ -97,12 +_,6 @@
+         this.chunkPos = p_187621_;
+         this.upgradeData = p_187622_;
+         this.levelHeightAccessor = p_187623_;
+-        if (p_187623_ instanceof Level level) {
+-            this.certainPotato = level.isPotato();
+-        } else {
+-            this.certainPotato = false;
+-        }
+-
+         this.sections = new LevelChunkSection[p_187623_.getSectionsCount()];
+         this.inhabitedTime = p_187625_;
+         this.postProcessing = new ShortList[p_187623_.getSectionsCount()];
+@@ -119,13 +_,8 @@
+         replaceMissingSections(p_187624_, this.sections);
+     }
+ 
+-    @Override
+-    public boolean isPotato() {
+-        return this.certainPotato;
+-    }
+-
+     private static void replaceMissingSections(Registry<Biome> p_281389_, LevelChunkSection[] p_282796_) {
+-        for(int i = 0; i < p_282796_.length; ++i) {
++        for (int i = 0; i < p_282796_.length; i++) {
+             if (p_282796_[i] == null) {
+                 p_282796_[i] = new LevelChunkSection(p_281389_);
+             }
+@@ -146,7 +_,7 @@
+     public int getHighestFilledSectionIndex() {
+         LevelChunkSection[] alevelchunksection = this.getSections();
+ 
+-        for(int i = alevelchunksection.length - 1; i >= 0; --i) {
++        for (int i = alevelchunksection.length - 1; i >= 0; i--) {
+             LevelChunkSection levelchunksection = alevelchunksection[i];
+             if (!levelchunksection.hasOnlyAir()) {
+                 return i;
+@@ -266,7 +_,7 @@
+             p_62076_ = this.getMaxBuildHeight() - 1;
+         }
+ 
+-        for(int i = p_62075_; i <= p_62076_; i += 16) {
++        for (int i = p_62075_; i <= p_62076_; i += 16) {
+             if (!this.getSection(this.getSectionIndex(i)).hasOnlyAir()) {
+                 return false;
+             }
+@@ -324,23 +_,28 @@
  
      @Override
      public final void findBlockLightSources(BiConsumer<BlockPos, BlockState> p_285269_) {
@@ -24,15 +86,19 @@
 +    public void findBlocks(java.util.function.BiPredicate<BlockState, BlockPos> p_285343_, BiConsumer<BlockPos, BlockState> p_285030_) {
          BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
  
-         for(int i = this.getMinSection(); i < this.getMaxSection(); ++i) {
+-        for(int i = this.getMinSection(); i < this.getMaxSection(); ++i) {
++        for (int i = this.getMinSection(); i < this.getMaxSection(); i++) {
              LevelChunkSection levelchunksection = this.getSection(this.getSectionIndexFromSectionY(i));
 -            if (levelchunksection.maybeHas(p_285343_)) {
 +            if (levelchunksection.maybeHas((state) -> p_285343_.test(state, BlockPos.ZERO))) {
                  BlockPos blockpos = SectionPos.of(this.chunkPos, i).origin();
  
-                 for(int j = 0; j < 16; ++j) {
-                     for(int k = 0; k < 16; ++k) {
-                         for(int l = 0; l < 16; ++l) {
+-                for(int j = 0; j < 16; ++j) {
+-                    for(int k = 0; k < 16; ++k) {
+-                        for(int l = 0; l < 16; ++l) {
++                for (int j = 0; j < 16; j++) {
++                    for (int k = 0; k < 16; k++) {
++                        for (int l = 0; l < 16; l++) {
                              BlockState blockstate = levelchunksection.getBlockState(l, j, k);
 -                            if (p_285343_.test(blockstate)) {
 -                                p_285030_.accept(blockpos$mutableblockpos.setWithOffset(blockpos, l, j, k), blockstate);
@@ -42,7 +108,16 @@
                              }
                          }
                      }
-@@ -472,4 +_,70 @@
+@@ -450,7 +_,7 @@
+         int j = QuartPos.fromBlock(chunkpos.getMinBlockZ());
+         LevelHeightAccessor levelheightaccessor = this.getHeightAccessorForGeneration();
+ 
+-        for(int k = levelheightaccessor.getMinSection(); k < levelheightaccessor.getMaxSection(); ++k) {
++        for (int k = levelheightaccessor.getMinSection(); k < levelheightaccessor.getMaxSection(); k++) {
+             LevelChunkSection levelchunksection = this.getSection(this.getSectionIndexFromSectionY(k));
+             int l = QuartPos.fromSection(k);
+             levelchunksection.fillBiomesFromNoise(p_187638_, p_187639_, i, l, j);
+@@ -485,4 +_,70 @@
  
      public static record TicksToSave(SerializableTickContainer<Block> blocks, SerializableTickContainer<Fluid> fluids) {
      }

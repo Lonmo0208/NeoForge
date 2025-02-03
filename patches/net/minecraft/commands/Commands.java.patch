@@ -34,6 +34,15 @@
          commandsourcestack.getServer().getProfiler().push(() -> "/" + p_242841_);
          ContextChain<CommandSourceStack> contextchain = finishParsing(p_242844_, p_242841_, commandsourcestack);
  
+@@ -285,7 +_,7 @@
+                 LOGGER.error("Command exception: /{}", p_242841_, exception);
+                 StackTraceElement[] astacktraceelement = exception.getStackTrace();
+ 
+-                for(int i = 0; i < Math.min(astacktraceelement.length, 3); ++i) {
++                for (int i = 0; i < Math.min(astacktraceelement.length, 3); i++) {
+                     mutablecomponent.append("\n\n")
+                         .append(astacktraceelement[i].getMethodName())
+                         .append("\n ")
 @@ -364,7 +_,8 @@
          Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> map = Maps.newHashMap();
          RootCommandNode<SharedSuggestionProvider> rootcommandnode = new RootCommandNode<>();
@@ -44,3 +53,48 @@
          p_82096_.connection.send(new ClientboundCommandsPacket(rootcommandnode));
      }
  
+@@ -374,7 +_,7 @@
+         CommandSourceStack p_82115_,
+         Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> p_82116_
+     ) {
+-        for(CommandNode<CommandSourceStack> commandnode : p_82113_.getChildren()) {
++        for (CommandNode<CommandSourceStack> commandnode : p_82113_.getChildren()) {
+             if (commandnode.canUse(p_82115_)) {
+                 ArgumentBuilder<SharedSuggestionProvider, ?> argumentbuilder = (ArgumentBuilder<SharedSuggestionProvider, ?>)(ArgumentBuilder<?, ?>)commandnode.createBuilder();
+                 argumentbuilder.requires(p_82126_ -> true);
+@@ -382,8 +_,11 @@
+                     argumentbuilder.executes(p_82102_ -> 0);
+                 }
+ 
+-                if (argumentbuilder instanceof RequiredArgumentBuilder requiredargumentbuilder && requiredargumentbuilder.getSuggestionsProvider() != null) {
+-                    requiredargumentbuilder.suggests(SuggestionProviders.safelySwap(requiredargumentbuilder.getSuggestionsProvider()));
++                if (argumentbuilder instanceof RequiredArgumentBuilder) {
++                    RequiredArgumentBuilder<SharedSuggestionProvider, ?> requiredargumentbuilder = (RequiredArgumentBuilder<SharedSuggestionProvider, ?>)argumentbuilder;
++                    if (requiredargumentbuilder.getSuggestionsProvider() != null) {
++                        requiredargumentbuilder.suggests(SuggestionProviders.safelySwap(requiredargumentbuilder.getSuggestionsProvider()));
++                    }
+                 }
+ 
+                 if (argumentbuilder.getRedirect() != null) {
+@@ -452,7 +_,7 @@
+ 
+             @Override
+             public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> p_323467_) {
+-                return p_256243_.<T>lookup(p_323467_).map(this::createLookup);
++                return p_256243_.lookup(p_323467_).map(this::createLookup);
+             }
+ 
+             private <T> HolderLookup.RegistryLookup.Delegate<T> createLookup(final HolderLookup.RegistryLookup<T> p_323830_) {
+@@ -490,10 +_,10 @@
+                 )
+         );
+         Set<ArgumentType<?>> set = ArgumentUtils.findUsedArgumentTypes(rootcommandnode);
+-        Set<ArgumentType<?>> set1 = set.stream().filter(p_230961_ -> !ArgumentTypeInfos.isClassRecognized(p_230961_.getClass())).collect(Collectors.toSet());
++        Set<ArgumentType<?>> set1 = set.stream().filter(p_339316_ -> !ArgumentTypeInfos.isClassRecognized(p_339316_.getClass())).collect(Collectors.toSet());
+         if (!set1.isEmpty()) {
+             LOGGER.warn(
+-                "Missing type registration for following arguments:\n {}", set1.stream().map(p_230952_ -> "\t" + p_230952_).collect(Collectors.joining(",\n"))
++                "Missing type registration for following arguments:\n {}", set1.stream().map(p_339315_ -> "\t" + p_339315_).collect(Collectors.joining(",\n"))
+             );
+             throw new IllegalStateException("Unregistered argument types");
+         }

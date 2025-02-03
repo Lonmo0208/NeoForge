@@ -14,9 +14,12 @@
      public static final int PING_PORT = 4445;
      private static final long PING_INTERVAL = 1500L;
      private final String motd;
-@@ -40,7 +_,7 @@
+@@ -38,9 +_,9 @@
+         String s = createPingString(this.motd, this.serverAddress);
+         byte[] abyte = s.getBytes(StandardCharsets.UTF_8);
  
-         while(!this.isInterrupted() && this.isRunning) {
+-        while(!this.isInterrupted() && this.isRunning) {
++        while (!this.isInterrupted() && this.isRunning) {
              try {
 -                InetAddress inetaddress = InetAddress.getByName("224.0.2.60");
 +                InetAddress inetaddress = InetAddress.getByName(MULTICAST_GROUP);

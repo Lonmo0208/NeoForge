@@ -1,6 +1,14 @@
 --- a/net/minecraft/client/gui/Font.java
 +++ b/net/minecraft/client/gui/Font.java
-@@ -31,7 +_,7 @@
+@@ -9,7 +_,6 @@
+ import java.util.List;
+ import java.util.function.Function;
+ import javax.annotation.Nullable;
+-import net.minecraft.Util;
+ import net.minecraft.client.StringSplitter;
+ import net.minecraft.client.gui.font.FontSet;
+ import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+@@ -32,7 +_,7 @@
  import org.joml.Vector3f;
  
  @OnlyIn(Dist.CLIENT)
@@ -9,12 +17,74 @@
      private static final float EFFECT_DEPTH = 0.01F;
      private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, 0.03F);
      public static final int ALPHA_CUTOFF = 8;
-@@ -326,6 +_,8 @@
-     public StringSplitter getSplitter() {
+@@ -144,8 +_,8 @@
+             p_168652_, 0.0F, 0.0F, i, false, p_254170_, Font.DisplayMode.NORMAL, p_168653_
+         );
+ 
+-        for(int j = -1; j <= 1; ++j) {
+-            for(int k = -1; k <= 1; ++k) {
++        for (int j = -1; j <= 1; j++) {
++            for (int k = -1; k <= 1; k++) {
+                 if (j != 0 || k != 0) {
+                     float[] afloat = new float[]{p_168647_};
+                     int l = j;
+@@ -328,6 +_,8 @@
          return this.splitter;
      }
-+
-+    @Override public Font self() { return this; }
  
++    @Override public Font self() { return this; }
++
      @OnlyIn(Dist.CLIENT)
      public static enum DisplayMode {
+         NORMAL,
+@@ -406,33 +_,26 @@
+                 f2 = this.b;
+             }
+ 
+-            float f6;
+-            if (p_92969_ == 129364) {
+-                f6 = 1.5F * Mth.sin(this.x + (float)Util.getNanos() / 1.0E8F);
+-            } else {
+-                f6 = 0.0F;
+-            }
+-
+             if (!(bakedglyph instanceof EmptyGlyph)) {
+-                float f4 = flag ? glyphinfo.getBoldOffset() : 0.0F;
+-                float f5 = this.dropShadow ? glyphinfo.getShadowOffset() : 0.0F;
++                float f5 = flag ? glyphinfo.getBoldOffset() : 0.0F;
++                float f4 = this.dropShadow ? glyphinfo.getShadowOffset() : 0.0F;
+                 VertexConsumer vertexconsumer = this.bufferSource.getBuffer(bakedglyph.renderType(this.mode));
+                 Font.this.renderChar(
+-                    bakedglyph, flag, p_92968_.isItalic(), f4, this.x + f5, this.y + f5 + f6, this.pose, vertexconsumer, f, f1, f2, f3, this.packedLightCoords
++                    bakedglyph, flag, p_92968_.isItalic(), f5, this.x + f4, this.y + f4, this.pose, vertexconsumer, f, f1, f2, f3, this.packedLightCoords
+                 );
+             }
+ 
+-            float f7 = glyphinfo.getAdvance(flag);
+-            float f8 = this.dropShadow ? 1.0F : 0.0F;
++            float f6 = glyphinfo.getAdvance(flag);
++            float f7 = this.dropShadow ? 1.0F : 0.0F;
+             if (p_92968_.isStrikethrough()) {
+-                this.addEffect(new BakedGlyph.Effect(this.x + f8 - 1.0F, this.y + f8 + 4.5F, this.x + f8 + f7, this.y + f8 + 4.5F - 1.0F, 0.01F, f, f1, f2, f3));
++                this.addEffect(new BakedGlyph.Effect(this.x + f7 - 1.0F, this.y + f7 + 4.5F, this.x + f7 + f6, this.y + f7 + 4.5F - 1.0F, 0.01F, f, f1, f2, f3));
+             }
+ 
+             if (p_92968_.isUnderlined()) {
+-                this.addEffect(new BakedGlyph.Effect(this.x + f8 - 1.0F, this.y + f8 + 9.0F, this.x + f8 + f7, this.y + f8 + 9.0F - 1.0F, 0.01F, f, f1, f2, f3));
++                this.addEffect(new BakedGlyph.Effect(this.x + f7 - 1.0F, this.y + f7 + 9.0F, this.x + f7 + f6, this.y + f7 + 9.0F - 1.0F, 0.01F, f, f1, f2, f3));
+             }
+ 
+-            this.x += f7;
++            this.x += f6;
+             return true;
+         }
+ 
+@@ -449,7 +_,7 @@
+                 BakedGlyph bakedglyph = Font.this.getFontSet(Style.DEFAULT_FONT).whiteGlyph();
+                 VertexConsumer vertexconsumer = this.bufferSource.getBuffer(bakedglyph.renderType(this.mode));
+ 
+-                for(BakedGlyph.Effect bakedglyph$effect : this.effects) {
++                for (BakedGlyph.Effect bakedglyph$effect : this.effects) {
+                     bakedglyph.renderEffect(bakedglyph$effect, this.pose, vertexconsumer, this.packedLightCoords);
+                 }
+             }

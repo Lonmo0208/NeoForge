@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/projectile/FishingHook.java
 +++ b/net/minecraft/world/entity/projectile/FishingHook.java
+@@ -143,7 +_,7 @@
+             this.discard();
+         } else if (this.level().isClientSide || !this.shouldStopFishing(player)) {
+             if (this.onGround()) {
+-                ++this.life;
++                this.life++;
+                 if (this.life >= 1200) {
+                     this.discard();
+                     return;
 @@ -239,8 +_,8 @@
      private boolean shouldStopFishing(Player p_37137_) {
          ItemStack itemstack = p_37137_.getMainHandItem();
@@ -20,6 +29,66 @@
      }
  
      @Override
+@@ -283,15 +_,15 @@
+         int i = 1;
+         BlockPos blockpos = p_37146_.above();
+         if (this.random.nextFloat() < 0.25F && this.level().isRainingAt(blockpos)) {
+-            ++i;
++            i++;
+         }
+ 
+         if (this.random.nextFloat() < 0.5F && !this.level().canSeeSky(blockpos)) {
+-            --i;
++            i--;
+         }
+ 
+         if (this.nibble > 0) {
+-            --this.nibble;
++            this.nibble--;
+             if (this.nibble <= 0) {
+                 this.timeUntilLured = 0;
+                 this.timeUntilHooked = 0;
+@@ -300,7 +_,7 @@
+         } else if (this.timeUntilHooked > 0) {
+             this.timeUntilHooked -= i;
+             if (this.timeUntilHooked > 0) {
+-                this.fishAngle += (float)this.random.triangle(0.0, 9.188);
++                this.fishAngle = this.fishAngle + (float)this.random.triangle(0.0, 9.188);
+                 float f = this.fishAngle * (float) (Math.PI / 180.0);
+                 float f1 = Mth.sin(f);
+                 float f2 = Mth.cos(f);
+@@ -375,18 +_,16 @@
+             }
+         } else {
+             this.timeUntilLured = Mth.nextInt(this.random, 100, 600);
+-            this.timeUntilLured -= this.lureSpeed * 20 * 5;
++            this.timeUntilLured = this.timeUntilLured - this.lureSpeed * 20 * 5;
+         }
+     }
+ 
+     private boolean calculateOpenWater(BlockPos p_37159_) {
+         FishingHook.OpenWaterType fishinghook$openwatertype = FishingHook.OpenWaterType.INVALID;
+ 
+-        for(int i = -1; i <= 2; ++i) {
++        for (int i = -1; i <= 2; i++) {
+             FishingHook.OpenWaterType fishinghook$openwatertype1 = this.getOpenWaterTypeForArea(p_37159_.offset(-2, i, -2), p_37159_.offset(2, i, 2));
+-            switch(fishinghook$openwatertype1) {
+-                case INVALID:
+-                    return false;
++            switch (fishinghook$openwatertype1) {
+                 case ABOVE_WATER:
+                     if (fishinghook$openwatertype == FishingHook.OpenWaterType.INVALID) {
+                         return false;
+@@ -396,6 +_,9 @@
+                     if (fishinghook$openwatertype == FishingHook.OpenWaterType.ABOVE_WATER) {
+                         return false;
+                     }
++                    break;
++                case INVALID:
++                    return false;
+             }
+ 
+             fishinghook$openwatertype = fishinghook$openwatertype1;
 @@ -439,6 +_,7 @@
          Player player = this.getPlayerOwner();
          if (!this.level().isClientSide && player != null && !this.shouldStopFishing(player)) {
@@ -28,7 +97,7 @@
              if (this.hookedIn != null) {
                  this.pullEntity(this.hookedIn);
                  CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)player, p_37157_, this, Collections.emptyList());
-@@ -449,10 +_,17 @@
+@@ -449,13 +_,20 @@
                      .withParameter(LootContextParams.ORIGIN, this.position())
                      .withParameter(LootContextParams.TOOL, p_37157_)
                      .withParameter(LootContextParams.THIS_ENTITY, this)
@@ -45,7 +114,11 @@
 +                }
                  CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)player, p_37157_, this, list);
  
-                 for(ItemStack itemstack : list) {
+-                for(ItemStack itemstack : list) {
++                for (ItemStack itemstack : list) {
+                     ItemEntity itementity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), itemstack);
+                     double d0 = player.getX() - this.getX();
+                     double d1 = player.getY() - this.getY();
 @@ -478,6 +_,7 @@
              }
  

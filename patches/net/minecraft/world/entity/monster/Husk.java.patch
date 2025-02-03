@@ -1,6 +1,18 @@
 --- a/net/minecraft/world/entity/monster/Husk.java
 +++ b/net/minecraft/world/entity/monster/Husk.java
-@@ -70,6 +_,7 @@
+@@ -28,11 +_,6 @@
+     }
+ 
+     @Override
+-    public boolean hasPotatoVariant() {
+-        return true;
+-    }
+-
+-    @Override
+     protected boolean isSunSensitive() {
+         return false;
+     }
+@@ -75,6 +_,7 @@
  
      @Override
      protected void doUnderWaterConversion() {

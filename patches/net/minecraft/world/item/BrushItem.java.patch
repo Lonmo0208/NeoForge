@@ -1,12 +1,77 @@
 --- a/net/minecraft/world/item/BrushItem.java
 +++ b/net/minecraft/world/item/BrushItem.java
-@@ -148,4 +_,9 @@
+@@ -17,10 +_,8 @@
+ import net.minecraft.world.entity.projectile.ProjectileUtil;
+ import net.minecraft.world.item.context.UseOnContext;
+ import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.BrushableBlock;
+ import net.minecraft.world.level.block.RenderShape;
+-import net.minecraft.world.level.block.entity.BlockEntity;
+ import net.minecraft.world.level.block.entity.BrushableBlockEntity;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.phys.BlockHitResult;
+@@ -72,25 +_,21 @@
+                         this.spawnDustParticles(p_273467_, blockhitresult, blockstate, p_273619_.getViewVector(0.0F), humanoidarm);
+                     }
+ 
+-                    Block $$18 = blockstate.getBlock();
+                     SoundEvent soundevent;
+-                    if ($$18 instanceof BrushableBlock brushableblock) {
++                    if (blockstate.getBlock() instanceof BrushableBlock brushableblock) {
+                         soundevent = brushableblock.getBrushSound();
+                     } else {
+                         soundevent = SoundEvents.BRUSH_GENERIC;
+                     }
+ 
+                     p_273467_.playSound(player, blockpos, soundevent, SoundSource.BLOCKS);
+-                    if (!p_273467_.isClientSide()) {
+-                        BlockEntity blockentity = p_273467_.getBlockEntity(blockpos);
+-                        if (blockentity instanceof BrushableBlockEntity brushableblockentity) {
+-                            boolean flag1 = brushableblockentity.brush(p_273467_.getGameTime(), player, blockhitresult.getDirection());
+-                            if (flag1) {
+-                                EquipmentSlot equipmentslot = p_273316_.equals(player.getItemBySlot(EquipmentSlot.OFFHAND))
+-                                    ? EquipmentSlot.OFFHAND
+-                                    : EquipmentSlot.MAINHAND;
+-                                p_273316_.hurtAndBreak(1, p_273619_, equipmentslot);
+-                            }
++                    if (!p_273467_.isClientSide() && p_273467_.getBlockEntity(blockpos) instanceof BrushableBlockEntity brushableblockentity) {
++                        boolean flag1 = brushableblockentity.brush(p_273467_.getGameTime(), player, blockhitresult.getDirection());
++                        if (flag1) {
++                            EquipmentSlot equipmentslot = p_273316_.equals(player.getItemBySlot(EquipmentSlot.OFFHAND))
++                                ? EquipmentSlot.OFFHAND
++                                : EquipmentSlot.MAINHAND;
++                            p_273316_.hurtAndBreak(1, p_273619_, equipmentslot);
+                         }
+                     }
+                 }
+@@ -119,7 +_,7 @@
+         BrushItem.DustParticlesDelta brushitem$dustparticlesdelta = BrushItem.DustParticlesDelta.fromDirection(p_278337_, direction);
+         Vec3 vec3 = p_278272_.getLocation();
+ 
+-        for(int k = 0; k < j; ++k) {
++        for (int k = 0; k < j; k++) {
+             p_278327_.addParticle(
+                 blockparticleoption,
+                 vec3.x - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F),
+@@ -139,13 +_,19 @@
+         public static BrushItem.DustParticlesDelta fromDirection(Vec3 p_273421_, Direction p_272987_) {
+             double d0 = 0.0;
+ 
+-            return switch(p_272987_) {
++            return switch (p_272987_) {
+                 case DOWN, UP -> new BrushItem.DustParticlesDelta(p_273421_.z(), 0.0, -p_273421_.x());
+                 case NORTH -> new BrushItem.DustParticlesDelta(1.0, 0.0, -0.1);
+                 case SOUTH -> new BrushItem.DustParticlesDelta(-1.0, 0.0, 0.1);
+                 case WEST -> new BrushItem.DustParticlesDelta(-0.1, 0.0, -1.0);
+                 case EAST -> new BrushItem.DustParticlesDelta(0.1, 0.0, 1.0);
++                default -> throw new MatchException(null, null);
              };
          }
-     }
++    }
 +
 +    @Override
 +    public boolean canPerformAction(ItemStack stack, net.neoforged.neoforge.common.ToolAction toolAction) {
 +        return net.neoforged.neoforge.common.ToolActions.DEFAULT_BRUSH_ACTIONS.contains(toolAction);
-+    }
+     }
  }

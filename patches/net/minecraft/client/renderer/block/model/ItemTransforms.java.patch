@@ -40,7 +40,7 @@
          this.thirdPersonLeftHand = p_111798_;
          this.thirdPersonRightHand = p_111799_;
          this.firstPersonLeftHand = p_111800_;
-@@ -64,6 +_,7 @@
+@@ -64,10 +_,11 @@
          this.gui = p_111803_;
          this.ground = p_111804_;
          this.fixed = p_111805_;
@@ -48,6 +48,11 @@
      }
  
      public ItemTransform getTransform(ItemDisplayContext p_270619_) {
+-        return switch(p_270619_) {
++        return switch (p_270619_) {
+             case THIRD_PERSON_LEFT_HAND -> this.thirdPersonLeftHand;
+             case THIRD_PERSON_RIGHT_HAND -> this.thirdPersonRightHand;
+             case FIRST_PERSON_LEFT_HAND -> this.firstPersonLeftHand;
 @@ -104,9 +_,23 @@
              ItemTransform itemtransform5 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.GUI);
              ItemTransform itemtransform6 = this.getTransform(p_111822_, jsonobject, ItemDisplayContext.GROUND);

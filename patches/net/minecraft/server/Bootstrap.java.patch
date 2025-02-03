@@ -9,6 +9,15 @@
                      wrapStreams();
                      bootstrapDuration.set(Duration.between(instant, Instant.now()).toMillis());
                  }
+@@ -65,7 +_,7 @@
+     private static <T> void checkTranslations(Iterable<T> p_135872_, Function<T, String> p_135873_, Set<String> p_135874_) {
+         Language language = Language.getInstance();
+         p_135872_.forEach(p_135883_ -> {
+-            String s = p_135873_.apply(p_135883_);
++            String s = p_135873_.apply((T)p_135883_);
+             if (!language.has(s)) {
+                 p_135874_.add(s);
+             }
 @@ -121,7 +_,6 @@
              Commands.validate();
          }

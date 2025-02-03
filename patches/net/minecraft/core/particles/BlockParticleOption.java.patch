@@ -1,9 +1,30 @@
 --- a/net/minecraft/core/particles/BlockParticleOption.java
 +++ b/net/minecraft/core/particles/BlockParticleOption.java
-@@ -48,4 +_,15 @@
+@@ -2,7 +_,7 @@
+ 
+ import com.mojang.brigadier.StringReader;
+ import com.mojang.brigadier.exceptions.CommandSyntaxException;
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import net.minecraft.commands.arguments.blocks.BlockStateParser;
+ import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.registries.BuiltInRegistries;
+@@ -22,8 +_,8 @@
+     private final ParticleType<BlockParticleOption> type;
+     private final BlockState state;
+ 
+-    public static Codec<BlockParticleOption> codec(ParticleType<BlockParticleOption> p_123635_) {
+-        return BlockState.CODEC.xmap(p_123638_ -> new BlockParticleOption(p_123635_, p_123638_), p_123633_ -> p_123633_.state);
++    public static MapCodec<BlockParticleOption> codec(ParticleType<BlockParticleOption> p_123635_) {
++        return BlockState.CODEC.xmap(p_123638_ -> new BlockParticleOption(p_123635_, p_123638_), p_123633_ -> p_123633_.state).fieldOf("value");
+     }
+ 
+     public static StreamCodec<? super RegistryFriendlyByteBuf, BlockParticleOption> streamCodec(ParticleType<BlockParticleOption> p_320740_) {
+@@ -47,5 +_,16 @@
+ 
      public BlockState getState() {
          return this.state;
-     }
++    }
 +
 +    //FORGE: Add a source pos property, so we can provide models with additional model data
 +    private net.minecraft.core.BlockPos pos;
@@ -14,5 +35,5 @@
 +
 +    public net.minecraft.core.BlockPos getPos() {
 +        return pos;
-+    }
+     }
  }

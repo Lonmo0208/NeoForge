@@ -42,7 +42,7 @@
              }
  
              return pack$metadata;
-@@ -132,6 +_,38 @@
+@@ -132,15 +_,44 @@
          return this.location.source();
      }
  
@@ -81,6 +81,16 @@
      @Override
      public boolean equals(Object p_10448_) {
          if (this == p_10448_) {
+             return true;
+-        } else if (!(p_10448_ instanceof Pack)) {
+-            return false;
+         } else {
+-            Pack pack = (Pack)p_10448_;
+-            return this.location.equals(pack.location);
++            return !(p_10448_ instanceof Pack pack) ? false : this.location.equals(pack.location);
+         }
+     }
+ 
 @@ -149,7 +_,12 @@
          return this.location.hashCode();
      }
@@ -95,3 +105,21 @@
      }
  
      public static enum Position {
+@@ -160,7 +_,7 @@
+             Pack.Position pack$position = p_10474_ ? this.opposite() : this;
+             if (pack$position == BOTTOM) {
+                 int j;
+-                for(j = 0; j < p_10471_.size(); ++j) {
++                for (j = 0; j < p_10471_.size(); j++) {
+                     PackSelectionConfig packselectionconfig1 = p_10473_.apply(p_10471_.get(j));
+                     if (!packselectionconfig1.fixedPosition() || packselectionconfig1.defaultPosition() != this) {
+                         break;
+@@ -171,7 +_,7 @@
+                 return j;
+             } else {
+                 int i;
+-                for(i = p_10471_.size() - 1; i >= 0; --i) {
++                for (i = p_10471_.size() - 1; i >= 0; i--) {
+                     PackSelectionConfig packselectionconfig = p_10473_.apply(p_10471_.get(i));
+                     if (!packselectionconfig.fixedPosition() || packselectionconfig.defaultPosition() != this) {
+                         break;

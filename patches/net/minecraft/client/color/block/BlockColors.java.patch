@@ -10,7 +10,15 @@
      private final Map<Block, Set<Property<?>>> coloringStates = Maps.newHashMap();
  
      public static BlockColors createDefault() {
-@@ -94,11 +_,12 @@
+@@ -66,7 +_,6 @@
+             (p_92626_, p_92627_, p_92628_, p_92629_) -> p_92627_ != null && p_92628_ != null
+                     ? BiomeColors.getAverageFoliageColor(p_92627_, p_92628_)
+                     : FoliageColor.getDefaultColor(),
+-            Blocks.POTATO_LEAVES,
+             Blocks.OAK_LEAVES,
+             Blocks.JUNGLE_LEAVES,
+             Blocks.ACACIA_LEAVES,
+@@ -95,11 +_,12 @@
          }, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
          blockcolors.addColoringState(StemBlock.AGE, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
          blockcolors.register((p_92596_, p_92597_, p_92598_, p_92599_) -> p_92597_ != null && p_92598_ != null ? -14647248 : -9321636, Blocks.LILY_PAD);
@@ -24,7 +32,7 @@
          if (blockcolor != null) {
              return blockcolor.getColor(p_92583_, null, null, 0);
          } else {
-@@ -108,13 +_,15 @@
+@@ -109,18 +_,20 @@
      }
  
      public int getColor(BlockState p_92578_, @Nullable BlockAndTintGetter p_92579_, @Nullable BlockPos p_92580_, int p_92581_) {
@@ -36,9 +44,16 @@
 +    /** @deprecated Register via {@link net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Block} */
 +    @Deprecated
      public void register(BlockColor p_92590_, Block... p_92591_) {
-         for(Block block : p_92591_) {
+-        for(Block block : p_92591_) {
 -            this.blockColors.addMapping(p_92590_, BuiltInRegistries.BLOCK.getId(block));
++        for (Block block : p_92591_) {
 +            this.blockColors.put(block, p_92590_);
          }
      }
  
+     private void addColoringStates(Set<Property<?>> p_92593_, Block... p_92594_) {
+-        for(Block block : p_92594_) {
++        for (Block block : p_92594_) {
+             this.coloringStates.put(block, p_92593_);
+         }
+     }

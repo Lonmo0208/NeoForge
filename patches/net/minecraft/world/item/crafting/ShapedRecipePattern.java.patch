@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/item/crafting/ShapedRecipePattern.java
 +++ b/net/minecraft/world/item/crafting/ShapedRecipePattern.java
+@@ -12,7 +_,6 @@
+ import java.util.Map;
+ import java.util.Optional;
+ import java.util.function.Function;
+-import net.minecraft.Util;
+ import net.minecraft.core.NonNullList;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+ import net.minecraft.network.codec.StreamCodec;
 @@ -20,7 +_,30 @@
  import net.minecraft.world.inventory.CraftingContainer;
  
@@ -31,6 +39,110 @@
      public static final MapCodec<ShapedRecipePattern> MAP_CODEC = ShapedRecipePattern.Data.MAP_CODEC
          .flatXmap(
              ShapedRecipePattern::unpack,
+@@ -36,7 +_,7 @@
+ 
+     public static ShapedRecipePattern of(Map<Character, Ingredient> p_312370_, List<String> p_312701_) {
+         ShapedRecipePattern.Data shapedrecipepattern$data = new ShapedRecipePattern.Data(p_312370_, p_312701_);
+-        return Util.getOrThrow(unpack(shapedrecipepattern$data), IllegalArgumentException::new);
++        return unpack(shapedrecipepattern$data).getOrThrow();
+     }
+ 
+     private static DataResult<ShapedRecipePattern> unpack(ShapedRecipePattern.Data p_312037_) {
+@@ -46,10 +_,10 @@
+         NonNullList<Ingredient> nonnulllist = NonNullList.withSize(i * j, Ingredient.EMPTY);
+         CharSet charset = new CharArraySet(p_312037_.key.keySet());
+ 
+-        for(int k = 0; k < astring.length; ++k) {
++        for (int k = 0; k < astring.length; k++) {
+             String s = astring[k];
+ 
+-            for(int l = 0; l < s.length(); ++l) {
++            for (int l = 0; l < s.length(); l++) {
+                 char c0 = s.charAt(l);
+                 Ingredient ingredient = c0 == ' ' ? Ingredient.EMPTY : p_312037_.key.get(c0);
+                 if (ingredient == null) {
+@@ -73,17 +_,17 @@
+         int k = 0;
+         int l = 0;
+ 
+-        for(int i1 = 0; i1 < p_311893_.size(); ++i1) {
++        for (int i1 = 0; i1 < p_311893_.size(); i1++) {
+             String s = p_311893_.get(i1);
+             i = Math.min(i, firstNonSpace(s));
+             int j1 = lastNonSpace(s);
+             j = Math.max(j, j1);
+             if (j1 < 0) {
+                 if (k == i1) {
+-                    ++k;
++                    k++;
+                 }
+ 
+-                ++l;
++                l++;
+             } else {
+                 l = 0;
+             }
+@@ -94,7 +_,7 @@
+         } else {
+             String[] astring = new String[p_311893_.size() - l - k];
+ 
+-            for(int k1 = 0; k1 < astring.length; ++k1) {
++            for (int k1 = 0; k1 < astring.length; k1++) {
+                 astring[k1] = p_311893_.get(k1 + k).substring(i, j + 1);
+             }
+ 
+@@ -105,8 +_,8 @@
+     private static int firstNonSpace(String p_312343_) {
+         int i = 0;
+ 
+-        while(i < p_312343_.length() && p_312343_.charAt(i) == ' ') {
+-            ++i;
++        while (i < p_312343_.length() && p_312343_.charAt(i) == ' ') {
++            i++;
+         }
+ 
+         return i;
+@@ -115,16 +_,16 @@
+     private static int lastNonSpace(String p_311944_) {
+         int i = p_311944_.length() - 1;
+ 
+-        while(i >= 0 && p_311944_.charAt(i) == ' ') {
+-            --i;
++        while (i >= 0 && p_311944_.charAt(i) == ' ') {
++            i--;
+         }
+ 
+         return i;
+     }
+ 
+     public boolean matches(CraftingContainer p_311919_) {
+-        for(int i = 0; i <= p_311919_.getWidth() - this.width; ++i) {
+-            for(int j = 0; j <= p_311919_.getHeight() - this.height; ++j) {
++        for (int i = 0; i <= p_311919_.getWidth() - this.width; i++) {
++            for (int j = 0; j <= p_311919_.getHeight() - this.height; j++) {
+                 if (this.matches(p_311919_, i, j, true)) {
+                     return true;
+                 }
+@@ -139,8 +_,8 @@
+     }
+ 
+     private boolean matches(CraftingContainer p_312113_, int p_312598_, int p_312930_, boolean p_312052_) {
+-        for(int i = 0; i < p_312113_.getWidth(); ++i) {
+-            for(int j = 0; j < p_312113_.getHeight(); ++j) {
++        for (int i = 0; i < p_312113_.getWidth(); i++) {
++            for (int j = 0; j < p_312113_.getHeight(); j++) {
+                 int k = i - p_312598_;
+                 int l = j - p_312930_;
+                 Ingredient ingredient = Ingredient.EMPTY;
+@@ -165,7 +_,7 @@
+         p_320098_.writeVarInt(this.width);
+         p_320098_.writeVarInt(this.height);
+ 
+-        for(Ingredient ingredient : this.ingredients) {
++        for (Ingredient ingredient : this.ingredients) {
+             Ingredient.CONTENTS_STREAM_CODEC.encode(p_320098_, ingredient);
+         }
+     }
 @@ -180,16 +_,16 @@
  
      public static record Data(Map<Character, Ingredient> key, List<String> pattern) {
@@ -44,9 +156,10 @@
              } else {
                  int i = p_312085_.get(0).length();
  
-                 for(String s : p_312085_) {
+-                for(String s : p_312085_) {
 -                    if (s.length() > 3) {
 -                        return DataResult.error(() -> "Invalid pattern: too many columns, 3 is maximum");
++                for (String s : p_312085_) {
 +                    if (s.length() > maxWidth) {
 +                        return DataResult.error(() -> "Invalid pattern: too many columns, %s is maximum".formatted(maxWidth));
                      }

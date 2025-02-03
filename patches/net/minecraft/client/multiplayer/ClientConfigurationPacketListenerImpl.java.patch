@@ -1,15 +1,40 @@
 --- a/net/minecraft/client/multiplayer/ClientConfigurationPacketListenerImpl.java
 +++ b/net/minecraft/client/multiplayer/ClientConfigurationPacketListenerImpl.java
-@@ -40,6 +_,9 @@
+@@ -6,6 +_,7 @@
+ import java.util.function.Function;
+ import javax.annotation.Nullable;
+ import net.minecraft.client.Minecraft;
++import net.minecraft.client.gui.components.ChatComponent;
+ import net.minecraft.core.RegistryAccess;
+ import net.minecraft.network.Connection;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+@@ -17,6 +_,7 @@
+ import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
+ import net.minecraft.network.protocol.configuration.ClientboundFinishConfigurationPacket;
+ import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
++import net.minecraft.network.protocol.configuration.ClientboundResetChatPacket;
+ import net.minecraft.network.protocol.configuration.ClientboundSelectKnownPacks;
+ import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
+ import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+@@ -40,12 +_,18 @@
      private final RegistryDataCollector registryDataCollector = new RegistryDataCollector();
      @Nullable
      private KnownPacksManager knownPacks;
++    @Nullable
++    protected ChatComponent.State chatState;
 +    private net.neoforged.neoforge.network.connection.ConnectionType connectionType = net.neoforged.neoforge.network.connection.ConnectionType.VANILLA;
 +    private boolean initializedConnection = false;
 +    private java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.network.chat.Component> failureReasons = new java.util.HashMap<>();
  
      public ClientConfigurationPacketListenerImpl(Minecraft p_295262_, Connection p_296339_, CommonListenerCookie p_294706_) {
          super(p_295262_, p_296339_, p_294706_);
+         this.localGameProfile = p_294706_.localGameProfile();
+         this.receivedRegistries = p_294706_.receivedRegistries();
+         this.enabledFeatures = p_294706_.enabledFeatures();
++        this.chatState = p_294706_.chatState();
+     }
+ 
+     @Override
 @@ -54,7 +_,41 @@
      }
  
@@ -65,12 +90,25 @@
      }
  
      @Override
-@@ -123,10 +_,17 @@
+@@ -90,6 +_,11 @@
+         this.send(new ServerboundSelectKnownPacks(list));
+     }
+ 
++    @Override
++    public void handleResetChat(ClientboundResetChatPacket p_338215_) {
++        this.chatState = null;
++    }
++
+     private <T> T runWithResources(Function<ResourceProvider, T> p_325978_) {
+         if (this.knownPacks == null) {
+             return p_325978_.apply(ResourceProvider.EMPTY);
+@@ -123,10 +_,18 @@
                          this.serverBrand,
                          this.serverData,
                          this.postDisconnectScreen,
 -                        this.serverCookies
 +                        this.serverCookies,
++                        this.chatState,
 +                        this.connectionType
                      )
                  )

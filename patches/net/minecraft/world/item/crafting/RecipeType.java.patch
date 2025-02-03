@@ -1,9 +1,19 @@
 --- a/net/minecraft/world/item/crafting/RecipeType.java
 +++ b/net/minecraft/world/item/crafting/RecipeType.java
-@@ -21,4 +_,14 @@
+@@ -12,8 +_,6 @@
+     RecipeType<CampfireCookingRecipe> CAMPFIRE_COOKING = register("campfire_cooking");
+     RecipeType<StonecutterRecipe> STONECUTTING = register("stonecutting");
+     RecipeType<SmithingRecipe> SMITHING = register("smithing");
+-    RecipeType<PoisonousPotatoCutterRecipe> POISONOUS_POTATO_CUTTING = register("poisonous_potato_cutting");
+-    RecipeType<PotatoRefinementRecipe> POTATO_REFINEMENT = register("potato_refinement");
+ 
+     static <T extends Recipe<?>> RecipeType<T> register(final String p_44120_) {
+         return Registry.register(BuiltInRegistries.RECIPE_TYPE, new ResourceLocation(p_44120_), new RecipeType<T>() {
+@@ -22,5 +_,15 @@
+                 return p_44120_;
              }
          });
-     }
++    }
 +
 +    public static <T extends Recipe<?>> RecipeType<T> simple(final ResourceLocation name) {
 +        final String toString = name.toString();
@@ -13,5 +23,5 @@
 +                return toString;
 +            }
 +        };
-+    }
+     }
  }

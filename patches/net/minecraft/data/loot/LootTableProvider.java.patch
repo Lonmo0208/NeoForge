@@ -28,10 +28,14 @@
          Multimap<String, String> multimap = problemreporter$collector.get();
          if (!multimap.isEmpty()) {
              multimap.forEach((p_124446_, p_124447_) -> LOGGER.warn("Found validation problem in {}: {}", p_124446_, p_124447_));
-@@ -101,6 +_,20 @@
+@@ -99,8 +_,22 @@
+                 LootTable loottable = p_335193_.getValue();
+                 Path path = this.pathProvider.json(resourcekey1.location());
                  return DataProvider.saveStable(p_324447_, p_323978_, LootTable.DIRECT_CODEC, loottable, path);
-             }).toArray(p_253403_ -> new CompletableFuture[p_253403_]));
-         }
+-            }).toArray(p_253403_ -> new CompletableFuture[p_253403_]));
+-        }
++            }).toArray(CompletableFuture[]::new));
++        }
 +    }
 +
 +    public List<LootTableProvider.SubProviderEntry> getTables() {

@@ -14,3 +14,21 @@
              }
          }
      }
+@@ -81,7 +_,7 @@
+     @Override
+     protected VoxelShape getShape(BlockState p_51787_, BlockGetter p_51788_, BlockPos p_51789_, CollisionContext p_51790_) {
+         int i = p_51787_.getValue(AGE);
+-        switch((Direction)p_51787_.getValue(FACING)) {
++        switch ((Direction)p_51787_.getValue(FACING)) {
+             case SOUTH:
+                 return SOUTH_AABB[i];
+             case NORTH:
+@@ -101,7 +_,7 @@
+         LevelReader levelreader = p_51750_.getLevel();
+         BlockPos blockpos = p_51750_.getClickedPos();
+ 
+-        for(Direction direction : p_51750_.getNearestLookingDirections()) {
++        for (Direction direction : p_51750_.getNearestLookingDirections()) {
+             if (direction.getAxis().isHorizontal()) {
+                 blockstate = blockstate.setValue(FACING, direction);
+                 if (blockstate.canSurvive(levelreader, blockpos)) {

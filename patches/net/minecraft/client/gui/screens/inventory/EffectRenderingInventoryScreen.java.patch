@@ -19,10 +19,30 @@
              this.renderBackgrounds(p_281945_, i, k, iterable, flag);
              this.renderIcons(p_281945_, i, k, iterable, flag);
              if (flag) {
-@@ -99,6 +_,11 @@
+@@ -61,7 +_,7 @@
+                 int l = this.topPos;
+                 MobEffectInstance mobeffectinstance = null;
+ 
+-                for(MobEffectInstance mobeffectinstance1 : iterable) {
++                for (MobEffectInstance mobeffectinstance1 : iterable) {
+                     if (p_282335_ >= l && p_282335_ <= l + k) {
+                         mobeffectinstance = mobeffectinstance1;
+                     }
+@@ -83,7 +_,7 @@
+     private void renderBackgrounds(GuiGraphics p_281540_, int p_282479_, int p_283680_, Iterable<MobEffectInstance> p_282013_, boolean p_283630_) {
          int i = this.topPos;
  
-         for(MobEffectInstance mobeffectinstance : p_282642_) {
+-        for(MobEffectInstance mobeffectinstance : p_282013_) {
++        for (MobEffectInstance mobeffectinstance : p_282013_) {
+             if (p_283630_) {
+                 p_281540_.blitSprite(EFFECT_BACKGROUND_LARGE_SPRITE, p_282479_, i, 120, 32);
+             } else {
+@@ -98,7 +_,12 @@
+         MobEffectTextureManager mobeffecttexturemanager = this.minecraft.getMobEffectTextures();
+         int i = this.topPos;
+ 
+-        for(MobEffectInstance mobeffectinstance : p_282642_) {
++        for (MobEffectInstance mobeffectinstance : p_282642_) {
 +            var renderer = net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions.of(mobeffectinstance);
 +            if (renderer.renderInventoryIcon(mobeffectinstance, this, p_282745_, p_282521_ + (p_281536_ ? 6 : 7), i, 0)) {
 +                i += p_282291_;
@@ -31,10 +51,12 @@
              Holder<MobEffect> holder = mobeffectinstance.getEffect();
              TextureAtlasSprite textureatlassprite = mobeffecttexturemanager.get(holder);
              p_282745_.blit(p_282521_ + (p_281536_ ? 6 : 7), i + 7, 0, 18, 18, textureatlassprite);
-@@ -110,6 +_,11 @@
+@@ -109,7 +_,12 @@
+     private void renderLabels(GuiGraphics p_281462_, int p_283484_, int p_282057_, Iterable<MobEffectInstance> p_281986_) {
          int i = this.topPos;
  
-         for(MobEffectInstance mobeffectinstance : p_281986_) {
+-        for(MobEffectInstance mobeffectinstance : p_281986_) {
++        for (MobEffectInstance mobeffectinstance : p_281986_) {
 +            var renderer = net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions.of(mobeffectinstance);
 +            if (renderer.renderInventoryText(mobeffectinstance, this, p_281462_, p_283484_, i, 0)) {
 +                i += p_282057_;

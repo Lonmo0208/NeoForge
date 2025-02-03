@@ -1,6 +1,37 @@
 --- a/net/minecraft/world/item/DyeColor.java
 +++ b/net/minecraft/world/item/DyeColor.java
-@@ -42,6 +_,7 @@
+@@ -3,20 +_,17 @@
+ import io.netty.buffer.ByteBuf;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+ import java.util.Arrays;
+-import java.util.function.Consumer;
+ import java.util.function.IntFunction;
+ import java.util.stream.Collectors;
+ import javax.annotation.Nullable;
+-import net.minecraft.network.chat.Component;
+ import net.minecraft.network.codec.ByteBufCodecs;
+ import net.minecraft.network.codec.StreamCodec;
+ import net.minecraft.util.ByIdMap;
+ import net.minecraft.util.StringRepresentable;
+-import net.minecraft.world.item.component.TooltipProvider;
+ import net.minecraft.world.level.material.MapColor;
+ import org.jetbrains.annotations.Contract;
+ 
+-public enum DyeColor implements StringRepresentable, TooltipProvider {
++public enum DyeColor implements StringRepresentable {
+     WHITE(0, "white", 16383998, MapColor.SNOW, 15790320, 16777215),
+     ORANGE(1, "orange", 16351261, MapColor.COLOR_ORANGE, 15435844, 16738335),
+     MAGENTA(2, "magenta", 13061821, MapColor.COLOR_MAGENTA, 12801229, 16711935),
+@@ -36,7 +_,7 @@
+ 
+     private static final IntFunction<DyeColor> BY_ID = ByIdMap.continuous(DyeColor::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+     private static final Int2ObjectOpenHashMap<DyeColor> BY_FIREWORK_COLOR = new Int2ObjectOpenHashMap<>(
+-        Arrays.stream(values()).collect(Collectors.toMap(p_41064_ -> p_41064_.fireworkColor, p_41056_ -> p_41056_))
++        Arrays.stream(values()).collect(Collectors.toMap(p_41064_ -> p_41064_.fireworkColor, p_41056_ -> (DyeColor)p_41056_))
+     );
+     public static final StringRepresentable.EnumCodec<DyeColor> CODEC = StringRepresentable.fromEnum(DyeColor::values);
+     public static final StreamCodec<ByteBuf, DyeColor> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, DyeColor::getId);
+@@ -45,6 +_,7 @@
      private final MapColor mapColor;
      private final float[] textureDiffuseColors;
      private final int fireworkColor;
@@ -8,7 +39,7 @@
      private final int textColor;
  
      private DyeColor(int p_41046_, String p_41047_, int p_41048_, MapColor p_285297_, int p_41050_, int p_41051_) {
-@@ -52,6 +_,7 @@
+@@ -55,6 +_,7 @@
          int i = (p_41048_ & 0xFF0000) >> 16;
          int j = (p_41048_ & 0xFF00) >> 8;
          int k = (p_41048_ & 0xFF) >> 0;
@@ -16,12 +47,15 @@
          this.textureDiffuseColors = new float[]{(float)i / 255.0F, (float)j / 255.0F, (float)k / 255.0F};
          this.fireworkColor = p_41050_;
      }
-@@ -104,5 +_,23 @@
-     @Override
-     public String getSerializedName() {
+@@ -109,10 +_,21 @@
          return this.name;
-+    }
-+
+     }
+ 
+-    @Override
+-    public void addToTooltip(Consumer<Component> p_340929_, TooltipFlag p_341336_) {
+-        String s = this.name.substring(0, 1).toUpperCase();
+-        String s1 = s + this.name.substring(1);
+-        p_340929_.accept(Component.translatable("baseColor.tooltip", s1).withColor(this.textColor));
 +    public net.minecraft.tags.TagKey<Item> getTag() {
 +        return tag;
 +    }

@@ -1,6 +1,25 @@
 --- a/net/minecraft/world/item/crafting/SmithingTrimRecipe.java
 +++ b/net/minecraft/world/item/crafting/SmithingTrimRecipe.java
-@@ -92,7 +_,7 @@
+@@ -1,6 +_,6 @@
+ package net.minecraft.world.item.crafting;
+ 
+-import com.mojang.serialization.Codec;
++import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+ import java.util.Optional;
+@@ -61,8 +_,8 @@
+     @Override
+     public ItemStack getResultItem(HolderLookup.Provider p_335445_) {
+         ItemStack itemstack = new ItemStack(Items.IRON_CHESTPLATE);
+-        Optional<Holder.Reference<TrimPattern>> optional = p_335445_.<TrimPattern>lookupOrThrow(Registries.TRIM_PATTERN).listElements().findFirst();
+-        Optional<Holder.Reference<TrimMaterial>> optional1 = p_335445_.<TrimMaterial>lookupOrThrow(Registries.TRIM_MATERIAL).get(TrimMaterials.REDSTONE);
++        Optional<Holder.Reference<TrimPattern>> optional = p_335445_.lookupOrThrow(Registries.TRIM_PATTERN).listElements().findFirst();
++        Optional<Holder.Reference<TrimMaterial>> optional1 = p_335445_.lookupOrThrow(Registries.TRIM_MATERIAL).get(TrimMaterials.REDSTONE);
+         if (optional.isPresent() && optional1.isPresent()) {
+             itemstack.set(DataComponents.TRIM, new ArmorTrim(optional1.get(), optional.get()));
+         }
+@@ -92,11 +_,11 @@
  
      @Override
      public boolean isIncomplete() {
@@ -9,3 +28,17 @@
      }
  
      public static class Serializer implements RecipeSerializer<SmithingTrimRecipe> {
+-        private static final Codec<SmithingTrimRecipe> CODEC = RecordCodecBuilder.create(
++        private static final MapCodec<SmithingTrimRecipe> CODEC = RecordCodecBuilder.mapCodec(
+             p_301227_ -> p_301227_.group(
+                         Ingredient.CODEC.fieldOf("template").forGetter(p_301070_ -> p_301070_.template),
+                         Ingredient.CODEC.fieldOf("base").forGetter(p_300969_ -> p_300969_.base),
+@@ -109,7 +_,7 @@
+         );
+ 
+         @Override
+-        public Codec<SmithingTrimRecipe> codec() {
++        public MapCodec<SmithingTrimRecipe> codec() {
+             return CODEC;
+         }
+ 

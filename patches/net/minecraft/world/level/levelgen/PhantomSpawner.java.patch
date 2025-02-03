@@ -1,7 +1,23 @@
 --- a/net/minecraft/world/level/levelgen/PhantomSpawner.java
 +++ b/net/minecraft/world/level/levelgen/PhantomSpawner.java
-@@ -42,13 +_,15 @@
-                     for(ServerPlayer serverplayer : p_64576_.players()) {
+@@ -29,26 +_,28 @@
+             return 0;
+         } else {
+             RandomSource randomsource = p_64576_.random;
+-            --this.nextTick;
++            this.nextTick--;
+             if (this.nextTick > 0) {
+                 return 0;
+             } else {
+-                this.nextTick += (60 + randomsource.nextInt(60)) * 20;
++                this.nextTick = this.nextTick + (60 + randomsource.nextInt(60)) * 20;
+                 if (p_64576_.getSkyDarken() < 5 && p_64576_.dimensionType().hasSkyLight()) {
+                     return 0;
+                 } else {
+                     int i = 0;
+ 
+-                    for(ServerPlayer serverplayer : p_64576_.players()) {
++                    for (ServerPlayer serverplayer : p_64576_.players()) {
                          if (!serverplayer.isSpectator()) {
                              BlockPos blockpos = serverplayer.blockPosition();
 -                            if (!p_64576_.dimensionType().hasSkyLight() || blockpos.getY() >= p_64576_.getSeaLevel() && p_64576_.canSeeSky(blockpos)) {
@@ -19,12 +35,22 @@
                                          BlockPos blockpos1 = blockpos.above(20 + randomsource.nextInt(15))
                                              .east(-10 + randomsource.nextInt(21))
                                              .south(-10 + randomsource.nextInt(21));
-@@ -56,7 +_,7 @@
+@@ -56,15 +_,15 @@
                                          FluidState fluidstate = p_64576_.getFluidState(blockpos1);
                                          if (NaturalSpawner.isValidEmptySpawnBlock(p_64576_, blockpos1, blockstate, fluidstate, EntityType.PHANTOM)) {
                                              SpawnGroupData spawngroupdata = null;
 -                                            int l = 1 + randomsource.nextInt(difficultyinstance.getDifficulty().getId() + 1);
 +                                            int l = event.getPhantomsToSpawn();
  
-                                             for(int i1 = 0; i1 < l; ++i1) {
+-                                            for(int i1 = 0; i1 < l; ++i1) {
++                                            for (int i1 = 0; i1 < l; i1++) {
                                                  Phantom phantom = EntityType.PHANTOM.create(p_64576_);
+                                                 if (phantom != null) {
+                                                     phantom.moveTo(blockpos1, 0.0F, 0.0F);
+                                                     spawngroupdata = phantom.finalizeSpawn(p_64576_, difficultyinstance, MobSpawnType.NATURAL, spawngroupdata);
+                                                     p_64576_.addFreshEntityWithPassengers(phantom);
+-                                                    ++i;
++                                                    i++;
+                                                 }
+                                             }
+                                         }

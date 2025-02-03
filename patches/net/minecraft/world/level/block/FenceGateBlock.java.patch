@@ -40,6 +40,15 @@
          this.registerDefaultState(
              this.stateDefinition
                  .any()
+@@ -117,7 +_,7 @@
+ 
+     @Override
+     protected boolean isPathfindable(BlockState p_53360_, PathComputationType p_53363_) {
+-        switch(p_53363_) {
++        switch (p_53363_) {
+             case LAND:
+                 return p_53360_.getValue(OPEN);
+             case WATER:
 @@ -169,7 +_,7 @@
          p_53366_.playSound(
              p_53368_,

@@ -1,6 +1,6 @@
 --- a/net/minecraft/core/NonNullList.java
 +++ b/net/minecraft/core/NonNullList.java
-@@ -9,6 +_,28 @@
+@@ -9,16 +_,38 @@
  import org.apache.commons.lang3.Validate;
  
  public class NonNullList<E> extends AbstractList<E> {
@@ -29,3 +29,24 @@
      private final List<E> list;
      @Nullable
      private final E defaultValue;
+ 
+     public static <E> NonNullList<E> create() {
+-        return new NonNullList<>(Lists.newArrayList(), (E)null);
++        return new NonNullList<>(Lists.newArrayList(), null);
+     }
+ 
+     public static <E> NonNullList<E> createWithCapacity(int p_182648_) {
+-        return new NonNullList<>(Lists.newArrayListWithCapacity(p_182648_), (E)null);
++        return new NonNullList<>(Lists.newArrayListWithCapacity(p_182648_), null);
+     }
+ 
+     public static <E> NonNullList<E> withSize(int p_122781_, E p_122782_) {
+@@ -71,7 +_,7 @@
+         if (this.defaultValue == null) {
+             super.clear();
+         } else {
+-            for(int i = 0; i < this.size(); ++i) {
++            for (int i = 0; i < this.size(); i++) {
+                 this.set(i, this.defaultValue);
+             }
+         }

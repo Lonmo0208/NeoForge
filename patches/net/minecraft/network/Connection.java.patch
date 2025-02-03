@@ -23,14 +23,30 @@
      }
  
      @Override
-@@ -137,6 +_,7 @@
+@@ -137,6 +_,14 @@
                      this.disconnect(Component.translatable("disconnect.timeout"));
                  } else {
                      Component component = Component.translatable("disconnect.genericReason", "Internal Exception: " + p_129534_);
-+                    LOGGER.error("Exception caught in connection", p_129534_); // Neo: Always log critical network exceptions
++                    PacketListener listener = this.packetListener;
++                    if (listener != null) {
++                        ConnectionProtocol protocol = listener.protocol();
++                        if (protocol == ConnectionProtocol.CONFIGURATION || protocol == ConnectionProtocol.PLAY) {
++                            // Neo: Always log critical network exceptions for config and play packets
++                            LOGGER.error("Exception caught in connection", p_129534_);
++                        }
++                    }
                      if (flag) {
                          LOGGER.debug("Failed to sent packet", p_129534_);
                          if (this.getSending() == PacketFlow.CLIENTBOUND) {
+@@ -175,7 +_,7 @@
+                         this.disconnect(Component.translatable("multiplayer.disconnect.invalid_packet"));
+                     }
+ 
+-                    ++this.receivedPackets;
++                    this.receivedPackets++;
+                 }
+             }
+         }
 @@ -203,6 +_,7 @@
          if (p_320903_.flow() != this.getReceiving()) {
              throw new IllegalStateException("Invalid inbound protocol: " + p_320903_.id());
@@ -39,14 +55,49 @@
              this.packetListener = p_320940_;
              this.disconnectListener = null;
              UnconfiguredPipelineHandler.InboundConfigurationTask unconfiguredpipelinehandler$inboundconfigurationtask = UnconfiguredPipelineHandler.setupInboundProtocol(
-@@ -233,6 +_,7 @@
+@@ -231,7 +_,10 @@
+             if (bundlerinfo != null) {
+                 PacketBundleUnpacker packetbundleunpacker = new PacketBundleUnpacker(bundlerinfo);
                  unconfiguredpipelinehandler$outboundconfigurationtask = unconfiguredpipelinehandler$outboundconfigurationtask.andThen(
-                     p_319516_ -> p_319516_.pipeline().addAfter("encoder", "unbundler", packetbundleunpacker)
+-                    p_319516_ -> p_319516_.pipeline().addAfter("encoder", "unbundler", packetbundleunpacker)
++                    p_319516_ -> {
++                        p_319516_.pipeline().addAfter("encoder", "unbundler", packetbundleunpacker);
++                        net.neoforged.neoforge.network.filters.NetworkFilters.injectIfNecessary(this); // Neo: our handlers must be between the encoder and the unbundler, so re-inject them
++                    }
                  );
-+                net.neoforged.neoforge.network.filters.NetworkFilters.injectIfNecessary(this); // Neo: our handlers must be between the encoder and the unbundler, so re-inject them
              }
  
-             boolean flag = p_319974_.id() == ConnectionProtocol.LOGIN;
+@@ -312,7 +_,7 @@
+     }
+ 
+     private void sendPacket(Packet<?> p_129521_, @Nullable PacketSendListener p_243246_, boolean p_294510_) {
+-        ++this.sentPackets;
++        this.sentPackets++;
+         if (this.channel.eventLoop().inEventLoop()) {
+             this.doSendPacket(p_129521_, p_243246_, p_294510_);
+         } else {
+@@ -357,9 +_,9 @@
+ 
+     private void flushQueue() {
+         if (this.channel != null && this.channel.isOpen()) {
+-            synchronized(this.pendingActions) {
++            synchronized (this.pendingActions) {
+                 Consumer<Connection> consumer;
+-                while((consumer = this.pendingActions.poll()) != null) {
++                while ((consumer = this.pendingActions.poll()) != null) {
+                     consumer.accept(this);
+                 }
+             }
+@@ -368,8 +_,7 @@
+ 
+     public void tick() {
+         this.flushQueue();
+-        PacketListener packetlistener = this.packetListener;
+-        if (packetlistener instanceof TickablePacketListener tickablepacketlistener) {
++        if (this.packetListener instanceof TickablePacketListener tickablepacketlistener) {
+             tickablepacketlistener.tick();
+         }
+ 
 @@ -405,7 +_,7 @@
          if (this.address == null) {
              return "local";
@@ -64,6 +115,24 @@
          Class<? extends SocketChannel> oclass;
          EventLoopGroup eventloopgroup;
          if (Epoll.isAvailable() && p_290035_) {
+@@ -550,15 +_,13 @@
+ 
+     public void setupCompression(int p_129485_, boolean p_182682_) {
+         if (p_129485_ >= 0) {
+-            ChannelHandler channelhandler = this.channel.pipeline().get("decompress");
+-            if (channelhandler instanceof CompressionDecoder compressiondecoder) {
++            if (this.channel.pipeline().get("decompress") instanceof CompressionDecoder compressiondecoder) {
+                 compressiondecoder.setThreshold(p_129485_, p_182682_);
+             } else {
+                 this.channel.pipeline().addAfter("splitter", "decompress", new CompressionDecoder(p_129485_, p_182682_));
+             }
+ 
+-            channelhandler = this.channel.pipeline().get("compress");
+-            if (channelhandler instanceof CompressionEncoder compressionencoder) {
++            if (this.channel.pipeline().get("compress") instanceof CompressionEncoder compressionencoder) {
+                 compressionencoder.setThreshold(p_129485_);
+             } else {
+                 this.channel.pipeline().addAfter("prepender", "compress", new CompressionEncoder(p_129485_));
 @@ -602,5 +_,17 @@
  
      public void setBandwidthLogger(LocalSampleLogger p_323799_) {

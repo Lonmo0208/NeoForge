@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/item/crafting/Ingredient.java
 +++ b/net/minecraft/world/item/crafting/Ingredient.java
-@@ -30,22 +_,62 @@
+@@ -22,7 +_,6 @@
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+ import net.minecraft.network.codec.StreamCodec;
+ import net.minecraft.tags.TagKey;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.world.entity.player.StackedContents;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+@@ -30,30 +_,68 @@
  
  public class Ingredient implements Predicate<ItemStack> {
      public static final Ingredient EMPTY = new Ingredient(Stream.empty());
@@ -36,6 +44,7 @@
 -    public static final Codec<Ingredient> CODEC = codec(true);
 -    public static final Codec<Ingredient> CODEC_NONEMPTY = codec(false);
 +    private final java.util.function.Supplier<? extends net.neoforged.neoforge.common.crafting.IngredientType<?>> type;
++    @Nullable private Boolean areAllStacksEmpty;
 +
 +    public static final Codec<Ingredient> VANILLA_CODEC = codec(true);
 +    public static final Codec<Ingredient> VANILLA_CODEC_NONEMPTY = codec(false);
@@ -68,16 +77,27 @@
      }
  
      public ItemStack[] getItems() {
-@@ -66,7 +_,7 @@
+         if (this.itemStacks == null) {
+-            this.itemStacks = Arrays.stream(this.values)
+-                .flatMap(p_43916_ -> p_43916_.getItems().stream())
+-                .distinct()
+-                .toArray(p_43910_ -> new ItemStack[p_43910_]);
++            this.itemStacks = Arrays.stream(this.values).flatMap(p_43916_ -> p_43916_.getItems().stream()).distinct().toArray(ItemStack[]::new);
+         }
+ 
+         return this.itemStacks;
+@@ -65,8 +_,8 @@
+         } else if (this.isEmpty()) {
              return p_43914_.isEmpty();
          } else {
-             for(ItemStack itemstack : this.getItems()) {
+-            for(ItemStack itemstack : this.getItems()) {
 -                if (itemstack.is(p_43914_.getItem())) {
++            for (ItemStack itemstack : this.getItems()) {
 +                if (areStacksEqual(itemstack, p_43914_)) {
                      return true;
                  }
              }
-@@ -75,6 +_,10 @@
+@@ -75,12 +_,16 @@
          }
      }
  
@@ -88,12 +108,35 @@
      public IntList getStackingIds() {
          if (this.stackingIds == null) {
              ItemStack[] aitemstack = this.getItems();
-@@ -91,7 +_,7 @@
+             this.stackingIds = new IntArrayList(aitemstack.length);
+ 
+-            for(ItemStack itemstack : aitemstack) {
++            for (ItemStack itemstack : aitemstack) {
+                 this.stackingIds.add(StackedContents.getStackingIndex(itemstack));
+             }
+ 
+@@ -90,8 +_,23 @@
+         return this.stackingIds;
      }
  
++    private boolean areAllStacksEmpty() {
++        Boolean empty = this.areAllStacksEmpty;
++        if (empty == null) {
++            boolean allEmpty = true;
++            for (ItemStack stack : this.getItems()) {
++                if (!stack.isEmpty()) {
++                    allEmpty = false;
++                    break;
++                }
++            }
++            this.areAllStacksEmpty = empty = allEmpty;
++        }
++        return empty;
++    }
++
      public boolean isEmpty() {
 -        return this.values.length == 0;
-+        return this.values.length == 0 || Arrays.stream(getItems()).allMatch(ItemStack::isEmpty);
++        return this.values.length == 0 || this.areAllStacksEmpty();
      }
  
      @Override
@@ -115,6 +158,15 @@
      public static Ingredient fromValues(Stream<? extends Ingredient.Value> p_43939_) {
          Ingredient ingredient = new Ingredient(p_43939_);
          return ingredient.isEmpty() ? EMPTY : ingredient;
+@@ -132,7 +_,7 @@
+                         : DataResult.success(p_300810_.toArray(new Ingredient.Value[0])),
+                 List::of
+             );
+-        return ExtraCodecs.either(codec, Ingredient.Value.CODEC)
++        return Codec.either(codec, Ingredient.Value.CODEC)
+             .flatComapMap(
+                 p_300805_ -> p_300805_.map(Ingredient::new, p_300806_ -> new Ingredient(new Ingredient.Value[]{p_300806_})),
+                 p_300808_ -> {
 @@ -147,7 +_,11 @@
              );
      }
@@ -128,16 +180,22 @@
          static final Codec<Ingredient.ItemValue> CODEC = RecordCodecBuilder.create(
              p_330109_ -> p_330109_.group(ItemStack.SIMPLE_ITEM_CODEC.fieldOf("item").forGetter(p_300919_ -> p_300919_.item))
                      .apply(p_330109_, Ingredient.ItemValue::new)
-@@ -159,7 +_,7 @@
-                 return false;
-             } else {
-                 Ingredient.ItemValue ingredient$itemvalue = (Ingredient.ItemValue)p_301316_;
+@@ -155,18 +_,20 @@
+ 
+         @Override
+         public boolean equals(Object p_301316_) {
+-            if (!(p_301316_ instanceof Ingredient.ItemValue)) {
+-                return false;
+-            } else {
+-                Ingredient.ItemValue ingredient$itemvalue = (Ingredient.ItemValue)p_301316_;
 -                return ingredient$itemvalue.item.getItem().equals(this.item.getItem()) && ingredient$itemvalue.item.getCount() == this.item.getCount();
-+                return comparator().apply(item(), ingredient$itemvalue.item());
-             }
+-            }
++            return !(p_301316_ instanceof Ingredient.ItemValue ingredient$itemvalue)
++                ? false
++                : comparator().apply(item(), ingredient$itemvalue.item());
          }
  
-@@ -167,6 +_,11 @@
+         @Override
          public Collection<ItemStack> getItems() {
              return Collections.singleton(this.item);
          }
@@ -149,7 +207,12 @@
      }
  
      public static record TagValue(TagKey<Item> tag) implements Ingredient.Value {
-@@ -188,6 +_,11 @@
+@@ -184,16 +_,21 @@
+         public Collection<ItemStack> getItems() {
+             List<ItemStack> list = Lists.newArrayList();
+ 
+-            for(Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
++            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                  list.add(new ItemStack(holder));
              }
  
@@ -161,6 +224,13 @@
              return list;
          }
      }
+ 
+     public interface Value {
+-        Codec<Ingredient.Value> CODEC = ExtraCodecs.xor(Ingredient.ItemValue.CODEC, Ingredient.TagValue.CODEC)
++        Codec<Ingredient.Value> CODEC = Codec.xor(Ingredient.ItemValue.CODEC, Ingredient.TagValue.CODEC)
+             .xmap(p_300956_ -> p_300956_.map(p_300932_ -> p_300932_, p_301313_ -> p_301313_), p_301304_ -> {
+                 if (p_301304_ instanceof Ingredient.TagValue ingredient$tagvalue) {
+                     return Either.right(ingredient$tagvalue);
 @@ -205,5 +_,9 @@
              });
  

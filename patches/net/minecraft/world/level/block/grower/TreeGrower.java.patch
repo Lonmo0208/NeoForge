@@ -1,6 +1,40 @@
 --- a/net/minecraft/world/level/block/grower/TreeGrower.java
 +++ b/net/minecraft/world/level/block/grower/TreeGrower.java
-@@ -131,6 +_,9 @@
+@@ -12,7 +_,6 @@
+ import net.minecraft.resources.ResourceKey;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.tags.BlockTags;
+-import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.level.BlockGetter;
+ import net.minecraft.world.level.LevelAccessor;
+@@ -24,7 +_,7 @@
+ 
+ public final class TreeGrower {
+     private static final Map<String, TreeGrower> GROWERS = new Object2ObjectArrayMap<>();
+-    public static final Codec<TreeGrower> CODEC = ExtraCodecs.stringResolverCodec(p_304625_ -> p_304625_.name, GROWERS::get);
++    public static final Codec<TreeGrower> CODEC = Codec.stringResolver(p_304625_ -> p_304625_.name, GROWERS::get);
+     public static final TreeGrower OAK = new TreeGrower(
+         "oak",
+         0.1F,
+@@ -55,16 +_,6 @@
+         Optional.empty(),
+         Optional.empty()
+     );
+-    public static final TreeGrower POTATO = new TreeGrower(
+-        "potato",
+-        0.05F,
+-        Optional.of(TreeFeatures.MOTHER_POTATO_TREE),
+-        Optional.empty(),
+-        Optional.of(TreeFeatures.POTATO_TREE),
+-        Optional.of(TreeFeatures.POTATO_TREE_TALL),
+-        Optional.empty(),
+-        Optional.empty()
+-    );
+     public static final TreeGrower AZALEA = new TreeGrower("azalea", Optional.empty(), Optional.of(TreeFeatures.AZALEA_TREE), Optional.empty());
+     public static final TreeGrower BIRCH = new TreeGrower("birch", Optional.empty(), Optional.of(TreeFeatures.BIRCH), Optional.of(TreeFeatures.BIRCH_BEES_005));
+     public static final TreeGrower JUNGLE = new TreeGrower(
+@@ -141,9 +_,12 @@
                  .registryOrThrow(Registries.CONFIGURED_FEATURE)
                  .getHolder(resourcekey)
                  .orElse(null);
@@ -8,9 +42,14 @@
 +            holder = event.getFeature();
 +            if (event.getResult() == net.neoforged.bus.api.Event.Result.DENY) return false;
              if (holder != null) {
-                 for(int i = 0; i >= -1; --i) {
-                     for(int j = 0; j >= -1; --j) {
-@@ -164,6 +_,9 @@
+-                for(int i = 0; i >= -1; --i) {
+-                    for(int j = 0; j >= -1; --j) {
++                for (int i = 0; i >= -1; i--) {
++                    for (int j = 0; j >= -1; j--) {
+                         if (isTwoByTwoSapling(p_304439_, p_304396_, p_304643_, i, j)) {
+                             ConfiguredFeature<?, ?> configuredfeature = holder.value();
+                             BlockState blockstate = Blocks.AIR.defaultBlockState();
+@@ -174,6 +_,9 @@
                  .registryOrThrow(Registries.CONFIGURED_FEATURE)
                  .getHolder(resourcekey1)
                  .orElse(null);
@@ -20,3 +59,12 @@
              if (holder1 == null) {
                  return false;
              } else {
+@@ -203,7 +_,7 @@
+     }
+ 
+     private boolean hasFlowers(LevelAccessor p_304555_, BlockPos p_304465_) {
+-        for(BlockPos blockpos : BlockPos.MutableBlockPos.betweenClosed(p_304465_.below().north(2).west(2), p_304465_.above().south(2).east(2))) {
++        for (BlockPos blockpos : BlockPos.MutableBlockPos.betweenClosed(p_304465_.below().north(2).west(2), p_304465_.above().south(2).east(2))) {
+             if (p_304555_.getBlockState(blockpos).is(BlockTags.FLOWERS)) {
+                 return true;
+             }

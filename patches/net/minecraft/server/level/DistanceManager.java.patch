@@ -9,6 +9,34 @@
      protected DistanceManager(Executor p_140774_, Executor p_140775_) {
          ProcessorHandle<Runnable> processorhandle = ProcessorHandle.of("player ticket throttler", p_140775_::execute);
          ChunkTaskPriorityQueueSorter chunktaskpriorityqueuesorter = new ChunkTaskPriorityQueueSorter(ImmutableList.of(processorhandle), p_140774_, 4);
+@@ -64,15 +_,15 @@
+     }
+ 
+     protected void purgeStaleTickets() {
+-        ++this.ticketTickCounter;
++        this.ticketTickCounter++;
+         ObjectIterator<Entry<SortedArraySet<Ticket<?>>>> objectiterator = this.tickets.long2ObjectEntrySet().fastIterator();
+ 
+-        while(objectiterator.hasNext()) {
++        while (objectiterator.hasNext()) {
+             Entry<SortedArraySet<Ticket<?>>> entry = objectiterator.next();
+             Iterator<Ticket<?>> iterator = entry.getValue().iterator();
+             boolean flag = false;
+ 
+-            while(iterator.hasNext()) {
++            while (iterator.hasNext()) {
+                 Ticket<?> ticket = iterator.next();
+                 if (ticket.timedOut(this.ticketTickCounter)) {
+                     iterator.remove();
+@@ -120,7 +_,7 @@
+             if (!this.ticketsToRelease.isEmpty()) {
+                 LongIterator longiterator = this.ticketsToRelease.iterator();
+ 
+-                while(longiterator.hasNext()) {
++                while (longiterator.hasNext()) {
+                     long j = longiterator.nextLong();
+                     if (this.getTickets(j).stream().anyMatch(p_183910_ -> p_183910_.getType() == TicketType.PLAYER)) {
+                         ChunkHolder chunkholder = p_140806_.getUpdatingChunkIfPresent(j);
 @@ -151,6 +_,10 @@
          if (p_140786_.getTicketLevel() < i) {
              this.ticketTracker.update(p_140785_, p_140786_.getTicketLevel(), true);
@@ -57,15 +85,74 @@
          long i = p_140851_.toLong();
          this.removeTicket(i, ticket);
          this.tickingTicketsTracker.removeTicket(i, ticket);
-@@ -266,6 +_,11 @@
- 
-     public String getDebugStatus() {
+@@ -207,7 +_,7 @@
+     public void addPlayer(SectionPos p_140803_, ServerPlayer p_140804_) {
+         ChunkPos chunkpos = p_140803_.chunk();
+         long i = chunkpos.toLong();
+-        this.playersPerChunk.computeIfAbsent(i, p_183921_ -> new ObjectOpenHashSet()).add(p_140804_);
++        this.playersPerChunk.computeIfAbsent(i, p_183921_ -> new ObjectOpenHashSet<>()).add(p_140804_);
+         this.naturalSpawnChunkCounter.update(i, 0, true);
+         this.playerTicketManager.update(i, 0, true);
+         this.tickingTicketsTracker.addTicket(TicketType.PLAYER, chunkpos, this.getPlayerTicketLevel(), chunkpos);
+@@ -268,12 +_,17 @@
          return this.ticketThrottler.getDebugStatus();
-+    }
-+
+     }
+ 
 +    public boolean shouldForceTicks(long chunkPos) {
 +         SortedArraySet<Ticket<?>> tickets = forcedTickets.get(chunkPos);
 +         return tickets != null && !tickets.isEmpty();
-     }
- 
++    }
++
      private void dumpTickets(String p_143208_) {
+         try (FileOutputStream fileoutputstream = new FileOutputStream(new File(p_143208_))) {
+-            for(Entry<SortedArraySet<Ticket<?>>> entry : this.tickets.long2ObjectEntrySet()) {
++            for (Entry<SortedArraySet<Ticket<?>>> entry : this.tickets.long2ObjectEntrySet()) {
+                 ChunkPos chunkpos = new ChunkPos(entry.getLongKey());
+ 
+-                for(Ticket<?> ticket : entry.getValue()) {
++                for (Ticket<?> ticket : entry.getValue()) {
+                     fileoutputstream.write(
+                         (chunkpos.x + "\t" + chunkpos.z + "\t" + ticket.getType() + "\t" + ticket.getTicketLevel() + "\t\n").getBytes(StandardCharsets.UTF_8)
+                     );
+@@ -293,12 +_,12 @@
+         ImmutableSet<TicketType<?>> immutableset = ImmutableSet.of(TicketType.UNKNOWN, TicketType.POST_TELEPORT, TicketType.LIGHT);
+         ObjectIterator<Entry<SortedArraySet<Ticket<?>>>> objectiterator = this.tickets.long2ObjectEntrySet().fastIterator();
+ 
+-        while(objectiterator.hasNext()) {
++        while (objectiterator.hasNext()) {
+             Entry<SortedArraySet<Ticket<?>>> entry = objectiterator.next();
+             Iterator<Ticket<?>> iterator = entry.getValue().iterator();
+             boolean flag = false;
+ 
+-            while(iterator.hasNext()) {
++            while (iterator.hasNext()) {
+                 Ticket<?> ticket = iterator.next();
+                 if (!immutableset.contains(ticket.getType())) {
+                     iterator.remove();
+@@ -413,7 +_,7 @@
+ 
+         private void dumpChunks(String p_143213_) {
+             try (FileOutputStream fileoutputstream = new FileOutputStream(new File(p_143213_))) {
+-                for(it.unimi.dsi.fastutil.longs.Long2ByteMap.Entry entry : this.chunks.long2ByteEntrySet()) {
++                for (it.unimi.dsi.fastutil.longs.Long2ByteMap.Entry entry : this.chunks.long2ByteEntrySet()) {
+                     ChunkPos chunkpos = new ChunkPos(entry.getLongKey());
+                     String s = Byte.toString(entry.getByteValue());
+                     fileoutputstream.write((chunkpos.x + "\t" + chunkpos.z + "\t" + s + "\n").getBytes(StandardCharsets.UTF_8));
+@@ -441,7 +_,7 @@
+         }
+ 
+         public void updateViewDistance(int p_140913_) {
+-            for(it.unimi.dsi.fastutil.longs.Long2ByteMap.Entry entry : this.chunks.long2ByteEntrySet()) {
++            for (it.unimi.dsi.fastutil.longs.Long2ByteMap.Entry entry : this.chunks.long2ByteEntrySet()) {
+                 byte b0 = entry.getByteValue();
+                 long i = entry.getLongKey();
+                 this.onLevelChange(i, b0, this.haveTicketFor(b0), b0 <= p_140913_);
+@@ -483,7 +_,7 @@
+             if (!this.toUpdate.isEmpty()) {
+                 LongIterator longiterator = this.toUpdate.iterator();
+ 
+-                while(longiterator.hasNext()) {
++                while (longiterator.hasNext()) {
+                     long i = longiterator.nextLong();
+                     int j = this.queueLevels.get(i);
+                     int k = this.getLevel(i);

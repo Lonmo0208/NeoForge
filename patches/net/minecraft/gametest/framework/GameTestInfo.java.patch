@@ -1,5 +1,23 @@
 --- a/net/minecraft/gametest/framework/GameTestInfo.java
 +++ b/net/minecraft/gametest/framework/GameTestInfo.java
+@@ -84,7 +_,7 @@
+         if (this.placedStructure) {
+             return true;
+         } else if (this.ticksToWaitForChunkLoading > 0) {
+-            --this.ticksToWaitForChunkLoading;
++            this.ticksToWaitForChunkLoading--;
+             return false;
+         } else {
+             this.placeStructure().startExecution(0);
+@@ -126,7 +_,7 @@
+ 
+             ObjectIterator<Entry<Runnable>> objectiterator = this.runAtTickTimeMap.object2LongEntrySet().iterator();
+ 
+-            while(objectiterator.hasNext()) {
++            while (objectiterator.hasNext()) {
+                 Entry<Runnable> entry = objectiterator.next();
+                 if (entry.getLongValue() <= this.tickCount) {
+                     try {
 @@ -264,6 +_,7 @@
          BlockPos blockpos = this.getOrCalculateNorthwestCorner();
          this.structureBlockEntity = StructureUtils.prepareTestStructure(this, blockpos, this.getRotation(), this.level);

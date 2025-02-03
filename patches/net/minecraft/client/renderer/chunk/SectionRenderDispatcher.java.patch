@@ -1,5 +1,99 @@
 --- a/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
 +++ b/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+@@ -23,6 +_,7 @@
+ import java.util.Set;
+ import java.util.concurrent.CancellationException;
+ import java.util.concurrent.CompletableFuture;
++import java.util.concurrent.CompletionStage;
+ import java.util.concurrent.Executor;
+ import java.util.concurrent.PriorityBlockingQueue;
+ import java.util.concurrent.atomic.AtomicBoolean;
+@@ -103,7 +_,7 @@
+                         ),
+                         this.executor
+                     )
+-                    .thenCompose(p_296185_ -> p_296185_)
++                    .thenCompose(p_296185_ -> (CompletionStage<SectionRenderDispatcher.SectionTaskResult>)p_296185_)
+                     .whenComplete((p_296170_, p_294818_) -> {
+                         if (p_294818_ != null) {
+                             Minecraft.getInstance().delayCrash(CrashReport.forThrowable(p_294818_, "Batching sections"));
+@@ -136,7 +_,7 @@
+ 
+         SectionRenderDispatcher.RenderSection.CompileTask sectionrenderdispatcher$rendersection$compiletask1 = this.toBatchHighPriority.poll();
+         if (sectionrenderdispatcher$rendersection$compiletask1 != null) {
+-            --this.highPriorityQuota;
++            this.highPriorityQuota--;
+             return sectionrenderdispatcher$rendersection$compiletask1;
+         } else {
+             this.highPriorityQuota = 2;
+@@ -170,7 +_,7 @@
+ 
+     public void uploadAllPendingUploads() {
+         Runnable runnable;
+-        while((runnable = this.toUpload.poll()) != null) {
++        while ((runnable = this.toUpload.poll()) != null) {
+             runnable.run();
+         }
+     }
+@@ -213,14 +_,14 @@
+     }
+ 
+     private void clearBatchQueue() {
+-        while(!this.toBatchHighPriority.isEmpty()) {
++        while (!this.toBatchHighPriority.isEmpty()) {
+             SectionRenderDispatcher.RenderSection.CompileTask sectionrenderdispatcher$rendersection$compiletask = this.toBatchHighPriority.poll();
+             if (sectionrenderdispatcher$rendersection$compiletask != null) {
+                 sectionrenderdispatcher$rendersection$compiletask.cancel();
+             }
+         }
+ 
+-        while(!this.toBatchLowPriority.isEmpty()) {
++        while (!this.toBatchLowPriority.isEmpty()) {
+             SectionRenderDispatcher.RenderSection.CompileTask sectionrenderdispatcher$rendersection$compiletask1 = this.toBatchLowPriority.poll();
+             if (sectionrenderdispatcher$rendersection$compiletask1 != null) {
+                 sectionrenderdispatcher$rendersection$compiletask1.cancel();
+@@ -286,12 +_,12 @@
+         private final Set<BlockEntity> globalBlockEntities = Sets.newHashSet();
+         private final Map<RenderType, VertexBuffer> buffers = RenderType.chunkBufferLayers()
+             .stream()
+-            .collect(Collectors.toMap(p_295245_ -> p_295245_, p_295640_ -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
++            .collect(Collectors.toMap(p_295245_ -> (RenderType)p_295245_, p_295640_ -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
+         private AABB bb;
+         private boolean dirty = true;
+         final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);
+         private final BlockPos.MutableBlockPos[] relativeOrigins = Util.make(new BlockPos.MutableBlockPos[6], p_294717_ -> {
+-            for(int i = 0; i < p_294717_.length; ++i) {
++            for (int i = 0; i < p_294717_.length; i++) {
+                 p_294717_[i] = new BlockPos.MutableBlockPos();
+             }
+         });
+@@ -310,14 +_,12 @@
+ 
+         public boolean hasAllNeighbors() {
+             int i = 24;
+-            if (!(this.getDistToPlayerSqr() > 576.0)) {
+-                return true;
+-            } else {
+-                return this.doesChunkExistAt(this.relativeOrigins[Direction.WEST.ordinal()])
++            return !(this.getDistToPlayerSqr() > 576.0)
++                ? true
++                : this.doesChunkExistAt(this.relativeOrigins[Direction.WEST.ordinal()])
+                     && this.doesChunkExistAt(this.relativeOrigins[Direction.NORTH.ordinal()])
+                     && this.doesChunkExistAt(this.relativeOrigins[Direction.EAST.ordinal()])
+                     && this.doesChunkExistAt(this.relativeOrigins[Direction.SOUTH.ordinal()]);
+-            }
+         }
+ 
+         public AABB getBoundingBox() {
+@@ -335,7 +_,7 @@
+                 (double)p_294148_, (double)p_295137_, (double)p_295706_, (double)(p_294148_ + 16), (double)(p_295137_ + 16), (double)(p_295706_ + 16)
+             );
+ 
+-            for(Direction direction : Direction.values()) {
++            for (Direction direction : Direction.values()) {
+                 this.relativeOrigins[direction.ordinal()].set(this.origin).move(direction, 16);
+             }
+         }
 @@ -431,8 +_,9 @@
              boolean flag = this.cancelTasks();
              BlockPos blockpos = this.origin.immutable();
@@ -20,6 +114,24 @@
              );
              return this.lastRebuildTask;
          }
+@@ -453,7 +_,7 @@
+         void updateGlobalBlockEntities(Collection<BlockEntity> p_296155_) {
+             Set<BlockEntity> set = Sets.newHashSet(p_296155_);
+             Set<BlockEntity> set1;
+-            synchronized(this.globalBlockEntities) {
++            synchronized (this.globalBlockEntities) {
+                 set1 = Sets.newHashSet(this.globalBlockEntities);
+                 set.removeAll(this.globalBlockEntities);
+                 set1.removeAll(p_296155_);
+@@ -482,7 +_,7 @@
+             protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
+             protected final boolean isHighPriority;
+ 
+-            public CompileTask(double p_294428_, boolean p_295051_) {
++            public CompileTask(SectionRenderDispatcher.RenderSection var1, double p_294428_, boolean p_295051_) {
+                 this.distAtCreation = p_294428_;
+                 this.isHighPriority = p_295051_;
+             }
 @@ -502,10 +_,20 @@
          class RebuildTask extends SectionRenderDispatcher.RenderSection.CompileTask {
              @Nullable
@@ -29,11 +141,12 @@
  
 +            @Deprecated
              public RebuildTask(double p_294400_, @Nullable RenderChunkRegion p_294382_, boolean p_295207_) {
+-                super(p_294400_, p_295207_);
 +                this(p_294400_, p_294382_, p_295207_, List.of());
 +            }
 +
 +            public RebuildTask(double p_294400_, @Nullable RenderChunkRegion p_294382_, boolean p_295207_, List<net.neoforged.neoforge.client.event.AddSectionGeometryEvent.AdditionalSectionRenderer> additionalRenderers) {
-                 super(p_294400_, p_295207_);
++                super(RenderSection.this, p_294400_, p_295207_);
                  this.region = p_294382_;
 +                var manager = p_294382_ != null ? p_294382_.getModelDataManager() : null;
 +                this.modelData = manager != null ? manager : net.neoforged.neoforge.client.model.data.ModelDataManager.Snapshot.EMPTY;
@@ -41,7 +154,30 @@
              }
  
              @Override
-@@ -609,7 +_,11 @@
+@@ -584,7 +_,7 @@
+                     RandomSource randomsource = RandomSource.create();
+                     BlockRenderDispatcher blockrenderdispatcher = Minecraft.getInstance().getBlockRenderer();
+ 
+-                    for(BlockPos blockpos2 : BlockPos.betweenClosed(blockpos, blockpos1)) {
++                    for (BlockPos blockpos2 : BlockPos.betweenClosed(blockpos, blockpos1)) {
+                         BlockState blockstate = renderchunkregion.getBlockState(blockpos2);
+                         if (blockstate.isSolidRender(renderchunkregion, blockpos2)) {
+                             visgraph.setOpaque(blockpos2);
+@@ -605,20 +_,15 @@
+                                 RenderSection.this.beginLayer(bufferbuilder);
+                             }
+ 
+-                            blockrenderdispatcher.renderLiquid(
+-                                blockpos2,
+-                                renderchunkregion,
+-                                bufferbuilder,
+-                                blockstate,
+-                                fluidstate,
+-                                blockpos2.getX() & 15,
+-                                blockpos2.getY() & 15,
+-                                blockpos2.getZ() & 15
+-                            );
++                            blockrenderdispatcher.renderLiquid(blockpos2, renderchunkregion, bufferbuilder, blockstate, fluidstate);
                          }
  
                          if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
@@ -54,7 +190,7 @@
                              BufferBuilder bufferbuilder2 = p_294319_.builder(rendertype2);
                              if (set.add(rendertype2)) {
                                  RenderSection.this.beginLayer(bufferbuilder2);
-@@ -617,10 +_,20 @@
+@@ -626,10 +_,20 @@
  
                              posestack.pushPose();
                              posestack.translate((float)(blockpos2.getX() & 15), (float)(blockpos2.getY() & 15), (float)(blockpos2.getZ() & 15));
@@ -76,7 +212,16 @@
  
                      if (set.contains(RenderType.translucent())) {
                          BufferBuilder bufferbuilder1 = p_294319_.builder(RenderType.translucent());
-@@ -651,9 +_,10 @@
+@@ -643,7 +_,7 @@
+                         }
+                     }
+ 
+-                    for(RenderType rendertype1 : set) {
++                    for (RenderType rendertype1 : set) {
+                         BufferBuilder.RenderedBuffer bufferbuilder$renderedbuffer = p_294319_.builder(rendertype1).endOrDiscardIfEmpty();
+                         if (bufferbuilder$renderedbuffer != null) {
+                             sectionrenderdispatcher$rendersection$rebuildtask$compileresults.renderedLayers.put(rendertype1, bufferbuilder$renderedbuffer);
+@@ -660,9 +_,10 @@
              private <E extends BlockEntity> void handleBlockEntity(SectionRenderDispatcher.RenderSection.RebuildTask.CompileResults p_294198_, E p_296214_) {
                  BlockEntityRenderer<E> blockentityrenderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(p_296214_);
                  if (blockentityrenderer != null) {
@@ -88,3 +233,12 @@
                      }
                  }
              }
+@@ -691,7 +_,7 @@
+             private final SectionRenderDispatcher.CompiledSection compiledSection;
+ 
+             public ResortTransparencyTask(double p_294102_, SectionRenderDispatcher.CompiledSection p_294601_) {
+-                super(p_294102_, true);
++                super(RenderSection.this, p_294102_, true);
+                 this.compiledSection = p_294601_;
+             }
+ 

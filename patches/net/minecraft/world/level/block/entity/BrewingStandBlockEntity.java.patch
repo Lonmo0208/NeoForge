@@ -1,6 +1,60 @@
 --- a/net/minecraft/world/level/block/entity/BrewingStandBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/BrewingStandBlockEntity.java
-@@ -147,6 +_,7 @@
+@@ -41,7 +_,7 @@
+     protected final ContainerData dataAccess = new ContainerData() {
+         @Override
+         public int get(int p_59038_) {
+-            return switch(p_59038_) {
++            return switch (p_59038_) {
+                 case 0 -> BrewingStandBlockEntity.this.brewTime;
+                 case 1 -> BrewingStandBlockEntity.this.fuel;
+                 default -> 0;
+@@ -50,7 +_,7 @@
+ 
+         @Override
+         public void set(int p_59040_, int p_59041_) {
+-            switch(p_59040_) {
++            switch (p_59040_) {
+                 case 0:
+                     BrewingStandBlockEntity.this.brewTime = p_59041_;
+                     break;
+@@ -101,7 +_,7 @@
+         boolean flag1 = p_155289_.brewTime > 0;
+         ItemStack itemstack1 = p_155289_.items.get(3);
+         if (flag1) {
+-            --p_155289_.brewTime;
++            p_155289_.brewTime--;
+             boolean flag2 = p_155289_.brewTime == 0;
+             if (flag2 && flag) {
+                 doBrew(p_155286_, p_155287_, p_155289_.items);
+@@ -111,7 +_,7 @@
+                 setChanged(p_155286_, p_155287_, p_155288_);
+             }
+         } else if (flag && p_155289_.fuel > 0) {
+-            --p_155289_.fuel;
++            p_155289_.fuel--;
+             p_155289_.brewTime = 400;
+             p_155289_.ingredient = itemstack1.getItem();
+             setChanged(p_155286_, p_155287_, p_155288_);
+@@ -125,7 +_,7 @@
+                 return;
+             }
+ 
+-            for(int i = 0; i < BrewingStandBlock.HAS_BOTTLE.length; ++i) {
++            for (int i = 0; i < BrewingStandBlock.HAS_BOTTLE.length; i++) {
+                 blockstate = blockstate.setValue(BrewingStandBlock.HAS_BOTTLE[i], Boolean.valueOf(aboolean[i]));
+             }
+ 
+@@ -136,7 +_,7 @@
+     private boolean[] getPotionBits() {
+         boolean[] aboolean = new boolean[3];
+ 
+-        for(int i = 0; i < 3; ++i) {
++        for (int i = 0; i < 3; i++) {
+             if (!this.items.get(i).isEmpty()) {
+                 aboolean[i] = true;
+             }
+@@ -147,12 +_,13 @@
  
      private static boolean isBrewable(NonNullList<ItemStack> p_155295_) {
          ItemStack itemstack = p_155295_.get(3);
@@ -8,7 +62,14 @@
          if (itemstack.isEmpty()) {
              return false;
          } else if (!PotionBrewing.isIngredient(itemstack)) {
-@@ -164,21 +_,21 @@
+             return false;
+         } else {
+-            for(int i = 0; i < 3; ++i) {
++            for (int i = 0; i < 3; i++) {
+                 ItemStack itemstack1 = p_155295_.get(i);
+                 if (!itemstack1.isEmpty() && PotionBrewing.hasMix(itemstack1, itemstack)) {
+                     return true;
+@@ -164,33 +_,33 @@
      }
  
      private static void doBrew(Level p_155291_, BlockPos p_155292_, NonNullList<ItemStack> p_155293_) {
@@ -37,17 +98,38 @@
  
          p_155293_.set(3, itemstack);
          p_155291_.levelEvent(1035, p_155292_, 0);
-@@ -204,11 +_,11 @@
+     }
+ 
+     @Override
+-    public void load(CompoundTag p_155297_, HolderLookup.Provider p_324506_) {
+-        super.load(p_155297_, p_324506_);
++    protected void loadAdditional(CompoundTag p_338530_, HolderLookup.Provider p_338200_) {
++        super.loadAdditional(p_338530_, p_338200_);
+         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+-        ContainerHelper.loadAllItems(p_155297_, this.items, p_324506_);
+-        this.brewTime = p_155297_.getShort("BrewTime");
+-        this.fuel = p_155297_.getByte("Fuel");
++        ContainerHelper.loadAllItems(p_338530_, this.items, p_338200_);
++        this.brewTime = p_338530_.getShort("BrewTime");
++        this.fuel = p_338530_.getByte("Fuel");
+     }
+ 
+     @Override
+@@ -204,12 +_,12 @@
      @Override
      public boolean canPlaceItem(int p_59017_, ItemStack p_59018_) {
          if (p_59017_ == 3) {
 -            return PotionBrewing.isIngredient(p_59018_);
+-        } else if (p_59017_ == 4) {
+-            return p_59018_.is(Items.BLAZE_POWDER);
 +            return net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry.isValidIngredient(p_59018_);
-         } else if (p_59017_ == 4) {
-             return p_59018_.is(Items.BLAZE_POWDER);
          } else {
 -            return (p_59018_.is(Items.POTION) || p_59018_.is(Items.SPLASH_POTION) || p_59018_.is(Items.LINGERING_POTION) || p_59018_.is(Items.GLASS_BOTTLE))
-+            return net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry.isValidInput(p_59018_)
-                 && this.getItem(p_59017_).isEmpty();
+-                && this.getItem(p_59017_).isEmpty();
++            return p_59017_ == 4
++                ? p_59018_.is(Items.BLAZE_POWDER)
++                : net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry.isValidInput(p_59018_)
++                    && this.getItem(p_59017_).isEmpty();
          }
      }
+ 

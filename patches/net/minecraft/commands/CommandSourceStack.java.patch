@@ -9,3 +9,44 @@
      public static final SimpleCommandExceptionType ERROR_NOT_PLAYER = new SimpleCommandExceptionType(Component.translatable("permissions.requires.player"));
      public static final SimpleCommandExceptionType ERROR_NOT_ENTITY = new SimpleCommandExceptionType(Component.translatable("permissions.requires.entity"));
      public final CommandSource source;
+@@ -423,8 +_,7 @@
+ 
+     @Nullable
+     public ServerPlayer getPlayer() {
+-        Entity entityx = this.entity;
+-        return entityx instanceof ServerPlayer serverplayer ? serverplayer : null;
++        return this.entity instanceof ServerPlayer serverplayer ? serverplayer : null;
+     }
+ 
+     public boolean isPlayer() {
+@@ -453,11 +_,7 @@
+ 
+     public boolean shouldFilterMessageTo(ServerPlayer p_243268_) {
+         ServerPlayer serverplayer = this.getPlayer();
+-        if (p_243268_ == serverplayer) {
+-            return false;
+-        } else {
+-            return serverplayer != null && serverplayer.isTextFilteringEnabled() || p_243268_.isTextFilteringEnabled();
+-        }
++        return p_243268_ == serverplayer ? false : serverplayer != null && serverplayer.isTextFilteringEnabled() || p_243268_.isTextFilteringEnabled();
+     }
+ 
+     public void sendChatMessage(OutgoingChatMessage p_251464_, boolean p_252146_, ChatType.Bound p_250406_) {
+@@ -500,7 +_,7 @@
+     private void broadcastToAdmins(Component p_81367_) {
+         Component component = Component.translatable("chat.type.admin", this.getDisplayName(), p_81367_).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+         if (this.server.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+-            for(ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
++            for (ServerPlayer serverplayer : this.server.getPlayerList().getPlayers()) {
+                 if (serverplayer != this.source && this.server.getPlayerList().isOp(serverplayer.getGameProfile())) {
+                     serverplayer.sendSystemMessage(component);
+                 }
+@@ -556,7 +_,7 @@
+         CommandContext<?> p_212333_
+     ) {
+         return this.registryAccess().registry(p_212330_).map(p_212328_ -> {
+-            this.suggestRegistryElements(p_212328_, p_212331_, p_212332_);
++            this.suggestRegistryElements((Registry<?>)p_212328_, p_212331_, p_212332_);
+             return p_212332_.buildFuture();
+         }).orElseGet(Suggestions::empty);
+     }

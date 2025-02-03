@@ -14,7 +14,8 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforgespi.language.IModInfo;
 
-/**j
+/**
+ * j
  * Register an instance to {@link ModContainer#registerExtensionPoint(Class, Supplier)}
  * to supply a config screen for your mod.
  *

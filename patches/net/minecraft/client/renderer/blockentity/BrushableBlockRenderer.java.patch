@@ -1,13 +1,23 @@
 --- a/net/minecraft/client/renderer/blockentity/BrushableBlockRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/BrushableBlockRenderer.java
-@@ -73,4 +_,10 @@
+@@ -51,7 +_,7 @@
+     private float[] translations(Direction p_278030_, int p_277997_) {
+         float[] afloat = new float[]{0.5F, 0.0F, 0.5F};
+         float f = (float)p_277997_ / 10.0F * 0.75F;
+-        switch(p_278030_) {
++        switch (p_278030_) {
+             case EAST:
+                 afloat[0] = 0.73F + f;
+                 break;
+@@ -72,5 +_,11 @@
+         }
  
          return afloat;
-     }
++    }
 +
 +    @Override
 +    public net.minecraft.world.phys.AABB getRenderBoundingBox(BrushableBlockEntity blockEntity) {
 +        net.minecraft.core.BlockPos pos = blockEntity.getBlockPos();
 +        return new net.minecraft.world.phys.AABB(pos.getX() - .25, pos.getY() - .25, pos.getZ() - .25, pos.getX() + 1.25, pos.getY() + 1.25, pos.getZ() + 1.25);
-+    }
+     }
  }
