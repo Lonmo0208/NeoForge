@@ -71,11 +71,12 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.IPlantable;
 import net.neoforged.neoforge.common.ToolAction;
 import net.neoforged.neoforge.common.ToolActions;
+import net.neoforged.neoforge.common.enums.BubbleColumnDirection;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
@@ -193,7 +194,7 @@ public interface IBlockExtension {
      * @return True to spawn the drops
      */
     default public boolean canHarvestBlock(BlockState state, BlockGetter level, BlockPos pos, Player player) {
-        return CommonHooks.isCorrectToolForDrops(state, player);
+        return EventHooks.doPlayerHarvestCheck(player, state, level, pos);
     }
 
     /**
@@ -204,21 +205,24 @@ public interface IBlockExtension {
      *
      * Return true if the block is actually destroyed.
      *
-     * Note: When used in multiplayer, this is called on both client and
-     * server sides!
+     * This function is called on both the logical client and logical server.
      *
      * @param state       The current state.
      * @param level       The current level
      * @param player      The player damaging the block, may be null
      * @param pos         Block position in level
-     * @param willHarvest True if Block.harvestBlock will be called after this, if the return in true.
-     *                    Can be useful to delay the destruction of tile entities till after harvestBlock
+     * @param willHarvest The result of {@link #canHarvestBlock}, if called on the server by a non-creative player, otherwise always false.
      * @param fluid       The current fluid state at current position
      * @return True if the block is actually destroyed.
      */
     default boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
-        self().playerWillDestroy(level, pos, state, player);
-        return level.setBlock(pos, fluid.createLegacyBlock(), level.isClientSide ? 11 : 3);
+        if (level.isClientSide()) {
+            // On the client, vanilla calls Level#setBlock, per MultiPlayerGameMode#destroyBlock
+            return level.setBlock(pos, fluid.createLegacyBlock(), 11);
+        } else {
+            // On the server, vanilla calls Level#removeBlock, per ServerPlayerGameMode#destroyBlock
+            return level.removeBlock(pos, false);
+        }
     }
 
     /**
@@ -242,36 +246,34 @@ public interface IBlockExtension {
     }
 
     /**
-     * Determines if this block is classified as a Bed, Allowing
-     * players to sleep in it, though the block has to specifically
-     * perform the sleeping functionality in it's activated event.
+     * Determines if this block is classified as a bed, replacing <code>instanceof BedBlock</code> checks.
+     * <p>
+     * If true, players may sleep in it, though the block must manually put the player to sleep
+     * by calling {@link Player#startSleepInBed} from {@link BlockBehaviour#useWithoutItem} or similar.
+     * <p>
+     * If you want players to be able to respawn at your bed, you also need to override {@link #getRespawnPosition}.
      *
-     * @param state  The current state
-     * @param level  The current level
-     * @param pos    Block position in level
-     * @param player The player or camera entity, null in some cases.
+     * @param state   The current state
+     * @param level   The current level
+     * @param pos     Block position in level
+     * @param sleeper The sleeping entity.
      * @return True to treat this as a bed
      */
-    default boolean isBed(BlockState state, BlockGetter level, BlockPos pos, @Nullable Entity player) {
-        return self() instanceof BedBlock; //TODO: Forge: Keep isBed function?
+    default boolean isBed(BlockState state, BlockGetter level, BlockPos pos, LivingEntity sleeper) {
+        return self() instanceof BedBlock;
     }
 
     /**
-     * Returns the position that the entity is moved to upon
-     * respawning at this block.
+     * Returns the position that the entity is moved to upon respawning at this block.
      *
      * @param state       The current state
      * @param type        The entity type used when checking if a dismount blockstate is dangerous. Currently always PLAYER.
      * @param levelReader The current level
      * @param pos         Block position in level
      * @param orientation The angle the entity had when setting the respawn point
-     * @param entity      The entity respawning, often null
      * @return The spawn position or the empty optional if respawning here is not possible
      */
-    default Optional<Vec3> getRespawnPosition(BlockState state, EntityType<?> type, LevelReader levelReader, BlockPos pos, float orientation, @Nullable LivingEntity entity) {
-        if (isBed(state, levelReader, pos, entity) && levelReader instanceof Level level && BedBlock.canSetSpawn(level)) {
-            return BedBlock.findStandUpPosition(type, levelReader, pos, state.getValue(BedBlock.FACING), orientation);
-        }
+    default Optional<Vec3> getRespawnPosition(BlockState state, EntityType<?> type, LevelReader levelReader, BlockPos pos, float orientation) {
         return Optional.empty();
     }
 
@@ -975,5 +977,24 @@ public interface IBlockExtension {
      */
     default boolean isEmpty(BlockState state) {
         return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR);
+    }
+
+    /**
+     * Determines if this block can spawn Bubble Columns and if so, what direction the column flows.
+     * <p></p>
+     * NOTE: The block itself will still need to call {@link net.minecraft.world.level.block.BubbleColumnBlock#updateColumn(LevelAccessor, BlockPos, BlockState)} in their tick method and schedule a block tick in the block's onPlace.
+     * Also, schedule a fluid tick in updateShape method if update direction is up. Both are needed in order to get the Bubble Columns to function properly. See {@link net.minecraft.world.level.block.SoulSandBlock} and {@link net.minecraft.world.level.block.MagmaBlock} for example.
+     *
+     * @param state The current state
+     * @return BubbleColumnDirection.NONE for no Bubble Column. Otherwise, will spawn Bubble Column flowing with specified direction
+     */
+    default BubbleColumnDirection getBubbleColumnDirection(BlockState state) {
+        if (state.is(Blocks.SOUL_SAND)) {
+            return BubbleColumnDirection.UPWARD;
+        } else if (state.is(Blocks.MAGMA_BLOCK)) {
+            return BubbleColumnDirection.DOWNWARD;
+        } else {
+            return BubbleColumnDirection.NONE;
+        }
     }
 }

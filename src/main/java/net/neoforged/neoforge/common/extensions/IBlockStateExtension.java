@@ -30,6 +30,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.material.FluidState;
@@ -41,6 +42,7 @@ import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.common.IPlantable;
 import net.neoforged.neoforge.common.ToolAction;
 import net.neoforged.neoforge.common.ToolActions;
+import net.neoforged.neoforge.common.enums.BubbleColumnDirection;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.Nullable;
@@ -118,14 +120,12 @@ public interface IBlockStateExtension {
      *
      * Return true if the block is actually destroyed.
      *
-     * Note: When used in multiplayer, this is called on both client and
-     * server sides!
+     * This function is called on both the logical client and logical server.
      *
      * @param level       The current level
      * @param player      The player damaging the block, may be null
      * @param pos         Block position in level
-     * @param willHarvest True if Block.harvestBlock will be called after this, if the return in true.
-     *                    Can be useful to delay the destruction of tile entities till after harvestBlock
+     * @param willHarvest The result of {@link #canHarvestBlock}, if called on the server by a non-creative player, otherwise always false.
      * @param fluid       The current fluid and block state for the position in the level.
      * @return True if the block is actually destroyed.
      */
@@ -152,16 +152,17 @@ public interface IBlockStateExtension {
     }
 
     /**
-     * Determines if this block is classified as a Bed, Allowing
-     * players to sleep in it, though the block has to specifically
-     * perform the sleeping functionality in it's activated event.
+     * Determines if this block is classified as a bed, replacing <code>instanceof BedBlock</code> checks.
+     * <p>
+     * If true, players may sleep in it, though the block must manually put the player to sleep
+     * by calling {@link Player#startSleepInBed} from {@link BlockBehaviour#useWithoutItem} or similar.
      *
      * @param level   The current level
      * @param pos     Block position in level
-     * @param sleeper The sleeper or camera entity, null in some cases.
+     * @param sleeper The sleeping entity
      * @return True to treat this as a bed
      */
-    default boolean isBed(BlockGetter level, BlockPos pos, @Nullable LivingEntity sleeper) {
+    default boolean isBed(BlockGetter level, BlockPos pos, LivingEntity sleeper) {
         return self().getBlock().isBed(self(), level, pos, sleeper);
     }
 
@@ -173,11 +174,10 @@ public interface IBlockStateExtension {
      * @param level       The current level
      * @param pos         Block position in level
      * @param orientation The angle the entity had when setting the respawn point
-     * @param entity      The entity respawning, often null
      * @return The spawn position or the empty optional if respawning here is not possible
      */
-    default Optional<Vec3> getRespawnPosition(EntityType<?> type, LevelReader level, BlockPos pos, float orientation, @Nullable LivingEntity entity) {
-        return self().getBlock().getRespawnPosition(self(), type, level, pos, orientation, entity);
+    default Optional<Vec3> getRespawnPosition(EntityType<?> type, LevelReader level, BlockPos pos, float orientation) {
+        return self().getBlock().getRespawnPosition(self(), type, level, pos, orientation);
     }
 
     /**
@@ -347,6 +347,7 @@ public interface IBlockStateExtension {
      * @return Amount of XP from breaking this block.
      */
     default int getExpDrop(LevelReader level, RandomSource randomSource, BlockPos pos, int fortuneLevel, int silkTouchLevel) {
+        // TODO: Change this method to have context of the full tool ItemStack instead of just the enchantment levels.
         return self().getBlock().getExpDrop(self(), level, randomSource, pos, fortuneLevel, silkTouchLevel);
     }
 
@@ -745,5 +746,17 @@ public interface IBlockStateExtension {
      */
     default boolean isEmpty() {
         return self().getBlock().isEmpty(self());
+    }
+
+    /**
+     * Determines if this block can spawn Bubble Columns and if so, what direction the column flows.
+     * <p></p>
+     * NOTE: The block itself will still need to call {@link net.minecraft.world.level.block.BubbleColumnBlock#updateColumn(LevelAccessor, BlockPos, BlockState)} in their tick method and schedule a block tick in the block's onPlace.
+     * Also, schedule a fluid tick in updateShape method if update direction is up. Both are needed in order to get the Bubble Columns to function properly. See {@link net.minecraft.world.level.block.SoulSandBlock} and {@link net.minecraft.world.level.block.MagmaBlock} for example.
+     *
+     * @return BubbleColumnDirection.NONE for no Bubble Column. Otherwise, will spawn Bubble Column flowing with specified direction
+     */
+    default BubbleColumnDirection getBubbleColumnDirection() {
+        return self().getBlock().getBubbleColumnDirection(self());
     }
 }

@@ -5,8 +5,10 @@
 
 package net.neoforged.neoforge.debug.crafting;
 
+import com.google.gson.JsonArray;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -25,9 +27,12 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
@@ -43,7 +48,11 @@ import net.minecraft.world.level.block.CrafterBlock;
 import net.minecraft.world.level.block.entity.CrafterBlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.crafting.BlockTagIngredient;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
+import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
+import net.neoforged.neoforge.common.crafting.IntersectionIngredient;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.testframework.DynamicTest;
@@ -53,11 +62,43 @@ import net.neoforged.testframework.annotation.OnInit;
 import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.condition.TestEnabledIngredient;
 import net.neoforged.testframework.gametest.EmptyTemplate;
+import net.neoforged.testframework.gametest.ExtendedGameTestHelper;
 import net.neoforged.testframework.registration.RegistrationHelper;
 import org.jetbrains.annotations.Nullable;
 
 @ForEachTest(groups = "crafting.ingredient")
 public class IngredientTests {
+    @GameTest
+    @EmptyTemplate
+    @TestHolder(description = "Tests if BlockTagIngredient works")
+    static void blockTagIngredient(final DynamicTest test, final RegistrationHelper reg) {
+        reg.addProvider(event -> new RecipeProvider(event.getGenerator().getPackOutput(), event.getLookupProvider()) {
+            @Override
+            protected void buildRecipes(RecipeOutput output) {
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.MUD)
+                        .requires(new TestEnabledIngredient(new BlockTagIngredient(BlockTags.CONVERTABLE_TO_MUD).toVanilla(), test.framework(), test.id()).toVanilla())
+                        .requires(Items.WATER_BUCKET)
+                        .unlockedBy("has_item", has(Items.WATER_BUCKET))
+                        .save(output, new ResourceLocation(reg.modId(), "block_tag"));
+            }
+        });
+
+        test.onGameTest(helper -> helper
+                .startSequence()
+                .thenExecute(() -> helper.setBlock(1, 1, 1, Blocks.CRAFTER.defaultBlockState().setValue(BlockStateProperties.ORIENTATION, FrontAndTop.UP_NORTH).setValue(CrafterBlock.CRAFTING, true)))
+                .thenExecute(() -> helper.setBlock(1, 2, 1, Blocks.CHEST))
+
+                .thenMap(() -> helper.requireBlockEntity(1, 1, 1, CrafterBlockEntity.class))
+                .thenExecute(crafter -> crafter.setItem(0, Items.DIRT.getDefaultInstance()))
+                .thenExecute(crafter -> crafter.setItem(1, Items.WATER_BUCKET.getDefaultInstance()))
+                .thenIdle(3)
+
+                .thenExecute(() -> helper.pulseRedstone(1, 1, 2, 2))
+                .thenExecuteAfter(7, () -> helper.assertContainerContains(1, 2, 1, Items.MUD))
+
+                .thenSucceed());
+    }
+
     @GameTest
     @EmptyTemplate
     @TestHolder(description = "Tests if partial NBT ingredients match the correct stacks")
@@ -152,6 +193,41 @@ public class IngredientTests {
                 .thenExecuteAfter(7, () -> helper.assertContainerContains(1, 2, 1, Items.ACACIA_BOAT))
 
                 .thenSucceed());
+    }
+
+    @GameTest
+    @EmptyTemplate
+    @TestHolder(description = "Serialization tests for empty ingredients")
+    static void emptyIngredientSerialization(ExtendedGameTestHelper helper) {
+        // Make sure that empty ingredients serialize to []
+        var emptyResult = Ingredient.CODEC.encodeStart(JsonOps.INSTANCE, Ingredient.EMPTY);
+        var emptyJson = emptyResult.resultOrPartial(error -> helper.fail("Failed to serialize empty ingredient: " + error)).orElseThrow();
+        helper.assertValueEqual("[]", emptyJson.toString(), "empty ingredient");
+
+        // Make sure that [] deserializes to an empty ingredient
+        var result = Ingredient.CODEC.parse(JsonOps.INSTANCE, new JsonArray());
+        var ingredient = result.resultOrPartial(error -> helper.fail("Failed to deserialize empty ingredient: " + error)).orElseThrow();
+        helper.assertTrue(ingredient.isEmpty(), "empty ingredient should return true from isEmpty()");
+        helper.assertValueEqual(Ingredient.EMPTY, ingredient, "empty ingredient");
+        helper.assertTrue(Ingredient.EMPTY == ingredient, "Reference equality with Ingredient.EMPTY");
+
+        helper.succeed();
+    }
+
+    @GameTest
+    @EmptyTemplate
+    @TestHolder(description = "Tests that custom ingredients are not empty")
+    static void customIngredientNotEmpty(final GameTestHelper helper) {
+        Ingredient compoundIngredient = CompoundIngredient.of(Ingredient.of(Items.GRASS_BLOCK), Ingredient.of(Items.STONE));
+        helper.assertFalse(compoundIngredient.isEmpty(), "CompoundIngredient should not be empty");
+        Ingredient dataComponentIngredient = DataComponentIngredient.of(false, Items.DIAMOND_SWORD.getDefaultInstance());
+        helper.assertFalse(dataComponentIngredient.isEmpty(), "DataComponentIngredient should not be empty");
+        Ingredient differenceIngredient = DifferenceIngredient.of(Ingredient.of(ItemTags.FENCES), Ingredient.of(ItemTags.NON_FLAMMABLE_WOOD));
+        helper.assertFalse(differenceIngredient.isEmpty(), "DifferenceIngredient should not be empty");
+        Ingredient intersectionIngredient = IntersectionIngredient.of(Ingredient.of(ItemTags.PLANKS), Ingredient.of(ItemTags.NON_FLAMMABLE_WOOD));
+        helper.assertFalse(intersectionIngredient.isEmpty(), "IntersectionIngredient should not be empty");
+
+        helper.succeed();
     }
 
     private static final RegistrationHelper REG_HELPER = RegistrationHelper.create("neotests_ingredients");

@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +33,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.moddiscovery.ModAnnotation;
+import net.neoforged.fml.loading.modscan.ModAnnotation;
 import net.neoforged.neoforgespi.language.ModFileScanData;
 import net.neoforged.testframework.Test;
 import net.neoforged.testframework.annotation.ForEachTest;
@@ -47,6 +46,7 @@ import net.neoforged.testframework.impl.test.MethodBasedEventTest;
 import net.neoforged.testframework.impl.test.MethodBasedGameTestTest;
 import net.neoforged.testframework.impl.test.MethodBasedTest;
 import net.neoforged.testframework.registration.RegistrationHelper;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 public final class FrameworkCollectors {
@@ -56,7 +56,7 @@ public final class FrameworkCollectors {
         if (sidesValue == null) sidesValue = data.annotationData().get("dist");
         if (sidesValue == null) return true;
         @SuppressWarnings("unchecked")
-        final EnumSet<Dist> sides = ((List<ModAnnotation.EnumHolder>) sidesValue).stream().map(eh -> Dist.valueOf(eh.getValue())).collect(java.util.stream.Collectors.toCollection(() -> EnumSet.noneOf(Dist.class)));
+        final EnumSet<Dist> sides = ((List<ModAnnotation.EnumHolder>) sidesValue).stream().map(eh -> Dist.valueOf(eh.value())).collect(java.util.stream.Collectors.toCollection(() -> EnumSet.noneOf(Dist.class)));
         return sides.contains(current);
     };
 

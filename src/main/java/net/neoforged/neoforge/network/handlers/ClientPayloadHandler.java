@@ -87,7 +87,7 @@ public final class ClientPayloadHandler {
         try {
             Entity entity = context.player().level().getEntity(advancedAddEntityPayload.entityId());
             if (entity instanceof IEntityWithComplexSpawn entityAdditionalSpawnData) {
-                final RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(advancedAddEntityPayload.customPayload()), entity.registryAccess());
+                final RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(advancedAddEntityPayload.customPayload()), entity.registryAccess(), context.listener().getConnectionType());
                 try {
                     entityAdditionalSpawnData.readSpawnData(buf);
                 } finally {
@@ -102,7 +102,7 @@ public final class ClientPayloadHandler {
     public static void handle(AdvancedOpenScreenPayload msg, IPayloadContext context) {
         Minecraft mc = Minecraft.getInstance();
         RegistryAccess registryAccess = mc.player.registryAccess();
-        final RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(msg.additionalData()), registryAccess);
+        final RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(msg.additionalData()), registryAccess, context.listener().getConnectionType());
         try {
             createMenuScreen(msg.name(), msg.menuType(), msg.windowId(), buf);
         } catch (Throwable t) {
@@ -131,7 +131,7 @@ public final class ClientPayloadHandler {
                 manager.handleLightDataSync(msg.entries());
             }
         } catch (Throwable t) {
-            context.disconnect(Component.translatable("neoforge.network.aux_light_data.failed", msg.pos(), t.getMessage()));
+            context.disconnect(Component.translatable("neoforge.network.aux_light_data.failed", msg.pos().toString(), t.getMessage()));
         }
     }
 
