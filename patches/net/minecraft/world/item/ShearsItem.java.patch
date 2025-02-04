@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/item/ShearsItem.java
 +++ b/net/minecraft/world/item/ShearsItem.java
-@@ -55,6 +_,27 @@
+@@ -14,7 +_,6 @@
+ import net.minecraft.world.item.component.Tool;
+ import net.minecraft.world.item.context.UseOnContext;
+ import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.block.GrowingPlantHeadBlock;
+ import net.minecraft.world.level.block.state.BlockState;
+@@ -56,12 +_,32 @@
      }
  
      @Override
@@ -28,3 +36,10 @@
      public InteractionResult useOn(UseOnContext p_186371_) {
          Level level = p_186371_.getLevel();
          BlockPos blockpos = p_186371_.getClickedPos();
+         BlockState blockstate = level.getBlockState(blockpos);
+-        Block block = blockstate.getBlock();
+-        if (block instanceof GrowingPlantHeadBlock growingplantheadblock && !growingplantheadblock.isMaxAge(blockstate)) {
++        if (blockstate.getBlock() instanceof GrowingPlantHeadBlock growingplantheadblock && !growingplantheadblock.isMaxAge(blockstate)) {
+             Player player = p_186371_.getPlayer();
+             ItemStack itemstack = p_186371_.getItemInHand();
+             if (player instanceof ServerPlayer) {

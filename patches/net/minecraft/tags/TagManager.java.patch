@@ -9,3 +9,15 @@
      }
  
      @Override
+@@ -56,9 +_,9 @@
+     ) {
+         List<? extends CompletableFuture<? extends TagManager.LoadResult<?>>> list = this.registryAccess
+             .registries()
+-            .map(p_203927_ -> this.createLoader(p_13483_, p_13486_, p_203927_))
++            .map(p_203927_ -> this.createLoader(p_13483_, p_13486_, (RegistryAccess.RegistryEntry<?>)p_203927_))
+             .toList();
+-        return CompletableFuture.allOf(list.toArray(p_203906_ -> new CompletableFuture[p_203906_]))
++        return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new))
+             .thenCompose(p_13482_::wait)
+             .thenAcceptAsync(p_203917_ -> this.results = list.stream().map(CompletableFuture::join).collect(Collectors.toUnmodifiableList()), p_13487_);
+     }

@@ -1,6 +1,20 @@
 --- a/net/minecraft/world/level/block/SpawnerBlock.java
 +++ b/net/minecraft/world/level/block/SpawnerBlock.java
-@@ -46,10 +_,12 @@
+@@ -4,12 +_,11 @@
+ import java.util.List;
+ import javax.annotation.Nullable;
+ import net.minecraft.core.BlockPos;
+-import net.minecraft.core.RegistryAccess;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.server.level.ServerLevel;
++import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.TooltipFlag;
+-import net.minecraft.world.level.BlockGetter;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.Spawner;
+ import net.minecraft.world.level.block.entity.BlockEntity;
+@@ -47,10 +_,12 @@
      @Override
      protected void spawnAfterBreak(BlockState p_222477_, ServerLevel p_222478_, BlockPos p_222479_, ItemStack p_222480_, boolean p_222481_) {
          super.spawnAfterBreak(p_222477_, p_222478_, p_222479_, p_222480_, p_222481_);
@@ -17,3 +31,16 @@
      }
  
      @Override
+@@ -59,10 +_,8 @@
+     }
+ 
+     @Override
+-    public void appendHoverText(
+-        ItemStack p_255714_, @Nullable BlockGetter p_255801_, List<Component> p_255708_, TooltipFlag p_255667_, @Nullable RegistryAccess p_323982_
+-    ) {
+-        super.appendHoverText(p_255714_, p_255801_, p_255708_, p_255667_, p_323982_);
++    public void appendHoverText(ItemStack p_255714_, Item.TooltipContext p_339639_, List<Component> p_255708_, TooltipFlag p_255667_) {
++        super.appendHoverText(p_255714_, p_339639_, p_255708_, p_255667_);
+         Spawner.appendHoverText(p_255714_, p_255708_, "SpawnData");
+     }
+ }

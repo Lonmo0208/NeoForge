@@ -23,7 +23,25 @@
                  }
              }
          }
-@@ -193,7 +_,7 @@
+@@ -178,7 +_,7 @@
+         int k = i + j + 1;
+         int l = 1 + p_262034_.nextInt(2);
+ 
+-        for(int i1 = 0; i1 < l; ++i1) {
++        for (int i1 = 0; i1 < l; i1++) {
+             BlockPos blockpos = p_261955_.above(i);
+             BlockState blockstate = p_261845_.getBlockState(blockpos);
+             if (k >= 16 || blockstate.getValue(STAGE) == 1 || !p_261845_.isEmptyBlock(blockpos.above())) {
+@@ -186,14 +_,14 @@
+             }
+ 
+             this.growBamboo(blockstate, p_261845_, blockpos, p_262034_, k);
+-            ++i;
+-            ++k;
++            i++;
++            k++;
+         }
+     }
  
      @Override
      protected float getDestroyProgress(BlockState p_261691_, Player p_262171_, BlockGetter p_261621_, BlockPos p_261500_) {
@@ -32,7 +50,25 @@
      }
  
      protected void growBamboo(BlockState p_261855_, Level p_262076_, BlockPos p_262109_, RandomSource p_261633_, int p_261759_) {
-@@ -238,5 +_,12 @@
+@@ -223,8 +_,8 @@
+     protected int getHeightAboveUpToMax(BlockGetter p_261541_, BlockPos p_261593_) {
+         int i = 0;
+ 
+-        while(i < 16 && p_261541_.getBlockState(p_261593_.above(i + 1)).is(Blocks.BAMBOO)) {
+-            ++i;
++        while (i < 16 && p_261541_.getBlockState(p_261593_.above(i + 1)).is(Blocks.BAMBOO)) {
++            i++;
+         }
+ 
+         return i;
+@@ -233,10 +_,17 @@
+     protected int getHeightBelowUpToMax(BlockGetter p_261927_, BlockPos p_261481_) {
+         int i = 0;
+ 
+-        while(i < 16 && p_261927_.getBlockState(p_261481_.below(i + 1)).is(Blocks.BAMBOO)) {
+-            ++i;
++        while (i < 16 && p_261927_.getBlockState(p_261481_.below(i + 1)).is(Blocks.BAMBOO)) {
++            i++;
          }
  
          return i;

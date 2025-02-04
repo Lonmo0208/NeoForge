@@ -25,7 +25,7 @@
          List<String> list = this.getGameInformation();
          list.add("");
          boolean flag = this.minecraft.getSingleplayerServer() != null;
-@@ -176,11 +_,13 @@
+@@ -176,18 +_,20 @@
                  + (this.renderNetworkCharts ? " visible" : " hidden")
          );
          list.add("For help: press F3 + Q");
@@ -40,6 +40,86 @@
          this.renderLines(p_281261_, list, false);
      }
  
+     private void renderLines(GuiGraphics p_286519_, List<String> p_286665_, boolean p_286644_) {
+         int i = 9;
+ 
+-        for(int j = 0; j < p_286665_.size(); ++j) {
++        for (int j = 0; j < p_286665_.size(); j++) {
+             String s = p_286665_.get(j);
+             if (!Strings.isNullOrEmpty(s)) {
+                 int k = this.font.width(s);
+@@ -197,7 +_,7 @@
+             }
+         }
+ 
+-        for(int j1 = 0; j1 < p_286665_.size(); ++j1) {
++        for (int j1 = 0; j1 < p_286665_.size(); j1++) {
+             String s1 = p_286665_.get(j1);
+             if (!Strings.isNullOrEmpty(s1)) {
+                 int k1 = this.font.width(s1);
+@@ -261,7 +_,7 @@
+             Entity entity = this.minecraft.getCameraEntity();
+             Direction direction = entity.getDirection();
+ 
+-            String $$21 = switch(direction) {
++            String $$21 = switch (direction) {
+                 case NORTH -> "Towards negative Z";
+                 case SOUTH -> "Towards positive Z";
+                 case WEST -> "Towards negative X";
+@@ -349,7 +_,7 @@
+                 LevelChunk levelchunk1 = this.getServerChunk();
+                 StringBuilder stringbuilder = new StringBuilder("CH");
+ 
+-                for(Heightmap.Types heightmap$types : Heightmap.Types.values()) {
++                for (Heightmap.Types heightmap$types : Heightmap.Types.values()) {
+                     if (heightmap$types.sendToClient()) {
+                         stringbuilder.append(" ")
+                             .append(HEIGHTMAP_NAMES.get(heightmap$types))
+@@ -362,7 +_,7 @@
+                 stringbuilder.setLength(0);
+                 stringbuilder.append("SH");
+ 
+-                for(Heightmap.Types heightmap$types1 : Heightmap.Types.values()) {
++                for (Heightmap.Types heightmap$types1 : Heightmap.Types.values()) {
+                     if (heightmap$types1.keepAfterWorldgen()) {
+                         stringbuilder.append(" ").append(HEIGHTMAP_NAMES.get(heightmap$types1)).append(": ");
+                         if (levelchunk1 != null) {
+@@ -416,7 +_,7 @@
+                         "SC: "
+                             + i1
+                             + ", "
+-                            + (String)Stream.of(MobCategory.values())
++                            + Stream.of(MobCategory.values())
+                                 .map(p_94068_ -> Character.toUpperCase(p_94068_.getName().charAt(0)) + ": " + object2intmap.getInt(p_94068_))
+                                 .collect(Collectors.joining(", "))
+                     );
+@@ -439,7 +_,7 @@
+     }
+ 
+     private static String printBiome(Holder<Biome> p_205375_) {
+-        return p_205375_.unwrap().map(p_205377_ -> p_205377_.location().toString(), p_205367_ -> "[unregistered " + p_205367_ + "]");
++        return p_205375_.unwrap().map(p_205377_ -> p_205377_.location().toString(), p_339278_ -> "[unregistered " + p_339278_ + "]");
+     }
+ 
+     @Nullable
+@@ -457,7 +_,7 @@
+     private Level getLevel() {
+         return DataFixUtils.orElse(
+             Optional.ofNullable(this.minecraft.getSingleplayerServer())
+-                .flatMap(p_339479_ -> Optional.ofNullable(p_339479_.getLevel(this.minecraft.level.dimension()))),
++                .flatMap(p_329715_ -> Optional.ofNullable(p_329715_.getLevel(this.minecraft.level.dimension()))),
+             this.minecraft.level
+         );
+     }
+@@ -492,7 +_,7 @@
+         long k = Runtime.getRuntime().freeMemory();
+         long l = j - k;
+         List<String> list = Lists.newArrayList(
+-            String.format(Locale.ROOT, "Java: %s %dbit", System.getProperty("java.version"), this.minecraft.is64Bit() ? 64 : 32),
++            String.format(Locale.ROOT, "Java: %s", System.getProperty("java.version")),
+             String.format(Locale.ROOT, "Mem: %2d%% %03d/%03dMB", l * 100L / i, bytesToMegabytes(l), bytesToMegabytes(i)),
+             String.format(Locale.ROOT, "Allocation rate: %03dMB/s", bytesToMegabytes(this.allocationRateCalculator.bytesAllocatedPerSecond(l))),
+             String.format(Locale.ROOT, "Allocated: %2d%% %03dMB", j * 100L / i, bytesToMegabytes(j)),
 @@ -509,6 +_,13 @@
              GlUtil.getRenderer(),
              GlUtil.getOpenGLVersion()
@@ -54,6 +134,34 @@
          if (this.minecraft.showOnlyReducedInfo()) {
              return list;
          } else {
+@@ -519,11 +_,11 @@
+                 list.add(ChatFormatting.UNDERLINE + "Targeted Block: " + blockpos.getX() + ", " + blockpos.getY() + ", " + blockpos.getZ());
+                 list.add(String.valueOf(BuiltInRegistries.BLOCK.getKey(blockstate.getBlock())));
+ 
+-                for(Entry<Property<?>, Comparable<?>> entry : blockstate.getValues().entrySet()) {
++                for (Entry<Property<?>, Comparable<?>> entry : blockstate.getValues().entrySet()) {
+                     list.add(this.getPropertyValueString(entry));
+                 }
+ 
+-                blockstate.getTags().map(p_205379_ -> "#" + p_205379_.location()).forEach(list::add);
++                blockstate.getTags().map(p_339277_ -> "#" + p_339277_.location()).forEach(list::add);
+             }
+ 
+             if (this.liquid.getType() == HitResult.Type.BLOCK) {
+@@ -533,11 +_,11 @@
+                 list.add(ChatFormatting.UNDERLINE + "Targeted Fluid: " + blockpos1.getX() + ", " + blockpos1.getY() + ", " + blockpos1.getZ());
+                 list.add(String.valueOf(BuiltInRegistries.FLUID.getKey(fluidstate.getType())));
+ 
+-                for(Entry<Property<?>, Comparable<?>> entry1 : fluidstate.getValues().entrySet()) {
++                for (Entry<Property<?>, Comparable<?>> entry1 : fluidstate.getValues().entrySet()) {
+                     list.add(this.getPropertyValueString(entry1));
+                 }
+ 
+-                fluidstate.getTags().map(p_205365_ -> "#" + p_205365_.location()).forEach(list::add);
++                fluidstate.getTags().map(p_339279_ -> "#" + p_339279_.location()).forEach(list::add);
+             }
+ 
+             Entity entity = this.minecraft.crosshairPickEntity;
 @@ -545,6 +_,7 @@
                  list.add("");
                  list.add(ChatFormatting.UNDERLINE + "Targeted Entity");
@@ -62,3 +170,12 @@
              }
  
              return list;
+@@ -672,7 +_,7 @@
+         private static long gcCounts() {
+             long i = 0L;
+ 
+-            for(GarbageCollectorMXBean garbagecollectormxbean : GC_MBEANS) {
++            for (GarbageCollectorMXBean garbagecollectormxbean : GC_MBEANS) {
+                 i += garbagecollectormxbean.getCollectionCount();
+             }
+ 

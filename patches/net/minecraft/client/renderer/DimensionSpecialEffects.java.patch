@@ -1,15 +1,30 @@
 --- a/net/minecraft/client/renderer/DimensionSpecialEffects.java
 +++ b/net/minecraft/client/renderer/DimensionSpecialEffects.java
-@@ -13,7 +_,7 @@
+@@ -13,16 +_,15 @@
  import net.neoforged.api.distmarker.OnlyIn;
  
  @OnlyIn(Dist.CLIENT)
 -public abstract class DimensionSpecialEffects {
+-    private static final Object2ObjectMap<ResourceLocation, DimensionSpecialEffects> EFFECTS = Util.make(new Object2ObjectArrayMap<>(), p_339503_ -> {
 +public abstract class DimensionSpecialEffects implements net.neoforged.neoforge.client.extensions.IDimensionSpecialEffectsExtension {
-     private static final Object2ObjectMap<ResourceLocation, DimensionSpecialEffects> EFFECTS = Util.make(new Object2ObjectArrayMap<>(), p_108881_ -> {
++    private static final Object2ObjectMap<ResourceLocation, DimensionSpecialEffects> EFFECTS = Util.make(new Object2ObjectArrayMap<>(), p_108881_ -> {
          DimensionSpecialEffects.OverworldEffects dimensionspecialeffects$overworldeffects = new DimensionSpecialEffects.OverworldEffects();
-         p_108881_.defaultReturnValue(dimensionspecialeffects$overworldeffects);
-@@ -37,7 +_,7 @@
+-        p_339503_.defaultReturnValue(dimensionspecialeffects$overworldeffects);
+-        p_339503_.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, dimensionspecialeffects$overworldeffects);
+-        p_339503_.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());
+-        p_339503_.put(BuiltinDimensionTypes.END_EFFECTS, new DimensionSpecialEffects.EndEffects());
+-        p_339503_.put(BuiltinDimensionTypes.POTATO_EFFECTS, new DimensionSpecialEffects.PotatoEffects());
++        p_108881_.defaultReturnValue(dimensionspecialeffects$overworldeffects);
++        p_108881_.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, dimensionspecialeffects$overworldeffects);
++        p_108881_.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());
++        p_108881_.put(BuiltinDimensionTypes.END_EFFECTS, new DimensionSpecialEffects.EndEffects());
+     });
+-    protected final float[] sunriseCol = new float[4];
++    private final float[] sunriseCol = new float[4];
+     private final float cloudLevel;
+     private final boolean hasGround;
+     private final DimensionSpecialEffects.SkyType skyType;
+@@ -38,7 +_,7 @@
      }
  
      public static DimensionSpecialEffects forType(DimensionType p_108877_) {
@@ -18,3 +33,63 @@
      }
  
      @Nullable
+@@ -76,10 +_,6 @@
+         return this.skyType;
+     }
+ 
+-    public int getCloudColor() {
+-        return 16777215;
+-    }
+-
+     public boolean forceBrightLightmap() {
+         return this.forceBrightLightmap;
+     }
+@@ -144,48 +_,6 @@
+         @Override
+         public boolean isFoggyAt(int p_108905_, int p_108906_) {
+             return false;
+-        }
+-    }
+-
+-    @OnlyIn(Dist.CLIENT)
+-    public static class PotatoEffects extends DimensionSpecialEffects {
+-        public PotatoEffects() {
+-            super(112.0F, false, DimensionSpecialEffects.SkyType.NORMAL, false, false);
+-        }
+-
+-        @Override
+-        public Vec3 getBrightnessDependentFogColor(Vec3 p_342403_, float p_342257_) {
+-            return p_342403_.multiply((double)(p_342257_ * 0.94F + 0.06F), (double)(p_342257_ * 0.94F + 0.06F), (double)(p_342257_ * 0.91F + 0.09F));
+-        }
+-
+-        @Override
+-        public boolean isFoggyAt(int p_340601_, int p_340899_) {
+-            return false;
+-        }
+-
+-        @Override
+-        public int getCloudColor() {
+-            return 14548906;
+-        }
+-
+-        @Nullable
+-        @Override
+-        public float[] getSunriseColor(float p_341834_, float p_341449_) {
+-            float f = 0.4F;
+-            float f1 = Mth.cos(p_341834_ * (float) (Math.PI * 2)) - 0.0F;
+-            float f2 = -0.0F;
+-            if (f1 >= -0.4F && f1 <= 0.4F) {
+-                float f3 = (f1 - -0.0F) / 0.4F * 0.5F + 0.5F;
+-                float f4 = 1.0F - (1.0F - Mth.sin(f3 * (float) Math.PI)) * 0.99F;
+-                f4 *= f4;
+-                this.sunriseCol[0] = f3 * f3 * 0.3F + 0.35F;
+-                this.sunriseCol[1] = f3 * 0.7F + 0.2F;
+-                this.sunriseCol[2] = f3 * f3 * 0.0F + 0.2F;
+-                this.sunriseCol[3] = f4;
+-                return this.sunriseCol;
+-            } else {
+-                return null;
+-            }
+         }
+     }
+ 

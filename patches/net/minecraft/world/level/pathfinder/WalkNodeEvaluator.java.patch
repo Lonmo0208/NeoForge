@@ -1,7 +1,148 @@
 --- a/net/minecraft/world/level/pathfinder/WalkNodeEvaluator.java
 +++ b/net/minecraft/world/level/pathfinder/WalkNodeEvaluator.java
-@@ -471,6 +_,12 @@
-                 for (int k = -1; k <= 1; k++) {
+@@ -56,9 +_,9 @@
+         BlockState blockstate = this.currentContext.getBlockState(blockpos$mutableblockpos.set(this.mob.getX(), (double)i, this.mob.getZ()));
+         if (!this.mob.canStandOnFluid(blockstate.getFluidState())) {
+             if (this.canFloat() && this.mob.isInWater()) {
+-                while(true) {
++                while (true) {
+                     if (!blockstate.is(Blocks.WATER) && blockstate.getFluidState() != Fluids.WATER.getSource(false)) {
+-                        --i;
++                        i--;
+                         break;
+                     }
+ 
+@@ -69,7 +_,7 @@
+             } else {
+                 blockpos$mutableblockpos.set(this.mob.getX(), this.mob.getY() + 1.0, this.mob.getZ());
+ 
+-                while(blockpos$mutableblockpos.getY() > this.currentContext.level().getMinBuildHeight()) {
++                while (blockpos$mutableblockpos.getY() > this.currentContext.level().getMinBuildHeight()) {
+                     i = blockpos$mutableblockpos.getY();
+                     blockpos$mutableblockpos.setY(blockpos$mutableblockpos.getY() - 1);
+                     BlockState blockstate1 = this.currentContext.getBlockState(blockpos$mutableblockpos);
+@@ -79,11 +_,11 @@
+                 }
+             }
+         } else {
+-            while(this.mob.canStandOnFluid(blockstate.getFluidState())) {
++            while (this.mob.canStandOnFluid(blockstate.getFluidState())) {
+                 blockstate = this.currentContext.getBlockState(blockpos$mutableblockpos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
+             }
+ 
+-            --i;
++            i--;
+         }
+ 
+         BlockPos blockpos = this.mob.blockPosition();
+@@ -129,7 +_,7 @@
+ 
+         double d0 = this.getFloorLevel(new BlockPos(p_77641_.x, p_77641_.y, p_77641_.z));
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             Node node = this.findAcceptedNode(p_77641_.x + direction.getStepX(), p_77641_.y, p_77641_.z + direction.getStepZ(), j, d0, direction, pathtype1);
+             this.reusableNeighbors[direction.get2DDataValue()] = node;
+             if (this.isNeighborValid(node, p_77641_)) {
+@@ -137,7 +_,7 @@
+             }
+         }
+ 
+-        for(Direction direction1 : Direction.Plane.HORIZONTAL) {
++        for (Direction direction1 : Direction.Plane.HORIZONTAL) {
+             Direction direction2 = direction1.getClockWise();
+             if (this.isDiagonalValid(p_77641_, this.reusableNeighbors[direction1.get2DDataValue()], this.reusableNeighbors[direction2.get2DDataValue()])) {
+                 Node node1 = this.findAcceptedNode(
+@@ -176,10 +_,8 @@
+     protected boolean isDiagonalValid(@Nullable Node p_77630_) {
+         if (p_77630_ == null || p_77630_.closed) {
+             return false;
+-        } else if (p_77630_.type == PathType.WALKABLE_DOOR) {
+-            return false;
+         } else {
+-            return p_77630_.costMalus >= 0.0F;
++            return p_77630_.type == PathType.WALKABLE_DOOR ? false : p_77630_.costMalus >= 0.0F;
+         }
+     }
+ 
+@@ -197,7 +_,7 @@
+         int i = Mth.ceil(vec3.length() / aabb.getSize());
+         vec3 = vec3.scale((double)(1.0F / (float)i));
+ 
+-        for(int j = 1; j <= i; ++j) {
++        for (int j = 1; j <= i; j++) {
+             aabb = aabb.move(vec3);
+             if (this.hasCollisions(aabb)) {
+                 return false;
+@@ -327,23 +_,23 @@
+ 
+     @Nullable
+     private Node tryFindFirstNonWaterBelow(int p_326959_, int p_326927_, int p_326932_, @Nullable Node p_326880_) {
+-        --p_326927_;
++        p_326927_--;
+ 
+-        while(p_326927_ > this.mob.level().getMinBuildHeight()) {
++        while (p_326927_ > this.mob.level().getMinBuildHeight()) {
+             PathType pathtype = this.getCachedPathType(p_326959_, p_326927_, p_326932_);
+             if (pathtype != PathType.WATER) {
+                 return p_326880_;
+             }
+ 
+             p_326880_ = this.getNodeAndUpdateCostToMax(p_326959_, p_326927_, p_326932_, pathtype, this.mob.getPathfindingMalus(pathtype));
+-            --p_326927_;
++            p_326927_--;
+         }
+ 
+         return p_326880_;
+     }
+ 
+     private Node tryFindFirstGroundNodeBelow(int p_326892_, int p_326901_, int p_326809_) {
+-        for(int i = p_326901_ - 1; i >= this.mob.level().getMinBuildHeight(); --i) {
++        for (int i = p_326901_ - 1; i >= this.mob.level().getMinBuildHeight(); i--) {
+             if (p_326901_ - i > this.mob.getMaxFallDistance()) {
+                 return this.getBlockedNode(p_326892_, i, p_326809_);
+             }
+@@ -384,7 +_,7 @@
+         } else {
+             PathType pathtype = PathType.BLOCKED;
+ 
+-            for(PathType pathtype1 : set) {
++            for (PathType pathtype1 : set) {
+                 if (p_326786_.getPathfindingMalus(pathtype1) < 0.0F) {
+                     return pathtype1;
+                 }
+@@ -406,9 +_,9 @@
+     public Set<PathType> getPathTypeWithinMobBB(PathfindingContext p_331617_, int p_326916_, int p_326906_, int p_326848_) {
+         EnumSet<PathType> enumset = EnumSet.noneOf(PathType.class);
+ 
+-        for(int i = 0; i < this.entityWidth; ++i) {
+-            for(int j = 0; j < this.entityHeight; ++j) {
+-                for(int k = 0; k < this.entityDepth; ++k) {
++        for (int i = 0; i < this.entityWidth; i++) {
++            for (int j = 0; j < this.entityHeight; j++) {
++                for (int k = 0; k < this.entityDepth; k++) {
+                     int l = i + p_326916_;
+                     int i1 = j + p_326906_;
+                     int j1 = k + p_326848_;
+@@ -452,7 +_,7 @@
+         int k = p_331020_.getZ();
+         PathType pathtype = p_330755_.getPathTypeFromState(i, j, k);
+         if (pathtype == PathType.OPEN && j >= p_330755_.level().getMinBuildHeight() + 1) {
+-            return switch(p_330755_.getPathTypeFromState(i, j - 1, k)) {
++            return switch (p_330755_.getPathTypeFromState(i, j - 1, k)) {
+                 case OPEN, WATER, LAVA, WALKABLE -> PathType.OPEN;
+                 case DAMAGE_FIRE -> PathType.DAMAGE_FIRE;
+                 case DAMAGE_OTHER -> PathType.DAMAGE_OTHER;
+@@ -468,11 +_,17 @@
+     }
+ 
+     public static PathType checkNeighbourBlocks(PathfindingContext p_331893_, int p_332169_, int p_330433_, int p_331506_, PathType p_326944_) {
+-        for(int i = -1; i <= 1; ++i) {
+-            for(int j = -1; j <= 1; ++j) {
+-                for(int k = -1; k <= 1; ++k) {
++        for (int i = -1; i <= 1; i++) {
++            for (int j = -1; j <= 1; j++) {
++                for (int k = -1; k <= 1; k++) {
                      if (i != 0 || k != 0) {
                          PathType pathtype = p_331893_.getPathTypeFromState(p_332169_ + i, p_330433_ + j, p_331506_ + k);
 +                        BlockState blockState = p_331893_.level().getBlockState(p_331893_.currentEvalPos());
@@ -13,7 +154,7 @@
                          if (pathtype == PathType.DAMAGE_OTHER) {
                              return PathType.DANGER_OTHER;
                          }
-@@ -496,6 +_,8 @@
+@@ -498,6 +_,8 @@
  
      protected static PathType getPathTypeFromState(BlockGetter p_77644_, BlockPos p_77645_) {
          BlockState blockstate = p_77644_.getBlockState(p_77645_);
@@ -22,7 +163,7 @@
          Block block = blockstate.getBlock();
          if (blockstate.isAir()) {
              return PathType.OPEN;
-@@ -511,6 +_,8 @@
+@@ -513,6 +_,8 @@
              return PathType.COCOA;
          } else if (!blockstate.is(Blocks.WITHER_ROSE) && !blockstate.is(Blocks.POINTED_DRIPSTONE)) {
              FluidState fluidstate = blockstate.getFluidState();
@@ -31,7 +172,7 @@
              if (fluidstate.is(FluidTags.LAVA)) {
                  return PathType.LAVA;
              } else if (isBurningBlock(blockstate)) {
-@@ -531,6 +_,8 @@
+@@ -533,6 +_,8 @@
                  if (!blockstate.isPathfindable(PathComputationType.LAND)) {
                      return PathType.BLOCKED;
                  } else {

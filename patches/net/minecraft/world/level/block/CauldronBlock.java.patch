@@ -1,6 +1,18 @@
 --- a/net/minecraft/world/level/block/CauldronBlock.java
 +++ b/net/minecraft/world/level/block/CauldronBlock.java
-@@ -58,6 +_,7 @@
+@@ -33,10 +_,8 @@
+     protected static boolean shouldHandlePrecipitation(Level p_182451_, Biome.Precipitation p_182452_) {
+         if (p_182452_ == Biome.Precipitation.RAIN) {
+             return p_182451_.getRandom().nextFloat() < 0.05F;
+-        } else if (p_182452_ == Biome.Precipitation.SNOW) {
+-            return p_182451_.getRandom().nextFloat() < 0.1F;
+         } else {
+-            return false;
++            return p_182452_ == Biome.Precipitation.SNOW ? p_182451_.getRandom().nextFloat() < 0.1F : false;
+         }
+     }
+ 
+@@ -60,6 +_,7 @@
  
      @Override
      protected void receiveStalactiteDrip(BlockState p_152940_, Level p_152941_, BlockPos p_152942_, Fluid p_152943_) {

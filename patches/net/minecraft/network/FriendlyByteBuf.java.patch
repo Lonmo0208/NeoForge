@@ -1,6 +1,14 @@
 --- a/net/minecraft/network/FriendlyByteBuf.java
 +++ b/net/minecraft/network/FriendlyByteBuf.java
-@@ -67,7 +_,7 @@
+@@ -41,7 +_,6 @@
+ import java.util.function.IntFunction;
+ import java.util.function.ToIntFunction;
+ import javax.annotation.Nullable;
+-import net.minecraft.Util;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.core.GlobalPos;
+@@ -68,7 +_,7 @@
  import org.joml.Quaternionf;
  import org.joml.Vector3f;
  
@@ -9,7 +17,161 @@
      public static final int DEFAULT_NBT_QUOTA = 2097152;
      private final ByteBuf source;
      public static final short MAX_STRING_LENGTH = 32767;
-@@ -1588,5 +_,10 @@
+@@ -90,14 +_,12 @@
+     @Deprecated
+     public <T> T readWithCodec(DynamicOps<Tag> p_266903_, Codec<T> p_267107_, NbtAccounter p_295027_) {
+         Tag tag = this.readNbt(p_295027_);
+-        return Util.getOrThrow(p_267107_.parse(p_266903_, tag), p_261423_ -> new DecoderException("Failed to decode: " + p_261423_ + " " + tag));
++        return p_267107_.parse(p_266903_, tag).getOrThrow(p_339398_ -> new DecoderException("Failed to decode: " + p_339398_ + " " + tag));
+     }
+ 
+     @Deprecated
+     public <T> FriendlyByteBuf writeWithCodec(DynamicOps<Tag> p_266702_, Codec<T> p_267245_, T p_266783_) {
+-        Tag tag = Util.getOrThrow(
+-            p_267245_.encodeStart(p_266702_, p_266783_), p_272384_ -> new EncoderException("Failed to encode: " + p_272384_ + " " + p_266783_)
+-        );
++        Tag tag = p_267245_.encodeStart(p_266702_, p_266783_).getOrThrow(p_339400_ -> new EncoderException("Failed to encode: " + p_339400_ + " " + p_266783_));
+         this.writeNbt(tag);
+         return this;
+     }
+@@ -105,12 +_,12 @@
+     public <T> T readJsonWithCodec(Codec<T> p_273318_) {
+         JsonElement jsonelement = GsonHelper.fromJson(GSON, this.readUtf(), JsonElement.class);
+         DataResult<T> dataresult = p_273318_.parse(JsonOps.INSTANCE, jsonelement);
+-        return Util.getOrThrow(dataresult, p_272382_ -> new DecoderException("Failed to decode json: " + p_272382_));
++        return dataresult.getOrThrow(p_272382_ -> new DecoderException("Failed to decode json: " + p_272382_));
+     }
+ 
+     public <T> void writeJsonWithCodec(Codec<T> p_273285_, T p_272770_) {
+         DataResult<JsonElement> dataresult = p_273285_.encodeStart(JsonOps.INSTANCE, p_272770_);
+-        this.writeUtf(GSON.toJson(Util.getOrThrow(dataresult, p_261421_ -> new EncoderException("Failed to encode: " + p_261421_ + " " + p_272770_))));
++        this.writeUtf(GSON.toJson(dataresult.getOrThrow(p_339402_ -> new EncoderException("Failed to encode: " + p_339402_ + " " + p_272770_))));
+     }
+ 
+     public static <T> IntFunction<T> limitValue(IntFunction<T> p_182696_, int p_182697_) {
+@@ -125,9 +_,9 @@
+ 
+     public <T, C extends Collection<T>> C readCollection(IntFunction<C> p_236839_, StreamDecoder<? super FriendlyByteBuf, T> p_320606_) {
+         int i = this.readVarInt();
+-        C c = p_236839_.apply(i);
++        C c = (C)p_236839_.apply(i);
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             c.add(p_320606_.decode(this));
+         }
+ 
+@@ -137,7 +_,7 @@
+     public <T> void writeCollection(Collection<T> p_236829_, StreamEncoder<? super FriendlyByteBuf, T> p_319902_) {
+         this.writeVarInt(p_236829_.size());
+ 
+-        for(T t : p_236829_) {
++        for (T t : p_236829_) {
+             p_319902_.encode(this, t);
+         }
+     }
+@@ -150,7 +_,7 @@
+         int i = this.readVarInt();
+         IntList intlist = new IntArrayList();
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             intlist.add(this.readVarInt());
+         }
+ 
+@@ -166,9 +_,9 @@
+         IntFunction<M> p_236842_, StreamDecoder<? super FriendlyByteBuf, K> p_320803_, StreamDecoder<? super FriendlyByteBuf, V> p_320748_
+     ) {
+         int i = this.readVarInt();
+-        M m = p_236842_.apply(i);
++        M m = (M)p_236842_.apply(i);
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             K k = p_320803_.decode(this);
+             V v = p_320748_.decode(this);
+             m.put(k, v);
+@@ -184,24 +_,24 @@
+     public <K, V> void writeMap(Map<K, V> p_236832_, StreamEncoder<? super FriendlyByteBuf, K> p_320909_, StreamEncoder<? super FriendlyByteBuf, V> p_320188_) {
+         this.writeVarInt(p_236832_.size());
+         p_236832_.forEach((p_319534_, p_319535_) -> {
+-            p_320909_.encode(this, p_319534_);
+-            p_320188_.encode(this, p_319535_);
++            p_320909_.encode(this, (K)p_319534_);
++            p_320188_.encode(this, (V)p_319535_);
+         });
+     }
+ 
+     public void readWithCount(Consumer<FriendlyByteBuf> p_178365_) {
+         int i = this.readVarInt();
+ 
+-        for(int j = 0; j < i; ++j) {
++        for (int j = 0; j < i; j++) {
+             p_178365_.accept(this);
+         }
+     }
+ 
+     public <E extends Enum<E>> void writeEnumSet(EnumSet<E> p_250400_, Class<E> p_250673_) {
+-        E[] ae = p_250673_.getEnumConstants();
++        E[] ae = (E[])p_250673_.getEnumConstants();
+         BitSet bitset = new BitSet(ae.length);
+ 
+-        for(int i = 0; i < ae.length; ++i) {
++        for (int i = 0; i < ae.length; i++) {
+             bitset.set(i, p_250400_.contains(ae[i]));
+         }
+ 
+@@ -209,11 +_,11 @@
+     }
+ 
+     public <E extends Enum<E>> EnumSet<E> readEnumSet(Class<E> p_251289_) {
+-        E[] ae = p_251289_.getEnumConstants();
++        E[] ae = (E[])p_251289_.getEnumConstants();
+         BitSet bitset = this.readFixedBitSet(ae.length);
+         EnumSet<E> enumset = EnumSet.noneOf(p_251289_);
+ 
+-        for(int i = 0; i < ae.length; ++i) {
++        for (int i = 0; i < ae.length; i++) {
+             if (bitset.get(i)) {
+                 enumset.add(ae[i]);
+             }
+@@ -294,7 +_,7 @@
+     public FriendlyByteBuf writeVarIntArray(int[] p_130090_) {
+         this.writeVarInt(p_130090_.length);
+ 
+-        for(int i : p_130090_) {
++        for (int i : p_130090_) {
+             this.writeVarInt(i);
+         }
+ 
+@@ -312,7 +_,7 @@
+         } else {
+             int[] aint = new int[i];
+ 
+-            for(int j = 0; j < aint.length; ++j) {
++            for (int j = 0; j < aint.length; j++) {
+                 aint[j] = this.readVarInt();
+             }
+ 
+@@ -323,7 +_,7 @@
+     public FriendlyByteBuf writeLongArray(long[] p_130092_) {
+         this.writeVarInt(p_130092_.length);
+ 
+-        for(long i : p_130092_) {
++        for (long i : p_130092_) {
+             this.writeLong(i);
+         }
+ 
+@@ -348,7 +_,7 @@
+             p_130094_ = new long[i];
+         }
+ 
+-        for(int j = 0; j < p_130094_.length; ++j) {
++        for (int j = 0; j < p_130094_.length; j++) {
+             p_130094_[j] = this.readLong();
+         }
+ 
+@@ -1591,5 +_,10 @@
      @Override
      public boolean release(int p_130347_) {
          return this.source.release(p_130347_);

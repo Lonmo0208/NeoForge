@@ -13,11 +13,32 @@
          return true;
      }
  
-@@ -224,6 +_,7 @@
+@@ -130,7 +_,7 @@
+     }
+ 
+     private void tickPaused() {
+-        for(ServerPlayer serverplayer : this.getPlayerList().getPlayers()) {
++        for (ServerPlayer serverplayer : this.getPlayerList().getPlayers()) {
+             serverplayer.awardStat(Stats.TOTAL_WORLD_TIME);
+         }
+     }
+@@ -203,7 +_,7 @@
+             int i = this.getProfilePermissions(this.minecraft.player.getGameProfile());
+             this.minecraft.player.setPermissionLevel(i);
+ 
+-            for(ServerPlayer serverplayer : this.getPlayerList().getPlayers()) {
++            for (ServerPlayer serverplayer : this.getPlayerList().getPlayers()) {
+                 this.getCommands().sendCommands(serverplayer);
+             }
+ 
+@@ -224,8 +_,9 @@
  
      @Override
      public void halt(boolean p_120053_) {
 +        if (isRunning())
          this.executeBlocking(() -> {
-             for (ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
+-            for(ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
++            for (ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
                  if (!serverplayer.getUUID().equals(this.uuid)) {
+                     this.getPlayerList().remove(serverplayer);
+                 }

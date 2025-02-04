@@ -9,7 +9,15 @@
      public static final MapCodec<SugarCaneBlock> CODEC = simpleCodec(SugarCaneBlock::new);
      public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
      protected static final float AABB_OFFSET = 6.0F;
-@@ -58,12 +_,15 @@
+@@ -52,18 +_,21 @@
+         if (p_222549_.isEmptyBlock(p_222550_.above())) {
+             int i = 1;
+ 
+-            while(p_222549_.getBlockState(p_222550_.below(i)).is(this)) {
+-                ++i;
++            while (p_222549_.getBlockState(p_222550_.below(i)).is(this)) {
++                i++;
+             }
  
              if (i < 3) {
                  int j = p_222548_.getValue(AGE);
@@ -34,8 +42,12 @@
          BlockState blockstate = p_57176_.getBlockState(p_57177_.below());
          if (blockstate.is(this)) {
              return true;
-@@ -89,7 +_,7 @@
-                 for (Direction direction : Direction.Plane.HORIZONTAL) {
+@@ -86,10 +_,10 @@
+             if (blockstate.is(BlockTags.DIRT) || blockstate.is(BlockTags.SAND)) {
+                 BlockPos blockpos = p_57177_.below();
+ 
+-                for(Direction direction : Direction.Plane.HORIZONTAL) {
++                for (Direction direction : Direction.Plane.HORIZONTAL) {
                      BlockState blockstate1 = p_57176_.getBlockState(blockpos.relative(direction));
                      FluidState fluidstate = p_57176_.getFluidState(blockpos.relative(direction));
 -                    if (fluidstate.is(FluidTags.WATER) || blockstate1.is(Blocks.FROSTED_ICE)) {

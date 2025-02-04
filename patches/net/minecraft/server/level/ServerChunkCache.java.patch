@@ -1,6 +1,14 @@
 --- a/net/minecraft/server/level/ServerChunkCache.java
 +++ b/net/minecraft/server/level/ServerChunkCache.java
-@@ -44,7 +_,7 @@
+@@ -8,6 +_,7 @@
+ import java.util.Arrays;
+ import java.util.List;
+ import java.util.concurrent.CompletableFuture;
++import java.util.concurrent.CompletionStage;
+ import java.util.concurrent.Executor;
+ import java.util.function.BooleanSupplier;
+ import java.util.function.Consumer;
+@@ -43,7 +_,7 @@
  import net.minecraft.world.level.storage.DimensionDataStorage;
  import net.minecraft.world.level.storage.LevelStorageSource;
  
@@ -9,7 +17,25 @@
      private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
      private final DistanceManager distanceManager;
      public final ServerLevel level;
-@@ -149,6 +_,10 @@
+@@ -118,7 +_,7 @@
+     }
+ 
+     private void storeInCache(long p_8367_, @Nullable ChunkAccess p_8368_, ChunkStatus p_331839_) {
+-        for(int i = 3; i > 0; --i) {
++        for (int i = 3; i > 0; i--) {
+             this.lastChunkPos[i] = this.lastChunkPos[i - 1];
+             this.lastChunkStatus[i] = this.lastChunkStatus[i - 1];
+             this.lastChunk[i] = this.lastChunk[i - 1];
+@@ -139,7 +_,7 @@
+             profilerfiller.incrementCounter("getChunk");
+             long i = ChunkPos.asLong(p_8360_, p_8361_);
+ 
+-            for(int j = 0; j < 4; ++j) {
++            for (int j = 0; j < 4; j++) {
+                 if (i == this.lastChunkPos[j] && p_330876_ == this.lastChunkStatus[j]) {
+                     ChunkAccess chunkaccess = this.lastChunk[j];
+                     if (chunkaccess != null || !p_8363_) {
+@@ -148,6 +_,10 @@
                  }
              }
  
@@ -20,7 +46,16 @@
              profilerfiller.incrementCounter("getChunkCacheMiss");
              CompletableFuture<ChunkResult<ChunkAccess>> completablefuture = this.getChunkFutureMainThread(p_8360_, p_8361_, p_330876_, p_8363_);
              this.mainThreadProcessor.managedBlock(completablefuture::isDone);
-@@ -183,6 +_,7 @@
+@@ -171,7 +_,7 @@
+             this.level.getProfiler().incrementCounter("getChunkNow");
+             long i = ChunkPos.asLong(p_8357_, p_8358_);
+ 
+-            for(int j = 0; j < 4; ++j) {
++            for (int j = 0; j < 4; j++) {
+                 if (i == this.lastChunkPos[j] && this.lastChunkStatus[j] == ChunkStatus.FULL) {
+                     ChunkAccess chunkaccess = this.lastChunk[j];
+                     return chunkaccess instanceof LevelChunk ? (LevelChunk)chunkaccess : null;
+@@ -182,6 +_,7 @@
              if (chunkholder == null) {
                  return null;
              } else {
@@ -28,8 +63,48 @@
                  ChunkResult<ChunkAccess> chunkresult = chunkholder.getFutureIfPresent(ChunkStatus.FULL).getNow(null);
                  if (chunkresult == null) {
                      return null;
-@@ -375,7 +_,7 @@
-                 for (ServerChunkCache.ChunkAndHolder serverchunkcache$chunkandholder : list) {
+@@ -216,7 +_,7 @@
+             completablefuture = CompletableFuture.<CompletableFuture<ChunkResult<ChunkAccess>>>supplyAsync(
+                     () -> this.getChunkFutureMainThread(p_8432_, p_8433_, p_330326_, p_8435_), this.mainThreadProcessor
+                 )
+-                .thenCompose(p_331360_ -> p_331360_);
++                .thenCompose(p_331360_ -> (CompletionStage<ChunkResult<ChunkAccess>>)p_331360_);
+         }
+ 
+         return completablefuture;
+@@ -265,7 +_,7 @@
+         } else {
+             int j = CHUNK_STATUSES.size() - 1;
+ 
+-            while(true) {
++            while (true) {
+                 ChunkStatus chunkstatus = CHUNK_STATUSES.get(j);
+                 ChunkAccess chunkaccess = chunkholder.getFutureIfPresentUnchecked(chunkstatus).getNow(ChunkHolder.UNLOADED_CHUNK).orElse(null);
+                 if (chunkaccess != null) {
+@@ -276,7 +_,7 @@
+                     return null;
+                 }
+ 
+-                --j;
++                j--;
+             }
+         }
+     }
+@@ -351,7 +_,7 @@
+             profilerfiller.push("filteringLoadedChunks");
+             List<ServerChunkCache.ChunkAndHolder> list = Lists.newArrayListWithCapacity(this.chunkMap.size());
+ 
+-            for(ChunkHolder chunkholder : this.chunkMap.getChunks()) {
++            for (ChunkHolder chunkholder : this.chunkMap.getChunks()) {
+                 LevelChunk levelchunk = chunkholder.getTickingChunk();
+                 if (levelchunk != null) {
+                     list.add(new ServerChunkCache.ChunkAndHolder(levelchunk, chunkholder));
+@@ -371,10 +_,10 @@
+                 int k = this.level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
+                 boolean flag = this.level.getLevelData().getGameTime() % 400L == 0L;
+ 
+-                for(ServerChunkCache.ChunkAndHolder serverchunkcache$chunkandholder : list) {
++                for (ServerChunkCache.ChunkAndHolder serverchunkcache$chunkandholder : list) {
                      LevelChunk levelchunk1 = serverchunkcache$chunkandholder.chunk;
                      ChunkPos chunkpos = levelchunk1.getPos();
 -                    if (this.level.isNaturalSpawningAllowed(chunkpos) && this.chunkMap.anyPlayerCloseEnoughForSpawning(chunkpos)) {
@@ -37,7 +112,7 @@
                          levelchunk1.incrementInhabitedTime(j);
                          if (flag1 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(chunkpos)) {
                              NaturalSpawner.spawnForChunk(this.level, levelchunk1, naturalspawner$spawnstate, this.spawnFriendlies, this.spawnEnemies, flag);
-@@ -454,11 +_,17 @@
+@@ -453,11 +_,17 @@
      }
  
      public <T> void addRegionTicket(TicketType<T> p_8388_, ChunkPos p_8389_, int p_8390_, T p_8391_) {

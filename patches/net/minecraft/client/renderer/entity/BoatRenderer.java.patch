@@ -1,5 +1,14 @@
 --- a/net/minecraft/client/renderer/entity/BoatRenderer.java
 +++ b/net/minecraft/client/renderer/entity/BoatRenderer.java
+@@ -36,7 +_,7 @@
+         this.boatResources = Stream.of(Boat.Type.values())
+             .collect(
+                 ImmutableMap.toImmutableMap(
+-                    p_173938_ -> p_173938_,
++                    p_173938_ -> (Boat.Type)p_173938_,
+                     p_247941_ -> Pair.of(new ResourceLocation(getTextureLocation(p_247941_, p_234564_)), this.createBoatModel(p_234563_, p_247941_, p_234564_))
+                 )
+             );
 @@ -75,7 +_,7 @@
              p_113932_.mulPose(new Quaternionf().setAngleAxis(p_113929_.getBubbleAngle(p_113931_) * (float) (Math.PI / 180.0), 1.0F, 0.0F, 1.0F));
          }

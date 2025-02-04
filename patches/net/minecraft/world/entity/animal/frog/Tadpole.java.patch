@@ -1,9 +1,12 @@
 --- a/net/minecraft/world/entity/animal/frog/Tadpole.java
 +++ b/net/minecraft/world/entity/animal/frog/Tadpole.java
-@@ -225,8 +_,10 @@
+@@ -224,10 +_,11 @@
+     }
  
      private void ageUp() {
-         if (this.level() instanceof ServerLevel serverlevel) {
+-        Level $$1 = this.level();
+-        if ($$1 instanceof ServerLevel serverlevel) {
++        if (this.level() instanceof ServerLevel serverlevel) {
 +            if (!net.neoforged.neoforge.event.EventHooks.canLivingConvert(this, EntityType.FROG, (timer) -> {})) return;
              Frog frog = EntityType.FROG.create(this.level());
              if (frog != null) {

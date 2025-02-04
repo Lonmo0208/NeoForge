@@ -1,5 +1,50 @@
 --- a/net/minecraft/client/renderer/PostChain.java
 +++ b/net/minecraft/client/renderer/PostChain.java
+@@ -64,7 +_,7 @@
+                     JsonArray jsonarray = jsonobject.getAsJsonArray("targets");
+                     int i = 0;
+ 
+-                    for(JsonElement jsonelement : jsonarray) {
++                    for (JsonElement jsonelement : jsonarray) {
+                         try {
+                             this.parseTargetNode(jsonelement);
+                         } catch (Exception exception1) {
+@@ -73,7 +_,7 @@
+                             throw chainedjsonexception1;
+                         }
+ 
+-                        ++i;
++                        i++;
+                     }
+                 }
+ 
+@@ -81,7 +_,7 @@
+                     JsonArray jsonarray1 = jsonobject.getAsJsonArray("passes");
+                     int j = 0;
+ 
+-                    for(JsonElement jsonelement1 : jsonarray1) {
++                    for (JsonElement jsonelement1 : jsonarray1) {
+                         try {
+                             this.parsePassNode(p_110034_, jsonelement1);
+                         } catch (Exception exception) {
+@@ -90,7 +_,7 @@
+                             throw chainedjsonexception2;
+                         }
+ 
+-                        ++j;
++                        j++;
+                     }
+                 }
+             }
+@@ -135,7 +_,7 @@
+             if (jsonarray != null) {
+                 int i = 0;
+ 
+-                for(JsonElement jsonelement : jsonarray) {
++                for (JsonElement jsonelement : jsonarray) {
+                     try {
+                         JsonObject jsonobject1 = GsonHelper.convertToJsonObject(jsonelement, "auxtarget");
+                         String s5 = GsonHelper.getAsString(jsonobject1, "name");
 @@ -156,7 +_,8 @@
                                  throw new ChainedJsonException("Render target '" + s4 + "' can't be used as depth buffer");
                              }
@@ -10,6 +55,55 @@
                              this.resourceProvider
                                  .getResource(resourcelocation)
                                  .orElseThrow(() -> new ChainedJsonException("Render target or texture '" + s4 + "' does not exist"));
+@@ -186,7 +_,7 @@
+                         throw chainedjsonexception;
+                     }
+ 
+-                    ++i;
++                    i++;
+                 }
+             }
+ 
+@@ -194,7 +_,7 @@
+             if (jsonarray1 != null) {
+                 int l = 0;
+ 
+-                for(JsonElement jsonelement1 : jsonarray1) {
++                for (JsonElement jsonelement1 : jsonarray1) {
+                     try {
+                         this.parseUniformNode(jsonelement1);
+                     } catch (Exception exception) {
+@@ -203,7 +_,7 @@
+                         throw chainedjsonexception1;
+                     }
+ 
+-                    ++l;
++                    l++;
+                 }
+             }
+         }
+@@ -219,7 +_,7 @@
+             float[] afloat = new float[4];
+             int i = 0;
+ 
+-            for(JsonElement jsonelement : GsonHelper.getAsJsonArray(jsonobject, "values")) {
++            for (JsonElement jsonelement : GsonHelper.getAsJsonArray(jsonobject, "values")) {
+                 try {
+                     afloat[i] = GsonHelper.convertToFloat(jsonelement, "value");
+                 } catch (Exception exception) {
+@@ -228,10 +_,10 @@
+                     throw chainedjsonexception;
+                 }
+ 
+-                ++i;
++                i++;
+             }
+ 
+-            switch(i) {
++            switch (i) {
+                 case 0:
+                 default:
+                     break;
 @@ -257,6 +_,7 @@
      public void addTempTarget(String p_110039_, int p_110040_, int p_110041_) {
          RenderTarget rendertarget = new TextureTarget(p_110040_, p_110041_, true, Minecraft.ON_OSX);
@@ -18,3 +112,74 @@
          this.customRenderTargets.put(p_110039_, rendertarget);
          if (p_110040_ == this.screenWidth && p_110041_ == this.screenHeight) {
              this.fullSizedTargets.add(rendertarget);
+@@ -265,11 +_,11 @@
+ 
+     @Override
+     public void close() {
+-        for(RenderTarget rendertarget : this.customRenderTargets.values()) {
++        for (RenderTarget rendertarget : this.customRenderTargets.values()) {
+             rendertarget.destroyBuffers();
+         }
+ 
+-        for(PostPass postpass : this.passes) {
++        for (PostPass postpass : this.passes) {
+             postpass.close();
+         }
+ 
+@@ -291,11 +_,11 @@
+         this.screenHeight = this.screenTarget.height;
+         this.updateOrthoMatrix();
+ 
+-        for(PostPass postpass : this.passes) {
++        for (PostPass postpass : this.passes) {
+             postpass.setOrthoMatrix(this.shaderOrthoMatrix);
+         }
+ 
+-        for(RenderTarget rendertarget : this.fullSizedTargets) {
++        for (RenderTarget rendertarget : this.fullSizedTargets) {
+             rendertarget.resize(p_110026_, p_110027_, Minecraft.ON_OSX);
+         }
+     }
+@@ -303,28 +_,28 @@
+     private void setFilterMode(int p_333852_) {
+         this.screenTarget.setFilterMode(p_333852_);
+ 
+-        for(RenderTarget rendertarget : this.customRenderTargets.values()) {
++        for (RenderTarget rendertarget : this.customRenderTargets.values()) {
+             rendertarget.setFilterMode(p_333852_);
+         }
+     }
+ 
+     public void process(float p_110024_) {
+         if (p_110024_ < this.lastStamp) {
+-            this.time += 1.0F - this.lastStamp;
++            this.time = this.time + (1.0F - this.lastStamp);
+             this.time += p_110024_;
+         } else {
+-            this.time += p_110024_ - this.lastStamp;
++            this.time = this.time + (p_110024_ - this.lastStamp);
+         }
+ 
+         this.lastStamp = p_110024_;
+ 
+-        while(this.time > 20.0F) {
++        while (this.time > 20.0F) {
+             this.time -= 20.0F;
+         }
+ 
+         int i = 9728;
+ 
+-        for(PostPass postpass : this.passes) {
++        for (PostPass postpass : this.passes) {
+             int j = postpass.getFilterMode();
+             if (i != j) {
+                 this.setFilterMode(j);
+@@ -338,7 +_,7 @@
+     }
+ 
+     public void setUniform(String p_332204_, float p_331999_) {
+-        for(PostPass postpass : this.passes) {
++        for (PostPass postpass : this.passes) {
+             postpass.getEffect().safeGetUniform(p_332204_).set(p_331999_);
+         }
+     }

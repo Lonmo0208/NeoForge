@@ -1,6 +1,61 @@
 --- a/net/minecraft/world/entity/monster/Zombie.java
 +++ b/net/minecraft/world/entity/monster/Zombie.java
-@@ -251,6 +_,7 @@
+@@ -71,7 +_,6 @@
+     private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+     private static final EntityDataAccessor<Integer> DATA_SPECIAL_TYPE_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.INT);
+     private static final EntityDataAccessor<Boolean> DATA_DROWNED_CONVERSION_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+-    private static final EntityDataAccessor<Boolean> DATA_POTATO_CONVERTING_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+     public static final float ZOMBIE_LEADER_CHANCE = 0.05F;
+     public static final int REINFORCEMENT_ATTEMPTS = 50;
+     public static final int REINFORCEMENT_RANGE_MAX = 40;
+@@ -101,7 +_,7 @@
+     }
+ 
+     protected void addBehaviourGoals() {
+-        this.goalSelector.addGoal(2, new ZombieAttackGoal<>(this, 1.0, false));
++        this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0, false));
+         this.goalSelector.addGoal(6, new MoveThroughVillageGoal(this, 1.0, true, 4, this::canBreakDoors));
+         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
+         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(ZombifiedPiglin.class));
+@@ -126,17 +_,12 @@
+         p_326435_.define(DATA_BABY_ID, false);
+         p_326435_.define(DATA_SPECIAL_TYPE_ID, 0);
+         p_326435_.define(DATA_DROWNED_CONVERSION_ID, false);
+-        p_326435_.define(DATA_POTATO_CONVERTING_ID, false);
+     }
+ 
+     public boolean isUnderWaterConverting() {
+         return this.getEntityData().get(DATA_DROWNED_CONVERSION_ID);
+     }
+ 
+-    public boolean isPotatoConverting() {
+-        return this.getEntityData().get(DATA_POTATO_CONVERTING_ID);
+-    }
+-
+     public boolean canBreakDoors() {
+         return this.canBreakDoors;
+     }
+@@ -204,16 +_,14 @@
+     @Override
+     public void tick() {
+         if (!this.level().isClientSide && this.isAlive() && !this.isNoAi()) {
+-            if (this.isPotatoConverting()) {
+-                this.doPotatoConversion();
+-            } else if (this.isUnderWaterConverting()) {
+-                --this.conversionTime;
++            if (this.isUnderWaterConverting()) {
++                this.conversionTime--;
+                 if (this.conversionTime < 0) {
+                     this.doUnderWaterConversion();
+                 }
+             } else if (this.convertsInWater()) {
+                 if (this.isEyeInFluid(FluidTags.WATER)) {
+-                    ++this.inWaterTime;
++                    this.inWaterTime++;
+                     if (this.inWaterTime >= 600) {
+                         this.startUnderWaterConversion(300);
+                     }
+@@ -259,28 +_,19 @@
      }
  
      protected void doUnderWaterConversion() {
@@ -8,7 +63,22 @@
          this.convertToZombieType(EntityType.DROWNED);
          if (!this.isSilent()) {
              this.level().levelEvent(null, 1040, this.blockPosition(), 0);
-@@ -262,6 +_,7 @@
+         }
+     }
+ 
+-    private void startPotatoConversion() {
+-        this.getEntityData().set(DATA_POTATO_CONVERTING_ID, true);
+-    }
+-
+-    protected void doPotatoConversion() {
+-        this.convertToZombieType(EntityType.POISONOUS_POTATO_ZOMBIE);
+-        if (!this.isSilent()) {
+-            this.level().levelEvent(null, 1040, this.blockPosition(), 0);
+-        }
+-    }
+-
+     protected void convertToZombieType(EntityType<? extends Zombie> p_34311_) {
+         Zombie zombie = this.convertTo(p_34311_, true);
          if (zombie != null) {
              zombie.handleAttributes(zombie.level().getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
              zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
@@ -16,7 +86,7 @@
          }
      }
  
-@@ -282,14 +_,19 @@
+@@ -301,16 +_,21 @@
                  livingentity = (LivingEntity)p_34288_.getEntity();
              }
  
@@ -28,6 +98,8 @@
 -                int j = Mth.floor(this.getY());
 -                int k = Mth.floor(this.getZ());
 -                Zombie zombie = new Zombie(this.level());
+-
+-                for(int l = 0; l < 50; ++l) {
 +            int i = Mth.floor(this.getX());
 +            int j = Mth.floor(this.getY());
 +            int k = Mth.floor(this.getZ());
@@ -41,10 +113,12 @@
 +                      && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING))) {
 +
 +                Zombie zombie = event.getCustomSummonedAid() != null && event.getResult() == net.neoforged.bus.api.Event.Result.ALLOW ? event.getCustomSummonedAid() : EntityType.ZOMBIE.create(this.level());
- 
-                 for (int l = 0; l < 50; l++) {
++
++                for (int l = 0; l < 50; l++) {
                      int i1 = i + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
-@@ -304,7 +_,9 @@
+                     int j1 = j + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
+                     int k1 = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
+@@ -323,7 +_,9 @@
                              && this.level().isUnobstructed(zombie)
                              && this.level().noCollision(zombie)
                              && !this.level().containsAnyLiquid(zombie.getBoundingBox())) {
@@ -55,7 +129,7 @@
                              zombie.finalizeSpawn(serverlevel, this.level().getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null);
                              serverlevel.addFreshEntityWithPassengers(zombie);
                              this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
-@@ -398,7 +_,7 @@
+@@ -417,7 +_,7 @@
      @Override
      public boolean killedEntity(ServerLevel p_219160_, LivingEntity p_219161_) {
          boolean flag = super.killedEntity(p_219160_, p_219161_);
@@ -64,7 +138,7 @@
              if (p_219160_.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
                  return flag;
              }
-@@ -415,6 +_,7 @@
+@@ -434,6 +_,7 @@
                  zombievillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
                  zombievillager.setTradeOffers(villager.getOffers().copy());
                  zombievillager.setVillagerXp(villager.getVillagerXp());
@@ -72,3 +146,13 @@
                  if (!this.isSilent()) {
                      p_219160_.levelEvent(null, 1026, this.blockPosition(), 0);
                  }
+@@ -550,8 +_,7 @@
+     @Override
+     protected void dropCustomDeathLoot(DamageSource p_34291_, int p_34292_, boolean p_34293_) {
+         super.dropCustomDeathLoot(p_34291_, p_34292_, p_34293_);
+-        Entity entity = p_34291_.getEntity();
+-        if (entity instanceof Creeper creeper && creeper.canDropMobsSkull()) {
++        if (p_34291_.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
+             ItemStack itemstack = this.getSkull();
+             if (!itemstack.isEmpty()) {
+                 creeper.increaseDroppedSkulls();

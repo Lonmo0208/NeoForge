@@ -20,9 +20,9 @@
 +            return MappedRegistry.this.getData(type, key);
 +        }
      };
-     private final Object tagAdditionLock = new Object();
  
-@@ -114,9 +_,17 @@
+     public MappedRegistry(ResourceKey<? extends Registry<T>> p_249899_, Lifecycle p_252249_) {
+@@ -113,9 +_,17 @@
  
      @Override
      public Holder.Reference<T> register(ResourceKey<T> p_256252_, T p_256591_, RegistrationInfo p_326235_) {
@@ -40,10 +40,12 @@
          if (this.byLocation.containsKey(p_256252_.location())) {
              Util.pauseInIde(new IllegalStateException("Adding duplicate key '" + p_256252_ + "' to registry"));
          }
-@@ -135,16 +_,18 @@
+@@ -133,17 +_,19 @@
+ 
              reference.bindKey(p_256252_);
          } else {
-             reference = this.byKey.computeIfAbsent(p_256252_, p_258168_ -> Holder.Reference.createStandAlone(this.holderOwner(), (ResourceKey<T>)p_258168_));
+-            reference = this.byKey.computeIfAbsent(p_256252_, p_258168_ -> Holder.Reference.createStandAlone(this.holderOwner(), p_258168_));
++            reference = this.byKey.computeIfAbsent(p_256252_, p_258168_ -> Holder.Reference.createStandAlone(this.holderOwner(), (ResourceKey<T>)p_258168_));
 +            // Forge: Bind the value immediately so it can be queried while the registry is not frozen
 +            reference.bindValue(p_256591_);
          }
@@ -60,7 +62,7 @@
          return reference;
      }
  
-@@ -168,7 +_,7 @@
+@@ -167,7 +_,7 @@
      @Nullable
      @Override
      public T get(@Nullable ResourceKey<T> p_122714_) {
@@ -69,7 +71,7 @@
      }
  
      @Nullable
-@@ -189,7 +_,7 @@
+@@ -188,7 +_,7 @@
  
      @Override
      public Optional<Holder.Reference<T>> getHolder(ResourceKey<T> p_205905_) {
@@ -78,7 +80,7 @@
      }
  
      @Override
-@@ -199,7 +_,7 @@
+@@ -198,12 +_,12 @@
      }
  
      Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> p_248831_) {
@@ -87,7 +89,14 @@
              if (this.unregisteredIntrusiveHolders != null) {
                  throw new IllegalStateException("This registry can't create new holders without value");
              } else {
-@@ -232,7 +_,7 @@
+-                this.validateWrite(p_258169_);
+-                return Holder.Reference.createStandAlone(this.holderOwner(), p_258169_);
++                this.validateWrite((ResourceKey<T>)p_258169_);
++                return Holder.Reference.createStandAlone(this.holderOwner(), (ResourceKey<T>)p_258169_);
+             }
+         });
+     }
+@@ -231,7 +_,7 @@
      @Nullable
      @Override
      public T get(@Nullable ResourceLocation p_122739_) {
@@ -96,7 +105,7 @@
          return getValueFromNullable(reference);
      }
  
-@@ -316,13 +_,18 @@
+@@ -307,13 +_,18 @@
          return this.byKey.containsKey(p_175392_);
      }
  
@@ -112,11 +121,11 @@
              return this;
          } else {
              this.frozen = true;
--            this.byValue.forEach((p_247989_, p_247990_) -> p_247990_.bindValue((T)p_247989_));
+-            this.byValue.forEach((p_247989_, p_247990_) -> p_247990_.bindValue(p_247989_));
              List<ResourceLocation> list = this.byKey
                  .entrySet()
                  .stream()
-@@ -338,8 +_,10 @@
+@@ -329,8 +_,10 @@
                          throw new IllegalStateException("Some intrusive holders were not registered: " + this.unregisteredIntrusiveHolders.values());
                      }
  
@@ -128,7 +137,56 @@
  
                  return this;
              }
-@@ -435,5 +_,53 @@
+@@ -343,7 +_,7 @@
+             throw new IllegalStateException("This registry can't create intrusive holders");
+         } else {
+             this.validateWrite();
+-            return this.unregisteredIntrusiveHolders.computeIfAbsent(p_205915_, p_258166_ -> Holder.Reference.createIntrusive(this.asLookup(), p_258166_));
++            return this.unregisteredIntrusiveHolders.computeIfAbsent(p_205915_, p_258166_ -> Holder.Reference.createIntrusive(this.asLookup(), (T)p_258166_));
+         }
+     }
+ 
+@@ -355,19 +_,18 @@
+     @Override
+     public void bindTags(Map<TagKey<T>, List<Holder<T>>> p_205875_) {
+         Map<Holder.Reference<T>, List<TagKey<T>>> map = new IdentityHashMap<>();
+-        this.byKey.values().forEach(p_211801_ -> map.put(p_211801_, new ArrayList<>()));
+-        p_205875_.forEach((p_211806_, p_211807_) -> {
+-            for(Holder<T> holder : p_211807_) {
++        this.byKey.values().forEach(p_211801_ -> map.put((Holder.Reference<T>)p_211801_, new ArrayList<>()));
++        p_205875_.forEach((p_339332_, p_339333_) -> {
++            for (Holder<T> holder : p_339333_) {
+                 if (!holder.canSerializeIn(this.asLookup())) {
+-                    throw new IllegalStateException("Can't create named set " + p_211806_ + " containing value " + holder + " from outside registry " + this);
+-                }
+-
+-                if (!(holder instanceof Holder.Reference)) {
+-                    throw new IllegalStateException("Found direct holder " + holder + " value in tag " + p_211806_);
+-                }
+-
+-                Holder.Reference<T> reference = (Holder.Reference)holder;
+-                map.get(reference).add(p_211806_);
++                    throw new IllegalStateException("Can't create named set " + p_339332_ + " containing value " + holder + " from outside registry " + this);
++                }
++
++                if (!(holder instanceof Holder.Reference<T> reference)) {
++                    throw new IllegalStateException("Found direct holder " + holder + " value in tag " + p_339332_);
++                }
++
++                map.get(reference).add((TagKey<T>)p_339332_);
+             }
+         });
+         Set<TagKey<T>> set = Sets.difference(this.tags.keySet(), p_205875_.keySet());
+@@ -380,7 +_,7 @@
+         }
+ 
+         Map<TagKey<T>, HolderSet.Named<T>> map1 = new IdentityHashMap<>(this.tags);
+-        p_205875_.forEach((p_211797_, p_211798_) -> map1.computeIfAbsent(p_211797_, this::createTag).bind(p_211798_));
++        p_205875_.forEach((p_211797_, p_211798_) -> map1.computeIfAbsent((TagKey<T>)p_211797_, this::createTag).bind((List<Holder<T>>)p_211798_));
+         map.forEach(Holder.Reference::bindTags);
+         this.tags = map1;
+     }
+@@ -425,5 +_,53 @@
      @Override
      public HolderLookup.RegistryLookup<T> asLookup() {
          return this.lookup;

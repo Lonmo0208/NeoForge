@@ -1,11 +1,66 @@
 --- a/net/minecraft/world/level/lighting/LightEngine.java
 +++ b/net/minecraft/world/level/lighting/LightEngine.java
-@@ -44,7 +_,7 @@
-         return p_285372_ == p_285110_
-             ? false
-             : p_285372_.getLightBlock(p_285159_, p_284985_) != p_285110_.getLightBlock(p_285159_, p_284985_)
+@@ -41,14 +_,12 @@
+     }
+ 
+     public static boolean hasDifferentLightProperties(BlockGetter p_285159_, BlockPos p_284985_, BlockState p_285110_, BlockState p_285372_) {
+-        if (p_285372_ == p_285110_) {
+-            return false;
+-        } else {
+-            return p_285372_.getLightBlock(p_285159_, p_284985_) != p_285110_.getLightBlock(p_285159_, p_284985_)
 -                || p_285372_.getLightEmission() != p_285110_.getLightEmission()
++        return p_285372_ == p_285110_
++            ? false
++            : p_285372_.getLightBlock(p_285159_, p_284985_) != p_285110_.getLightBlock(p_285159_, p_284985_)
 +                || p_285372_.getLightEmission(p_285159_, p_284985_) != p_285110_.getLightEmission(p_285159_, p_284985_)
                  || p_285372_.useShapeForLightOcclusion()
                  || p_285110_.useShapeForLightOcclusion();
+-        }
      }
+ 
+     public static int getLightBlockInto(
+@@ -98,7 +_,7 @@
+     protected LightChunk getChunk(int p_284967_, int p_285447_) {
+         long i = ChunkPos.asLong(p_284967_, p_285447_);
+ 
+-        for(int j = 0; j < 2; ++j) {
++        for (int j = 0; j < 2; j++) {
+             if (i == this.lastChunkPos[j]) {
+                 return this.lastChunk[j];
+             }
+@@ -106,7 +_,7 @@
+ 
+         LightChunk lightchunk = this.chunkSource.getChunkForLighting(p_284967_, p_285447_);
+ 
+-        for(int k = 1; k > 0; --k) {
++        for (int k = 1; k > 0; k--) {
+             this.lastChunkPos[k] = this.lastChunkPos[k - 1];
+             this.lastChunk[k] = this.lastChunk[k - 1];
+         }
+@@ -148,7 +_,7 @@
+     public int runLightUpdates() {
+         LongIterator longiterator = this.blockNodesToCheck.iterator();
+ 
+-        while(longiterator.hasNext()) {
++        while (longiterator.hasNext()) {
+             this.checkNode(longiterator.nextLong());
+         }
+ 
+@@ -165,7 +_,7 @@
+ 
+     private int propagateIncreases() {
+         int i;
+-        for(i = 0; !this.increaseQueue.isEmpty(); ++i) {
++        for (i = 0; !this.increaseQueue.isEmpty(); i++) {
+             long j = this.increaseQueue.dequeueLong();
+             long k = this.increaseQueue.dequeueLong();
+             int l = this.storage.getStoredLevel(j);
+@@ -185,7 +_,7 @@
+ 
+     private int propagateDecreases() {
+         int i;
+-        for(i = 0; !this.decreaseQueue.isEmpty(); ++i) {
++        for (i = 0; !this.decreaseQueue.isEmpty(); i++) {
+             long j = this.decreaseQueue.dequeueLong();
+             long k = this.decreaseQueue.dequeueLong();
+             this.propagateDecrease(j, k);

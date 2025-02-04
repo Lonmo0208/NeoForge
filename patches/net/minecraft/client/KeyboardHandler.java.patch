@@ -1,5 +1,41 @@
 --- a/net/minecraft/client/KeyboardHandler.java
 +++ b/net/minecraft/client/KeyboardHandler.java
+@@ -63,7 +_,7 @@
+     }
+ 
+     private boolean handleChunkDebugKeys(int p_167814_) {
+-        switch(p_167814_) {
++        switch (p_167814_) {
+             case 69:
+                 this.minecraft.sectionPath = !this.minecraft.sectionPath;
+                 this.debugFeedback("SectionPath: {0}", this.minecraft.sectionPath ? "shown" : "hidden");
+@@ -127,7 +_,7 @@
+         if (this.debugCrashKeyTime > 0L && this.debugCrashKeyTime < Util.getMillis() - 100L) {
+             return true;
+         } else {
+-            switch(p_90933_) {
++            switch (p_90933_) {
+                 case 49:
+                     this.minecraft.getDebugOverlay().toggleProfilerChart();
+                     return true;
+@@ -266,7 +_,7 @@
+     private void copyRecreateCommand(boolean p_90929_, boolean p_90930_) {
+         HitResult hitresult = this.minecraft.hitResult;
+         if (hitresult != null) {
+-            switch(hitresult.getType()) {
++            switch (hitresult.getType()) {
+                 case BLOCK:
+                     BlockPos blockpos = ((BlockHitResult)hitresult).getBlockPos();
+                     Level level = this.minecraft.player.level();
+@@ -351,7 +_,7 @@
+ 
+             Screen screen = this.minecraft.screen;
+             if (screen != null) {
+-                switch(p_90895_) {
++                switch (p_90895_) {
+                     case 258:
+                         this.minecraft.setLastInputType(InputType.KEYBOARD_TAB);
+                     case 259:
 @@ -367,7 +_,9 @@
                  }
              }
@@ -11,7 +47,7 @@
                  if (this.minecraft.options.keyFullscreen.matches(p_90895_, p_90896_)) {
                      this.minecraft.getWindow().toggleFullScreen();
                      this.minecraft.options.fullscreen().set(this.minecraft.getWindow().isFullscreen());
-@@ -385,6 +_,8 @@
+@@ -385,12 +_,14 @@
                      );
                      return;
                  }
@@ -20,6 +56,13 @@
              }
  
              if (p_90897_ != 0) {
+                 boolean flag1 = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
+                 if (flag1) {
+-                    if (Screen.hasControlDown() && p_90895_ == 66 && this.minecraft.getNarrator().isActive()) {
++                    if (Screen.hasControlDown() && p_90895_ == 66 && this.minecraft.getNarrator().isActive() && this.minecraft.options.narratorHotkey().get()) {
+                         boolean flag2 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
+                         this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));
+                         this.minecraft.options.save();
 @@ -412,9 +_,13 @@
                  Screen.wrapScreenError(() -> {
                      if (p_90897_ == 1 || p_90897_ == 2) {
@@ -36,7 +79,31 @@
                      }
                  }, "keyPressed event handler", screen.getClass().getCanonicalName());
                  if (aboolean[0]) {
-@@ -483,22 +_,27 @@
+@@ -425,18 +_,17 @@
+             InputConstants.Key inputconstants$key;
+             boolean flag4;
+             boolean flag6;
+-            label185: {
++            label187: {
+                 inputconstants$key = InputConstants.getKey(p_90895_, p_90896_);
+                 flag4 = this.minecraft.screen == null;
+-                label145:
++                label147:
+                 if (!flag4) {
+-                    Screen screen1 = this.minecraft.screen;
+-                    if (screen1 instanceof PauseScreen pausescreen && !pausescreen.showsPauseMenu()) {
+-                        break label145;
++                    if (this.minecraft.screen instanceof PauseScreen pausescreen && !pausescreen.showsPauseMenu()) {
++                        break label147;
+                     }
+ 
+                     flag6 = false;
+-                    break label185;
++                    break label187;
+                 }
+ 
+                 flag6 = true;
+@@ -484,22 +_,27 @@
                      }
                  }
              }
@@ -59,10 +126,11 @@
 +                        net.neoforged.neoforge.client.ClientHooks.onScreenCharTypedPost(guieventlistener, (char)p_90891_, p_90892_);
 +                    }, "charTyped event handler", guieventlistener.getClass().getCanonicalName());
                  } else {
-                     for (char c0 : Character.toChars(p_90891_)) {
+-                    for(char c0 : Character.toChars(p_90891_)) {
 -                        Screen.wrapScreenError(
 -                            () -> guieventlistener.charTyped(c0, p_90892_), "charTyped event handler", guieventlistener.getClass().getCanonicalName()
 -                        );
++                    for (char c0 : Character.toChars(p_90891_)) {
 +                        Screen.wrapScreenError(() -> {
 +                            if (net.neoforged.neoforge.client.ClientHooks.onScreenCharTypedPre(guieventlistener, c0, p_90892_)) return;
 +                            if (guieventlistener.charTyped(c0, p_90892_)) return;
@@ -71,3 +139,12 @@
                      }
                  }
              }
+@@ -553,7 +_,7 @@
+                 }
+ 
+                 this.debugCrashKeyReportedTime = i;
+-                ++this.debugCrashKeyReportedCount;
++                this.debugCrashKeyReportedCount++;
+             }
+         }
+     }

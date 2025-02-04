@@ -18,3 +18,40 @@
      }
  
      @CheckReturnValue
+@@ -103,7 +_,7 @@
+     }
+ 
+     protected void runAllTasks() {
+-        while(this.pollTask()) {
++        while (this.pollTask()) {
+         }
+     }
+ 
+@@ -120,16 +_,16 @@
+     }
+ 
+     public void managedBlock(BooleanSupplier p_18702_) {
+-        ++this.blockingCount;
++        this.blockingCount++;
+ 
+         try {
+-            while(!p_18702_.getAsBoolean()) {
++            while (!p_18702_.getAsBoolean()) {
+                 if (!this.pollTask()) {
+                     this.waitForTasks();
+                 }
+             }
+         } finally {
+-            --this.blockingCount;
++            this.blockingCount--;
+         }
+     }
+ 
+@@ -143,6 +_,7 @@
+             p_18700_.run();
+         } catch (Exception exception) {
+             LOGGER.error(LogUtils.FATAL_MARKER, "Error executing task on {}", this.name(), exception);
++            throw exception;
+         }
+     }
+ 

@@ -1,102 +1,108 @@
 --- a/net/minecraft/world/item/alchemy/PotionBrewing.java
 +++ b/net/minecraft/world/item/alchemy/PotionBrewing.java
-@@ -19,15 +_,37 @@
-     private final List<Ingredient> containers;
-     private final List<PotionBrewing.Mix<Potion>> potionMixes;
-     private final List<PotionBrewing.Mix<Item>> containerMixes;
-+    private final net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry registry;
- 
-     PotionBrewing(List<Ingredient> p_340915_, List<PotionBrewing.Mix<Potion>> p_341164_, List<PotionBrewing.Mix<Item>> p_341170_) {
-+        this(p_340915_, p_341164_, p_341170_, List.of());
-+    }
-+
-+    PotionBrewing(List<Ingredient> p_340915_, List<PotionBrewing.Mix<Potion>> p_341164_, List<PotionBrewing.Mix<Item>> p_341170_, List<net.neoforged.neoforge.common.brewing.IBrewingRecipe> recipes) {
-         this.containers = p_340915_;
-         this.potionMixes = p_341164_;
-         this.containerMixes = p_341170_;
-+        this.registry = new net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry(recipes);
+@@ -19,7 +_,7 @@
+     private static final List<PotionBrewing.Mix<Item>> CONTAINER_MIXES = Lists.newArrayList();
+     private static final List<Ingredient> ALLOWED_CONTAINERS = Lists.newArrayList();
+     private static final Predicate<ItemStack> ALLOWED_CONTAINER = p_43528_ -> {
+-        for(Ingredient ingredient : ALLOWED_CONTAINERS) {
++        for (Ingredient ingredient : ALLOWED_CONTAINERS) {
+             if (ingredient.test(p_43528_)) {
+                 return true;
+             }
+@@ -33,7 +_,7 @@
      }
  
-     public boolean isIngredient(ItemStack p_43507_) {
--        return this.isContainerIngredient(p_43507_) || this.isPotionIngredient(p_43507_);
-+        return this.registry.isValidIngredient(p_43507_) || this.isContainerIngredient(p_43507_) || this.isPotionIngredient(p_43507_);
-+    }
-+
-+    /**
-+     * Checks if an item stack is a valid input for brewing,
-+     * for use in the lower 3 slots where water bottles would normally go.
-+     */
-+    public boolean isInput(ItemStack stack) {
-+        return this.registry.isValidInput(stack) || isContainer(stack);
-+    }
-+
-+    /**
-+     * Retrieves recipes that use the more general interface.
-+     * This does NOT include the container and potion mixes.
-+     */
-+    public List<net.neoforged.neoforge.common.brewing.IBrewingRecipe> getRecipes() {
-+        return registry.recipes();
+     protected static boolean isContainerIngredient(ItemStack p_43518_) {
+-        for(PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
++        for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
+             if (mix.ingredient.test(p_43518_)) {
+                 return true;
+             }
+@@ -43,7 +_,7 @@
      }
  
-     private boolean isContainer(ItemStack p_341168_) {
-@@ -71,6 +_,7 @@
+     protected static boolean isPotionIngredient(ItemStack p_43523_) {
+-        for(PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
++        for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
+             if (mix.ingredient.test(p_43523_)) {
+                 return true;
+             }
+@@ -53,7 +_,7 @@
      }
  
-     public boolean hasMix(ItemStack p_43509_, ItemStack p_43510_) {
-+        if (registry.hasOutput(p_43509_, p_43510_)) return true;
-         return !this.isContainer(p_43509_) ? false : this.hasContainerMix(p_43509_, p_43510_) || this.hasPotionMix(p_43509_, p_43510_);
+     public static boolean isBrewablePotion(Holder<Potion> p_316354_) {
+-        for(PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
++        for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
+             if (mix.to.is(p_316354_)) {
+                 return true;
+             }
+@@ -63,15 +_,11 @@
      }
  
-@@ -103,6 +_,8 @@
-         if (p_43531_.isEmpty()) {
-             return p_43531_;
+     public static boolean hasMix(ItemStack p_43509_, ItemStack p_43510_) {
+-        if (!ALLOWED_CONTAINER.test(p_43509_)) {
+-            return false;
+-        } else {
+-            return hasContainerMix(p_43509_, p_43510_) || hasPotionMix(p_43509_, p_43510_);
+-        }
++        return !ALLOWED_CONTAINER.test(p_43509_) ? false : hasContainerMix(p_43509_, p_43510_) || hasPotionMix(p_43509_, p_43510_);
+     }
+ 
+     protected static boolean hasContainerMix(ItemStack p_43520_, ItemStack p_43521_) {
+-        for(PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
++        for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
+             if (p_43520_.is(mix.from) && mix.ingredient.test(p_43521_)) {
+                 return true;
+             }
+@@ -85,7 +_,7 @@
+         if (optional.isEmpty()) {
+             return false;
          } else {
-+            var customMix = registry.getOutput(p_43531_, p_43530_); // Parameters are swapped compared to what vanilla passes!
-+            if (!customMix.isEmpty()) return customMix;
-             Optional<Holder<Potion>> optional = p_43531_.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion();
+-            for(PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
++            for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
+                 if (mix.from.is(optional.get()) && mix.ingredient.test(p_43526_)) {
+                     return true;
+                 }
+@@ -103,13 +_,13 @@
              if (optional.isEmpty()) {
                  return p_43531_;
-@@ -127,6 +_,7 @@
-     public static PotionBrewing bootstrap(FeatureFlagSet p_341301_) {
-         PotionBrewing.Builder potionbrewing$builder = new PotionBrewing.Builder(p_341301_);
-         addVanillaMixes(potionbrewing$builder);
-+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent(potionbrewing$builder));
-         return potionbrewing$builder.build();
+             } else {
+-                for(PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
++                for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
+                     if (p_43531_.is(mix.from) && mix.ingredient.test(p_43530_)) {
+                         return PotionContents.createItemStack(mix.to.value(), optional.get());
+                     }
+                 }
+ 
+-                for(PotionBrewing.Mix<Potion> mix1 : POTION_MIXES) {
++                for (PotionBrewing.Mix<Potion> mix1 : POTION_MIXES) {
+                     if (mix1.from.is(optional.get()) && mix1.ingredient.test(p_43530_)) {
+                         return PotionContents.createItemStack(p_43531_.getItem(), mix1.to);
+                     }
+@@ -133,9 +_,17 @@
+         addMix(Potions.WATER, Items.SPIDER_EYE, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.SUGAR, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.MAGMA_CREAM, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.BREEZE_ROD, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.SLIME_BLOCK, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.STONE, Potions.MUNDANE);
++        addMix(Potions.WATER, Items.COBWEB, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.GLOWSTONE_DUST, Potions.THICK);
+         addMix(Potions.WATER, Items.REDSTONE, Potions.MUNDANE);
+         addMix(Potions.WATER, Items.NETHER_WART, Potions.AWKWARD);
++        addMix(Potions.AWKWARD, Items.BREEZE_ROD, Potions.WIND_CHARGED);
++        addMix(Potions.AWKWARD, Items.SLIME_BLOCK, Potions.OOZING);
++        addMix(Potions.AWKWARD, Items.STONE, Potions.INFESTED);
++        addMix(Potions.AWKWARD, Items.COBWEB, Potions.WEAVING);
+         addMix(Potions.AWKWARD, Items.GOLDEN_CARROT, Potions.NIGHT_VISION);
+         addMix(Potions.NIGHT_VISION, Items.REDSTONE, Potions.LONG_NIGHT_VISION);
+         addMix(Potions.NIGHT_VISION, Items.FERMENTED_SPIDER_EYE, Potions.INVISIBILITY);
+@@ -206,8 +_,5 @@
      }
  
-@@ -194,6 +_,7 @@
-         private final List<Ingredient> containers = new ArrayList<>();
-         private final List<PotionBrewing.Mix<Potion>> potionMixes = new ArrayList<>();
-         private final List<PotionBrewing.Mix<Item>> containerMixes = new ArrayList<>();
-+        private final List<net.neoforged.neoforge.common.brewing.IBrewingRecipe> recipes = new ArrayList<>();
-         private final FeatureFlagSet enabledFeatures;
- 
-         public Builder(FeatureFlagSet p_340975_) {
-@@ -237,8 +_,26 @@
-             }
-         }
- 
-+        /**
-+         * Adds a new simple brewing recipe.
-+         *
-+         * @param input      the ingredient that goes in the same slot as water bottles would
-+         * @param ingredient the ingredient that goes in the same slot as nether wart would
-+         * @param output     the item stack that will replace the input once brewing is done
-+         */
-+        public void addRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
-+            addRecipe(new net.neoforged.neoforge.common.brewing.BrewingRecipe(input, ingredient, output));
-+        }
-+
-+        /**
-+         * Adds a new brewing recipe with custom logic.
-+         */
-+        public void addRecipe(net.neoforged.neoforge.common.brewing.IBrewingRecipe recipe) {
-+            this.recipes.add(recipe);
-+        }
-+
-         public PotionBrewing build() {
--            return new PotionBrewing(List.copyOf(this.containers), List.copyOf(this.potionMixes), List.copyOf(this.containerMixes));
-+            return new PotionBrewing(List.copyOf(this.containers), List.copyOf(this.potionMixes), List.copyOf(this.containerMixes), List.copyOf(this.recipes));
-         }
+     public static record Mix<T>(Holder<T> from, Ingredient ingredient, Holder<T> to) {
+-        public final Holder<T> from;
+-        public final Ingredient ingredient;
+-        public final Holder<T> to;
      }
- 
+ }

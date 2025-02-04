@@ -8,15 +8,51 @@
      }
  
      protected abstract void rewardTradeXp(MerchantOffer p_35299_);
-@@ -181,9 +_,9 @@
+@@ -159,11 +_,7 @@
+         MerchantOffers merchantoffers = this.getOffers();
+         if (!merchantoffers.isEmpty()) {
+             p_35301_.put(
+-                "Offers",
+-                Util.getOrThrow(
+-                    MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), merchantoffers),
+-                    IllegalStateException::new
+-                )
++                "Offers", MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), merchantoffers).getOrThrow()
+             );
+         }
+ 
+@@ -185,9 +_,9 @@
  
      @Nullable
      @Override
--    public Entity changeDimension(ServerLevel p_35295_) {
+-    public Entity changeDimension(ServerLevel p_35295_, boolean p_342208_) {
 +    public Entity changeDimension(ServerLevel p_35295_, net.neoforged.neoforge.common.util.ITeleporter teleporter) {
          this.stopTrading();
--        return super.changeDimension(p_35295_);
+-        return super.changeDimension(p_35295_, p_342208_);
 +        return super.changeDimension(p_35295_, teleporter);
      }
  
      protected void stopTrading() {
+@@ -201,7 +_,7 @@
+     }
+ 
+     protected void addParticlesAroundSelf(ParticleOptions p_35288_) {
+-        for(int i = 0; i < 5; ++i) {
++        for (int i = 0; i < 5; i++) {
+             double d0 = this.random.nextGaussian() * 0.02;
+             double d1 = this.random.nextGaussian() * 0.02;
+             double d2 = this.random.nextGaussian() * 0.02;
+@@ -231,11 +_,11 @@
+         ArrayList<VillagerTrades.ItemListing> arraylist = Lists.newArrayList(p_35279_);
+         int i = 0;
+ 
+-        while(i < p_35280_ && !arraylist.isEmpty()) {
++        while (i < p_35280_ && !arraylist.isEmpty()) {
+             MerchantOffer merchantoffer = arraylist.remove(this.random.nextInt(arraylist.size())).getOffer(this, this.random);
+             if (merchantoffer != null) {
+                 p_35278_.add(merchantoffer);
+-                ++i;
++                i++;
+             }
+         }
+     }

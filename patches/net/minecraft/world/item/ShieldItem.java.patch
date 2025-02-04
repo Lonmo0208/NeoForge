@@ -1,16 +1,33 @@
 --- a/net/minecraft/world/item/ShieldItem.java
 +++ b/net/minecraft/world/item/ShieldItem.java
-@@ -53,6 +_,13 @@
-         return p_43092_.is(ItemTags.PLANKS) || super.isValidRepairItem(p_43091_, p_43092_);
+@@ -1,7 +_,6 @@
+ package net.minecraft.world.item;
+ 
+ import java.util.List;
+-import javax.annotation.Nullable;
+ import net.minecraft.core.component.DataComponents;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.tags.ItemTags;
+@@ -28,7 +_,7 @@
      }
  
+     @Override
+-    public void appendHoverText(ItemStack p_43094_, @Nullable Level p_43095_, List<Component> p_43096_, TooltipFlag p_43097_) {
++    public void appendHoverText(ItemStack p_43094_, Item.TooltipContext p_339613_, List<Component> p_43096_, TooltipFlag p_43097_) {
+         BannerItem.appendHoverTextFromBannerBlockEntityTag(p_43094_, p_43096_);
+     }
+ 
+@@ -52,6 +_,13 @@
+     @Override
+     public boolean isValidRepairItem(ItemStack p_43091_, ItemStack p_43092_) {
+         return p_43092_.is(ItemTags.PLANKS) || super.isValidRepairItem(p_43091_, p_43092_);
++    }
++
 +    /* ******************** FORGE START ******************** */
 +
 +    @Override
 +    public boolean canPerformAction(ItemStack stack, net.neoforged.neoforge.common.ToolAction toolAction) {
 +        return net.neoforged.neoforge.common.ToolActions.DEFAULT_SHIELD_ACTIONS.contains(toolAction);
-+    }
-+
+     }
+ 
      @Override
-     public EquipmentSlot getEquipmentSlot() {
-         return EquipmentSlot.OFFHAND;

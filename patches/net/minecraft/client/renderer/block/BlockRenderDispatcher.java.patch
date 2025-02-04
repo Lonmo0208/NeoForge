@@ -59,15 +59,29 @@
                      );
              }
          } catch (Throwable throwable) {
-@@ -90,6 +_,7 @@
+@@ -88,18 +_,10 @@
+         }
+     }
  
-     public void renderLiquid(BlockPos p_234364_, BlockAndTintGetter p_234365_, VertexConsumer p_234366_, BlockState p_234367_, FluidState p_234368_) {
+-    public void renderLiquid(
+-        BlockPos p_234364_,
+-        BlockAndTintGetter p_234365_,
+-        VertexConsumer p_234366_,
+-        BlockState p_234367_,
+-        FluidState p_234368_,
+-        int p_342576_,
+-        int p_340630_,
+-        int p_342320_
+-    ) {
++    public void renderLiquid(BlockPos p_234364_, BlockAndTintGetter p_234365_, VertexConsumer p_234366_, BlockState p_234367_, FluidState p_234368_) {
          try {
+-            this.liquidBlockRenderer.tesselate(p_234365_, p_234364_, p_234366_, p_234367_, p_234368_, (double)p_342576_, (double)p_340630_, (double)p_342320_);
 +            if (net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions.of(p_234368_).renderFluid(p_234368_, p_234365_, p_234364_, p_234366_, p_234367_)) return;
-             this.liquidBlockRenderer.tesselate(p_234365_, p_234364_, p_234366_, p_234367_, p_234368_);
++            this.liquidBlockRenderer.tesselate(p_234365_, p_234364_, p_234366_, p_234367_, p_234368_);
          } catch (Throwable throwable) {
              CrashReport crashreport = CrashReport.forThrowable(throwable, "Tesselating liquid in world");
-@@ -107,7 +_,11 @@
+             CrashReportCategory crashreportcategory = crashreport.addCategory("Block being tesselated");
+@@ -116,32 +_,39 @@
          return this.blockModelShaper.getBlockModel(p_110911_);
      }
  
@@ -78,8 +92,11 @@
 +    public void renderSingleBlock(BlockState p_110913_, PoseStack p_110914_, MultiBufferSource p_110915_, int p_110916_, int p_110917_, net.neoforged.neoforge.client.model.data.ModelData modelData, net.minecraft.client.renderer.RenderType renderType) {
          RenderShape rendershape = p_110913_.getRenderShape();
          if (rendershape != RenderShape.INVISIBLE) {
-             switch (rendershape) {
-@@ -117,22 +_,25 @@
+-            switch(rendershape) {
++            switch (rendershape) {
+                 case MODEL:
+                     BakedModel bakedmodel = this.getBlockModel(p_110913_);
+                     int i = this.blockColors.getColor(p_110913_, null, null, 0);
                      float f = (float)(i >> 16 & 0xFF) / 255.0F;
                      float f1 = (float)(i >> 8 & 0xFF) / 255.0F;
                      float f2 = (float)(i & 0xFF) / 255.0F;
@@ -109,7 +126,7 @@
              }
          }
      }
-@@ -140,5 +_,9 @@
+@@ -149,5 +_,9 @@
      @Override
      public void onResourceManagerReload(ResourceManager p_110909_) {
          this.liquidBlockRenderer.setupSprites();

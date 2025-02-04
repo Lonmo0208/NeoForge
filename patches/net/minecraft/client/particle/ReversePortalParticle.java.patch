@@ -1,10 +1,41 @@
 --- a/net/minecraft/client/particle/ReversePortalParticle.java
 +++ b/net/minecraft/client/particle/ReversePortalParticle.java
-@@ -31,6 +_,7 @@
-             this.x = this.x + this.xd * (double)f;
-             this.y = this.y + this.yd * (double)f;
-             this.z = this.z + this.zd * (double)f;
+@@ -28,24 +_,19 @@
+             this.remove();
+         } else {
+             float f = (float)this.age / (float)this.lifetime;
+-            this.x += this.xd * (double)f;
+-            this.y += this.yd * (double)f;
+-            this.z += this.zd * (double)f;
++            this.x = this.x + this.xd * (double)f;
++            this.y = this.y + this.yd * (double)f;
++            this.z = this.z + this.zd * (double)f;
 +            this.setPos(this.x, this.y, this.z); // Neo: update the particle's bounding box
          }
      }
  
+     @OnlyIn(Dist.CLIENT)
+     public static class ReversePortalProvider implements ParticleProvider<SimpleParticleType> {
+         private final SpriteSet sprite;
+-        private final float rCol;
+-        private final float gCol;
+-        private final float bCol;
+ 
+-        public ReversePortalProvider(SpriteSet p_107611_, float p_341572_, float p_340314_, float p_340359_) {
++        public ReversePortalProvider(SpriteSet p_107611_) {
+             this.sprite = p_107611_;
+-            this.rCol = p_341572_;
+-            this.gCol = p_340314_;
+-            this.bCol = p_340359_;
+         }
+ 
+         public Particle createParticle(
+@@ -59,8 +_,6 @@
+             double p_107629_
+         ) {
+             ReversePortalParticle reverseportalparticle = new ReversePortalParticle(p_107623_, p_107624_, p_107625_, p_107626_, p_107627_, p_107628_, p_107629_);
+-            float f = p_107623_.random.nextFloat() * 0.6F + 0.4F;
+-            reverseportalparticle.setColor(this.rCol * f, this.gCol * f, this.bCol * f);
+             reverseportalparticle.pickSprite(this.sprite);
+             return reverseportalparticle;
+         }

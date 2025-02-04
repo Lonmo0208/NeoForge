@@ -1,10 +1,35 @@
 --- a/net/minecraft/world/level/block/TurtleEggBlock.java
 +++ b/net/minecraft/world/level/block/TurtleEggBlock.java
-@@ -171,7 +_,7 @@
+@@ -101,7 +_,7 @@
+                 p_222645_.removeBlock(p_222646_, false);
+                 p_222645_.gameEvent(GameEvent.BLOCK_DESTROY, p_222646_, GameEvent.Context.of(p_222644_));
+ 
+-                for(int j = 0; j < p_222644_.getValue(EGGS); ++j) {
++                for (int j = 0; j < p_222644_.getValue(EGGS); j++) {
+                     p_222645_.levelEvent(2001, p_222646_, Block.getId(p_222644_));
+                     Turtle turtle = EntityType.TURTLE.create(p_222645_);
+                     if (turtle != null) {
+@@ -132,11 +_,7 @@
+ 
+     private boolean shouldUpdateHatchLevel(Level p_57766_) {
+         float f = p_57766_.getTimeOfDay(1.0F);
+-        if ((double)f < 0.69 && (double)f > 0.65) {
+-            return true;
+-        } else {
+-            return p_57766_.random.nextInt(500) == 0;
+-        }
++        return (double)f < 0.69 && (double)f > 0.65 ? true : p_57766_.random.nextInt(500) == 0;
+     }
+ 
+     @Override
+@@ -174,10 +_,8 @@
+     private boolean canDestroyEgg(Level p_57768_, Entity p_57769_) {
          if (p_57769_ instanceof Turtle || p_57769_ instanceof Bat) {
              return false;
+-        } else if (!(p_57769_ instanceof LivingEntity)) {
+-            return false;
          } else {
--            return !(p_57769_ instanceof LivingEntity) ? false : p_57769_ instanceof Player || p_57768_.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+-            return p_57769_ instanceof Player || p_57768_.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
 +            return !(p_57769_ instanceof LivingEntity) ? false : p_57769_ instanceof Player || net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(p_57768_, p_57769_);
          }
      }

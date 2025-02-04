@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/entity/ai/behavior/HarvestFarmland.java
 +++ b/net/minecraft/world/entity/ai/behavior/HarvestFarmland.java
-@@ -47,7 +_,7 @@
+@@ -16,7 +_,6 @@
+ import net.minecraft.world.entity.npc.Villager;
+ import net.minecraft.world.entity.npc.VillagerProfession;
+ import net.minecraft.world.item.BlockItem;
+-import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.GameRules;
+ import net.minecraft.world.level.block.Block;
+@@ -48,7 +_,7 @@
      }
  
      protected boolean checkExtraStartConditions(ServerLevel p_23174_, Villager p_23175_) {
@@ -9,15 +17,50 @@
              return false;
          } else if (p_23175_.getVillagerData().getProfession() != VillagerProfession.FARMER) {
              return false;
-@@ -120,6 +_,11 @@
-                             p_23196_.setBlockAndUpdate(this.aboveFarmlandPos, blockstate1);
-                             p_23196_.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(p_23197_, blockstate1));
-                             flag = true;
+@@ -56,9 +_,9 @@
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = p_23175_.blockPosition().mutable();
+             this.validFarmlandAroundVillager.clear();
+ 
+-            for(int i = -1; i <= 1; ++i) {
+-                for(int j = -1; j <= 1; ++j) {
+-                    for(int k = -1; k <= 1; ++k) {
++            for (int i = -1; i <= 1; i++) {
++                for (int j = -1; j <= 1; j++) {
++                    for (int k = -1; k <= 1; k++) {
+                         blockpos$mutableblockpos.set(p_23175_.getX() + (double)i, p_23175_.getY() + (double)j, p_23175_.getZ() + (double)k);
+                         if (this.validPos(blockpos$mutableblockpos, p_23174_)) {
+                             this.validFarmlandAroundVillager.add(new BlockPos(blockpos$mutableblockpos));
+@@ -113,15 +_,17 @@
+                 if (blockstate.isAir() && block1 instanceof FarmBlock && p_23197_.hasFarmSeeds()) {
+                     SimpleContainer simplecontainer = p_23197_.getInventory();
+ 
+-                    for(int i = 0; i < simplecontainer.getContainerSize(); ++i) {
++                    for (int i = 0; i < simplecontainer.getContainerSize(); i++) {
+                         ItemStack itemstack = simplecontainer.getItem(i);
+                         boolean flag = false;
+-                        if (!itemstack.isEmpty() && itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
+-                            Item $$11 = itemstack.getItem();
+-                            if ($$11 instanceof BlockItem blockitem) {
+-                                BlockState blockstate1 = blockitem.getBlock().defaultBlockState();
+-                                p_23196_.setBlockAndUpdate(this.aboveFarmlandPos, blockstate1);
+-                                p_23196_.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(p_23197_, blockstate1));
++                        if (!itemstack.isEmpty() && itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS) && itemstack.getItem() instanceof BlockItem blockitem) {
++                            BlockState blockstate1 = blockitem.getBlock().defaultBlockState();
++                            p_23196_.setBlockAndUpdate(this.aboveFarmlandPos, blockstate1);
++                            p_23196_.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(p_23197_, blockstate1));
++                            flag = true;
 +                        } else if (itemstack.getItem() instanceof net.neoforged.neoforge.common.IPlantable) {
 +                            if (((net.neoforged.neoforge.common.IPlantable)itemstack.getItem()).getPlantType(p_23196_, aboveFarmlandPos) == net.neoforged.neoforge.common.PlantType.CROP) {
 +                                p_23196_.setBlock(aboveFarmlandPos, ((net.neoforged.neoforge.common.IPlantable)itemstack.getItem()).getPlant(p_23196_, aboveFarmlandPos), 3);
-+                                flag = true;
-+                            }
+                                 flag = true;
+                             }
                          }
+@@ -157,7 +_,7 @@
+                 }
+             }
  
-                         if (flag) {
+-            ++this.timeWorkedSoFar;
++            this.timeWorkedSoFar++;
+         }
+     }
+ 

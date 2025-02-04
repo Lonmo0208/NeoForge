@@ -34,7 +34,13 @@
          if (blockhitresult.getType() == HitResult.Type.MISS) {
              return InteractionResultHolder.pass(itemstack);
          } else if (blockhitresult.getType() != HitResult.Type.BLOCK) {
-@@ -58,7 +_,7 @@
+@@ -54,12 +_,11 @@
+                 return InteractionResultHolder.fail(itemstack);
+             } else if (this.content == Fluids.EMPTY) {
+                 BlockState blockstate1 = p_40703_.getBlockState(blockpos);
+-                Block $$10 = blockstate1.getBlock();
+-                if ($$10 instanceof BucketPickup bucketpickup) {
++                if (blockstate1.getBlock() instanceof BucketPickup bucketpickup) {
                      ItemStack itemstack2 = bucketpickup.pickupBlock(p_40704_, p_40703_, blockpos, blockstate1);
                      if (!itemstack2.isEmpty()) {
                          p_40704_.awardStat(Stats.ITEM_USED.get(this));
@@ -43,7 +49,7 @@
                          p_40703_.gameEvent(p_40704_, GameEvent.FLUID_PICKUP, blockpos);
                          ItemStack itemstack1 = ItemUtils.createFilledResult(itemstack, p_40704_, itemstack2);
                          if (!p_40703_.isClientSide) {
-@@ -72,8 +_,8 @@
+@@ -73,8 +_,8 @@
                  return InteractionResultHolder.fail(itemstack);
              } else {
                  BlockState blockstate = p_40703_.getBlockState(blockpos);
@@ -54,19 +60,32 @@
                      this.checkExtraContent(p_40704_, p_40703_, itemstack, blockpos2);
                      if (p_40704_ instanceof ServerPlayer) {
                          CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)p_40704_, blockpos2, itemstack);
-@@ -97,7 +_,11 @@
+@@ -98,18 +_,19 @@
      }
  
      @Override
 +    @Deprecated // Neo: use the ItemStack sensitive version
      public boolean emptyContents(@Nullable Player p_150716_, Level p_150717_, BlockPos p_150718_, @Nullable BlockHitResult p_150719_) {
+-        Fluid $$6 = this.content;
+-        if (!($$6 instanceof FlowingFluid)) {
 +        return this.emptyContents(p_150716_, p_150717_, p_150718_, p_150719_, null);
 +    }
 +    public boolean emptyContents(@Nullable Player p_150716_, Level p_150717_, BlockPos p_150718_, @Nullable BlockHitResult p_150719_, @Nullable ItemStack container) {
-         if (!(this.content instanceof FlowingFluid flowingfluid)) {
++        if (!(this.content instanceof FlowingFluid flowingfluid)) {
              return false;
          } else {
-@@ -124,8 +_,12 @@
+-            FlowingFluid flowingfluid;
+             Block $$7;
+             boolean $$8;
+-            boolean flag2;
+             BlockState blockstate;
++            boolean flag2;
+             label82: {
+-                flowingfluid = (FlowingFluid)$$6;
+                 blockstate = p_150717_.getBlockState(p_150718_);
+                 $$7 = blockstate.getBlock();
+                 $$8 = blockstate.canBeReplaced(this.content);
+@@ -128,8 +_,12 @@
              }
  
              boolean flag1 = flag2;
@@ -80,7 +99,16 @@
              } else if (p_150717_.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
                  int l = p_150718_.getX();
                  int i = p_150718_.getY();
-@@ -147,7 +_,7 @@
+@@ -143,7 +_,7 @@
+                     2.6F + (p_150717_.random.nextFloat() - p_150717_.random.nextFloat()) * 0.8F
+                 );
+ 
+-                for(int k = 0; k < 8; ++k) {
++                for (int k = 0; k < 8; k++) {
+                     p_150717_.addParticle(
+                         ParticleTypes.LARGE_SMOKE, (double)l + Math.random(), (double)i + Math.random(), (double)j + Math.random(), 0.0, 0.0, 0.0
+                     );
+@@ -151,7 +_,7 @@
  
                  return true;
              } else {
@@ -89,7 +117,7 @@
                      liquidblockcontainer1.placeLiquid(p_150717_, p_150718_, blockstate, flowingfluid.getSource(false));
                      this.playEmptySound(p_150716_, p_150717_, p_150718_);
                      return true;
-@@ -168,8 +_,17 @@
+@@ -172,8 +_,17 @@
      }
  
      protected void playEmptySound(@Nullable Player p_40696_, LevelAccessor p_40697_, BlockPos p_40698_) {

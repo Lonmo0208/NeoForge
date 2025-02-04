@@ -1,5 +1,14 @@
 --- a/net/minecraft/client/renderer/texture/TextureAtlas.java
 +++ b/net/minecraft/client/renderer/texture/TextureAtlas.java
+@@ -65,7 +_,7 @@
+             List<SpriteContents> list = new ArrayList<>();
+             List<TextureAtlasSprite.Ticker> list1 = new ArrayList<>();
+ 
+-            for(TextureAtlasSprite textureatlassprite : p_250662_.regions().values()) {
++            for (TextureAtlasSprite textureatlassprite : p_250662_.regions().values()) {
+                 list.add(textureatlassprite.contents());
+ 
+                 try {
 @@ -87,6 +_,8 @@
              this.sprites = List.copyOf(list);
              this.animatedTextures = List.copyOf(list1);
@@ -9,6 +18,24 @@
      }
  
      @Override
+@@ -100,7 +_,7 @@
+         Path path = p_261769_.resolve(p_262102_ + ".txt");
+ 
+         try (Writer writer = Files.newBufferedWriter(path)) {
+-            for(Entry<ResourceLocation, TextureAtlasSprite> entry : p_261722_.entrySet().stream().sorted(Entry.comparingByKey()).toList()) {
++            for (Entry<ResourceLocation, TextureAtlasSprite> entry : p_261722_.entrySet().stream().sorted(Entry.comparingByKey()).toList()) {
+                 TextureAtlasSprite textureatlassprite = entry.getValue();
+                 writer.write(
+                     String.format(
+@@ -122,7 +_,7 @@
+     public void cycleAnimationFrames() {
+         this.bind();
+ 
+-        for(TextureAtlasSprite.Ticker textureatlassprite$ticker : this.animatedTextures) {
++        for (TextureAtlasSprite.Ticker textureatlassprite$ticker : this.animatedTextures) {
+             textureatlassprite$ticker.tickAndUpload();
+         }
+     }
 @@ -172,5 +_,9 @@
  
      public void updateFilter(SpriteLoader.Preparations p_251993_) {

@@ -1,11 +1,65 @@
 --- a/net/minecraft/client/multiplayer/AccountProfileKeyPairManager.java
 +++ b/net/minecraft/client/multiplayer/AccountProfileKeyPairManager.java
-@@ -76,6 +_,8 @@
+@@ -40,16 +_,12 @@
+     private static final Path PROFILE_KEY_PAIR_DIR = Path.of("profilekeys");
+     private final UserApiService userApiService;
+     private final Path profileKeyPairPath;
+-    private CompletableFuture<Optional<ProfileKeyPair>> keyPair;
++    private CompletableFuture<Optional<ProfileKeyPair>> keyPair = CompletableFuture.completedFuture(Optional.empty());
+     private Instant nextProfileKeyRefreshTime = Instant.EPOCH;
+ 
+     public AccountProfileKeyPairManager(UserApiService p_253640_, UUID p_254415_, Path p_253813_) {
+         this.userApiService = p_253640_;
+         this.profileKeyPairPath = p_253813_.resolve(PROFILE_KEY_PAIR_DIR).resolve(p_254415_ + ".json");
+-        this.keyPair = CompletableFuture.<Optional<ProfileKeyPair>>supplyAsync(
+-                () -> this.readProfileKeyPair().filter(p_254127_ -> !p_254127_.publicKey().data().hasExpired()), Util.backgroundExecutor()
+-            )
+-            .thenCompose(this::readOrFetchProfileKeyPair);
+     }
+ 
+     @Override
+@@ -78,14 +_,16 @@
+                 try {
+                     ProfileKeyPair profilekeypair = this.fetchProfileKeyPair(this.userApiService);
                      this.writeProfileKeyPair(profilekeypair);
-                     return Optional.ofNullable(profilekeypair);
+-                    return Optional.of(profilekeypair);
++                    return Optional.ofNullable(profilekeypair);
                  } catch (CryptException | MinecraftClientException | IOException ioexception) {
 +                    // Forge: The offline user api service always returns a null profile key pair, so let's hide this useless exception if in dev
 +                    if (net.neoforged.fml.loading.FMLLoader.isProduction() || this.userApiService != UserApiService.OFFLINE)
                      LOGGER.error("Failed to retrieve profile key pair", (Throwable)ioexception);
                      this.writeProfileKeyPair(null);
                      return p_254074_;
+                 }
+             }
+-        }, Util.backgroundExecutor());
++        }, Util.nonCriticalIoPool());
+     }
+ 
+     private Optional<ProfileKeyPair> readProfileKeyPair() {
+@@ -115,7 +_,7 @@
+ 
+         if (p_254227_ != null) {
+             if (SharedConstants.IS_RUNNING_IN_IDE) {
+-                ProfileKeyPair.CODEC.encodeStart(JsonOps.INSTANCE, p_254227_).result().ifPresent(p_254406_ -> {
++                ProfileKeyPair.CODEC.encodeStart(JsonOps.INSTANCE, p_254227_).ifSuccess(p_254406_ -> {
+                     try {
+                         Files.createDirectories(this.profileKeyPairPath.getParent());
+                         Files.writeString(this.profileKeyPairPath, p_254406_.toString());
+@@ -127,6 +_,7 @@
+         }
+     }
+ 
++    @Nullable
+     private ProfileKeyPair fetchProfileKeyPair(UserApiService p_253844_) throws CryptException, IOException {
+         KeyPairResponse keypairresponse = p_253844_.getKeyPair();
+         if (keypairresponse != null) {
+@@ -137,7 +_,7 @@
+                 Instant.parse(keypairresponse.refreshedAfter())
+             );
+         } else {
+-            throw new IOException("Could not retrieve profile key pair");
++            return null;
+         }
+     }
+ 

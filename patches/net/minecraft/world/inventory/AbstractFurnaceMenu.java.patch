@@ -1,5 +1,22 @@
 --- a/net/minecraft/world/inventory/AbstractFurnaceMenu.java
 +++ b/net/minecraft/world/inventory/AbstractFurnaceMenu.java
+@@ -57,13 +_,13 @@
+         this.addSlot(new FurnaceFuelSlot(this, p_38971_, 1, 56, 53));
+         this.addSlot(new FurnaceResultSlot(p_38970_.player, p_38971_, 2, 116, 35));
+ 
+-        for(int i = 0; i < 3; ++i) {
+-            for(int j = 0; j < 9; ++j) {
++        for (int i = 0; i < 3; i++) {
++            for (int j = 0; j < 9; j++) {
+                 this.addSlot(new Slot(p_38970_, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+             }
+         }
+ 
+-        for(int k = 0; k < 9; ++k) {
++        for (int k = 0; k < 9; k++) {
+             this.addSlot(new Slot(p_38970_, k, 8 + k * 18, 142));
+         }
+ 
 @@ -167,7 +_,7 @@
      }
  

@@ -1,6 +1,57 @@
 --- a/net/minecraft/world/entity/animal/Wolf.java
 +++ b/net/minecraft/world/entity/animal/Wolf.java
-@@ -421,10 +_,11 @@
+@@ -91,8 +_,8 @@
+     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
+     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
+     private static final EntityDataAccessor<Holder<WolfVariant>> DATA_VARIANT_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.WOLF_VARIANT);
+-    public static final Predicate<LivingEntity> PREY_SELECTOR = p_340121_ -> {
+-        EntityType<?> entitytype = p_340121_.getType();
++    public static final Predicate<LivingEntity> PREY_SELECTOR = p_337838_ -> {
++        EntityType<?> entitytype = p_337838_.getType();
+         return entitytype == EntityType.SHEEP || entitytype == EntityType.RABBIT || entitytype == EntityType.FOX;
+     };
+     private static final float START_HEALTH = 8.0F;
+@@ -187,7 +_,7 @@
+         super.readAdditionalSaveData(p_30402_);
+         Optional.ofNullable(ResourceLocation.tryParse(p_30402_.getString("variant")))
+             .map(p_332608_ -> ResourceKey.create(Registries.WOLF_VARIANT, p_332608_))
+-            .flatMap(p_340120_ -> this.registryAccess().registryOrThrow(Registries.WOLF_VARIANT).getHolder(p_340120_))
++            .flatMap(p_337839_ -> this.registryAccess().registryOrThrow(Registries.WOLF_VARIANT).getHolder((ResourceKey<WolfVariant>)p_337839_))
+             .ifPresent(this::setVariant);
+         if (p_30402_.contains("CollarColor", 99)) {
+             this.setCollarColor(DyeColor.byId(p_30402_.getInt("CollarColor")));
+@@ -259,9 +_,9 @@
+         if (this.isAlive()) {
+             this.interestedAngleO = this.interestedAngle;
+             if (this.isInterested()) {
+-                this.interestedAngle += (1.0F - this.interestedAngle) * 0.4F;
++                this.interestedAngle = this.interestedAngle + (1.0F - this.interestedAngle) * 0.4F;
+             } else {
+-                this.interestedAngle += (0.0F - this.interestedAngle) * 0.4F;
++                this.interestedAngle = this.interestedAngle + (0.0F - this.interestedAngle) * 0.4F;
+             }
+ 
+             if (this.isInWaterRainOrBubble()) {
+@@ -290,7 +_,7 @@
+                     int i = (int)(Mth.sin((this.shakeAnim - 0.4F) * (float) Math.PI) * 7.0F);
+                     Vec3 vec3 = this.getDeltaMovement();
+ 
+-                    for(int j = 0; j < i; ++j) {
++                    for (int j = 0; j < i; j++) {
+                         float f1 = (this.random.nextFloat() * 2.0F - 1.0F) * this.getBbWidth() * 0.5F;
+                         float f2 = (this.random.nextFloat() * 2.0F - 1.0F) * this.getBbWidth() * 0.5F;
+                         this.level()
+@@ -368,8 +_,7 @@
+             itemstack.hurtAndBreak(Mth.ceil(p_330695_), this, EquipmentSlot.BODY);
+             if (Crackiness.WOLF_ARMOR.byDamage(i, j) != Crackiness.WOLF_ARMOR.byDamage(this.getBodyArmorItem())) {
+                 this.playSound(SoundEvents.WOLF_ARMOR_CRACK);
+-                Level level = this.level();
+-                if (level instanceof ServerLevel serverlevel) {
++                if (this.level() instanceof ServerLevel serverlevel) {
+                     serverlevel.sendParticles(
+                         new ItemParticleOption(ParticleTypes.ITEM, Items.ARMADILLO_SCUTE.getDefaultInstance()),
+                         this.getX(),
+@@ -422,10 +_,11 @@
          if (!this.level().isClientSide || this.isBaby() && this.isFood(itemstack)) {
              if (this.isTame()) {
                  if (this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
@@ -14,7 +65,7 @@
                      return InteractionResult.sidedSuccess(this.level().isClientSide());
                  } else {
                      if (item instanceof DyeItem dyeitem && this.isOwnedBy(p_30412_)) {
-@@ -490,7 +_,7 @@
+@@ -491,7 +_,7 @@
      }
  
      private void tryToTame(Player p_333736_) {
@@ -23,3 +74,38 @@
              this.tame(p_333736_);
              this.navigation.stop();
              this.setTarget(null);
+@@ -609,17 +_,12 @@
+             return false;
+         } else if (!this.isTame()) {
+             return false;
+-        } else if (!(p_30392_ instanceof Wolf)) {
++        } else if (!(p_30392_ instanceof Wolf wolf)) {
++            return false;
++        } else if (!wolf.isTame()) {
+             return false;
+         } else {
+-            Wolf wolf = (Wolf)p_30392_;
+-            if (!wolf.isTame()) {
+-                return false;
+-            } else if (wolf.isInSittingPose()) {
+-                return false;
+-            } else {
+-                return this.isInLove() && wolf.isInLove();
+-            }
++            return wolf.isInSittingPose() ? false : this.isInLove() && wolf.isInLove();
+         }
+     }
+ 
+@@ -676,11 +_,7 @@
+ 
+         @Override
+         public boolean canUse() {
+-            if (super.canUse() && this.toAvoid instanceof Llama) {
+-                return !this.wolf.isTame() && this.avoidLlama((Llama)this.toAvoid);
+-            } else {
+-                return false;
+-            }
++            return super.canUse() && this.toAvoid instanceof Llama ? !this.wolf.isTame() && this.avoidLlama((Llama)this.toAvoid) : false;
+         }
+ 
+         private boolean avoidLlama(Llama p_30461_) {

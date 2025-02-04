@@ -8,6 +8,24 @@
      private static final Map<VillagerProfession, ResourceKey<LootTable>> GIFTS = Util.make(Maps.newHashMap(), p_23020_ -> {
          p_23020_.put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT);
          p_23020_.put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT);
+@@ -71,7 +_,7 @@
+         if (!this.isHeroVisible(p_23004_)) {
+             return false;
+         } else if (this.timeUntilNextGift > 0) {
+-            --this.timeUntilNextGift;
++            this.timeUntilNextGift--;
+             return false;
+         } else {
+             return true;
+@@ -111,7 +_,7 @@
+     }
+ 
+     private void throwGift(Villager p_23012_, LivingEntity p_23013_) {
+-        for(ItemStack itemstack : this.getItemToThrow(p_23012_)) {
++        for (ItemStack itemstack : this.getItemToThrow(p_23012_)) {
+             BehaviorUtils.throwItem(p_23012_, itemstack, p_23013_.position());
+         }
+     }
 @@ -121,8 +_,12 @@
              return ImmutableList.of(new ItemStack(Items.POPPY));
          } else {

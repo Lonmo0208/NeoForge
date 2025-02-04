@@ -1,6 +1,22 @@
 --- a/net/minecraft/util/datafix/fixes/MobEffectIdFix.java
 +++ b/net/minecraft/util/datafix/fixes/MobEffectIdFix.java
-@@ -76,8 +_,20 @@
+@@ -17,7 +_,6 @@
+ import java.util.function.Function;
+ import java.util.stream.Stream;
+ import net.minecraft.Util;
+-import net.minecraft.util.datafix.ExtraDataFixUtils;
+ import net.minecraft.util.datafix.schemas.NamespacedSchema;
+ 
+ public class MobEffectIdFix extends DataFix {
+@@ -70,22 +_,34 @@
+ 
+     private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> p_298948_, String p_299234_, Dynamic<T> p_298832_, String p_298487_) {
+         Optional<Dynamic<T>> optional = getAndConvertMobEffectId(p_298948_, p_299234_);
+-        return ExtraDataFixUtils.replaceField(p_298832_, p_299234_, p_298487_, optional);
++        return p_298832_.replaceField(p_299234_, p_298487_, optional);
+     }
+ 
+     private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> p_299001_, String p_298420_, String p_299179_) {
          return updateMobEffectIdField(p_299001_, p_298420_, p_299001_, p_299179_);
      }
  
@@ -18,16 +34,46 @@
 +
      private static <T> Dynamic<T> updateMobEffectInstance(Dynamic<T> p_298320_) {
 -        p_298320_ = updateMobEffectIdField(p_298320_, "Id", "id");
+-        p_298320_ = ExtraDataFixUtils.renameField(p_298320_, "Ambient", "ambient");
+-        p_298320_ = ExtraDataFixUtils.renameField(p_298320_, "Amplifier", "amplifier");
+-        p_298320_ = ExtraDataFixUtils.renameField(p_298320_, "Duration", "duration");
+-        p_298320_ = ExtraDataFixUtils.renameField(p_298320_, "ShowParticles", "show_particles");
+-        p_298320_ = ExtraDataFixUtils.renameField(p_298320_, "ShowIcon", "show_icon");
 +        p_298320_ = updateMobEffectIdFieldConsideringForge(p_298320_, "Id", p_298320_, "id", "forge:id");
-         p_298320_ = p_298320_.renameField("Ambient", "ambient");
-         p_298320_ = p_298320_.renameField("Amplifier", "amplifier");
-         p_298320_ = p_298320_.renameField("Duration", "duration");
-@@ -96,7 +_,7 @@
++        p_298320_ = p_298320_.renameField("Ambient", "ambient");
++        p_298320_ = p_298320_.renameField("Amplifier", "amplifier");
++        p_298320_ = p_298320_.renameField("Duration", "duration");
++        p_298320_ = p_298320_.renameField("ShowParticles", "show_particles");
++        p_298320_ = p_298320_.renameField("ShowIcon", "show_icon");
+         Optional<Dynamic<T>> optional = p_298320_.get("HiddenEffect").result().map(MobEffectIdFix::updateMobEffectInstance);
+-        return ExtraDataFixUtils.replaceField(p_298320_, "HiddenEffect", "hidden_effect", optional);
++        return p_298320_.replaceField("HiddenEffect", "hidden_effect", optional);
+     }
+ 
+     private static <T> Dynamic<T> updateMobEffectInstanceList(Dynamic<T> p_299048_, String p_298254_, String p_298643_) {
+@@ -93,13 +_,13 @@
+             .asStreamOpt()
+             .result()
+             .map(p_298291_ -> p_299048_.createList(p_298291_.map(MobEffectIdFix::updateMobEffectInstance)));
+-        return ExtraDataFixUtils.replaceField(p_299048_, p_298254_, p_298643_, optional);
++        return p_299048_.replaceField(p_298254_, p_298643_, optional);
      }
  
      private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> p_298902_, Dynamic<T> p_299113_) {
 -        p_299113_ = updateMobEffectIdField(p_298902_, "EffectId", p_299113_, "id");
 +        p_299113_ = updateMobEffectIdFieldConsideringForge(p_298902_, "EffectId", p_299113_, "id", "forge:effect_id");
          Optional<Dynamic<T>> optional = p_298902_.get("EffectDuration").result();
-         return p_299113_.replaceField("EffectDuration", "duration", optional);
+-        return ExtraDataFixUtils.replaceField(p_299113_, "EffectDuration", "duration", optional);
++        return p_299113_.replaceField("EffectDuration", "duration", optional);
      }
+ 
+     private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> p_298873_) {
+@@ -166,7 +_,7 @@
+             .asStreamOpt()
+             .result()
+             .map(p_299036_ -> p_298546_.createList(p_299036_.map(MobEffectIdFix::updateSuspiciousStewEntry)));
+-        return ExtraDataFixUtils.replaceField(p_298546_, "Effects", "effects", optional);
++        return p_298546_.replaceField("Effects", "effects", optional);
+     }
+ 
+     private TypeRewriteRule itemStackFixer() {

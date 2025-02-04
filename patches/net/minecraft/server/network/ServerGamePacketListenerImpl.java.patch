@@ -1,6 +1,158 @@
 --- a/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-@@ -438,9 +_,11 @@
+@@ -14,6 +_,7 @@
+ import java.net.SocketAddress;
+ import java.util.Collections;
+ import java.util.EnumSet;
++import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Objects;
+@@ -33,6 +_,7 @@
+ import net.minecraft.commands.CommandSigningContext;
+ import net.minecraft.commands.CommandSourceStack;
+ import net.minecraft.commands.Commands;
++import net.minecraft.commands.arguments.ArgumentSignatures;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.core.component.DataComponents;
+@@ -75,6 +_,7 @@
+ import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
+ import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
+ import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
++import net.minecraft.network.protocol.game.ServerboundChatCommandSignedPacket;
+ import net.minecraft.network.protocol.game.ServerboundChatPacket;
+ import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
+ import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
+@@ -124,14 +_,13 @@
+ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
+-import net.minecraft.stats.Stats;
+ import net.minecraft.util.FutureChain;
+ import net.minecraft.util.Mth;
+ import net.minecraft.util.SignatureValidator;
+ import net.minecraft.util.StringUtil;
+-import net.minecraft.world.Container;
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.InteractionResult;
++import net.minecraft.world.effect.MobEffects;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.ExperienceOrb;
+ import net.minecraft.world.entity.HasCustomInventoryScreen;
+@@ -146,7 +_,6 @@
+ import net.minecraft.world.entity.player.ProfilePublicKey;
+ import net.minecraft.world.entity.projectile.AbstractArrow;
+ import net.minecraft.world.entity.vehicle.Boat;
+-import net.minecraft.world.inventory.AbstractContainerMenu;
+ import net.minecraft.world.inventory.AnvilMenu;
+ import net.minecraft.world.inventory.BeaconMenu;
+ import net.minecraft.world.inventory.CrafterMenu;
+@@ -182,7 +_,6 @@
+ import net.minecraft.world.phys.shapes.BooleanOp;
+ import net.minecraft.world.phys.shapes.Shapes;
+ import net.minecraft.world.phys.shapes.VoxelShape;
+-import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+ 
+ public class ServerGamePacketListenerImpl
+@@ -195,6 +_,7 @@
+     private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
+     private static final int MAXIMUM_FLYING_TICKS = 80;
+     private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
++    private static final Component INVALID_COMMAND_SIGNATURE = Component.translatable("chat.disabled.invalid_command_signature").withStyle(ChatFormatting.RED);
+     private static final int MAX_COMMAND_SUGGESTIONS = 1000;
+     public ServerPlayer player;
+     public final PlayerChunkSender chunkSender;
+@@ -233,6 +_,7 @@
+     private final MessageSignatureCache messageSignatureCache = MessageSignatureCache.createDefault();
+     private final FutureChain chatMessageChain;
+     private boolean waitingForSwitchToConfig;
++    private net.neoforged.neoforge.network.connection.ConnectionType connectionType;
+ 
+     public ServerGamePacketListenerImpl(MinecraftServer p_9770_, Connection p_9771_, ServerPlayer p_9772_, CommonListenerCookie p_301978_) {
+         super(p_9770_, p_9771_, p_301978_);
+@@ -242,6 +_,7 @@
+         p_9772_.getTextFilter().join();
+         this.signedMessageDecoder = SignedMessageChain.Decoder.unsigned(p_9772_.getUUID(), p_9770_::enforceSecureProfile);
+         this.chatMessageChain = new FutureChain(p_9770_);
++        this.connectionType = p_301978_.connectionType();
+     }
+ 
+     @Override
+@@ -257,7 +_,7 @@
+         this.player.zo = this.player.getZ();
+         this.player.doTick();
+         this.player.absMoveTo(this.firstGoodX, this.firstGoodY, this.firstGoodZ, this.player.getYRot(), this.player.getXRot());
+-        ++this.tickCount;
++        this.tickCount++;
+         this.knownMovePacketCount = this.receivedMovePacketCount;
+         if (this.clientIsFloating && !this.player.isSleeping() && !this.player.isPassenger() && !this.player.isDeadOrDying()) {
+             if (++this.aboveGroundTickCount > this.getMaximumFlyingTicks(this.player)) {
+@@ -296,11 +_,11 @@
+ 
+         this.keepConnectionAlive();
+         if (this.chatSpamTickCount > 0) {
+-            --this.chatSpamTickCount;
++            this.chatSpamTickCount--;
+         }
+ 
+         if (this.dropSpamTickCount > 0) {
+-            --this.dropSpamTickCount;
++            this.dropSpamTickCount--;
+         }
+ 
+         if (this.player.getLastActionTime() > 0L
+@@ -336,11 +_,9 @@
+ 
+     @Override
+     public boolean shouldHandleMessage(Packet<?> p_295183_) {
+-        if (super.shouldHandleMessage(p_295183_)) {
+-            return true;
+-        } else {
+-            return this.waitingForSwitchToConfig && this.connection.isConnected() && p_295183_ instanceof ServerboundConfigurationAcknowledgedPacket;
+-        }
++        return super.shouldHandleMessage(p_295183_)
++            ? true
++            : this.waitingForSwitchToConfig && this.connection.isConnected() && p_295183_ instanceof ServerboundConfigurationAcknowledgedPacket;
+     }
+ 
+     @Override
+@@ -354,7 +_,7 @@
+                 LOGGER.debug("Ignoring packet due to disconnection");
+                 throw new CancellationException("disconnected");
+             } else {
+-                return p_264862_;
++                return (R)p_264862_;
+             }
+         });
+     }
+@@ -407,7 +_,7 @@
+                 double d8 = d5 - this.vehicleFirstGoodZ;
+                 double d9 = entity.getDeltaMovement().lengthSqr();
+                 double d10 = d6 * d6 + d7 * d7 + d8 * d8;
+-                if (d10 - d9 > 100.0 && !this.isSingleplayerOwner() && !entity.isAttachedToGrid()) {
++                if (d10 - d9 > 100.0 && !this.isSingleplayerOwner()) {
+                     LOGGER.warn("{} (vehicle of {}) moved too quickly! {},{},{}", entity.getName().getString(), this.player.getName().getString(), d6, d7, d8);
+                     this.send(new ClientboundMoveVehiclePacket(entity));
+                     return;
+@@ -422,13 +_,8 @@
+                     livingentity.resetFallDistance();
+                 }
+ 
+-                try {
+-                    entity.ignoreGridCollision = true;
+-                    entity.move(MoverType.PLAYER, new Vec3(d6, d7, d8));
+-                } finally {
+-                    entity.ignoreGridCollision = false;
+-                }
+-
++                entity.move(MoverType.PLAYER, new Vec3(d6, d7, d8));
++                double d11 = d7;
+                 d6 = d3 - entity.getX();
+                 d7 = d4 - entity.getY();
+                 if (d7 > -0.5 || d7 < 0.5) {
+@@ -444,16 +_,22 @@
                  }
  
                  entity.absMoveTo(d3, d4, d5, f, f1);
@@ -12,7 +164,19 @@
                      this.send(new ClientboundMoveVehiclePacket(entity));
                      return;
                  }
-@@ -459,6 +_,23 @@
+ 
+                 this.player.serverLevel().getChunkSource().move(this.player);
+                 this.player.checkMovementStatistics(this.player.getX() - d0, this.player.getY() - d1, this.player.getZ() - d2);
+-                this.clientVehicleIsFloating = awesomeAntiCheatIsFlying();
++                this.clientVehicleIsFloating = d11 >= -0.03125
++                    && !flag1
++                    && !this.server.isFlightAllowed()
++                    && !entity.isNoGravity()
++                    && this.noBlocksAround(entity);
+                 this.vehicleLastGoodX = entity.getX();
+                 this.vehicleLastGoodY = entity.getY();
+                 this.vehicleLastGoodZ = entity.getZ();
+@@ -461,6 +_,23 @@
          }
      }
  
@@ -36,16 +200,165 @@
      private boolean noBlocksAround(Entity p_9794_) {
          return p_9794_.level()
              .getBlockStates(p_9794_.getBoundingBox().inflate(0.0625).expandTowards(0.0, -0.55, 0.0))
-@@ -936,7 +_,7 @@
-                                     && !flag1
-                                     && this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR
-                                     && !this.server.isFlightAllowed()
--                                    && !this.player.getAbilities().mayfly
+@@ -566,7 +_,7 @@
+                 BlockState blockstate = this.player.level().getBlockState(blockpos);
+                 Direction direction = blockstate.getValue(CommandBlock.FACING);
+ 
+-                BlockState blockstate1 = (switch(p_9911_.getMode()) {
++                BlockState blockstate1 = (switch (p_9911_.getMode()) {
+                     case SEQUENCE -> Blocks.CHAIN_COMMAND_BLOCK.defaultBlockState();
+                     case AUTO -> Blocks.REPEATING_COMMAND_BLOCK.defaultBlockState();
+                     default -> Blocks.COMMAND_BLOCK.defaultBlockState();
+@@ -636,8 +_,7 @@
+     @Override
+     public void handleRenameItem(ServerboundRenameItemPacket p_9899_) {
+         PacketUtils.ensureRunningOnSameThread(p_9899_, this, this.player.serverLevel());
+-        AbstractContainerMenu abstractcontainermenu = this.player.containerMenu;
+-        if (abstractcontainermenu instanceof AnvilMenu anvilmenu) {
++        if (this.player.containerMenu instanceof AnvilMenu anvilmenu) {
+             if (!anvilmenu.stillValid(this.player)) {
+                 LOGGER.debug("Player {} interacted with invalid menu {}", this.player, anvilmenu);
+                 return;
+@@ -650,8 +_,7 @@
+     @Override
+     public void handleSetBeaconPacket(ServerboundSetBeaconPacket p_9907_) {
+         PacketUtils.ensureRunningOnSameThread(p_9907_, this, this.player.serverLevel());
+-        AbstractContainerMenu abstractcontainermenu = this.player.containerMenu;
+-        if (abstractcontainermenu instanceof BeaconMenu beaconmenu) {
++        if (this.player.containerMenu instanceof BeaconMenu beaconmenu) {
+             if (!this.player.containerMenu.stillValid(this.player)) {
+                 LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
+                 return;
+@@ -667,8 +_,7 @@
+         if (this.player.canUseGameMasterBlocks()) {
+             BlockPos blockpos = p_9919_.getPos();
+             BlockState blockstate = this.player.level().getBlockState(blockpos);
+-            BlockEntity blockentity = this.player.level().getBlockEntity(blockpos);
+-            if (blockentity instanceof StructureBlockEntity structureblockentity) {
++            if (this.player.level().getBlockEntity(blockpos) instanceof StructureBlockEntity structureblockentity) {
+                 structureblockentity.setMode(p_9919_.getMode());
+                 structureblockentity.setStructureName(p_9919_.getName());
+                 structureblockentity.setStructurePos(p_9919_.getOffset());
+@@ -720,8 +_,7 @@
+         if (this.player.canUseGameMasterBlocks()) {
+             BlockPos blockpos = p_9917_.getPos();
+             BlockState blockstate = this.player.level().getBlockState(blockpos);
+-            BlockEntity blockentity = this.player.level().getBlockEntity(blockpos);
+-            if (blockentity instanceof JigsawBlockEntity jigsawblockentity) {
++            if (this.player.level().getBlockEntity(blockpos) instanceof JigsawBlockEntity jigsawblockentity) {
+                 jigsawblockentity.setName(p_9917_.getName());
+                 jigsawblockentity.setTarget(p_9917_.getTarget());
+                 jigsawblockentity.setPool(ResourceKey.create(Registries.TEMPLATE_POOL, p_9917_.getPool()));
+@@ -740,8 +_,7 @@
+         PacketUtils.ensureRunningOnSameThread(p_9868_, this, this.player.serverLevel());
+         if (this.player.canUseGameMasterBlocks()) {
+             BlockPos blockpos = p_9868_.getPos();
+-            BlockEntity blockentity = this.player.level().getBlockEntity(blockpos);
+-            if (blockentity instanceof JigsawBlockEntity jigsawblockentity) {
++            if (this.player.level().getBlockEntity(blockpos) instanceof JigsawBlockEntity jigsawblockentity) {
+                 jigsawblockentity.generate(this.player.serverLevel(), p_9868_.levels(), p_9868_.keepJigsaws());
+             }
+         }
+@@ -751,8 +_,7 @@
+     public void handleSelectTrade(ServerboundSelectTradePacket p_9905_) {
+         PacketUtils.ensureRunningOnSameThread(p_9905_, this, this.player.serverLevel());
+         int i = p_9905_.getItem();
+-        AbstractContainerMenu abstractcontainermenu = this.player.containerMenu;
+-        if (abstractcontainermenu instanceof MerchantMenu merchantmenu) {
++        if (this.player.containerMenu instanceof MerchantMenu merchantmenu) {
+             if (!merchantmenu.stillValid(this.player)) {
+                 LOGGER.debug("Player {} interacted with invalid menu {}", this.player, merchantmenu);
+                 return;
+@@ -820,12 +_,8 @@
+     public void handleContainerSlotStateChanged(ServerboundContainerSlotStateChangedPacket p_307480_) {
+         PacketUtils.ensureRunningOnSameThread(p_307480_, this, this.player.serverLevel());
+         if (!this.player.isSpectator() && p_307480_.containerId() == this.player.containerMenu.containerId) {
+-            AbstractContainerMenu abstractcontainermenu = this.player.containerMenu;
+-            if (abstractcontainermenu instanceof CrafterMenu craftermenu) {
+-                Container container = craftermenu.getContainer();
+-                if (container instanceof CrafterBlockEntity crafterblockentity) {
+-                    crafterblockentity.setSlotState(p_307480_.slotId(), p_307480_.newState());
+-                }
++            if (this.player.containerMenu instanceof CrafterMenu craftermenu && craftermenu.getContainer() instanceof CrafterBlockEntity crafterblockentity) {
++                crafterblockentity.setSlotState(p_307480_.slotId(), p_307480_.newState());
+             }
+         }
+     }
+@@ -889,7 +_,7 @@
+                         } else {
+                             boolean flag = this.player.isFallFlying();
+                             if (serverlevel.tickRateManager().runsNormally()) {
+-                                ++this.receivedMovePacketCount;
++                                this.receivedMovePacketCount++;
+                                 int i = this.receivedMovePacketCount - this.knownMovePacketCount;
+                                 if (i > 5) {
+                                     LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", this.player.getName().getString(), i);
+@@ -897,8 +_,6 @@
+                                 }
+ 
+                                 if (!this.player.isChangingDimension()
+-                                    && !this.player.isAttachedToGrid()
+-                                    && this.player.grappling == null
+                                     && (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !flag)) {
+                                     float f2 = flag ? 300.0F : 100.0F;
+                                     if (d10 - d9 > (double)(f2 * (float)i) && !this.isSingleplayerOwner()) {
+@@ -919,14 +_,7 @@
+                             }
+ 
+                             boolean flag1 = this.player.verticalCollisionBelow;
+-
+-                            try {
+-                                this.player.ignoreGridCollision = true;
+-                                this.player.move(MoverType.PLAYER, new Vec3(d6, d7, d8));
+-                            } finally {
+-                                this.player.ignoreGridCollision = false;
+-                            }
+-
++                            this.player.move(MoverType.PLAYER, new Vec3(d6, d7, d8));
+                             d6 = d0 - this.player.getX();
+                             d7 = d1 - this.player.getY();
+                             if (d7 > -0.5 || d7 < 0.5) {
+@@ -951,7 +_,15 @@
+                                     && !this.isPlayerCollidingWithAnythingNew(serverlevel, aabb, d0, d1, d2)) {
+                                 this.player.absMoveTo(d0, d1, d2, f, f1);
+                                 boolean flag3 = this.player.isAutoSpinAttack();
+-                                this.clientIsFloating = awesomeAntiCheatIsFlying();
++                                this.clientIsFloating = d7 >= -0.03125
++                                    && !flag1
++                                    && this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR
++                                    && !this.server.isFlightAllowed()
 +                                    && !this.player.mayFly()
-                                     && !this.player.hasEffect(MobEffects.LEVITATION)
-                                     && !flag
-                                     && !flag3
-@@ -1019,8 +_,10 @@
++                                    && !this.player.hasEffect(MobEffects.LEVITATION)
++                                    && !flag
++                                    && !flag3
++                                    && this.noBlocksAround(this.player);
+                                 this.player.serverLevel().getChunkSource().move(this.player);
+                                 this.player.doCheckFallDamage(this.player.getX() - d3, this.player.getY() - d4, this.player.getZ() - d5, p_9874_.isOnGround());
+                                 this.player
+@@ -983,16 +_,12 @@
+         }
+     }
+ 
+-    private static boolean awesomeAntiCheatIsFlying() {
+-        return false;
+-    }
+-
+     private boolean isPlayerCollidingWithAnythingNew(LevelReader p_289008_, AABB p_288986_, double p_288990_, double p_288991_, double p_288967_) {
+         AABB aabb = this.player.getBoundingBox().move(p_288990_ - this.player.getX(), p_288991_ - this.player.getY(), p_288967_ - this.player.getZ());
+         Iterable<VoxelShape> iterable = p_289008_.getCollisions(this.player, aabb.deflate(1.0E-5F));
+         VoxelShape voxelshape = Shapes.create(p_288986_.deflate(1.0E-5F));
+ 
+-        for(VoxelShape voxelshape1 : iterable) {
++        for (VoxelShape voxelshape1 : iterable) {
+             if (!Shapes.joinIsNotEmpty(voxelshape1, voxelshape, BooleanOp.AND)) {
+                 return true;
+             }
+@@ -1030,12 +_,14 @@
+         BlockPos blockpos = p_9889_.getPos();
+         this.player.resetLastActionTime();
+         ServerboundPlayerActionPacket.Action serverboundplayeractionpacket$action = p_9889_.getAction();
+-        switch(serverboundplayeractionpacket$action) {
++        switch (serverboundplayeractionpacket$action) {
              case SWAP_ITEM_WITH_OFFHAND:
                  if (!this.player.isSpectator()) {
                      ItemStack itemstack = this.player.getItemInHand(InteractionHand.OFF_HAND);
@@ -58,7 +371,7 @@
                      this.player.stopUsingItem();
                  }
  
-@@ -1048,7 +_,7 @@
+@@ -1063,7 +_,7 @@
                      .handleBlockBreakAction(
                          blockpos, serverboundplayeractionpacket$action, p_9889_.getDirection(), this.player.level().getMaxBuildHeight(), p_9889_.getSequence()
                      );
@@ -67,7 +380,7 @@
                  return;
              default:
                  throw new IllegalArgumentException("Invalid player action");
-@@ -1067,7 +_,7 @@
+@@ -1082,7 +_,7 @@
      @Override
      public void handleUseItemOn(ServerboundUseItemOnPacket p_9930_) {
          PacketUtils.ensureRunningOnSameThread(p_9930_, this, this.player.serverLevel());
@@ -76,19 +389,302 @@
          ServerLevel serverlevel = this.player.serverLevel();
          InteractionHand interactionhand = p_9930_.getHand();
          ItemStack itemstack = this.player.getItemInHand(interactionhand);
-@@ -1213,8 +_,9 @@
-                 }
+@@ -1155,7 +_,7 @@
+     public void handleTeleportToEntityPacket(ServerboundTeleportToEntityPacket p_9928_) {
+         PacketUtils.ensureRunningOnSameThread(p_9928_, this, this.player.serverLevel());
+         if (this.player.isSpectator()) {
+-            for(ServerLevel serverlevel : this.server.getAllLevels()) {
++            for (ServerLevel serverlevel : this.server.getAllLevels()) {
+                 Entity entity = p_9928_.getEntity(serverlevel);
+                 if (entity != null) {
+                     this.player.teleportTo(serverlevel, entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
+@@ -1168,8 +_,7 @@
+     @Override
+     public void handlePaddleBoat(ServerboundPaddleBoatPacket p_9878_) {
+         PacketUtils.ensureRunningOnSameThread(p_9878_, this, this.player.serverLevel());
+-        Entity entity = this.player.getControlledVehicle();
+-        if (entity instanceof Boat boat) {
++        if (this.player.getControlledVehicle() instanceof Boat boat) {
+             boat.setPaddleState(p_9878_.getLeft(), p_9878_.getRight());
+         }
+     }
+@@ -1217,58 +_,65 @@
  
-                 CompletableFuture<FilteredText> completablefuture = this.filterTextPacket(playerchatmessage.signedContent());
--                Component component = this.server.getChatDecorator().decorate(this.player, playerchatmessage.decoratedContent());
+     @Override
+     public void handleChat(ServerboundChatPacket p_9841_) {
+-        if (isChatMessageIllegal(p_9841_.message())) {
+-            this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
+-        } else {
+-            Optional<LastSeenMessages> optional = this.tryHandleChat(p_9841_.lastSeenMessages());
+-            if (optional.isPresent()) {
+-                this.server.execute(() -> {
+-                    int i = StringUtils.countMatches(p_9841_.message(), "potato");
+-                    if (i > 0) {
+-                        this.player.awardStat(Stats.SAID_POTATO, i);
+-                        CriteriaTriggers.SAID_POTATO.trigger(this.player);
+-                    }
+-
+-                    PlayerChatMessage playerchatmessage;
+-                    try {
+-                        playerchatmessage = this.getSignedMessage(p_9841_, optional.get());
+-                    } catch (SignedMessageChain.DecodeException signedmessagechain$decodeexception) {
+-                        this.handleMessageDecodeFailure(signedmessagechain$decodeexception);
+-                        return;
+-                    }
+-
+-                    CompletableFuture<FilteredText> completablefuture = this.filterTextPacket(playerchatmessage.signedContent());
+-                    Component component = this.server.getChatDecorator().decorate(this.player, playerchatmessage.decoratedContent());
+-                    this.chatMessageChain.append(completablefuture, p_300785_ -> {
+-                        PlayerChatMessage playerchatmessage1 = playerchatmessage.withUnsignedContent(component).filter(p_300785_.mask());
+-                        this.broadcastChatMessage(playerchatmessage1);
+-                    });
++        Optional<LastSeenMessages> optional = this.unpackAndApplyLastSeen(p_9841_.lastSeenMessages());
++        if (!optional.isEmpty()) {
++            this.tryHandleChat(p_9841_.message(), () -> {
++                PlayerChatMessage playerchatmessage;
++                try {
++                    playerchatmessage = this.getSignedMessage(p_9841_, optional.get());
++                } catch (SignedMessageChain.DecodeException signedmessagechain$decodeexception) {
++                    this.handleMessageDecodeFailure(signedmessagechain$decodeexception);
++                    return;
++                }
++
++                CompletableFuture<FilteredText> completablefuture = this.filterTextPacket(playerchatmessage.signedContent());
 +                Component component = net.neoforged.neoforge.common.CommonHooks.getServerChatSubmittedDecorator().decorate(this.player, playerchatmessage.decoratedContent());
-                 this.chatMessageChain.append(completablefuture, p_300785_ -> {
++                this.chatMessageChain.append(completablefuture, p_300785_ -> {
 +                    if (component == null) return; // Forge: ServerChatEvent was canceled if this is null.
-                     PlayerChatMessage playerchatmessage1 = playerchatmessage.withUnsignedContent(component).filter(p_300785_.mask());
-                     this.broadcastChatMessage(playerchatmessage1);
++                    PlayerChatMessage playerchatmessage1 = playerchatmessage.withUnsignedContent(component).filter(p_300785_.mask());
++                    this.broadcastChatMessage(playerchatmessage1);
                  });
-@@ -1541,7 +_,11 @@
+-            }
++            });
+         }
+     }
  
+     @Override
+     public void handleChatCommand(ServerboundChatCommandPacket p_215225_) {
+-        if (isChatMessageIllegal(p_215225_.command())) {
+-            this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
++        this.tryHandleChat(p_215225_.command(), () -> {
++            this.performUnsignedChatCommand(p_215225_.command());
++            this.detectRateSpam();
++        });
++    }
++
++    private void performUnsignedChatCommand(String p_338482_) {
++        ParseResults<CommandSourceStack> parseresults = this.parseCommand(p_338482_);
++        if (this.server.enforceSecureProfile() && SignableCommand.hasSignableArguments(parseresults)) {
++            LOGGER.error(
++                "Received unsigned command packet from {}, but the command requires signable arguments: {}", this.player.getGameProfile().getName(), p_338482_
++            );
++            this.player.sendSystemMessage(INVALID_COMMAND_SIGNATURE);
+         } else {
+-            Optional<LastSeenMessages> optional = this.tryHandleChat(p_215225_.lastSeenMessages());
+-            if (optional.isPresent()) {
+-                this.server.execute(() -> {
+-                    this.performChatCommand(p_215225_, optional.get());
+-                    this.detectRateSpam();
+-                });
+-            }
+-        }
+-    }
+-
+-    private void performChatCommand(ServerboundChatCommandPacket p_251139_, LastSeenMessages p_250484_) {
+-        ParseResults<CommandSourceStack> parseresults = this.parseCommand(p_251139_.command());
++            this.server.getCommands().performCommand(parseresults, p_338482_);
++        }
++    }
++
++    @Override
++    public void handleSignedChatCommand(ServerboundChatCommandSignedPacket p_338604_) {
++        Optional<LastSeenMessages> optional = this.unpackAndApplyLastSeen(p_338604_.lastSeenMessages());
++        if (!optional.isEmpty()) {
++            this.tryHandleChat(p_338604_.command(), () -> {
++                this.performSignedChatCommand(p_338604_, optional.get());
++                this.detectRateSpam();
++            });
++        }
++    }
++
++    private void performSignedChatCommand(ServerboundChatCommandSignedPacket p_338593_, LastSeenMessages p_250484_) {
++        ParseResults<CommandSourceStack> parseresults = this.parseCommand(p_338593_.command());
+ 
+         Map<String, PlayerChatMessage> map;
+         try {
+-            map = this.collectSignedArguments(p_251139_, SignableCommand.of(parseresults), p_250484_);
++            map = this.collectSignedArguments(p_338593_, SignableCommand.of(parseresults), p_250484_);
+         } catch (SignedMessageChain.DecodeException signedmessagechain$decodeexception) {
+             this.handleMessageDecodeFailure(signedmessagechain$decodeexception);
+             return;
+@@ -1276,50 +_,83 @@
+ 
+         CommandSigningContext commandsigningcontext = new CommandSigningContext.SignedArguments(map);
+         parseresults = Commands.mapSource(parseresults, p_301740_ -> p_301740_.withSigningContext(commandsigningcontext, this.chatMessageChain));
+-        this.server.getCommands().performCommand(parseresults, p_251139_.command());
++        this.server.getCommands().performCommand(parseresults, p_338593_.command());
+     }
+ 
+     private void handleMessageDecodeFailure(SignedMessageChain.DecodeException p_252068_) {
+         LOGGER.warn("Failed to update secure chat state for {}: '{}'", this.player.getGameProfile().getName(), p_252068_.getComponent().getString());
+-        if (p_252068_.shouldDisconnect()) {
+-            this.disconnect(p_252068_.getComponent());
+-        } else {
+-            this.player.sendSystemMessage(p_252068_.getComponent().copy().withStyle(ChatFormatting.RED));
+-        }
++        this.player.sendSystemMessage(p_252068_.getComponent().copy().withStyle(ChatFormatting.RED));
+     }
+ 
+-    private Map<String, PlayerChatMessage> collectSignedArguments(
+-        ServerboundChatCommandPacket p_249441_, SignableCommand<?> p_250039_, LastSeenMessages p_249207_
++    private <S> Map<String, PlayerChatMessage> collectSignedArguments(
++        ServerboundChatCommandSignedPacket p_338222_, SignableCommand<S> p_250039_, LastSeenMessages p_249207_
+     ) throws SignedMessageChain.DecodeException {
+-        Map<String, PlayerChatMessage> map = new Object2ObjectOpenHashMap<>();
+-
+-        for(SignableCommand.Argument<?> argument : p_250039_.arguments()) {
+-            MessageSignature messagesignature = p_249441_.argumentSignatures().get(argument.name());
+-            SignedMessageBody signedmessagebody = new SignedMessageBody(argument.value(), p_249441_.timeStamp(), p_249441_.salt(), p_249207_);
+-            map.put(argument.name(), this.signedMessageDecoder.unpack(messagesignature, signedmessagebody));
++        List<ArgumentSignatures.Entry> list = p_338222_.argumentSignatures().entries();
++        List<SignableCommand.Argument<S>> list1 = p_250039_.arguments();
++        if (list.isEmpty()) {
++            return this.collectUnsignedArguments(list1);
++        } else {
++            Map<String, PlayerChatMessage> map = new Object2ObjectOpenHashMap<>();
++
++            for (ArgumentSignatures.Entry argumentsignatures$entry : list) {
++                SignableCommand.Argument<S> argument = p_250039_.getArgument(argumentsignatures$entry.name());
++                if (argument == null) {
++                    this.signedMessageDecoder.setChainBroken();
++                    throw createSignedArgumentMismatchException(p_338222_.command(), list, list1);
++                }
++
++                SignedMessageBody signedmessagebody = new SignedMessageBody(argument.value(), p_338222_.timeStamp(), p_338222_.salt(), p_249207_);
++                map.put(argument.name(), this.signedMessageDecoder.unpack(argumentsignatures$entry.signature(), signedmessagebody));
++            }
++
++            for (SignableCommand.Argument<S> argument1 : list1) {
++                if (!map.containsKey(argument1.name())) {
++                    throw createSignedArgumentMismatchException(p_338222_.command(), list, list1);
++                }
++            }
++
++            return map;
++        }
++    }
++
++    private <S> Map<String, PlayerChatMessage> collectUnsignedArguments(List<SignableCommand.Argument<S>> p_338744_) throws SignedMessageChain.DecodeException {
++        Map<String, PlayerChatMessage> map = new HashMap<>();
++
++        for (SignableCommand.Argument<S> argument : p_338744_) {
++            SignedMessageBody signedmessagebody = SignedMessageBody.unsigned(argument.value());
++            map.put(argument.name(), this.signedMessageDecoder.unpack(null, signedmessagebody));
+         }
+ 
+         return map;
+     }
+ 
++    private static <S> SignedMessageChain.DecodeException createSignedArgumentMismatchException(
++        String p_338499_, List<ArgumentSignatures.Entry> p_338388_, List<SignableCommand.Argument<S>> p_338708_
++    ) {
++        String s = p_338388_.stream().map(ArgumentSignatures.Entry::name).collect(Collectors.joining(", "));
++        String s1 = p_338708_.stream().map(SignableCommand.Argument::name).collect(Collectors.joining(", "));
++        LOGGER.error("Signed command mismatch between server and client ('{}'): got [{}] from client, but expected [{}]", p_338499_, s, s1);
++        return new SignedMessageChain.DecodeException(INVALID_COMMAND_SIGNATURE);
++    }
++
+     private ParseResults<CommandSourceStack> parseCommand(String p_242938_) {
+         CommandDispatcher<CommandSourceStack> commanddispatcher = this.server.getCommands().getDispatcher();
+         return commanddispatcher.parse(p_242938_, this.player.createCommandSourceStack());
+     }
+ 
+-    private Optional<LastSeenMessages> tryHandleChat(LastSeenMessages.Update p_249613_) {
+-        Optional<LastSeenMessages> optional = this.unpackAndApplyLastSeen(p_249613_);
+-        if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
++    private void tryHandleChat(String p_338775_, Runnable p_338235_) {
++        if (isChatMessageIllegal(p_338775_)) {
++            this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
++        } else if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
+             this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), false));
+-            return Optional.empty();
+         } else {
+             this.player.resetLastActionTime();
+-            return optional;
++            this.server.execute(p_338235_);
+         }
+     }
+ 
+     private Optional<LastSeenMessages> unpackAndApplyLastSeen(LastSeenMessages.Update p_249673_) {
+-        synchronized(this.lastSeenMessages) {
++        synchronized (this.lastSeenMessages) {
+             Optional<LastSeenMessages> optional = this.lastSeenMessages.applyUpdate(p_249673_);
+             if (optional.isEmpty()) {
+                 LOGGER.warn("Failed to validate message acknowledgements from {}", this.player.getName().getString());
+@@ -1331,7 +_,7 @@
+     }
+ 
+     private static boolean isChatMessageIllegal(String p_215215_) {
+-        for(int i = 0; i < p_215215_.length(); ++i) {
++        for (int i = 0; i < p_215215_.length(); i++) {
+             if (!StringUtil.isAllowedChatCharacter(p_215215_.charAt(i))) {
+                 return true;
+             }
+@@ -1359,7 +_,7 @@
+ 
+     @Override
+     public void handleChatAck(ServerboundChatAckPacket p_242387_) {
+-        synchronized(this.lastSeenMessages) {
++        synchronized (this.lastSeenMessages) {
+             if (!this.lastSeenMessages.applyOffset(p_242387_.offset())) {
+                 LOGGER.warn("Failed to validate message acknowledgements from {}", this.player.getName().getString());
+                 this.disconnect(CHAT_VALIDATION_FAILED);
+@@ -1378,7 +_,7 @@
+     public void handlePlayerCommand(ServerboundPlayerCommandPacket p_9891_) {
+         PacketUtils.ensureRunningOnSameThread(p_9891_, this, this.player.serverLevel());
+         this.player.resetLastActionTime();
+-        switch(p_9891_.getAction()) {
++        switch (p_9891_.getAction()) {
+             case PRESS_SHIFT_KEY:
+                 this.player.setShiftKeyDown(true);
+                 break;
+@@ -1398,8 +_,7 @@
+                 }
+                 break;
+             case START_RIDING_JUMP:
+-                Entity entity2 = this.player.getControlledVehicle();
+-                if (entity2 instanceof PlayerRideableJumping playerrideablejumping1) {
++                if (this.player.getControlledVehicle() instanceof PlayerRideableJumping playerrideablejumping1) {
+                     int i = p_9891_.getData();
+                     if (playerrideablejumping1.canJump() && i > 0) {
+                         playerrideablejumping1.handleStartJump(i);
+@@ -1407,14 +_,12 @@
+                 }
+                 break;
+             case STOP_RIDING_JUMP:
+-                Entity entity1 = this.player.getControlledVehicle();
+-                if (entity1 instanceof PlayerRideableJumping playerrideablejumping) {
++                if (this.player.getControlledVehicle() instanceof PlayerRideableJumping playerrideablejumping) {
+                     playerrideablejumping.handleStopJump();
+                 }
+                 break;
+             case OPEN_INVENTORY:
+-                Entity $$2 = this.player.getVehicle();
+-                if ($$2 instanceof HasCustomInventoryScreen hascustominventoryscreen) {
++                if (this.player.getVehicle() instanceof HasCustomInventoryScreen hascustominventoryscreen) {
+                     hascustominventoryscreen.openCustomInventoryScreen(this.player);
+                 }
+                 break;
+@@ -1433,7 +_,7 @@
+         if (messagesignature != null) {
+             this.messageSignatureCache.push(p_242439_.signedBody(), p_242439_.signature());
+             int i;
+-            synchronized(this.lastSeenMessages) {
++            synchronized (this.lastSeenMessages) {
+                 this.lastSeenMessages.addPending(messagesignature);
+                 i = this.lastSeenMessages.trackedMessagesCount();
+             }
+@@ -1516,7 +_,11 @@
+     
                          @Override
                          public void onInteraction(InteractionHand p_143682_, Vec3 p_143683_) {
 -                            this.performInteraction(p_143682_, (p_143686_, p_143687_, p_143688_) -> p_143687_.interactAt(p_143686_, p_143683_, p_143688_));
@@ -98,9 +694,73 @@
 +                                return p_143687_.interactAt(p_143686_, p_143683_, p_143688_);
 +                            });
                          }
- 
+     
                          @Override
-@@ -1733,7 +_,7 @@
+@@ -1546,7 +_,7 @@
+         PacketUtils.ensureRunningOnSameThread(p_9843_, this, this.player.serverLevel());
+         this.player.resetLastActionTime();
+         ServerboundClientCommandPacket.Action serverboundclientcommandpacket$action = p_9843_.getAction();
+-        switch(serverboundclientcommandpacket$action) {
++        switch (serverboundclientcommandpacket$action) {
+             case PERFORM_RESPAWN:
+                 if (this.player.wonGame) {
+                     this.player.wonGame = false;
+@@ -1564,10 +_,6 @@
+                     }
+                 }
+                 break;
+-            case SPROUT_RESPAWN:
+-                this.player = this.server.getPlayerList().sproutRespawn(this.player);
+-                CriteriaTriggers.CHANGED_DIMENSION.trigger(this.player, Level.POTATO, Level.OVERWORLD);
+-                break;
+             case REQUEST_STATS:
+                 this.player.getStats().sendStats(this.player);
+         }
+@@ -1599,7 +_,7 @@
+                     this.player.containerMenu.suppressRemoteUpdates();
+                     this.player.containerMenu.clicked(i, p_9856_.getButtonNum(), p_9856_.getClickType(), this.player);
+ 
+-                    for(Entry<ItemStack> entry : Int2ObjectMaps.fastIterable(p_9856_.getChangedSlots())) {
++                    for (Entry<ItemStack> entry : Int2ObjectMaps.fastIterable(p_9856_.getChangedSlots())) {
+                         this.player.containerMenu.setRemoteSlotNoCopy(entry.getIntKey(), entry.getValue());
+                     }
+ 
+@@ -1628,7 +_,10 @@
+                 this.server
+                     .getRecipeManager()
+                     .byKey(p_9882_.getRecipe())
+-                    .ifPresent(p_300787_ -> ((RecipeBookMenu)this.player.containerMenu).handlePlacement(p_9882_.isShiftDown(), p_300787_, this.player));
++                    .ifPresent(
++                        p_300787_ -> ((RecipeBookMenu)this.player.containerMenu)
++                                .handlePlacement(p_9882_.isShiftDown(), (RecipeHolder<?>)p_300787_, this.player)
++                    );
+             }
+         }
+     }
+@@ -1686,7 +_,7 @@
+     @Override
+     public void handleSignUpdate(ServerboundSignUpdatePacket p_9921_) {
+         List<String> list = Stream.of(p_9921_.getLines()).map(ChatFormatting::stripFormatting).collect(Collectors.toList());
+-        this.filterTextPacket(list).thenAcceptAsync(p_215245_ -> this.updateSignText(p_9921_, p_215245_), this.server);
++        this.filterTextPacket(list).thenAcceptAsync(p_215245_ -> this.updateSignText(p_9921_, (List<FilteredText>)p_215245_), this.server);
+     }
+ 
+     private void updateSignText(ServerboundSignUpdatePacket p_9923_, List<FilteredText> p_9924_) {
+@@ -1694,12 +_,10 @@
+         ServerLevel serverlevel = this.player.serverLevel();
+         BlockPos blockpos = p_9923_.getPos();
+         if (serverlevel.hasChunkAt(blockpos)) {
+-            BlockEntity blockentity = serverlevel.getBlockEntity(blockpos);
+-            if (!(blockentity instanceof SignBlockEntity)) {
++            if (!(serverlevel.getBlockEntity(blockpos) instanceof SignBlockEntity signblockentity)) {
+                 return;
+             }
+ 
+-            SignBlockEntity signblockentity = (SignBlockEntity)blockentity;
+             signblockentity.updateSignText(this.player, p_9923_.isFrontText(), p_9924_);
+         }
+     }
+@@ -1707,7 +_,7 @@
      @Override
      public void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket p_9887_) {
          PacketUtils.ensureRunningOnSameThread(p_9887_, this, this.player.serverLevel());
@@ -109,7 +769,7 @@
      }
  
      @Override
-@@ -1792,7 +_,7 @@
+@@ -1766,7 +_,7 @@
              this.connection
                  .setupInboundProtocol(
                      ConfigurationProtocols.SERVERBOUND,
@@ -118,11 +778,42 @@
                  );
          }
      }
-@@ -1827,6 +_,7 @@
- 
-     @Override
-     public void handleCustomPayload(ServerboundCustomPayloadPacket p_333887_) {
-+        super.handleCustomPayload(p_333887_); // Neo: Call super to invoke modded payload handling.
+@@ -1800,7 +_,27 @@
      }
  
      @Override
+-    public void handleCustomPayload(ServerboundCustomPayloadPacket p_333887_) {
++    public void handleCustomPayload(ServerboundCustomPayloadPacket p_294276_) {
++        if (p_294276_.payload() instanceof net.neoforged.neoforge.network.payload.MinecraftRegisterPayload minecraftRegisterPayload) {
++            this.connectionType = this.connectionType.withMinecraftRegisterPayload();
++            net.neoforged.neoforge.network.registration.NetworkRegistry.getInstance().onMinecraftRegister(this, minecraftRegisterPayload.newChannels());
++            return;
++        }
++
++        if (p_294276_.payload() instanceof net.neoforged.neoforge.network.payload.MinecraftUnregisterPayload minecraftUnregisterPayload) {
++            this.connectionType = this.connectionType.withMinecraftRegisterPayload();
++            net.neoforged.neoforge.network.registration.NetworkRegistry.getInstance().onMinecraftUnregister(this, minecraftUnregisterPayload.forgottenChannels());
++            return;
++        }
++
++        if (this.connectionType.isVanilla()) {
++            super.handleCustomPayload(p_294276_);
++            return;
++        }
++
++        net.neoforged.neoforge.network.registration.NetworkRegistry.getInstance().onModdedPacketAtServer(
++                this, p_294276_
++        );
+     }
+ 
+     @Override
+@@ -1811,5 +_,9 @@
+     @FunctionalInterface
+     interface EntityInteraction {
+         InteractionResult run(ServerPlayer p_143695_, Entity p_143696_, InteractionHand p_143697_);
++    }
++
++    public net.neoforged.neoforge.network.connection.ConnectionType getConnectionType() {
++        return connectionType;
+     }
+ }

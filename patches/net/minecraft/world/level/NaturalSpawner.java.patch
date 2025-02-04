@@ -8,7 +8,22 @@
  public final class NaturalSpawner {
      private static final Logger LOGGER = LogUtils.getLogger();
      private static final int MIN_SPAWN_DISTANCE = 24;
-@@ -69,7 +_,7 @@
+@@ -53,7 +_,7 @@
+     static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
+     private static final MobCategory[] SPAWNING_CATEGORIES = Stream.of(MobCategory.values())
+         .filter(p_47037_ -> p_47037_ != MobCategory.MISC)
+-        .toArray(p_46983_ -> new MobCategory[p_46983_]);
++        .toArray(MobCategory[]::new);
+ 
+     private NaturalSpawner() {
+     }
+@@ -64,18 +_,18 @@
+         PotentialCalculator potentialcalculator = new PotentialCalculator();
+         Object2IntOpenHashMap<MobCategory> object2intopenhashmap = new Object2IntOpenHashMap<>();
+ 
+-        for(Entity entity : p_186526_) {
++        for (Entity entity : p_186526_) {
+             if (entity instanceof Mob mob && (mob.isPersistenceRequired() || mob.requiresCustomPersistence())) {
                  continue;
              }
  
@@ -17,8 +32,58 @@
              if (mobcategory != MobCategory.MISC) {
                  BlockPos blockpos = entity.blockPosition();
                  p_186527_.query(
-@@ -199,7 +_,7 @@
-                                     l1++;
+                     ChunkPos.asLong(blockpos),
+-                    p_340216_ -> {
+-                        MobSpawnSettings.MobSpawnCost mobspawnsettings$mobspawncost = getRoughBiome(blockpos, p_340216_)
++                    p_275163_ -> {
++                        MobSpawnSettings.MobSpawnCost mobspawnsettings$mobspawncost = getRoughBiome(blockpos, p_275163_)
+                             .getMobSettings()
+                             .getMobSpawnCost(entity.getType());
+                         if (mobspawnsettings$mobspawncost != null) {
+@@ -83,7 +_,7 @@
+                         }
+     
+                         if (entity instanceof Mob) {
+-                            p_186528_.addMob(p_340216_.getPos(), mobcategory);
++                            p_186528_.addMob(p_275163_.getPos(), mobcategory);
+                         }
+     
+                         object2intopenhashmap.addTo(mobcategory, 1);
+@@ -104,7 +_,7 @@
+     ) {
+         p_47030_.getProfiler().push("spawner");
+ 
+-        for(MobCategory mobcategory : SPAWNING_CATEGORIES) {
++        for (MobCategory mobcategory : SPAWNING_CATEGORIES) {
+             if ((p_47033_ || !mobcategory.isFriendly())
+                 && (p_47034_ || mobcategory.isFriendly())
+                 && (p_47035_ || !mobcategory.isPersistent())
+@@ -149,7 +_,7 @@
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+             int j = 0;
+ 
+-            for(int k = 0; k < 3; ++k) {
++            for (int k = 0; k < 3; k++) {
+                 int l = p_47042_.getX();
+                 int i1 = p_47042_.getZ();
+                 int j1 = 6;
+@@ -158,7 +_,7 @@
+                 int k1 = Mth.ceil(p_47040_.random.nextFloat() * 4.0F);
+                 int l1 = 0;
+ 
+-                for(int i2 = 0; i2 < k1; ++i2) {
++                for (int i2 = 0; i2 < k1; i2++) {
+                     l += p_47040_.random.nextInt(6) - p_47040_.random.nextInt(6);
+                     i1 += p_47040_.random.nextInt(6) - p_47040_.random.nextInt(6);
+                     blockpos$mutableblockpos.set(l, i, i1);
+@@ -195,11 +_,11 @@
+                                     spawngroupdata = mob.finalizeSpawn(
+                                         p_47040_, p_47040_.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawngroupdata
+                                     );
+-                                    ++j;
+-                                    ++l1;
++                                    j++;
++                                    l1++;
                                      p_47040_.addFreshEntityWithPassengers(mob);
                                      p_47044_.run(mob, p_47041_);
 -                                    if (j >= mob.getMaxSpawnClusterSize()) {
@@ -26,16 +91,54 @@
                                          return;
                                      }
  
-@@ -272,7 +_,7 @@
-         return p_46994_ > (double)(p_46993_.getType().getCategory().getDespawnDistance() * p_46993_.getType().getCategory().getDespawnDistance())
-                 && p_46993_.removeWhenFarAway(p_46994_)
-             ? false
--            : p_46993_.checkSpawnRules(p_46992_, MobSpawnType.NATURAL) && p_46993_.checkSpawnObstruction(p_46992_);
+@@ -218,11 +_,11 @@
+     private static boolean isRightDistanceToPlayerAndSpawnPoint(ServerLevel p_47025_, ChunkAccess p_47026_, BlockPos.MutableBlockPos p_47027_, double p_47028_) {
+         if (p_47028_ <= 576.0) {
+             return false;
+-        } else if (p_47025_.getSharedSpawnPos()
+-            .closerToCenterThan(new Vec3((double)p_47027_.getX() + 0.5, (double)p_47027_.getY(), (double)p_47027_.getZ() + 0.5), 24.0)) {
+-            return false;
+         } else {
+-            return Objects.equals(new ChunkPos(p_47027_), p_47026_.getPos()) || p_47025_.isNaturalSpawningAllowed(p_47027_);
++            return p_47025_.getSharedSpawnPos()
++                    .closerToCenterThan(new Vec3((double)p_47027_.getX() + 0.5, (double)p_47027_.getY(), (double)p_47027_.getZ() + 0.5), 24.0)
++                ? false
++                : Objects.equals(new ChunkPos(p_47027_), p_47026_.getPos()) || p_47025_.isNaturalSpawningAllowed(p_47027_);
+         }
+     }
+ 
+@@ -245,10 +_,10 @@
+             return false;
+         } else if (!SpawnPlacements.isSpawnPositionOk(entitytype, p_220422_, p_220427_)) {
+             return false;
+-        } else if (!SpawnPlacements.checkSpawnRules(entitytype, p_220422_, MobSpawnType.NATURAL, p_220427_, p_220422_.random)) {
+-            return false;
+         } else {
+-            return p_220422_.noCollision(entitytype.getAABB((double)p_220427_.getX() + 0.5, (double)p_220427_.getY(), (double)p_220427_.getZ() + 0.5));
++            return !SpawnPlacements.checkSpawnRules(entitytype, p_220422_, MobSpawnType.NATURAL, p_220427_, p_220422_.random)
++                ? false
++                : p_220422_.noCollision(entitytype.getSpawnAABB((double)p_220427_.getX() + 0.5, (double)p_220427_.getY(), (double)p_220427_.getZ() + 0.5));
+         }
+     }
+ 
+@@ -269,12 +_,10 @@
+     }
+ 
+     private static boolean isValidPositionForMob(ServerLevel p_46992_, Mob p_46993_, double p_46994_) {
+-        if (p_46994_ > (double)(p_46993_.getType().getCategory().getDespawnDistance() * p_46993_.getType().getCategory().getDespawnDistance())
+-            && p_46993_.removeWhenFarAway(p_46994_)) {
+-            return false;
+-        } else {
+-            return p_46993_.checkSpawnRules(p_46992_, MobSpawnType.NATURAL) && p_46993_.checkSpawnObstruction(p_46992_);
+-        }
++        return p_46994_ > (double)(p_46993_.getType().getCategory().getDespawnDistance() * p_46993_.getType().getCategory().getDespawnDistance())
++                && p_46993_.removeWhenFarAway(p_46994_)
++            ? false
 +            : net.neoforged.neoforge.event.EventHooks.checkSpawnPosition(p_46993_, p_46992_, MobSpawnType.NATURAL);
      }
  
      private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
-@@ -303,9 +_,14 @@
+@@ -305,9 +_,14 @@
          BlockPos p_220448_,
          @Nullable Holder<Biome> p_220449_
      ) {
@@ -53,7 +156,49 @@
      }
  
      public static boolean isInNetherFortressBounds(BlockPos p_220456_, ServerLevel p_220457_, MobCategory p_220458_, StructureManager p_220459_) {
-@@ -392,8 +_,7 @@
+@@ -335,10 +_,8 @@
+             return false;
+         } else if (!p_47060_.isEmpty()) {
+             return false;
+-        } else if (p_47059_.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE)) {
+-            return false;
+         } else {
+-            return !p_47061_.isBlockDangerous(p_47059_);
++            return p_47059_.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ? false : !p_47061_.isBlockDangerous(p_47059_);
+         }
+     }
+ 
+@@ -349,7 +_,7 @@
+             int i = p_220453_.getMinBlockX();
+             int j = p_220453_.getMinBlockZ();
+ 
+-            while(p_220454_.nextFloat() < mobspawnsettings.getCreatureProbability()) {
++            while (p_220454_.nextFloat() < mobspawnsettings.getCreatureProbability()) {
+                 Optional<MobSpawnSettings.SpawnerData> optional = weightedrandomlist.getRandom(p_220454_);
+                 if (!optional.isEmpty()) {
+                     MobSpawnSettings.SpawnerData mobspawnsettings$spawnerdata = optional.get();
+@@ -361,17 +_,17 @@
+                     int j1 = l;
+                     int k1 = i1;
+ 
+-                    for(int l1 = 0; l1 < k; ++l1) {
++                    for (int l1 = 0; l1 < k; l1++) {
+                         boolean flag = false;
+ 
+-                        for(int i2 = 0; !flag && i2 < 4; ++i2) {
++                        for (int i2 = 0; !flag && i2 < 4; i2++) {
+                             BlockPos blockpos = getTopNonCollidingPos(p_220451_, mobspawnsettings$spawnerdata.type, l, i1);
+                             if (mobspawnsettings$spawnerdata.type.canSummon()
+                                 && SpawnPlacements.isSpawnPositionOk(mobspawnsettings$spawnerdata.type, p_220451_, blockpos)) {
+                                 float f = mobspawnsettings$spawnerdata.type.getWidth();
+                                 double d0 = Mth.clamp((double)l, (double)i + (double)f, (double)i + 16.0 - (double)f);
+                                 double d1 = Mth.clamp((double)i1, (double)j + (double)f, (double)j + 16.0 - (double)f);
+-                                if (!p_220451_.noCollision(mobspawnsettings$spawnerdata.type.getAABB(d0, (double)blockpos.getY(), d1))
++                                if (!p_220451_.noCollision(mobspawnsettings$spawnerdata.type.getSpawnAABB(d0, (double)blockpos.getY(), d1))
+                                     || !SpawnPlacements.checkSpawnRules(
+                                         mobspawnsettings$spawnerdata.type,
+                                         p_220451_,
+@@ -396,8 +_,7 @@
  
                                  entity.moveTo(d0, (double)blockpos.getY(), d1, p_220454_.nextFloat() * 360.0F, 0.0F);
                                  if (entity instanceof Mob mob
@@ -63,3 +208,39 @@
                                      spawngroupdata = mob.finalizeSpawn(
                                          p_220451_, p_220451_.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawngroupdata
                                      );
+@@ -408,7 +_,7 @@
+ 
+                             l += p_220454_.nextInt(5) - p_220454_.nextInt(5);
+ 
+-                            for(i1 += p_220454_.nextInt(5) - p_220454_.nextInt(5);
++                            for (i1 += p_220454_.nextInt(5) - p_220454_.nextInt(5);
+                                 l < i || l >= i + 16 || i1 < j || i1 >= j + 16;
+                                 i1 = k1 + p_220454_.nextInt(5) - p_220454_.nextInt(5)
+                             ) {
+@@ -427,11 +_,11 @@
+         if (p_47066_.dimensionType().hasCeiling()) {
+             do {
+                 blockpos$mutableblockpos.move(Direction.DOWN);
+-            } while(!p_47066_.getBlockState(blockpos$mutableblockpos).isAir());
++            } while (!p_47066_.getBlockState(blockpos$mutableblockpos).isAir());
+ 
+             do {
+                 blockpos$mutableblockpos.move(Direction.DOWN);
+-            } while(p_47066_.getBlockState(blockpos$mutableblockpos).isAir() && blockpos$mutableblockpos.getY() > p_47066_.getMinBuildHeight());
++            } while (p_47066_.getBlockState(blockpos$mutableblockpos).isAir() && blockpos$mutableblockpos.getY() > p_47066_.getMinBuildHeight());
+         }
+ 
+         return SpawnPlacements.getPlacementType(p_47067_).adjustSpawnPosition(p_47066_, blockpos$mutableblockpos.immutable());
+@@ -522,11 +_,7 @@
+ 
+         boolean canSpawnForCategory(MobCategory p_186549_, ChunkPos p_186550_) {
+             int i = p_186549_.getMaxInstancesPerChunk() * this.spawnableChunkCount / NaturalSpawner.MAGIC_NUMBER;
+-            if (this.mobCategoryCounts.getInt(p_186549_) >= i) {
+-                return false;
+-            } else {
+-                return this.localMobCapCalculator.canSpawn(p_186549_, p_186550_);
+-            }
++            return this.mobCategoryCounts.getInt(p_186549_) >= i ? false : this.localMobCapCalculator.canSpawn(p_186549_, p_186550_);
+         }
+     }
+ }

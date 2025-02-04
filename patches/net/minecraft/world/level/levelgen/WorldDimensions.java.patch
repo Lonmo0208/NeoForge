@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/level/levelgen/WorldDimensions.java
 +++ b/net/minecraft/world/level/levelgen/WorldDimensions.java
-@@ -36,7 +_,8 @@
+@@ -24,7 +_,6 @@
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.resources.ResourceKey;
+ import net.minecraft.world.level.Level;
+-import net.minecraft.world.level.biome.BiomeSource;
+ import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+ import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
+ import net.minecraft.world.level.biome.TheEndBiomeSource;
+@@ -37,11 +_,12 @@
  public record WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions) {
      public static final MapCodec<WorldDimensions> CODEC = RecordCodecBuilder.mapCodec(
          p_325905_ -> p_325905_.group(
@@ -10,3 +18,95 @@
                  )
                  .apply(p_325905_, p_325905_.stable(WorldDimensions::new))
      );
+-    private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = ImmutableSet.of(LevelStem.OVERWORLD, LevelStem.NETHER, LevelStem.END, LevelStem.POTATO);
++    private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = ImmutableSet.of(LevelStem.OVERWORLD, LevelStem.NETHER, LevelStem.END);
+     private static final int VANILLA_DIMENSION_COUNT = BUILTIN_ORDER.size();
+ 
+     public WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions) {
+@@ -127,10 +_,8 @@
+             return isStableOverworld(p_250034_);
+         } else if (p_250556_ == LevelStem.NETHER) {
+             return isStableNether(p_250034_);
+-        } else if (p_250556_ == LevelStem.END) {
+-            return isStableEnd(p_250034_);
+         } else {
+-            return p_250556_ == LevelStem.POTATO ? isStablePotato(p_250034_) : false;
++            return p_250556_ == LevelStem.END ? isStableEnd(p_250034_) : false;
+         }
+     }
+ 
+@@ -139,8 +_,7 @@
+         if (!holder.is(BuiltinDimensionTypes.OVERWORLD) && !holder.is(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
+             return false;
+         } else {
+-            BiomeSource biomesource = p_250762_.generator().getBiomeSource();
+-            if (biomesource instanceof MultiNoiseBiomeSource multinoisebiomesource
++            if (p_250762_.generator().getBiomeSource() instanceof MultiNoiseBiomeSource multinoisebiomesource
+                 && !multinoisebiomesource.stable(MultiNoiseBiomeSourceParameterLists.OVERWORLD)) {
+                 return false;
+             }
+@@ -150,46 +_,18 @@
+     }
+ 
+     private static boolean isStableNether(LevelStem p_250497_) {
+-        if (p_250497_.type().is(BuiltinDimensionTypes.NETHER)) {
+-            ChunkGenerator chunkgenerator = p_250497_.generator();
+-            if (chunkgenerator instanceof NoiseBasedChunkGenerator noisebasedchunkgenerator && noisebasedchunkgenerator.stable(NoiseGeneratorSettings.NETHER)) {
+-                BiomeSource biomesource = noisebasedchunkgenerator.getBiomeSource();
+-                if (biomesource instanceof MultiNoiseBiomeSource multinoisebiomesource
+-                    && multinoisebiomesource.stable(MultiNoiseBiomeSourceParameterLists.NETHER)) {
+-                    return true;
+-                }
+-            }
+-        }
+-
+-        return false;
++        return p_250497_.type().is(BuiltinDimensionTypes.NETHER)
++            && p_250497_.generator() instanceof NoiseBasedChunkGenerator noisebasedchunkgenerator
++            && noisebasedchunkgenerator.stable(NoiseGeneratorSettings.NETHER)
++            && noisebasedchunkgenerator.getBiomeSource() instanceof MultiNoiseBiomeSource multinoisebiomesource
++            && multinoisebiomesource.stable(MultiNoiseBiomeSourceParameterLists.NETHER);
+     }
+ 
+     private static boolean isStableEnd(LevelStem p_250720_) {
+-        if (p_250720_.type().is(BuiltinDimensionTypes.END)) {
+-            ChunkGenerator chunkgenerator = p_250720_.generator();
+-            if (chunkgenerator instanceof NoiseBasedChunkGenerator noisebasedchunkgenerator
+-                && noisebasedchunkgenerator.stable(NoiseGeneratorSettings.END)
+-                && noisebasedchunkgenerator.getBiomeSource() instanceof TheEndBiomeSource) {
+-                return true;
+-            }
+-        }
+-
+-        return false;
+-    }
+-
+-    private static boolean isStablePotato(LevelStem p_342255_) {
+-        if (p_342255_.type().is(BuiltinDimensionTypes.POTATO)) {
+-            ChunkGenerator chunkgenerator = p_342255_.generator();
+-            if (chunkgenerator instanceof NoiseBasedChunkGenerator noisebasedchunkgenerator && noisebasedchunkgenerator.stable(NoiseGeneratorSettings.POTATO)) {
+-                BiomeSource biomesource = noisebasedchunkgenerator.getBiomeSource();
+-                if (biomesource instanceof MultiNoiseBiomeSource multinoisebiomesource
+-                    && multinoisebiomesource.stable(MultiNoiseBiomeSourceParameterLists.POTATO)) {
+-                    return true;
+-                }
+-            }
+-        }
+-
+-        return false;
++        return p_250720_.type().is(BuiltinDimensionTypes.END)
++            && p_250720_.generator() instanceof NoiseBasedChunkGenerator noisebasedchunkgenerator
++            && noisebasedchunkgenerator.stable(NoiseGeneratorSettings.END)
++            && noisebasedchunkgenerator.getBiomeSource() instanceof TheEndBiomeSource;
+     }
+ 
+     public WorldDimensions.Complete bake(Registry<LevelStem> p_248787_) {
+@@ -204,7 +_,7 @@
+         List<Entry> list = new ArrayList<>();
+         keysInOrder(stream)
+             .forEach(
+-                p_248571_ -> p_248787_.getOptional(p_248571_)
++                p_248571_ -> p_248787_.getOptional((ResourceKey<LevelStem>)p_248571_)
+                         .or(() -> Optional.ofNullable(this.dimensions.get(p_248571_)))
+                         .ifPresent(p_250263_ -> list.add(new Entry(p_248571_, p_250263_)))
+             );

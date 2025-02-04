@@ -1,15 +1,49 @@
 --- a/net/minecraft/world/level/material/FlowingFluid.java
 +++ b/net/minecraft/world/level/material/FlowingFluid.java
-@@ -164,7 +_,7 @@
+@@ -56,7 +_,7 @@
+         double d1 = 0.0;
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             blockpos$mutableblockpos.setWithOffset(p_75988_, direction);
+             FluidState fluidstate = p_75987_.getFluidState(blockpos$mutableblockpos);
+             if (this.affectsFlow(fluidstate)) {
+@@ -86,7 +_,7 @@
+ 
+         Vec3 vec3 = new Vec3(d0, 0.0, d1);
+         if (p_75989_.getValue(FALLING)) {
+-            for(Direction direction1 : Direction.Plane.HORIZONTAL) {
++            for (Direction direction1 : Direction.Plane.HORIZONTAL) {
+                 blockpos$mutableblockpos.setWithOffset(p_75988_, direction1);
+                 if (this.isSolidFace(p_75987_, blockpos$mutableblockpos, direction1)
+                     || this.isSolidFace(p_75987_, blockpos$mutableblockpos.above(), direction1)) {
+@@ -143,7 +_,7 @@
+         if (i > 0) {
+             Map<Direction, FluidState> map = this.getSpread(p_256644_, p_76016_, p_76018_);
+ 
+-            for(Entry<Direction, FluidState> entry : map.entrySet()) {
++            for (Entry<Direction, FluidState> entry : map.entrySet()) {
+                 Direction direction = entry.getKey();
+                 FluidState fluidstate = entry.getValue();
+                 BlockPos blockpos = p_76016_.relative(direction);
+@@ -159,20 +_,20 @@
+         int i = 0;
+         int j = 0;
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             BlockPos blockpos = p_76037_.relative(direction);
              BlockState blockstate = p_256464_.getBlockState(blockpos);
              FluidState fluidstate = blockstate.getFluidState();
              if (fluidstate.getType().isSame(this) && this.canPassThroughWall(direction, p_256464_, p_76037_, p_76038_, blockpos, blockstate)) {
 -                if (fluidstate.isSource()) {
+-                    ++j;
 +                if (fluidstate.isSource() && net.neoforged.neoforge.event.EventHooks.canCreateFluidSource(p_256464_, blockpos, blockstate, fluidstate.canConvertToSource(p_256464_, blockpos))) {
-                     j++;
++                    j++;
                  }
  
-@@ -172,7 +_,7 @@
+                 i = Math.max(i, fluidstate.getAmount());
              }
          }
  
@@ -34,3 +68,56 @@
      protected abstract boolean canConvertToSource(Level p_256009_);
  
      protected void spreadTo(LevelAccessor p_76005_, BlockPos p_76006_, BlockState p_76007_, Direction p_76008_, FluidState p_76009_) {
+@@ -272,7 +_,7 @@
+     ) {
+         int i = 1000;
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             if (direction != p_76030_) {
+                 BlockPos blockpos = p_76028_.relative(direction);
+                 short short1 = getCacheKey(p_76032_, blockpos);
+@@ -337,11 +_,11 @@
+     private int sourceNeighborCount(LevelReader p_76020_, BlockPos p_76021_) {
+         int i = 0;
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             BlockPos blockpos = p_76021_.relative(direction);
+             FluidState fluidstate = p_76020_.getFluidState(blockpos);
+             if (this.isSourceBlockOfThisType(fluidstate)) {
+-                ++i;
++                i++;
+             }
+         }
+ 
+@@ -354,7 +_,7 @@
+         Short2ObjectMap<Pair<BlockState, FluidState>> short2objectmap = new Short2ObjectOpenHashMap<>();
+         Short2BooleanMap short2booleanmap = new Short2BooleanOpenHashMap();
+ 
+-        for(Direction direction : Direction.Plane.HORIZONTAL) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
+             BlockPos blockpos = p_76081_.relative(direction);
+             short short1 = getCacheKey(p_76081_, blockpos);
+             Pair<BlockState, FluidState> pair = short2objectmap.computeIfAbsent(short1, p_284929_ -> {
+@@ -401,14 +_,13 @@
+             || p_75975_.is(Blocks.SUGAR_CANE)
+             || p_75975_.is(Blocks.BUBBLE_COLUMN)) {
+             return false;
+-        } else if (!p_75975_.is(Blocks.NETHER_PORTAL)
+-            && !p_75975_.is(Blocks.END_PORTAL)
+-            && !p_75975_.is(Blocks.END_GATEWAY)
+-            && !p_75975_.is(Blocks.STRUCTURE_VOID)
+-            && !p_75975_.is(Blocks.POTATO_PORTAL)) {
+-            return !p_75975_.blocksMotion();
+         } else {
+-            return false;
++            return !p_75975_.is(Blocks.NETHER_PORTAL)
++                    && !p_75975_.is(Blocks.END_PORTAL)
++                    && !p_75975_.is(Blocks.END_GATEWAY)
++                    && !p_75975_.is(Blocks.STRUCTURE_VOID)
++                ? !p_75975_.blocksMotion()
++                : false;
+         }
+     }
+ 

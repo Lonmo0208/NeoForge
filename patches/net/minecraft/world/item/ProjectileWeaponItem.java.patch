@@ -1,6 +1,33 @@
 --- a/net/minecraft/world/item/ProjectileWeaponItem.java
 +++ b/net/minecraft/world/item/ProjectileWeaponItem.java
-@@ -108,7 +_,7 @@
+@@ -19,7 +_,6 @@
+ public abstract class ProjectileWeaponItem extends Item {
+     public static final Predicate<ItemStack> ARROW_ONLY = p_43017_ -> p_43017_.is(ItemTags.ARROWS);
+     public static final Predicate<ItemStack> ARROW_OR_FIREWORK = ARROW_ONLY.or(p_43015_ -> p_43015_.is(Items.FIREWORK_ROCKET));
+-    public static final Predicate<ItemStack> POISONOUS_POTATO = p_340205_ -> p_340205_.is(Items.POISONOUS_POTATO);
+ 
+     public ProjectileWeaponItem(Item.Properties p_43009_) {
+         super(p_43009_);
+@@ -62,7 +_,7 @@
+         float f2 = (float)((p_331726_.size() - 1) % 2) * f1 / 2.0F;
+         float f3 = 1.0F;
+ 
+-        for(int i = 0; i < p_331726_.size(); ++i) {
++        for (int i = 0; i < p_331726_.size(); i++) {
+             ItemStack itemstack = p_331726_.get(i);
+             if (!itemstack.isEmpty()) {
+                 float f4 = f2 + f3 * (float)((i + 1) / 2) * f1;
+@@ -84,8 +_,7 @@
+     );
+ 
+     protected Projectile createProjectile(Level p_331008_, LivingEntity p_330781_, ItemStack p_330846_, ItemStack p_331497_, boolean p_331305_) {
+-        Item $$8 = p_331497_.getItem();
+-        ArrowItem arrowitem = $$8 instanceof ArrowItem arrowitem1 ? arrowitem1 : (ArrowItem)Items.ARROW;
++        ArrowItem arrowitem = p_331497_.getItem() instanceof ArrowItem arrowitem1 ? arrowitem1 : (ArrowItem)Items.ARROW;
+         AbstractArrow abstractarrow = arrowitem.createArrow(p_331008_, p_331497_, p_330781_);
+         if (p_331305_) {
+             abstractarrow.setCritArrow(true);
+@@ -110,7 +_,7 @@
              abstractarrow.setPierceLevel((byte)j);
          }
  
@@ -9,7 +36,16 @@
      }
  
      protected static boolean hasInfiniteArrows(ItemStack p_330642_, ItemStack p_332202_, boolean p_331512_) {
-@@ -133,7 +_,7 @@
+@@ -126,7 +_,7 @@
+             List<ItemStack> list = new ArrayList<>(j);
+             ItemStack itemstack = p_330406_.copy();
+ 
+-            for(int k = 0; k < j; ++k) {
++            for (int k = 0; k < j; k++) {
+                 list.add(useAmmo(p_331565_, k == 0 ? p_330406_ : itemstack, p_330823_, k > 0));
+             }
+ 
+@@ -135,7 +_,7 @@
      }
  
      protected static ItemStack useAmmo(ItemStack p_331207_, ItemStack p_331434_, LivingEntity p_330302_, boolean p_330934_) {
@@ -18,7 +54,7 @@
          if (!flag) {
              ItemStack itemstack1 = p_331434_.copyWithCount(1);
              itemstack1.set(DataComponents.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
-@@ -146,5 +_,9 @@
+@@ -148,5 +_,9 @@
  
              return itemstack;
          }

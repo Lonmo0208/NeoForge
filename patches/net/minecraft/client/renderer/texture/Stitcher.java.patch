@@ -9,9 +9,12 @@
      private static final Comparator<Stitcher.Holder<?>> HOLDER_COMPARATOR = Comparator.<Stitcher.Holder<?>, Integer>comparing(p_118201_ -> -p_118201_.height)
          .thenComparing(p_118199_ -> -p_118199_.width)
          .thenComparing(p_247945_ -> p_247945_.entry.name());
-@@ -48,6 +_,14 @@
+@@ -46,15 +_,23 @@
+         List<Stitcher.Holder<T>> list = new ArrayList<>(this.texturesToBeStitched);
+         list.sort(HOLDER_COMPARATOR);
  
-         for (Stitcher.Holder<T> holder : list) {
+-        for(Stitcher.Holder<T> holder : list) {
++        for (Stitcher.Holder<T> holder : list) {
              if (!this.addToStorage(holder)) {
 +                if (LOGGER.isInfoEnabled()) {
 +                    StringBuilder sb = new StringBuilder();
@@ -24,6 +27,23 @@
                  throw new StitcherException(holder.entry, list.stream().map(p_247946_ -> p_247946_.entry).collect(ImmutableList.toImmutableList()));
              }
          }
+     }
+ 
+     public void gatherSprites(Stitcher.SpriteLoader<T> p_118181_) {
+-        for(Stitcher.Region<T> region : this.storage) {
++        for (Stitcher.Region<T> region : this.storage) {
+             region.walk(p_118181_);
+         }
+     }
+@@ -64,7 +_,7 @@
+     }
+ 
+     private boolean addToStorage(Stitcher.Holder<T> p_118179_) {
+-        for(Stitcher.Region<T> region : this.storage) {
++        for (Stitcher.Region<T> region : this.storage) {
+             if (region.add(p_118179_)) {
+                 return true;
+             }
 @@ -87,7 +_,7 @@
              boolean flag4 = flag2 && j != l;
              boolean flag;
@@ -32,4 +52,22 @@
 +                flag = !flag3 && flag1; // Forge: Fix stitcher not expanding entire height before growing width, and (potentially) growing larger then the max size.
              } else {
                  flag = flag1 && i <= j;
+             }
+@@ -186,7 +_,7 @@
+                             }
+                         }
+ 
+-                        for(Stitcher.Region<T> region : this.subSlots) {
++                        for (Stitcher.Region<T> region : this.subSlots) {
+                             if (region.add(p_118222_)) {
+                                 return true;
+                             }
+@@ -204,7 +_,7 @@
+             if (this.holder != null) {
+                 p_250195_.load(this.holder.entry, this.getX(), this.getY());
+             } else if (this.subSlots != null) {
+-                for(Stitcher.Region<T> region : this.subSlots) {
++                for (Stitcher.Region<T> region : this.subSlots) {
+                     region.walk(p_250195_);
+                 }
              }

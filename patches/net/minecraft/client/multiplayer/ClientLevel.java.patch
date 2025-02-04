@@ -1,6 +1,79 @@
 --- a/net/minecraft/client/multiplayer/ClientLevel.java
 +++ b/net/minecraft/client/multiplayer/ClientLevel.java
-@@ -121,6 +_,7 @@
+@@ -1,21 +_,16 @@
+ package net.minecraft.client.multiplayer;
+ 
+-import com.google.common.collect.ImmutableList;
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Queues;
+ import com.mojang.logging.LogUtils;
+ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+ import java.util.Deque;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Set;
+-import java.util.UUID;
+ import java.util.function.BooleanSupplier;
+-import java.util.function.Consumer;
+ import java.util.function.Supplier;
+ import javax.annotation.Nullable;
+ import net.minecraft.CrashReport;
+@@ -24,7 +_,6 @@
+ import net.minecraft.Util;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.color.block.BlockTintCache;
+-import net.minecraft.client.grid.ClientSubGrid;
+ import net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler;
+ import net.minecraft.client.particle.FireworkParticles;
+ import net.minecraft.client.player.AbstractClientPlayer;
+@@ -46,7 +_,6 @@
+ import net.minecraft.network.protocol.Packet;
+ import net.minecraft.resources.ResourceKey;
+ import net.minecraft.sounds.SoundEvent;
+-import net.minecraft.sounds.SoundSequenceBuilder;
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.tags.BlockTags;
+ import net.minecraft.util.CubicSampler;
+@@ -58,8 +_,6 @@
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.flag.FeatureFlagSet;
+-import net.minecraft.world.grid.GridCarrier;
+-import net.minecraft.world.grid.SubGrid;
+ import net.minecraft.world.item.BlockItem;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+@@ -85,9 +_,6 @@
+ import net.minecraft.world.level.entity.LevelEntityGetter;
+ import net.minecraft.world.level.entity.TransientEntitySectionManager;
+ import net.minecraft.world.level.gameevent.GameEvent;
+-import net.minecraft.world.level.levelgen.LegacyRandomSource;
+-import net.minecraft.world.level.levelgen.WorldgenRandom;
+-import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
+ import net.minecraft.world.level.material.Fluid;
+ import net.minecraft.world.level.material.FluidState;
+ import net.minecraft.world.level.saveddata.maps.MapId;
+@@ -110,7 +_,6 @@
+     private static final int LIGHT_UPDATE_QUEUE_SIZE_THRESHOLD = 1000;
+     final EntityTickList tickingEntities = new EntityTickList();
+     private final TransientEntitySectionManager<Entity> entityStorage = new TransientEntitySectionManager<>(Entity.class, new ClientLevel.EntityCallbacks());
+-    final Object2ObjectMap<UUID, ClientSubGrid> grids = new Object2ObjectOpenHashMap<>();
+     private final ClientPacketListener connection;
+     private final LevelRenderer levelRenderer;
+     private final ClientLevel.ClientLevelData clientLevelData;
+@@ -119,6 +_,7 @@
+     private final Minecraft minecraft = Minecraft.getInstance();
+     final List<AbstractClientPlayer> players = Lists.newArrayList();
+     private final Map<MapId, MapItemSavedData> mapData = Maps.newHashMap();
++    private static final long CLOUD_COLOR = 16777215L;
+     private int skyFlashTime;
+     private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(
+         new Object2ObjectArrayMap<>(3),
+@@ -132,6 +_,7 @@
              p_194170_.put(
                  BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(p_194168_ -> this.calculateBlockTint(p_194168_, BiomeColors.WATER_COLOR_RESOLVER))
              );
@@ -8,16 +81,19 @@
          }
      );
      private final ClientChunkCache chunkSource;
-@@ -128,6 +_,8 @@
+@@ -139,9 +_,8 @@
      private int serverSimulationDistance;
      private final BlockStatePredictionHandler blockStatePredictionHandler = new BlockStatePredictionHandler();
      private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
+-    private static final int NOISE_SIZE = 512;
+-    private static final float[][] noisedColorFromTexture1 = new float[512][512];
+-    private static final float[][] noisedColorFromTexture2 = new float[512][512];
 +    private final it.unimi.dsi.fastutil.ints.Int2ObjectMap<net.neoforged.neoforge.entity.PartEntity<?>> partEntities = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<>();
-+    private final net.neoforged.neoforge.client.model.data.ModelDataManager modelDataManager = new net.neoforged.neoforge.client.model.data.ModelDataManager(this);
++    private final net.neoforged.neoforge.client.model.data.ModelDataManager.Active modelDataManager = new net.neoforged.neoforge.client.model.data.ModelDataManager.Active(this);
  
      public void handleBlockChangedAck(int p_233652_) {
          this.blockStatePredictionHandler.endPredictionsUpTo(p_233652_, this);
-@@ -192,6 +_,7 @@
+@@ -206,6 +_,7 @@
          this.serverSimulationDistance = p_205510_;
          this.updateSkyBrightness();
          this.prepareWeather();
@@ -25,15 +101,73 @@
      }
  
      public void queueLightUpdate(Runnable p_194172_) {
-@@ -282,6 +_,7 @@
+@@ -216,7 +_,7 @@
+         int i = this.lightUpdateQueue.size();
+         int j = i < 1000 ? Math.max(10, i / 10) : i;
+ 
+-        for(int k = 0; k < j; ++k) {
++        for (int k = 0; k < j; k++) {
+             Runnable runnable = this.lightUpdateQueue.poll();
+             if (runnable == null) {
+                 break;
+@@ -278,22 +_,15 @@
+     public void tickEntities() {
+         ProfilerFiller profilerfiller = this.getProfiler();
+         profilerfiller.push("entities");
+-
+-        for(ClientSubGrid clientsubgrid : List.copyOf(this.grids.values())) {
+-            this.tickEntity(clientsubgrid.carrier());
+-        }
+-
+-        this.tickingEntities.forEach(this::tickEntity);
++        this.tickingEntities.forEach(p_308457_ -> {
++            if (!p_308457_.isRemoved() && !p_308457_.isPassenger() && !this.tickRateManager.isEntityFrozen(p_308457_)) {
++                this.guardEntityTick(this::tickNonPassenger, p_308457_);
++            }
++        });
+         profilerfiller.pop();
+         this.tickBlockEntities();
+     }
+ 
+-    private void tickEntity(Entity p_340888_) {
+-        if (!p_340888_.isRemoved() && !p_340888_.isPassenger() && !this.tickRateManager.isEntityFrozen(p_340888_)) {
+-            this.guardEntityTick(this::tickNonPassenger, p_340888_);
+-        }
+-    }
+-
+     @Override
+     public boolean shouldTickDeath(Entity p_194185_) {
+         return p_194185_.chunkPosition().getChessboardDistance(this.minecraft.player.chunkPosition()) <= this.serverSimulationDistance;
+@@ -301,12 +_,13 @@
+ 
+     public void tickNonPassenger(Entity p_104640_) {
          p_104640_.setOldPosAndRot();
-         p_104640_.tickCount++;
+-        ++p_104640_.tickCount;
++        p_104640_.tickCount++;
          this.getProfiler().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(p_104640_.getType()).toString());
 +        if (p_104640_.canUpdate())
          p_104640_.tick();
          this.getProfiler().pop();
  
-@@ -330,8 +_,10 @@
+-        for(Entity entity : p_104640_.getPassengers()) {
++        for (Entity entity : p_104640_.getPassengers()) {
+             this.tickPassenger(p_104640_, entity);
+         }
+     }
+@@ -316,10 +_,10 @@
+             p_104643_.stopRiding();
+         } else if (p_104643_ instanceof Player || this.tickingEntities.contains(p_104643_)) {
+             p_104643_.setOldPosAndRot();
+-            ++p_104643_.tickCount;
++            p_104643_.tickCount++;
+             p_104643_.rideTick();
+ 
+-            for(Entity entity : p_104643_.getPassengers()) {
++            for (Entity entity : p_104643_.getPassengers()) {
+                 this.tickPassenger(p_104643_, entity);
+             }
+         }
+@@ -351,8 +_,10 @@
      }
  
      public void addEntity(Entity p_104741_) {
@@ -44,7 +178,16 @@
      }
  
      public void removeEntity(int p_171643_, Entity.RemovalReason p_171644_) {
-@@ -502,6 +_,13 @@
+@@ -380,7 +_,7 @@
+         Block block = this.getMarkerParticleTarget();
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-        for(int j = 0; j < 667; ++j) {
++        for (int j = 0; j < 667; j++) {
+             this.doAnimateTick(p_104785_, p_104786_, p_104787_, 16, randomsource, block, blockpos$mutableblockpos);
+             this.doAnimateTick(p_104785_, p_104786_, p_104787_, 32, randomsource, block, blockpos$mutableblockpos);
+         }
+@@ -523,6 +_,13 @@
          float p_263349_,
          long p_263408_
      ) {
@@ -58,7 +201,7 @@
          if (p_263381_ == this.minecraft.player) {
              this.playSound(p_263372_, p_263404_, p_263365_, p_263335_.value(), p_263417_, p_263416_, p_263349_, false, p_263408_);
          }
-@@ -511,6 +_,12 @@
+@@ -532,6 +_,12 @@
      public void playSeededSound(
          @Nullable Player p_263514_, Entity p_263536_, Holder<SoundEvent> p_263518_, SoundSource p_263487_, float p_263538_, float p_263524_, long p_263509_
      ) {
@@ -71,7 +214,172 @@
          if (p_263514_ == this.minecraft.player) {
              this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(p_263518_.value(), p_263487_, p_263538_, p_263524_, p_263536_, p_263509_));
          }
-@@ -1033,6 +_,7 @@
+@@ -573,30 +_,11 @@
+     }
+ 
+     @Override
+-    public void playDelayedSound(
+-        int p_340400_, double p_341823_, double p_342359_, double p_340883_, SoundEvent p_340462_, SoundSource p_341566_, float p_341894_, float p_341531_
+-    ) {
+-        SimpleSoundInstance simplesoundinstance = new SimpleSoundInstance(
+-            p_340462_, p_341566_, p_341894_, p_341531_, RandomSource.create(0L), p_341823_, p_342359_, p_340883_
+-        );
+-        this.minecraft.getSoundManager().playDelayed(simplesoundinstance, p_340400_);
+-    }
+-
+-    @Override
+-    public void playSoundSequence(double p_342151_, double p_340496_, double p_341873_, Consumer<SoundSequenceBuilder> p_341653_) {
+-        p_341653_.accept(
+-            (p_339488_, p_339489_, p_339490_, p_339491_, p_339492_) -> this.playDelayedSound(
+-                    p_339488_, p_342151_, p_340496_, p_341873_, p_339489_, p_339490_, p_339491_, p_339492_
+-                )
+-        );
+-    }
+-
+-    @Override
+     public void createFireworks(
+         double p_104585_, double p_104586_, double p_104587_, double p_104588_, double p_104589_, double p_104590_, List<FireworkExplosion> p_330281_
+     ) {
+         if (p_330281_.isEmpty()) {
+-            for(int i = 0; i < this.random.nextInt(3) + 2; ++i) {
++            for (int i = 0; i < this.random.nextInt(3) + 2; i++) {
+                 this.addParticle(
+                     ParticleTypes.POOF, p_104585_, p_104586_, p_104587_, this.random.nextGaussian() * 0.05, 0.005, this.random.nextGaussian() * 0.05
+                 );
+@@ -782,7 +_,7 @@
+         float f2 = (float)vec31.x * f1;
+         float f3 = (float)vec31.y * f1;
+         float f4 = (float)vec31.z * f1;
+-        float f5 = this.getRainLevel(p_171662_, p_171661_.y());
++        float f5 = this.getRainLevel(p_171662_);
+         if (f5 > 0.0F) {
+             float f6 = (f2 * 0.3F + f3 * 0.59F + f4 * 0.11F) * 0.6F;
+             float f7 = 1.0F - f5 * 0.75F;
+@@ -791,7 +_,7 @@
+             f4 = f4 * f7 + f6 * (1.0F - f7);
+         }
+ 
+-        float f9 = this.getThunderLevel(p_171662_, p_171661_.y());
++        float f9 = this.getThunderLevel(p_171662_);
+         if (f9 > 0.0F) {
+             float f10 = (f2 * 0.3F + f3 * 0.59F + f4 * 0.11F) * 0.2F;
+             float f8 = 1.0F - f9 * 0.75F;
+@@ -820,10 +_,9 @@
+         float f = this.getTimeOfDay(p_104809_);
+         float f1 = Mth.cos(f * (float) (Math.PI * 2)) * 2.0F + 0.5F;
+         f1 = Mth.clamp(f1, 0.0F, 1.0F);
+-        int i = this.effects().getCloudColor();
+-        float f2 = (float)(i >> 16 & 0xFF) / 255.0F;
+-        float f3 = (float)(i >> 8 & 0xFF) / 255.0F;
+-        float f4 = (float)(i & 0xFF) / 255.0F;
++        float f2 = 1.0F;
++        float f3 = 1.0F;
++        float f4 = 1.0F;
+         float f5 = this.getRainLevel(p_104809_);
+         if (f5 > 0.0F) {
+             float f6 = (f2 * 0.3F + f3 * 0.59F + f4 * 0.11F) * 0.6F;
+@@ -870,7 +_,7 @@
+         if (!p_104704_) {
+             return flag ? 0.9F : 1.0F;
+         } else {
+-            switch(p_104703_) {
++            switch (p_104703_) {
+                 case DOWN:
+                     return flag ? 0.9F : 0.5F;
+                 case UP:
+@@ -895,16 +_,8 @@
+ 
+     public int calculateBlockTint(BlockPos p_104763_, ColorResolver p_104764_) {
+         int i = Minecraft.getInstance().options.biomeBlendRadius().get();
+-        boolean flag = this.getBiome(p_104763_).is(Biomes.ARBORETUM) && p_104764_ == BiomeColors.FOLIAGE_COLOR_RESOLVER;
+         if (i == 0) {
+-            return flag
+-                ? this.getBiome(p_104763_)
+-                    .value()
+-                    .getNoisedColorFromTexture(
+-                        noisedColorFromTexture1[Math.floorMod(p_104763_.getX(), 512)][Math.floorMod(p_104763_.getZ(), 512)],
+-                        noisedColorFromTexture2[Math.floorMod(p_104763_.getX(), 512)][Math.floorMod(p_104763_.getZ(), 512)]
+-                    )
+-                : p_104764_.getColor(this.getBiome(p_104763_).value(), (double)p_104763_.getX(), (double)p_104763_.getZ());
++            return p_104764_.getColor(this.getBiome(p_104763_).value(), (double)p_104763_.getX(), (double)p_104763_.getZ());
+         } else {
+             int j = (i * 2 + 1) * (i * 2 + 1);
+             int k = 0;
+@@ -913,25 +_,16 @@
+             Cursor3D cursor3d = new Cursor3D(
+                 p_104763_.getX() - i, p_104763_.getY(), p_104763_.getZ() - i, p_104763_.getX() + i, p_104763_.getY(), p_104763_.getZ() + i
+             );
++            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-            int j1;
+-            for(BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(); cursor3d.advance(); i1 += j1 & 0xFF) {
++            while (cursor3d.advance()) {
+                 blockpos$mutableblockpos.set(cursor3d.nextX(), cursor3d.nextY(), cursor3d.nextZ());
+-                if (flag) {
+-                    j1 = this.getBiome(blockpos$mutableblockpos)
+-                        .value()
+-                        .getNoisedColorFromTexture(
+-                            noisedColorFromTexture1[Math.floorMod(blockpos$mutableblockpos.getX(), 512)][Math.floorMod(blockpos$mutableblockpos.getZ(), 512)],
+-                            noisedColorFromTexture2[Math.floorMod(blockpos$mutableblockpos.getX(), 512)][Math.floorMod(blockpos$mutableblockpos.getZ(), 512)]
+-                        );
+-                } else {
+-                    j1 = p_104764_.getColor(
+-                        this.getBiome(blockpos$mutableblockpos).value(), (double)blockpos$mutableblockpos.getX(), (double)blockpos$mutableblockpos.getZ()
+-                    );
+-                }
+-
++                int j1 = p_104764_.getColor(
++                    this.getBiome(blockpos$mutableblockpos).value(), (double)blockpos$mutableblockpos.getX(), (double)blockpos$mutableblockpos.getZ()
++                );
+                 k += (j1 & 0xFF0000) >> 16;
+                 l += (j1 & 0xFF00) >> 8;
++                i1 += j1 & 0xFF;
+             }
+ 
+             return (k / j & 0xFF) << 16 | (l / j & 0xFF) << 8 | i1 / j & 0xFF;
+@@ -969,22 +_,6 @@
+     }
+ 
+     @Override
+-    public Iterable<ClientSubGrid> getGrids() {
+-        return this.grids.values();
+-    }
+-
+-    @Nullable
+-    @Override
+-    public SubGrid getGrid(UUID p_340607_) {
+-        return this.grids.get(p_340607_);
+-    }
+-
+-    @Override
+-    public SubGrid createSubGrid(GridCarrier p_340421_) {
+-        return new ClientSubGrid(this, p_340421_);
+-    }
+-
+-    @Override
+     public String gatherChunkSourceStats() {
+         return "Chunks[C] W: " + this.chunkSource.gatherStats() + " E: " + this.entityStorage.gatherStats();
+     }
+@@ -1007,18 +_,6 @@
+         return this.connection.enabledFeatures();
+     }
+ 
+-    static {
+-        PerlinSimplexNoise perlinsimplexnoise = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(-559038242L)), ImmutableList.of(-2, -1, 0));
+-        PerlinSimplexNoise perlinsimplexnoise1 = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(-17973521L)), ImmutableList.of(-2, -1, 0));
+-
+-        for(int i = 0; i < 512; ++i) {
+-            for(int j = 0; j < 512; ++j) {
+-                noisedColorFromTexture1[i][j] = 2.0F * (float)perlinsimplexnoise.getValue((double)((float)i / 8.0F), (double)((float)j / 8.0F), false);
+-                noisedColorFromTexture2[i][j] = 2.0F * (float)perlinsimplexnoise1.getValue((double)((float)i / 8.0F), (double)((float)j / 8.0F), false);
+-            }
+-        }
+-    }
+-
+     @OnlyIn(Dist.CLIENT)
+     public static class ClientLevelData implements WritableLevelData {
+         private final boolean hardcore;
+@@ -1114,6 +_,7 @@
          }
  
          public void setDifficulty(Difficulty p_104852_) {
@@ -79,20 +387,41 @@
              this.difficulty = p_104852_;
          }
  
-@@ -1069,14 +_,51 @@
+@@ -1139,9 +_,7 @@
+         }
+ 
+         public void onTickingStart(Entity p_171704_) {
+-            if (!(p_171704_ instanceof GridCarrier)) {
+-                ClientLevel.this.tickingEntities.add(p_171704_);
+-            }
++            ClientLevel.this.tickingEntities.add(p_171704_);
+         }
+ 
+         public void onTickingEnd(Entity p_171708_) {
+@@ -1152,11 +_,9 @@
              if (p_171712_ instanceof AbstractClientPlayer) {
                  ClientLevel.this.players.add((AbstractClientPlayer)p_171712_);
              }
+-
+-            if (p_171712_ instanceof GridCarrier gridcarrier) {
+-                SubGrid subgrid = gridcarrier.grid();
+-                if (subgrid instanceof ClientSubGrid clientsubgrid) {
+-                    ClientLevel.this.grids.put(gridcarrier.getUUID(), clientsubgrid);
 +            if (p_171712_.isMultipartEntity()) {
 +                for (net.neoforged.neoforge.entity.PartEntity<?> part : p_171712_.getParts()) {
 +                    ClientLevel.this.partEntities.put(part.getId(), part);
-+                }
-+            }
+                 }
+             }
          }
- 
+@@ -1164,16 +_,36 @@
          public void onTrackingEnd(Entity p_171716_) {
              p_171716_.unRide();
              ClientLevel.this.players.remove(p_171716_);
+-            if (p_171716_ instanceof GridCarrier gridcarrier) {
+-                SubGrid subgrid = gridcarrier.grid();
+-                if (subgrid instanceof ClientSubGrid clientsubgrid) {
+-                    clientsubgrid.close();
+-                    ClientLevel.this.grids.remove(clientsubgrid.id(), clientsubgrid);
 +
 +            p_171716_.onRemovedFromWorld();
 +            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent(p_171716_, ClientLevel.this));
@@ -100,8 +429,8 @@
 +            if (p_171716_.isMultipartEntity()) {
 +                for (net.neoforged.neoforge.entity.PartEntity<?> part : p_171716_.getParts()) {
 +                    ClientLevel.this.partEntities.remove(part.getId());
-+                }
-+            }
+                 }
+             }
          }
  
          public void onSectionChange(Entity p_233660_) {
@@ -114,13 +443,8 @@
 +    }
 +
 +    @Override
-+    public net.neoforged.neoforge.client.model.data.ModelDataManager getModelDataManager() {
++    public net.neoforged.neoforge.client.model.data.ModelDataManager.Active getModelDataManager() {
 +        return modelDataManager;
-+    }
-+
-+    @Override
-+    public net.neoforged.neoforge.client.model.data.ModelData getModelData(BlockPos pos) {
-+        return modelDataManager.getAt(pos);
 +    }
 +
 +    @Override

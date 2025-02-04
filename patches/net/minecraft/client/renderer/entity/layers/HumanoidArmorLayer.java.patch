@@ -1,6 +1,21 @@
 --- a/net/minecraft/client/renderer/entity/layers/HumanoidArmorLayer.java
 +++ b/net/minecraft/client/renderer/entity/layers/HumanoidArmorLayer.java
-@@ -66,6 +_,7 @@
+@@ -22,7 +_,6 @@
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.item.ArmorItem;
+ import net.minecraft.world.item.ArmorMaterial;
+-import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.armortrim.ArmorTrim;
+ import net.minecraft.world.item.component.DyedItemColor;
+@@ -63,17 +_,16 @@
+ 
+     private void renderArmorPiece(PoseStack p_117119_, MultiBufferSource p_117120_, T p_117121_, EquipmentSlot p_117122_, int p_117123_, A p_117124_) {
+         ItemStack itemstack = p_117121_.getItemBySlot(p_117122_);
+-        Item $$9 = itemstack.getItem();
+-        if ($$9 instanceof ArmorItem) {
+-            ArmorItem armoritem = (ArmorItem)$$9;
++        if (itemstack.getItem() instanceof ArmorItem armoritem) {
              if (armoritem.getEquipmentSlot() == p_117122_) {
                  this.getParentModel().copyPropertiesTo(p_117124_);
                  this.setPartVisibility(p_117124_, p_117122_);
@@ -8,7 +23,13 @@
                  boolean flag = this.usesInnerModel(p_117122_);
                  ArmorMaterial armormaterial = armoritem.getMaterial().value();
                  int i = itemstack.is(ItemTags.DYEABLE) ? DyedItemColor.getOrDefault(itemstack, -6265536) : -1;
-@@ -84,16 +_,17 @@
+ 
+-                for(ArmorMaterial.Layer armormaterial$layer : armormaterial.layers()) {
++                for (ArmorMaterial.Layer armormaterial$layer : armormaterial.layers()) {
+                     float f;
+                     float f1;
+                     float f2;
+@@ -87,16 +_,17 @@
                          f2 = 1.0F;
                      }
  
@@ -29,7 +50,16 @@
                  }
              }
          }
-@@ -132,6 +_,18 @@
+@@ -104,7 +_,7 @@
+ 
+     protected void setPartVisibility(A p_117126_, EquipmentSlot p_117127_) {
+         p_117126_.setAllVisible(false);
+-        switch(p_117127_) {
++        switch (p_117127_) {
+             case HEAD:
+                 p_117126_.head.visible = true;
+                 p_117126_.hat.visible = true;
+@@ -135,6 +_,18 @@
          float p_289693_,
          ResourceLocation p_324344_
      ) {
@@ -48,7 +78,7 @@
          VertexConsumer vertexconsumer = p_289689_.getBuffer(RenderType.armorCutoutNoCull(p_324344_));
          p_289658_.renderToBuffer(p_289664_, vertexconsumer, p_289681_, OverlayTexture.NO_OVERLAY, p_289678_, p_289674_, p_289693_, 1.0F);
      }
-@@ -139,6 +_,11 @@
+@@ -142,6 +_,11 @@
      private void renderTrim(
          Holder<ArmorMaterial> p_323506_, PoseStack p_289687_, MultiBufferSource p_289643_, int p_289683_, ArmorTrim p_289692_, A p_289663_, boolean p_289651_
      ) {
@@ -60,7 +90,7 @@
          TextureAtlasSprite textureatlassprite = this.armorTrimAtlas
              .getSprite(p_289651_ ? p_289692_.innerTexture(p_323506_) : p_289692_.outerTexture(p_323506_));
          VertexConsumer vertexconsumer = textureatlassprite.wrap(p_289643_.getBuffer(Sheets.armorTrimsSheet(p_289692_.pattern().value().decal())));
-@@ -146,6 +_,9 @@
+@@ -149,14 +_,24 @@
      }
  
      private void renderGlint(PoseStack p_289673_, MultiBufferSource p_289654_, int p_289649_, A p_289659_) {
@@ -70,7 +100,10 @@
          p_289659_.renderToBuffer(p_289673_, p_289654_.getBuffer(RenderType.armorEntityGlint()), p_289649_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
      }
  
-@@ -155,5 +_,12 @@
+     private A getArmorModel(EquipmentSlot p_117079_) {
+-        return (A)(this.usesInnerModel(p_117079_) ? this.innerModel : this.outerModel);
++        return this.usesInnerModel(p_117079_) ? this.innerModel : this.outerModel;
+     }
  
      private boolean usesInnerModel(EquipmentSlot p_117129_) {
          return p_117129_ == EquipmentSlot.LEGS;

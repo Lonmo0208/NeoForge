@@ -1,9 +1,32 @@
 --- a/net/minecraft/world/level/block/ComparatorBlock.java
 +++ b/net/minecraft/world/level/block/ComparatorBlock.java
-@@ -199,4 +_,16 @@
+@@ -84,11 +_,7 @@
+             return false;
+         } else {
+             int j = this.getAlternateSignal(p_51861_, p_51862_, p_51863_);
+-            if (i > j) {
+-                return true;
+-            } else {
+-                return i == j && p_51863_.getValue(MODE) == ComparatorMode.COMPARE;
+-            }
++            return i > j ? true : i == j && p_51863_.getValue(MODE) == ComparatorMode.COMPARE;
+         }
+     }
+ 
+@@ -128,7 +_,7 @@
+                 (double)(p_51867_.getY() + 1),
+                 (double)(p_51867_.getZ() + 1)
+             ),
+-            p_340242_ -> p_340242_ != null && p_340242_.getDirection() == p_51866_
++            p_337974_ -> p_337974_ != null && p_337974_.getDirection() == p_51866_
+         );
+         return list.size() == 1 ? list.get(0) : null;
+     }
+@@ -202,5 +_,17 @@
+     @Override
      protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_51887_) {
          p_51887_.add(FACING, MODE, POWERED);
-     }
++    }
 +
 +    @Override
 +    public boolean getWeakChanges(BlockState state, net.minecraft.world.level.LevelReader world, BlockPos pos) {
@@ -15,5 +38,5 @@
 +        if (pos.getY() == neighbor.getY() && world instanceof Level && !((Level)world).isClientSide()) {
 +            state.handleNeighborChanged((Level)world, pos, world.getBlockState(neighbor).getBlock(), neighbor, false);
 +        }
-+    }
+     }
  }

@@ -1,23 +1,40 @@
 --- a/net/minecraft/world/level/chunk/LevelChunkSection.java
 +++ b/net/minecraft/world/level/chunk/LevelChunkSection.java
-@@ -65,7 +_,7 @@
+@@ -65,26 +_,26 @@
  
          FluidState fluidstate = blockstate.getFluidState();
          FluidState fluidstate1 = p_62995_.getFluidState();
 -        if (!blockstate.isAir()) {
+-            --this.nonEmptyBlockCount;
 +        if (!blockstate.isEmpty()) { // Neo: Fix MC-232360 for modded blocks (Makes modded isAir blocks not be replaced with Blocks.AIR in all-air chunk sections)
-             this.nonEmptyBlockCount--;
++            this.nonEmptyBlockCount--;
              if (blockstate.isRandomlyTicking()) {
-                 this.tickingBlockCount--;
-@@ -76,7 +_,7 @@
-             this.tickingFluidCount--;
+-                --this.tickingBlockCount;
++                this.tickingBlockCount--;
+             }
+         }
+ 
+         if (!fluidstate.isEmpty()) {
+-            --this.tickingFluidCount;
++            this.tickingFluidCount--;
          }
  
 -        if (!p_62995_.isAir()) {
+-            ++this.nonEmptyBlockCount;
 +        if (!p_62995_.isEmpty()) { // Neo: Fix MC-232360 for modded blocks (Makes modded isAir blocks not be replaced with Blocks.AIR in all-air chunk sections)
-             this.nonEmptyBlockCount++;
++            this.nonEmptyBlockCount++;
              if (p_62995_.isRandomlyTicking()) {
-                 this.tickingBlockCount++;
+-                ++this.tickingBlockCount;
++                this.tickingBlockCount++;
+             }
+         }
+ 
+         if (!fluidstate1.isEmpty()) {
+-            ++this.tickingFluidCount;
++            this.tickingFluidCount++;
+         }
+ 
+         return blockstate;
 @@ -114,7 +_,7 @@
  
              public void accept(BlockState p_204444_, int p_204445_) {
@@ -27,3 +44,16 @@
                      this.nonEmptyBlockCount += p_204445_;
                      if (p_204444_.isRandomlyTicking()) {
                          this.tickingBlockCount += p_204445_;
+@@ -181,9 +_,9 @@
+         PalettedContainer<Holder<Biome>> palettedcontainer = this.biomes.recreate();
+         int i = 4;
+ 
+-        for(int j = 0; j < 4; ++j) {
+-            for(int k = 0; k < 4; ++k) {
+-                for(int l = 0; l < 4; ++l) {
++        for (int j = 0; j < 4; j++) {
++            for (int k = 0; k < 4; k++) {
++                for (int l = 0; l < 4; l++) {
+                     palettedcontainer.getAndSetUnchecked(j, k, l, p_282075_.getNoiseBiome(p_282310_ + j, p_281510_ + k, p_283057_ + l, p_283084_));
+                 }
+             }

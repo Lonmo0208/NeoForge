@@ -24,17 +24,23 @@
          this.registries = p_255780_;
          this.output = p_256643_;
      }
-@@ -35,8 +_,7 @@
+@@ -35,10 +_,11 @@
                  p_326736_ -> {
                      DynamicOps<JsonElement> dynamicops = p_326736_.createSerializationContext(JsonOps.INSTANCE);
                      return CompletableFuture.allOf(
 -                        RegistryDataLoader.WORLDGEN_REGISTRIES
 -                            .stream()
+-                            .flatMap(p_256552_ -> this.dumpRegistryCap(p_255785_, p_326736_, dynamicops, p_256552_).stream())
+-                            .toArray(p_255809_ -> new CompletableFuture[p_255809_])
 +                        net.neoforged.neoforge.registries.DataPackRegistriesHooks.getDataPackRegistriesWithDimensions()
-                             .flatMap(
-                                 p_256552_ -> this.dumpRegistryCap(p_255785_, p_326736_, dynamicops, (RegistryDataLoader.RegistryData<?>)p_256552_).stream()
-                             )
-@@ -54,9 +_,10 @@
++                            .flatMap(
++                                p_256552_ -> this.dumpRegistryCap(p_255785_, p_326736_, dynamicops, (RegistryDataLoader.RegistryData<?>)p_256552_).stream()
++                            )
++                            .toArray(CompletableFuture[]::new)
+                     );
+                 }
+             );
+@@ -52,19 +_,20 @@
              .map(
                  p_255847_ -> {
                      PackOutput.PathProvider packoutput$pathprovider = this.output
@@ -46,3 +52,15 @@
                              .map(
                                  p_256105_ -> dumpValue(
                                          packoutput$pathprovider.json(p_256105_.key().location()),
+                                         p_256502_,
+                                         p_256000_,
+                                         p_256449_.elementCodec(),
+-                                        (T)p_256105_.value()
++                                        p_256105_.value()
+                                     )
+                             )
+-                            .toArray(p_256279_ -> new CompletableFuture[p_256279_])
++                            .toArray(CompletableFuture[]::new)
+                     );
+                 }
+             );

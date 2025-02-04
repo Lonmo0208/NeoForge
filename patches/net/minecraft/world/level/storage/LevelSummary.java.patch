@@ -1,13 +1,26 @@
 --- a/net/minecraft/world/level/storage/LevelSummary.java
 +++ b/net/minecraft/world/level/storage/LevelSummary.java
-@@ -275,6 +_,10 @@
-         }
+@@ -120,11 +_,7 @@
      }
  
-+    public boolean isLifecycleExperimental() {
-+        return this.settings.getLifecycle().equals(com.mojang.serialization.Lifecycle.experimental());
+     public boolean isDisabled() {
+-        if (!this.isLocked() && !this.requiresManualConversion()) {
+-            return !this.isCompatible();
+-        } else {
+-            return true;
+-        }
++        return !this.isLocked() && !this.requiresManualConversion() ? !this.isCompatible() : true;
+     }
+ 
+     public boolean isCompatible() {
+@@ -277,6 +_,10 @@
+         public boolean canRecreate() {
+             return false;
+         }
 +    }
 +
++    public boolean isLifecycleExperimental() {
++        return this.settings.getLifecycle().equals(com.mojang.serialization.Lifecycle.experimental());
+     }
+ 
      public static class SymlinkLevelSummary extends LevelSummary {
-         private static final Component MORE_INFO_BUTTON = Component.translatable("symlink_warning.more_info");
-         private static final Component INFO = Component.translatable("symlink_warning.title").withColor(-65536);

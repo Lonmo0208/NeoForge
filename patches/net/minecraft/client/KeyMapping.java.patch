@@ -12,14 +12,15 @@
      private static final Set<String> CATEGORIES = Sets.newHashSet();
      public static final String CATEGORY_MOVEMENT = "key.categories.movement";
      public static final String CATEGORY_MISC = "key.categories.misc";
-@@ -42,17 +_,17 @@
+@@ -42,21 +_,21 @@
      private int clickCount;
  
      public static void click(InputConstants.Key p_90836_) {
 -        KeyMapping keymapping = MAP.get(p_90836_);
 +        for (KeyMapping keymapping : MAP.getAll(p_90836_))
          if (keymapping != null) {
-             keymapping.clickCount++;
+-            ++keymapping.clickCount;
++            keymapping.clickCount++;
          }
      }
  
@@ -35,6 +36,36 @@
      }
  
      public static void setAll() {
+-        for(KeyMapping keymapping : ALL.values()) {
++        for (KeyMapping keymapping : ALL.values()) {
+             if (keymapping.key.getType() == InputConstants.Type.KEYSYM && keymapping.key.getValue() != InputConstants.UNKNOWN.getValue()) {
+                 keymapping.setDown(InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keymapping.key.getValue()));
+             }
+@@ -64,13 +_,13 @@
+     }
+ 
+     public static void releaseAll() {
+-        for(KeyMapping keymapping : ALL.values()) {
++        for (KeyMapping keymapping : ALL.values()) {
+             keymapping.release();
+         }
+     }
+ 
+     public static void resetToggleKeys() {
+-        for(KeyMapping keymapping : ALL.values()) {
++        for (KeyMapping keymapping : ALL.values()) {
+             if (keymapping instanceof ToggleKeyMapping togglekeymapping) {
+                 togglekeymapping.reset();
+             }
+@@ -80,7 +_,7 @@
+     public static void resetMapping() {
+         MAP.clear();
+ 
+-        for(KeyMapping keymapping : ALL.values()) {
++        for (KeyMapping keymapping : ALL.values()) {
+             MAP.put(keymapping.key, keymapping);
+         }
+     }
 @@ -100,7 +_,7 @@
      }
  
@@ -44,6 +75,15 @@
      }
  
      public String getCategory() {
+@@ -111,7 +_,7 @@
+         if (this.clickCount == 0) {
+             return false;
+         } else {
+-            --this.clickCount;
++            this.clickCount--;
+             return true;
+         }
+     }
 @@ -134,9 +_,13 @@
      }
  
@@ -82,7 +122,22 @@
          return this.key.equals(p_90851_.key);
      }
  
-@@ -163,11 +_,13 @@
+@@ -153,11 +_,9 @@
+     }
+ 
+     public boolean matches(int p_90833_, int p_90834_) {
+-        if (p_90833_ == InputConstants.UNKNOWN.getValue()) {
+-            return this.key.getType() == InputConstants.Type.SCANCODE && this.key.getValue() == p_90834_;
+-        } else {
+-            return this.key.getType() == InputConstants.Type.KEYSYM && this.key.getValue() == p_90833_;
+-        }
++        return p_90833_ == InputConstants.UNKNOWN.getValue()
++            ? this.key.getType() == InputConstants.Type.SCANCODE && this.key.getValue() == p_90834_
++            : this.key.getType() == InputConstants.Type.KEYSYM && this.key.getValue() == p_90833_;
+     }
+ 
+     public boolean matchesMouse(int p_90831_) {
+@@ -165,11 +_,13 @@
      }
  
      public Component getTranslatedKeyMessage() {
@@ -97,7 +152,7 @@
      }
  
      public String saveString() {
-@@ -177,4 +_,84 @@
+@@ -179,4 +_,84 @@
      public void setDown(boolean p_90846_) {
          this.isDown = p_90846_;
      }

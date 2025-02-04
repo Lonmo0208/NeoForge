@@ -1,6 +1,36 @@
 --- a/net/minecraft/client/gui/screens/worldselection/WorldCreationUiState.java
 +++ b/net/minecraft/client/gui/screens/worldselection/WorldCreationUiState.java
-@@ -225,7 +_,7 @@
+@@ -56,7 +_,7 @@
+         this.updatePresetLists();
+         this.seed = p_276014_.isPresent() ? Long.toString(p_276014_.getAsLong()) : "";
+         this.generateStructures = p_276050_.options().generateStructures();
+-        this.bonusChest = true;
++        this.bonusChest = p_276050_.options().generateBonusChest();
+         this.targetFolder = this.findResultFolder(this.name);
+     }
+ 
+@@ -75,7 +_,7 @@
+             this.settings = this.settings.withOptions(p_267945_ -> p_267945_.withStructures(flag1));
+         }
+ 
+-        for(Consumer<WorldCreationUiState> consumer : this.listeners) {
++        for (Consumer<WorldCreationUiState> consumer : this.listeners) {
+             consumer.accept(this);
+         }
+     }
+@@ -140,10 +_,8 @@
+             return true;
+         } else if (this.isHardcore()) {
+             return false;
+-        } else if (this.allowCommands == null) {
+-            return this.getGameMode() == WorldCreationUiState.SelectedGameMode.CREATIVE;
+         } else {
+-            return this.allowCommands;
++            return this.allowCommands == null ? this.getGameMode() == WorldCreationUiState.SelectedGameMode.CREATIVE : this.allowCommands;
+         }
+     }
+ 
+@@ -227,7 +_,7 @@
      @Nullable
      public PresetEditor getPresetEditor() {
          Holder<WorldPreset> holder = this.getWorldType().preset();
@@ -9,3 +39,14 @@
      }
  
      public List<WorldCreationUiState.WorldTypeEntry> getNormalPresetList() {
+@@ -256,7 +_,9 @@
+     }
+ 
+     private static Optional<Holder<WorldPreset>> findPreset(WorldCreationContext p_268025_, Optional<ResourceKey<WorldPreset>> p_268184_) {
+-        return p_268184_.flatMap(p_267974_ -> p_268025_.worldgenLoadContext().<WorldPreset>registryOrThrow(Registries.WORLD_PRESET).getHolder(p_267974_));
++        return p_268184_.flatMap(
++            p_267974_ -> p_268025_.worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET).getHolder((ResourceKey<WorldPreset>)p_267974_)
++        );
+     }
+ 
+     private static Optional<List<WorldCreationUiState.WorldTypeEntry>> getNonEmptyList(Registry<WorldPreset> p_268296_, TagKey<WorldPreset> p_268097_) {

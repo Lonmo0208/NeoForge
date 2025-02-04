@@ -1,6 +1,30 @@
 --- a/net/minecraft/world/level/levelgen/structure/Structure.java
 +++ b/net/minecraft/world/level/levelgen/structure/Structure.java
-@@ -42,10 +_,11 @@
+@@ -5,7 +_,6 @@
+ import com.mojang.serialization.MapCodec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+-import java.util.List;
+ import java.util.Map;
+ import java.util.Optional;
+ import java.util.function.Consumer;
+@@ -17,7 +_,6 @@
+ import net.minecraft.core.QuartPos;
+ import net.minecraft.core.RegistryAccess;
+ import net.minecraft.core.RegistryCodecs;
+-import net.minecraft.core.Vec3i;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.resources.RegistryFileCodec;
+@@ -32,7 +_,6 @@
+ import net.minecraft.world.level.biome.BiomeSource;
+ import net.minecraft.world.level.block.Rotation;
+ import net.minecraft.world.level.chunk.ChunkGenerator;
+-import net.minecraft.world.level.levelgen.DensityFunction;
+ import net.minecraft.world.level.levelgen.GenerationStep;
+ import net.minecraft.world.level.levelgen.Heightmap;
+ import net.minecraft.world.level.levelgen.LegacyRandomSource;
+@@ -45,28 +_,26 @@
  public abstract class Structure {
      public static final Codec<Structure> DIRECT_CODEC = BuiltInRegistries.STRUCTURE_TYPE.byNameCodec().dispatch(Structure::type, StructureType::codec);
      public static final Codec<Holder<Structure>> CODEC = RegistryFileCodec.create(Registries.STRUCTURE, DIRECT_CODEC);
@@ -13,8 +37,11 @@
 +        return Structure.StructureSettings.CODEC.forGetter(p_226595_ -> p_226595_.modifiableStructureInfo().getOriginalStructureInfo().structureSettings()); // FORGE: Patch codec to ignore field redirect coremods.
      }
  
-     public static <S extends Structure> MapCodec<S> simpleCodec(Function<Structure.StructureSettings, S> p_226608_) {
-@@ -54,6 +_,7 @@
+-    public static <S extends Structure> Codec<S> simpleCodec(Function<Structure.StructureSettings, S> p_226608_) {
+-        return RecordCodecBuilder.create(p_226611_ -> p_226611_.group(settingsCodec(p_226611_)).apply(p_226611_, p_226608_));
++    public static <S extends Structure> MapCodec<S> simpleCodec(Function<Structure.StructureSettings, S> p_226608_) {
++        return RecordCodecBuilder.mapCodec(p_226611_ -> p_226611_.group(settingsCodec(p_226611_)).apply(p_226611_, p_226608_));
+     }
  
      protected Structure(Structure.StructureSettings p_226558_) {
          this.settings = p_226558_;
@@ -22,11 +49,78 @@
      }
  
      public HolderSet<Biome> biomes() {
-@@ -196,6 +_,29 @@
+         return this.settings.biomes;
+     }
+ 
+-    public List<Structure.DensityCheck> densityChecks() {
+-        return this.settings.densityChecks;
+-    }
+-
+     public Map<MobCategory, StructureSpawnOverride> spawnOverrides() {
+         return this.settings.spawnOverrides;
+     }
+@@ -93,11 +_,10 @@
+         ChunkPos p_226603_,
+         int p_226604_,
+         LevelHeightAccessor p_226605_,
+-        Predicate<Holder<Biome>> p_226606_,
+-        List<Structure.DensityCheck> p_342018_
++        Predicate<Holder<Biome>> p_226606_
+     ) {
+         Structure.GenerationContext structure$generationcontext = new Structure.GenerationContext(
+-            p_226597_, p_226598_, p_226599_, p_226600_, p_226601_, p_226602_, p_226603_, p_226605_, p_226606_, p_342018_
++            p_226597_, p_226598_, p_226599_, p_226600_, p_226601_, p_226602_, p_226603_, p_226605_, p_226606_
+         );
+         Optional<Structure.GenerationStub> optional = this.findValidGenerationPoint(structure$generationcontext);
+         if (optional.isPresent()) {
+@@ -136,24 +_,6 @@
+             );
+     }
+ 
+-    private static boolean passesDensityTest(Structure.GenerationStub p_341504_, Structure.GenerationContext p_341579_) {
+-        BlockPos blockpos = p_341504_.position();
+-
+-        for(Structure.DensityCheck structure$densitycheck : p_341579_.densityChecks()) {
+-            Vec3i vec3i = structure$densitycheck.offset();
+-            BlockPos blockpos1 = blockpos.offset(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+-            double d0 = p_341579_.randomState
+-                .router()
+-                .finalDensity()
+-                .compute(new DensityFunction.SinglePointContext(blockpos1.getX(), blockpos1.getY(), blockpos1.getZ()));
+-            if (structure$densitycheck.dense() != d0 > 0.0) {
+-                return false;
+-            }
+-        }
+-
+-        return true;
+-    }
+-
+     public void afterPlace(
+         WorldGenLevel p_226560_,
+         StructureManager p_226561_,
+@@ -213,24 +_,33 @@
+     protected abstract Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext p_226571_);
+ 
+     public Optional<Structure.GenerationStub> findValidGenerationPoint(Structure.GenerationContext p_263060_) {
+-        return this.findGenerationPoint(p_263060_).filter(p_340300_ -> isValidBiome(p_340300_, p_263060_) && passesDensityTest(p_340300_, p_263060_));
++        return this.findGenerationPoint(p_263060_).filter(p_262911_ -> isValidBiome(p_262911_, p_263060_));
      }
  
      public abstract StructureType<?> type();
-+
+ 
+-    public static record DensityCheck(Vec3i offset, boolean dense) {
+-        public static final Codec<Structure.DensityCheck> CODEC = RecordCodecBuilder.create(
+-            p_342572_ -> p_342572_.group(
+-                        Vec3i.CODEC.fieldOf("offset").forGetter(Structure.DensityCheck::offset),
+-                        Codec.BOOL.fieldOf("dense").forGetter(Structure.DensityCheck::dense)
+-                    )
+-                    .apply(p_342572_, Structure.DensityCheck::new)
+-        );
+-
+-        public static Structure.DensityCheck of(int p_341857_, int p_341172_, int p_340725_, boolean p_341890_) {
+-            return new Structure.DensityCheck(new Vec3i(p_341857_, p_341172_, p_340725_), p_341890_);
+-        }
+-    }
 +    // FORGE START
 +
 +    private final net.neoforged.neoforge.common.world.ModifiableStructureInfo modifiableStructureInfo;
@@ -52,3 +146,60 @@
  
      public static record GenerationContext(
          RegistryAccess registryAccess,
+@@ -242,8 +_,7 @@
+         long seed,
+         ChunkPos chunkPos,
+         LevelHeightAccessor heightAccessor,
+-        Predicate<Holder<Biome>> validBiome,
+-        List<Structure.DensityCheck> densityChecks
++        Predicate<Holder<Biome>> validBiome
+     ) {
+         public GenerationContext(
+             RegistryAccess p_226632_,
+@@ -254,10 +_,9 @@
+             long p_226637_,
+             ChunkPos p_226638_,
+             LevelHeightAccessor p_226639_,
+-            Predicate<Holder<Biome>> p_226640_,
+-            List<Structure.DensityCheck> p_342115_
++            Predicate<Holder<Biome>> p_226640_
+         ) {
+-            this(p_226632_, p_226633_, p_226634_, p_226635_, p_226636_, makeRandom(p_226637_, p_226638_), p_226637_, p_226638_, p_226639_, p_226640_, p_342115_);
++            this(p_226632_, p_226633_, p_226634_, p_226635_, p_226636_, makeRandom(p_226637_, p_226638_), p_226637_, p_226638_, p_226639_, p_226640_);
+         }
+ 
+         private static WorldgenRandom makeRandom(long p_226654_, ChunkPos p_226655_) {
+@@ -277,21 +_,16 @@
+                 StructurePiecesBuilder structurepiecesbuilder = new StructurePiecesBuilder();
+                 p_226681_.accept(structurepiecesbuilder);
+                 return structurepiecesbuilder;
+-            }, p_226679_ -> p_226679_);
++            }, p_226679_ -> (StructurePiecesBuilder)p_226679_);
+         }
+     }
+ 
+     public static record StructureSettings(
+-        HolderSet<Biome> biomes,
+-        List<Structure.DensityCheck> densityChecks,
+-        Map<MobCategory, StructureSpawnOverride> spawnOverrides,
+-        GenerationStep.Decoration step,
+-        TerrainAdjustment terrainAdaptation
++        HolderSet<Biome> biomes, Map<MobCategory, StructureSpawnOverride> spawnOverrides, GenerationStep.Decoration step, TerrainAdjustment terrainAdaptation
+     ) {
+         public static final MapCodec<Structure.StructureSettings> CODEC = RecordCodecBuilder.mapCodec(
+-            p_340301_ -> p_340301_.group(
++            p_259014_ -> p_259014_.group(
+                         RegistryCodecs.homogeneousList(Registries.BIOME).fieldOf("biomes").forGetter(Structure.StructureSettings::biomes),
+-                        Codec.list(Structure.DensityCheck.CODEC).fieldOf("density_checks").forGetter(Structure.StructureSettings::densityChecks),
+                         Codec.simpleMap(MobCategory.CODEC, StructureSpawnOverride.CODEC, StringRepresentable.keys(MobCategory.values()))
+                             .fieldOf("spawn_overrides")
+                             .forGetter(Structure.StructureSettings::spawnOverrides),
+@@ -300,7 +_,7 @@
+                             .optionalFieldOf("terrain_adaptation", TerrainAdjustment.NONE)
+                             .forGetter(Structure.StructureSettings::terrainAdaptation)
+                     )
+-                    .apply(p_340301_, Structure.StructureSettings::new)
++                    .apply(p_259014_, Structure.StructureSettings::new)
+         );
+     }
+ }

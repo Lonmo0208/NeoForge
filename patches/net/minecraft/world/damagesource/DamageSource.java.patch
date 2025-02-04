@@ -1,6 +1,16 @@
 --- a/net/minecraft/world/damagesource/DamageSource.java
 +++ b/net/minecraft/world/damagesource/DamageSource.java
-@@ -88,6 +_,10 @@
+@@ -77,8 +_,7 @@
+                 : Component.translatable(s, p_19343_.getDisplayName());
+         } else {
+             Component component = this.causingEntity == null ? this.directEntity.getDisplayName() : this.causingEntity.getDisplayName();
+-            Entity entity = this.causingEntity;
+-            ItemStack itemstack = entity instanceof LivingEntity livingentity ? livingentity.getMainHandItem() : ItemStack.EMPTY;
++            ItemStack itemstack = this.causingEntity instanceof LivingEntity livingentity ? livingentity.getMainHandItem() : ItemStack.EMPTY;
+             return !itemstack.isEmpty() && itemstack.has(DataComponents.CUSTOM_NAME)
+                 ? Component.translatable(s + ".item", p_19343_.getDisplayName(), component, itemstack.getDisplayName())
+                 : Component.translatable(s, p_19343_.getDisplayName(), component);
+@@ -89,17 +_,21 @@
          return this.type().msgId();
      }
  
@@ -9,5 +19,19 @@
 +     */
 +    @Deprecated(since = "1.20.1")
      public boolean scalesWithDifficulty() {
-         return switch (this.type().scaling()) {
+-        return switch(this.type().scaling()) {
++        return switch (this.type().scaling()) {
              case NEVER -> false;
+             case WHEN_CAUSED_BY_LIVING_NON_PLAYER -> this.causingEntity instanceof LivingEntity && !(this.causingEntity instanceof Player);
+             case ALWAYS -> true;
++            default -> throw new MatchException(null, null);
+         };
+     }
+ 
+     public boolean isCreativePlayer() {
+-        Entity entity = this.getEntity();
+-        if (entity instanceof Player player && player.getAbilities().instabuild) {
++        if (this.getEntity() instanceof Player player && player.getAbilities().instabuild) {
+             return true;
+         }
+ 

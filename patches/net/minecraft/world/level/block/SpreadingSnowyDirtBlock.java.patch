@@ -1,13 +1,30 @@
 --- a/net/minecraft/world/level/block/SpreadingSnowyDirtBlock.java
 +++ b/net/minecraft/world/level/block/SpreadingSnowyDirtBlock.java
-@@ -42,8 +_,10 @@
+@@ -42,22 +_,16 @@
      @Override
      protected void randomTick(BlockState p_222508_, ServerLevel p_222509_, BlockPos p_222510_, RandomSource p_222511_) {
          if (!canBeGrass(p_222508_, p_222509_, p_222510_)) {
+-            p_222509_.setBlockAndUpdate(p_222510_, (p_222509_.isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState());
 +            if (!p_222509_.isAreaLoaded(p_222510_, 1)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
-             p_222509_.setBlockAndUpdate(p_222510_, Blocks.DIRT.defaultBlockState());
++            p_222509_.setBlockAndUpdate(p_222510_, Blocks.DIRT.defaultBlockState());
          } else {
 +            if (!p_222509_.isAreaLoaded(p_222510_, 3)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
              if (p_222509_.getMaxLocalRawBrightness(p_222510_.above()) >= 9) {
                  BlockState blockstate = this.defaultBlockState();
  
+-                for(int i = 0; i < 4; ++i) {
++                for (int i = 0; i < 4; i++) {
+                     BlockPos blockpos = p_222510_.offset(p_222511_.nextInt(3) - 1, p_222511_.nextInt(5) - 3, p_222511_.nextInt(3) - 1);
+-                    BlockState blockstate1 = p_222509_.getBlockState(blockpos);
+-                    if (blockstate.is(Blocks.CORRUPTED_PEELGRASS_BLOCK)
+-                        && p_222511_.nextInt(20) == 0
+-                        && blockstate1.is(Blocks.PEELGRASS_BLOCK)
+-                        && canPropagate(blockstate, p_222509_, blockpos)) {
+-                        p_222509_.setBlockAndUpdate(blockpos, blockstate);
+-                    }
+-
+-                    if ((blockstate1.is(Blocks.DIRT) || blockstate1.is(Blocks.TERREDEPOMME)) && canPropagate(blockstate, p_222509_, blockpos)) {
++                    if (p_222509_.getBlockState(blockpos).is(Blocks.DIRT) && canPropagate(blockstate, p_222509_, blockpos)) {
+                         p_222509_.setBlockAndUpdate(
+                             blockpos, blockstate.setValue(SNOWY, Boolean.valueOf(p_222509_.getBlockState(blockpos.above()).is(Blocks.SNOW)))
+                         );

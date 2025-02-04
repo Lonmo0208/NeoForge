@@ -1,10 +1,147 @@
 --- a/net/minecraft/world/level/Explosion.java
 +++ b/net/minecraft/world/level/Explosion.java
-@@ -268,6 +_,7 @@
+@@ -44,18 +_,18 @@
+     private final boolean fire;
+     private final Explosion.BlockInteraction blockInteraction;
+     private final RandomSource random = RandomSource.create();
+-    final Level level;
+-    final double x;
+-    final double y;
+-    final double z;
++    private final Level level;
++    private final double x;
++    private final double y;
++    private final double z;
+     @Nullable
+     private final Entity source;
+-    final float radius;
++    private final float radius;
+     private final DamageSource damageSource;
+     private final ExplosionDamageCalculator damageCalculator;
+-    final ParticleOptions smallExplosionParticles;
+-    final ParticleOptions largeExplosionParticles;
+-    final Holder<SoundEvent> explosionSound;
++    private final ParticleOptions smallExplosionParticles;
++    private final ParticleOptions largeExplosionParticles;
++    private final Holder<SoundEvent> explosionSound;
+     private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
+     private final Map<Player, Vec3> hitPlayers = Maps.newHashMap();
+ 
+@@ -181,19 +_,19 @@
+             int i = 0;
+             int j = 0;
+ 
+-            for(double d5 = 0.0; d5 <= 1.0; d5 += d0) {
+-                for(double d6 = 0.0; d6 <= 1.0; d6 += d1) {
+-                    for(double d7 = 0.0; d7 <= 1.0; d7 += d2) {
++            for (double d5 = 0.0; d5 <= 1.0; d5 += d0) {
++                for (double d6 = 0.0; d6 <= 1.0; d6 += d1) {
++                    for (double d7 = 0.0; d7 <= 1.0; d7 += d2) {
+                         double d8 = Mth.lerp(d5, aabb.minX, aabb.maxX);
+                         double d9 = Mth.lerp(d6, aabb.minY, aabb.maxY);
+                         double d10 = Mth.lerp(d7, aabb.minZ, aabb.maxZ);
+                         Vec3 vec3 = new Vec3(d8 + d3, d9, d10 + d4);
+                         if (p_46066_.level().clip(new ClipContext(vec3, p_46065_, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p_46066_)).getType()
+                             == HitResult.Type.MISS) {
+-                            ++i;
++                            i++;
+                         }
+ 
+-                        ++j;
++                        j++;
+                     }
+                 }
+             }
+@@ -217,9 +_,9 @@
+         Set<BlockPos> set = Sets.newHashSet();
+         int i = 16;
+ 
+-        for(int j = 0; j < 16; ++j) {
+-            for(int k = 0; k < 16; ++k) {
+-                for(int l = 0; l < 16; ++l) {
++        for (int j = 0; j < 16; j++) {
++            for (int k = 0; k < 16; k++) {
++                for (int l = 0; l < 16; l++) {
+                     if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
+                         double d0 = (double)((float)j / 15.0F * 2.0F - 1.0F);
+                         double d1 = (double)((float)k / 15.0F * 2.0F - 1.0F);
+@@ -233,7 +_,7 @@
+                         double d6 = this.y;
+                         double d8 = this.z;
+ 
+-                        for(float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
++                        for (float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
+                             BlockPos blockpos = BlockPos.containing(d4, d6, d8);
+                             BlockState blockstate = this.level.getBlockState(blockpos);
+                             FluidState fluidstate = this.level.getFluidState(blockpos);
+@@ -268,9 +_,10 @@
          int j2 = Mth.floor(this.z - (double)f2 - 1.0);
          int j1 = Mth.floor(this.z + (double)f2 + 1.0);
          List<Entity> list = this.level.getEntities(this.source, new AABB((double)k1, (double)i2, (double)j2, (double)l1, (double)i1, (double)j1));
 +        net.neoforged.neoforge.event.EventHooks.onExplosionDetonate(this.level, this, list, f2);
          Vec3 vec3 = new Vec3(this.x, this.y, this.z);
  
-         for (Entity entity : list) {
+-        for(Entity entity : list) {
++        for (Entity entity : list) {
+             if (!entity.ignoreExplosion(this)) {
+                 double d11 = Math.sqrt(entity.distanceToSqr(vec3)) / (double)f2;
+                 if (d11 <= 1.0) {
+@@ -299,8 +_,11 @@
+                         d9 *= d10;
+                         Vec3 vec31 = new Vec3(d5, d7, d9);
+                         entity.setDeltaMovement(entity.getDeltaMovement().add(vec31));
+-                        if (entity instanceof Player player && !player.isSpectator() && (!player.isCreative() || !player.getAbilities().flying)) {
+-                            this.hitPlayers.put(player, vec31);
++                        if (entity instanceof Player) {
++                            Player player = (Player)entity;
++                            if (!player.isSpectator() && (!player.isCreative() || !player.getAbilities().flying)) {
++                                this.hitPlayers.put(player, vec31);
++                            }
+                         }
+ 
+                         entity.onExplosionHit(this.source);
+@@ -342,13 +_,13 @@
+             List<Pair<ItemStack, BlockPos>> list = new ArrayList<>();
+             Util.shuffle(this.toBlow, this.level.random);
+ 
+-            for(BlockPos blockpos : this.toBlow) {
++            for (BlockPos blockpos : this.toBlow) {
+                 this.level
+                     .getBlockState(blockpos)
+                     .onExplosionHit(this.level, blockpos, this, (p_311741_, p_311742_) -> addOrAppendStack(list, p_311741_, p_311742_));
+             }
+ 
+-            for(Pair<ItemStack, BlockPos> pair : list) {
++            for (Pair<ItemStack, BlockPos> pair : list) {
+                 Block.popResource(this.level, pair.getSecond(), pair.getFirst());
+             }
+ 
+@@ -356,7 +_,7 @@
+         }
+ 
+         if (this.fire) {
+-            for(BlockPos blockpos1 : this.toBlow) {
++            for (BlockPos blockpos1 : this.toBlow) {
+                 if (this.random.nextInt(3) == 0
+                     && this.level.getBlockState(blockpos1).isAir()
+                     && this.level.getBlockState(blockpos1.below()).isSolidRender(this.level, blockpos1.below())) {
+@@ -367,7 +_,7 @@
+     }
+ 
+     private static void addOrAppendStack(List<Pair<ItemStack, BlockPos>> p_312455_, ItemStack p_312913_, BlockPos p_312738_) {
+-        for(int i = 0; i < p_312455_.size(); ++i) {
++        for (int i = 0; i < p_312455_.size(); i++) {
+             Pair<ItemStack, BlockPos> pair = p_312455_.get(i);
+             ItemStack itemstack = pair.getFirst();
+             if (ItemEntity.areMergable(itemstack, p_312913_)) {
+@@ -395,8 +_,8 @@
+             return null;
+         } else if (p_312444_ instanceof PrimedTnt primedtnt) {
+             return primedtnt.getOwner();
+-        } else if (p_312444_ instanceof LivingEntity livingentity) {
+-            return livingentity;
++        } else if (p_312444_ instanceof LivingEntity) {
++            return (LivingEntity)p_312444_;
+         } else {
+             if (p_312444_ instanceof Projectile projectile) {
+                 Entity entity = projectile.getOwner();

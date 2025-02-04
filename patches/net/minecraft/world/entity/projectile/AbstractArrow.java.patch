@@ -1,7 +1,20 @@
 --- a/net/minecraft/world/entity/projectile/AbstractArrow.java
 +++ b/net/minecraft/world/entity/projectile/AbstractArrow.java
-@@ -167,7 +_,7 @@
-             this.shakeTime--;
+@@ -152,7 +_,7 @@
+             if (!voxelshape.isEmpty()) {
+                 Vec3 vec31 = this.position();
+ 
+-                for(AABB aabb : voxelshape.toAabbs()) {
++                for (AABB aabb : voxelshape.toAabbs()) {
+                     if (aabb.move(blockpos).contains(vec31)) {
+                         this.inGround = true;
+                         break;
+@@ -162,10 +_,10 @@
+         }
+ 
+         if (this.shakeTime > 0) {
+-            --this.shakeTime;
++            this.shakeTime--;
          }
  
 -        if (this.isInWaterOrRain() || blockstate.is(Blocks.POWDER_SNOW)) {
@@ -9,14 +22,93 @@
              this.clearFire();
          }
  
-@@ -203,7 +_,9 @@
+@@ -176,7 +_,7 @@
+                 this.tickDespawn();
+             }
+ 
+-            ++this.inGroundTime;
++            this.inGroundTime++;
+         } else {
+             this.inGroundTime = 0;
+             Vec3 vec32 = this.position();
+@@ -186,7 +_,7 @@
+                 vec33 = hitresult.getLocation();
+             }
+ 
+-            while(!this.isRemoved() && !this.isDeflected) {
++            while (!this.isRemoved()) {
+                 EntityHitResult entityhitresult = this.findHitEntity(vec32, vec33);
+                 if (entityhitresult != null) {
+                     hitresult = entityhitresult;
+@@ -201,9 +_,14 @@
                      }
                  }
  
 -                if (hitresult != null && !flag) {
+-                    this.onHit(hitresult);
 +                if (hitresult != null && hitresult.getType() != HitResult.Type.MISS && !flag) {
 +                    if (net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hitresult))
 +                        break;
-                     ProjectileDeflection projectiledeflection = this.hitTargetOrDeflectSelf(hitresult);
++                    ProjectileDeflection projectiledeflection = this.hitOrDeflect(hitresult);
                      this.hasImpulse = true;
-                     if (projectiledeflection != ProjectileDeflection.NONE) {
++                    if (projectiledeflection != ProjectileDeflection.NONE) {
++                        break;
++                    }
+                 }
+ 
+                 if (entityhitresult == null || this.getPierceLevel() <= 0) {
+@@ -213,13 +_,12 @@
+                 hitresult = null;
+             }
+ 
+-            this.isDeflected = false;
+             vec3 = this.getDeltaMovement();
+             double d5 = vec3.x;
+             double d6 = vec3.y;
+             double d1 = vec3.z;
+             if (this.isCritArrow()) {
+-                for(int i = 0; i < 4; ++i) {
++                for (int i = 0; i < 4; i++) {
+                     this.level()
+                         .addParticle(
+                             ParticleTypes.CRIT,
+@@ -248,7 +_,7 @@
+             this.setYRot(lerpRotation(this.yRotO, this.getYRot()));
+             float f = 0.99F;
+             if (this.isInWater()) {
+-                for(int j = 0; j < 4; ++j) {
++                for (int j = 0; j < 4; j++) {
+                     float f1 = 0.25F;
+                     this.level().addParticle(ParticleTypes.BUBBLE, d7 - d5 * 0.25, d2 - d6 * 0.25, d3 - d1 * 0.25, d5, d6, d1);
+                 }
+@@ -293,7 +_,7 @@
+     }
+ 
+     protected void tickDespawn() {
+-        ++this.life;
++        this.life++;
+         if (this.life >= 1200) {
+             this.discard();
+         }
+@@ -524,7 +_,7 @@
+     }
+ 
+     protected boolean tryPickup(Player p_150121_) {
+-        return switch(this.pickup) {
++        return switch (this.pickup) {
+             case DISALLOWED -> false;
+             case ALLOWED -> p_150121_.getInventory().add(this.getPickupItem());
+             case CREATIVE_ONLY -> p_150121_.hasInfiniteMaterials();
+@@ -629,11 +_,7 @@
+     }
+ 
+     public boolean isNoPhysics() {
+-        if (!this.level().isClientSide) {
+-            return this.noPhysics;
+-        } else {
+-            return (this.entityData.get(ID_FLAGS) & 2) != 0;
+-        }
++        return !this.level().isClientSide ? this.noPhysics : (this.entityData.get(ID_FLAGS) & 2) != 0;
+     }
+ 
+     public void setShotFromCrossbow(boolean p_36794_) {

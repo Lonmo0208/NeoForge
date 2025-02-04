@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/level/material/LavaFluid.java
 +++ b/net/minecraft/world/level/material/LavaFluid.java
+@@ -78,7 +_,7 @@
+             if (i > 0) {
+                 BlockPos blockpos = p_230573_;
+ 
+-                for(int j = 0; j < i; ++j) {
++                for (int j = 0; j < i; j++) {
+                     blockpos = blockpos.offset(p_230575_.nextInt(3) - 1, 1, p_230575_.nextInt(3) - 1);
+                     if (!p_230572_.isLoaded(blockpos)) {
+                         return;
 @@ -87,7 +_,7 @@
                      BlockState blockstate = p_230572_.getBlockState(blockpos);
                      if (blockstate.isAir()) {
@@ -9,7 +18,14 @@
                              return;
                          }
                      } else if (blockstate.blocksMotion()) {
-@@ -101,8 +_,8 @@
+@@ -95,14 +_,14 @@
+                     }
+                 }
+             } else {
+-                for(int k = 0; k < 3; ++k) {
++                for (int k = 0; k < 3; k++) {
+                     BlockPos blockpos1 = p_230573_.offset(p_230575_.nextInt(3) - 1, 0, p_230575_.nextInt(3) - 1);
+                     if (!p_230572_.isLoaded(blockpos1)) {
                          return;
                      }
  
@@ -20,11 +36,13 @@
                      }
                  }
              }
-@@ -111,7 +_,7 @@
+@@ -110,8 +_,8 @@
+     }
  
      private boolean hasFlammableNeighbours(LevelReader p_76228_, BlockPos p_76229_) {
-         for (Direction direction : Direction.values()) {
+-        for(Direction direction : Direction.values()) {
 -            if (this.isFlammable(p_76228_, p_76229_.relative(direction))) {
++        for (Direction direction : Direction.values()) {
 +            if (this.isFlammable(p_76228_, p_76229_.relative(direction), direction.getOpposite())) {
                  return true;
              }

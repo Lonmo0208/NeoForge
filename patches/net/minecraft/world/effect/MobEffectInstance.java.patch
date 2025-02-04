@@ -1,6 +1,23 @@
 --- a/net/minecraft/world/effect/MobEffectInstance.java
 +++ b/net/minecraft/world/effect/MobEffectInstance.java
-@@ -86,6 +_,7 @@
+@@ -10,7 +_,6 @@
+ import it.unimi.dsi.fastutil.ints.Int2IntFunction;
+ import java.util.Optional;
+ import javax.annotation.Nullable;
+-import net.minecraft.Util;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.particles.ParticleOptions;
+ import net.minecraft.core.registries.BuiltInRegistries;
+@@ -23,6 +_,8 @@
+ import net.minecraft.network.codec.StreamCodec;
+ import net.minecraft.util.ExtraCodecs;
+ import net.minecraft.util.Mth;
++import net.minecraft.world.damagesource.DamageSource;
++import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
+ import org.slf4j.Logger;
+ 
+@@ -85,6 +_,7 @@
          this.visible = p_19532_;
          this.showIcon = p_19533_;
          this.hiddenEffect = p_316863_;
@@ -8,7 +25,7 @@
      }
  
      public MobEffectInstance(MobEffectInstance p_19543_) {
-@@ -103,6 +_,8 @@
+@@ -102,6 +_,8 @@
              p_324529_.showIcon(),
              p_324529_.hiddenEffect().map(p_323227_ -> new MobEffectInstance(p_324441_, p_323227_)).orElse(null)
          );
@@ -17,7 +34,7 @@
      }
  
      private MobEffectInstance.Details asDetails() {
-@@ -112,7 +_,8 @@
+@@ -111,7 +_,8 @@
              this.isAmbient(),
              this.isVisible(),
              this.showIcon(),
@@ -27,7 +44,7 @@
          );
      }
  
-@@ -130,6 +_,8 @@
+@@ -129,6 +_,8 @@
          this.ambient = p_19549_.ambient;
          this.visible = p_19549_.visible;
          this.showIcon = p_19549_.showIcon;
@@ -36,7 +53,52 @@
      }
  
      public boolean update(MobEffectInstance p_19559_) {
-@@ -326,11 +_,11 @@
+@@ -251,6 +_,14 @@
+         this.effect.value().onEffectStarted(p_295220_, this.amplifier);
+     }
+ 
++    public void onMobRemoved(LivingEntity p_338566_, Entity.RemovalReason p_338384_) {
++        this.effect.value().onMobRemoved(p_338566_, this.amplifier, p_338384_);
++    }
++
++    public void onMobHurt(LivingEntity p_338201_, DamageSource p_338572_, float p_338779_) {
++        this.effect.value().onMobHurt(p_338201_, this.amplifier, p_338572_, p_338779_);
++    }
++
+     public String getDescriptionId() {
+         return this.effect.value().getDescriptionId();
+     }
+@@ -283,14 +_,13 @@
+     public boolean equals(Object p_19574_) {
+         if (this == p_19574_) {
+             return true;
+-        } else if (!(p_19574_ instanceof MobEffectInstance)) {
+-            return false;
+         } else {
+-            MobEffectInstance mobeffectinstance = (MobEffectInstance)p_19574_;
+-            return this.duration == mobeffectinstance.duration
+-                && this.amplifier == mobeffectinstance.amplifier
+-                && this.ambient == mobeffectinstance.ambient
+-                && this.effect.equals(mobeffectinstance.effect);
++            return !(p_19574_ instanceof MobEffectInstance mobeffectinstance)
++                ? false
++                : this.duration == mobeffectinstance.duration
++                    && this.amplifier == mobeffectinstance.amplifier
++                    && this.ambient == mobeffectinstance.ambient
++                    && this.effect.equals(mobeffectinstance.effect);
+         }
+     }
+ 
+@@ -303,7 +_,7 @@
+     }
+ 
+     public Tag save() {
+-        return Util.getOrThrow(CODEC.encodeStart(NbtOps.INSTANCE, this), IllegalStateException::new);
++        return CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();
+     }
+ 
+     @Nullable
+@@ -318,14 +_,18 @@
                  .compareFalseFirst(this.isAmbient(), p_19566_.isAmbient())
                  .compareFalseFirst(this.isInfiniteDuration(), p_19566_.isInfiniteDuration())
                  .compare(this.getDuration(), p_19566_.getDuration())
@@ -50,7 +112,14 @@
                  .result();
      }
  
-@@ -350,6 +_,15 @@
++    public void onEffectAdded(LivingEntity p_338286_) {
++        this.effect.value().onEffectAdded(p_338286_, this.amplifier);
++    }
++
+     public boolean is(Holder<MobEffect> p_316657_) {
+         return this.effect.equals(p_316657_);
+     }
+@@ -338,6 +_,15 @@
          this.blendState.setImmediate(this);
      }
  
@@ -66,21 +135,38 @@
      static class BlendState {
          private float factor;
          private float factorPreviousFrame;
-@@ -397,8 +_,7 @@
+@@ -361,7 +_,7 @@
+                 float f = computeTarget(p_316550_);
+                 if (this.factor != f) {
+                     float f1 = 1.0F / (float)i;
+-                    this.factor += Mth.clamp(f - this.factor, -f1, f1);
++                    this.factor = this.factor + Mth.clamp(f - this.factor, -f1, f1);
+                 }
+             }
+         }
+@@ -385,24 +_,24 @@
      }
  
      static record Details(
 -        int amplifier, int duration, boolean ambient, boolean showParticles, boolean showIcon, Optional<MobEffectInstance.Details> hiddenEffect
 -    ) {
+-        public static final MapCodec<MobEffectInstance.Details> MAP_CODEC = ExtraCodecs.recursiveMap(
 +        int amplifier, int duration, boolean ambient, boolean showParticles, boolean showIcon, Optional<MobEffectInstance.Details> hiddenEffect, Optional<java.util.Set<net.neoforged.neoforge.common.EffectCure>> cures) {
-         public static final MapCodec<MobEffectInstance.Details> MAP_CODEC = MapCodec.recursive(
++        public static final MapCodec<MobEffectInstance.Details> MAP_CODEC = MapCodec.recursive(
              "MobEffectInstance.Details",
              p_323465_ -> RecordCodecBuilder.mapCodec(
-@@ -408,13 +_,14 @@
-                                 Codec.BOOL.optionalFieldOf("ambient", Boolean.valueOf(false)).forGetter(MobEffectInstance.Details::ambient),
-                                 Codec.BOOL.optionalFieldOf("show_particles", Boolean.valueOf(true)).forGetter(MobEffectInstance.Details::showParticles),
-                                 Codec.BOOL.optionalFieldOf("show_icon").forGetter(p_323788_ -> Optional.of(p_323788_.showIcon())),
--                                p_323465_.optionalFieldOf("hidden_effect").forGetter(MobEffectInstance.Details::hiddenEffect)
+                     p_324063_ -> p_324063_.group(
+-                                ExtraCodecs.strictOptionalField(ExtraCodecs.UNSIGNED_BYTE, "amplifier", 0).forGetter(MobEffectInstance.Details::amplifier),
+-                                ExtraCodecs.strictOptionalField(Codec.INT, "duration", 0).forGetter(MobEffectInstance.Details::duration),
+-                                ExtraCodecs.strictOptionalField(Codec.BOOL, "ambient", false).forGetter(MobEffectInstance.Details::ambient),
+-                                ExtraCodecs.strictOptionalField(Codec.BOOL, "show_particles", true).forGetter(MobEffectInstance.Details::showParticles),
+-                                ExtraCodecs.strictOptionalField(Codec.BOOL, "show_icon").forGetter(p_323788_ -> Optional.of(p_323788_.showIcon())),
+-                                ExtraCodecs.strictOptionalField(p_323465_, "hidden_effect").forGetter(MobEffectInstance.Details::hiddenEffect)
++                                ExtraCodecs.UNSIGNED_BYTE.optionalFieldOf("amplifier", 0).forGetter(MobEffectInstance.Details::amplifier),
++                                Codec.INT.optionalFieldOf("duration", Integer.valueOf(0)).forGetter(MobEffectInstance.Details::duration),
++                                Codec.BOOL.optionalFieldOf("ambient", Boolean.valueOf(false)).forGetter(MobEffectInstance.Details::ambient),
++                                Codec.BOOL.optionalFieldOf("show_particles", Boolean.valueOf(true)).forGetter(MobEffectInstance.Details::showParticles),
++                                Codec.BOOL.optionalFieldOf("show_icon").forGetter(p_323788_ -> Optional.of(p_323788_.showIcon())),
 +                                p_323465_.optionalFieldOf("hidden_effect").forGetter(MobEffectInstance.Details::hiddenEffect),
 +                                net.neoforged.neoforge.common.util.NeoForgeExtraCodecs.setOf(net.neoforged.neoforge.common.EffectCure.CODEC).optionalFieldOf("neoforge:cures").forGetter(MobEffectInstance.Details::cures)
                              )
@@ -93,7 +179,7 @@
                      ByteBufCodecs.VAR_INT,
                      MobEffectInstance.Details::amplifier,
                      ByteBufCodecs.VAR_INT,
-@@ -427,14 +_,16 @@
+@@ -415,14 +_,16 @@
                      MobEffectInstance.Details::showIcon,
                      p_329990_.apply(ByteBufCodecs::optional),
                      MobEffectInstance.Details::hiddenEffect,

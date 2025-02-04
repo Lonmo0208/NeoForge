@@ -1,10 +1,99 @@
 --- a/net/minecraft/server/level/ChunkHolder.java
 +++ b/net/minecraft/server/level/ChunkHolder.java
-@@ -62,6 +_,7 @@
+@@ -7,6 +_,7 @@
+ import java.util.BitSet;
+ import java.util.List;
+ import java.util.concurrent.CompletableFuture;
++import java.util.concurrent.CompletionStage;
+ import java.util.concurrent.Executor;
+ import java.util.concurrent.atomic.AtomicReferenceArray;
+ import java.util.function.IntConsumer;
+@@ -61,6 +_,7 @@
      private final ChunkHolder.LevelChangeListener onLevelChange;
      private final ChunkHolder.PlayerProvider playerProvider;
      private boolean wasAccessibleSinceLastSave;
 +    LevelChunk currentlyLoading; // Forge: Used to bypass future chain when loading chunks.
      private CompletableFuture<Void> pendingFullStateConfirmation = CompletableFuture.completedFuture(null);
      private CompletableFuture<?> sendSync = CompletableFuture.completedFuture(null);
+ 
+@@ -121,7 +_,7 @@
+ 
+     @Nullable
+     public ChunkStatus getLastAvailableStatus() {
+-        for(int i = CHUNK_STATUSES.size() - 1; i >= 0; --i) {
++        for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
+             ChunkStatus chunkstatus = CHUNK_STATUSES.get(i);
+             CompletableFuture<ChunkResult<ChunkAccess>> completablefuture = this.getFutureIfPresentUnchecked(chunkstatus);
+             if (completablefuture.getNow(UNLOADED_CHUNK).isSuccess()) {
+@@ -134,7 +_,7 @@
+ 
+     @Nullable
+     public ChunkAccess getLastAvailable() {
+-        for(int i = CHUNK_STATUSES.size() - 1; i >= 0; --i) {
++        for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
+             ChunkStatus chunkstatus = CHUNK_STATUSES.get(i);
+             CompletableFuture<ChunkResult<ChunkAccess>> completablefuture = this.getFutureIfPresentUnchecked(chunkstatus);
+             if (!completablefuture.isCompletedExceptionally()) {
+@@ -204,7 +_,7 @@
+             if (this.hasChangedSections) {
+                 List<ServerPlayer> list1 = this.playerProvider.getPlayers(this.pos, false);
+ 
+-                for(int j = 0; j < this.changedBlocksPerSection.length; ++j) {
++                for (int j = 0; j < this.changedBlocksPerSection.length; j++) {
+                     ShortSet shortset = this.changedBlocksPerSection[j];
+                     if (shortset != null) {
+                         this.changedBlocksPerSection[j] = null;
+@@ -285,7 +_,7 @@
+             this.chunkToSaveHistory.push(new ChunkHolder.ChunkSaveDebug(Thread.currentThread(), p_200418_, p_200417_));
+         }
+ 
+-        this.chunkToSave = this.chunkToSave.thenCombine(p_200418_, (p_200414_, p_200415_) -> p_200414_);
++        this.chunkToSave = this.chunkToSave.thenCombine((CompletionStage<? extends Object>)p_200418_, (p_200414_, p_200415_) -> (ChunkAccess)p_200414_);
+     }
+ 
+     private void updateChunkToSave(CompletableFuture<? extends ChunkResult<? extends ChunkAccess>> p_143018_, String p_143019_) {
+@@ -293,14 +_,15 @@
+             this.chunkToSaveHistory.push(new ChunkHolder.ChunkSaveDebug(Thread.currentThread(), p_143018_, p_143019_));
+         }
+ 
+-        this.chunkToSave = this.chunkToSave.thenCombine(p_143018_, (p_329906_, p_329907_) -> ChunkResult.orElse(p_329907_, p_329906_));
++        this.chunkToSave = this.chunkToSave
++            .thenCombine(p_143018_, (p_329906_, p_329907_) -> ChunkResult.orElse((ChunkResult<? extends ChunkAccess>)p_329907_, (ChunkAccess)p_329906_));
+     }
+ 
+     public void addSendDependency(CompletableFuture<?> p_301235_) {
+         if (this.sendSync.isDone()) {
+             this.sendSync = p_301235_;
+         } else {
+-            this.sendSync = this.sendSync.thenCombine(p_301235_, (p_300767_, p_300768_) -> null);
++            this.sendSync = this.sendSync.thenCombine((CompletionStage<? extends Object>)p_301235_, (p_300767_, p_300768_) -> null);
+         }
+     }
+ 
+@@ -353,7 +_,7 @@
+         if (flag) {
+             ChunkResult<ChunkAccess> chunkresult = ChunkResult.error(() -> "Unloaded ticket level " + this.pos);
+ 
+-            for(int i = flag1 ? chunkstatus1.getIndex() + 1 : 0; i <= chunkstatus.getIndex(); ++i) {
++            for (int i = flag1 ? chunkstatus1.getIndex() + 1 : 0; i <= chunkstatus.getIndex(); i++) {
+                 CompletableFuture<ChunkResult<ChunkAccess>> completablefuture = this.futures.get(i);
+                 if (completablefuture == null) {
+                     this.futures.set(i, CompletableFuture.completedFuture(chunkresult));
+@@ -422,7 +_,7 @@
+     }
+ 
+     public void replaceProtoChunk(ImposterProtoChunk p_140053_) {
+-        for(int i = 0; i < this.futures.length(); ++i) {
++        for (int i = 0; i < this.futures.length(); i++) {
+             CompletableFuture<ChunkResult<ChunkAccess>> completablefuture = this.futures.get(i);
+             if (completablefuture != null) {
+                 ChunkAccess chunkaccess = completablefuture.getNow(UNLOADED_CHUNK).orElse(null);
+@@ -438,7 +_,7 @@
+     public List<Pair<ChunkStatus, CompletableFuture<ChunkResult<ChunkAccess>>>> getAllFutures() {
+         List<Pair<ChunkStatus, CompletableFuture<ChunkResult<ChunkAccess>>>> list = new ArrayList<>();
+ 
+-        for(int i = 0; i < CHUNK_STATUSES.size(); ++i) {
++        for (int i = 0; i < CHUNK_STATUSES.size(); i++) {
+             list.add(Pair.of(CHUNK_STATUSES.get(i), this.futures.get(i)));
+         }
  

@@ -1,6 +1,14 @@
 --- a/net/minecraft/world/inventory/AnvilMenu.java
 +++ b/net/minecraft/world/inventory/AnvilMenu.java
-@@ -79,6 +_,8 @@
+@@ -75,14 +_,12 @@
+ 
+     @Override
+     protected void onTake(Player p_150474_, ItemStack p_150475_) {
+-        if (p_150474_.isChapterAndProgressPast("anvil_dropped", 0) && p_150475_.is(Items.PAPER)) {
+-            p_150474_.setPotatoQuestChapter("wrote_thoughts");
+-        }
+-
+         if (!p_150474_.getAbilities().instabuild) {
              p_150474_.giveExperienceLevels(-this.cost.get());
          }
  
@@ -9,7 +17,7 @@
          this.inputSlots.setItem(0, ItemStack.EMPTY);
          if (this.repairItemCountCost > 0) {
              ItemStack itemstack = this.inputSlots.getItem(1);
-@@ -95,7 +_,7 @@
+@@ -99,7 +_,7 @@
          this.cost.set(0);
          this.access.execute((p_150479_, p_150480_) -> {
              BlockState blockstate = p_150479_.getBlockState(p_150480_);
@@ -18,7 +26,7 @@
                  BlockState blockstate1 = AnvilBlock.damage(blockstate);
                  if (blockstate1 == null) {
                      p_150479_.removeBlock(p_150480_, false);
-@@ -124,8 +_,10 @@
+@@ -128,8 +_,10 @@
              j += (long)itemstack.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0)).intValue()
                  + (long)itemstack2.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0)).intValue();
              this.repairItemCountCost = 0;
@@ -30,7 +38,42 @@
                  if (itemstack1.isDamageableItem() && itemstack1.getItem().isValidRepairItem(itemstack, itemstack2)) {
                      int l2 = Math.min(itemstack1.getDamageValue(), itemstack1.getMaxDamage() / 4);
                      if (l2 <= 0) {
-@@ -228,6 +_,7 @@
+@@ -139,10 +_,10 @@
+                     }
+ 
+                     int j3;
+-                    for(j3 = 0; l2 > 0 && j3 < itemstack2.getCount(); ++j3) {
++                    for (j3 = 0; l2 > 0 && j3 < itemstack2.getCount(); j3++) {
+                         int k3 = itemstack1.getDamageValue() - l2;
+                         itemstack1.setDamageValue(k3);
+-                        ++i;
++                        i++;
+                         l2 = Math.min(itemstack1.getDamageValue(), itemstack1.getMaxDamage() / 4);
+                     }
+ 
+@@ -174,7 +_,7 @@
+                     boolean flag2 = false;
+                     boolean flag3 = false;
+ 
+-                    for(Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
++                    for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
+                         Holder<Enchantment> holder = entry.getKey();
+                         Enchantment enchantment = holder.value();
+                         int i2 = itemenchantments$mutable.getLevel(enchantment);
+@@ -185,10 +_,10 @@
+                             flag1 = true;
+                         }
+ 
+-                        for(Holder<Enchantment> holder1 : itemenchantments$mutable.keySet()) {
++                        for (Holder<Enchantment> holder1 : itemenchantments$mutable.keySet()) {
+                             if (!holder1.equals(holder) && !enchantment.isCompatibleWith(holder1.value())) {
+                                 flag1 = false;
+-                                ++i;
++                                i++;
+                             }
+                         }
+ 
+@@ -232,6 +_,7 @@
                  i += k;
                  itemstack1.remove(DataComponents.CUSTOM_NAME);
              }
@@ -38,7 +81,7 @@
  
              int k2 = (int)Mth.clamp(j + (long)i, 0L, 2147483647L);
              this.cost.set(k2);
-@@ -297,5 +_,12 @@
+@@ -301,5 +_,12 @@
  
      public int getCost() {
          return this.cost.get();

@@ -1,5 +1,22 @@
 --- a/net/minecraft/gametest/framework/GameTestServer.java
 +++ b/net/minecraft/gametest/framework/GameTestServer.java
+@@ -45,7 +_,6 @@
+ import net.minecraft.world.level.dimension.LevelStem;
+ import net.minecraft.world.level.levelgen.WorldDimensions;
+ import net.minecraft.world.level.levelgen.WorldOptions;
+-import net.minecraft.world.level.levelgen.presets.WorldPreset;
+ import net.minecraft.world.level.levelgen.presets.WorldPresets;
+ import net.minecraft.world.level.storage.LevelStorageSource;
+ import net.minecraft.world.level.storage.PrimaryLevelData;
+@@ -94,7 +_,7 @@
+                                 p_258205_ -> {
+                                     Registry<LevelStem> registry = new MappedRegistry<>(Registries.LEVEL_STEM, Lifecycle.stable()).freeze();
+                                     WorldDimensions.Complete worlddimensions$complete = p_258205_.datapackWorldgen()
+-                                        .<WorldPreset>registryOrThrow(Registries.WORLD_PRESET)
++                                        .registryOrThrow(Registries.WORLD_PRESET)
+                                         .getHolderOrThrow(WorldPresets.FLAT)
+                                         .value()
+                                         .createWorldDimensions()
 @@ -149,6 +_,7 @@
      public boolean initServer() {
          this.setPlayerList(new PlayerList(this, this.registries(), this.playerDataStorage, 1) {

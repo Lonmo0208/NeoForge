@@ -15,3 +15,12 @@
      }
  
      @Override
+@@ -105,7 +_,7 @@
+         double d0 = 0.5625;
+         RandomSource randomsource = p_55455_.random;
+ 
+-        for(Direction direction : Direction.values()) {
++        for (Direction direction : Direction.values()) {
+             BlockPos blockpos = p_55456_.relative(direction);
+             if (!p_55455_.getBlockState(blockpos).isSolidRender(p_55455_, blockpos)) {
+                 Direction.Axis direction$axis = direction.getAxis();

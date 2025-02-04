@@ -9,7 +9,7 @@
  
      public MeleeAttackGoal(PathfinderMob p_25552_, double p_25553_, boolean p_25554_) {
          this.mob = p_25552_;
-@@ -42,6 +_,15 @@
+@@ -42,12 +_,17 @@
              } else if (!livingentity.isAlive()) {
                  return false;
              } else {
@@ -23,9 +23,30 @@
 +                    }
 +                }
                  this.path = this.mob.getNavigation().createPath(livingentity, 0);
-                 return this.path != null ? true : this.mob.isWithinMeleeAttackRange(livingentity);
+-                if (this.path != null) {
+-                    return true;
+-                } else {
+-                    return this.mob.isWithinMeleeAttackRange(livingentity);
+-                }
++                return this.path != null ? true : this.mob.isWithinMeleeAttackRange(livingentity);
              }
-@@ -106,6 +_,18 @@
+         }
+     }
+@@ -61,10 +_,10 @@
+             return false;
+         } else if (!this.followingTargetEvenIfNotSeen) {
+             return !this.mob.getNavigation().isDone();
+-        } else if (!this.mob.isWithinRestriction(livingentity.blockPosition())) {
+-            return false;
+         } else {
+-            return !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
++            return !this.mob.isWithinRestriction(livingentity.blockPosition())
++                ? false
++                : !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
+         }
+     }
+ 
+@@ -110,6 +_,18 @@
                  this.pathedTargetZ = livingentity.getZ();
                  this.ticksUntilNextPathRecalculation = 4 + this.mob.getRandom().nextInt(7);
                  double d0 = this.mob.distanceToSqr(livingentity);

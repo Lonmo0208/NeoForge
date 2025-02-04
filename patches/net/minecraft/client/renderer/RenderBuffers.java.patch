@@ -1,10 +1,39 @@
 --- a/net/minecraft/client/renderer/RenderBuffers.java
 +++ b/net/minecraft/client/renderer/RenderBuffers.java
-@@ -39,6 +_,7 @@
-             put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.waterMask());
+@@ -23,22 +_,23 @@
+             p_307112_.put(Sheets.cutoutBlockSheet(), this.fixedBufferPack.builder(RenderType.cutout()));
+             p_307112_.put(Sheets.bannerSheet(), this.fixedBufferPack.builder(RenderType.cutoutMipped()));
+             p_307112_.put(Sheets.translucentCullBlockSheet(), this.fixedBufferPack.builder(RenderType.translucent()));
+-            put(p_307112_, Sheets.shieldSheet());
+-            put(p_307112_, Sheets.bedSheet());
+-            put(p_307112_, Sheets.shulkerBoxSheet());
+-            put(p_307112_, Sheets.signSheet());
+-            put(p_307112_, Sheets.hangingSignSheet());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, Sheets.shieldSheet());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, Sheets.bedSheet());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, Sheets.shulkerBoxSheet());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, Sheets.signSheet());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, Sheets.hangingSignSheet());
+             p_307112_.put(Sheets.chestSheet(), new BufferBuilder(786432));
+-            put(p_307112_, RenderType.armorGlint());
+-            put(p_307112_, RenderType.armorEntityGlint());
+-            put(p_307112_, RenderType.glint());
+-            put(p_307112_, RenderType.glintDirect());
+-            put(p_307112_, RenderType.glintTranslucent());
+-            put(p_307112_, RenderType.entityGlint());
+-            put(p_307112_, RenderType.entityGlintDirect());
+-            put(p_307112_, RenderType.waterMask());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.armorGlint());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.armorEntityGlint());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.glint());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.glintDirect());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.glintTranslucent());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.entityGlint());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.entityGlintDirect());
++            put((Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder>)p_307112_, RenderType.waterMask());
              ModelBakery.DESTROY_TYPES.forEach(p_173062_ -> put(p_307112_, p_173062_));
          });
-+        net.neoforged.fml.ModLoader.postEvent(new net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent(sortedmap));
++        net.neoforged.fml.ModLoader.get().postEvent(new net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent(sortedmap));
          this.crumblingBufferSource = MultiBufferSource.immediate(new BufferBuilder(1536));
          this.bufferSource = MultiBufferSource.immediateWithBuffers(sortedmap, new BufferBuilder(786432));
          this.outlineBufferSource = new OutlineBufferSource(this.bufferSource);

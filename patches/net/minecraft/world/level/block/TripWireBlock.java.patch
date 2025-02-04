@@ -9,3 +9,51 @@
              p_57615_.setBlock(p_57616_, p_57617_.setValue(DISARMED, Boolean.valueOf(true)), 4);
              p_57615_.gameEvent(p_57618_, GameEvent.SHEAR, p_57616_);
          }
+@@ -113,8 +_,8 @@
+     }
+ 
+     private void updateSource(Level p_57611_, BlockPos p_57612_, BlockState p_57613_) {
+-        for(Direction direction : new Direction[]{Direction.SOUTH, Direction.WEST}) {
+-            for(int i = 1; i < 42; ++i) {
++        for (Direction direction : new Direction[]{Direction.SOUTH, Direction.WEST}) {
++            for (int i = 1; i < 42; i++) {
+                 BlockPos blockpos = p_57612_.relative(direction, i);
+                 BlockState blockstate = p_57611_.getBlockState(blockpos);
+                 if (blockstate.is(this.hook)) {
+@@ -153,7 +_,7 @@
+         boolean flag1 = false;
+         List<? extends Entity> list = p_57608_.getEntities(null, blockstate.getShape(p_57608_, p_57609_).bounds().move(p_57609_));
+         if (!list.isEmpty()) {
+-            for(Entity entity : list) {
++            for (Entity entity : list) {
+                 if (!entity.isIgnoringBlockTriggers()) {
+                     flag1 = true;
+                     break;
+@@ -173,16 +_,12 @@
+     }
+ 
+     public boolean shouldConnectTo(BlockState p_57642_, Direction p_57643_) {
+-        if (p_57642_.is(this.hook)) {
+-            return p_57642_.getValue(TripWireHookBlock.FACING) == p_57643_.getOpposite();
+-        } else {
+-            return p_57642_.is(this);
+-        }
++        return p_57642_.is(this.hook) ? p_57642_.getValue(TripWireHookBlock.FACING) == p_57643_.getOpposite() : p_57642_.is(this);
+     }
+ 
+     @Override
+     protected BlockState rotate(BlockState p_57639_, Rotation p_57640_) {
+-        switch(p_57640_) {
++        switch (p_57640_) {
+             case CLOCKWISE_180:
+                 return p_57639_.setValue(NORTH, p_57639_.getValue(SOUTH))
+                     .setValue(EAST, p_57639_.getValue(WEST))
+@@ -205,7 +_,7 @@
+ 
+     @Override
+     protected BlockState mirror(BlockState p_57636_, Mirror p_57637_) {
+-        switch(p_57637_) {
++        switch (p_57637_) {
+             case LEFT_RIGHT:
+                 return p_57636_.setValue(NORTH, p_57636_.getValue(SOUTH)).setValue(SOUTH, p_57636_.getValue(NORTH));
+             case FRONT_BACK:

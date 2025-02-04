@@ -1,6 +1,118 @@
 --- a/net/minecraft/world/entity/animal/Bee.java
 +++ b/net/minecraft/world/entity/animal/Bee.java
-@@ -482,7 +_,7 @@
+@@ -145,11 +_,6 @@
+     }
+ 
+     @Override
+-    public boolean hasPotatoVariant() {
+-        return true;
+-    }
+-
+-    @Override
+     protected void defineSynchedData(SynchedEntityData.Builder p_326248_) {
+         super.defineSynchedData(p_326248_);
+         p_326248_.define(DATA_FLAGS_ID, (byte)0);
+@@ -246,28 +_,10 @@
+     public void tick() {
+         super.tick();
+         if (this.hasNectar() && this.getCropsGrownSincePollination() < 10 && this.random.nextFloat() < 0.05F) {
+-            for(int i = 0; i < this.random.nextInt(2) + 1; ++i) {
+-                if (this.isPotato()) {
+-                    this.spawnFluidParticle(
+-                        this.level(),
+-                        this.getX() - 0.3F,
+-                        this.getX() + 0.3F,
+-                        this.getZ() - 0.3F,
+-                        this.getZ() + 0.3F,
+-                        this.getY(0.5),
+-                        ParticleTypes.FALLING_POISON
+-                    );
+-                } else {
+-                    this.spawnFluidParticle(
+-                        this.level(),
+-                        this.getX() - 0.3F,
+-                        this.getX() + 0.3F,
+-                        this.getZ() - 0.3F,
+-                        this.getZ() + 0.3F,
+-                        this.getY(0.5),
+-                        ParticleTypes.FALLING_NECTAR
+-                    );
+-                }
++            for (int i = 0; i < this.random.nextInt(2) + 1; i++) {
++                this.spawnFluidParticle(
++                    this.level(), this.getX() - 0.3F, this.getX() + 0.3F, this.getZ() - 0.3F, this.getZ() + 0.3F, this.getY(0.5), ParticleTypes.FALLING_NECTAR
++                );
+             }
+         }
+ 
+@@ -371,7 +_,7 @@
+     protected void customServerAiStep() {
+         boolean flag = this.hasStung();
+         if (this.isInWaterOrBubble()) {
+-            ++this.underWaterTicks;
++            this.underWaterTicks++;
+         } else {
+             this.underWaterTicks = 0;
+         }
+@@ -381,14 +_,14 @@
+         }
+ 
+         if (flag) {
+-            ++this.timeSinceSting;
++            this.timeSinceSting++;
+             if (this.timeSinceSting % 5 == 0 && this.random.nextInt(Mth.clamp(1200 - this.timeSinceSting, 1, 1200)) == 0) {
+                 this.hurt(this.damageSources().generic(), this.getHealth());
+             }
+         }
+ 
+         if (!this.hasNectar()) {
+-            ++this.ticksWithoutNectarSinceExitingHive;
++            this.ticksWithoutNectarSinceExitingHive++;
+         }
+ 
+         if (!this.level().isClientSide) {
+@@ -437,11 +_,7 @@
+ 
+     private boolean doesHiveHaveSpace(BlockPos p_27885_) {
+         BlockEntity blockentity = this.level().getBlockEntity(p_27885_);
+-        if (blockentity instanceof BeehiveBlockEntity) {
+-            return !((BeehiveBlockEntity)blockentity).isFull();
+-        } else {
+-            return false;
+-        }
++        return blockentity instanceof BeehiveBlockEntity ? !((BeehiveBlockEntity)blockentity).isFull() : false;
+     }
+ 
+     @VisibleForDebug
+@@ -475,7 +_,7 @@
+     }
+ 
+     void incrementNumCropsGrownSincePollination() {
+-        ++this.numCropsGrownSincePollination;
++        this.numCropsGrownSincePollination++;
+     }
+ 
+     @Override
+@@ -483,15 +_,15 @@
+         super.aiStep();
+         if (!this.level().isClientSide) {
+             if (this.stayOutOfHiveCountdown > 0) {
+-                --this.stayOutOfHiveCountdown;
++                this.stayOutOfHiveCountdown--;
+             }
+ 
+             if (this.remainingCooldownBeforeLocatingNewHive > 0) {
+-                --this.remainingCooldownBeforeLocatingNewHive;
++                this.remainingCooldownBeforeLocatingNewHive--;
+             }
+ 
+             if (this.remainingCooldownBeforeLocatingNewFlower > 0) {
+-                --this.remainingCooldownBeforeLocatingNewFlower;
++                this.remainingCooldownBeforeLocatingNewFlower--;
+             }
+ 
+             boolean flag = this.isAngry() && !this.hasStung() && this.getTarget() != null && this.getTarget().distanceToSqr(this) < 4.0;
+@@ -509,7 +_,7 @@
              return false;
          } else {
              BlockEntity blockentity = this.level().getBlockEntity(this.hivePos);
@@ -9,7 +121,7 @@
          }
      }
  
-@@ -631,8 +_,18 @@
+@@ -658,11 +_,21 @@
      }
  
      @Override
@@ -20,11 +132,171 @@
 +
 +    private void jumpInLiquidInternal() {
          this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.01, 0.0));
-+    }
-+
-+    @Override
-+    public void jumpInFluid(net.neoforged.neoforge.fluids.FluidType type) {
-+        this.jumpInLiquidInternal();
      }
  
      @Override
++    public void jumpInFluid(net.neoforged.neoforge.fluids.FluidType type) {
++        this.jumpInLiquidInternal();
++    }
++
++    @Override
+     public Vec3 getLeashOffset() {
+         return new Vec3(0.0, (double)(0.5F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.2F));
+     }
+@@ -737,15 +_,15 @@
+     class BeeEnterHiveGoal extends Bee.BaseBeeGoal {
+         @Override
+         public boolean canBeeUse() {
+-            if (Bee.this.hasHive() && Bee.this.wantsToEnterHive() && Bee.this.hivePos.closerToCenterThan(Bee.this.position(), 2.0)) {
+-                BlockEntity blockentity = Bee.this.level().getBlockEntity(Bee.this.hivePos);
+-                if (blockentity instanceof BeehiveBlockEntity beehiveblockentity) {
+-                    if (!beehiveblockentity.isFull()) {
+-                        return true;
+-                    }
+-
+-                    Bee.this.hivePos = null;
++            if (Bee.this.hasHive()
++                && Bee.this.wantsToEnterHive()
++                && Bee.this.hivePos.closerToCenterThan(Bee.this.position(), 2.0)
++                && Bee.this.level().getBlockEntity(Bee.this.hivePos) instanceof BeehiveBlockEntity beehiveblockentity) {
++                if (!beehiveblockentity.isFull()) {
++                    return true;
+                 }
++
++                Bee.this.hivePos = null;
+             }
+ 
+             return false;
+@@ -758,8 +_,7 @@
+ 
+         @Override
+         public void start() {
+-            BlockEntity blockentity = Bee.this.level().getBlockEntity(Bee.this.hivePos);
+-            if (blockentity instanceof BeehiveBlockEntity beehiveblockentity) {
++            if (Bee.this.level().getBlockEntity(Bee.this.hivePos) instanceof BeehiveBlockEntity beehiveblockentity) {
+                 beehiveblockentity.addOccupant(Bee.this);
+             }
+         }
+@@ -812,7 +_,7 @@
+         @Override
+         public void tick() {
+             if (Bee.this.hivePos != null) {
+-                ++this.travellingTicks;
++                this.travellingTicks++;
+                 if (this.travellingTicks > this.adjustedTickDelay(600)) {
+                     this.dropAndBlacklistHive();
+                 } else if (!Bee.this.navigation.isInProgress()) {
+@@ -827,7 +_,7 @@
+                         if (!flag) {
+                             this.dropAndBlacklistHive();
+                         } else if (this.lastPath != null && Bee.this.navigation.getPath().sameAs(this.lastPath)) {
+-                            ++this.ticksStuck;
++                            this.ticksStuck++;
+                             if (this.ticksStuck > 60) {
+                                 this.dropHive();
+                                 this.ticksStuck = 0;
+@@ -853,7 +_,7 @@
+         private void blacklistTarget(BlockPos p_27999_) {
+             this.blacklistedTargets.add(p_27999_);
+ 
+-            while(this.blacklistedTargets.size() > 3) {
++            while (this.blacklistedTargets.size() > 3) {
+                 this.blacklistedTargets.remove(0);
+             }
+         }
+@@ -923,7 +_,7 @@
+         @Override
+         public void tick() {
+             if (Bee.this.savedFlowerPos != null) {
+-                ++this.travellingTicks;
++                this.travellingTicks++;
+                 if (this.travellingTicks > this.adjustedTickDelay(600)) {
+                     Bee.this.savedFlowerPos = null;
+                 } else if (!Bee.this.navigation.isInProgress()) {
+@@ -948,10 +_,8 @@
+         public boolean canBeeUse() {
+             if (Bee.this.getCropsGrownSincePollination() >= 10) {
+                 return false;
+-            } else if (Bee.this.random.nextFloat() < 0.3F) {
+-                return false;
+             } else {
+-                return Bee.this.hasNectar() && Bee.this.isHiveValid();
++                return Bee.this.random.nextFloat() < 0.3F ? false : Bee.this.hasNectar() && Bee.this.isHiveValid();
+             }
+         }
+ 
+@@ -963,15 +_,16 @@
+         @Override
+         public void tick() {
+             if (Bee.this.random.nextInt(this.adjustedTickDelay(30)) == 0) {
+-                for(int i = 1; i <= 2; ++i) {
++                for (int i = 1; i <= 2; i++) {
+                     BlockPos blockpos = Bee.this.blockPosition().below(i);
+                     BlockState blockstate = Bee.this.level().getBlockState(blockpos);
+                     Block block = blockstate.getBlock();
+                     BlockState blockstate1 = null;
+                     if (blockstate.is(BlockTags.BEE_GROWABLES)) {
+-                        if (block instanceof CropBlock cropblock) {
++                        if (block instanceof CropBlock) {
++                            CropBlock cropblock = (CropBlock)block;
+                             if (!cropblock.isMaxAge(blockstate)) {
+-                                blockstate1 = cropblock.getStateForAge(cropblock.getAge(blockstate) + 1, blockstate);
++                                blockstate1 = cropblock.getStateForAge(cropblock.getAge(blockstate) + 1);
+                             }
+                         } else if (block instanceof StemBlock) {
+                             int k = blockstate.getValue(StemBlock.AGE);
+@@ -1032,7 +_,7 @@
+             Bee.this.remainingCooldownBeforeLocatingNewHive = 200;
+             List<BlockPos> list = this.findNearbyHivesWithSpace();
+             if (!list.isEmpty()) {
+-                for(BlockPos blockpos : list) {
++                for (BlockPos blockpos : list) {
+                     if (!Bee.this.goToHiveGoal.isTargetBlacklisted(blockpos)) {
+                         Bee.this.hivePos = blockpos;
+                         return;
+@@ -1081,11 +_,7 @@
+             if (p_28074_.hasProperty(BlockStateProperties.WATERLOGGED) && p_28074_.getValue(BlockStateProperties.WATERLOGGED)) {
+                 return false;
+             } else if (p_28074_.is(BlockTags.FLOWERS)) {
+-                if (p_28074_.is(Blocks.SUNFLOWER)) {
+-                    return p_28074_.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER;
+-                } else {
+-                    return true;
+-                }
++                return p_28074_.is(Blocks.SUNFLOWER) ? p_28074_.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER : true;
+             } else {
+                 return false;
+             }
+@@ -1191,7 +_,7 @@
+ 
+         @Override
+         public void tick() {
+-            ++this.pollinatingTicks;
++            this.pollinatingTicks++;
+             if (this.pollinatingTicks > 600) {
+                 Bee.this.savedFlowerPos = null;
+             } else {
+@@ -1225,7 +_,7 @@
+                             this.setWantedPos();
+                         }
+ 
+-                        ++this.successfulPollinatingTicks;
++                        this.successfulPollinatingTicks++;
+                         if (Bee.this.random.nextFloat() < 0.05F && this.successfulPollinatingTicks > this.lastSoundPlayedTick + 60) {
+                             this.lastSoundPlayedTick = this.successfulPollinatingTicks;
+                             Bee.this.playSound(SoundEvents.BEE_POLLINATE, 1.0F, 1.0F);
+@@ -1251,10 +_,10 @@
+             BlockPos blockpos = Bee.this.blockPosition();
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-            for(int i = 0; (double)i <= p_28077_; i = i > 0 ? -i : 1 - i) {
+-                for(int j = 0; (double)j < p_28077_; ++j) {
+-                    for(int k = 0; k <= j; k = k > 0 ? -k : 1 - k) {
+-                        for(int l = k < j && k > -j ? j : 0; l <= j; l = l > 0 ? -l : 1 - l) {
++            for (int i = 0; (double)i <= p_28077_; i = i > 0 ? -i : 1 - i) {
++                for (int j = 0; (double)j < p_28077_; j++) {
++                    for (int k = 0; k <= j; k = k > 0 ? -k : 1 - k) {
++                        for (int l = k < j && k > -j ? j : 0; l <= j; l = l > 0 ? -l : 1 - l) {
+                             blockpos$mutableblockpos.setWithOffset(blockpos, k, i - 1, l);
+                             if (blockpos.closerThan(blockpos$mutableblockpos, p_28077_)
+                                 && p_28076_.test(Bee.this.level().getBlockState(blockpos$mutableblockpos))) {

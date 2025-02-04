@@ -1,6 +1,19 @@
 --- a/net/minecraft/world/level/storage/PrimaryLevelData.java
 +++ b/net/minecraft/world/level/storage/PrimaryLevelData.java
-@@ -74,6 +_,7 @@
+@@ -3,11 +_,10 @@
+ import com.google.common.collect.ImmutableSet;
+ import com.google.common.collect.Sets;
+ import com.mojang.logging.LogUtils;
+-import com.mojang.serialization.DataResult;
+ import com.mojang.serialization.Dynamic;
+ import com.mojang.serialization.DynamicOps;
+ import com.mojang.serialization.Lifecycle;
+-import com.mojang.serialization.DataResult.PartialResult;
++import com.mojang.serialization.DataResult.Error;
+ import java.util.HashSet;
+ import java.util.Set;
+ import java.util.UUID;
+@@ -75,6 +_,7 @@
      private boolean wasModded;
      private final Set<String> removedFeatureFlags;
      private final TimerQueue<MinecraftServer> scheduledEvents;
@@ -8,7 +21,19 @@
  
      private PrimaryLevelData(
          @Nullable CompoundTag p_277888_,
-@@ -200,7 +_,7 @@
+@@ -191,9 +_,9 @@
+             p_78531_.get("WanderingTraderId").read(UUIDUtil.CODEC).result().orElse(null),
+             p_78531_.get("ServerBrands")
+                 .asStream()
+-                .flatMap(p_78529_ -> p_78529_.asString().result().stream())
++                .flatMap(p_338118_ -> p_338118_.asString().result().stream())
+                 .collect(Collectors.toCollection(Sets::newLinkedHashSet)),
+-            p_78531_.get("removed_features").asStream().flatMap(p_277335_ -> p_277335_.asString().result().stream()).collect(Collectors.toSet()),
++            p_78531_.get("removed_features").asStream().flatMap(p_338117_ -> p_338117_.asString().result().stream()).collect(Collectors.toSet()),
+             new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS, p_78531_.get("ScheduledEvents").asStream()),
+             (CompoundTag)p_78531_.get("CustomBossEvents").orElseEmptyMap().getValue(),
+             p_78531_.get("DragonFight").read(EndDragonFight.Data.CODEC).resultOrPartial(LOGGER::error).orElse(EndDragonFight.Data.DEFAULT),
+@@ -201,7 +_,7 @@
              p_251864_,
              p_250651_,
              p_78538_
@@ -17,7 +42,30 @@
      }
  
      @Override
-@@ -273,6 +_,8 @@
+@@ -255,17 +_,15 @@
+         p_78547_.putByte("Difficulty", (byte)this.settings.difficulty().getId());
+         p_78547_.putBoolean("DifficultyLocked", this.difficultyLocked);
+         p_78547_.put("GameRules", this.settings.gameRules().createTag());
+-        p_78547_.put(
+-            "DragonFight", Util.getOrThrow(EndDragonFight.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.endDragonFightData), IllegalStateException::new)
+-        );
++        p_78547_.put("DragonFight", EndDragonFight.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.endDragonFightData).getOrThrow());
+         if (p_78548_ != null) {
+             p_78547_.put("Player", p_78548_);
+         }
+ 
+-        DataResult<Tag> dataresult = WorldDataConfiguration.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataConfiguration());
+-        dataresult.get()
+-            .ifLeft(p_248505_ -> p_78547_.merge((CompoundTag)p_248505_))
+-            .ifRight(p_248506_ -> LOGGER.warn("Failed to encode configuration {}", p_248506_.message()));
++        WorldDataConfiguration.CODEC
++            .encodeStart(NbtOps.INSTANCE, this.settings.getDataConfiguration())
++            .ifSuccess(p_248505_ -> p_78547_.merge((CompoundTag)p_248505_))
++            .ifError(p_338116_ -> LOGGER.warn("Failed to encode configuration {}", p_338116_.message()));
+         if (this.customBossEvents != null) {
+             p_78547_.put("CustomBossEvents", this.customBossEvents);
+         }
+@@ -276,6 +_,8 @@
          if (this.wanderingTraderId != null) {
              p_78547_.putUUID("WanderingTraderId", this.wanderingTraderId);
          }
@@ -26,7 +74,7 @@
      }
  
      private static ListTag stringCollectionToTag(Set<String> p_277880_) {
-@@ -570,6 +_,15 @@
+@@ -573,6 +_,15 @@
      @Override
      public LevelSettings getLevelSettings() {
          return this.settings.copy();

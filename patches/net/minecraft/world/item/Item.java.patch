@@ -1,6 +1,48 @@
 --- a/net/minecraft/world/item/Item.java
 +++ b/net/minecraft/world/item/Item.java
-@@ -54,9 +_,9 @@
+@@ -1,10 +_,8 @@
+ package net.minecraft.world.item;
+ 
+-import com.google.common.collect.ImmutableMultimap;
+ import com.google.common.collect.Interner;
+ import com.google.common.collect.Interners;
+ import com.google.common.collect.Maps;
+-import com.google.common.collect.Multimap;
+ import com.mojang.logging.LogUtils;
+ import java.util.List;
+ import java.util.Map;
+@@ -15,6 +_,7 @@
+ import net.minecraft.Util;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
++import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.component.DataComponentMap;
+ import net.minecraft.core.component.DataComponentType;
+ import net.minecraft.core.component.DataComponents;
+@@ -24,7 +_,6 @@
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.util.Mth;
+ import net.minecraft.util.Unit;
+-import net.minecraft.world.Container;
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.InteractionResult;
+ import net.minecraft.world.InteractionResultHolder;
+@@ -32,8 +_,6 @@
+ import net.minecraft.world.entity.EquipmentSlot;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.SlotAccess;
+-import net.minecraft.world.entity.ai.attributes.Attribute;
+-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+ import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.flag.FeatureElement;
+@@ -52,13 +_,15 @@
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.state.BlockState;
++import net.minecraft.world.level.saveddata.maps.MapId;
++import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+ import net.minecraft.world.phys.BlockHitResult;
  import net.minecraft.world.phys.Vec3;
  import org.slf4j.Logger;
  
@@ -12,7 +54,7 @@
      public static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
      public static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
      public static final int DEFAULT_MAX_STACK_SIZE = 64;
-@@ -87,12 +_,14 @@
+@@ -89,12 +_,14 @@
          this.components = p_41383_.buildAndValidateComponents();
          this.craftingRemainingItem = p_41383_.craftingRemainingItem;
          this.requiredFeatures = p_41383_.requiredFeatures;
@@ -20,7 +62,8 @@
 +        if (SharedConstants.IS_RUNNING_IN_IDE && false) {
              String s = this.getClass().getSimpleName();
              if (!s.endsWith("Item")) {
-                 LOGGER.error("Item classes should end with Item and {} doesn't.", s);
+-                LOGGER.error("Item classes should end with Item and {} doesn't.", s.trim().isEmpty() ? this.getClass().getName() : s);
++                LOGGER.error("Item classes should end with Item and {} doesn't.", s);
              }
          }
 +        this.canRepair = p_41383_.canRepair;
@@ -28,7 +71,7 @@
      }
  
      @Deprecated
-@@ -111,6 +_,8 @@
+@@ -113,12 +_,11 @@
      public void onUseTick(Level p_41428_, LivingEntity p_41429_, ItemStack p_41430_, int p_41431_) {
      }
  
@@ -37,7 +80,13 @@
      public void onDestroyed(ItemEntity p_150887_) {
      }
  
-@@ -137,7 +_,7 @@
+-    public void onViewedInContainer(ItemStack p_341696_, Level p_340410_, BlockPos p_341451_, Container p_341754_) {
+-    }
+-
+     public void verifyComponentsAfterLoad(ItemStack p_331627_) {
+     }
+ 
+@@ -142,7 +_,7 @@
  
      public InteractionResultHolder<ItemStack> use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) {
          ItemStack itemstack = p_41433_.getItemInHand(p_41434_);
@@ -46,7 +95,7 @@
          if (foodproperties != null) {
              if (p_41433_.canEat(foodproperties.canAlwaysEat())) {
                  p_41433_.startUsingItem(p_41434_);
-@@ -159,12 +_,13 @@
+@@ -164,12 +_,13 @@
      }
  
      public int getBarWidth(ItemStack p_150900_) {
@@ -62,16 +111,21 @@
          return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
      }
  
-@@ -214,7 +_,7 @@
+@@ -219,12 +_,7 @@
  
      @Override
      public String toString() {
 -        return BuiltInRegistries.ITEM.getKey(this).getPath();
+-    }
+-
+-    public Item withDescriptionId(String p_340933_) {
+-        this.descriptionId = p_340933_;
+-        return this;
 +        return BuiltInRegistries.ITEM.getKey(this).toString();
      }
  
      protected String getOrCreateDescriptionId() {
-@@ -234,10 +_,12 @@
+@@ -244,10 +_,12 @@
      }
  
      @Nullable
@@ -84,7 +138,7 @@
      public boolean hasCraftingRemainingItem() {
          return this.craftingRemainingItem != null;
      }
-@@ -261,7 +_,7 @@
+@@ -271,14 +_,14 @@
      }
  
      public int getUseDuration(ItemStack p_41454_) {
@@ -93,7 +147,25 @@
          return foodproperties != null ? foodproperties.eatDurationTicks() : 0;
      }
  
-@@ -293,6 +_,8 @@
+     public void releaseUsing(ItemStack p_41412_, Level p_41413_, LivingEntity p_41414_, int p_41415_) {
+     }
+ 
+-    public void appendHoverText(ItemStack p_41421_, @Nullable Level p_41422_, List<Component> p_41423_, TooltipFlag p_41424_) {
++    public void appendHoverText(ItemStack p_41421_, Item.TooltipContext p_339594_, List<Component> p_41423_, TooltipFlag p_41424_) {
+     }
+ 
+     public Optional<TooltipComponent> getTooltipImage(ItemStack p_150902_) {
+@@ -290,8 +_,7 @@
+     }
+ 
+     public boolean isFoil(ItemStack p_41453_) {
+-        Boolean obool = p_41453_.get(DataComponents.EXPLICIT_FOIL);
+-        return obool != null && obool ? true : p_41453_.isEnchanted();
++        return p_41453_.isEnchanted();
+     }
+ 
+     public boolean isEnchantable(ItemStack p_41456_) {
+@@ -304,6 +_,8 @@
          return p_41436_.clip(new ClipContext(vec3, vec31, ClipContext.Block.OUTLINE, p_41438_, p_41437_));
      }
  
@@ -102,34 +174,46 @@
      public int getEnchantmentValue() {
          return 0;
      }
-@@ -301,13 +_,20 @@
+@@ -312,13 +_,20 @@
          return false;
      }
  
 -    @Deprecated
+-    public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot p_41388_) {
+-        return ImmutableMultimap.of();
 +    @Deprecated // Use ItemStack sensitive version or data components. (deprecated by vanilla too)
-     public ItemAttributeModifiers getDefaultAttributeModifiers() {
-         return ItemAttributeModifiers.EMPTY;
-     }
- 
++    public ItemAttributeModifiers getDefaultAttributeModifiers() {
++        return ItemAttributeModifiers.EMPTY;
++    }
++
 +    protected final boolean canRepair;
 +
 +    @Override
 +    public boolean isRepairable(ItemStack stack) {
 +        return canRepair && isDamageable(stack);
-+    }
-+
+     }
+ 
      public boolean useOnRelease(ItemStack p_41464_) {
 -        return false;
 +        return p_41464_.getItem() == Items.CROSSBOW;
      }
  
      public ItemStack getDefaultInstance() {
-@@ -335,13 +_,40 @@
+@@ -329,6 +_,10 @@
+         return SoundEvents.GENERIC_DRINK;
+     }
+ 
++    public SoundEvent getEatingSound() {
++        return SoundEvents.GENERIC_EAT;
++    }
++
+     public SoundEvent getBreakingSound() {
+         return SoundEvents.ITEM_BREAK;
+     }
+@@ -342,6 +_,32 @@
          return this.requiredFeatures;
      }
  
--    public static class Properties {
 +    // NEO START
 +    private Object renderProperties;
 +
@@ -156,10 +240,10 @@
 +    }
 +    // END NEO
 +
-+    public static class Properties implements net.neoforged.neoforge.common.extensions.IItemPropertiesExtensions {
+     public static class Properties {
          private static final Interner<DataComponentMap> COMPONENT_INTERNER = Interners.newStrongInterner();
          @Nullable
-         private DataComponentMap.Builder components;
+@@ -349,6 +_,7 @@
          @Nullable
          Item craftingRemainingItem;
          FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
@@ -167,7 +251,7 @@
  
          public Item.Properties food(FoodProperties p_41490_) {
              return this.component(DataComponents.FOOD, p_41490_);
-@@ -371,12 +_,18 @@
+@@ -378,12 +_,18 @@
              return this.component(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
          }
  
@@ -186,3 +270,78 @@
              if (this.components == null) {
                  this.components = DataComponentMap.builder().addAll(DataComponents.COMMON_ITEM_COMPONENTS);
              }
+@@ -407,6 +_,74 @@
+ 
+         private DataComponentMap buildComponents() {
+             return this.components == null ? DataComponents.COMMON_ITEM_COMPONENTS : COMPONENT_INTERNER.intern(this.components.build());
++        }
++    }
++
++    public interface TooltipContext {
++        Item.TooltipContext EMPTY = new Item.TooltipContext() {
++            @Nullable
++            @Override
++            public HolderLookup.Provider registries() {
++                return null;
++            }
++
++            @Override
++            public float tickRate() {
++                return 20.0F;
++            }
++
++            @Nullable
++            @Override
++            public MapItemSavedData mapData(MapId p_339618_) {
++                return null;
++            }
++        };
++
++        @Nullable
++        HolderLookup.Provider registries();
++
++        float tickRate();
++
++        @Nullable
++        MapItemSavedData mapData(MapId p_339670_);
++
++        static Item.TooltipContext of(@Nullable final Level p_339599_) {
++            return p_339599_ == null ? EMPTY : new Item.TooltipContext() {
++                @Override
++                public HolderLookup.Provider registries() {
++                    return p_339599_.registryAccess();
++                }
++
++                @Override
++                public float tickRate() {
++                    return p_339599_.tickRateManager().tickrate();
++                }
++
++                @Override
++                public MapItemSavedData mapData(MapId p_339628_) {
++                    return p_339599_.getMapData(p_339628_);
++                }
++            };
++        }
++
++        static Item.TooltipContext of(final HolderLookup.Provider p_339633_) {
++            return new Item.TooltipContext() {
++                @Override
++                public HolderLookup.Provider registries() {
++                    return p_339633_;
++                }
++
++                @Override
++                public float tickRate() {
++                    return 20.0F;
++                }
++
++                @Nullable
++                @Override
++                public MapItemSavedData mapData(MapId p_339679_) {
++                    return null;
++                }
++            };
+         }
+     }
+ }

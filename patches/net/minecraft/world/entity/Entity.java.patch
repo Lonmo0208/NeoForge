@@ -1,6 +1,70 @@
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -126,7 +_,7 @@
+@@ -1,15 +_,12 @@
+ package net.minecraft.world.entity;
+ 
+ import com.google.common.collect.ImmutableList;
+-import com.google.common.collect.Iterables;
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Sets;
+ import com.google.common.collect.ImmutableList.Builder;
+-import com.mojang.datafixers.util.Pair;
+ import com.mojang.logging.LogUtils;
+ import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
+ import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+-import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.HashSet;
+ import java.util.List;
+@@ -35,12 +_,10 @@
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.core.Holder;
+-import net.minecraft.core.HolderSet;
+ import net.minecraft.core.RegistryAccess;
+ import net.minecraft.core.SectionPos;
+ import net.minecraft.core.particles.BlockParticleOption;
+ import net.minecraft.core.particles.ParticleTypes;
+-import net.minecraft.core.registries.Registries;
+ import net.minecraft.nbt.CompoundTag;
+ import net.minecraft.nbt.DoubleTag;
+ import net.minecraft.nbt.FloatTag;
+@@ -79,14 +_,11 @@
+ import net.minecraft.world.Nameable;
+ import net.minecraft.world.damagesource.DamageSource;
+ import net.minecraft.world.damagesource.DamageSources;
+-import net.minecraft.world.entity.ai.village.poi.PoiManager;
+-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+ import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.entity.projectile.Projectile;
+ import net.minecraft.world.entity.projectile.ProjectileDeflection;
+ import net.minecraft.world.entity.vehicle.Boat;
+-import net.minecraft.world.grid.SubGrid;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.enchantment.EnchantmentHelper;
+@@ -108,19 +_,12 @@
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+ import net.minecraft.world.level.border.WorldBorder;
+-import net.minecraft.world.level.chunk.ChunkAccess;
+-import net.minecraft.world.level.chunk.status.ChunkStatus;
+ import net.minecraft.world.level.dimension.DimensionType;
+ import net.minecraft.world.level.entity.EntityAccess;
+ import net.minecraft.world.level.entity.EntityInLevelCallback;
+ import net.minecraft.world.level.gameevent.DynamicGameEventListener;
+ import net.minecraft.world.level.gameevent.GameEvent;
+ import net.minecraft.world.level.levelgen.Heightmap;
+-import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+-import net.minecraft.world.level.levelgen.structure.Structure;
+-import net.minecraft.world.level.levelgen.structure.StructurePiece;
+-import net.minecraft.world.level.levelgen.structure.StructureStart;
+-import net.minecraft.world.level.levelgen.structure.structures.StrongholdPieces;
+ import net.minecraft.world.level.material.Fluid;
+ import net.minecraft.world.level.material.FluidState;
+ import net.minecraft.world.level.material.PushReaction;
+@@ -140,7 +_,7 @@
  import net.minecraft.world.scores.Team;
  import org.slf4j.Logger;
  
@@ -9,15 +73,24 @@
      private static final Logger LOGGER = LogUtils.getLogger();
      public static final String ID_TAG = "id";
      public static final String PASSENGERS_TAG = "Passengers";
-@@ -147,6 +_,7 @@
+@@ -161,8 +_,8 @@
      private static final double LAVA_SLOW_FLOW_SCALE = 0.0023333333333333335;
      public static final String UUID_TAG = "UUID";
      private static double viewScale = 1.0;
 +    @Deprecated // Forge: Use the getter to allow overriding in mods
      private final EntityType<?> type;
+-    public boolean ignoreGridCollision;
      private int id = ENTITY_COUNTER.incrementAndGet();
      public boolean blocksBuilding;
-@@ -192,8 +_,10 @@
+     private ImmutableList<Entity> passengers = ImmutableList.of();
+@@ -203,15 +_,14 @@
+     public double yOld;
+     public double zOld;
+     public boolean noPhysics;
+-    protected float screenShakeIntensity;
+-    public Vec3 screenShakeOffset = Vec3.ZERO;
+-    public Vec3 lastScreenShakeOffset = Vec3.ZERO;
+     protected final RandomSource random = RandomSource.create();
      public int tickCount;
      private int remainingFireTicks = -this.getFireImmuneTicks();
      protected boolean wasTouchingWater;
@@ -28,7 +101,26 @@
      private final Set<TagKey<Fluid>> fluidOnEyes = new HashSet<>();
      public int invulnerableTime;
      protected boolean firstTick = true;
-@@ -262,7 +_,10 @@
+@@ -260,18 +_,6 @@
+     private boolean hasVisualFire;
+     @Nullable
+     private BlockState inBlockState = null;
+-    private static final int ATTACHED_GRID_TIMEOUT = 30;
+-    @Nullable
+-    protected SubGrid attachedGrid;
+-    protected int attachedGridTimeout;
+-    @Nullable
+-    public UUID reloadAttachedGrid;
+-    public int reloadAttachedGridTimeout;
+-    private static final List<Pair<ResourceKey<Structure>, ResourceKey<Structure>>> STRUCTURE_LINKS = List.of(
+-        Pair.of(BuiltinStructures.VILLAGE_PLAINS, BuiltinStructures.VILLAGE_POTATO),
+-        Pair.of(BuiltinStructures.STRONGHOLD, BuiltinStructures.COLOSSEUM),
+-        Pair.of(BuiltinStructures.RUINED_PORTATOL, BuiltinStructures.RUINED_PORTATOL)
+-    );
+ 
+     public Entity(EntityType<?> p_19870_, Level p_19871_) {
+         this.type = p_19870_;
+@@ -292,7 +_,10 @@
          this.defineSynchedData(synchedentitydata$builder);
          this.entityData = synchedentitydata$builder.build();
          this.setPos(0.0, 0.0, 0.0);
@@ -40,7 +132,72 @@
      }
  
      public boolean isColliding(BlockPos p_20040_, BlockState p_20041_) {
-@@ -466,7 +_,7 @@
+@@ -370,11 +_,7 @@
+ 
+     @Override
+     public boolean equals(Object p_20245_) {
+-        if (p_20245_ instanceof Entity) {
+-            return ((Entity)p_20245_).id == this.id;
+-        } else {
+-            return false;
+-        }
++        return p_20245_ instanceof Entity ? ((Entity)p_20245_).id == this.id : false;
+     }
+ 
+     @Override
+@@ -453,25 +_,6 @@
+     }
+ 
+     public void baseTick() {
+-        if (this.attachedGridTimeout > 0) {
+-            if (--this.attachedGridTimeout == 0) {
+-                this.attachedGrid = null;
+-            } else if (this.attachedGrid != null && this.attachedGrid.carrier().isRemoved()) {
+-                this.attachedGrid = null;
+-            }
+-        }
+-
+-        if (this.reloadAttachedGrid != null && this.reloadAttachedGridTimeout > 0) {
+-            SubGrid subgrid = this.level().getGrid(this.reloadAttachedGrid);
+-            if (subgrid != null) {
+-                this.attachedGrid = subgrid;
+-                this.reloadAttachedGrid = null;
+-                this.reloadAttachedGridTimeout = 0;
+-            } else if (--this.reloadAttachedGridTimeout == 0 || this.attachedGrid != null) {
+-                this.reloadAttachedGrid = null;
+-            }
+-        }
+-
+         this.level().getProfiler().push("entityBaseTick");
+         this.inBlockState = null;
+         if (this.isPassenger() && this.getVehicle().isRemoved()) {
+@@ -479,24 +_,12 @@
+         }
+ 
+         if (this.boardingCooldown > 0) {
+-            --this.boardingCooldown;
++            this.boardingCooldown--;
+         }
+ 
+         this.walkDistO = this.walkDist;
+         this.xRotO = this.getXRot();
+         this.yRotO = this.getYRot();
+-        this.screenShakeIntensity *= 0.7F;
+-        this.lastScreenShakeOffset = this.screenShakeOffset;
+-        if (this.screenShakeIntensity > 0.0F) {
+-            this.screenShakeOffset = new Vec3(
+-                (this.random.nextDouble() - this.random.nextDouble()) * (double)this.screenShakeIntensity,
+-                (this.random.nextDouble() - this.random.nextDouble()) * (double)this.screenShakeIntensity,
+-                (this.random.nextDouble() - this.random.nextDouble()) * (double)this.screenShakeIntensity
+-            );
+-        } else {
+-            this.screenShakeOffset = Vec3.ZERO;
+-        }
+-
+         this.handleNetherPortal();
+         if (this.canSpawnSprintParticle()) {
+             this.spawnSprintParticle();
+@@ -531,7 +_,7 @@
  
          if (this.isInLava()) {
              this.lavaHurt();
@@ -49,16 +206,143 @@
          }
  
          this.checkBelowWorld();
-@@ -672,7 +_,7 @@
-                     double d1 = vec3.x;
-                     double d2 = vec3.y;
-                     double d3 = vec3.z;
--                    this.flyDist = this.flyDist + (float)(vec3.length() * 0.6);
+@@ -571,7 +_,7 @@
+ 
+     protected void processPortalCooldown() {
+         if (this.isOnPortalCooldown()) {
+-            --this.portalCooldown;
++            this.portalCooldown--;
+         }
+     }
+ 
+@@ -662,15 +_,7 @@
+         return this.onGround;
+     }
+ 
+-    protected boolean shouldMoveWithSubGrid() {
+-        return true;
+-    }
+-
+     public void move(MoverType p_19973_, Vec3 p_19974_) {
+-        if (this.attachedGrid != null && this.shouldMoveWithSubGrid()) {
+-            p_19974_ = p_19974_.add(this.attachedGrid.getLastMovement());
+-        }
+-
+         if (this.noPhysics) {
+             this.setPos(this.getX() + p_19974_.x, this.getY() + p_19974_.y, this.getZ() + p_19974_.z);
+         } else {
+@@ -690,57 +_,49 @@
+             }
+ 
+             p_19974_ = this.maybeBackOffFromEdge(p_19974_, p_19973_);
+-            Entity.CollideResult entity$collideresult = this.collide(p_19974_);
+-            if (entity$collideresult.subGrid != null) {
+-                this.attachedGrid = entity$collideresult.subGrid;
+-                this.attachedGridTimeout = 30;
+-            }
+-
+-            Vec3 vec3 = this.attachedGrid != null ? this.attachedGrid.getLastMovement() : Vec3.ZERO;
+-            Vec3 vec31 = entity$collideresult.movement;
+-            Vec3 vec32 = vec31.subtract(vec3);
+-            double d0 = vec31.lengthSqr();
++            Vec3 vec3 = this.collide(p_19974_);
++            double d0 = vec3.lengthSqr();
+             if (d0 > 1.0E-7) {
+                 if (this.fallDistance != 0.0F && d0 >= 1.0) {
+                     BlockHitResult blockhitresult = this.level()
+                         .clip(
+-                            new ClipContext(this.position(), this.position().add(vec31), ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this)
++                            new ClipContext(this.position(), this.position().add(vec3), ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this)
+                         );
+                     if (blockhitresult.getType() != HitResult.Type.MISS) {
+                         this.resetFallDistance();
+                     }
+                 }
+ 
+-                this.setPos(this.getX() + vec31.x, this.getY() + vec31.y, this.getZ() + vec31.z);
++                this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
+             }
+ 
+             this.level().getProfiler().pop();
+             this.level().getProfiler().push("rest");
+-            boolean flag4 = !Mth.equal(p_19974_.x, vec31.x);
+-            boolean flag = !Mth.equal(p_19974_.z, vec31.z);
++            boolean flag4 = !Mth.equal(p_19974_.x, vec3.x);
++            boolean flag = !Mth.equal(p_19974_.z, vec3.z);
+             this.horizontalCollision = flag4 || flag;
+-            this.verticalCollision = p_19974_.y != vec31.y;
+-            this.verticalCollisionBelow = this.verticalCollision && p_19974_.y < vec3.y;
++            this.verticalCollision = p_19974_.y != vec3.y;
++            this.verticalCollisionBelow = this.verticalCollision && p_19974_.y < 0.0;
+             if (this.horizontalCollision) {
+-                this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec31);
++                this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec3);
+             } else {
+                 this.minorHorizontalCollision = false;
+             }
+ 
+-            this.setOnGroundWithKnownMovement(this.verticalCollisionBelow, vec31);
++            this.setOnGroundWithKnownMovement(this.verticalCollisionBelow, vec3);
+             BlockPos blockpos = this.getOnPosLegacy();
+-            BlockState blockstate = this.getEffectState();
+-            this.checkFallDamage(vec31.y, this.onGround(), blockstate, blockpos);
++            BlockState blockstate = this.level().getBlockState(blockpos);
++            this.checkFallDamage(vec3.y, this.onGround(), blockstate, blockpos);
+             if (this.isRemoved()) {
+                 this.level().getProfiler().pop();
+             } else {
+                 if (this.horizontalCollision) {
+-                    Vec3 vec33 = this.getDeltaMovement();
+-                    this.setDeltaMovement(flag4 ? 0.0 : vec33.x, vec33.y, flag ? 0.0 : vec33.z);
++                    Vec3 vec31 = this.getDeltaMovement();
++                    this.setDeltaMovement(flag4 ? 0.0 : vec31.x, vec31.y, flag ? 0.0 : vec31.z);
+                 }
+ 
+                 Block block = blockstate.getBlock();
+-                if (p_19974_.y != vec31.y) {
++                if (p_19974_.y != vec3.y) {
+                     block.updateEntityAfterFallOn(this.level(), this);
+                 }
+ 
+@@ -750,10 +_,10 @@
+ 
+                 Entity.MovementEmission entity$movementemission = this.getMovementEmission();
+                 if (entity$movementemission.emitsAnything() && !this.isPassenger()) {
+-                    double d1 = vec32.x;
+-                    double d2 = vec32.y;
+-                    double d3 = vec32.z;
+-                    this.flyDist += (float)(vec32.length() * 0.6);
++                    double d1 = vec3.x;
++                    double d2 = vec3.y;
++                    double d3 = vec3.z;
 +                    this.flyDist = (float)((double)this.flyDist + vec3.length() * 0.6D);
                      BlockPos blockpos1 = this.getOnPos();
                      BlockState blockstate1 = this.level().getBlockState(blockpos1);
                      boolean flag1 = this.isStateClimbable(blockstate1);
-@@ -716,16 +_,16 @@
+@@ -761,9 +_,9 @@
+                         d2 = 0.0;
+                     }
+ 
+-                    this.walkDist += (float)vec32.horizontalDistance() * 0.6F;
+-                    this.moveDist += (float)Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3) * 0.6F;
+-                    if (this.moveDist > this.nextStep && (!blockstate1.isAir() || this.attachedGrid != null)) {
++                    this.walkDist = this.walkDist + (float)vec3.horizontalDistance() * 0.6F;
++                    this.moveDist = this.moveDist + (float)Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3) * 0.6F;
++                    if (this.moveDist > this.nextStep && !blockstate1.isAir()) {
+                         boolean flag2 = blockpos1.equals(blockpos);
+                         boolean flag3 = this.vibrationAndSoundEffectsFromBlock(blockpos, blockstate, entity$movementemission.emitsSounds(), flag2, p_19974_);
+                         if (!flag2) {
+@@ -772,9 +_,6 @@
+ 
+                         if (flag3) {
+                             this.nextStep = this.nextStep();
+-                            if (this.canSpawnFootprintParticle()) {
+-                                this.spawnFootprintParticle();
+-                            }
+                         } else if (this.isInWater()) {
+                             this.nextStep = this.nextStep();
+                             if (entity$movementemission.emitsSounds()) {
+@@ -800,26 +_,18 @@
                          this.setRemainingFireTicks(-this.getFireImmuneTicks());
                      }
  
@@ -77,8 +361,18 @@
 +                this.level.getProfiler().pop();
              }
          }
+-    }
+-
+-    public boolean canSpawnFootprintParticle() {
+-        return false;
+-    }
+-
+-    protected void spawnFootprintParticle() {
+-        this.level.addParticle(ParticleTypes.FOOTSTEP, this.getX(), this.getY() + 0.001, this.getZ(), (double)this.yRot, 0.0, 0.0);
      }
-@@ -811,9 +_,7 @@
+ 
+     private boolean isStateClimbable(BlockState p_286733_) {
+@@ -903,9 +_,7 @@
                  return blockpos;
              } else {
                  BlockState blockstate = this.level().getBlockState(blockpos);
@@ -89,7 +383,129 @@
                      ? blockpos.atY(Mth.floor(this.position.y - (double)p_216987_))
                      : blockpos;
              }
-@@ -1039,19 +_,19 @@
+@@ -970,90 +_,35 @@
+         return p_20044_;
+     }
+ 
+-    public boolean isAttachedToGrid() {
+-        return this.attachedGrid != null;
+-    }
+-
+-    private Entity.CollideResult collide(Vec3 p_20273_) {
++    private Vec3 collide(Vec3 p_20273_) {
+         AABB aabb = this.getBoundingBox();
+         List<VoxelShape> list = this.level().getEntityCollisions(this, aabb.expandTowards(p_20273_));
+-        Entity.CollideResult entity$collideresult = collideBoundingBox(this, p_20273_, aabb, this.level(), list);
+-        boolean flag = p_20273_.x != entity$collideresult.movement.x;
+-        boolean flag1 = p_20273_.y != entity$collideresult.movement.y;
+-        boolean flag2 = p_20273_.z != entity$collideresult.movement.z;
++        Vec3 vec3 = p_20273_.lengthSqr() == 0.0 ? p_20273_ : collideBoundingBox(this, p_20273_, aabb, this.level(), list);
++        boolean flag = p_20273_.x != vec3.x;
++        boolean flag1 = p_20273_.y != vec3.y;
++        boolean flag2 = p_20273_.z != vec3.z;
+         boolean flag3 = this.onGround() || flag1 && p_20273_.y < 0.0;
+         if (this.maxUpStep() > 0.0F && flag3 && (flag || flag2)) {
+-            Vec3 vec3 = entity$collideresult.gridMovement();
+-            Vec3 vec31 = collideBoundingBox(this, new Vec3(p_20273_.x, vec3.y + (double)this.maxUpStep(), p_20273_.z), aabb, this.level(), list)
+-                .movementRelativeTo(vec3);
++            Vec3 vec31 = collideBoundingBox(this, new Vec3(p_20273_.x, (double)this.maxUpStep(), p_20273_.z), aabb, this.level(), list);
+             Vec3 vec32 = collideBoundingBox(
+-                    this, vec3.add(0.0, (double)this.maxUpStep(), 0.0), aabb.expandTowards(p_20273_.x, 0.0, p_20273_.z), this.level(), list
+-                )
+-                .movementRelativeTo(vec3);
++                this, new Vec3(0.0, (double)this.maxUpStep(), 0.0), aabb.expandTowards(p_20273_.x, 0.0, p_20273_.z), this.level(), list
++            );
+             if (vec32.y < (double)this.maxUpStep()) {
+-                Vec3 vec33 = collideBoundingBox(this, new Vec3(p_20273_.x, 0.0, p_20273_.z), aabb.move(vec32), this.level(), list)
+-                    .add(vec32)
+-                    .movementRelativeTo(vec3);
++                Vec3 vec33 = collideBoundingBox(this, new Vec3(p_20273_.x, 0.0, p_20273_.z), aabb.move(vec32), this.level(), list).add(vec32);
+                 if (vec33.horizontalDistanceSqr() > vec31.horizontalDistanceSqr()) {
+                     vec31 = vec33;
+                 }
+             }
+ 
+-            if (vec31.horizontalDistanceSqr() > entity$collideresult.movementRelativeTo(vec3).horizontalDistanceSqr()) {
+-                Vec3 vec34 = collideBoundingBox(this, vec3.add(0.0, -vec31.y + p_20273_.y, 0.0), aabb.move(vec31), this.level(), list).movementRelativeTo(vec3);
+-                return new Entity.CollideResult(vec34.add(vec31).add(vec3), entity$collideresult.subGrid);
+-            }
+-        }
+-
+-        return entity$collideresult;
+-    }
+-
+-    public static Entity.CollideResult collideBoundingBox(
+-        @Nullable Entity p_340474_, Vec3 p_341844_, AABB p_342354_, Level p_340833_, List<VoxelShape> p_341909_
+-    ) {
+-        if (p_341844_.lengthSqr() > 0.0) {
+-            p_341844_ = collideBoundingBoxWithWorld(p_340474_, p_341844_, p_342354_, p_340833_, p_341909_);
+-        }
+-
+-        return collideBoundingBoxWithSubGrids(p_340474_, new Entity.CollideResult(p_341844_, null), p_342354_, p_340833_);
+-    }
+-
+-    private static Entity.CollideResult collideBoundingBoxWithSubGrids(
+-        @Nullable Entity p_340428_, Entity.CollideResult p_342240_, AABB p_340826_, Level p_340651_
+-    ) {
+-        if (p_340428_ != null && p_340428_.ignoreGridCollision) {
+-            return p_342240_;
+-        } else {
+-            List<VoxelShape> list = new ArrayList<>();
+-
+-            for(SubGrid subgrid : p_340651_.getGrids()) {
+-                p_342240_ = collideWithSubGrid(p_340428_, p_342240_, p_340826_, subgrid, list);
+-                list.clear();
+-            }
+-
+-            return p_342240_;
+-        }
+-    }
+-
+-    private static Entity.CollideResult collideWithSubGrid(
+-        @Nullable Entity p_340484_, Entity.CollideResult p_341471_, AABB p_340898_, SubGrid p_341627_, List<VoxelShape> p_340800_
+-    ) {
+-        Vec3 vec3 = p_341627_.getLastMovement();
+-        AABB aabb = p_341627_.getKnownBoundingBox();
+-        Vec3 vec31 = p_341471_.movement.subtract(vec3);
+-        AABB aabb1 = p_340898_.expandTowards(vec31);
+-        if (!aabb.intersects(aabb1)) {
+-            return p_341471_;
+-        } else {
+-            AABB aabb2 = p_340898_.move(-aabb.minX, -aabb.minY, -aabb.minZ);
+-            AABB aabb3 = aabb1.move(-aabb.minX, -aabb.minY, -aabb.minZ);
+-            Iterables.addAll(p_340800_, p_341627_.getBlockCollisions(p_340484_, aabb3));
+-            Vec3 vec32 = collideWithShapes(vec31, aabb2, p_340800_);
+-            return vec32.equals(vec31) ? p_341471_ : new Entity.CollideResult(vec32.add(vec3), p_341627_);
+-        }
+-    }
+-
+-    private static Vec3 collideBoundingBoxWithWorld(@Nullable Entity p_198895_, Vec3 p_198896_, AABB p_198897_, Level p_198898_, List<VoxelShape> p_198899_) {
++            if (vec31.horizontalDistanceSqr() > vec3.horizontalDistanceSqr()) {
++                return vec31.add(collideBoundingBox(this, new Vec3(0.0, -vec31.y + p_20273_.y, 0.0), aabb.move(vec31), this.level(), list));
++            }
++        }
++
++        return vec3;
++    }
++
++    public static Vec3 collideBoundingBox(@Nullable Entity p_198895_, Vec3 p_198896_, AABB p_198897_, Level p_198898_, List<VoxelShape> p_198899_) {
+         Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(p_198899_.size() + 1);
+         if (!p_198899_.isEmpty()) {
+             builder.addAll(p_198899_);
+@@ -1129,9 +_,9 @@
+         if (this.level().hasChunksAt(blockpos, blockpos1)) {
+             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+-            for(int i = blockpos.getX(); i <= blockpos1.getX(); ++i) {
+-                for(int j = blockpos.getY(); j <= blockpos1.getY(); ++j) {
+-                    for(int k = blockpos.getZ(); k <= blockpos1.getZ(); ++k) {
++            for (int i = blockpos.getX(); i <= blockpos1.getX(); i++) {
++                for (int j = blockpos.getY(); j <= blockpos1.getY(); j++) {
++                    for (int k = blockpos.getZ(); k <= blockpos1.getZ(); k++) {
+                         if (!this.isAlive()) {
+                             return;
+                         }
+@@ -1186,19 +_,19 @@
          return !blockstate.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !blockstate.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? p_278049_ : blockpos;
      }
  
@@ -115,7 +531,38 @@
          this.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
      }
  
-@@ -1204,20 +_,23 @@
+@@ -1207,7 +_,7 @@
+     }
+ 
+     private void playAmethystStepSound() {
+-        this.crystalSoundIntensity *= (float)Math.pow(0.997, (double)(this.tickCount - this.lastCrystalSoundPlayTick));
++        this.crystalSoundIntensity = this.crystalSoundIntensity * (float)Math.pow(0.997, (double)(this.tickCount - this.lastCrystalSoundPlayTick));
+         this.crystalSoundIntensity = Math.min(1.0F, this.crystalSoundIntensity + 0.07F);
+         float f = 0.5F + this.crystalSoundIntensity * this.random.nextFloat() * 1.2F;
+         float f1 = 0.1F + this.crystalSoundIntensity * 1.2F;
+@@ -1259,11 +_,7 @@
+     }
+ 
+     public final double getGravity() {
+-        if (this.reloadAttachedGrid != null) {
+-            return 0.0;
+-        } else {
+-            return this.isNoGravity() ? 0.0 : this.getDefaultGravity();
+-        }
++        return this.isNoGravity() ? 0.0 : this.getDefaultGravity();
+     }
+ 
+     protected void applyGravity() {
+@@ -1310,7 +_,7 @@
+             return false;
+         } else {
+             if (this.isVehicle()) {
+-                for(Entity entity : this.getPassengers()) {
++                for (Entity entity : this.getPassengers()) {
+                     entity.causeFallDamage(p_146828_, p_146829_, p_146830_);
+                 }
+             }
+@@ -1355,25 +_,27 @@
  
      public void updateSwimming() {
          if (this.isSwimming()) {
@@ -144,15 +591,25 @@
      }
  
      void updateInWaterStateAndDoWaterCurrentPushing() {
-@@ -1242,6 +_,7 @@
+-        Entity entity = this.getVehicle();
+-        if (entity instanceof Boat boat && !boat.isUnderWater()) {
++        if (this.getVehicle() instanceof Boat boat && !boat.isUnderWater()) {
+             this.wasTouchingWater = false;
+             return;
+         }
+@@ -1394,9 +_,9 @@
      private void updateFluidOnEyes() {
          this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
          this.fluidOnEyes.clear();
 +        this.forgeFluidTypeOnEyes = net.neoforged.neoforge.common.NeoForgeMod.EMPTY_TYPE.value();
          double d0 = this.getEyeY();
-         if (this.getVehicle() instanceof Boat boat && !boat.isUnderWater() && boat.getBoundingBox().maxY >= d0 && boat.getBoundingBox().minY <= d0) {
+-        Entity entity = this.getVehicle();
+-        if (entity instanceof Boat boat && !boat.isUnderWater() && boat.getBoundingBox().maxY >= d0 && boat.getBoundingBox().minY <= d0) {
++        if (this.getVehicle() instanceof Boat boat && !boat.isUnderWater() && boat.getBoundingBox().maxY >= d0 && boat.getBoundingBox().minY <= d0) {
              return;
-@@ -1251,7 +_,7 @@
+         }
+ 
+@@ -1404,7 +_,7 @@
          FluidState fluidstate = this.level().getFluidState(blockpos);
          double d1 = (double)((float)blockpos.getY() + fluidstate.getHeight(this.level(), blockpos));
          if (d1 > d0) {
@@ -161,22 +618,60 @@
          }
      }
  
-@@ -1296,12 +_,13 @@
+@@ -1421,7 +_,7 @@
+ 
+         float f2 = (float)Mth.floor(this.getY());
+ 
+-        for(int i = 0; (float)i < 1.0F + this.dimensions.width() * 20.0F; ++i) {
++        for (int i = 0; (float)i < 1.0F + this.dimensions.width() * 20.0F; i++) {
+             double d0 = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
+             double d1 = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
+             this.level()
+@@ -1430,7 +_,7 @@
+                 );
+         }
+ 
+-        for(int j = 0; (float)j < 1.0F + this.dimensions.width() * 20.0F; ++j) {
++        for (int j = 0; (float)j < 1.0F + this.dimensions.width() * 20.0F; j++) {
+             double d2 = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
+             double d3 = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
+             this.level().addParticle(ParticleTypes.SPLASH, this.getX() + d2, (double)(f2 + 1.0F), this.getZ() + d3, vec3.x, vec3.y, vec3.z);
+@@ -1441,7 +_,7 @@
+ 
+     @Deprecated
+     protected BlockState getBlockStateOnLegacy() {
+-        return this.getEffectState();
++        return this.level().getBlockState(this.getOnPosLegacy());
+     }
+ 
+     public BlockState getBlockStateOn() {
+@@ -1449,22 +_,13 @@
      }
  
      public boolean canSpawnSprintParticle() {
 -        return this.isSprinting() && !this.isInWater() && !this.isSpectator() && !this.isCrouching() && !this.isInLava() && this.isAlive();
+-    }
+-
+-    protected BlockState getEffectState() {
+-        if (this.attachedGrid != null) {
+-            Vec3 vec3 = this.position.subtract(this.attachedGrid.carrier().position());
+-            BlockPos blockpos = BlockPos.containing(vec3.add(0.0, -0.2F, 0.0));
+-            return this.attachedGrid.getBlockState(blockpos);
+-        } else {
+-            return this.level().getBlockState(this.getOnPosLegacy());
+-        }
 +        return this.isSprinting() && !this.isInWater() && !this.isSpectator() && !this.isCrouching() && !this.isInLava() && this.isAlive() && !this.isInFluidType();
      }
  
      protected void spawnSprintParticle() {
          BlockPos blockpos = this.getOnPosLegacy();
-         BlockState blockstate = this.level().getBlockState(blockpos);
+-        BlockState blockstate = this.getEffectState();
++        BlockState blockstate = this.level().getBlockState(blockpos);
 +        if(!blockstate.addRunningEffects(level, blockpos, this))
          if (blockstate.getRenderShape() != RenderShape.INVISIBLE) {
              Vec3 vec3 = this.getDeltaMovement();
              BlockPos blockpos1 = this.blockPosition();
-@@ -1315,16 +_,19 @@
+@@ -1478,16 +_,19 @@
                  d1 = Mth.clamp(d1, (double)blockpos.getZ(), (double)blockpos.getZ() + 1.0);
              }
  
@@ -198,7 +693,7 @@
      }
  
      public void moveRelative(float p_19921_, Vec3 p_19922_) {
-@@ -1645,6 +_,8 @@
+@@ -1808,25 +_,27 @@
                  p_20241_.putBoolean("HasVisualFire", this.hasVisualFire);
              }
  
@@ -207,7 +702,11 @@
              if (!this.tags.isEmpty()) {
                  ListTag listtag = new ListTag();
  
-@@ -1655,6 +_,10 @@
+-                for(String s : this.tags) {
++                for (String s : this.tags) {
+                     listtag.add(StringTag.valueOf(s));
+                 }
+ 
                  p_20241_.put("Tags", listtag);
              }
  
@@ -216,9 +715,31 @@
 +            if (persistentData != null) p_20241_.put("NeoForgeData", persistentData.copy());
 +
              this.addAdditionalSaveData(p_20241_);
+-            if (this.attachedGrid != null) {
+-                p_20241_.putUUID("attached_to_grid", this.attachedGrid.id());
+-            }
+-
              if (this.isVehicle()) {
                  ListTag listtag1 = new ListTag();
-@@ -1735,6 +_,9 @@
+ 
+-                for(Entity entity : this.getPassengers()) {
++                for (Entity entity : this.getPassengers()) {
+                     CompoundTag compoundtag = new CompoundTag();
+                     if (entity.saveAsPassenger(compoundtag)) {
+                         listtag1.add(compoundtag);
+@@ -1881,11 +_,6 @@
+                 this.stringUUID = this.uuid.toString();
+             }
+ 
+-            if (p_20259_.hasUUID("attached_to_grid")) {
+-                this.reloadAttachedGrid = p_20259_.getUUID("attached_to_grid");
+-                this.reloadAttachedGridTimeout = 40;
+-            }
+-
+             if (!Double.isFinite(this.getX()) || !Double.isFinite(this.getY()) || !Double.isFinite(this.getZ())) {
+                 throw new IllegalStateException("Entity has invalid position");
+             } else if (Double.isFinite((double)this.getYRot()) && Double.isFinite((double)this.getXRot())) {
+@@ -1907,12 +_,15 @@
                  this.setGlowingTag(p_20259_.getBoolean("Glowing"));
                  this.setTicksFrozen(p_20259_.getInt("TicksFrozen"));
                  this.hasVisualFire = p_20259_.getBoolean("HasVisualFire");
@@ -228,7 +749,32 @@
                  if (p_20259_.contains("Tags", 9)) {
                      this.tags.clear();
                      ListTag listtag3 = p_20259_.getList("Tags", 8);
-@@ -1819,6 +_,8 @@
+                     int i = Math.min(listtag3.size(), 1024);
+ 
+-                    for(int j = 0; j < i; ++j) {
++                    for (int j = 0; j < i; j++) {
+                         this.tags.add(listtag3.getString(j));
+                     }
+                 }
+@@ -1950,7 +_,7 @@
+     protected ListTag newDoubleList(double... p_20064_) {
+         ListTag listtag = new ListTag();
+ 
+-        for(double d0 : p_20064_) {
++        for (double d0 : p_20064_) {
+             listtag.add(DoubleTag.valueOf(d0));
+         }
+ 
+@@ -1960,7 +_,7 @@
+     protected ListTag newFloatList(float... p_20066_) {
+         ListTag listtag = new ListTag();
+ 
+-        for(float f : p_20066_) {
++        for (float f : p_20066_) {
+             listtag.add(FloatTag.valueOf(f));
+         }
+ 
+@@ -1991,6 +_,8 @@
          } else {
              ItemEntity itementity = new ItemEntity(this.level(), this.getX(), this.getY() + (double)p_19986_, this.getZ(), p_19985_);
              itementity.setDefaultPickUpDelay();
@@ -237,7 +783,7 @@
              this.level().addFreshEntity(itementity);
              return itementity;
          }
-@@ -1865,6 +_,7 @@
+@@ -2037,6 +_,7 @@
  
      public void rideTick() {
          this.setDeltaMovement(Vec3.ZERO);
@@ -245,7 +791,14 @@
          this.tick();
          if (this.isPassenger()) {
              this.getVehicle().positionRider(this);
-@@ -1923,6 +_,7 @@
+@@ -2089,12 +_,13 @@
+         } else if (!p_19966_.couldAcceptPassenger()) {
+             return false;
+         } else {
+-            for(Entity entity = p_19966_; entity.vehicle != null; entity = entity.vehicle) {
++            for (Entity entity = p_19966_; entity.vehicle != null; entity = entity.vehicle) {
+                 if (entity.vehicle == this) {
+                     return false;
                  }
              }
  
@@ -253,7 +806,16 @@
              if (p_19967_ || this.canRide(p_19966_) && p_19966_.canAddPassenger(this)) {
                  if (this.isPassenger()) {
                      this.stopRiding();
-@@ -1954,6 +_,7 @@
+@@ -2118,7 +_,7 @@
+     }
+ 
+     public void ejectPassengers() {
+-        for(int i = this.passengers.size() - 1; i >= 0; --i) {
++        for (int i = this.passengers.size() - 1; i >= 0; i--) {
+             this.passengers.get(i).stopRiding();
+         }
+     }
+@@ -2126,6 +_,7 @@
      public void removeVehicle() {
          if (this.vehicle != null) {
              Entity entity = this.vehicle;
@@ -261,7 +823,7 @@
              this.vehicle = null;
              entity.removePassenger(this);
          }
-@@ -2003,6 +_,8 @@
+@@ -2175,6 +_,8 @@
          return this.passengers.isEmpty();
      }
  
@@ -270,7 +832,62 @@
      protected boolean couldAcceptPassenger() {
          return true;
      }
-@@ -2192,7 +_,7 @@
+@@ -2217,10 +_,9 @@
+     }
+ 
+     public Vec3 getHandHoldingItemAngle(Item p_204035_) {
+-        if (!(this instanceof Player)) {
++        if (!(this instanceof Player player)) {
+             return Vec3.ZERO;
+         } else {
+-            Player player = (Player)this;
+             boolean flag = player.getOffhandItem().is(p_204035_) && !player.getMainHandItem().is(p_204035_);
+             HumanoidArm humanoidarm = flag ? player.getMainArm().getOpposite() : player.getMainArm();
+             return this.calculateViewVector(0.0F, this.getYRot() + (float)(humanoidarm == HumanoidArm.RIGHT ? 80 : -80)).scale(0.5);
+@@ -2248,28 +_,18 @@
+     }
+ 
+     protected void handleNetherPortal() {
+-        Level $$2 = this.level();
+-        if ($$2 instanceof ServerLevel) {
+-            ServerLevel serverlevel = (ServerLevel)$$2;
++        if (this.level() instanceof ServerLevel) {
+             int i = this.getPortalWaitTime();
++            ServerLevel serverlevel = (ServerLevel)this.level();
+             if (this.isInsidePortal) {
+                 MinecraftServer minecraftserver = serverlevel.getServer();
+-                BlockState blockstate = serverlevel.getBlockState(this.portalEntrancePos);
+-                boolean flag = blockstate.is(Blocks.POTATO_PORTAL);
+-                boolean flag1 = this.level.getBlockState(this.portalEntrancePos.below()).is(Blocks.PEDESTAL);
+-                ResourceKey<Level> resourcekey = flag
+-                    ? (this.level().isPotato() ? Level.OVERWORLD : Level.POTATO)
+-                    : (this.level().dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER);
++                ResourceKey<Level> resourcekey = this.level().dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER;
+                 ServerLevel serverlevel1 = minecraftserver.getLevel(resourcekey);
+-                if (serverlevel1 != null && (minecraftserver.isNetherEnabled() || flag) && !this.isPassenger() && this.portalTime++ >= i) {
++                if (serverlevel1 != null && minecraftserver.isNetherEnabled() && !this.isPassenger() && this.portalTime++ >= i) {
+                     this.level().getProfiler().push("portal");
+                     this.portalTime = i;
+                     this.setPortalCooldown();
+-                    this.changeDimension(serverlevel1, flag1);
+-                    if (this instanceof ServerPlayer serverplayer && flag && this.level().isPotato() && !serverplayer.chapterIsPast("dimension")) {
+-                        serverplayer.setPotatoQuestChapter("dimension");
+-                    }
+-
++                    this.changeDimension(serverlevel1);
+                     this.level().getProfiler().pop();
+                 }
+ 
+@@ -2300,7 +_,7 @@
+     }
+ 
+     public void handleEntityEvent(byte p_19882_) {
+-        switch(p_19882_) {
++        switch (p_19882_) {
+             case 53:
+                 HoneyBlock.showSlideParticles(this);
+         }
+@@ -2375,7 +_,7 @@
      }
  
      public boolean isVisuallyCrawling() {
@@ -279,7 +896,7 @@
      }
  
      public void setSwimming(boolean p_20283_) {
-@@ -2301,7 +_,7 @@
+@@ -2484,7 +_,7 @@
              this.igniteForSeconds(8);
          }
  
@@ -288,7 +905,25 @@
      }
  
      public void onAboveBubbleCol(boolean p_20313_) {
-@@ -2396,7 +_,7 @@
+@@ -2533,7 +_,7 @@
+         Direction direction = Direction.UP;
+         double d0 = Double.MAX_VALUE;
+ 
+-        for(Direction direction1 : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.UP}) {
++        for (Direction direction1 : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.UP}) {
+             blockpos$mutableblockpos.setWithOffset(blockpos, direction1);
+             if (!this.level().getBlockState(blockpos$mutableblockpos).isCollisionShapeFullBlock(this.level(), blockpos$mutableblockpos)) {
+                 double d1 = vec3.get(direction1.getAxis());
+@@ -2565,7 +_,7 @@
+     private static Component removeAction(Component p_20141_) {
+         MutableComponent mutablecomponent = p_20141_.plainCopy().setStyle(p_20141_.getStyle().withClickEvent(null));
+ 
+-        for(Component component : p_20141_.getSiblings()) {
++        for (Component component : p_20141_.getSiblings()) {
+             mutablecomponent.append(removeAction(component));
+         }
+ 
+@@ -2579,7 +_,7 @@
      }
  
      protected Component getTypeName() {
@@ -297,10 +932,12 @@
      }
  
      public boolean is(Entity p_20356_) {
-@@ -2479,14 +_,20 @@
+@@ -2661,15 +_,21 @@
+     }
  
      @Nullable
-     public Entity changeDimension(ServerLevel p_20118_) {
+-    public Entity changeDimension(ServerLevel p_20118_, boolean p_342337_) {
++    public Entity changeDimension(ServerLevel p_20118_) {
 +        return this.changeDimension(p_20118_, p_20118_.getPortalForcer());
 +    }
 +    @Nullable
@@ -310,7 +947,7 @@
              this.level().getProfiler().push("changeDimension");
              this.unRide();
              this.level().getProfiler().push("reposition");
--            PortalInfo portalinfo = this.findDimensionEntryPoint(p_20118_);
+-            PortalInfo portalinfo = this.findDimensionEntryPoint(p_20118_, p_342337_);
 +            PortalInfo portalinfo = teleporter.getPortalInfo(this, p_20118_, this::findDimensionEntryPoint);
              if (portalinfo == null) {
                  return null;
@@ -319,7 +956,7 @@
                  this.level().getProfiler().popPush("reloading");
                  Entity entity = this.getType().create(p_20118_);
                  if (entity != null) {
-@@ -2494,17 +_,19 @@
+@@ -2677,17 +_,19 @@
                      entity.moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z, portalinfo.yRot, entity.getXRot());
                      entity.setDeltaMovement(portalinfo.speed);
                      p_20118_.addDuringTeleport(entity);
@@ -341,7 +978,246 @@
              }
          } else {
              return null;
-@@ -2639,6 +_,7 @@
+@@ -2699,189 +_,60 @@
+     }
+ 
+     @Nullable
+-    protected PortalInfo findDimensionEntryPoint(ServerLevel p_19923_, boolean p_341843_) {
+-        boolean flag = p_19923_.isPotato() || this.level().isPotato();
+-        ServerLevel serverlevel = (ServerLevel)this.level();
+-        if (flag) {
+-            WorldBorder worldborder = p_19923_.getWorldBorder();
+-            double d1 = DimensionType.getTeleportationScale(this.level().dimensionType(), p_19923_.dimensionType());
+-            BlockPos blockpos3 = worldborder.clampToBounds(
+-                (double)this.portalEntrancePos.getX() * d1,
+-                (double)Mth.clamp(this.portalEntrancePos.getY(), p_19923_.getMinBuildHeight() + 1, p_19923_.getMaxBuildHeight() - 1),
+-                (double)this.portalEntrancePos.getZ() * d1
+-            );
+-            PortalInfo portalinfo = null;
+-            if (p_341843_) {
+-                portalinfo = this.getPortalInfoInPotatoWithStructureLink(p_19923_, serverlevel, blockpos3);
+-            }
+-
+-            if (portalinfo == null) {
+-                portalinfo = this.getPortalInfoInPotatoWithRegularPortal(p_19923_, blockpos3);
+-            }
+-
+-            serverlevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(this.portalEntrancePos), 3, this.portalEntrancePos);
+-            BlockPos blockpos1 = BlockPos.containing(portalinfo.pos);
+-            p_19923_.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockpos1), 3, blockpos1);
+-            return portalinfo;
+-        } else {
+-            boolean flag1 = this.level().dimension() == Level.END && p_19923_.dimension() == Level.OVERWORLD;
+-            boolean flag2 = p_19923_.dimension() == Level.END;
+-            if (!flag1 && !flag2) {
+-                boolean flag3 = p_19923_.dimension() == Level.NETHER;
+-                if (this.level().dimension() != Level.NETHER && !flag3) {
+-                    return null;
+-                } else {
+-                    WorldBorder worldborder1 = p_19923_.getWorldBorder();
+-                    double d0 = DimensionType.getTeleportationScale(this.level().dimensionType(), p_19923_.dimensionType());
+-                    BlockPos blockpos2 = worldborder1.clampToBounds(this.getX() * d0, this.getY(), this.getZ() * d0);
+-                    return this.getExitPortal(p_19923_, blockpos2, flag3, worldborder1)
+-                        .map(
+-                            p_258249_ -> {
+-                                BlockState blockstate = this.level().getBlockState(this.portalEntrancePos);
+-                                Direction.Axis direction$axis;
+-                                Vec3 vec3;
+-                                if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
+-                                    direction$axis = blockstate.getValue(BlockStateProperties.HORIZONTAL_AXIS);
+-                                    BlockUtil.FoundRectangle blockutil$foundrectangle = BlockUtil.getLargestRectangleAround(
+-                                        this.portalEntrancePos,
+-                                        direction$axis,
+-                                        21,
+-                                        Direction.Axis.Y,
+-                                        21,
+-                                        p_284700_ -> this.level().getBlockState(p_284700_) == blockstate
+-                                    );
+-                                    vec3 = this.getRelativePortalPosition(direction$axis, blockutil$foundrectangle);
+-                                } else {
+-                                    direction$axis = Direction.Axis.X;
+-                                    vec3 = new Vec3(0.5, 0.0, 0.0);
+-                                }
+-        
+-                                return PortalShape.createPortalInfo(
+-                                    p_19923_, p_258249_, direction$axis, vec3, this, this.getDeltaMovement(), this.getYRot(), this.getXRot()
++    protected PortalInfo findDimensionEntryPoint(ServerLevel p_19923_) {
++        boolean flag = this.level().dimension() == Level.END && p_19923_.dimension() == Level.OVERWORLD;
++        boolean flag1 = p_19923_.dimension() == Level.END;
++        if (!flag && !flag1) {
++            boolean flag2 = p_19923_.dimension() == Level.NETHER;
++            if (this.level().dimension() != Level.NETHER && !flag2) {
++                return null;
++            } else {
++                WorldBorder worldborder = p_19923_.getWorldBorder();
++                double d0 = DimensionType.getTeleportationScale(this.level().dimensionType(), p_19923_.dimensionType());
++                BlockPos blockpos1 = worldborder.clampToBounds(this.getX() * d0, this.getY(), this.getZ() * d0);
++                return this.getExitPortal(p_19923_, blockpos1, flag2, worldborder)
++                    .map(
++                        p_258249_ -> {
++                            BlockState blockstate = this.level().getBlockState(this.portalEntrancePos);
++                            Direction.Axis direction$axis;
++                            Vec3 vec3;
++                            if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
++                                direction$axis = blockstate.getValue(BlockStateProperties.HORIZONTAL_AXIS);
++                                BlockUtil.FoundRectangle blockutil$foundrectangle = BlockUtil.getLargestRectangleAround(
++                                    this.portalEntrancePos,
++                                    direction$axis,
++                                    21,
++                                    Direction.Axis.Y,
++                                    21,
++                                    p_284700_ -> this.level().getBlockState(p_284700_) == blockstate
+                                 );
++                                vec3 = this.getRelativePortalPosition(direction$axis, blockutil$foundrectangle);
++                            } else {
++                                direction$axis = Direction.Axis.X;
++                                vec3 = new Vec3(0.5, 0.0, 0.0);
+                             }
+-                        )
+-                        .orElse(null);
+-                }
+-            } else {
+-                BlockPos blockpos = flag2 ? ServerLevel.END_SPAWN_POINT : p_19923_.getSharedSpawnPos();
+-                p_19923_.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockpos), 3, blockpos);
+-                int i;
+-                if (flag2) {
+-                    i = blockpos.getY();
+-                } else {
+-                    i = p_19923_.getChunkAt(blockpos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockpos.getX(), blockpos.getZ()) + 1;
+-                }
+-
+-                return new PortalInfo(
+-                    new Vec3((double)blockpos.getX() + 0.5, (double)i, (double)blockpos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
+-                );
+-            }
+-        }
+-    }
+-
+-    private PortalInfo getPortalInfoInPotatoWithRegularPortal(ServerLevel p_341416_, BlockPos p_340341_) {
+-        Vec3 vec3 = this.position.subtract(Vec3.atLowerCornerOf(this.portalEntrancePos));
+-        PoiManager poimanager = p_341416_.getPoiManager();
+-        poimanager.ensureLoadedAndValid(p_341416_, p_340341_, 64, ChunkStatus.EMPTY);
+-        BlockPos blockpos = poimanager.findClosest(p_339915_ -> p_339915_.is(PoiTypes.POTATO_PORTAL), p_340341_, 64, PoiManager.Occupancy.ANY)
+-            .or(() -> getClosestLandingPointBruteForce(p_341416_, p_340341_))
+-            .orElseGet(() -> setupSafeLandingPosition(p_341416_, p_340341_));
+-        if (!p_341416_.getBlockState(blockpos).is(Blocks.POTATO_PORTAL) && p_341416_.isEmptyBlock(blockpos)) {
+-            p_341416_.setBlock(blockpos, Blocks.POTATO_PORTAL.defaultBlockState(), 3);
+-        }
+-
+-        return new PortalInfo(Vec3.atLowerCornerOf(blockpos).add(vec3), this.getDeltaMovement(), this.getYRot(), this.getXRot());
+-    }
+-
+-    private static Optional<BlockPos> getClosestLandingPointBruteForce(ServerLevel p_342552_, BlockPos p_342303_) {
+-        return BlockPos.findClosestMatch(
+-            p_342303_,
+-            32,
+-            32,
+-            p_339912_ -> isValidLandingBlock(p_342552_, p_339912_.below()) && p_342552_.isEmptyBlock(p_339912_) && p_342552_.isEmptyBlock(p_339912_.above())
+-        );
+-    }
+-
+-    private static boolean isValidLandingBlock(ServerLevel p_342323_, BlockPos p_342317_) {
+-        BlockState blockstate = p_342323_.getBlockState(p_342317_);
+-        return !blockstate.is(Blocks.FLOATATO) && blockstate.isFaceSturdy(p_342323_, p_342317_, Direction.UP);
+-    }
+-
+-    private static Optional<BlockPos> getClosestPedestalBruteForce(ServerLevel p_340467_, BlockPos p_341663_) {
+-        return BlockPos.findClosestMatch(
+-            p_341663_,
+-            32,
+-            32,
+-            p_339928_ -> p_340467_.getBlockState(p_339928_.below()).is(Blocks.PEDESTAL)
+-                    && (p_340467_.isEmptyBlock(p_339928_) || p_340467_.getBlockState(p_339928_).canBeReplaced())
+-        );
+-    }
+-
+-    private static BlockPos setupSafeLandingPosition(ServerLevel p_340344_, BlockPos p_340628_) {
+-        if (!p_340344_.getBlockState(p_340628_.below()).isFaceSturdy(p_340344_, p_340628_, Direction.UP)) {
+-            p_340344_.setBlock(p_340628_.below(), p_340344_.isPotato() ? Blocks.PEELGRASS_BLOCK.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+-        }
+-
+-        p_340344_.setBlock(p_340628_, Blocks.CAVE_AIR.defaultBlockState(), 3);
+-        p_340344_.setBlock(p_340628_.above(), Blocks.CAVE_AIR.defaultBlockState(), 3);
+-        return p_340628_;
+-    }
+-
+-    @Nullable
+-    private PortalInfo getPortalInfoInPotatoWithStructureLink(ServerLevel p_340656_, ServerLevel p_340774_, BlockPos p_340556_) {
+-        Vec3 vec3 = this.position.subtract(Vec3.atLowerCornerOf(this.portalEntrancePos));
+-
+-        for(Pair<ResourceKey<Structure>, ResourceKey<Structure>> pair : STRUCTURE_LINKS) {
+-            ResourceKey<Structure> resourcekey = p_340774_.isPotato() ? pair.getSecond() : pair.getFirst();
+-            if (p_340774_.structureManager().getStructureWithPieceAt(this.portalEntrancePos, p_339914_ -> p_339914_.is(resourcekey)).isValid()) {
+-                ResourceKey<Structure> resourcekey1 = p_340774_.isPotato() ? pair.getFirst() : pair.getSecond();
+-                HolderSet<Structure> holderset = HolderSet.direct(
+-                    this.registryAccess().registryOrThrow(Registries.STRUCTURE).getHolder(resourcekey1).orElseThrow()
+-                );
+-                Pair<BlockPos, Holder<Structure>> pair1 = p_340656_.getChunkSource()
+-                    .getGenerator()
+-                    .findNearestMapStructure(p_340656_, holderset, p_340556_, 128, false);
+-                if (pair1 != null) {
+-                    ChunkPos chunkpos = new ChunkPos(pair1.getFirst());
+-                    ChunkAccess chunkaccess = p_340656_.getChunk(chunkpos.x, chunkpos.z, ChunkStatus.FEATURES);
+-                    StructureStart structurestart = p_340656_.structureManager()
+-                        .getStartForStructure(SectionPos.bottomOf(chunkaccess), pair1.getSecond().value(), chunkaccess);
+-                    if (structurestart != null && structurestart.isValid() && !structurestart.getPieces().isEmpty()) {
+-                        StructurePiece structurepiece = resourcekey1 == BuiltinStructures.STRONGHOLD
+-                            ? structurestart.getPieces()
+-                                .stream()
+-                                .filter(p_339932_ -> p_339932_ instanceof StrongholdPieces.PortalRoom)
+-                                .findFirst()
+-                                .orElse(structurestart.getPieces().get(0))
+-                            : structurestart.getPieces().get(0);
+-                        BlockPos blockpos = structurepiece.getBoundingBox().getCenter();
+-                        PoiManager poimanager = p_340656_.getPoiManager();
+-                        poimanager.ensureLoadedAndValid(p_340656_, blockpos, 64, ChunkStatus.FULL);
+-                        System.out
+-                            .println("Counts on the other side: " + poimanager.getInSquare(p_339929_ -> true, blockpos, 64, PoiManager.Occupancy.ANY).count());
+-                        BlockPos blockpos1 = poimanager.findClosest(
+-                                p_339922_ -> p_339922_.is(PoiTypes.POTATO_PORTAL), blockpos.below(16), 64, PoiManager.Occupancy.ANY
+-                            )
+-                            .or(() -> poimanager.findClosest(p_339919_ -> p_339919_.is(PoiTypes.PEDESTAL), p_339931_ -> {
+-                                    BlockPos blockpos2 = p_339931_.above();
+-                                    BlockState blockstate = p_340656_.getBlockState(blockpos2);
+-                                    return blockstate.getCollisionShape(p_340656_, blockpos2).isEmpty() || blockstate.canBeReplaced();
+-                                }, blockpos.below(16), 64, PoiManager.Occupancy.ANY).map(BlockPos::above))
+-                            .or(() -> getClosestPedestalBruteForce(p_340656_, blockpos.below(8)))
+-                            .or(() -> getClosestLandingPointBruteForce(p_340656_, blockpos.below(8)))
+-                            .orElseGet(() -> setupSafeLandingPosition(p_340656_, blockpos));
+-                        if (p_340656_.getBlockState(blockpos1.below()).is(Blocks.PEDESTAL) && !p_340656_.getBlockState(blockpos1).is(Blocks.POTATO_PORTAL)) {
+-                            p_340656_.setBlock(blockpos1, Blocks.POTATO_PORTAL.defaultBlockState(), 3);
++
++                            return PortalShape.createPortalInfo(
++                                p_19923_, p_258249_, direction$axis, vec3, this, this.getDeltaMovement(), this.getYRot(), this.getXRot()
++                            );
+                         }
++                    )
++                    .orElse(null);
++            }
++        } else {
++            BlockPos blockpos = flag1 ? ServerLevel.END_SPAWN_POINT : p_19923_.getSharedSpawnPos();
++            p_19923_.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockpos), 3, blockpos);
++            int i;
++            if (flag1) {
++                i = blockpos.getY();
++            } else {
++                i = p_19923_.getChunkAt(blockpos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockpos.getX(), blockpos.getZ()) + 1;
++            }
+ 
+-                        return new PortalInfo(Vec3.atLowerCornerOf(blockpos1).add(vec3), this.getDeltaMovement(), this.getYRot(), this.getXRot());
+-                    }
+-                }
+-            }
++            return new PortalInfo(
++                new Vec3((double)blockpos.getX() + 0.5, (double)i, (double)blockpos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
++            );
+         }
+-
+-        return null;
+     }
+ 
+     protected Vec3 getRelativePortalPosition(Direction.Axis p_20045_, BlockUtil.FoundRectangle p_20046_) {
+@@ -2951,6 +_,7 @@
          return this.stringUUID;
      }
  
@@ -349,7 +1225,16 @@
      public boolean isPushedByFluid() {
          return true;
      }
-@@ -2764,6 +_,8 @@
+@@ -3039,7 +_,7 @@
+ 
+     private void teleportPassengers() {
+         this.getSelfAndPassengers().forEach(p_185977_ -> {
+-            for(Entity entity : p_185977_.passengers) {
++            for (Entity entity : p_185977_.passengers) {
+                 p_185977_.positionRider(entity, Entity::moveTo);
+             }
+         });
+@@ -3076,6 +_,8 @@
          EntityDimensions entitydimensions = this.dimensions;
          Pose pose = this.getPose();
          EntityDimensions entitydimensions1 = this.getDimensions(pose);
@@ -358,7 +1243,7 @@
          this.dimensions = entitydimensions1;
          this.eyeHeight = entitydimensions1.eyeHeight();
          this.reapplyPosition();
-@@ -2778,11 +_,12 @@
+@@ -3090,11 +_,12 @@
              double d0 = (double)Math.max(0.0F, entitydimensions1.width() - entitydimensions.width()) + 1.0E-6;
              double d1 = (double)Math.max(0.0F, entitydimensions1.height() - entitydimensions.height()) + 1.0E-6;
              VoxelShape voxelshape = Shapes.create(AABB.ofSize(vec3, d0, d1, d0));
@@ -372,7 +1257,53 @@
          }
      }
  
-@@ -3084,9 +_,17 @@
+@@ -3184,7 +_,7 @@
+ 
+     public float rotate(Rotation p_20004_) {
+         float f = Mth.wrapDegrees(this.getYRot());
+-        switch(p_20004_) {
++        switch (p_20004_) {
+             case CLOCKWISE_180:
+                 return f + 180.0F;
+             case COUNTERCLOCKWISE_90:
+@@ -3198,7 +_,7 @@
+ 
+     public float mirror(Mirror p_20003_) {
+         float f = Mth.wrapDegrees(this.getYRot());
+-        switch(p_20003_) {
++        switch (p_20003_) {
+             case FRONT_BACK:
+                 return -f;
+             case LEFT_RIGHT:
+@@ -3239,7 +_,7 @@
+     }
+ 
+     public boolean hasPassenger(Predicate<Entity> p_146863_) {
+-        for(Entity entity : this.passengers) {
++        for (Entity entity : this.passengers) {
+             if (p_146863_.test(entity)) {
+                 return true;
+             }
+@@ -3277,7 +_,7 @@
+     public Entity getRootVehicle() {
+         Entity entity = this;
+ 
+-        while(entity.isPassenger()) {
++        while (entity.isPassenger()) {
+             entity = entity.getVehicle();
+         }
+ 
+@@ -3298,8 +_,7 @@
+     }
+ 
+     public boolean isControlledByLocalInstance() {
+-        LivingEntity livingentity = this.getControllingPassenger();
+-        return livingentity instanceof Player player ? player.isLocalPlayer() : this.isEffectiveAi();
++        return this.getControllingPassenger() instanceof Player player ? player.isLocalPlayer() : this.isEffectiveAi();
+     }
+ 
+     public boolean isEffectiveAi() {
+@@ -3390,9 +_,17 @@
          this.yRotO = this.getYRot();
      }
  
@@ -391,7 +1322,7 @@
          } else {
              AABB aabb = this.getBoundingBox().deflate(0.001);
              int i = Mth.floor(aabb.minX);
-@@ -3101,25 +_,36 @@
+@@ -3407,25 +_,36 @@
              Vec3 vec3 = Vec3.ZERO;
              int k1 = 0;
              BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
@@ -402,9 +1333,12 @@
 +            }
 +            it.unimi.dsi.fastutil.objects.Object2ObjectMap<net.neoforged.neoforge.fluids.FluidType, InterimCalculation> interimCalcs = null;
  
-             for (int l1 = i; l1 < j; l1++) {
-                 for (int i2 = k; i2 < l; i2++) {
-                     for (int j2 = i1; j2 < j1; j2++) {
+-            for(int l1 = i; l1 < j; ++l1) {
+-                for(int i2 = k; i2 < l; ++i2) {
+-                    for(int j2 = i1; j2 < j1; ++j2) {
++            for (int l1 = i; l1 < j; l1++) {
++                for (int i2 = k; i2 < l; i2++) {
++                    for (int j2 = i1; j2 < j1; j2++) {
                          blockpos$mutableblockpos.set(l1, i2, j2);
                          FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
 -                        if (fluidstate.is(p_204032_)) {
@@ -429,13 +1363,13 @@
                                      }
  
 -                                    vec3 = vec3.add(vec31);
--                                    k1++;
+-                                    ++k1;
 +                                    interim.flowVector = interim.flowVector.add(vec31);
 +                                    interim.blockCount++;
                                  }
                              }
                          }
-@@ -3127,27 +_,30 @@
+@@ -3433,27 +_,30 @@
                  }
              }
  
@@ -476,7 +1410,7 @@
          }
      }
  
-@@ -3160,7 +_,10 @@
+@@ -3466,7 +_,10 @@
          return !this.level().hasChunksAt(i, k, j, l);
      }
  
@@ -487,7 +1421,7 @@
          return this.fluidHeight.getDouble(p_204037_);
      }
  
-@@ -3297,6 +_,7 @@
+@@ -3603,6 +_,7 @@
  
              this.levelCallback.onMove();
          }
@@ -495,11 +1429,22 @@
      }
  
      public void checkDespawn() {
-@@ -3424,6 +_,126 @@
-     public boolean mayInteract(Level p_146843_, BlockPos p_146844_) {
+@@ -3717,10 +_,8 @@
+     public boolean shouldBeSaved() {
+         if (this.removalReason != null && !this.removalReason.shouldSave()) {
+             return false;
+-        } else if (this.isPassenger()) {
+-            return false;
+         } else {
+-            return !this.isVehicle() || !this.hasExactlyOnePlayerPassenger();
++            return this.isPassenger() ? false : !this.isVehicle() || !this.hasExactlyOnePlayerPassenger();
+         }
+     }
+ 
+@@ -3733,18 +_,130 @@
          return true;
      }
-+
+ 
 +    /* ================================== Forge Start =====================================*/
 +
 +    private boolean canUpdate = true;
@@ -619,6 +1564,49 @@
 +
 +    /* ================================== Forge End =====================================*/
 +
- 
++
      public Level level() {
          return this.level;
+     }
+ 
+-    public boolean isPotato() {
+-        return this.hasPotatoVariant() && this.level.isPotato();
+-    }
+-
+-    public boolean hasPotatoVariant() {
+-        return false;
+-    }
+-
+     protected void setLevel(Level p_285201_) {
+         this.level = p_285201_;
+     }
+@@ -3757,7 +_,7 @@
+         return this.level().registryAccess();
+     }
+ 
+-    public void lerpPositionAndRotationStep(int p_294824_, double p_296038_, double p_294518_, double p_294658_, double p_294681_, double p_295540_) {
++    protected void lerpPositionAndRotationStep(int p_294824_, double p_296038_, double p_294518_, double p_294658_, double p_294681_, double p_295540_) {
+         double d0 = 1.0 / (double)p_294824_;
+         double d1 = Mth.lerp(d0, this.getX(), p_296038_);
+         double d2 = Mth.lerp(d0, this.getY(), p_294518_);
+@@ -3766,20 +_,6 @@
+         float f1 = (float)Mth.lerp(d0, (double)this.getXRot(), p_295540_);
+         this.setPos(d1, d2, d3);
+         this.setRot(f, f1);
+-    }
+-
+-    public static record CollideResult(Vec3 movement, @Nullable SubGrid subGrid) {
+-        public Entity.CollideResult add(Vec3 p_342529_) {
+-            return new Entity.CollideResult(this.movement.add(p_342529_), this.subGrid);
+-        }
+-
+-        public Vec3 gridMovement() {
+-            return this.subGrid != null ? this.subGrid.getLastMovement() : Vec3.ZERO;
+-        }
+-
+-        public Vec3 movementRelativeTo(Vec3 p_342538_) {
+-            return this.movement.subtract(p_342538_);
+-        }
+     }
+ 
+     @FunctionalInterface
