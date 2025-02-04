@@ -70,15 +70,6 @@
      @OnlyIn(Dist.CLIENT)
      public static class Builder {
          private final List<BakedQuad> unculledFaces = Lists.newArrayList();
-@@ -103,7 +_,7 @@
-         }
- 
-         public Builder(boolean p_119521_, boolean p_119522_, boolean p_119523_, ItemTransforms p_119524_, ItemOverrides p_119525_) {
--            for(Direction direction : Direction.values()) {
-+            for (Direction direction : Direction.values()) {
-                 this.culledFaces.put(direction, Lists.newArrayList());
-             }
- 
 @@ -133,7 +_,13 @@
              return this;
          }

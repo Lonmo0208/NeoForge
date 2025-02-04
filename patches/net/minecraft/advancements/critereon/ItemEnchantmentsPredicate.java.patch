@@ -1,6 +1,6 @@
 --- a/net/minecraft/advancements/critereon/ItemEnchantmentsPredicate.java
 +++ b/net/minecraft/advancements/critereon/ItemEnchantmentsPredicate.java
-@@ -23,8 +_,13 @@
+@@ -23,6 +_,11 @@
          return this.enchantments;
      }
  
@@ -10,8 +10,5 @@
 +    }
 +
      public boolean matches(ItemStack p_333811_, ItemEnchantments p_334059_) {
--        for(EnchantmentPredicate enchantmentpredicate : this.enchantments) {
-+        for (EnchantmentPredicate enchantmentpredicate : this.enchantments) {
+         for (EnchantmentPredicate enchantmentpredicate : this.enchantments) {
              if (!enchantmentpredicate.containedIn(p_334059_)) {
-                 return false;
-             }

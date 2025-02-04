@@ -18,19 +18,3 @@
      }
  
      default int getMaxLightLevel() {
-@@ -142,7 +_,7 @@
-                 double d13 = d10 * (i1 > 0 ? 1.0 - Mth.frac(d4) : Mth.frac(d4));
-                 double d14 = d11 * (j1 > 0 ? 1.0 - Mth.frac(d5) : Mth.frac(d5));
- 
--                while(d12 <= 1.0 || d13 <= 1.0 || d14 <= 1.0) {
-+                while (d12 <= 1.0 || d13 <= 1.0 || d14 <= 1.0) {
-                     if (d12 < d13) {
-                         if (d12 < d14) {
-                             i += l;
-@@ -169,6 +_,4 @@
-             }
-         }
-     }
--
--    boolean isPotato();
- }

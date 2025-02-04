@@ -1,14 +1,5 @@
 --- a/net/minecraft/client/renderer/texture/SpriteLoader.java
 +++ b/net/minecraft/client/renderer/texture/SpriteLoader.java
-@@ -53,7 +_,7 @@
-         int j = Integer.MAX_VALUE;
-         int k = 1 << p_261919_;
- 
--        for(SpriteContents spritecontents : p_262029_) {
-+        for (SpriteContents spritecontents : p_262029_) {
-             j = Math.min(j, Math.min(spritecontents.width(), spritecontents.height()));
-             int l = Math.min(Integer.lowestOneBit(spritecontents.width()), Integer.lowestOneBit(spritecontents.height()));
-             if (l < k) {
 @@ -74,7 +_,7 @@
          int j1 = Math.min(j, k);
          int k1 = Mth.log2(j1);
@@ -18,14 +9,3 @@
              LOGGER.warn("{}: dropping miplevel from {} to {}, because of minimum power of two: {}", this.location, p_261919_, k1, j1);
              l1 = k1;
          } else {
-@@ -131,8 +_,8 @@
-         return CompletableFuture.<List<Function<SpriteResourceLoader, SpriteContents>>>supplyAsync(
-                 () -> SpriteSourceList.load(p_295469_, p_294925_).list(p_295469_), p_294720_
-             )
--            .thenCompose(p_293671_ -> runSpriteSuppliers(spriteresourceloader, p_293671_, p_294720_))
--            .thenApply(p_261393_ -> this.stitch(p_261393_, p_294855_, p_294720_));
-+            .thenCompose(p_293671_ -> runSpriteSuppliers(spriteresourceloader, (List<Function<SpriteResourceLoader, SpriteContents>>)p_293671_, p_294720_))
-+            .thenApply(p_261393_ -> this.stitch((List<SpriteContents>)p_261393_, p_294855_, p_294720_));
-     }
- 
-     private Map<ResourceLocation, TextureAtlasSprite> getStitchedSprites(Stitcher<SpriteContents> p_276117_, int p_276111_, int p_276112_) {

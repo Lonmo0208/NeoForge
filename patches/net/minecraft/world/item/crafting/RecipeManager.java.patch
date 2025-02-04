@@ -1,79 +1,27 @@
 --- a/net/minecraft/world/item/crafting/RecipeManager.java
 +++ b/net/minecraft/world/item/crafting/RecipeManager.java
-@@ -22,7 +_,6 @@
- import java.util.stream.Collectors;
- import java.util.stream.Stream;
- import javax.annotation.Nullable;
--import net.minecraft.Util;
- import net.minecraft.core.HolderLookup;
- import net.minecraft.core.NonNullList;
- import net.minecraft.resources.RegistryOps;
-@@ -53,23 +_,29 @@
+@@ -50,16 +_,22 @@
          this.hasErrors = false;
-         Map<RecipeType<?>, Builder<ResourceLocation, RecipeHolder<?>>> map = Maps.newHashMap();
-         Builder<ResourceLocation, RecipeHolder<?>> builder = ImmutableMap.builder();
+         Builder<RecipeType<?>, RecipeHolder<?>> builder = ImmutableMultimap.builder();
+         com.google.common.collect.ImmutableMap.Builder<ResourceLocation, RecipeHolder<?>> builder1 = ImmutableMap.builder();
 -        RegistryOps<JsonElement> registryops = this.registries.createSerializationContext(JsonOps.INSTANCE);
 +        RegistryOps<JsonElement> registryops = this.makeConditionalOps(); // Neo: add condition context
  
--        for(Entry<ResourceLocation, JsonElement> entry : p_44037_.entrySet()) {
-+        for (Entry<ResourceLocation, JsonElement> entry : p_44037_.entrySet()) {
+         for (Entry<ResourceLocation, JsonElement> entry : p_44037_.entrySet()) {
              ResourceLocation resourcelocation = entry.getKey();
 +            if (resourcelocation.getPath().startsWith("_")) continue; //Forge: filter anything beginning with "_" as it's used for metadata.
  
              try {
-                 JsonObject jsonobject = GsonHelper.convertToJsonObject(entry.getValue(), "top element");
--                Recipe<?> recipe = Util.getOrThrow(Recipe.CODEC.parse(registryops, jsonobject), JsonParseException::new);
-+                var decoded = Recipe.CONDITIONAL_CODEC.parse(registryops, jsonobject).getOrThrow(JsonParseException::new);
+-                Recipe<?> recipe = Recipe.CODEC.parse(registryops, entry.getValue()).getOrThrow(JsonParseException::new);
++                var decoded = Recipe.CONDITIONAL_CODEC.parse(registryops, entry.getValue()).getOrThrow(JsonParseException::new);
 +                decoded.ifPresentOrElse(r -> {
 +                Recipe<?> recipe = r.carrier();
                  RecipeHolder<?> recipeholder = new RecipeHolder<>(resourcelocation, recipe);
-                 map.computeIfAbsent(recipe.getType(), p_44075_ -> ImmutableMap.builder()).put(resourcelocation, recipeholder);
-                 builder.put(resourcelocation, recipeholder);
+                 builder.put(recipe.getType(), recipeholder);
+                 builder1.put(resourcelocation, recipeholder);
 +                }, () -> {
 +                    LOGGER.debug("Skipping loading recipe {} as its conditions were not met", resourcelocation);
 +                });
              } catch (IllegalArgumentException | JsonParseException jsonparseexception) {
                  LOGGER.error("Parsing error loading recipe {}", resourcelocation, jsonparseexception);
-             }
-         }
- 
--        this.recipes = map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, p_44033_ -> ((Builder)p_44033_.getValue()).build()));
-+        this.recipes = map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, p_44033_ -> p_44033_.getValue().build()));
-         this.byName = builder.build();
-         LOGGER.info("Loaded {} recipes", map.size());
-     }
-@@ -124,7 +_,7 @@
-         } else {
-             NonNullList<ItemStack> nonnulllist = NonNullList.withSize(p_44071_.getContainerSize(), ItemStack.EMPTY);
- 
--            for(int i = 0; i < nonnulllist.size(); ++i) {
-+            for (int i = 0; i < nonnulllist.size(); i++) {
-                 nonnulllist.set(i, p_44071_.getItem(i));
-             }
- 
-@@ -146,7 +_,7 @@
- 
-     @VisibleForTesting
-     protected static RecipeHolder<?> fromJson(ResourceLocation p_44046_, JsonObject p_44047_, HolderLookup.Provider p_323755_) {
--        Recipe<?> recipe = Util.getOrThrow(Recipe.CODEC.parse(p_323755_.createSerializationContext(JsonOps.INSTANCE), p_44047_), JsonParseException::new);
-+        Recipe<?> recipe = Recipe.CODEC.parse(p_323755_.createSerializationContext(JsonOps.INSTANCE), p_44047_).getOrThrow(JsonParseException::new);
-         return new RecipeHolder<>(p_44046_, recipe);
-     }
- 
-@@ -154,11 +_,11 @@
-         this.hasErrors = false;
-         Map<RecipeType<?>, Map<ResourceLocation, RecipeHolder<?>>> map = Maps.newHashMap();
-         Builder<ResourceLocation, RecipeHolder<?>> builder = ImmutableMap.builder();
--        p_44025_.forEach(p_300825_ -> {
--            Map<ResourceLocation, RecipeHolder<?>> map1 = map.computeIfAbsent(p_300825_.value().getType(), p_220272_ -> Maps.newHashMap());
--            ResourceLocation resourcelocation = p_300825_.id();
--            RecipeHolder<?> recipeholder = map1.put(resourcelocation, p_300825_);
--            builder.put(resourcelocation, p_300825_);
-+        p_44025_.forEach(p_339533_ -> {
-+            Map<ResourceLocation, RecipeHolder<?>> map1 = map.computeIfAbsent(p_339533_.value().getType(), p_220272_ -> Maps.newHashMap());
-+            ResourceLocation resourcelocation = p_339533_.id();
-+            RecipeHolder<?> recipeholder = map1.put(resourcelocation, (RecipeHolder<?>)p_339533_);
-+            builder.put(resourcelocation, (RecipeHolder<?>)p_339533_);
-             if (recipeholder != null) {
-                 throw new IllegalStateException("Duplicate recipe ignored with ID " + resourcelocation);
              }

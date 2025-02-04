@@ -12,31 +12,12 @@
  public class AdvancementProvider implements DataProvider {
      private final PackOutput.PathProvider pathProvider;
      private final List<AdvancementSubProvider> subProviders;
-@@ -31,20 +_,20 @@
-         return this.registries.thenCompose(p_323115_ -> {
-             Set<ResourceLocation> set = new HashSet<>();
-             List<CompletableFuture<?>> list = new ArrayList<>();
--            Consumer<AdvancementHolder> consumer = p_323113_ -> {
--                if (!set.add(p_323113_.id())) {
--                    throw new IllegalStateException("Duplicate advancement " + p_323113_.id());
-+            Consumer<AdvancementHolder> consumer = p_339356_ -> {
-+                if (!set.add(p_339356_.id())) {
-+                    throw new IllegalStateException("Duplicate advancement " + p_339356_.id());
+@@ -36,7 +_,7 @@
+                     throw new IllegalStateException("Duplicate advancement " + p_339356_.id());
                  } else {
--                    Path path = this.pathProvider.json(p_323113_.id());
--                    list.add(DataProvider.saveStable(p_254268_, p_323115_, Advancement.CODEC, p_323113_.value(), path));
-+                    Path path = this.pathProvider.json(p_339356_.id());
+                     Path path = this.pathProvider.json(p_339356_.id());
+-                    list.add(DataProvider.saveStable(p_254268_, p_323115_, Advancement.CODEC, p_339356_.value(), path));
 +                    list.add(DataProvider.saveStable(p_254268_, p_323115_, Advancement.CODEC, p_339356_.value(), path));// TODO: make conditional
                  }
              };
- 
--            for(AdvancementSubProvider advancementsubprovider : this.subProviders) {
-+            for (AdvancementSubProvider advancementsubprovider : this.subProviders) {
-                 advancementsubprovider.generate(p_323115_, consumer);
-             }
- 
--            return CompletableFuture.allOf(list.toArray(p_253393_ -> new CompletableFuture[p_253393_]));
-+            return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new));
-         });
-     }
  

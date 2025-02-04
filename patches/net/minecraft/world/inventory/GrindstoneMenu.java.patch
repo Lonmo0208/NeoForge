@@ -40,32 +40,6 @@
                  int l = 0;
                  l += this.getExperienceFromItem(GrindstoneMenu.this.repairSlots.getItem(0));
                  l += this.getExperienceFromItem(GrindstoneMenu.this.repairSlots.getItem(1));
-@@ -92,7 +_,7 @@
-                 int l = 0;
-                 ItemEnchantments itemenchantments = EnchantmentHelper.getEnchantmentsForCrafting(p_39637_);
- 
--                for(Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
-+                for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
-                     Enchantment enchantment = entry.getKey().value();
-                     int i1 = entry.getIntValue();
-                     if (!enchantment.isCurse()) {
-@@ -104,13 +_,13 @@
-             }
-         });
- 
--        for(int i = 0; i < 3; ++i) {
--            for(int j = 0; j < 9; ++j) {
-+        for (int i = 0; i < 3; i++) {
-+            for (int j = 0; j < 9; j++) {
-                 this.addSlot(new Slot(p_39567_, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
-             }
-         }
- 
--        for(int k = 0; k < 9; ++k) {
-+        for (int k = 0; k < 9; k++) {
-             this.addSlot(new Slot(p_39567_, k, 8 + k * 18, 142));
-         }
-     }
 @@ -130,6 +_,8 @@
  
      private ItemStack computeResult(ItemStack p_332654_, ItemStack p_332736_) {
@@ -92,21 +66,3 @@
              }
  
              this.mergeEnchantsFrom(itemstack, p_332686_);
-@@ -177,7 +_,7 @@
-         EnchantmentHelper.updateEnchantments(p_332680_, p_330065_ -> {
-             ItemEnchantments itemenchantments = EnchantmentHelper.getEnchantmentsForCrafting(p_332800_);
- 
--            for(Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
-+            for (Entry<Holder<Enchantment>> entry : itemenchantments.entrySet()) {
-                 Enchantment enchantment = entry.getKey().value();
-                 if (!enchantment.isCurse() || p_330065_.getLevel(enchantment) == 0) {
-                     p_330065_.upgrade(enchantment, entry.getIntValue());
-@@ -196,7 +_,7 @@
- 
-         int i = 0;
- 
--        for(int j = 0; j < itemenchantments.size(); ++j) {
-+        for (int j = 0; j < itemenchantments.size(); j++) {
-             i = AnvilMenu.calculateIncreasedRepairCost(i);
-         }
- 

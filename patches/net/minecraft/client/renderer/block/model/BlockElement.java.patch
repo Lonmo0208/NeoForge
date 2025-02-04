@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/block/model/BlockElement.java
 +++ b/net/minecraft/client/renderer/block/model/BlockElement.java
-@@ -29,27 +_,34 @@
+@@ -29,16 +_,23 @@
      public final Map<Direction, BlockElementFace> faces;
      public final BlockElementRotation rotation;
      public final boolean shade;
@@ -24,19 +24,6 @@
      }
  
      private void fillUvs() {
--        for(Entry<Direction, BlockElementFace> entry : this.faces.entrySet()) {
-+        for (Entry<Direction, BlockElementFace> entry : this.faces.entrySet()) {
-             float[] afloat = this.uvsByFace(entry.getKey());
-             entry.getValue().uv.setMissingUv(afloat);
-         }
-     }
- 
-     public float[] uvsByFace(Direction p_111321_) {
--        switch(p_111321_) {
-+        switch (p_111321_) {
-             case DOWN:
-                 return new float[]{this.from.x(), 16.0F - this.to.z(), this.to.x(), 16.0F - this.from.z()};
-             case UP:
 @@ -80,7 +_,9 @@
                  throw new JsonParseException("Expected shade to be a Boolean");
              } else {
@@ -48,24 +35,7 @@
              }
          }
  
-@@ -132,7 +_,7 @@
-             Map<Direction, BlockElementFace> map = Maps.newEnumMap(Direction.class);
-             JsonObject jsonobject = GsonHelper.getAsJsonObject(p_111341_, "faces");
- 
--            for(Entry<String, JsonElement> entry : jsonobject.entrySet()) {
-+            for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
-                 Direction direction = this.getFacing(entry.getKey());
-                 map.put(direction, p_111340_.deserialize(entry.getValue(), BlockElementFace.class));
-             }
-@@ -184,12 +_,20 @@
-             } else {
-                 float[] afloat = new float[3];
- 
--                for(int i = 0; i < afloat.length; ++i) {
-+                for (int i = 0; i < afloat.length; i++) {
-                     afloat[i] = GsonHelper.convertToFloat(jsonarray.get(i), p_111336_ + "[" + i + "]");
-                 }
- 
+@@ -191,5 +_,13 @@
                  return new Vector3f(afloat[0], afloat[1], afloat[2]);
              }
          }

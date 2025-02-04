@@ -36,12 +36,3 @@
          }
  
          private Vector3f getVector3f(JsonObject p_111779_, String p_111780_, Vector3f p_253777_) {
-@@ -93,7 +_,7 @@
-                 } else {
-                     float[] afloat = new float[3];
- 
--                    for(int i = 0; i < afloat.length; ++i) {
-+                    for (int i = 0; i < afloat.length; i++) {
-                         afloat[i] = GsonHelper.convertToFloat(jsonarray.get(i), p_111780_ + "[" + i + "]");
-                     }
- 

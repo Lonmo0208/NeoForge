@@ -25,15 +25,6 @@
      static <T> Holder<T> direct(T p_205710_) {
          return new Holder.Direct<>(p_205710_);
      }
-@@ -129,7 +_,7 @@
-         }
- 
-         public static <T> Holder.Reference<T> createStandAlone(HolderOwner<T> p_255955_, ResourceKey<T> p_255958_) {
--            return new Holder.Reference<>(Holder.Reference.Type.STAND_ALONE, p_255955_, p_255958_, (T)null);
-+            return new Holder.Reference<>(Holder.Reference.Type.STAND_ALONE, p_255955_, p_255958_, null);
-         }
- 
-         @Deprecated
 @@ -220,6 +_,14 @@
              }
          }

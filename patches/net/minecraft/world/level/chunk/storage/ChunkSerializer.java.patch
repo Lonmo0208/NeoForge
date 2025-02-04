@@ -1,51 +1,6 @@
 --- a/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
 +++ b/net/minecraft/world/level/chunk/storage/ChunkSerializer.java
-@@ -13,7 +_,6 @@
- import java.util.Objects;
- import java.util.Map.Entry;
- import javax.annotation.Nullable;
--import net.minecraft.Util;
- import net.minecraft.core.BlockPos;
- import net.minecraft.core.Holder;
- import net.minecraft.core.Registry;
-@@ -100,18 +_,16 @@
-         Codec<PalettedContainerRO<Holder<Biome>>> codec = makeBiomeCodec(registry);
-         boolean flag2 = false;
- 
--        for(int j = 0; j < listtag.size(); ++j) {
-+        for (int j = 0; j < listtag.size(); j++) {
-             CompoundTag compoundtag = listtag.getCompound(j);
-             int k = compoundtag.getByte("Y");
-             int l = p_188231_.getSectionIndexFromSectionY(k);
-             if (l >= 0 && l < alevelchunksection.length) {
-                 PalettedContainer<BlockState> palettedcontainer;
-                 if (compoundtag.contains("block_states", 10)) {
--                    palettedcontainer = Util.getOrThrow(
--                        BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundtag.getCompound("block_states"))
--                            .promotePartial(p_188283_ -> logErrors(p_188233_, k, p_188283_)),
--                        ChunkSerializer.ChunkReadException::new
--                    );
-+                    palettedcontainer = BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundtag.getCompound("block_states"))
-+                        .promotePartial(p_188283_ -> logErrors(p_188233_, k, p_188283_))
-+                        .getOrThrow(ChunkSerializer.ChunkReadException::new);
-                 } else {
-                     palettedcontainer = new PalettedContainer<>(
-                         Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES
-@@ -120,10 +_,9 @@
- 
-                 PalettedContainerRO<Holder<Biome>> palettedcontainerro;
-                 if (compoundtag.contains("biomes", 10)) {
--                    palettedcontainerro = Util.getOrThrow(
--                        codec.parse(NbtOps.INSTANCE, compoundtag.getCompound("biomes")).promotePartial(p_188274_ -> logErrors(p_188233_, k, p_188274_)),
--                        ChunkSerializer.ChunkReadException::new
--                    );
-+                    palettedcontainerro = codec.parse(NbtOps.INSTANCE, compoundtag.getCompound("biomes"))
-+                        .promotePartial(p_188274_ -> logErrors(p_188233_, k, p_188274_))
-+                        .getOrThrow(ChunkSerializer.ChunkReadException::new);
-                 } else {
-                     palettedcontainerro = new PalettedContainer<>(
-                         registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES
-@@ -185,6 +_,8 @@
+@@ -182,6 +_,8 @@
                  postLoadChunk(p_188231_, p_188234_),
                  blendingdata
              );
@@ -54,7 +9,7 @@
          } else {
              ProtoChunkTicks<Block> protochunkticks = ProtoChunkTicks.load(
                  p_188234_.getList("block_ticks", 10), p_258992_ -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(p_258992_)), p_188233_
-@@ -211,11 +_,13 @@
+@@ -208,6 +_,8 @@
              }
          }
  
@@ -63,24 +18,7 @@
          chunkaccess.setLightCorrect(flag);
          CompoundTag compoundtag2 = p_188234_.getCompound("Heightmaps");
          EnumSet<Heightmap.Types> enumset = EnumSet.noneOf(Heightmap.Types.class);
- 
--        for(Heightmap.Types heightmap$types : chunkaccess.getStatus().heightmapsAfter()) {
-+        for (Heightmap.Types heightmap$types : chunkaccess.getStatus().heightmapsAfter()) {
-             String s = heightmap$types.getSerializationKey();
-             if (compoundtag2.contains(s, 12)) {
-                 chunkaccess.setHeightmap(heightmap$types, compoundtag2.getLongArray(s));
-@@ -234,38 +_,40 @@
- 
-         ListTag listtag2 = p_188234_.getList("PostProcessing", 9);
- 
--        for(int l1 = 0; l1 < listtag2.size(); ++l1) {
-+        for (int l1 = 0; l1 < listtag2.size(); l1++) {
-             ListTag listtag1 = listtag2.getList(l1);
- 
--            for(int i1 = 0; i1 < listtag1.size(); ++i1) {
-+            for (int i1 = 0; i1 < listtag1.size(); i1++) {
-                 chunkaccess.addPackedPostProcess(listtag1.getShort(i1), l1);
-             }
+@@ -240,6 +_,7 @@
          }
  
          if (chunktype == ChunkType.LEVELCHUNK) {
@@ -88,26 +26,7 @@
              return new ImposterProtoChunk((LevelChunk)chunkaccess, false);
          } else {
              ProtoChunk protochunk1 = (ProtoChunk)chunkaccess;
-             ListTag listtag3 = p_188234_.getList("entities", 10);
- 
--            for(int i2 = 0; i2 < listtag3.size(); ++i2) {
-+            for (int i2 = 0; i2 < listtag3.size(); i2++) {
-                 protochunk1.addEntity(listtag3.getCompound(i2));
-             }
- 
-             ListTag listtag4 = p_188234_.getList("block_entities", 10);
- 
--            for(int j1 = 0; j1 < listtag4.size(); ++j1) {
-+            for (int j1 = 0; j1 < listtag4.size(); j1++) {
-                 CompoundTag compoundtag1 = listtag4.getCompound(j1);
-                 chunkaccess.setBlockEntityNbt(compoundtag1);
-             }
- 
-             CompoundTag compoundtag4 = p_188234_.getCompound("CarvingMasks");
- 
--            for(String s1 : compoundtag4.getAllKeys()) {
-+            for (String s1 : compoundtag4.getAllKeys()) {
-                 GenerationStep.Carving generationstep$carving = GenerationStep.Carving.valueOf(s1);
+@@ -263,6 +_,7 @@
                  protochunk1.setCarvingMask(generationstep$carving, new CarvingMask(compoundtag4.getLongArray(s1), chunkaccess.getMinBuildHeight()));
              }
  
@@ -115,47 +34,7 @@
              return protochunk1;
          }
      }
-@@ -317,7 +_,7 @@
-         Codec<PalettedContainerRO<Holder<Biome>>> codec = makeBiomeCodec(registry);
-         boolean flag = p_63456_.isLightCorrect();
- 
--        for(int i = levellightengine.getMinLightSection(); i < levellightengine.getMaxLightSection(); ++i) {
-+        for (int i = levellightengine.getMinLightSection(); i < levellightengine.getMaxLightSection(); i++) {
-             int j = p_63456_.getSectionIndexFromSectionY(i);
-             boolean flag1 = j >= 0 && j < alevelchunksection.length;
-             DataLayer datalayer = levellightengine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkpos, i));
-@@ -326,10 +_,8 @@
-                 CompoundTag compoundtag1 = new CompoundTag();
-                 if (flag1) {
-                     LevelChunkSection levelchunksection = alevelchunksection[j];
--                    compoundtag1.put(
--                        "block_states", BLOCK_STATE_CODEC.encodeStart(NbtOps.INSTANCE, levelchunksection.getStates()).getOrThrow(false, LOGGER::error)
--                    );
--                    compoundtag1.put("biomes", codec.encodeStart(NbtOps.INSTANCE, levelchunksection.getBiomes()).getOrThrow(false, LOGGER::error));
-+                    compoundtag1.put("block_states", BLOCK_STATE_CODEC.encodeStart(NbtOps.INSTANCE, levelchunksection.getStates()).getOrThrow());
-+                    compoundtag1.put("biomes", codec.encodeStart(NbtOps.INSTANCE, levelchunksection.getBiomes()).getOrThrow());
-                 }
- 
-                 if (datalayer != null && !datalayer.isEmpty()) {
-@@ -354,7 +_,7 @@
- 
-         ListTag listtag1 = new ListTag();
- 
--        for(BlockPos blockpos : p_63456_.getBlockEntitiesPos()) {
-+        for (BlockPos blockpos : p_63456_.getBlockEntitiesPos()) {
-             CompoundTag compoundtag3 = p_63456_.getBlockEntityNbtForSaving(blockpos, p_63455_.registryAccess());
-             if (compoundtag3 != null) {
-                 listtag1.add(compoundtag3);
-@@ -369,7 +_,7 @@
-             compoundtag.put("entities", listtag2);
-             CompoundTag compoundtag4 = new CompoundTag();
- 
--            for(GenerationStep.Carving generationstep$carving : GenerationStep.Carving.values()) {
-+            for (GenerationStep.Carving generationstep$carving : GenerationStep.Carving.values()) {
-                 CarvingMask carvingmask = protochunk.getCarvingMask(generationstep$carving);
-                 if (carvingmask != null) {
-                     compoundtag4.putLongArray(generationstep$carving.toString(), carvingmask.toArray());
-@@ -378,17 +_,28 @@
+@@ -373,6 +_,11 @@
  
              compoundtag.put("CarvingMasks", compoundtag4);
          }
@@ -167,12 +46,7 @@
  
          saveTicks(p_63455_, compoundtag, p_63456_.getTicksForSerialization());
          compoundtag.put("PostProcessing", packOffsets(p_63456_.getPostProcessing()));
-         CompoundTag compoundtag2 = new CompoundTag();
- 
--        for(Entry<Heightmap.Types, Heightmap> entry : p_63456_.getHeightmaps()) {
-+        for (Entry<Heightmap.Types, Heightmap> entry : p_63456_.getHeightmaps()) {
-             if (p_63456_.getStatus().heightmapsAfter().contains(entry.getKey())) {
-                 compoundtag2.put(entry.getKey().getSerializationKey(), new LongArrayTag(entry.getValue().getRawData()));
+@@ -384,6 +_,12 @@
              }
          }
  
@@ -185,61 +59,3 @@
          compoundtag.put("Heightmaps", compoundtag2);
          compoundtag.put(
              "structures",
-@@ -417,7 +_,7 @@
-             }
- 
-             if (listtag1 != null) {
--                for(int i = 0; i < listtag1.size(); ++i) {
-+                for (int i = 0; i < listtag1.size(); i++) {
-                     CompoundTag compoundtag = listtag1.getCompound(i);
-                     boolean flag = compoundtag.getBoolean("keepPacked");
-                     if (flag) {
-@@ -447,7 +_,7 @@
-         CompoundTag compoundtag1 = new CompoundTag();
-         Registry<Structure> registry = p_188250_.registryAccess().registryOrThrow(Registries.STRUCTURE);
- 
--        for(Entry<Structure, StructureStart> entry : p_188252_.entrySet()) {
-+        for (Entry<Structure, StructureStart> entry : p_188252_.entrySet()) {
-             ResourceLocation resourcelocation = registry.getKey(entry.getKey());
-             compoundtag1.put(resourcelocation.toString(), entry.getValue().createTag(p_188250_, p_188251_));
-         }
-@@ -455,7 +_,7 @@
-         compoundtag.put("starts", compoundtag1);
-         CompoundTag compoundtag2 = new CompoundTag();
- 
--        for(Entry<Structure, LongSet> entry1 : p_188253_.entrySet()) {
-+        for (Entry<Structure, LongSet> entry1 : p_188253_.entrySet()) {
-             if (!entry1.getValue().isEmpty()) {
-                 ResourceLocation resourcelocation1 = registry.getKey(entry1.getKey());
-                 compoundtag2.put(resourcelocation1.toString(), new LongArrayTag(entry1.getValue()));
-@@ -471,7 +_,7 @@
-         Registry<Structure> registry = p_188255_.registryAccess().registryOrThrow(Registries.STRUCTURE);
-         CompoundTag compoundtag = p_188256_.getCompound("starts");
- 
--        for(String s : compoundtag.getAllKeys()) {
-+        for (String s : compoundtag.getAllKeys()) {
-             ResourceLocation resourcelocation = ResourceLocation.tryParse(s);
-             Structure structure = registry.get(resourcelocation);
-             if (structure == null) {
-@@ -492,7 +_,7 @@
-         Registry<Structure> registry = p_208155_.registryOrThrow(Registries.STRUCTURE);
-         CompoundTag compoundtag = p_208157_.getCompound("References");
- 
--        for(String s : compoundtag.getAllKeys()) {
-+        for (String s : compoundtag.getAllKeys()) {
-             ResourceLocation resourcelocation = ResourceLocation.tryParse(s);
-             Structure structure = registry.get(resourcelocation);
-             if (structure == null) {
-@@ -519,10 +_,10 @@
-     public static ListTag packOffsets(ShortList[] p_63491_) {
-         ListTag listtag = new ListTag();
- 
--        for(ShortList shortlist : p_63491_) {
-+        for (ShortList shortlist : p_63491_) {
-             ListTag listtag1 = new ListTag();
-             if (shortlist != null) {
--                for(Short oshort : shortlist) {
-+                for (Short oshort : shortlist) {
-                     listtag1.add(ShortTag.valueOf(oshort));
-                 }
-             }

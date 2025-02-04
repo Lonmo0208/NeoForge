@@ -11,15 +11,6 @@
          this.registerDefaultState(
              this.stateDefinition
                  .any()
-@@ -120,7 +_,7 @@
-     protected void updatePowerToConnected(Level p_52473_, BlockPos p_52474_, BlockState p_52475_, boolean p_52476_) {
-         RailState railstate = new RailState(p_52473_, p_52474_, p_52475_);
- 
--        for(BlockPos blockpos : railstate.getConnections()) {
-+        for (BlockPos blockpos : railstate.getConnections()) {
-             BlockState blockstate = p_52473_.getBlockState(blockpos);
-             p_52473_.neighborChanged(blockstate, blockpos, blockstate.getBlock(), p_52474_, false);
-         }
 @@ -152,9 +_,9 @@
                  return list.get(0).getCommandBlock().getSuccessCount();
              }
@@ -33,57 +24,6 @@
              if (!list1.isEmpty()) {
                  return AbstractContainerMenu.getRedstoneSignalFromContainer((Container)list1.get(0));
              }
-@@ -181,9 +_,9 @@
- 
-     @Override
-     protected BlockState rotate(BlockState p_52466_, Rotation p_52467_) {
--        switch(p_52467_) {
-+        switch (p_52467_) {
-             case CLOCKWISE_180:
--                switch((RailShape)p_52466_.getValue(SHAPE)) {
-+                switch ((RailShape)p_52466_.getValue(SHAPE)) {
-                     case ASCENDING_EAST:
-                         return p_52466_.setValue(SHAPE, RailShape.ASCENDING_WEST);
-                     case ASCENDING_WEST:
-@@ -202,7 +_,7 @@
-                         return p_52466_.setValue(SHAPE, RailShape.SOUTH_WEST);
-                 }
-             case COUNTERCLOCKWISE_90:
--                switch((RailShape)p_52466_.getValue(SHAPE)) {
-+                switch ((RailShape)p_52466_.getValue(SHAPE)) {
-                     case ASCENDING_EAST:
-                         return p_52466_.setValue(SHAPE, RailShape.ASCENDING_NORTH);
-                     case ASCENDING_WEST:
-@@ -225,7 +_,7 @@
-                         return p_52466_.setValue(SHAPE, RailShape.NORTH_SOUTH);
-                 }
-             case CLOCKWISE_90:
--                switch((RailShape)p_52466_.getValue(SHAPE)) {
-+                switch ((RailShape)p_52466_.getValue(SHAPE)) {
-                     case ASCENDING_EAST:
-                         return p_52466_.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
-                     case ASCENDING_WEST:
-@@ -255,9 +_,9 @@
-     @Override
-     protected BlockState mirror(BlockState p_52463_, Mirror p_52464_) {
-         RailShape railshape = p_52463_.getValue(SHAPE);
--        switch(p_52464_) {
-+        switch (p_52464_) {
-             case LEFT_RIGHT:
--                switch(railshape) {
-+                switch (railshape) {
-                     case ASCENDING_NORTH:
-                         return p_52463_.setValue(SHAPE, RailShape.ASCENDING_SOUTH);
-                     case ASCENDING_SOUTH:
-@@ -274,7 +_,7 @@
-                         return super.mirror(p_52463_, p_52464_);
-                 }
-             case FRONT_BACK:
--                switch(railshape) {
-+                switch (railshape) {
-                     case ASCENDING_EAST:
-                         return p_52463_.setValue(SHAPE, RailShape.ASCENDING_WEST);
-                     case ASCENDING_WEST:
 @@ -299,6 +_,6 @@
  
      @Override

@@ -35,24 +35,6 @@
      public ShapelessRecipeBuilder requires(TagKey<Item> p_206420_) {
          return this.requires(Ingredient.of(p_206420_));
      }
-@@ -50,7 +_,7 @@
-     }
- 
-     public ShapelessRecipeBuilder requires(ItemLike p_126212_, int p_126213_) {
--        for(int i = 0; i < p_126213_; ++i) {
-+        for (int i = 0; i < p_126213_; i++) {
-             this.requires(Ingredient.of(p_126212_));
-         }
- 
-@@ -62,7 +_,7 @@
-     }
- 
-     public ShapelessRecipeBuilder requires(Ingredient p_126187_, int p_126188_) {
--        for(int i = 0; i < p_126188_; ++i) {
-+        for (int i = 0; i < p_126188_; i++) {
-             this.ingredients.add(p_126187_);
-         }
- 
 @@ -95,7 +_,7 @@
          ShapelessRecipe shapelessrecipe = new ShapelessRecipe(
              Objects.requireNonNullElse(this.group, ""),

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/particle/PortalParticle.java
 +++ b/net/minecraft/client/particle/PortalParticle.java
-@@ -80,21 +_,16 @@
+@@ -80,6 +_,7 @@
              this.x = this.xStart + this.xd * (double)f2;
              this.y = this.yStart + this.yd * (double)f2 + (double)(1.0F - f);
              this.z = this.zStart + this.zd * (double)f2;
@@ -8,28 +8,3 @@
          }
      }
  
-     @OnlyIn(Dist.CLIENT)
-     public static class Provider implements ParticleProvider<SimpleParticleType> {
-         private final SpriteSet sprite;
--        private final float rCol;
--        private final float gCol;
--        private final float bCol;
- 
--        public Provider(SpriteSet p_107570_, float p_341197_, float p_340441_, float p_340479_) {
-+        public Provider(SpriteSet p_107570_) {
-             this.sprite = p_107570_;
--            this.rCol = p_341197_;
--            this.gCol = p_340441_;
--            this.bCol = p_340479_;
-         }
- 
-         public Particle createParticle(
-@@ -108,8 +_,6 @@
-             double p_107588_
-         ) {
-             PortalParticle portalparticle = new PortalParticle(p_107582_, p_107583_, p_107584_, p_107585_, p_107586_, p_107587_, p_107588_);
--            float f = p_107582_.random.nextFloat() * 0.6F + 0.4F;
--            portalparticle.setColor(this.rCol * f, this.gCol * f, this.bCol * f);
-             portalparticle.pickSprite(this.sprite);
-             return portalparticle;
-         }

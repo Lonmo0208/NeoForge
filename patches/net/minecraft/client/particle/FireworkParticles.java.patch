@@ -1,91 +1,13 @@
 --- a/net/minecraft/client/particle/FireworkParticles.java
 +++ b/net/minecraft/client/particle/FireworkParticles.java
-@@ -206,7 +_,7 @@
-                 this.explosions = p_330899_;
-                 this.lifetime = p_330899_.size() * 2 - 1;
- 
--                for(FireworkExplosion fireworkexplosion : p_330899_) {
-+                for (FireworkExplosion fireworkexplosion : p_330899_) {
-                     if (fireworkexplosion.hasTwinkle()) {
-                         this.twinkleDelay = true;
-                         this.lifetime += 15;
-@@ -224,7 +_,7 @@
-                 if (this.explosions.size() >= 3) {
-                     flag1 = true;
-                 } else {
--                    for(FireworkExplosion fireworkexplosion : this.explosions) {
-+                    for (FireworkExplosion fireworkexplosion : this.explosions) {
-                         if (fireworkexplosion.shape() == FireworkExplosion.Shape.LARGE_BALL) {
-                             flag1 = true;
-                             break;
-@@ -253,7 +_,11 @@
+@@ -253,6 +_,10 @@
                      intlist = IntList.of(DyeColor.BLACK.getFireworkColor());
                  }
  
--                switch(fireworkexplosion1.shape()) {
 +                var factory = net.neoforged.neoforge.client.FireworkShapeFactoryRegistry.get(fireworkexplosion1.shape());
 +                if (factory != null)
 +                    factory.build(this, flag3, flag4, intlist.toIntArray(), intlist1.toIntArray());
 +                else
-+                switch (fireworkexplosion1.shape()) {
+                 switch (fireworkexplosion1.shape()) {
                      case SMALL_BALL:
                          this.createParticleBall(0.25, 2, intlist, intlist1, flag3, flag4);
-                         break;
-@@ -275,7 +_,7 @@
-                 particle.setColor((float)FastColor.ARGB32.red(i) / 255.0F, (float)FastColor.ARGB32.green(i) / 255.0F, (float)FastColor.ARGB32.blue(i) / 255.0F);
-             }
- 
--            ++this.life;
-+            this.life++;
-             if (this.life > this.lifetime) {
-                 if (this.twinkleDelay) {
-                     boolean flag2 = this.isFarAwayFromCamera();
-@@ -320,9 +_,9 @@
-             double d1 = this.y;
-             double d2 = this.z;
- 
--            for(int i = -p_106780_; i <= p_106780_; ++i) {
--                for(int j = -p_106780_; j <= p_106780_; ++j) {
--                    for(int k = -p_106780_; k <= p_106780_; ++k) {
-+            for (int i = -p_106780_; i <= p_106780_; i++) {
-+                for (int j = -p_106780_; j <= p_106780_; j++) {
-+                    for (int k = -p_106780_; k <= p_106780_; k++) {
-                         double d3 = (double)j + (this.random.nextDouble() - this.random.nextDouble()) * 0.5;
-                         double d4 = (double)i + (this.random.nextDouble() - this.random.nextDouble()) * 0.5;
-                         double d5 = (double)k + (this.random.nextDouble() - this.random.nextDouble()) * 0.5;
-@@ -345,22 +_,22 @@
-             float f = this.random.nextFloat() * (float) Math.PI;
-             double d2 = p_106792_ ? 0.034 : 0.34;
- 
--            for(int i = 0; i < 3; ++i) {
-+            for (int i = 0; i < 3; i++) {
-                 double d3 = (double)f + (double)((float)i * (float) Math.PI) * d2;
-                 double d4 = d0;
-                 double d5 = d1;
- 
--                for(int j = 1; j < p_106787_.length; ++j) {
-+                for (int j = 1; j < p_106787_.length; j++) {
-                     double d6 = p_106787_[j][0];
-                     double d7 = p_106787_[j][1];
- 
--                    for(double d8 = 0.25; d8 <= 1.0; d8 += 0.25) {
-+                    for (double d8 = 0.25; d8 <= 1.0; d8 += 0.25) {
-                         double d9 = Mth.lerp(d8, d4, d6) * p_106786_;
-                         double d10 = Mth.lerp(d8, d5, d7) * p_106786_;
-                         double d11 = d9 * Math.sin(d3);
-                         d9 *= Math.cos(d3);
- 
--                        for(double d12 = -1.0; d12 <= 1.0; d12 += 2.0) {
-+                        for (double d12 = -1.0; d12 <= 1.0; d12 += 2.0) {
-                             this.createParticle(this.x, this.y, this.z, d9 * d12, d10, d11 * d12, p_330715_, p_331438_, p_106790_, p_106791_);
-                         }
-                     }
-@@ -375,7 +_,7 @@
-             double d0 = this.random.nextGaussian() * 0.05;
-             double d1 = this.random.nextGaussian() * 0.05;
- 
--            for(int i = 0; i < 70; ++i) {
-+            for (int i = 0; i < 70; i++) {
-                 double d2 = this.xd * 0.5 + this.random.nextGaussian() * 0.15 + d0;
-                 double d3 = this.zd * 0.5 + this.random.nextGaussian() * 0.15 + d1;
-                 double d4 = this.yd * 0.5 + this.random.nextDouble() * 0.5;

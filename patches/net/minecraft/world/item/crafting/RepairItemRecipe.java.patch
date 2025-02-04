@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/item/crafting/RepairItemRecipe.java
 +++ b/net/minecraft/world/item/crafting/RepairItemRecipe.java
-@@ -23,7 +_,7 @@
-         ItemStack itemstack = null;
-         ItemStack itemstack1 = null;
- 
--        for(int i = 0; i < p_335540_.getContainerSize(); ++i) {
-+        for (int i = 0; i < p_335540_.getContainerSize(); i++) {
-             ItemStack itemstack2 = p_335540_.getItem(i);
-             if (!itemstack2.isEmpty()) {
-                 if (itemstack == null) {
 @@ -48,7 +_,9 @@
              && p_336139_.has(DataComponents.MAX_DAMAGE)
              && p_335795_.has(DataComponents.MAX_DAMAGE)

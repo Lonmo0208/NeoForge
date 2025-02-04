@@ -8,22 +8,3 @@
  
      private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider p_256242_) {
          validateThatAllBiomeFeaturesHaveBiomeFilter(p_256242_.lookupOrThrow(Registries.PLACED_FEATURE), p_256242_.lookupOrThrow(Registries.BIOME));
-@@ -69,13 +_,13 @@
-         p_273693_.listElements().forEach(p_256326_ -> {
-             ResourceLocation resourcelocation = p_256326_.key().location();
-             List<HolderSet<PlacedFeature>> list = p_256326_.value().getGenerationSettings().features();
--            list.stream().flatMap(HolderSet::stream).forEach(p_256657_ -> p_256657_.unwrap().ifLeft(p_256188_ -> {
--                    Holder.Reference<PlacedFeature> reference = p_272963_.getOrThrow(p_256188_);
-+            list.stream().flatMap(HolderSet::stream).forEach(p_256657_ -> p_256657_.unwrap().ifLeft(p_339381_ -> {
-+                    Holder.Reference<PlacedFeature> reference = p_272963_.getOrThrow((ResourceKey<PlacedFeature>)p_339381_);
-                     if (!validatePlacedFeature(reference.value())) {
--                        Util.logAndPauseIfInIde("Placed feature " + p_256188_.location() + " in biome " + resourcelocation + " is missing BiomeFilter.biome()");
-+                        Util.logAndPauseIfInIde("Placed feature " + p_339381_.location() + " in biome " + resourcelocation + " is missing BiomeFilter.biome()");
-                     }
--                }).ifRight(p_256575_ -> {
--                    if (!validatePlacedFeature(p_256575_)) {
-+                }).ifRight(p_339383_ -> {
-+                    if (!validatePlacedFeature(p_339383_)) {
-                         Util.logAndPauseIfInIde("Placed inline feature in biome " + p_256326_ + " is missing BiomeFilter.biome()");
-                     }
-                 }));

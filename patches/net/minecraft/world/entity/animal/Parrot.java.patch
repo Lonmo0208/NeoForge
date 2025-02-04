@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/animal/Parrot.java
 +++ b/net/minecraft/world/entity/animal/Parrot.java
-@@ -70,48 +_,48 @@
+@@ -70,9 +_,11 @@
      private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Parrot.class, EntityDataSerializers.INT);
      private static final Predicate<Mob> NOT_PARROT_PREDICATE = new Predicate<Mob>() {
          public boolean test(@Nullable Mob p_29453_) {
@@ -8,106 +8,12 @@
 +            return p_29453_ != null && (Parrot.MOB_SOUND_MAP.containsKey(p_29453_.getType()) || p_29453_.getType().builtInRegistryHolder().getData(net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps.PARROT_IMITATIONS) != null);
          }
      };
--    static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), p_340112_ -> {
--        p_340112_.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
--        p_340112_.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
--        p_340112_.put(EntityType.BREEZE, SoundEvents.PARROT_IMITATE_BREEZE);
--        p_340112_.put(EntityType.CAVE_SPIDER, SoundEvents.PARROT_IMITATE_SPIDER);
--        p_340112_.put(EntityType.CREEPER, SoundEvents.PARROT_IMITATE_CREEPER);
--        p_340112_.put(EntityType.DROWNED, SoundEvents.PARROT_IMITATE_DROWNED);
--        p_340112_.put(EntityType.ELDER_GUARDIAN, SoundEvents.PARROT_IMITATE_ELDER_GUARDIAN);
--        p_340112_.put(EntityType.TOXIFIN, SoundEvents.PARROT_IMITATE_GUARDIAN);
--        p_340112_.put(EntityType.PLAGUEWHALE, SoundEvents.PARROT_IMITATE_ELDER_GUARDIAN);
--        p_340112_.put(EntityType.ENDER_DRAGON, SoundEvents.PARROT_IMITATE_ENDER_DRAGON);
--        p_340112_.put(EntityType.ENDERMITE, SoundEvents.PARROT_IMITATE_ENDERMITE);
--        p_340112_.put(EntityType.EVOKER, SoundEvents.PARROT_IMITATE_EVOKER);
--        p_340112_.put(EntityType.GHAST, SoundEvents.PARROT_IMITATE_GHAST);
--        p_340112_.put(EntityType.GUARDIAN, SoundEvents.PARROT_IMITATE_GUARDIAN);
--        p_340112_.put(EntityType.HOGLIN, SoundEvents.PARROT_IMITATE_HOGLIN);
--        p_340112_.put(EntityType.HUSK, SoundEvents.PARROT_IMITATE_HUSK);
--        p_340112_.put(EntityType.ILLUSIONER, SoundEvents.PARROT_IMITATE_ILLUSIONER);
--        p_340112_.put(EntityType.MAGMA_CUBE, SoundEvents.PARROT_IMITATE_MAGMA_CUBE);
--        p_340112_.put(EntityType.PHANTOM, SoundEvents.PARROT_IMITATE_PHANTOM);
--        p_340112_.put(EntityType.PIGLIN, SoundEvents.PARROT_IMITATE_PIGLIN);
--        p_340112_.put(EntityType.PIGLIN_BRUTE, SoundEvents.PARROT_IMITATE_PIGLIN_BRUTE);
--        p_340112_.put(EntityType.PILLAGER, SoundEvents.PARROT_IMITATE_PILLAGER);
--        p_340112_.put(EntityType.RAVAGER, SoundEvents.PARROT_IMITATE_RAVAGER);
--        p_340112_.put(EntityType.SHULKER, SoundEvents.PARROT_IMITATE_SHULKER);
--        p_340112_.put(EntityType.SILVERFISH, SoundEvents.PARROT_IMITATE_SILVERFISH);
--        p_340112_.put(EntityType.SKELETON, SoundEvents.PARROT_IMITATE_SKELETON);
--        p_340112_.put(EntityType.SLIME, SoundEvents.PARROT_IMITATE_SLIME);
--        p_340112_.put(EntityType.SPIDER, SoundEvents.PARROT_IMITATE_SPIDER);
--        p_340112_.put(EntityType.STRAY, SoundEvents.PARROT_IMITATE_STRAY);
--        p_340112_.put(EntityType.VEX, SoundEvents.PARROT_IMITATE_VEX);
--        p_340112_.put(EntityType.VINDICATOR, SoundEvents.PARROT_IMITATE_VINDICATOR);
--        p_340112_.put(EntityType.WARDEN, SoundEvents.PARROT_IMITATE_WARDEN);
--        p_340112_.put(EntityType.WITCH, SoundEvents.PARROT_IMITATE_WITCH);
--        p_340112_.put(EntityType.WITHER, SoundEvents.PARROT_IMITATE_WITHER);
--        p_340112_.put(EntityType.WITHER_SKELETON, SoundEvents.PARROT_IMITATE_WITHER_SKELETON);
--        p_340112_.put(EntityType.ZOGLIN, SoundEvents.PARROT_IMITATE_ZOGLIN);
--        p_340112_.put(EntityType.ZOMBIE, SoundEvents.PARROT_IMITATE_ZOMBIE);
--        p_340112_.put(EntityType.ZOMBIE_VILLAGER, SoundEvents.PARROT_IMITATE_ZOMBIE_VILLAGER);
 +    /** @deprecated Neo: use the {@link net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps#PARROT_IMITATIONS data map} instead */
 +    @Deprecated
-+    static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), p_326764_ -> {
-+        p_326764_.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
-+        p_326764_.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
-+        p_326764_.put(EntityType.BREEZE, SoundEvents.PARROT_IMITATE_BREEZE);
-+        p_326764_.put(EntityType.CAVE_SPIDER, SoundEvents.PARROT_IMITATE_SPIDER);
-+        p_326764_.put(EntityType.CREEPER, SoundEvents.PARROT_IMITATE_CREEPER);
-+        p_326764_.put(EntityType.DROWNED, SoundEvents.PARROT_IMITATE_DROWNED);
-+        p_326764_.put(EntityType.ELDER_GUARDIAN, SoundEvents.PARROT_IMITATE_ELDER_GUARDIAN);
-+        p_326764_.put(EntityType.ENDER_DRAGON, SoundEvents.PARROT_IMITATE_ENDER_DRAGON);
-+        p_326764_.put(EntityType.ENDERMITE, SoundEvents.PARROT_IMITATE_ENDERMITE);
-+        p_326764_.put(EntityType.EVOKER, SoundEvents.PARROT_IMITATE_EVOKER);
-+        p_326764_.put(EntityType.GHAST, SoundEvents.PARROT_IMITATE_GHAST);
-+        p_326764_.put(EntityType.GUARDIAN, SoundEvents.PARROT_IMITATE_GUARDIAN);
-+        p_326764_.put(EntityType.HOGLIN, SoundEvents.PARROT_IMITATE_HOGLIN);
-+        p_326764_.put(EntityType.HUSK, SoundEvents.PARROT_IMITATE_HUSK);
-+        p_326764_.put(EntityType.ILLUSIONER, SoundEvents.PARROT_IMITATE_ILLUSIONER);
-+        p_326764_.put(EntityType.MAGMA_CUBE, SoundEvents.PARROT_IMITATE_MAGMA_CUBE);
-+        p_326764_.put(EntityType.PHANTOM, SoundEvents.PARROT_IMITATE_PHANTOM);
-+        p_326764_.put(EntityType.PIGLIN, SoundEvents.PARROT_IMITATE_PIGLIN);
-+        p_326764_.put(EntityType.PIGLIN_BRUTE, SoundEvents.PARROT_IMITATE_PIGLIN_BRUTE);
-+        p_326764_.put(EntityType.PILLAGER, SoundEvents.PARROT_IMITATE_PILLAGER);
-+        p_326764_.put(EntityType.RAVAGER, SoundEvents.PARROT_IMITATE_RAVAGER);
-+        p_326764_.put(EntityType.SHULKER, SoundEvents.PARROT_IMITATE_SHULKER);
-+        p_326764_.put(EntityType.SILVERFISH, SoundEvents.PARROT_IMITATE_SILVERFISH);
-+        p_326764_.put(EntityType.SKELETON, SoundEvents.PARROT_IMITATE_SKELETON);
-+        p_326764_.put(EntityType.SLIME, SoundEvents.PARROT_IMITATE_SLIME);
-+        p_326764_.put(EntityType.SPIDER, SoundEvents.PARROT_IMITATE_SPIDER);
-+        p_326764_.put(EntityType.STRAY, SoundEvents.PARROT_IMITATE_STRAY);
-+        p_326764_.put(EntityType.VEX, SoundEvents.PARROT_IMITATE_VEX);
-+        p_326764_.put(EntityType.VINDICATOR, SoundEvents.PARROT_IMITATE_VINDICATOR);
-+        p_326764_.put(EntityType.WARDEN, SoundEvents.PARROT_IMITATE_WARDEN);
-+        p_326764_.put(EntityType.WITCH, SoundEvents.PARROT_IMITATE_WITCH);
-+        p_326764_.put(EntityType.WITHER, SoundEvents.PARROT_IMITATE_WITHER);
-+        p_326764_.put(EntityType.WITHER_SKELETON, SoundEvents.PARROT_IMITATE_WITHER_SKELETON);
-+        p_326764_.put(EntityType.ZOGLIN, SoundEvents.PARROT_IMITATE_ZOGLIN);
-+        p_326764_.put(EntityType.ZOMBIE, SoundEvents.PARROT_IMITATE_ZOMBIE);
-+        p_326764_.put(EntityType.ZOMBIE_VILLAGER, SoundEvents.PARROT_IMITATE_ZOMBIE_VILLAGER);
-     });
-     public float flap;
-     public float flapSpeed;
-@@ -200,7 +_,7 @@
-     private void calculateFlapping() {
-         this.oFlap = this.flap;
-         this.oFlapSpeed = this.flapSpeed;
--        this.flapSpeed += (float)(!this.onGround() && !this.isPassenger() ? 4 : -1) * 0.3F;
-+        this.flapSpeed = this.flapSpeed + (float)(!this.onGround() && !this.isPassenger() ? 4 : -1) * 0.3F;
-         this.flapSpeed = Mth.clamp(this.flapSpeed, 0.0F, 1.0F);
-         if (!this.onGround() && this.flapping < 1.0F) {
-             this.flapping = 1.0F;
-@@ -212,7 +_,7 @@
-             this.setDeltaMovement(vec3.multiply(1.0, 0.6, 1.0));
-         }
- 
--        this.flap += this.flapping * 2.0F;
-+        this.flap = this.flap + this.flapping * 2.0F;
-     }
- 
-     public static boolean imitateNearbyMobs(Level p_29383_, Entity p_29384_) {
-@@ -255,7 +_,7 @@
+     static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), p_326764_ -> {
+         p_326764_.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
+         p_326764_.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
+@@ -253,7 +_,7 @@
              }
  
              if (!this.level().isClientSide) {
@@ -116,7 +22,7 @@
                      this.tame(p_29414_);
                      this.level().broadcastEntityEvent(this, (byte)7);
                  } else {
-@@ -324,7 +_,10 @@
+@@ -322,7 +_,10 @@
  
      public static SoundEvent getAmbient(Level p_218239_, RandomSource p_218240_) {
          if (p_218239_.getDifficulty() != Difficulty.PEACEFUL && p_218240_.nextInt(1000) == 0) {
@@ -128,7 +34,7 @@
              return getImitatedSound(list.get(p_218240_.nextInt(list.size())));
          } else {
              return SoundEvents.PARROT_AMBIENT;
-@@ -332,6 +_,8 @@
+@@ -330,6 +_,8 @@
      }
  
      private static SoundEvent getImitatedSound(EntityType<?> p_29409_) {
@@ -137,12 +43,3 @@
          return MOB_SOUND_MAP.getOrDefault(p_29409_, SoundEvents.PARROT_AMBIENT);
      }
  
-@@ -462,7 +_,7 @@
-             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-             BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
- 
--            for(BlockPos blockpos1 : BlockPos.betweenClosed(
-+            for (BlockPos blockpos1 : BlockPos.betweenClosed(
-                 Mth.floor(this.mob.getX() - 3.0),
-                 Mth.floor(this.mob.getY() - 6.0),
-                 Mth.floor(this.mob.getZ() - 3.0),

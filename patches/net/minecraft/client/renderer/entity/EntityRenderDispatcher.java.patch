@@ -10,36 +10,11 @@
              double d1 = -Mth.lerp((double)p_114445_, p_114444_.yOld, p_114444_.getY());
              double d2 = -Mth.lerp((double)p_114445_, p_114444_.zOld, p_114444_.getZ());
  
--            for(EnderDragonPart enderdragonpart : ((EnderDragon)p_114444_).getSubEntities()) {
+-            for (EnderDragonPart enderdragonpart : ((EnderDragon)p_114444_).getSubEntities()) {
 +            for(net.neoforged.neoforge.entity.PartEntity<?> enderdragonpart : p_114444_.getParts()) {
                  p_114442_.pushPose();
                  double d3 = d0 + Mth.lerp((double)p_114445_, enderdragonpart.xOld, enderdragonpart.getX());
                  double d4 = d1 + Mth.lerp((double)p_114445_, enderdragonpart.yOld, enderdragonpart.getY());
-@@ -281,7 +_,7 @@
-         int i = 0;
-         VertexConsumer vertexconsumer = p_114455_.getBuffer(Sheets.cutoutBlockSheet());
- 
--        for(PoseStack.Pose posestack$pose = p_114454_.last(); f3 > 0.0F; ++i) {
-+        for (PoseStack.Pose posestack$pose = p_114454_.last(); f3 > 0.0F; i++) {
-             TextureAtlasSprite textureatlassprite2 = i % 2 == 0 ? textureatlassprite : textureatlassprite1;
-             float f6 = textureatlassprite2.getU0();
-             float f7 = textureatlassprite2.getV0();
-@@ -335,12 +_,12 @@
-         VertexConsumer vertexconsumer = p_114459_.getBuffer(SHADOW_RENDER_TYPE);
-         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
- 
--        for(int k1 = i1; k1 <= j1; ++k1) {
--            for(int l1 = i; l1 <= j; ++l1) {
-+        for (int k1 = i1; k1 <= j1; k1++) {
-+            for (int l1 = i; l1 <= j; l1++) {
-                 blockpos$mutableblockpos.set(l1, 0, k1);
-                 ChunkAccess chunkaccess = p_114463_.getChunk(blockpos$mutableblockpos);
- 
--                for(int i2 = k; i2 <= l; ++i2) {
-+                for (int i2 = k; i2 <= l; i2++) {
-                     blockpos$mutableblockpos.setY(i2);
-                     float f1 = p_114461_ - (float)(d1 - (double)blockpos$mutableblockpos.getY()) * 0.5F;
-                     renderBlockShadow(posestack$pose, vertexconsumer, chunkaccess, p_114463_, blockpos$mutableblockpos, d0, d1, d2, p_114464_, f1);
 @@ -438,6 +_,10 @@
          return this.itemInHandRenderer;
      }
@@ -55,6 +30,6 @@
          );
          this.renderers = EntityRenderers.createEntityRenderers(entityrendererprovider$context);
          this.playerRenderers = EntityRenderers.createPlayerRenderers(entityrendererprovider$context);
-+        net.neoforged.fml.ModLoader.get().postEvent(new net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers(renderers, playerRenderers, entityrendererprovider$context));
++        net.neoforged.fml.ModLoader.postEvent(new net.neoforged.neoforge.client.event.EntityRenderersEvent.AddLayers(renderers, playerRenderers, entityrendererprovider$context));
      }
  }

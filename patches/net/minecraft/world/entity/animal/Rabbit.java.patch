@@ -1,28 +1,5 @@
 --- a/net/minecraft/world/entity/animal/Rabbit.java
 +++ b/net/minecraft/world/entity/animal/Rabbit.java
-@@ -175,11 +_,11 @@
-     @Override
-     public void customServerAiStep() {
-         if (this.jumpDelayTicks > 0) {
--            --this.jumpDelayTicks;
-+            this.jumpDelayTicks--;
-         }
- 
-         if (this.moreCarrotTicks > 0) {
--            this.moreCarrotTicks -= this.random.nextInt(3);
-+            this.moreCarrotTicks = this.moreCarrotTicks - this.random.nextInt(3);
-             if (this.moreCarrotTicks < 0) {
-                 this.moreCarrotTicks = 0;
-             }
-@@ -255,7 +_,7 @@
-     public void aiStep() {
-         super.aiStep();
-         if (this.jumpTicks != this.jumpDuration) {
--            ++this.jumpTicks;
-+            this.jumpTicks++;
-         } else if (this.jumpDuration != 0) {
-             this.jumpTicks = 0;
-             this.jumpDuration = 0;
 @@ -527,7 +_,7 @@
          @Override
          public boolean canUse() {

@@ -9,30 +9,6 @@
          } else if (p_90577_ instanceof LivingEntity && ((LivingEntity)p_90577_).isSleeping()) {
              Direction direction = ((LivingEntity)p_90577_).getBedOrientation();
              this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);
-@@ -69,12 +_,12 @@
-     public void tick() {
-         if (this.entity != null) {
-             this.eyeHeightOld = this.eyeHeight;
--            this.eyeHeight += (this.entity.getEyeHeight() - this.eyeHeight) * 0.5F;
-+            this.eyeHeight = this.eyeHeight + (this.entity.getEyeHeight() - this.eyeHeight) * 0.5F;
-         }
-     }
- 
-     private double getMaxZoom(double p_90567_) {
--        for(int i = 0; i < 8; ++i) {
-+        for (int i = 0; i < 8; i++) {
-             float f = (float)((i & 1) * 2 - 1);
-             float f1 = (float)((i >> 1 & 1) * 2 - 1);
-             float f2 = (float)((i >> 2 & 1) * 2 - 1);
-@@ -178,7 +_,7 @@
-             } else {
-                 Camera.NearPlane camera$nearplane = this.getNearPlane();
- 
--                for(Vec3 vec3 : Arrays.asList(
-+                for (Vec3 vec3 : Arrays.asList(
-                     camera$nearplane.forward,
-                     camera$nearplane.getTopLeft(),
-                     camera$nearplane.getTopRight(),
 @@ -225,6 +_,18 @@
  
      public float getPartialTickTime() {

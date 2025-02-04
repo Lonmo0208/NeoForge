@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/level/block/DropExperienceBlock.java
 +++ b/net/minecraft/world/level/block/DropExperienceBlock.java
-@@ -15,7 +_,7 @@
-         p_308822_ -> p_308822_.group(IntProvider.codec(0, 10).fieldOf("experience").forGetter(p_304879_ -> p_304879_.xpRange), propertiesCodec())
-                 .apply(p_308822_, DropExperienceBlock::new)
-     );
--    protected final IntProvider xpRange;
-+    private final IntProvider xpRange;
- 
-     @Override
-     public MapCodec<? extends DropExperienceBlock> codec() {
 @@ -30,8 +_,11 @@
      @Override
      protected void spawnAfterBreak(BlockState p_221086_, ServerLevel p_221087_, BlockPos p_221088_, ItemStack p_221089_, boolean p_221090_) {

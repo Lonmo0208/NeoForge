@@ -18,28 +18,7 @@
  
      public static RegistryAccess.Frozen load(ResourceManager p_252046_, RegistryAccess p_249916_, List<RegistryDataLoader.RegistryData<?>> p_250344_) {
          return load((p_321412_, p_321413_) -> p_321412_.loadFromResources(p_252046_, p_321413_), p_249916_, p_250344_);
-@@ -124,7 +_,7 @@
-             .map(p_321410_ -> p_321410_.create(Lifecycle.stable(), map))
-             .collect(Collectors.toUnmodifiableList());
-         RegistryOps.RegistryInfoLookup registryops$registryinfolookup = createContext(p_321583_, list);
--        list.forEach(p_321416_ -> p_321713_.apply(p_321416_, registryops$registryinfolookup));
-+        list.forEach(p_321416_ -> p_321713_.apply((RegistryDataLoader.Loader<?>)p_321416_, registryops$registryinfolookup));
-         list.forEach(p_321406_ -> {
-             Registry<?> registry = p_321406_.registry();
- 
-@@ -168,10 +_,7 @@
-         Map<ResourceLocation, Map<ResourceLocation, Exception>> map = p_252325_.entrySet()
-             .stream()
-             .collect(
--                Collectors.groupingBy(
--                    p_249353_ -> ((ResourceKey)p_249353_.getKey()).registry(),
--                    Collectors.toMap(p_251444_ -> ((ResourceKey)p_251444_.getKey()).location(), Entry::getValue)
--                )
-+                Collectors.groupingBy(p_249353_ -> p_249353_.getKey().registry(), Collectors.toMap(p_251444_ -> p_251444_.getKey().location(), Entry::getValue))
-             );
-         map.entrySet().stream().sorted(Entry.comparingByKey()).forEach(p_249838_ -> {
-             printwriter.printf("> Errors in registry %s:%n", p_249838_.getKey());
-@@ -185,7 +_,7 @@
+@@ -182,7 +_,7 @@
      }
  
      private static String registryDirPath(ResourceLocation p_252033_) {
@@ -48,7 +27,7 @@
      }
  
      private static <E> void loadElementFromResource(
-@@ -196,12 +_,16 @@
+@@ -193,11 +_,16 @@
          Resource p_326141_,
          RegistrationInfo p_326033_
      ) throws IOException {
@@ -56,8 +35,7 @@
          try (Reader reader = p_326141_.openAsReader()) {
              JsonElement jsonelement = JsonParser.parseReader(reader);
 -            DataResult<E> dataresult = p_326476_.parse(p_325932_, jsonelement);
--            E e = dataresult.getOrThrow(false, p_321404_ -> {
--            });
+-            E e = dataresult.getOrThrow();
 +            DataResult<Optional<E>> dataresult = decoder.parse(p_325932_, jsonelement);
 +            Optional<E> candidate = dataresult.getOrThrow();
 +            candidate.ifPresentOrElse(e -> {
@@ -68,32 +46,12 @@
          }
      }
  
-@@ -214,9 +_,9 @@
+@@ -210,7 +_,7 @@
      ) {
          String s = registryDirPath(p_321557_.key().location());
          FileToIdConverter filetoidconverter = FileToIdConverter.json(s);
 -        RegistryOps<JsonElement> registryops = RegistryOps.create(JsonOps.INSTANCE, p_321612_);
 +        RegistryOps<JsonElement> registryops = new net.neoforged.neoforge.common.conditions.ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, p_321612_), net.neoforged.neoforge.common.conditions.ICondition.IContext.TAGS_INVALID);
  
--        for(Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_321535_).entrySet()) {
-+        for (Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_321535_).entrySet()) {
+         for (Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_321535_).entrySet()) {
              ResourceLocation resourcelocation = entry.getKey();
-             ResourceKey<E> resourcekey = ResourceKey.create(p_321557_.key(), filetoidconverter.fileToId(resourcelocation));
-             Resource resource = entry.getValue();
-@@ -250,14 +_,13 @@
-             String s = registryDirPath(p_321671_.key().location());
-             FileToIdConverter filetoidconverter = FileToIdConverter.json(s);
- 
--            for(RegistrySynchronization.PackedRegistryEntry registrysynchronization$packedregistryentry : list) {
-+            for (RegistrySynchronization.PackedRegistryEntry registrysynchronization$packedregistryentry : list) {
-                 ResourceKey<E> resourcekey = ResourceKey.create(p_321671_.key(), registrysynchronization$packedregistryentry.id());
-                 Optional<Tag> optional = registrysynchronization$packedregistryentry.data();
-                 if (optional.isPresent()) {
-                     try {
-                         DataResult<E> dataresult = p_321718_.parse(registryops, optional.get());
--                        E e = dataresult.getOrThrow(false, p_248715_ -> {
--                        });
-+                        E e = dataresult.getOrThrow();
-                         p_321671_.register(resourcekey, e, NETWORK_REGISTRATION_INFO);
-                     } catch (Exception exception) {
-                         p_321625_.put(

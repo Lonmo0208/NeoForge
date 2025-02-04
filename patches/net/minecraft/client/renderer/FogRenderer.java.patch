@@ -1,29 +1,5 @@
 --- a/net/minecraft/client/renderer/FogRenderer.java
 +++ b/net/minecraft/client/renderer/FogRenderer.java
-@@ -121,10 +_,10 @@
-                 }
-             }
- 
--            fogRed += (f6 - fogRed) * f4;
--            fogGreen += (f8 - fogGreen) * f4;
--            fogBlue += (f10 - fogBlue) * f4;
--            float f13 = p_109021_.getRainLevel(p_109020_, p_109019_.getPosition().y);
-+            fogRed = fogRed + (f6 - fogRed) * f4;
-+            fogGreen = fogGreen + (f8 - fogGreen) * f4;
-+            fogBlue = fogBlue + (f10 - fogBlue) * f4;
-+            float f13 = p_109021_.getRainLevel(p_109020_);
-             if (f13 > 0.0F) {
-                 float f14 = 1.0F - f13 * 0.5F;
-                 float f17 = 1.0F - f13 * 0.4F;
-@@ -133,7 +_,7 @@
-                 fogBlue *= f17;
-             }
- 
--            float f15 = p_109021_.getThunderLevel(p_109020_, p_109019_.getPosition().y);
-+            float f15 = p_109021_.getThunderLevel(p_109020_);
-             if (f15 > 0.0F) {
-                 float f18 = 1.0F - f15 * 0.5F;
-                 fogRed *= f18;
 @@ -197,6 +_,12 @@
              fogBlue = fogBlue * (1.0F - f7) + fogBlue * f9 * f7;
          }
@@ -37,15 +13,6 @@
          RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0F);
      }
  
-@@ -245,7 +_,7 @@
-             fogrenderer$fogdata.start = -8.0F;
-             fogrenderer$fogdata.end = 96.0F;
-             if (entity instanceof LocalPlayer localplayer) {
--                fogrenderer$fogdata.end *= Math.max(0.25F, localplayer.getWaterVision());
-+                fogrenderer$fogdata.end = fogrenderer$fogdata.end * Math.max(0.25F, localplayer.getWaterVision());
-                 Holder<Biome> holder = localplayer.level().getBiome(localplayer.blockPosition());
-                 if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
-                     fogrenderer$fogdata.end *= 0.85F;
 @@ -273,6 +_,7 @@
          RenderSystem.setShaderFogStart(fogrenderer$fogdata.start);
          RenderSystem.setShaderFogEnd(fogrenderer$fogdata.end);

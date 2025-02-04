@@ -9,15 +9,6 @@
      private final Matrix4f matrix;
      public static final Codec<Transformation> CODEC = RecordCodecBuilder.create(
          p_269604_ -> p_269604_.group(
-@@ -24,7 +_,7 @@
-                 )
-                 .apply(p_269604_, Transformation::new)
-     );
--    public static final Codec<Transformation> EXTENDED_CODEC = ExtraCodecs.withAlternative(
-+    public static final Codec<Transformation> EXTENDED_CODEC = Codec.withAlternative(
-         CODEC, ExtraCodecs.MATRIX4F.xmap(Transformation::new, Transformation::getMatrix)
-     );
-     private boolean decomposed;
 @@ -157,6 +_,19 @@
      @Override
      public int hashCode() {

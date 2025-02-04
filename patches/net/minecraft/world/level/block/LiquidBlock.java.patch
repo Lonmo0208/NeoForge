@@ -1,14 +1,6 @@
 --- a/net/minecraft/world/level/block/LiquidBlock.java
 +++ b/net/minecraft/world/level/block/LiquidBlock.java
-@@ -44,14 +_,16 @@
-             p_304912_ -> p_304912_ instanceof FlowingFluid flowingfluid
-                     ? DataResult.success(flowingfluid)
-                     : DataResult.error(() -> "Not a flowing fluid: " + p_304912_),
--            p_304608_ -> p_304608_
-+            p_304608_ -> (Fluid)p_304608_
-         );
-     public static final MapCodec<LiquidBlock> CODEC = RecordCodecBuilder.mapCodec(
-         p_308830_ -> p_308830_.group(FLOWING_FLUID.fieldOf("fluid").forGetter(p_304898_ -> p_304898_.fluid), propertiesCodec())
+@@ -51,7 +_,9 @@
                  .apply(p_308830_, LiquidBlock::new)
      );
      public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL;
@@ -19,7 +11,7 @@
      private final List<FluidState> stateCache;
      public static final VoxelShape STABLE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
      public static final ImmutableList<Direction> POSSIBLE_FLOW_DIRECTIONS = ImmutableList.of(
-@@ -63,18 +_,32 @@
+@@ -63,6 +_,7 @@
          return CODEC;
      }
  
@@ -27,13 +19,7 @@
      public LiquidBlock(FlowingFluid p_54694_, BlockBehaviour.Properties p_54695_) {
          super(p_54695_);
          this.fluid = p_54694_;
-         this.stateCache = Lists.newArrayList();
-         this.stateCache.add(p_54694_.getSource(false));
- 
--        for(int i = 1; i < 8; ++i) {
-+        for (int i = 1; i < 8; i++) {
-             this.stateCache.add(p_54694_.getFlowing(8 - i, false));
-         }
+@@ -75,6 +_,19 @@
  
          this.stateCache.add(p_54694_.getFlowing(8, true));
          this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, Integer.valueOf(0)));
@@ -70,7 +56,7 @@
              p_54755_.scheduleTick(p_54756_, p_54754_.getFluidState().getType(), this.fluid.getTickDelay(p_54755_));
          }
      }
-@@ -150,16 +_,17 @@
+@@ -150,11 +_,12 @@
  
      @Override
      protected void neighborChanged(BlockState p_54709_, Level p_54710_, BlockPos p_54711_, Block p_54712_, BlockPos p_54713_, boolean p_54714_) {
@@ -84,12 +70,6 @@
      private boolean shouldSpreadLiquid(Level p_54697_, BlockPos p_54698_, BlockState p_54699_) {
          if (this.fluid.is(FluidTags.LAVA)) {
              boolean flag = p_54697_.getBlockState(p_54698_.below()).is(Blocks.SOUL_SOIL);
- 
--            for(Direction direction : POSSIBLE_FLOW_DIRECTIONS) {
-+            for (Direction direction : POSSIBLE_FLOW_DIRECTIONS) {
-                 BlockPos blockpos = p_54698_.relative(direction.getOpposite());
-                 if (p_54697_.getFluidState(blockpos).is(FluidTags.WATER)) {
-                     Block block = p_54697_.getFluidState(p_54698_).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
 @@ -195,6 +_,25 @@
              return new ItemStack(this.fluid.getBucket());
          } else {

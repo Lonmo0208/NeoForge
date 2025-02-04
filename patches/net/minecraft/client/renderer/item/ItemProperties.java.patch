@@ -1,21 +1,6 @@
 --- a/net/minecraft/client/renderer/item/ItemProperties.java
 +++ b/net/minecraft/client/renderer/item/ItemProperties.java
-@@ -20,14 +_,11 @@
- import net.minecraft.world.item.Item;
- import net.minecraft.world.item.ItemStack;
- import net.minecraft.world.item.Items;
--import net.minecraft.world.item.LashingPotatoItem;
--import net.minecraft.world.item.PoisonousPolytraItem;
- import net.minecraft.world.item.armortrim.ArmorTrim;
- import net.minecraft.world.item.component.BlockItemStateProperties;
- import net.minecraft.world.item.component.ChargedProjectiles;
- import net.minecraft.world.item.component.CustomModelData;
- import net.minecraft.world.item.component.LodestoneTracker;
--import net.minecraft.world.item.component.SnekComponent;
- import net.minecraft.world.level.Level;
- import net.minecraft.world.level.block.LightBlock;
- import net.neoforged.api.distmarker.Dist;
-@@ -45,6 +_,9 @@
+@@ -42,6 +_,9 @@
      private static final Map<Item, Map<ResourceLocation, ItemPropertyFunction>> PROPERTIES = Maps.newHashMap();
  
      private static ClampedItemPropertyFunction registerGeneric(ResourceLocation p_174582_, ClampedItemPropertyFunction p_174583_) {
@@ -25,7 +10,7 @@
          GENERIC_PROPERTIES.put(p_174582_, p_174583_);
          return p_174583_;
      }
-@@ -54,6 +_,10 @@
+@@ -51,6 +_,10 @@
      }
  
      private static void register(Item p_174571_, ResourceLocation p_174572_, ClampedItemPropertyFunction p_174573_) {
@@ -36,51 +21,3 @@
          PROPERTIES.computeIfAbsent(p_174571_, p_117828_ -> Maps.newHashMap()).put(p_174572_, p_174573_);
      }
  
-@@ -203,11 +_,6 @@
-             return chargedprojectiles != null && chargedprojectiles.contains(Items.FIREWORK_ROCKET) ? 1.0F : 0.0F;
-         });
-         register(Items.ELYTRA, new ResourceLocation("broken"), (p_174590_, p_174591_, p_174592_, p_174593_) -> ElytraItem.isFlyEnabled(p_174590_) ? 0.0F : 1.0F);
--        register(
--            Items.POISONOUS_POLYTRA,
--            new ResourceLocation("broken"),
--            (p_339531_, p_339532_, p_339533_, p_339534_) -> PoisonousPolytraItem.isFlyEnabled(p_339531_) ? 0.0F : 1.0F
--        );
-         register(Items.FISHING_ROD, new ResourceLocation("cast"), (p_174585_, p_174586_, p_174587_, p_174588_) -> {
-             if (p_174587_ == null) {
-                 return 0.0F;
-@@ -221,19 +_,6 @@
-                 return (flag || flag1) && p_174587_ instanceof Player && ((Player)p_174587_).fishing != null ? 1.0F : 0.0F;
-             }
-         });
--        register(Items.LASHING_POTATO, new ResourceLocation("lashing_potato_extended"), (p_339539_, p_339540_, p_339541_, p_339542_) -> {
--            if (p_339541_ == null) {
--                return 0.0F;
--            } else {
--                boolean flag = p_339541_.getMainHandItem() == p_339539_;
--                boolean flag1 = p_339541_.getOffhandItem() == p_339539_;
--                if (p_339541_.getMainHandItem().getItem() instanceof LashingPotatoItem) {
--                    flag1 = false;
--                }
--
--                return (flag || flag1) && p_339541_ instanceof Player && ((Player)p_339541_).grappling != null ? 1.0F : 0.0F;
--            }
--        });
-         register(
-             Items.SHIELD,
-             new ResourceLocation("blocking"),
-@@ -253,15 +_,6 @@
-             Items.GOAT_HORN,
-             new ResourceLocation("tooting"),
-             (p_234978_, p_234979_, p_234980_, p_234981_) -> p_234980_ != null && p_234980_.isUsingItem() && p_234980_.getUseItem() == p_234978_ ? 1.0F : 0.0F
--        );
--        register(
--            Items.VENOMOUS_POTATO,
--            new ResourceLocation("hidden"),
--            (p_339527_, p_339528_, p_339529_, p_339530_) -> p_339527_.getOrDefault(DataComponents.SNEK, SnekComponent.HIDDEN_SNEK).revealed() ? 0.0F : 1.0F
--        );
--        registerGeneric(
--            new ResourceLocation("hovered"),
--            (p_339535_, p_339536_, p_339537_, p_339538_) -> p_339535_.getOrDefault(DataComponents.HOVERED, Boolean.valueOf(false)) ? 1.0F : 0.0F
-         );
-     }
- }

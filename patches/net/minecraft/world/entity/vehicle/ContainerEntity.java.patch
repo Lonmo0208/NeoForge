@@ -10,12 +10,3 @@
              if (p_219950_ != null) {
                  lootparams$builder.withLuck(p_219950_.getLuck()).withParameter(LootContextParams.THIS_ENTITY, p_219950_);
              }
-@@ -121,7 +_,7 @@
-     }
- 
-     default boolean isChestVehicleEmpty() {
--        for(ItemStack itemstack : this.getItemStacks()) {
-+        for (ItemStack itemstack : this.getItemStacks()) {
-             if (!itemstack.isEmpty()) {
-                 return false;
-             }

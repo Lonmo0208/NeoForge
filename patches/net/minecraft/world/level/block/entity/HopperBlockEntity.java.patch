@@ -1,34 +1,5 @@
 --- a/net/minecraft/world/level/block/entity/HopperBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/HopperBlockEntity.java
-@@ -43,8 +_,8 @@
-     }
- 
-     @Override
--    public void load(CompoundTag p_155588_, HolderLookup.Provider p_324320_) {
--        super.load(p_155588_, p_324320_);
-+    protected void loadAdditional(CompoundTag p_155588_, HolderLookup.Provider p_324320_) {
-+        super.loadAdditional(p_155588_, p_324320_);
-         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-         if (!this.tryLoadLootTable(p_155588_)) {
-             ContainerHelper.loadAllItems(p_155588_, this.items, p_324320_);
-@@ -93,7 +_,7 @@
-     }
- 
-     public static void pushItemsTick(Level p_155574_, BlockPos p_155575_, BlockState p_155576_, HopperBlockEntity p_155577_) {
--        --p_155577_.cooldownTime;
-+        p_155577_.cooldownTime--;
-         p_155577_.tickedGameTime = p_155574_.getGameTime();
-         if (!p_155577_.isOnCooldown()) {
-             p_155577_.setCooldown(0);
-@@ -127,7 +_,7 @@
-     }
- 
-     private boolean inventoryFull() {
--        for(ItemStack itemstack : this.items) {
-+        for (ItemStack itemstack : this.items) {
-             if (itemstack.isEmpty() || itemstack.getCount() != itemstack.getMaxStackSize()) {
-                 return false;
-             }
 @@ -137,6 +_,7 @@
      }
  
@@ -37,34 +8,7 @@
          Container container = getAttachedContainer(p_155563_, p_155564_, p_326256_);
          if (container == null) {
              return false;
-@@ -145,7 +_,7 @@
-             if (isFullContainer(container, direction)) {
-                 return false;
-             } else {
--                for(int i = 0; i < p_326256_.getContainerSize(); ++i) {
-+                for (int i = 0; i < p_326256_.getContainerSize(); i++) {
-                     ItemStack itemstack = p_326256_.getItem(i);
-                     if (!itemstack.isEmpty()) {
-                         int j = itemstack.getCount();
-@@ -191,7 +_,7 @@
-         int[] aint = new int[p_326328_];
-         int i = 0;
- 
--        while(i < aint.length) {
-+        while (i < aint.length) {
-             aint[i] = i++;
-         }
- 
-@@ -201,7 +_,7 @@
-     private static boolean isFullContainer(Container p_59386_, Direction p_59387_) {
-         int[] aint = getSlots(p_59386_, p_59387_);
- 
--        for(int i : aint) {
-+        for (int i : aint) {
-             ItemStack itemstack = p_59386_.getItem(i);
-             if (itemstack.getCount() < itemstack.getMaxStackSize()) {
-                 return false;
-@@ -214,11 +_,13 @@
+@@ -214,6 +_,8 @@
      public static boolean suckInItems(Level p_155553_, Hopper p_155554_) {
          BlockPos blockpos = BlockPos.containing(p_155554_.getLevelX(), p_155554_.getLevelY() + 1.0, p_155554_.getLevelZ());
          BlockState blockstate = p_155553_.getBlockState(blockpos);
@@ -73,64 +17,7 @@
          Container container = getSourceContainer(p_155553_, p_155554_, blockpos, blockstate);
          if (container != null) {
              Direction direction = Direction.DOWN;
- 
--            for(int i : getSlots(container, direction)) {
-+            for (int i : getSlots(container, direction)) {
-                 if (tryTakeInItemFromSlot(p_155554_, container, i, direction)) {
-                     return true;
-                 }
-@@ -230,7 +_,7 @@
-                 && blockstate.isCollisionShapeFullBlock(p_155553_, blockpos)
-                 && !blockstate.is(BlockTags.DOES_NOT_BLOCK_HOPPERS);
-             if (!flag) {
--                for(ItemEntity itementity : getItemsAtAndAbove(p_155553_, p_155554_)) {
-+                for (ItemEntity itementity : getItemsAtAndAbove(p_155553_, p_155554_)) {
-                     if (addItem(p_155554_, itementity)) {
-                         return true;
-                     }
-@@ -279,7 +_,7 @@
-         if (p_59328_ instanceof WorldlyContainer worldlycontainer && p_59330_ != null) {
-             int[] aint = worldlycontainer.getSlotsForFace(p_59330_);
- 
--            for(int k = 0; k < aint.length && !p_59329_.isEmpty(); ++k) {
-+            for (int k = 0; k < aint.length && !p_59329_.isEmpty(); k++) {
-                 p_59329_ = tryMoveInItem(p_59327_, p_59328_, p_59329_, aint[k], p_59330_);
-             }
- 
-@@ -288,7 +_,7 @@
- 
-         int i = p_59328_.getContainerSize();
- 
--        for(int j = 0; j < i && !p_59329_.isEmpty(); ++j) {
-+        for (int j = 0; j < i && !p_59329_.isEmpty(); j++) {
-             p_59329_ = tryMoveInItem(p_59327_, p_59328_, p_59329_, j, p_59330_);
-         }
- 
-@@ -390,18 +_,13 @@
-         Block block = p_326108_.getBlock();
-         if (block instanceof WorldlyContainerHolder) {
-             return ((WorldlyContainerHolder)block).getContainer(p_326108_, p_326127_, p_326017_);
--        } else {
--            if (p_326108_.hasBlockEntity()) {
--                BlockEntity blockentity = p_326127_.getBlockEntity(p_326017_);
--                if (blockentity instanceof Container container) {
--                    if (container instanceof ChestBlockEntity && block instanceof ChestBlock) {
--                        container = ChestBlock.getContainer((ChestBlock)block, p_326108_, p_326127_, p_326017_, true);
--                    }
--
--                    return container;
--                }
-+        } else if (p_326108_.hasBlockEntity() && p_326127_.getBlockEntity(p_326017_) instanceof Container container) {
-+            if (container instanceof ChestBlockEntity && block instanceof ChestBlock) {
-+                container = ChestBlock.getContainer((ChestBlock)block, p_326108_, p_326127_, p_326017_, true);
-             }
- 
-+            return container;
-+        } else {
-             return null;
-         }
-     }
-@@ -475,5 +_,9 @@
+@@ -470,5 +_,9 @@
      @Override
      protected AbstractContainerMenu createMenu(int p_59312_, Inventory p_59313_) {
          return new HopperMenu(p_59312_, p_59313_, this);

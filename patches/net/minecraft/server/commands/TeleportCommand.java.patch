@@ -1,23 +1,5 @@
 --- a/net/minecraft/server/commands/TeleportCommand.java
 +++ b/net/minecraft/server/commands/TeleportCommand.java
-@@ -158,7 +_,7 @@
-     }
- 
-     private static int teleportToEntity(CommandSourceStack p_139033_, Collection<? extends Entity> p_139034_, Entity p_139035_) throws CommandSyntaxException {
--        for(Entity entity : p_139034_) {
-+        for (Entity entity : p_139034_) {
-             performTeleport(
-                 p_139033_,
-                 entity,
-@@ -223,7 +_,7 @@
-             }
-         }
- 
--        for(Entity entity : p_139027_) {
-+        for (Entity entity : p_139027_) {
-             if (p_139030_ == null) {
-                 performTeleport(p_139026_, entity, p_139028_, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), p_139031_);
-             } else {
 @@ -270,6 +_,14 @@
          float p_139023_,
          @Nullable TeleportCommand.LookAt p_139024_

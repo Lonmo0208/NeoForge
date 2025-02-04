@@ -1,7 +1,7 @@
 --- a/net/minecraft/world/food/FoodData.java
 +++ b/net/minecraft/world/food/FoodData.java
-@@ -23,8 +_,14 @@
-         this.saturationLevel = Math.min(this.saturationLevel + (float)p_38708_ * p_38709_ * 2.0F, (float)this.foodLevel);
+@@ -27,8 +_,13 @@
+         this.add(p_38708_, FoodConstants.saturationByModifier(p_38708_, p_38709_));
      }
  
 +    // Use the LivingEntity sensitive version in favour of this.
@@ -10,48 +10,8 @@
 -        FoodProperties foodproperties = p_38714_.get(DataComponents.FOOD);
 +        this.eat(p_38714_, null);
 +    }
-+
 +    public void eat(ItemStack p_38714_, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.LivingEntity entity) {
 +        FoodProperties foodproperties = p_38714_.getFoodProperties(entity);
          if (foodproperties != null) {
-             this.eat(foodproperties.nutrition(), foodproperties.saturationModifier());
+             this.add(foodproperties.nutrition(), foodproperties.saturation());
          }
-@@ -38,31 +_,28 @@
-             if (this.saturationLevel > 0.0F) {
-                 this.saturationLevel = Math.max(this.saturationLevel - 1.0F, 0.0F);
-             } else if (difficulty != Difficulty.PEACEFUL) {
--                boolean flag = p_38711_.tryEatArmor();
--                if (!flag) {
--                    this.foodLevel = Math.max(this.foodLevel - 1, 0);
--                }
-+                this.foodLevel = Math.max(this.foodLevel - 1, 0);
-             }
-         }
- 
--        boolean flag1 = p_38711_.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
--        if (flag1 && this.saturationLevel > 0.0F && p_38711_.isHurt() && this.foodLevel >= 20) {
--            ++this.tickTimer;
-+        boolean flag = p_38711_.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
-+        if (flag && this.saturationLevel > 0.0F && p_38711_.isHurt() && this.foodLevel >= 20) {
-+            this.tickTimer++;
-             if (this.tickTimer >= 10) {
-                 float f = Math.min(this.saturationLevel, 6.0F);
-                 p_38711_.heal(f / 6.0F);
-                 this.addExhaustion(f);
-                 this.tickTimer = 0;
-             }
--        } else if (flag1 && this.foodLevel >= 18 && p_38711_.isHurt()) {
--            ++this.tickTimer;
-+        } else if (flag && this.foodLevel >= 18 && p_38711_.isHurt()) {
-+            this.tickTimer++;
-             if (this.tickTimer >= 80) {
-                 p_38711_.heal(1.0F);
-                 this.addExhaustion(6.0F);
-                 this.tickTimer = 0;
-             }
-         } else if (this.foodLevel <= 0) {
--            ++this.tickTimer;
-+            this.tickTimer++;
-             if (this.tickTimer >= 80) {
-                 if (p_38711_.getHealth() > 10.0F || difficulty == Difficulty.HARD || p_38711_.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
-                     p_38711_.hurt(p_38711_.damageSources().starve(), 1.0F);

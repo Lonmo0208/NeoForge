@@ -1,70 +1,14 @@
 --- a/net/minecraft/world/level/block/entity/BlockEntityType.java
 +++ b/net/minecraft/world/level/block/entity/BlockEntityType.java
-@@ -23,9 +_,6 @@
- public class BlockEntityType<T extends BlockEntity> {
-     private static final Logger LOGGER = LogUtils.getLogger();
-     public static final BlockEntityType<FurnaceBlockEntity> FURNACE = register("furnace", BlockEntityType.Builder.of(FurnaceBlockEntity::new, Blocks.FURNACE));
--    public static final BlockEntityType<FletchingBlockEntity> FLETCHING = register(
--        "fletching", BlockEntityType.Builder.of(FletchingBlockEntity::new, Blocks.FLETCHING_TABLE)
--    );
-     public static final BlockEntityType<ChestBlockEntity> CHEST = register("chest", BlockEntityType.Builder.of(ChestBlockEntity::new, Blocks.CHEST));
-     public static final BlockEntityType<TrappedChestBlockEntity> TRAPPED_CHEST = register(
-         "trapped_chest", BlockEntityType.Builder.of(TrappedChestBlockEntity::new, Blocks.TRAPPED_CHEST)
-@@ -42,8 +_,6 @@
-         "sign",
-         BlockEntityType.Builder.of(
-             SignBlockEntity::new,
--            Blocks.POTATO_SIGN,
--            Blocks.POTATO_WALL_SIGN,
-             Blocks.OAK_SIGN,
-             Blocks.SPRUCE_SIGN,
-             Blocks.BIRCH_SIGN,
-@@ -72,8 +_,6 @@
-         "hanging_sign",
-         BlockEntityType.Builder.of(
-             HangingSignBlockEntity::new,
--            Blocks.POTATO_HANGING_SIGN,
--            Blocks.POTATO_WALL_HANGING_SIGN,
-             Blocks.OAK_HANGING_SIGN,
-             Blocks.SPRUCE_HANGING_SIGN,
-             Blocks.BIRCH_HANGING_SIGN,
-@@ -243,7 +_,7 @@
-     public static final BlockEntityType<BellBlockEntity> BELL = register("bell", BlockEntityType.Builder.of(BellBlockEntity::new, Blocks.BELL));
-     public static final BlockEntityType<JigsawBlockEntity> JIGSAW = register("jigsaw", BlockEntityType.Builder.of(JigsawBlockEntity::new, Blocks.JIGSAW));
-     public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = register(
--        "campfire", BlockEntityType.Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE, Blocks.FRYING_TABLE)
-+        "campfire", BlockEntityType.Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE)
-     );
-     public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = register(
-         "beehive", BlockEntityType.Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE)
-@@ -274,12 +_,6 @@
-         "trial_spawner", BlockEntityType.Builder.of(TrialSpawnerBlockEntity::new, Blocks.TRIAL_SPAWNER)
-     );
-     public static final BlockEntityType<VaultBlockEntity> VAULT = register("vault", BlockEntityType.Builder.of(VaultBlockEntity::new, Blocks.VAULT));
--    public static final BlockEntityType<BigBrainBlockEntity> BIG_BRAIN = register(
--        "big_brain", BlockEntityType.Builder.of(BigBrainBlockEntity::new, Blocks.BIG_BRAIN)
--    );
--    public static final BlockEntityType<PotatoRefineryBlockEntity> POTATO_REFINERY = register(
--        "potato_refinery", BlockEntityType.Builder.of(PotatoRefineryBlockEntity::new, Blocks.POTATO_REFINERY)
--    );
-     private final BlockEntityType.BlockEntitySupplier<? extends T> factory;
-     private final Set<Block> validBlocks;
-     private final Type<?> dataType;
-@@ -307,11 +_,16 @@
- 
-     @Nullable
-     public T create(BlockPos p_155265_, BlockState p_155266_) {
--        return this.factory.create(p_155265_, p_155266_);
-+        return (T)this.factory.create(p_155265_, p_155266_);
+@@ -301,6 +_,11 @@
+         return this.validBlocks.contains(p_155263_.getBlock());
      }
  
-     public boolean isValid(BlockState p_155263_) {
-         return this.validBlocks.contains(p_155263_.getBlock());
-+    }
-+
 +    // Neo: Add block getter
 +    public Set<Block> getValidBlocks() {
 +        return java.util.Collections.unmodifiableSet(this.validBlocks);
-     }
- 
++    }
++
      @Nullable
+     public Holder.Reference<BlockEntityType<?>> builtInRegistryHolder() {
+         return this.builtInRegistryHolder;

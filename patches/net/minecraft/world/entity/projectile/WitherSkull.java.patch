@@ -9,14 +9,3 @@
      }
  
      @Override
-@@ -54,9 +_,8 @@
-         super.onHitEntity(p_37626_);
-         if (!this.level().isClientSide) {
-             Entity entity = p_37626_.getEntity();
--            Entity entity1 = this.getOwner();
-             boolean flag;
--            if (entity1 instanceof LivingEntity livingentity) {
-+            if (this.getOwner() instanceof LivingEntity livingentity) {
-                 flag = entity.hurt(this.damageSources().witherSkull(this, livingentity), 8.0F);
-                 if (flag) {
-                     if (entity.isAlive()) {

@@ -1,36 +1,11 @@
 --- a/net/minecraft/tags/ItemTags.java
 +++ b/net/minecraft/tags/ItemTags.java
-@@ -96,7 +_,6 @@
-     public static final TagKey<Item> DIRT = bind("dirt");
-     public static final TagKey<Item> TERRACOTTA = bind("terracotta");
-     public static final TagKey<Item> COMPLETES_FIND_TREE_TUTORIAL = bind("completes_find_tree_tutorial");
--    public static final TagKey<Item> HEATABLE_POTATOS = bind("heatable_potatos");
-     public static final TagKey<Item> BOATS = bind("boats");
-     public static final TagKey<Item> CHEST_BOATS = bind("chest_boats");
-     public static final TagKey<Item> FISHES = bind("fishes");
-@@ -142,6 +_,8 @@
-     public static final TagKey<Item> HEAD_ARMOR_ENCHANTABLE = bind("enchantable/head_armor");
-     public static final TagKey<Item> ARMOR_ENCHANTABLE = bind("enchantable/armor");
-     public static final TagKey<Item> SWORD_ENCHANTABLE = bind("enchantable/sword");
-+    public static final TagKey<Item> FIRE_ASPECT_ENCHANTABLE = bind("enchantable/fire_aspect");
-+    public static final TagKey<Item> SHARP_WEAPON_ENCHANTABLE = bind("enchantable/sharp_weapon");
-     public static final TagKey<Item> WEAPON_ENCHANTABLE = bind("enchantable/weapon");
-     public static final TagKey<Item> MINING_ENCHANTABLE = bind("enchantable/mining");
-     public static final TagKey<Item> MINING_LOOT_ENCHANTABLE = bind("enchantable/mining_loot");
-@@ -152,11 +_,16 @@
-     public static final TagKey<Item> EQUIPPABLE_ENCHANTABLE = bind("enchantable/equippable");
-     public static final TagKey<Item> CROSSBOW_ENCHANTABLE = bind("enchantable/crossbow");
-     public static final TagKey<Item> VANISHING_ENCHANTABLE = bind("enchantable/vanishing");
-+    public static final TagKey<Item> MACE_ENCHANTABLE = bind("enchantable/mace");
- 
-     private ItemTags() {
-     }
- 
+@@ -160,4 +_,8 @@
      private static TagKey<Item> bind(String p_203855_) {
          return TagKey.create(Registries.ITEM, new ResourceLocation(p_203855_));
-+    }
+     }
 +
 +    public static TagKey<Item> create(final ResourceLocation name) {
 +        return TagKey.create(Registries.ITEM, name);
-     }
++    }
  }

@@ -1,19 +1,8 @@
 --- a/net/minecraft/world/level/levelgen/placement/EnvironmentScanPlacement.java
 +++ b/net/minecraft/world/level/levelgen/placement/EnvironmentScanPlacement.java
-@@ -1,6 +_,7 @@
- package net.minecraft.world.level.levelgen.placement;
- 
- import com.mojang.serialization.Codec;
-+import com.mojang.serialization.MapCodec;
- import com.mojang.serialization.codecs.RecordCodecBuilder;
- import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
- import java.util.stream.Stream;
-@@ -15,9 +_,10 @@
-     private final BlockPredicate targetCondition;
-     private final BlockPredicate allowedSearchCondition;
+@@ -18,7 +_,8 @@
      private final int maxSteps;
--    public static final Codec<EnvironmentScanPlacement> CODEC = RecordCodecBuilder.create(
-+    public static final MapCodec<EnvironmentScanPlacement> CODEC = RecordCodecBuilder.mapCodec(
+     public static final MapCodec<EnvironmentScanPlacement> CODEC = RecordCodecBuilder.mapCodec(
          p_191650_ -> p_191650_.group(
 -                    Direction.VERTICAL_CODEC.fieldOf("direction_of_search").forGetter(p_191672_ -> p_191672_.directionOfSearch),
 +                    // NeoForge: Allow any direction, not just vertical. The code already handles it fine.
@@ -21,12 +10,3 @@
                      BlockPredicate.CODEC.fieldOf("target_condition").forGetter(p_191670_ -> p_191670_.targetCondition),
                      BlockPredicate.CODEC
                          .optionalFieldOf("allowed_search_condition", BlockPredicate.alwaysTrue())
-@@ -49,7 +_,7 @@
-         if (!this.allowedSearchCondition.test(worldgenlevel, blockpos$mutableblockpos)) {
-             return Stream.of();
-         } else {
--            for(int i = 0; i < this.maxSteps; ++i) {
-+            for (int i = 0; i < this.maxSteps; i++) {
-                 if (this.targetCondition.test(worldgenlevel, blockpos$mutableblockpos)) {
-                     return Stream.of(blockpos$mutableblockpos);
-                 }

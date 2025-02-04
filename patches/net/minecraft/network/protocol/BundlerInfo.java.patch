@@ -8,7 +8,7 @@
 +            public void unbundlePacket(Packet<?> bundlePacket, Consumer<Packet<?>> packetSender, io.netty.channel.ChannelHandlerContext context) {
 +                if (bundlePacket.type() == p_320816_) {
 +                    P p = (P)bundlePacket;
-+                    java.util.List<Packet<?>> packets = net.neoforged.neoforge.network.registration.NetworkRegistry.getInstance().filterGameBundlePackets(context, p.subPackets());
++                    java.util.List<Packet<?>> packets = net.neoforged.neoforge.network.registration.NetworkRegistry.filterGameBundlePackets(context, p.subPackets());
 +                    if (packets.isEmpty()) {
 +                        return;
 +                    }
@@ -27,15 +27,6 @@
              @Nullable
              @Override
              public BundlerInfo.Bundler startPacketBundling(Packet<?> p_265749_) {
-@@ -40,7 +_,7 @@
-                         } else if (this.bundlePackets.size() >= 4096) {
-                             throw new IllegalStateException("Too many packets in a bundle");
-                         } else {
--                            this.bundlePackets.add((Packet<T>)p_320276_);
-+                            this.bundlePackets.add((Packet<? super T>)p_320276_);
-                             return null;
-                         }
-                     }
 @@ -49,7 +_,24 @@
          };
      }

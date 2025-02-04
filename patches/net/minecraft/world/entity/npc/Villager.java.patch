@@ -1,27 +1,6 @@
 --- a/net/minecraft/world/entity/npc/Villager.java
 +++ b/net/minecraft/world/entity/npc/Villager.java
-@@ -197,11 +_,6 @@
-     }
- 
-     @Override
--    public boolean hasPotatoVariant() {
--        return true;
--    }
--
--    @Override
-     public Brain<Villager> getBrain() {
-         return (Brain<Villager>)super.getBrain();
-     }
-@@ -283,7 +_,7 @@
-         }
- 
-         if (!this.isTrading() && this.updateMerchantTimer > 0) {
--            --this.updateMerchantTimer;
-+            this.updateMerchantTimer--;
-             if (this.updateMerchantTimer <= 0) {
-                 if (this.increaseProfessionLevelOnUpdate) {
-                     this.increaseMerchantCareer();
-@@ -327,7 +_,7 @@
+@@ -322,7 +_,7 @@
      @Override
      public InteractionResult mobInteract(Player p_35472_, InteractionHand p_35473_) {
          ItemStack itemstack = p_35472_.getItemInHand(p_35473_);
@@ -30,121 +9,7 @@
              return super.mobInteract(p_35472_, p_35473_);
          } else if (this.isBaby()) {
              this.setUnhappy();
-@@ -383,7 +_,7 @@
-     }
- 
-     private void resetSpecialPrices() {
--        for(MerchantOffer merchantoffer : this.getOffers()) {
-+        for (MerchantOffer merchantoffer : this.getOffers()) {
-             merchantoffer.resetSpecialPriceDiff();
-         }
-     }
-@@ -401,13 +_,13 @@
-     public void restock() {
-         this.updateDemand();
- 
--        for(MerchantOffer merchantoffer : this.getOffers()) {
-+        for (MerchantOffer merchantoffer : this.getOffers()) {
-             merchantoffer.resetUses();
-         }
- 
-         this.resendOffersToTradingPlayer();
-         this.lastRestockGameTime = this.level().getGameTime();
--        ++this.numberOfRestocksToday;
-+        this.numberOfRestocksToday++;
-     }
- 
-     private void resendOffersToTradingPlayer() {
-@@ -426,7 +_,7 @@
-     }
- 
-     private boolean needsToRestock() {
--        for(MerchantOffer merchantoffer : this.getOffers()) {
-+        for (MerchantOffer merchantoffer : this.getOffers()) {
-             if (merchantoffer.needsRestock()) {
-                 return true;
-             }
-@@ -462,12 +_,12 @@
-     private void catchUpDemand() {
-         int i = 2 - this.numberOfRestocksToday;
-         if (i > 0) {
--            for(MerchantOffer merchantoffer : this.getOffers()) {
-+            for (MerchantOffer merchantoffer : this.getOffers()) {
-                 merchantoffer.resetUses();
-             }
-         }
- 
--        for(int j = 0; j < i; ++j) {
-+        for (int j = 0; j < i; j++) {
-             this.updateDemand();
-         }
- 
-@@ -475,7 +_,7 @@
-     }
- 
-     private void updateDemand() {
--        for(MerchantOffer merchantoffer : this.getOffers()) {
-+        for (MerchantOffer merchantoffer : this.getOffers()) {
-             merchantoffer.updateDemand();
-         }
-     }
-@@ -483,7 +_,7 @@
-     private void updateSpecialPrices(Player p_35541_) {
-         int i = this.getPlayerReputation(p_35541_);
-         if (i != 0) {
--            for(MerchantOffer merchantoffer : this.getOffers()) {
-+            for (MerchantOffer merchantoffer : this.getOffers()) {
-                 merchantoffer.addToSpecialPriceDiff(-Mth.floor((float)i * merchantoffer.getPriceMultiplier()));
-             }
-         }
-@@ -492,7 +_,7 @@
-             MobEffectInstance mobeffectinstance = p_35541_.getEffect(MobEffects.HERO_OF_THE_VILLAGE);
-             int k = mobeffectinstance.getAmplifier();
- 
--            for(MerchantOffer merchantoffer1 : this.getOffers()) {
-+            for (MerchantOffer merchantoffer1 : this.getOffers()) {
-                 double d0 = 0.3 + 0.0625 * (double)k;
-                 int j = (int)Math.floor(d0 * (double)merchantoffer1.getBaseCostA().getCount());
-                 merchantoffer1.addToSpecialPriceDiff(-Math.max(j, 1));
-@@ -604,7 +_,7 @@
-     @Override
-     protected void rewardTradeXp(MerchantOffer p_35475_) {
-         int i = 3 + this.random.nextInt(4);
--        this.villagerXp += p_35475_.getXp();
-+        this.villagerXp = this.villagerXp + p_35475_.getXp();
-         this.lastTradedPlayer = this.getTradingPlayer();
-         if (this.shouldIncreaseLevel()) {
-             this.updateMerchantTimer = 40;
-@@ -657,8 +_,7 @@
-     }
- 
-     private void tellWitnessesThatIWasMurdered(Entity p_35421_) {
--        Level $$3 = this.level();
--        if ($$3 instanceof ServerLevel serverlevel) {
-+        if (this.level() instanceof ServerLevel serverlevel) {
-             Optional<NearestVisibleLivingEntities> optional = this.brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-             if (!optional.isEmpty()) {
-                 optional.get()
-@@ -697,15 +_,15 @@
- 
-     private void eatUntilFull() {
-         if (this.hungry() && this.countFoodPointsInInventory() != 0) {
--            for(int i = 0; i < this.getInventory().getContainerSize(); ++i) {
-+            for (int i = 0; i < this.getInventory().getContainerSize(); i++) {
-                 ItemStack itemstack = this.getInventory().getItem(i);
-                 if (!itemstack.isEmpty()) {
-                     Integer integer = FOOD_POINTS.get(itemstack.getItem());
-                     if (integer != null) {
-                         int j = itemstack.getCount();
- 
--                        for(int k = j; k > 0; --k) {
--                            this.foodLevel += integer;
-+                        for (int k = j; k > 0; k--) {
-+                            this.foodLevel = this.foodLevel + integer;
-                             this.getInventory().removeItem(i, 1);
-                             if (!this.hungry()) {
-                                 return;
-@@ -746,8 +_,9 @@
+@@ -740,8 +_,9 @@
  
      @Override
      protected Component getTypeName() {
@@ -155,7 +20,7 @@
          );
      }
  
-@@ -803,7 +_,7 @@
+@@ -797,7 +_,7 @@
  
      @Override
      public void thunderHit(ServerLevel p_35409_, LightningBolt p_35410_) {
@@ -164,7 +29,7 @@
              LOGGER.info("Villager {} was struck by lightning {}.", this, p_35410_);
              Witch witch = EntityType.WITCH.create(p_35409_);
              if (witch != null) {
-@@ -816,6 +_,7 @@
+@@ -810,6 +_,7 @@
                  }
  
                  witch.setPersistenceRequired();
@@ -172,37 +37,3 @@
                  p_35409_.addFreshEntityWithPassengers(witch);
                  this.releaseAllPois();
                  this.discard();
-@@ -868,7 +_,7 @@
-         }
- 
-         if (int2objectmap != null && !int2objectmap.isEmpty()) {
--            VillagerTrades.ItemListing[] avillagertrades$itemlisting = (VillagerTrades.ItemListing[])int2objectmap.get(villagerdata.getLevel());
-+            VillagerTrades.ItemListing[] avillagertrades$itemlisting = int2objectmap.get(villagerdata.getLevel());
-             if (avillagertrades$itemlisting != null) {
-                 MerchantOffers merchantoffers = this.getOffers();
-                 this.addOffersFromItemListings(merchantoffers, avillagertrades$itemlisting, 2);
-@@ -913,11 +_,7 @@
-     }
- 
-     public boolean wantsToSpawnGolem(long p_35393_) {
--        if (!this.golemSpawnConditionsMet(this.level().getGameTime())) {
--            return false;
--        } else {
--            return !this.brain.hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY);
--        }
-+        return !this.golemSpawnConditionsMet(this.level().getGameTime()) ? false : !this.brain.hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY);
-     }
- 
-     @Override
-@@ -978,10 +_,6 @@
- 
-     private boolean golemSpawnConditionsMet(long p_35462_) {
-         Optional<Long> optional = this.brain.getMemory(MemoryModuleType.LAST_SLEPT);
--        if (optional.isPresent()) {
--            return p_35462_ - optional.get() < 24000L;
--        } else {
--            return false;
--        }
-+        return optional.isPresent() ? p_35462_ - optional.get() < 24000L : false;
-     }
- }

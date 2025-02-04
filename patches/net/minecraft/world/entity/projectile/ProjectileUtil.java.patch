@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/entity/projectile/ProjectileUtil.java
 +++ b/net/minecraft/world/entity/projectile/ProjectileUtil.java
-@@ -68,7 +_,7 @@
-         Entity entity = null;
-         Vec3 vec3 = null;
- 
--        for(Entity entity1 : level.getEntities(p_37288_, p_37291_, p_37292_)) {
-+        for (Entity entity1 : level.getEntities(p_37288_, p_37291_, p_37292_)) {
-             AABB aabb = entity1.getBoundingBox().inflate((double)entity1.getPickRadius());
-             Optional<Vec3> optional = aabb.clip(p_37289_, p_37290_);
-             if (aabb.contains(p_37289_)) {
 @@ -81,7 +_,7 @@
                  Vec3 vec31 = optional.get();
                  double d1 = p_37289_.distanceToSqr(vec31);
@@ -18,39 +9,6 @@
                          if (d0 == 0.0) {
                              entity = entity1;
                              vec3 = vec31;
-@@ -110,7 +_,7 @@
-         double d0 = Double.MAX_VALUE;
-         Entity entity = null;
- 
--        for(Entity entity1 : p_150176_.getEntities(p_150177_, p_150180_, p_150181_)) {
-+        for (Entity entity1 : p_150176_.getEntities(p_150177_, p_150180_, p_150181_)) {
-             AABB aabb = entity1.getBoundingBox().inflate((double)p_150182_);
-             Optional<Vec3> optional = aabb.clip(p_150178_, p_150179_);
-             if (optional.isPresent()) {
-@@ -132,19 +_,19 @@
-             p_37285_.setYRot((float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) + 90.0F);
-             p_37285_.setXRot((float)(Mth.atan2(d0, vec3.y) * 180.0F / (float)Math.PI) - 90.0F);
- 
--            while(p_37285_.getXRot() - p_37285_.xRotO < -180.0F) {
-+            while (p_37285_.getXRot() - p_37285_.xRotO < -180.0F) {
-                 p_37285_.xRotO -= 360.0F;
-             }
- 
--            while(p_37285_.getXRot() - p_37285_.xRotO >= 180.0F) {
-+            while (p_37285_.getXRot() - p_37285_.xRotO >= 180.0F) {
-                 p_37285_.xRotO += 360.0F;
-             }
- 
--            while(p_37285_.getYRot() - p_37285_.yRotO < -180.0F) {
-+            while (p_37285_.getYRot() - p_37285_.yRotO < -180.0F) {
-                 p_37285_.yRotO -= 360.0F;
-             }
- 
--            while(p_37285_.getYRot() - p_37285_.yRotO >= 180.0F) {
-+            while (p_37285_.getYRot() - p_37285_.yRotO >= 180.0F) {
-                 p_37285_.yRotO += 360.0F;
-             }
- 
 @@ -153,8 +_,13 @@
          }
      }

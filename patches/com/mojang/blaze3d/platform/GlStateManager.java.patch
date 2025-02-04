@@ -1,23 +1,5 @@
 --- a/com/mojang/blaze3d/platform/GlStateManager.java
 +++ b/com/mojang/blaze3d/platform/GlStateManager.java
-@@ -42,7 +_,7 @@
-     private static int activeTexture;
-     private static final GlStateManager.TextureState[] TEXTURES = IntStream.range(0, 12)
-         .mapToObj(p_157120_ -> new GlStateManager.TextureState())
--        .toArray(p_157122_ -> new GlStateManager.TextureState[p_157122_]);
-+        .toArray(GlStateManager.TextureState[]::new);
-     private static final GlStateManager.ColorMask COLOR_MASK = new GlStateManager.ColorMask();
- 
-     public static void _disableScissorTest() {
-@@ -145,7 +_,7 @@
-         RenderSystem.assertOnRenderThread();
-         StringBuilder stringbuilder = new StringBuilder();
- 
--        for(String s : p_157118_) {
-+        for (String s : p_157118_) {
-             stringbuilder.append(s);
-         }
- 
 @@ -493,9 +_,16 @@
          }
      }
@@ -35,26 +17,6 @@
      }
  
      public static void _texParameter(int p_84332_, int p_84333_, int p_84334_) {
-@@ -522,7 +_,7 @@
-         RenderSystem.assertOnRenderThreadOrInit();
-         GL11.glDeleteTextures(p_84542_);
- 
--        for(GlStateManager.TextureState glstatemanager$texturestate : TEXTURES) {
-+        for (GlStateManager.TextureState glstatemanager$texturestate : TEXTURES) {
-             if (glstatemanager$texturestate.binding == p_84542_) {
-                 glstatemanager$texturestate.binding = -1;
-             }
-@@ -532,8 +_,8 @@
-     public static void _deleteTextures(int[] p_84366_) {
-         RenderSystem.assertOnRenderThreadOrInit();
- 
--        for(GlStateManager.TextureState glstatemanager$texturestate : TEXTURES) {
--            for(int i : p_84366_) {
-+        for (GlStateManager.TextureState glstatemanager$texturestate : TEXTURES) {
-+            for (int i : p_84366_) {
-                 if (glstatemanager$texturestate.binding == i) {
-                     glstatemanager$texturestate.binding = -1;
-                 }
 @@ -945,5 +_,54 @@
          public static int height() {
              return INSTANCE.height;

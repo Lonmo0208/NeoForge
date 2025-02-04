@@ -9,15 +9,6 @@
      ToIntFunction<ResourceKey<GameEvent>> VIBRATION_FREQUENCY_FOR_EVENT = Util.make(new Reference2IntOpenHashMap<>(), p_316653_ -> {
          p_316653_.defaultReturnValue(0);
          p_316653_.put(GameEvent.STEP.key(), 1);
-@@ -95,7 +_,7 @@
-         p_316653_.put(GameEvent.ENTITY_DIE.key(), 15);
-         p_316653_.put(GameEvent.EXPLODE.key(), 15);
- 
--        for(int i = 1; i <= 15; ++i) {
-+        for (int i = 1; i <= 15; i++) {
-             p_316653_.put(getResonanceEventByFrequency(i), i);
-         }
-     });
 @@ -105,11 +_,13 @@
      VibrationSystem.User getVibrationUser();
  
@@ -34,52 +25,3 @@
      }
  
      static ResourceKey<GameEvent> getResonanceEventByFrequency(int p_282105_) {
-@@ -123,12 +_,12 @@
- 
-     public static final class Data {
-         public static Codec<VibrationSystem.Data> CODEC = RecordCodecBuilder.create(
--            p_283387_ -> p_283387_.group(
--                        VibrationInfo.CODEC.optionalFieldOf("event").forGetter(p_281665_ -> Optional.ofNullable(p_281665_.currentVibration)),
-+            p_338090_ -> p_338090_.group(
-+                        VibrationInfo.CODEC.lenientOptionalFieldOf("event").forGetter(p_281665_ -> Optional.ofNullable(p_281665_.currentVibration)),
-                         VibrationSelector.CODEC.fieldOf("selector").forGetter(VibrationSystem.Data::getSelectionStrategy),
-                         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay").orElse(0).forGetter(VibrationSystem.Data::getTravelTimeInTicks)
-                     )
--                    .apply(p_283387_, (p_281934_, p_282381_, p_282931_) -> new VibrationSystem.Data(p_281934_.orElse(null), p_282381_, p_282931_, true))
-+                    .apply(p_338090_, (p_281934_, p_282381_, p_282931_) -> new VibrationSystem.Data(p_281934_.orElse(null), p_282381_, p_282931_, true))
-         );
-         public static final String NBT_TAG_KEY = "listener";
-         @Nullable
-@@ -250,7 +_,7 @@
-             Vec3 vec3 = new Vec3((double)Mth.floor(p_283328_.x) + 0.5, (double)Mth.floor(p_283328_.y) + 0.5, (double)Mth.floor(p_283328_.z) + 0.5);
-             Vec3 vec31 = new Vec3((double)Mth.floor(p_283163_.x) + 0.5, (double)Mth.floor(p_283163_.y) + 0.5, (double)Mth.floor(p_283163_.z) + 0.5);
- 
--            for(Direction direction : Direction.values()) {
-+            for (Direction direction : Direction.values()) {
-                 Vec3 vec32 = vec3.relative(direction, 1.0E-5F);
-                 if (p_283225_.isBlockInLine(new ClipBlockStateContext(vec32, vec31, p_283608_ -> p_283608_.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))).getType()
-                     != HitResult.Type.BLOCK) {
-@@ -353,8 +_,8 @@
-         private static boolean areAdjacentChunksTicking(Level p_282735_, BlockPos p_281722_) {
-             ChunkPos chunkpos = new ChunkPos(p_281722_);
- 
--            for(int i = chunkpos.x - 1; i <= chunkpos.x + 1; ++i) {
--                for(int j = chunkpos.z - 1; j <= chunkpos.z + 1; ++j) {
-+            for (int i = chunkpos.x - 1; i <= chunkpos.x + 1; i++) {
-+                for (int j = chunkpos.z - 1; j <= chunkpos.z + 1; j++) {
-                     if (!p_282735_.shouldTickBlocksAt(ChunkPos.asLong(i, j)) || p_282735_.getChunkSource().getChunkNow(i, j) == null) {
-                         return false;
-                     }
-@@ -415,11 +_,7 @@
-                     }
-                 }
- 
--                if (p_283373_.affectedState() != null) {
--                    return !p_283373_.affectedState().is(BlockTags.DAMPENS_VIBRATIONS);
--                } else {
--                    return true;
--                }
-+                return p_283373_.affectedState() != null ? !p_283373_.affectedState().is(BlockTags.DAMPENS_VIBRATIONS) : true;
-             }
-         }
- 

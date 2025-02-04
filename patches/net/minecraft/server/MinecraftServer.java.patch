@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -255,13 +_,13 @@
+@@ -258,7 +_,7 @@
  
      public static <S extends MinecraftServer> S spin(Function<Thread, S> p_129873_) {
          AtomicReference<S> atomicreference = new AtomicReference<>();
@@ -9,23 +9,7 @@
          thread.setUncaughtExceptionHandler((p_177909_, p_177910_) -> LOGGER.error("Uncaught exception in server thread", p_177910_));
          if (Runtime.getRuntime().availableProcessors() > 4) {
              thread.setPriority(8);
-         }
- 
--        S s = p_129873_.apply(thread);
-+        S s = (S)p_129873_.apply(thread);
-         atomicreference.set(s);
-         thread.start();
-         return s;
-@@ -300,7 +_,7 @@
-             this.functionManager = new ServerFunctionManager(this, this.resources.managers.getFunctionLibrary());
-             HolderGetter<Block> holdergetter = this.registries
-                 .compositeAccess()
--                .<Block>registryOrThrow(Registries.BLOCK)
-+                .registryOrThrow(Registries.BLOCK)
-                 .asLookup()
-                 .filterFeatures(this.worldData.enabledFeatures());
-             this.structureTemplateManager = new StructureTemplateManager(p_236726_.resourceManager(), p_236724_, p_236728_, holdergetter);
-@@ -362,6 +_,7 @@
+@@ -366,6 +_,7 @@
          this.readScoreboard(dimensiondatastorage);
          this.commandStorage = new CommandStorage(dimensiondatastorage);
          WorldBorder worldborder = serverlevel.getWorldBorder();
@@ -33,16 +17,7 @@
          if (!serverleveldata.isInitialized()) {
              try {
                  setInitialSpawn(serverlevel, serverleveldata, worldoptions.generateBonusChest(), flag);
-@@ -390,7 +_,7 @@
- 
-         RandomSequences randomsequences = serverlevel.getRandomSequences();
- 
--        for(Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
-+        for (Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
-             ResourceKey<LevelStem> resourcekey = entry.getKey();
-             if (resourcekey != LevelStem.OVERWORLD) {
-                 ResourceKey<Level> resourcekey1 = ResourceKey.create(Registries.DIMENSION, resourcekey.location());
-@@ -411,6 +_,7 @@
+@@ -415,6 +_,7 @@
                  );
                  worldborder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
                  this.levels.put(resourcekey1, serverlevel1);
@@ -50,7 +25,7 @@
              }
          }
  
-@@ -422,6 +_,7 @@
+@@ -426,6 +_,7 @@
              p_177898_.setSpawn(BlockPos.ZERO.above(80), 0.0F);
          } else {
              ServerChunkCache serverchunkcache = p_177897_.getChunkSource();
@@ -58,37 +33,7 @@
              ChunkPos chunkpos = new ChunkPos(serverchunkcache.randomState().sampler().findSpawnPosition());
              int i = serverchunkcache.getGenerator().getSpawnHeight(p_177897_);
              if (i < p_177897_.getMinBuildHeight()) {
-@@ -435,7 +_,7 @@
-             int k = 0;
-             int l = -1;
- 
--            for(int i1 = 0; i1 < Mth.square(11); ++i1) {
-+            for (int i1 = 0; i1 < Mth.square(11); i1++) {
-                 if (j1 >= -5 && j1 <= 5 && j >= -5 && j <= 5) {
-                     BlockPos blockpos1 = PlayerRespawnLogic.getSpawnPosInChunk(p_177897_, new ChunkPos(chunkpos.x + j1, chunkpos.z + j));
-                     if (blockpos1 != null) {
-@@ -485,7 +_,7 @@
-         int i = this.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS);
-         int j = i > 0 ? Mth.square(ChunkProgressListener.calculateDiameter(i)) : 0;
- 
--        while(serverchunkcache.getTickingGenerated() < j) {
-+        while (serverchunkcache.getTickingGenerated() < j) {
-             this.nextTickTimeNanos = Util.getNanos() + PREPARE_LEVELS_DEFAULT_DELAY_NANOS;
-             this.waitUntilNextTick();
-         }
-@@ -493,16 +_,17 @@
-         this.nextTickTimeNanos = Util.getNanos() + PREPARE_LEVELS_DEFAULT_DELAY_NANOS;
-         this.waitUntilNextTick();
- 
--        for(ServerLevel serverlevel1 : this.levels.values()) {
-+        for (ServerLevel serverlevel1 : this.levels.values()) {
-             ForcedChunksSavedData forcedchunkssaveddata = serverlevel1.getDataStorage().get(ForcedChunksSavedData.factory(), "chunks");
-             if (forcedchunkssaveddata != null) {
-                 LongIterator longiterator = forcedchunkssaveddata.getChunks().iterator();
- 
--                while(longiterator.hasNext()) {
-+                while (longiterator.hasNext()) {
-                     long k = longiterator.nextLong();
+@@ -507,6 +_,7 @@
                      ChunkPos chunkpos = new ChunkPos(k);
                      serverlevel1.getChunkSource().updateChunkForced(chunkpos, true);
                  }
@@ -96,57 +41,15 @@
              }
          }
  
-@@ -529,7 +_,7 @@
-     public boolean saveAllChunks(boolean p_129886_, boolean p_129887_, boolean p_129888_) {
-         boolean flag = false;
- 
--        for(ServerLevel serverlevel : this.getAllLevels()) {
-+        for (ServerLevel serverlevel : this.getAllLevels()) {
-             if (!p_129886_) {
-                 LOGGER.info("Saving chunks for level '{}'/{}", serverlevel, serverlevel.dimension().location());
-             }
-@@ -544,7 +_,7 @@
-         this.worldData.setCustomBossEvents(this.getCustomBossEvents().save(this.registryAccess()));
-         this.storageSource.saveDataTag(this.registryAccess(), this.worldData, this.getPlayerList().getSingleplayerData());
-         if (p_129887_) {
--            for(ServerLevel serverlevel1 : this.getAllLevels()) {
-+            for (ServerLevel serverlevel1 : this.getAllLevels()) {
-                 LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", serverlevel1.getChunkSource().chunkMap.getStorageName());
-             }
- 
-@@ -588,16 +_,16 @@
- 
-         LOGGER.info("Saving worlds");
- 
--        for(ServerLevel serverlevel : this.getAllLevels()) {
-+        for (ServerLevel serverlevel : this.getAllLevels()) {
-             if (serverlevel != null) {
-                 serverlevel.noSave = false;
-             }
-         }
- 
--        while(this.levels.values().stream().anyMatch(p_202480_ -> p_202480_.getChunkSource().chunkMap.hasWork())) {
-+        while (this.levels.values().stream().anyMatch(p_202480_ -> p_202480_.getChunkSource().chunkMap.hasWork())) {
-             this.nextTickTimeNanos = Util.getNanos() + TimeUtil.NANOSECONDS_PER_MILLISECOND;
- 
--            for(ServerLevel serverlevel1 : this.getAllLevels()) {
-+            for (ServerLevel serverlevel1 : this.getAllLevels()) {
-                 serverlevel1.getChunkSource().removeTicketsOnClosing();
-                 serverlevel1.getChunkSource().tick(() -> true, false);
-             }
-@@ -607,9 +_,10 @@
- 
-         this.saveAllChunks(false, true, false);
- 
--        for(ServerLevel serverlevel2 : this.getAllLevels()) {
-+        for (ServerLevel serverlevel2 : this.getAllLevels()) {
+@@ -614,6 +_,7 @@
+         for (ServerLevel serverlevel2 : this.getAllLevels()) {
              if (serverlevel2 != null) {
                  try {
 +                    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Unload(serverlevel2));
                      serverlevel2.close();
                  } catch (IOException ioexception1) {
                      LOGGER.error("Exception closing the level", (Throwable)ioexception1);
-@@ -656,11 +_,13 @@
+@@ -660,9 +_,11 @@
                  throw new IllegalStateException("Failed to initialize server");
              }
  
@@ -156,12 +59,9 @@
              this.status = this.buildServerStatus();
 +            resetStatusCache(status);
  
--            while(this.running) {
-+            while (this.running) {
+             while (this.running) {
                  long i;
-                 if (!this.isPaused() && this.tickRateManager.isSprinting() && this.tickRateManager.checkShouldSprintThisTick()) {
-                     i = 0L;
-@@ -704,6 +_,8 @@
+@@ -708,6 +_,8 @@
                  this.isReady = true;
                  JvmProfiler.INSTANCE.onServerTick(this.smoothedTickTimeMillis);
              }
@@ -170,7 +70,7 @@
          } catch (Throwable throwable1) {
              LOGGER.error("Encountered an unexpected exception", throwable1);
              CrashReport crashreport = constructOrExtractCrashReport(throwable1);
-@@ -715,6 +_,7 @@
+@@ -719,6 +_,7 @@
                  LOGGER.error("We were unable to save this crash report to disk.");
              }
  
@@ -178,7 +78,7 @@
              this.onServerCrash(crashreport);
          } finally {
              try {
-@@ -727,6 +_,7 @@
+@@ -731,6 +_,7 @@
                      this.services.profileCache().clearExecutor();
                  }
  
@@ -186,40 +86,12 @@
                  this.onServerExit();
              }
          }
-@@ -759,7 +_,7 @@
-     private static CrashReport constructOrExtractCrashReport(Throwable p_206569_) {
-         ReportedException reportedexception = null;
- 
--        for(Throwable throwable = p_206569_; throwable != null; throwable = throwable.getCause()) {
-+        for (Throwable throwable = p_206569_; throwable != null; throwable = throwable.getCause()) {
-             if (throwable instanceof ReportedException reportedexception1) {
-                 reportedexception = reportedexception1;
-             }
-@@ -793,7 +_,7 @@
-         long i = flag ? Util.getNanos() : 0L;
-         super.waitForTasks();
-         if (flag) {
--            this.idleTimeNanos += Util.getNanos() - i;
-+            this.idleTimeNanos = this.idleTimeNanos + (Util.getNanos() - i);
-         }
-     }
- 
-@@ -817,7 +_,7 @@
-             return true;
-         } else {
-             if (this.tickRateManager.isSprinting() || this.haveTime()) {
--                for(ServerLevel serverlevel : this.getAllLevels()) {
-+                for (ServerLevel serverlevel : this.getAllLevels()) {
-                     if (serverlevel.getChunkSource().pollTask()) {
-                         return true;
-                     }
-@@ -872,15 +_,17 @@
+@@ -876,12 +_,14 @@
  
      public void tickServer(BooleanSupplier p_129871_) {
          long i = Util.getNanos();
--        ++this.tickCount;
 +        net.neoforged.neoforge.event.EventHooks.onPreServerTick(p_129871_, this);
-+        this.tickCount++;
+         this.tickCount++;
          this.tickRateManager.tick();
          this.tickChildren(p_129871_);
          if (i - this.lastServerStatus >= STATUS_EXPIRE_TIME_NANOS) {
@@ -228,19 +100,8 @@
 +            resetStatusCache(status);
          }
  
--        --this.ticksUntilAutosave;
-+        this.ticksUntilAutosave--;
-         if (this.ticksUntilAutosave <= 0) {
-             this.ticksUntilAutosave = this.computeNextAutosaveInterval();
-             LOGGER.debug("Autosave started");
-@@ -893,12 +_,13 @@
-         this.profiler.push("tallying");
-         long j = Util.getNanos() - i;
-         int k = this.tickCount % 100;
--        this.aggregatedTickTimesNanos -= this.tickTimesNanos[k];
-+        this.aggregatedTickTimesNanos = this.aggregatedTickTimesNanos - this.tickTimesNanos[k];
-         this.aggregatedTickTimesNanos += j;
-         this.tickTimesNanos[k] = j;
+         this.ticksUntilAutosave--;
+@@ -903,6 +_,7 @@
          this.smoothedTickTimeMillis = this.smoothedTickTimeMillis * 0.8F + (float)j / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND * 0.19999999F;
          this.logTickMethodTime(i);
          this.profiler.pop();
@@ -248,7 +109,7 @@
      }
  
      private void logTickMethodTime(long p_321837_) {
-@@ -907,6 +_,16 @@
+@@ -911,6 +_,16 @@
          }
      }
  
@@ -265,7 +126,7 @@
      private int computeNextAutosaveInterval() {
          float f;
          if (this.tickRateManager.isSprinting()) {
-@@ -938,7 +_,8 @@
+@@ -942,7 +_,8 @@
              Optional.of(serverstatus$players),
              Optional.of(ServerStatus.Version.current()),
              Optional.ofNullable(this.statusIcon),
@@ -275,26 +136,17 @@
          );
      }
  
-@@ -952,7 +_,7 @@
-             ObjectArrayList<GameProfile> objectarraylist = new ObjectArrayList<>(j);
-             int k = Mth.nextInt(this.random, 0, list.size() - j);
- 
--            for(int l = 0; l < j; ++l) {
-+            for (int l = 0; l < j; l++) {
-                 ServerPlayer serverplayer = list.get(k + l);
-                 objectarraylist.add(serverplayer.allowsListing() ? serverplayer.getGameProfile() : ANONYMOUS_PLAYER_PROFILE);
-             }
-@@ -968,7 +_,8 @@
+@@ -972,7 +_,8 @@
          this.getFunctions().tick();
          this.profiler.popPush("levels");
  
--        for(ServerLevel serverlevel : this.getAllLevels()) {
+-        for (ServerLevel serverlevel : this.getAllLevels()) {
 +        for(ServerLevel serverlevel : this.getWorldArray()) {
 +            long tickStart = Util.getNanos();
              this.profiler.push(() -> serverlevel + " " + serverlevel.dimension().location());
              if (this.tickCount % 20 == 0) {
                  this.profiler.push("timeSync");
-@@ -977,6 +_,7 @@
+@@ -981,6 +_,7 @@
              }
  
              this.profiler.push("tick");
@@ -302,7 +154,7 @@
  
              try {
                  serverlevel.tick(p_129954_);
-@@ -985,28 +_,30 @@
+@@ -989,16 +_,18 @@
                  serverlevel.fillReportDetails(crashreport);
                  throw new ReportedException(crashreport);
              }
@@ -322,30 +174,7 @@
              GameTestTicker.SINGLETON.tick();
          }
  
-         this.profiler.popPush("server gui refresh");
- 
--        for(int i = 0; i < this.tickables.size(); ++i) {
-+        for (int i = 0; i < this.tickables.size(); i++) {
-             this.tickables.get(i).run();
-         }
- 
-         this.profiler.popPush("send chunks");
- 
--        for(ServerPlayer serverplayer : this.playerList.getPlayers()) {
-+        for (ServerPlayer serverplayer : this.playerList.getPlayers()) {
-             serverplayer.connection.chunkSender.sendNextChunks(serverplayer);
-             serverplayer.connection.resumeFlushing();
-         }
-@@ -1025,7 +_,7 @@
-     public void forceTimeSynchronization() {
-         this.profiler.push("timeSync");
- 
--        for(ServerLevel serverlevel : this.getAllLevels()) {
-+        for (ServerLevel serverlevel : this.getAllLevels()) {
-             this.synchronizeTime(serverlevel);
-         }
- 
-@@ -1090,7 +_,7 @@
+@@ -1094,7 +_,7 @@
  
      @DontObfuscate
      public String getServerModName() {
@@ -354,16 +183,7 @@
      }
  
      public SystemReport fillSystemReport(SystemReport p_177936_) {
-@@ -1181,7 +_,7 @@
-     }
- 
-     private void updateMobSpawningFlags() {
--        for(ServerLevel serverlevel : this.getAllLevels()) {
-+        for (ServerLevel serverlevel : this.getAllLevels()) {
-             serverlevel.setSpawnSettings(this.isSpawningMonsters(), this.isSpawningAnimals());
-         }
-     }
-@@ -1419,7 +_,7 @@
+@@ -1417,7 +_,7 @@
  
      public CompletableFuture<Void> reloadResources(Collection<String> p_129862_) {
          CompletableFuture<Void> completablefuture = CompletableFuture.<ImmutableList>supplyAsync(
@@ -372,7 +192,7 @@
                  this
              )
              .thenCompose(
-@@ -1456,6 +_,7 @@
+@@ -1454,6 +_,7 @@
                      this.getPlayerList().reloadResources();
                      this.functionManager.replaceLibrary(this.resources.managers.getFunctionLibrary());
                      this.structureTemplateManager.onResourceManagerReload(this.resources.resourceManager);
@@ -380,44 +200,19 @@
                  },
                  this
              );
-@@ -1470,13 +_,15 @@
-         PackRepository p_248681_, DataPackConfig p_248920_, boolean p_249869_, FeatureFlagSet p_251243_
-     ) {
+@@ -1471,8 +_,10 @@
+         FeatureFlagSet featureflagset = p_249869_ ? FeatureFlagSet.of() : p_341632_.enabledFeatures();
+         FeatureFlagSet featureflagset1 = p_249869_ ? FeatureFlags.REGISTRY.allFlags() : p_341632_.enabledFeatures();
          p_248681_.reload();
 +        DataPackConfig.DEFAULT.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
-+        p_248920_.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
-         if (p_249869_) {
--            p_248681_.setSelected(Collections.singleton("vanilla"));
--            return WorldDataConfiguration.DEFAULT;
-+            p_248681_.setSelected(net.neoforged.neoforge.common.CommonHooks.getModDataPacksWithVanilla());
-+            return new WorldDataConfiguration(new DataPackConfig(net.neoforged.neoforge.common.CommonHooks.getModDataPacksWithVanilla(), ImmutableList.of()), FeatureFlags.DEFAULT_FLAGS);
++        datapackconfig.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
+         if (p_341620_) {
+-            return configureRepositoryWithSelection(p_248681_, List.of("vanilla"), featureflagset, false);
++            return configureRepositoryWithSelection(p_248681_, net.neoforged.neoforge.common.CommonHooks.getModDataPacksWithVanilla(), featureflagset, false);
          } else {
              Set<String> set = Sets.newLinkedHashSet();
  
--            for(String s : p_248920_.getEnabled()) {
-+            for (String s : p_248920_.getEnabled()) {
-                 if (p_248681_.isAvailable(s)) {
-                     set.add(s);
-                 } else {
-@@ -1484,7 +_,7 @@
-                 }
-             }
- 
--            for(Pack pack : p_248681_.getAvailablePacks()) {
-+            for (Pack pack : p_248681_.getAvailablePacks()) {
-                 String s1 = pack.getId();
-                 FeatureFlagSet featureflagset = pack.getRequestedFeatures();
-                 FeatureFlagSet featureflagset1 = p_248681_.getRequestedFeatureFlags();
-@@ -1543,7 +_,7 @@
-             PlayerList playerlist = p_129850_.getServer().getPlayerList();
-             UserWhiteList userwhitelist = playerlist.getWhiteList();
- 
--            for(ServerPlayer serverplayer : Lists.newArrayList(playerlist.getPlayers())) {
-+            for (ServerPlayer serverplayer : Lists.newArrayList(playerlist.getPlayers())) {
-                 if (!userwhitelist.isWhiteListed(serverplayer.getGameProfile())) {
-                     serverplayer.connection.disconnect(Component.translatable("multiplayer.disconnect.not_whitelisted"));
-                 }
-@@ -1658,6 +_,31 @@
+@@ -1688,6 +_,31 @@
  
      public abstract boolean isSingleplayerOwner(GameProfile p_129840_);
  
@@ -449,57 +244,7 @@
      public void dumpServerProperties(Path p_177911_) throws IOException {
      }
  
-@@ -1665,7 +_,7 @@
-         Path path = p_129860_.resolve("levels");
- 
-         try {
--            for(Entry<ResourceKey<Level>, ServerLevel> entry : this.levels.entrySet()) {
-+            for (Entry<ResourceKey<Level>, ServerLevel> entry : this.levels.entrySet()) {
-                 ResourceLocation resourcelocation = entry.getKey().location();
-                 Path path1 = path.resolve(resourcelocation.getNamespace()).resolve(resourcelocation.getPath());
-                 Files.createDirectories(path1);
-@@ -1699,11 +_,11 @@
-             GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
-                 @Override
-                 public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> p_195531_, GameRules.Type<T> p_195532_) {
--                    list.add(String.format(Locale.ROOT, "%s=%s\n", p_195531_.getId(), gamerules.<T>getRule(p_195531_)));
-+                    list.add(String.format(Locale.ROOT, "%s=%s\n", p_195531_.getId(), gamerules.getRule(p_195531_)));
-                 }
-             });
- 
--            for(String s : list) {
-+            for (String s : list) {
-                 writer.write(s);
-             }
-         }
-@@ -1714,7 +_,7 @@
-             String s = System.getProperty("java.class.path");
-             String s1 = System.getProperty("path.separator");
- 
--            for(String s2 : Splitter.on(s1).split(s)) {
-+            for (String s2 : Splitter.on(s1).split(s)) {
-                 writer.write(s2);
-                 writer.write("\n");
-             }
-@@ -1727,7 +_,7 @@
-         Arrays.sort(athreadinfo, Comparator.comparing(ThreadInfo::getThreadName));
- 
-         try (Writer writer = Files.newBufferedWriter(p_129996_)) {
--            for(ThreadInfo threadinfo : athreadinfo) {
-+            for (ThreadInfo threadinfo : athreadinfo) {
-                 writer.write(threadinfo.toString());
-                 writer.write(10);
-             }
-@@ -1746,7 +_,7 @@
- 
-             list.sort(Comparator.comparing(p_212910_ -> p_212910_.name));
- 
--            for(NativeModuleLister.NativeModuleInfo nativemodulelister$nativemoduleinfo : list) {
-+            for (NativeModuleLister.NativeModuleInfo nativemodulelister$nativemoduleinfo : list) {
-                 writer.write(nativemodulelister$nativemoduleinfo.toString());
-                 writer.write(10);
-             }
-@@ -1819,6 +_,10 @@
+@@ -1849,6 +_,10 @@
  
      public WorldData getWorldData() {
          return this.worldData;

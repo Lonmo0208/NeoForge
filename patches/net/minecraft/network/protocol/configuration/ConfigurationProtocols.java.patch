@@ -9,18 +9,3 @@
                  .addPacket(ConfigurationPacketTypes.SERVERBOUND_FINISH_CONFIGURATION, ServerboundFinishConfigurationPacket.STREAM_CODEC)
                  .addPacket(CommonPacketTypes.SERVERBOUND_KEEP_ALIVE, ServerboundKeepAlivePacket.STREAM_CODEC)
                  .addPacket(CommonPacketTypes.SERVERBOUND_PONG, ServerboundPongPacket.STREAM_CODEC)
-@@ -36,12 +_,13 @@
-     );
-     public static final ProtocolInfo<ClientConfigurationPacketListener> CLIENTBOUND = ProtocolInfoBuilder.clientboundProtocol(
-         ConnectionProtocol.CONFIGURATION,
--        p_325553_ -> p_325553_.addPacket(CookiePacketTypes.CLIENTBOUND_COOKIE_REQUEST, ClientboundCookieRequestPacket.STREAM_CODEC)
-+        p_337517_ -> p_337517_.addPacket(CookiePacketTypes.CLIENTBOUND_COOKIE_REQUEST, ClientboundCookieRequestPacket.STREAM_CODEC)
-                 .addPacket(CommonPacketTypes.CLIENTBOUND_CUSTOM_PAYLOAD, ClientboundCustomPayloadPacket.CONFIG_STREAM_CODEC)
-                 .addPacket(CommonPacketTypes.CLIENTBOUND_DISCONNECT, ClientboundDisconnectPacket.STREAM_CODEC)
-                 .addPacket(ConfigurationPacketTypes.CLIENTBOUND_FINISH_CONFIGURATION, ClientboundFinishConfigurationPacket.STREAM_CODEC)
-                 .addPacket(CommonPacketTypes.CLIENTBOUND_KEEP_ALIVE, ClientboundKeepAlivePacket.STREAM_CODEC)
-                 .addPacket(CommonPacketTypes.CLIENTBOUND_PING, ClientboundPingPacket.STREAM_CODEC)
-+                .addPacket(ConfigurationPacketTypes.CLIENTBOUND_RESET_CHAT, ClientboundResetChatPacket.STREAM_CODEC)
-                 .addPacket(ConfigurationPacketTypes.CLIENTBOUND_REGISTRY_DATA, ClientboundRegistryDataPacket.STREAM_CODEC)
-                 .addPacket(CommonPacketTypes.CLIENTBOUND_RESOURCE_PACK_POP, ClientboundResourcePackPopPacket.STREAM_CODEC)
-                 .addPacket(CommonPacketTypes.CLIENTBOUND_RESOURCE_PACK_PUSH, ClientboundResourcePackPushPacket.STREAM_CODEC)

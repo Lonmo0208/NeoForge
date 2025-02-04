@@ -1,21 +1,11 @@
 --- a/net/minecraft/client/renderer/texture/MipmapGenerator.java
 +++ b/net/minecraft/client/renderer/texture/MipmapGenerator.java
-@@ -9,7 +_,7 @@
- public class MipmapGenerator {
-     private static final int ALPHA_CUTOUT_CUTOFF = 96;
-     private static final float[] POW22 = Util.make(new float[256], p_118058_ -> {
--        for(int i = 0; i < p_118058_.length; ++i) {
-+        for (int i = 0; i < p_118058_.length; i++) {
-             p_118058_[i] = (float)Math.pow((double)((float)i / 255.0F), 2.2);
-         }
-     });
-@@ -25,17 +_,20 @@
+@@ -25,12 +_,15 @@
              anativeimage[0] = p_251300_[0];
              boolean flag = hasTransparentPixel(anativeimage[0]);
  
--            for(int i = 1; i <= p_252326_; ++i) {
 +            int maxMipmapLevel = net.neoforged.neoforge.client.ClientHooks.getMaxMipmapLevel(anativeimage[0].getWidth(), anativeimage[0].getHeight());
-+            for (int i = 1; i <= p_252326_; i++) {
+             for (int i = 1; i <= p_252326_; i++) {
                  if (i < p_251300_.length) {
                      anativeimage[i] = p_251300_[i];
                  } else {
@@ -27,29 +17,11 @@
                      int j = nativeimage1.getWidth();
                      int k = nativeimage1.getHeight();
  
--                    for(int l = 0; l < j; ++l) {
--                        for(int i1 = 0; i1 < k; ++i1) {
-+                    for (int l = 0; l < j; l++) {
-+                        for (int i1 = 0; i1 < k; i1++) {
-                             nativeimage1.setPixelRGBA(
-                                 l,
-                                 i1,
-@@ -49,6 +_,7 @@
+@@ -48,6 +_,7 @@
+                                 )
                              );
                          }
-                     }
 +                    }
+                     }
  
                      anativeimage[i] = nativeimage1;
-                 }
-@@ -59,8 +_,8 @@
-     }
- 
-     private static boolean hasTransparentPixel(NativeImage p_252279_) {
--        for(int i = 0; i < p_252279_.getWidth(); ++i) {
--            for(int j = 0; j < p_252279_.getHeight(); ++j) {
-+        for (int i = 0; i < p_252279_.getWidth(); i++) {
-+            for (int j = 0; j < p_252279_.getHeight(); j++) {
-                 if (p_252279_.getPixelRGBA(i, j) >> 24 == 0) {
-                     return true;
-                 }

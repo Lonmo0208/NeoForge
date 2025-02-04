@@ -9,39 +9,6 @@
                  boolean flag = false;
                  boolean flag1 = false;
                  BlockState blockstate = p_220981_.getBlockState(p_220982_.below());
-@@ -74,7 +_,7 @@
-                 } else if (blockstate.is(this.plant)) {
-                     int j = 1;
- 
--                    for(int k = 0; k < 4; ++k) {
-+                    for (int k = 0; k < 4; k++) {
-                         BlockState blockstate1 = p_220981_.getBlockState(p_220982_.below(j + 1));
-                         if (!blockstate1.is(this.plant)) {
-                             if (blockstate1.is(Blocks.END_STONE)) {
-@@ -83,7 +_,7 @@
-                             break;
-                         }
- 
--                        ++j;
-+                        j++;
-                     }
- 
-                     if (j < 2 || j <= p_220983_.nextInt(flag1 ? 5 : 4)) {
-@@ -99,12 +_,12 @@
-                 } else if (i < 4) {
-                     int l = p_220983_.nextInt(4);
-                     if (flag1) {
--                        ++l;
-+                        l++;
-                     }
- 
-                     boolean flag2 = false;
- 
--                    for(int i1 = 0; i1 < l; ++i1) {
-+                    for (int i1 = 0; i1 < l; i1++) {
-                         Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(p_220983_);
-                         BlockPos blockpos1 = p_220982_.relative(direction);
-                         if (p_220981_.isEmptyBlock(blockpos1)
 @@ -123,6 +_,7 @@
                  } else {
                      this.placeDeadFlower(p_220981_, p_220982_);
@@ -50,47 +17,3 @@
              }
          }
      }
-@@ -138,7 +_,7 @@
-     }
- 
-     private static boolean allNeighborsEmpty(LevelReader p_51698_, BlockPos p_51699_, @Nullable Direction p_51700_) {
--        for(Direction direction : Direction.Plane.HORIZONTAL) {
-+        for (Direction direction : Direction.Plane.HORIZONTAL) {
-             if (direction != p_51700_ && !p_51698_.isEmptyBlock(p_51699_.relative(direction))) {
-                 return false;
-             }
-@@ -165,7 +_,7 @@
-             } else {
-                 boolean flag = false;
- 
--                for(Direction direction : Direction.Plane.HORIZONTAL) {
-+                for (Direction direction : Direction.Plane.HORIZONTAL) {
-                     BlockState blockstate1 = p_51684_.getBlockState(p_51685_.relative(direction));
-                     if (blockstate1.is(this.plant)) {
-                         if (flag) {
-@@ -199,10 +_,10 @@
-         Block block = Blocks.CHORUS_PLANT;
-         int i = p_220970_.nextInt(4) + 1;
-         if (p_220973_ == 0) {
--            ++i;
-+            i++;
-         }
- 
--        for(int j = 0; j < i; ++j) {
-+        for (int j = 0; j < i; j++) {
-             BlockPos blockpos = p_220969_.above(j + 1);
-             if (!allNeighborsEmpty(p_220968_, blockpos, null)) {
-                 return;
-@@ -216,10 +_,10 @@
-         if (p_220973_ < 4) {
-             int l = p_220970_.nextInt(4);
-             if (p_220973_ == 0) {
--                ++l;
-+                l++;
-             }
- 
--            for(int k = 0; k < l; ++k) {
-+            for (int k = 0; k < l; k++) {
-                 Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(p_220970_);
-                 BlockPos blockpos1 = p_220969_.above(i).relative(direction);
-                 if (Math.abs(blockpos1.getX() - p_220971_.getX()) < p_220972_

@@ -18,24 +18,6 @@
  
          GLFW.glfwMakeContextCurrent(this.window);
          GL.createCapabilities();
-@@ -134,7 +_,7 @@
-     public void setIcon(PackResources p_281860_, IconSet p_282155_) throws IOException {
-         RenderSystem.assertInInitPhase();
-         int i = GLFW.glfwGetPlatform();
--        switch(i) {
-+        switch (i) {
-             case 393217:
-             case 393220:
-                 List<IoSupplier<InputStream>> list = p_282155_.getStandardIcons(p_281860_);
-@@ -143,7 +_,7 @@
-                 try (MemoryStack memorystack = MemoryStack.stackPush()) {
-                     Buffer buffer = GLFWImage.malloc(list.size(), memorystack);
- 
--                    for(int j = 0; j < list.size(); ++j) {
-+                    for (int j = 0; j < list.size(); j++) {
-                         try (NativeImage nativeimage = NativeImage.read(list.get(j).get())) {
-                             ByteBuffer bytebuffer = MemoryUtil.memAlloc(nativeimage.getWidth() * nativeimage.getHeight() * 4);
-                             list1.add(bytebuffer);
 @@ -244,6 +_,7 @@
          GLFW.glfwGetFramebufferSize(this.window, aint, aint1);
          this.framebufferWidth = aint[0] > 0 ? aint[0] : 1;
@@ -44,25 +26,3 @@
      }
  
      private void onResize(long p_85428_, int p_85429_, int p_85430_) {
-@@ -365,18 +_,18 @@
-     public int calculateScale(int p_85386_, boolean p_85387_) {
-         int i = 1;
- 
--        while(
-+        while (
-             i != p_85386_
-                 && i < this.framebufferWidth
-                 && i < this.framebufferHeight
-                 && this.framebufferWidth / (i + 1) >= 320
-                 && this.framebufferHeight / (i + 1) >= 240
-         ) {
--            ++i;
-+            i++;
-         }
- 
-         if (p_85387_ && i % 2 != 0) {
--            ++i;
-+            i++;
-         }
- 
-         return i;

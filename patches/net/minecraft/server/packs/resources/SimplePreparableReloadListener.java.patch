@@ -9,12 +9,3 @@
      @Override
      public final CompletableFuture<Void> reload(
          PreparableReloadListener.PreparationBarrier p_10780_,
-@@ -16,7 +_,7 @@
-     ) {
-         return CompletableFuture.<T>supplyAsync(() -> this.prepare(p_10781_, p_10782_), p_10784_)
-             .thenCompose(p_10780_::wait)
--            .thenAcceptAsync(p_10792_ -> this.apply(p_10792_, p_10781_, p_10783_), p_10785_);
-+            .thenAcceptAsync(p_10792_ -> this.apply((T)p_10792_, p_10781_, p_10783_), p_10785_);
-     }
- 
-     protected abstract T prepare(ResourceManager p_10796_, ProfilerFiller p_10797_);

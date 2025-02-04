@@ -1,29 +1,6 @@
 --- a/net/minecraft/world/inventory/InventoryMenu.java
 +++ b/net/minecraft/world/inventory/InventoryMenu.java
-@@ -48,13 +_,13 @@
-         this.owner = p_39708_;
-         this.addSlot(new ResultSlot(p_39706_.player, this.craftSlots, this.resultSlots, 0, 154, 28));
- 
--        for(int i = 0; i < 2; ++i) {
--            for(int j = 0; j < 2; ++j) {
-+        for (int i = 0; i < 2; i++) {
-+            for (int j = 0; j < 2; j++) {
-                 this.addSlot(new Slot(this.craftSlots, j + i * 2, 98 + j * 18, 18 + i * 18));
-             }
-         }
- 
--        for(int k = 0; k < 4; ++k) {
-+        for (int k = 0; k < 4; k++) {
-             final EquipmentSlot equipmentslot = SLOT_IDS[k];
-             this.addSlot(new Slot(p_39706_, 39 - k, 8, 8 + k * 18) {
-                 @Override
-@@ -65,12 +_,12 @@
- 
-                 @Override
-                 public int getMaxStackSize() {
--                    return equipmentslot == EquipmentSlot.FEET ? 64 : 1;
-+                    return 1;
-                 }
+@@ -70,7 +_,7 @@
  
                  @Override
                  public boolean mayPlace(ItemStack p_39746_) {
@@ -32,20 +9,3 @@
                  }
  
                  @Override
-@@ -86,13 +_,13 @@
-             });
-         }
- 
--        for(int l = 0; l < 3; ++l) {
--            for(int j1 = 0; j1 < 9; ++j1) {
-+        for (int l = 0; l < 3; l++) {
-+            for (int j1 = 0; j1 < 9; j1++) {
-                 this.addSlot(new Slot(p_39706_, j1 + (l + 1) * 9, 8 + j1 * 18, 84 + l * 18));
-             }
-         }
- 
--        for(int i1 = 0; i1 < 9; ++i1) {
-+        for (int i1 = 0; i1 < 9; i1++) {
-             this.addSlot(new Slot(p_39706_, i1, 8 + i1 * 18, 142));
-         }
- 

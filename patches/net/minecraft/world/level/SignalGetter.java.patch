@@ -9,23 +9,3 @@
      }
  
      default boolean hasNeighborSignal(BlockPos p_277626_) {
-@@ -77,17 +_,15 @@
-             return true;
-         } else if (this.getSignal(p_277626_.south(), Direction.SOUTH) > 0) {
-             return true;
--        } else if (this.getSignal(p_277626_.west(), Direction.WEST) > 0) {
--            return true;
-         } else {
--            return this.getSignal(p_277626_.east(), Direction.EAST) > 0;
-+            return this.getSignal(p_277626_.west(), Direction.WEST) > 0 ? true : this.getSignal(p_277626_.east(), Direction.EAST) > 0;
-         }
-     }
- 
-     default int getBestNeighborSignal(BlockPos p_277977_) {
-         int i = 0;
- 
--        for(Direction direction : DIRECTIONS) {
-+        for (Direction direction : DIRECTIONS) {
-             int j = this.getSignal(p_277977_.relative(direction), direction);
-             if (j >= 15) {
-                 return 15;

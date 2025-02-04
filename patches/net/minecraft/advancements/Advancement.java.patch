@@ -1,57 +1,14 @@
 --- a/net/minecraft/advancements/Advancement.java
 +++ b/net/minecraft/advancements/Advancement.java
-@@ -21,7 +_,6 @@
- import net.minecraft.network.codec.ByteBufCodecs;
- import net.minecraft.network.codec.StreamCodec;
- import net.minecraft.resources.ResourceLocation;
--import net.minecraft.util.ExtraCodecs;
- import net.minecraft.util.ProblemReporter;
- import net.minecraft.world.item.ItemStack;
- import net.minecraft.world.level.ItemLike;
-@@ -35,29 +_,25 @@
-     boolean sendsTelemetryEvent,
-     Optional<Component> name
- ) {
--    private static final Codec<Map<String, Criterion<?>>> CRITERIA_CODEC = ExtraCodecs.validate(
--        Codec.unboundedMap(Codec.STRING, Criterion.CODEC),
--        p_311380_ -> p_311380_.isEmpty() ? DataResult.error(() -> "Advancement criteria cannot be empty") : DataResult.success(p_311380_)
--    );
--    public static final Codec<Advancement> CODEC = ExtraCodecs.validate(
--        RecordCodecBuilder.create(
--            p_311387_ -> p_311387_.group(
--                        ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "parent").forGetter(Advancement::parent),
--                        ExtraCodecs.strictOptionalField(DisplayInfo.CODEC, "display").forGetter(Advancement::display),
--                        ExtraCodecs.strictOptionalField(AdvancementRewards.CODEC, "rewards", AdvancementRewards.EMPTY).forGetter(Advancement::rewards),
-+    private static final Codec<Map<String, Criterion<?>>> CRITERIA_CODEC = Codec.unboundedMap(Codec.STRING, Criterion.CODEC)
-+        .validate(p_311380_ -> p_311380_.isEmpty() ? DataResult.error(() -> "Advancement criteria cannot be empty") : DataResult.success(p_311380_));
-+    public static final Codec<Advancement> CODEC = RecordCodecBuilder.<Advancement>create(
-+            p_337334_ -> p_337334_.group(
-+                        ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(Advancement::parent),
-+                        DisplayInfo.CODEC.optionalFieldOf("display").forGetter(Advancement::display),
-+                        AdvancementRewards.CODEC.optionalFieldOf("rewards", AdvancementRewards.EMPTY).forGetter(Advancement::rewards),
-                         CRITERIA_CODEC.fieldOf("criteria").forGetter(Advancement::criteria),
--                        ExtraCodecs.strictOptionalField(AdvancementRequirements.CODEC, "requirements")
--                            .forGetter(p_311389_ -> Optional.of(p_311389_.requirements())),
--                        ExtraCodecs.strictOptionalField(Codec.BOOL, "sends_telemetry_event", false).forGetter(Advancement::sendsTelemetryEvent)
-+                        AdvancementRequirements.CODEC.optionalFieldOf("requirements").forGetter(p_311389_ -> Optional.of(p_311389_.requirements())),
-+                        Codec.BOOL.optionalFieldOf("sends_telemetry_event", Boolean.valueOf(false)).forGetter(Advancement::sendsTelemetryEvent)
-                     )
--                    .apply(p_311387_, (p_311374_, p_311375_, p_311376_, p_311377_, p_311378_, p_311379_) -> {
-+                    .apply(p_337334_, (p_311374_, p_311375_, p_311376_, p_311377_, p_311378_, p_311379_) -> {
-                         AdvancementRequirements advancementrequirements = p_311378_.orElseGet(() -> AdvancementRequirements.allOf(p_311377_.keySet()));
-                         return new Advancement(p_311374_, p_311375_, p_311376_, p_311377_, advancementrequirements, p_311379_);
-                     })
--        ),
--        Advancement::validate
--    );
-+        )
-+        .validate(Advancement::validate);
+@@ -52,6 +_,7 @@
+         )
+         .validate(Advancement::validate);
      public static final StreamCodec<RegistryFriendlyByteBuf, Advancement> STREAM_CODEC = StreamCodec.ofMember(Advancement::write, Advancement::read);
 +    public static final Codec<Optional<net.neoforged.neoforge.common.conditions.WithConditions<Advancement>>> CONDITIONAL_CODEC = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodecWithConditions(CODEC);
  
      public Advancement(
          Optional<ResourceLocation> p_300893_,
-@@ -117,7 +_,7 @@
+@@ -111,7 +_,7 @@
          });
      }
  

@@ -1,14 +1,5 @@
 --- a/net/minecraft/client/particle/VibrationSignalParticle.java
 +++ b/net/minecraft/client/particle/VibrationSignalParticle.java
-@@ -60,7 +_,7 @@
-         };
-         float f3 = this.getQuadSize(p_172481_);
- 
--        for(int i = 0; i < 4; ++i) {
-+        for (int i = 0; i < 4; i++) {
-             Vector3f vector3f1 = avector3f[i];
-             vector3f1.rotate(quaternionf);
-             vector3f1.mul(f3);
 @@ -122,6 +_,7 @@
                  this.x = Mth.lerp(d0, this.x, vec3.x());
                  this.y = Mth.lerp(d0, this.y, vec3.y());

@@ -9,17 +9,3 @@
          }
  
          if (p_41348_.isEmpty()) {
-@@ -57,7 +_,12 @@
- 
-     @Override
-     public SoundEvent getDrinkingSound() {
--        return SoundEvents.HONEY_DRINK.value();
-+        return SoundEvents.HONEY_DRINK;
-+    }
-+
-+    @Override
-+    public SoundEvent getEatingSound() {
-+        return SoundEvents.HONEY_DRINK;
-     }
- 
-     @Override

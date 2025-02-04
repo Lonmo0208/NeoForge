@@ -17,15 +17,7 @@
          if (!p_220908_.canSurvive(p_220909_, p_220910_)) {
              p_220909_.destroyBlock(p_220910_, true);
          }
-@@ -52,12 +_,13 @@
-         if (p_220914_.isEmptyBlock(blockpos)) {
-             int i = 1;
- 
--            while(p_220914_.getBlockState(p_220915_.below(i)).is(this)) {
--                ++i;
-+            while (p_220914_.getBlockState(p_220915_.below(i)).is(this)) {
-+                i++;
-             }
+@@ -58,6 +_,7 @@
  
              if (i < 3) {
                  int j = p_220913_.getValue(AGE);
@@ -42,15 +34,6 @@
              }
          }
      }
-@@ -91,7 +_,7 @@
- 
-     @Override
-     protected boolean canSurvive(BlockState p_51153_, LevelReader p_51154_, BlockPos p_51155_) {
--        for(Direction direction : Direction.Plane.HORIZONTAL) {
-+        for (Direction direction : Direction.Plane.HORIZONTAL) {
-             BlockState blockstate = p_51154_.getBlockState(p_51155_.relative(direction));
-             if (blockstate.isSolid() || p_51154_.getFluidState(p_51155_.relative(direction)).is(FluidTags.LAVA)) {
-                 return false;
 @@ -99,7 +_,7 @@
          }
  

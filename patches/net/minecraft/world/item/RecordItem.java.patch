@@ -1,12 +1,6 @@
 --- a/net/minecraft/world/item/RecordItem.java
 +++ b/net/minecraft/world/item/RecordItem.java
-@@ -16,23 +_,47 @@
- import net.minecraft.world.level.Level;
- import net.minecraft.world.level.block.Blocks;
- import net.minecraft.world.level.block.JukeboxBlock;
--import net.minecraft.world.level.block.entity.BlockEntity;
- import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
- import net.minecraft.world.level.block.state.BlockState;
+@@ -21,17 +_,42 @@
  import net.minecraft.world.level.gameevent.GameEvent;
  
  public class RecordItem extends Item {
@@ -49,26 +43,7 @@
      }
  
      @Override
-@@ -44,8 +_,7 @@
-             ItemStack itemstack = p_43048_.getItemInHand();
-             if (!level.isClientSide) {
-                 Player player = p_43048_.getPlayer();
--                BlockEntity blockentity = level.getBlockEntity(blockpos);
--                if (blockentity instanceof JukeboxBlockEntity jukeboxblockentity) {
-+                if (level.getBlockEntity(blockpos) instanceof JukeboxBlockEntity jukeboxblockentity) {
-                     jukeboxblockentity.setTheItem(itemstack.copy());
-                     level.gameEvent(GameEvent.BLOCK_CHANGE, blockpos, GameEvent.Context.of(player, blockstate));
-                 }
-@@ -67,7 +_,7 @@
-     }
- 
-     @Override
--    public void appendHoverText(ItemStack p_43043_, @Nullable Level p_43044_, List<Component> p_43045_, TooltipFlag p_43046_) {
-+    public void appendHoverText(ItemStack p_43043_, Item.TooltipContext p_339671_, List<Component> p_43045_, TooltipFlag p_43046_) {
-         p_43045_.add(this.getDisplayName().withStyle(ChatFormatting.GRAY));
-     }
- 
-@@ -81,7 +_,7 @@
+@@ -79,7 +_,7 @@
      }
  
      public SoundEvent getSound() {

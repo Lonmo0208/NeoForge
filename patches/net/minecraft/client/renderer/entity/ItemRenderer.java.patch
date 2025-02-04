@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/entity/ItemRenderer.java
 +++ b/net/minecraft/client/renderer/entity/ItemRenderer.java
-@@ -68,10 +_,10 @@
+@@ -68,7 +_,7 @@
      public ItemRenderer(Minecraft p_266926_, TextureManager p_266774_, ModelManager p_266850_, ItemColors p_267016_, BlockEntityWithoutLevelRenderer p_267049_) {
          this.minecraft = p_266926_;
          this.textureManager = p_266774_;
@@ -8,20 +8,7 @@
 +        this.itemModelShaper = new net.neoforged.neoforge.client.model.RegistryAwareItemModelShaper(p_266850_);
          this.blockEntityRenderer = p_267049_;
  
--        for(Item item : BuiltInRegistries.ITEM) {
-+        for (Item item : BuiltInRegistries.ITEM) {
-             if (!IGNORED.contains(item)) {
-                 this.itemModelShaper.register(item, new ModelResourceLocation(BuiltInRegistries.ITEM.getKey(item), "inventory"));
-             }
-@@ -88,7 +_,7 @@
-         RandomSource randomsource = RandomSource.create();
-         long i = 42L;
- 
--        for(Direction direction : Direction.values()) {
-+        for (Direction direction : Direction.values()) {
-             randomsource.setSeed(42L);
-             this.renderQuadList(p_115194_, p_115195_, p_115190_.getQuads(null, direction, randomsource), p_115191_, p_115192_, p_115193_);
-         }
+         for (Item item : BuiltInRegistries.ITEM) {
 @@ -118,7 +_,7 @@
                  }
              }
@@ -55,15 +42,6 @@
              }
  
              p_115147_.popPose();
-@@ -205,7 +_,7 @@
-         boolean flag = !p_115166_.isEmpty();
-         PoseStack.Pose posestack$pose = p_115163_.last();
- 
--        for(BakedQuad bakedquad : p_115165_) {
-+        for (BakedQuad bakedquad : p_115165_) {
-             int i = -1;
-             if (flag && bakedquad.isTinted()) {
-                 i = this.itemColors.getColor(p_115166_, bakedquad.getTintIndex());
 @@ -215,7 +_,7 @@
              float f1 = (float)FastColor.ARGB32.red(i) / 255.0F;
              float f2 = (float)FastColor.ARGB32.green(i) / 255.0F;

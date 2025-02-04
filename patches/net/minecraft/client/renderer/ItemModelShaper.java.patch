@@ -8,12 +8,3 @@
          return bakedmodel == null ? this.modelManager.getMissingModel() : bakedmodel;
      }
  
-@@ -47,7 +_,7 @@
-     public void rebuildCache() {
-         this.shapesCache.clear();
- 
--        for(Entry<Integer, ModelResourceLocation> entry : this.shapes.entrySet()) {
-+        for (Entry<Integer, ModelResourceLocation> entry : this.shapes.entrySet()) {
-             this.shapesCache.put(entry.getKey(), this.modelManager.getModel(entry.getValue()));
-         }
-     }

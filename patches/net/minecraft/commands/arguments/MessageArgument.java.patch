@@ -1,33 +1,11 @@
 --- a/net/minecraft/commands/arguments/MessageArgument.java
 +++ b/net/minecraft/commands/arguments/MessageArgument.java
-@@ -97,7 +_,7 @@
-         }
+@@ -84,7 +_,7 @@
  
+     public static record Message(String text, MessageArgument.Part[] parts) {
          Component resolveComponent(CommandSourceStack p_232197_) throws CommandSyntaxException {
 -            return this.toComponent(p_232197_, p_232197_.hasPermission(2));
 +            return this.toComponent(p_232197_, net.neoforged.neoforge.common.CommonHooks.canUseEntitySelectors(p_232197_));
          }
  
          public Component toComponent(CommandSourceStack p_96850_, boolean p_96851_) throws CommandSyntaxException {
-@@ -105,7 +_,7 @@
-                 MutableComponent mutablecomponent = Component.literal(this.text.substring(0, this.parts[0].getStart()));
-                 int i = this.parts[0].getStart();
- 
--                for(MessageArgument.Part messageargument$part : this.parts) {
-+                for (MessageArgument.Part messageargument$part : this.parts) {
-                     Component component = messageargument$part.toComponent(p_96850_);
-                     if (i < messageargument$part.getStart()) {
-                         mutablecomponent.append(this.text.substring(i, messageargument$part.getStart()));
-@@ -137,10 +_,10 @@
-                 List<MessageArgument.Part> list = Lists.newArrayList();
-                 int i = p_96847_.getCursor();
- 
--                while(true) {
-+                while (true) {
-                     int j;
-                     EntitySelector entityselector;
--                    while(true) {
-+                    while (true) {
-                         if (!p_96847_.canRead()) {
-                             return new MessageArgument.Message(s, list.toArray(new MessageArgument.Part[0]));
-                         }

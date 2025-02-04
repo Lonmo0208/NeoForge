@@ -1,32 +1,5 @@
 --- a/net/minecraft/client/gui/components/toasts/ToastComponent.java
 +++ b/net/minecraft/client/gui/components/toasts/ToastComponent.java
-@@ -57,7 +_,7 @@
-         if (this.freeSlots() >= p_243272_) {
-             int i = 0;
- 
--            for(int j = 0; j < 5; ++j) {
-+            for (int j = 0; j < 5; j++) {
-                 if (this.occupiedSlots.get(j)) {
-                     i = 0;
-                 } else if (++i == p_243272_) {
-@@ -75,7 +_,7 @@
- 
-     @Nullable
-     public <T extends Toast> T getToast(Class<? extends T> p_94927_, Object p_94928_) {
--        for(ToastComponent.ToastInstance<?> toastinstance : this.visible) {
-+        for (ToastComponent.ToastInstance<?> toastinstance : this.visible) {
-             if (toastinstance != null && p_94927_.isAssignableFrom(toastinstance.getToast().getClass()) && toastinstance.getToast().getToken().equals(p_94928_)
-                 )
-              {
-@@ -83,7 +_,7 @@
-             }
-         }
- 
--        for(Toast toast : this.queued) {
-+        for (Toast toast : this.queued) {
-             if (p_94927_.isAssignableFrom(toast.getClass()) && toast.getToken().equals(p_94928_)) {
-                 return (T)toast;
-             }
 @@ -99,6 +_,7 @@
      }
  

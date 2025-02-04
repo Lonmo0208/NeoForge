@@ -1,64 +1,9 @@
 --- a/com/mojang/blaze3d/systems/RenderSystem.java
 +++ b/com/mojang/blaze3d/systems/RenderSystem.java
-@@ -189,7 +_,7 @@
-     public static void replayQueue() {
-         isReplayingQueue = true;
- 
--        while(!recordingQueue.isEmpty()) {
-+        while (!recordingQueue.isEmpty()) {
-             RenderCall rendercall = recordingQueue.poll();
-             rendercall.execute();
-         }
-@@ -201,7 +_,7 @@
-         double d0 = lastDrawTime + 1.0 / (double)p_69831_;
- 
-         double d1;
--        for(d1 = GLFW.glfwGetTime(); d1 < d0; d1 = GLFW.glfwGetTime()) {
-+        for (d1 = GLFW.glfwGetTime(); d1 < d0; d1 = GLFW.glfwGetTime()) {
-             GLFW.glfwWaitEventsTimeout(d0 - d1);
-         }
- 
-@@ -595,7 +_,7 @@
-             assertOnRenderThreadOrInit();
-             int i = GlStateManager._getInteger(3379);
- 
--            for(int j = Math.max(32768, i); j >= 1024; j >>= 1) {
-+            for (int j = Math.max(32768, i); j >= 1024; j >>= 1) {
-                 GlStateManager._texImage2D(32868, 0, 6408, j, j, 0, 6408, 5121, null);
-                 int k = GlStateManager._getTexLevelParameter(32868, 0, 4096);
-                 if (k != 0) {
-@@ -915,7 +_,7 @@
-     public static RenderSystem.AutoStorageIndexBuffer getSequentialBuffer(VertexFormat.Mode p_221942_) {
-         assertOnRenderThread();
- 
--        return switch(p_221942_) {
-+        return switch (p_221942_) {
-             case QUADS -> sharedSequentialQuad;
-             case LINES -> sharedSequentialLines;
-             default -> sharedSequential;
-@@ -985,7 +_,7 @@
-                     this.type = vertexformat$indextype;
-                     it.unimi.dsi.fastutil.ints.IntConsumer intconsumer = this.intConsumer(bytebuffer);
- 
--                    for(int l = 0; l < p_157477_; l += this.indexStride) {
-+                    for (int l = 0; l < p_157477_; l += this.indexStride) {
-                         this.generator.accept(intconsumer, l * this.vertexStride / this.indexStride);
-                     }
- 
-@@ -996,7 +_,7 @@
-         }
- 
-         private it.unimi.dsi.fastutil.ints.IntConsumer intConsumer(ByteBuffer p_157479_) {
--            switch(this.type) {
-+            switch (this.type) {
-                 case SHORT:
-                     return p_157482_ -> p_157479_.putShort((short)p_157482_);
-                 case INT:
-@@ -1013,5 +_,15 @@
-         interface IndexGenerator {
+@@ -1014,4 +_,14 @@
              void accept(it.unimi.dsi.fastutil.ints.IntConsumer p_157488_, int p_157489_);
          }
-+    }
+     }
 +
 +    public static void backupGlState(net.neoforged.neoforge.client.GlStateBackup state) {
 +        assertOnRenderThread();
@@ -68,5 +13,5 @@
 +    public static void restoreGlState(net.neoforged.neoforge.client.GlStateBackup state) {
 +        assertOnRenderThread();
 +        GlStateManager._restoreGlState(state);
-     }
++    }
  }

@@ -8,8 +8,7 @@
 +        if (!this.canCatchFire(p_53471_, blockpos, Direction.UP) && !blockstate.isFaceSturdy(p_53471_, blockpos, Direction.UP)) {
              BlockState blockstate1 = this.defaultBlockState();
  
--            for(Direction direction : Direction.values()) {
-+            for (Direction direction : Direction.values()) {
+             for (Direction direction : Direction.values()) {
                  BooleanProperty booleanproperty = PROPERTY_BY_DIRECTION.get(direction);
                  if (booleanproperty != null) {
 -                    blockstate1 = blockstate1.setValue(booleanproperty, Boolean.valueOf(this.canBurn(p_53471_.getBlockState(p_53472_.relative(direction)))));
@@ -35,7 +34,7 @@
                          p_221161_.removeBlock(p_221162_, false);
                          return;
                      }
-@@ -192,17 +_,17 @@
+@@ -192,12 +_,12 @@
  
                  boolean flag1 = p_221161_.getBiome(p_221162_).is(BiomeTags.INCREASED_FIRE_BURNOUT);
                  int k = flag1 ? -50 : 0;
@@ -53,15 +52,7 @@
 +                this.checkBurnOut(p_221161_, p_221162_.south(), 300 + k, p_221163_, i, Direction.NORTH);
                  BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
  
--                for(int l = -1; l <= 1; ++l) {
--                    for(int i1 = -1; i1 <= 1; ++i1) {
--                        for(int j1 = -1; j1 <= 4; ++j1) {
-+                for (int l = -1; l <= 1; l++) {
-+                    for (int i1 = -1; i1 <= 1; i1++) {
-+                        for (int j1 = -1; j1 <= 4; j1++) {
-                             if (l != 0 || j1 != 0 || i1 != 0) {
-                                 int k1 = 100;
-                                 if (j1 > 1) {
+                 for (int l = -1; l <= 1; l++) {
 @@ -240,33 +_,32 @@
              || p_53429_.isRainingAt(p_53430_.south());
      }
@@ -102,23 +93,18 @@
          }
      }
  
-@@ -276,8 +_,8 @@
-     }
+@@ -277,7 +_,7 @@
  
      private boolean isValidFireLocation(BlockGetter p_53486_, BlockPos p_53487_) {
--        for(Direction direction : Direction.values()) {
+         for (Direction direction : Direction.values()) {
 -            if (this.canBurn(p_53486_.getBlockState(p_53487_.relative(direction)))) {
-+        for (Direction direction : Direction.values()) {
 +            if (this.canCatchFire(p_53486_, p_53487_.relative(direction), direction.getOpposite())) {
                  return true;
              }
          }
-@@ -291,9 +_,9 @@
-         } else {
-             int i = 0;
+@@ -293,7 +_,7 @@
  
--            for(Direction direction : Direction.values()) {
-+            for (Direction direction : Direction.values()) {
+             for (Direction direction : Direction.values()) {
                  BlockState blockstate = p_221157_.getBlockState(p_221158_.relative(direction));
 -                i = Math.max(this.getIgniteOdds(blockstate), i);
 +                i = Math.max(blockstate.getFireSpreadSpeed(p_221157_, p_221158_.relative(direction), direction.getOpposite()), i);

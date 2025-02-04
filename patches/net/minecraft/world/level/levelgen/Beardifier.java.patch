@@ -1,113 +1,14 @@
 --- a/net/minecraft/world/level/levelgen/Beardifier.java
 +++ b/net/minecraft/world/level/levelgen/Beardifier.java
-@@ -21,9 +_,9 @@
-     public static final int BEARD_KERNEL_RADIUS = 12;
-     private static final int BEARD_KERNEL_SIZE = 24;
-     private static final float[] BEARD_KERNEL = Util.make(new float[13824], p_158082_ -> {
--        for(int i = 0; i < 24; ++i) {
--            for(int j = 0; j < 24; ++j) {
--                for(int k = 0; k < 24; ++k) {
-+        for (int i = 0; i < 24; i++) {
-+            for (int j = 0; j < 24; j++) {
-+                for (int k = 0; k < 24; k++) {
-                     p_158082_[i * 24 * 24 + j * 24 + k] = (float)computeBeardContribution(j - 12, k - 12, i - 12);
-                 }
-             }
-@@ -42,9 +_,15 @@
-                 p_223936_ -> {
-                     TerrainAdjustment terrainadjustment = p_223936_.getStructure().terrainAdaptation();
-         
--                    for(StructurePiece structurepiece : p_223936_.getPieces()) {
-+                    for (StructurePiece structurepiece : p_223936_.getPieces()) {
+@@ -44,6 +_,11 @@
+ 
+                     for (StructurePiece structurepiece : p_223936_.getPieces()) {
                          if (structurepiece.isCloseToChunk(p_223939_, 12)) {
--                            if (structurepiece instanceof PoolElementStructurePiece poolelementstructurepiece) {
 +                            if (structurepiece instanceof net.neoforged.neoforge.common.world.PieceBeardifierModifier pieceBeardifierModifier) {
 +                                if (pieceBeardifierModifier.getTerrainAdjustment() != TerrainAdjustment.NONE) {
 +                                    objectlist.add(new Beardifier.Rigid(pieceBeardifierModifier.getBeardifierBox(), pieceBeardifierModifier.getTerrainAdjustment(), pieceBeardifierModifier.getGroundLevelDelta()));
 +                                }
 +                            } else
-+                            if (structurepiece instanceof PoolElementStructurePiece) {
-+                                PoolElementStructurePiece poolelementstructurepiece = (PoolElementStructurePiece)structurepiece;
+                             if (structurepiece instanceof PoolElementStructurePiece) {
+                                 PoolElementStructurePiece poolelementstructurepiece = (PoolElementStructurePiece)structurepiece;
                                  StructureTemplatePool.Projection structuretemplatepool$projection = poolelementstructurepiece.getElement().getProjection();
-                                 if (structuretemplatepool$projection == StructureTemplatePool.Projection.RIGID) {
-                                     objectlist.add(
-@@ -54,7 +_,7 @@
-                                     );
-                                 }
-         
--                                for(JigsawJunction jigsawjunction : poolelementstructurepiece.getJunctions()) {
-+                                for (JigsawJunction jigsawjunction : poolelementstructurepiece.getJunctions()) {
-                                     int k = jigsawjunction.getSourceX();
-                                     int l = jigsawjunction.getSourceZ();
-                                     if (k > i - 12 && l > j - 12 && k < i + 15 + 12 && l < j + 15 + 12) {
-@@ -82,10 +_,9 @@
-         int i = p_208200_.blockX();
-         int j = p_208200_.blockY();
-         int k = p_208200_.blockZ();
-+        double d0 = 0.0;
- 
--        double d0;
--        double d1;
--        for(d0 = 0.0; this.pieceIterator.hasNext(); d0 += d1) {
-+        while (this.pieceIterator.hasNext()) {
-             Beardifier.Rigid beardifier$rigid = this.pieceIterator.next();
-             BoundingBox boundingbox = beardifier$rigid.box();
-             int l = beardifier$rigid.groundLevelDelta();
-@@ -94,34 +_,24 @@
-             int k1 = boundingbox.minY() + l;
-             int l1 = j - k1;
- 
--            int i2 = switch(beardifier$rigid.terrainAdjustment()) {
-+            int i2 = switch (beardifier$rigid.terrainAdjustment()) {
-                 case NONE -> 0;
-                 case BURY, BEARD_THIN -> l1;
--                case BURY_PROPER -> Math.max(0, Math.max(boundingbox.minY() - j, j - boundingbox.maxY()));
-                 case BEARD_BOX -> Math.max(0, Math.max(k1 - j, j - boundingbox.maxY()));
--            };
--            switch(beardifier$rigid.terrainAdjustment()) {
--                case NONE:
--                    d1 = 0.0;
--                    break;
--                case BURY:
--                    d1 = getBuryContribution(i1, i2, j1);
--                    break;
--                case BEARD_THIN:
--                case BEARD_BOX:
--                    d1 = getBeardContribution(i1, i2, j1, l1) * 0.8;
--                    break;
--                case BURY_PROPER:
--                    d1 = getBuryXContribution(i1, i2, j1);
--                    break;
--                default:
--                    throw new IncompatibleClassChangeError();
--            }
-+                default -> throw new MatchException(null, null);
-+            };
-+
-+            d0 += switch (beardifier$rigid.terrainAdjustment()) {
-+                case NONE -> 0.0;
-+                case BURY -> getBuryContribution(i1, i2, j1);
-+                case BEARD_THIN, BEARD_BOX -> getBeardContribution(i1, i2, j1, l1) * 0.8;
-+                default -> throw new MatchException(null, null);
-+            };
-         }
- 
-         this.pieceIterator.back(Integer.MAX_VALUE);
- 
--        while(this.junctionIterator.hasNext()) {
-+        while (this.junctionIterator.hasNext()) {
-             JigsawJunction jigsawjunction = this.junctionIterator.next();
-             int j2 = i - jigsawjunction.getSourceX();
-             int k2 = j - jigsawjunction.getSourceGroundY();
-@@ -145,11 +_,6 @@
- 
-     protected static double getBuryContribution(int p_158084_, int p_158085_, int p_158086_) {
-         double d0 = Mth.length((double)p_158084_, (double)p_158085_ / 2.0, (double)p_158086_);
--        return Mth.clampedMap(d0, 0.0, 6.0, 1.0, 0.0);
--    }
--
--    private static double getBuryXContribution(int p_340922_, int p_340809_, int p_342266_) {
--        double d0 = Mth.length((double)p_340922_, (double)p_340809_, (double)p_342266_);
-         return Mth.clampedMap(d0, 0.0, 6.0, 1.0, 0.0);
-     }
- 

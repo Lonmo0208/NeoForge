@@ -1,21 +1,6 @@
 --- a/net/minecraft/client/resources/model/ModelBakery.java
 +++ b/net/minecraft/client/resources/model/ModelBakery.java
-@@ -151,19 +_,26 @@
-         );
-         p_252014_.popPush("blocks");
- 
--        for(Block block : BuiltInRegistries.BLOCK) {
-+        for (Block block : BuiltInRegistries.BLOCK) {
-             block.getStateDefinition().getPossibleStates().forEach(p_119264_ -> this.loadTopLevel(BlockModelShaper.stateToModelLocation(p_119264_)));
-         }
- 
-         p_252014_.popPush("items");
- 
--        for(ResourceLocation resourcelocation : BuiltInRegistries.ITEM.keySet()) {
-+        for (ResourceLocation resourcelocation : BuiltInRegistries.ITEM.keySet()) {
-             this.loadTopLevel(new ModelResourceLocation(resourcelocation, "inventory"));
-         }
- 
+@@ -164,6 +_,13 @@
          p_252014_.popPush("special");
          this.loadTopLevel(ItemRenderer.TRIDENT_IN_HAND_MODEL);
          this.loadTopLevel(ItemRenderer.SPYGLASS_IN_HAND_MODEL);
@@ -29,82 +14,7 @@
          this.topLevelModels.values().forEach(p_247954_ -> p_247954_.resolveParents(this::getModel));
          p_252014_.pop();
      }
-@@ -187,7 +_,7 @@
-     private static Predicate<BlockState> predicate(StateDefinition<Block, BlockState> p_119274_, String p_119275_) {
-         Map<Property<?>, Comparable<?>> map = Maps.newHashMap();
- 
--        for(String s : COMMA_SPLITTER.split(p_119275_)) {
-+        for (String s : COMMA_SPLITTER.split(p_119275_)) {
-             Iterator<String> iterator = EQUAL_SPLITTER.split(s).iterator();
-             if (iterator.hasNext()) {
-                 String s1 = iterator.next();
-@@ -209,7 +_,7 @@
-         Block block = p_119274_.getOwner();
-         return p_119262_ -> {
-             if (p_119262_ != null && p_119262_.is(block)) {
--                for(Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
-+                for (Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
-                     if (!Objects.equals(p_119262_.getValue(entry.getKey()), entry.getValue())) {
-                         return false;
-                     }
-@@ -224,7 +_,7 @@
- 
-     @Nullable
-     static <T extends Comparable<T>> T getValueHelper(Property<T> p_119277_, String p_119278_) {
--        return p_119277_.getValue(p_119278_).orElse((T)null);
-+        return p_119277_.getValue(p_119278_).orElse(null);
-     }
- 
-     public UnbakedModel getModel(ResourceLocation p_119342_) {
-@@ -236,7 +_,7 @@
-             this.loadingStack.add(p_119342_);
-             UnbakedModel unbakedmodel = this.unbakedCache.get(MISSING_MODEL_LOCATION);
- 
--            while(!this.loadingStack.isEmpty()) {
-+            while (!this.loadingStack.isEmpty()) {
-                 ResourceLocation resourcelocation = this.loadingStack.iterator().next();
- 
-                 try {
-@@ -259,10 +_,9 @@
-     }
- 
-     private void loadModel(ResourceLocation p_119363_) throws Exception {
--        if (!(p_119363_ instanceof ModelResourceLocation)) {
-+        if (!(p_119363_ instanceof ModelResourceLocation modelresourcelocation)) {
-             this.cacheAndQueueDependencies(p_119363_, this.loadBlockModel(p_119363_));
-         } else {
--            ModelResourceLocation modelresourcelocation = (ModelResourceLocation)p_119363_;
-             if (Objects.equals(modelresourcelocation.getVariant(), "inventory")) {
-                 ResourceLocation resourcelocation = p_119363_.withPrefix("item/");
-                 BlockModel blockmodel = this.loadBlockModel(resourcelocation);
-@@ -284,7 +_,7 @@
-                 Pair<UnbakedModel, Supplier<ModelBakery.ModelGroupKey>> pair = Pair.of(unbakedmodel, () -> modelbakery$modelgroupkey);
- 
-                 try {
--                    for(Pair<String, BlockModelDefinition> pair1 : this.blockStateResources
-+                    for (Pair<String, BlockModelDefinition> pair1 : this.blockStateResources
-                         .getOrDefault(resourcelocation1, List.of())
-                         .stream()
-                         .map(
-@@ -332,7 +_,7 @@
-                                                         map2.put(p_174902_, pair);
-                                                         throw new RuntimeException(
-                                                             "Overlapping definition with: "
--                                                                + (String)blockmodeldefinition.getVariants()
-+                                                                + blockmodeldefinition.getVariants()
-                                                                     .entrySet()
-                                                                     .stream()
-                                                                     .filter(p_174892_ -> p_174892_.getValue() == pair2.getFirst())
-@@ -383,7 +_,7 @@
-                     map3.forEach((p_284640_, p_284641_) -> {
-                         Iterator<BlockState> iterator = p_284641_.iterator();
- 
--                        while(iterator.hasNext()) {
-+                        while (iterator.hasNext()) {
-                             BlockState blockstate = iterator.next();
-                             if (blockstate.getRenderShape() != RenderShape.MODEL) {
-                                 iterator.remove();
-@@ -482,7 +_,17 @@
+@@ -481,7 +_,17 @@
          }
  
          @Override
@@ -122,7 +32,7 @@
              ModelBakery.BakedCacheKey modelbakery$bakedcachekey = new ModelBakery.BakedCacheKey(p_252176_, p_249765_.getRotation(), p_249765_.isUvLocked());
              BakedModel bakedmodel = ModelBakery.this.bakedCache.get(modelbakery$bakedcachekey);
              if (bakedmodel != null) {
-@@ -491,11 +_,11 @@
+@@ -490,11 +_,11 @@
                  UnbakedModel unbakedmodel = this.getModel(p_252176_);
                  if (unbakedmodel instanceof BlockModel blockmodel && blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
                      return ModelBakery.ITEM_MODEL_GENERATOR
@@ -137,20 +47,3 @@
                  ModelBakery.this.bakedCache.put(modelbakery$bakedcachekey, bakedmodel1);
                  return bakedmodel1;
              }
-@@ -516,12 +_,11 @@
-         public boolean equals(Object p_119395_) {
-             if (this == p_119395_) {
-                 return true;
--            } else if (!(p_119395_ instanceof ModelBakery.ModelGroupKey)) {
--                return false;
-             } else {
--                ModelBakery.ModelGroupKey modelbakery$modelgroupkey = (ModelBakery.ModelGroupKey)p_119395_;
--                return Objects.equals(this.models, modelbakery$modelgroupkey.models)
--                    && Objects.equals(this.coloringValues, modelbakery$modelgroupkey.coloringValues);
-+                return !(p_119395_ instanceof ModelBakery.ModelGroupKey modelbakery$modelgroupkey)
-+                    ? false
-+                    : Objects.equals(this.models, modelbakery$modelgroupkey.models)
-+                        && Objects.equals(this.coloringValues, modelbakery$modelgroupkey.coloringValues);
-             }
-         }
- 

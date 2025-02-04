@@ -69,6 +69,7 @@ sourceSets {
 dependencies {
     runtimeOnly "cpw.mods:bootstraplauncher:${project.bootstraplauncher_version}"
 
+    moduleOnly "com.mojang:datafixerupper:6.0.12"
     moduleOnly "cpw.mods:securejarhandler:${project.securejarhandler_version}"
     moduleOnly "org.ow2.asm:asm:${project.asm_version}"
     moduleOnly "org.ow2.asm:asm-commons:${project.asm_version}"
@@ -88,6 +89,8 @@ dependencies {
         exclude group: 'net.fabricmc'
     }
     installer "cpw.mods:securejarhandler:${project.securejarhandler_version}"
+    installer "com.mojang:datafixerupper:6.0.12"
+
     installer "org.ow2.asm:asm:${project.asm_version}"
     installer "org.ow2.asm:asm-commons:${project.asm_version}"
     installer "org.ow2.asm:asm-tree:${project.asm_version}"

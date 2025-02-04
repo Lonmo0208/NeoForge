@@ -1,29 +1,6 @@
 --- a/net/minecraft/world/entity/ai/goal/EatBlockGoal.java
 +++ b/net/minecraft/world/entity/ai/goal/EatBlockGoal.java
-@@ -3,9 +_,6 @@
- import java.util.EnumSet;
- import java.util.function.Predicate;
- import net.minecraft.core.BlockPos;
--import net.minecraft.tags.BlockTags;
--import net.minecraft.world.effect.MobEffectInstance;
--import net.minecraft.world.effect.MobEffects;
- import net.minecraft.world.entity.Mob;
- import net.minecraft.world.level.GameRules;
- import net.minecraft.world.level.Level;
-@@ -33,11 +_,7 @@
-             return false;
-         } else {
-             BlockPos blockpos = this.mob.blockPosition();
--            if (IS_TALL_GRASS.test(this.level.getBlockState(blockpos))) {
--                return true;
--            } else {
--                return this.level.getBlockState(blockpos.below()).is(BlockTags.ANIMALS_SPAWNABLE_ON);
--            }
-+            return IS_TALL_GRASS.test(this.level.getBlockState(blockpos)) ? true : this.level.getBlockState(blockpos.below()).is(Blocks.GRASS_BLOCK);
-         }
-     }
- 
-@@ -68,22 +_,17 @@
+@@ -61,7 +_,7 @@
          if (this.eatAnimationTick == this.adjustedTickDelay(4)) {
              BlockPos blockpos = this.mob.blockPosition();
              if (IS_TALL_GRASS.test(this.level.getBlockState(blockpos))) {
@@ -32,22 +9,12 @@
                      this.level.destroyBlock(blockpos, false);
                  }
  
-                 this.mob.ate();
+@@ -69,7 +_,7 @@
              } else {
                  BlockPos blockpos1 = blockpos.below();
--                BlockState blockstate = this.level.getBlockState(blockpos1);
--                if (blockstate.is(BlockTags.ANIMALS_SPAWNABLE_ON)) {
+                 if (this.level.getBlockState(blockpos1).is(Blocks.GRASS_BLOCK)) {
 -                    if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
--                        this.level.levelEvent(2001, blockpos1, Block.getId(blockstate));
--                        this.level.setBlock(blockpos1, (this.level.isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState(), 2);
--                    }
--
--                    if (blockstate.is(Blocks.CORRUPTED_PEELGRASS_BLOCK)) {
--                        this.mob.addEffect(new MobEffectInstance(MobEffects.POISON, 20));
-+                if (this.level.getBlockState(blockpos1).is(Blocks.GRASS_BLOCK)) {
 +                    if (net.neoforged.neoforge.event.EventHooks.getMobGriefingEvent(this.level, this.mob)) {
-+                        this.level.levelEvent(2001, blockpos1, Block.getId(Blocks.GRASS_BLOCK.defaultBlockState()));
-+                        this.level.setBlock(blockpos1, Blocks.DIRT.defaultBlockState(), 2);
+                         this.level.levelEvent(2001, blockpos1, Block.getId(Blocks.GRASS_BLOCK.defaultBlockState()));
+                         this.level.setBlock(blockpos1, Blocks.DIRT.defaultBlockState(), 2);
                      }
- 
-                     this.mob.ate();

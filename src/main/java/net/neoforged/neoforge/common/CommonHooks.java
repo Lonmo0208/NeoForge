@@ -211,6 +211,7 @@ import org.jetbrains.annotations.Nullable;
 public class CommonHooks {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker WORLDPERSISTENCE = MarkerManager.getMarker("WP");
+    private static BlockState p60466;
 
     public static boolean canContinueUsing(ItemStack from, ItemStack to) {
         if (!from.isEmpty() && !to.isEmpty()) {
@@ -794,6 +795,14 @@ public class CommonHooks {
         final List<CreativeModeTab> tabs = new ArrayList<>(Arrays.asList(vanillaTabs));
         return tabs;
     }
+
+    public static boolean canEntityDestroy(BlockState p60466, Player p60467) {
+        CommonHooks.p60466 = p60466;
+        return false;
+    }
+
+
+
 
     @FunctionalInterface
     public interface BiomeCallbackFunction {

@@ -9,7 +9,7 @@
  
      public DedicatedServer(
          Thread p_214789_,
-@@ -99,11 +_,12 @@
+@@ -99,6 +_,7 @@
          Thread thread = new Thread("Server console handler") {
              @Override
              public void run() {
@@ -17,12 +17,6 @@
                  BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
  
                  String s1;
-                 try {
--                    while(!DedicatedServer.this.isStopped() && DedicatedServer.this.isRunning() && (s1 = bufferedreader.readLine()) != null) {
-+                    while (!DedicatedServer.this.isStopped() && DedicatedServer.this.isRunning() && (s1 = bufferedreader.readLine()) != null) {
-                         DedicatedServer.this.handleConsoleInput(s1, DedicatedServer.this.createCommandSourceStack());
-                     }
-                 } catch (IOException ioexception1) {
 @@ -181,11 +_,13 @@
              long i = Util.getNanos();
              SkullBlockEntity.setup(this.services, this);
@@ -61,60 +55,6 @@
      }
  
      @Override
-@@ -309,7 +_,7 @@
-     }
- 
-     public void handleConsoleInputs() {
--        while(!this.consoleInput.isEmpty()) {
-+        while (!this.consoleInput.isEmpty()) {
-             ConsoleInput consoleinput = this.consoleInput.remove(0);
-             this.getCommands().performPrefixedCommand(consoleinput.source, consoleinput.msg);
-         }
-@@ -454,7 +_,7 @@
-     protected boolean convertOldUsers() {
-         boolean flag = false;
- 
--        for(int i = 0; !flag && i <= 2; ++i) {
-+        for (int i = 0; !flag && i <= 2; i++) {
-             if (i > 0) {
-                 LOGGER.warn("Encountered a problem while converting the user banlist, retrying in a few seconds");
-                 this.waitForRetry();
-@@ -465,7 +_,7 @@
- 
-         boolean flag1 = false;
- 
--        for(int j = 0; !flag1 && j <= 2; ++j) {
-+        for (int j = 0; !flag1 && j <= 2; j++) {
-             if (j > 0) {
-                 LOGGER.warn("Encountered a problem while converting the ip banlist, retrying in a few seconds");
-                 this.waitForRetry();
-@@ -476,7 +_,7 @@
- 
-         boolean flag2 = false;
- 
--        for(int k = 0; !flag2 && k <= 2; ++k) {
-+        for (int k = 0; !flag2 && k <= 2; k++) {
-             if (k > 0) {
-                 LOGGER.warn("Encountered a problem while converting the op list, retrying in a few seconds");
-                 this.waitForRetry();
-@@ -487,7 +_,7 @@
- 
-         boolean flag3 = false;
- 
--        for(int l = 0; !flag3 && l <= 2; ++l) {
-+        for (int l = 0; !flag3 && l <= 2; l++) {
-             if (l > 0) {
-                 LOGGER.warn("Encountered a problem while converting the whitelist, retrying in a few seconds");
-                 this.waitForRetry();
-@@ -498,7 +_,7 @@
- 
-         boolean flag4 = false;
- 
--        for(int i1 = 0; !flag4 && i1 <= 2; ++i1) {
-+        for (int i1 = 0; !flag4 && i1 <= 2; i1++) {
-             if (i1 > 0) {
-                 LOGGER.warn("Encountered a problem while converting the player save files, retrying in a few seconds");
-                 this.waitForRetry();
 @@ -544,7 +_,12 @@
  
      @Override

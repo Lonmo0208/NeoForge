@@ -1,25 +1,11 @@
 --- a/net/minecraft/world/entity/ai/goal/BreakDoorGoal.java
 +++ b/net/minecraft/world/entity/ai/goal/BreakDoorGoal.java
-@@ -31,10 +_,10 @@
-     public boolean canUse() {
+@@ -32,7 +_,7 @@
          if (!super.canUse()) {
              return false;
--        } else if (!this.mob.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
--            return false;
          } else {
--            return this.isValidDifficulty(this.mob.level().getDifficulty()) && !this.isOpen();
+-            return !this.mob.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
 +            return !net.neoforged.neoforge.common.CommonHooks.canEntityDestroy(this.mob.level(), this.doorPos, this.mob)
-+                ? false
-+                : this.isValidDifficulty(this.mob.level().getDifficulty()) && !this.isOpen();
+                 ? false
+                 : this.isValidDifficulty(this.mob.level().getDifficulty()) && !this.isOpen();
          }
-     }
- 
-@@ -68,7 +_,7 @@
-             }
-         }
- 
--        ++this.breakTime;
-+        this.breakTime++;
-         int i = (int)((float)this.breakTime / (float)this.getDoorBreakTime() * 10.0F);
-         if (i != this.lastBreakProgress) {
-             this.mob.level().destroyBlockProgress(this.mob.getId(), this.doorPos, i);

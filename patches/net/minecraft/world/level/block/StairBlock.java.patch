@@ -17,15 +17,6 @@
      private final Block base;
      protected final BlockState baseState;
  
-@@ -58,7 +_,7 @@
-     private static VoxelShape[] makeShapes(VoxelShape p_56934_, VoxelShape p_56935_, VoxelShape p_56936_, VoxelShape p_56937_, VoxelShape p_56938_) {
-         return IntStream.range(0, 16)
-             .mapToObj(p_56945_ -> makeStairShape(p_56945_, p_56934_, p_56935_, p_56936_, p_56937_, p_56938_))
--            .toArray(p_56949_ -> new VoxelShape[p_56949_]);
-+            .toArray(VoxelShape[]::new);
-     }
- 
-     private static VoxelShape makeStairShape(
 @@ -84,7 +_,12 @@
          return voxelshape;
      }
@@ -51,28 +42,6 @@
      }
  
      @Override
-@@ -192,10 +_,10 @@
-     protected BlockState mirror(BlockState p_56919_, Mirror p_56920_) {
-         Direction direction = p_56919_.getValue(FACING);
-         StairsShape stairsshape = p_56919_.getValue(SHAPE);
--        switch(p_56920_) {
-+        switch (p_56920_) {
-             case LEFT_RIGHT:
-                 if (direction.getAxis() == Direction.Axis.Z) {
--                    switch(stairsshape) {
-+                    switch (stairsshape) {
-                         case INNER_LEFT:
-                             return p_56919_.rotate(Rotation.CLOCKWISE_180).setValue(SHAPE, StairsShape.INNER_RIGHT);
-                         case INNER_RIGHT:
-@@ -211,7 +_,7 @@
-                 break;
-             case FRONT_BACK:
-                 if (direction.getAxis() == Direction.Axis.X) {
--                    switch(stairsshape) {
-+                    switch (stairsshape) {
-                         case INNER_LEFT:
-                             return p_56919_.rotate(Rotation.CLOCKWISE_180).setValue(SHAPE, StairsShape.INNER_LEFT);
-                         case INNER_RIGHT:
 @@ -243,4 +_,18 @@
      protected boolean isPathfindable(BlockState p_56891_, PathComputationType p_56894_) {
          return false;

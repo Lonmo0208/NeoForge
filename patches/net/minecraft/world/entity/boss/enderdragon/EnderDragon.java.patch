@@ -28,115 +28,7 @@
          this.processFlappingMovement();
          if (this.level().isClientSide) {
              this.setHealth(this.getHealth());
-@@ -190,13 +_,10 @@
-             }
-         }
- 
--        if (this.dragonFight == null) {
--            Level $$6 = this.level();
--            if ($$6 instanceof ServerLevel serverlevel) {
--                EndDragonFight enddragonfight = serverlevel.getDragonFight();
--                if (enddragonfight != null && this.getUUID().equals(enddragonfight.getDragonUUID())) {
--                    this.dragonFight = enddragonfight;
--                }
-+        if (this.dragonFight == null && this.level() instanceof ServerLevel serverlevel) {
-+            EndDragonFight enddragonfight = serverlevel.getDragonFight();
-+            if (enddragonfight != null && this.getUUID().equals(enddragonfight.getDragonUUID())) {
-+                this.dragonFight = enddragonfight;
-             }
-         }
- 
-@@ -225,7 +_,7 @@
-                 this.flapTime = 0.5F;
-             } else {
-                 if (this.posPointer < 0) {
--                    for(int i = 0; i < this.positions.length; ++i) {
-+                    for (int i = 0; i < this.positions.length; i++) {
-                         this.positions[i][0] = (double)this.getYRot();
-                         this.positions[i][1] = this.getY();
-                     }
-@@ -240,7 +_,7 @@
-                 if (this.level().isClientSide) {
-                     if (this.lerpSteps > 0) {
-                         this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
--                        --this.lerpSteps;
-+                        this.lerpSteps--;
-                     }
- 
-                     this.phaseManager.getCurrentPhase().doClientTick();
-@@ -277,7 +_,7 @@
-                         if (Math.abs(d0) > 1.0E-5F || Math.abs(d2) > 1.0E-5F) {
-                             float f6 = Mth.clamp(Mth.wrapDegrees(180.0F - (float)Mth.atan2(d0, d2) * (180.0F / (float)Math.PI) - this.getYRot()), -50.0F, 50.0F);
-                             this.yRotA *= 0.8F;
--                            this.yRotA += f6 * dragonphaseinstance.getTurnSpeed();
-+                            this.yRotA = this.yRotA + f6 * dragonphaseinstance.getTurnSpeed();
-                             this.setYRot(this.getYRot() + this.yRotA * 0.1F);
-                         }
- 
-@@ -299,7 +_,7 @@
-                 this.yBodyRot = this.getYRot();
-                 Vec3[] avec3 = new Vec3[this.subEntities.length];
- 
--                for(int j = 0; j < this.subEntities.length; ++j) {
-+                for (int j = 0; j < this.subEntities.length; j++) {
-                     avec3[j] = new Vec3(this.subEntities[j].getX(), this.subEntities[j].getY(), this.subEntities[j].getZ());
-                 }
- 
-@@ -332,7 +_,7 @@
-                 this.tickPart(this.neck, (double)(f2 * 5.5F * f13), (double)(f3 + f * 5.5F), (double)(-f16 * 5.5F * f13));
-                 double[] adouble = this.getLatencyPos(5, 1.0F);
- 
--                for(int k = 0; k < 3; ++k) {
-+                for (int k = 0; k < 3; k++) {
-                     EnderDragonPart enderdragonpart = null;
-                     if (k == 0) {
-                         enderdragonpart = this.tail1;
-@@ -369,7 +_,7 @@
-                     }
-                 }
- 
--                for(int l = 0; l < this.subEntities.length; ++l) {
-+                for (int l = 0; l < this.subEntities.length; l++) {
-                     this.subEntities[l].xo = avec3[l].x;
-                     this.subEntities[l].yo = avec3[l].y;
-                     this.subEntities[l].zo = avec3[l].z;
-@@ -409,7 +_,7 @@
-             EndCrystal endcrystal = null;
-             double d0 = Double.MAX_VALUE;
- 
--            for(EndCrystal endcrystal1 : list) {
-+            for (EndCrystal endcrystal1 : list) {
-                 double d1 = endcrystal1.distanceToSqr(this);
-                 if (d1 < d0) {
-                     d0 = d1;
-@@ -425,7 +_,7 @@
-         double d0 = (this.body.getBoundingBox().minX + this.body.getBoundingBox().maxX) / 2.0;
-         double d1 = (this.body.getBoundingBox().minZ + this.body.getBoundingBox().maxZ) / 2.0;
- 
--        for(Entity entity : p_31132_) {
-+        for (Entity entity : p_31132_) {
-             if (entity instanceof LivingEntity) {
-                 double d2 = entity.getX() - d0;
-                 double d3 = entity.getZ() - d1;
-@@ -440,7 +_,7 @@
-     }
- 
-     private void hurt(List<Entity> p_31142_) {
--        for(Entity entity : p_31142_) {
-+        for (Entity entity : p_31142_) {
-             if (entity instanceof LivingEntity) {
-                 entity.hurt(this.damageSources().mobAttack(this), 10.0F);
-                 this.doEnchantDamageEffects(this, entity);
-@@ -462,13 +_,13 @@
-         boolean flag = false;
-         boolean flag1 = false;
- 
--        for(int k1 = i; k1 <= l; ++k1) {
--            for(int l1 = j; l1 <= i1; ++l1) {
--                for(int i2 = k; i2 <= j1; ++i2) {
-+        for (int k1 = i; k1 <= l; k1++) {
-+            for (int l1 = j; l1 <= i1; l1++) {
-+                for (int i2 = k; i2 <= j1; i2++) {
+@@ -465,7 +_,7 @@
                      BlockPos blockpos = new BlockPos(k1, l1, i2);
                      BlockState blockstate = this.level().getBlockState(blockpos);
                      if (!blockstate.isAir() && !blockstate.is(BlockTags.DRAGON_TRANSPARENT)) {
@@ -145,16 +37,7 @@
                              flag1 = this.level().removeBlock(blockpos, false) || flag1;
                          } else {
                              flag = true;
-@@ -545,7 +_,7 @@
-             this.dragonFight.updateDragon(this);
-         }
- 
--        ++this.dragonDeathTime;
-+        this.dragonDeathTime++;
-         if (this.dragonDeathTime >= 180 && this.dragonDeathTime <= 200) {
-             float f = (this.random.nextFloat() - 0.5F) * 8.0F;
-             float f1 = (this.random.nextFloat() - 0.5F) * 4.0F;
-@@ -562,7 +_,8 @@
+@@ -559,7 +_,8 @@
  
          if (this.level() instanceof ServerLevel) {
              if (this.dragonDeathTime > 150 && this.dragonDeathTime % 5 == 0 && flag) {
@@ -164,7 +47,7 @@
              }
  
              if (this.dragonDeathTime == 1 && !this.isSilent()) {
-@@ -573,7 +_,8 @@
+@@ -570,7 +_,8 @@
          this.move(MoverType.SELF, new Vec3(0.0, 0.1F, 0.0));
          if (this.dragonDeathTime == 200 && this.level() instanceof ServerLevel) {
              if (flag) {
@@ -174,69 +57,7 @@
              }
  
              if (this.dragonFight != null) {
-@@ -587,7 +_,7 @@
- 
-     public int findClosestNode() {
-         if (this.nodes[0] == null) {
--            for(int i = 0; i < 24; ++i) {
-+            for (int i = 0; i < 24; i++) {
-                 int j = 5;
-                 int l;
-                 int i1;
-@@ -649,7 +_,7 @@
-             j = 12;
-         }
- 
--        for(int k = j; k < 24; ++k) {
-+        for (int k = j; k < 24; k++) {
-             if (this.nodes[k] != null) {
-                 float f1 = this.nodes[k].distanceToSqr(node);
-                 if (f1 < f) {
-@@ -664,7 +_,7 @@
- 
-     @Nullable
-     public Path findPath(int p_31105_, int p_31106_, @Nullable Node p_31107_) {
--        for(int i = 0; i < 24; ++i) {
-+        for (int i = 0; i < 24; i++) {
-             Node node = this.nodes[i];
-             node.closed = false;
-             node.f = 0.0F;
-@@ -687,7 +_,7 @@
-             j = 12;
-         }
- 
--        while(!this.openSet.isEmpty()) {
-+        while (!this.openSet.isEmpty()) {
-             Node node2 = this.openSet.pop();
-             if (node2.equals(node5)) {
-                 if (p_31107_ != null) {
-@@ -705,14 +_,14 @@
-             node2.closed = true;
-             int k = 0;
- 
--            for(int l = 0; l < 24; ++l) {
-+            for (int l = 0; l < 24; l++) {
-                 if (this.nodes[l] == node2) {
-                     k = l;
-                     break;
-                 }
-             }
- 
--            for(int i1 = j; i1 < 24; ++i1) {
-+            for (int i1 = j; i1 < 24; i1++) {
-                 if ((this.nodeAdjacency[k] & 1 << i1) > 0) {
-                     Node node3 = this.nodes[i1];
-                     if (!node3.closed) {
-@@ -751,7 +_,7 @@
-         Node node = p_31130_;
-         list.add(0, p_31130_);
- 
--        while(node.cameFrom != null) {
-+        while (node.cameFrom != null) {
-             node = node.cameFrom;
-             list.add(0, node);
-         }
-@@ -905,11 +_,22 @@
+@@ -902,8 +_,19 @@
      }
  
      @Override
@@ -255,8 +76,4 @@
 +        if (true) return; // Forge: Fix MC-158205: Moved into setId()
          EnderDragonPart[] aenderdragonpart = this.getSubEntities();
  
--        for(int i = 0; i < aenderdragonpart.length; ++i) {
-+        for (int i = 0; i < aenderdragonpart.length; i++) {
-             aenderdragonpart[i].setId(i + p_218825_.getId());
-         }
-     }
+         for (int i = 0; i < aenderdragonpart.length; i++) {

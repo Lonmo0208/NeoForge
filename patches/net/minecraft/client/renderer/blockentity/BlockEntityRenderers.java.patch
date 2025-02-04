@@ -9,27 +9,3 @@
  
      public static <T extends BlockEntity> void register(BlockEntityType<? extends T> p_173591_, BlockEntityRendererProvider<T> p_173592_) {
          PROVIDERS.put(p_173591_, p_173592_);
-@@ -20,13 +_,17 @@
- 
-     public static Map<BlockEntityType<?>, BlockEntityRenderer<?>> createEntityRenderers(BlockEntityRendererProvider.Context p_173599_) {
-         Builder<BlockEntityType<?>, BlockEntityRenderer<?>> builder = ImmutableMap.builder();
--        PROVIDERS.forEach((p_258150_, p_258151_) -> {
--            try {
--                builder.put(p_258150_, p_258151_.create(p_173599_));
--            } catch (Exception exception) {
--                throw new IllegalStateException("Failed to create model for " + BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(p_258150_), exception);
-+        PROVIDERS.forEach(
-+            (p_339298_, p_339299_) -> {
-+                try {
-+                    builder.put((BlockEntityType<?>)p_339298_, p_339299_.create(p_173599_));
-+                } catch (Exception exception) {
-+                    throw new IllegalStateException(
-+                        "Failed to create model for " + BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey((BlockEntityType<?>)p_339298_), exception
-+                    );
-+                }
-             }
--        });
-+        );
-         return builder.build();
-     }
- 

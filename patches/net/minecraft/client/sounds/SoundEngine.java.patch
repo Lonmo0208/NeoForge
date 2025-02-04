@@ -1,60 +1,21 @@
 --- a/net/minecraft/client/sounds/SoundEngine.java
 +++ b/net/minecraft/client/sounds/SoundEngine.java
-@@ -79,12 +_,13 @@
+@@ -79,6 +_,7 @@
          this.soundManager = p_120236_;
          this.options = p_120237_;
          this.soundBuffers = new SoundBufferLibrary(p_249332_);
-+        net.neoforged.fml.ModLoader.get().postEvent(new net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent(this));
++        net.neoforged.fml.ModLoader.postEvent(new net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent(this));
      }
  
      public void reload() {
-         ONLY_WARN_ONCE.clear();
- 
--        for(SoundEvent soundevent : BuiltInRegistries.SOUND_EVENT) {
-+        for (SoundEvent soundevent : BuiltInRegistries.SOUND_EVENT) {
-             if (soundevent != SoundEvents.EMPTY) {
-                 ResourceLocation resourcelocation = soundevent.getLocation();
-                 if (this.soundManager.getSoundEvent(resourcelocation) == null) {
 @@ -96,6 +_,7 @@
  
          this.destroy();
          this.loadLibrary();
-+        net.neoforged.fml.ModLoader.get().postEvent(new net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent(this));
++        net.neoforged.fml.ModLoader.postEvent(new net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent(this));
      }
  
      private synchronized void loadLibrary() {
-@@ -227,11 +_,11 @@
-     }
- 
-     private void tickNonPaused() {
--        ++this.tickCount;
-+        this.tickCount++;
-         this.queuedTickableSounds.stream().filter(SoundInstance::canPlaySound).forEach(this::play);
-         this.queuedTickableSounds.clear();
- 
--        for(TickableSoundInstance tickablesoundinstance : this.tickingSounds) {
-+        for (TickableSoundInstance tickablesoundinstance : this.tickingSounds) {
-             if (!tickablesoundinstance.canPlaySound()) {
-                 this.stop(tickablesoundinstance);
-             }
-@@ -256,7 +_,7 @@
- 
-         Iterator<Entry<SoundInstance, ChannelAccess.ChannelHandle>> iterator = this.instanceToChannel.entrySet().iterator();
- 
--        while(iterator.hasNext()) {
-+        while (iterator.hasNext()) {
-             Entry<SoundInstance, ChannelAccess.ChannelHandle> entry = iterator.next();
-             ChannelAccess.ChannelHandle channelaccess$channelhandle1 = entry.getValue();
-             SoundInstance soundinstance = entry.getKey();
-@@ -289,7 +_,7 @@
- 
-         Iterator<Entry<SoundInstance, Integer>> iterator1 = this.queuedSounds.entrySet().iterator();
- 
--        while(iterator1.hasNext()) {
-+        while (iterator1.hasNext()) {
-             Entry<SoundInstance, Integer> entry1 = iterator1.next();
-             if (this.tickCount >= entry1.getValue()) {
-                 SoundInstance soundinstance1 = entry1.getKey();
 @@ -327,7 +_,8 @@
  
      public void play(SoundInstance p_120313_) {
@@ -65,15 +26,6 @@
                  WeighedSoundEvents weighedsoundevents = p_120313_.resolve(this.soundManager);
                  ResourceLocation resourcelocation = p_120313_.getLocation();
                  if (weighedsoundevents == null) {
-@@ -356,7 +_,7 @@
-                                 if (!this.listeners.isEmpty()) {
-                                     float f4 = !flag && soundinstance$attenuation != SoundInstance.Attenuation.NONE ? f1 : Float.POSITIVE_INFINITY;
- 
--                                    for(SoundEventListener soundeventlistener : this.listeners) {
-+                                    for (SoundEventListener soundeventlistener : this.listeners) {
-                                         soundeventlistener.onPlaySound(p_120313_, weighedsoundevents, f4);
-                                     }
-                                 }
 @@ -391,19 +_,22 @@
                                              p_194488_.setSelfPosition(vec3);
                                              p_194488_.setRelative(flag);
@@ -99,21 +51,3 @@
                                                      }));
                                          }
  
-@@ -467,7 +_,7 @@
- 
-     public void stop(@Nullable ResourceLocation p_120300_, @Nullable SoundSource p_120301_) {
-         if (p_120301_ != null) {
--            for(SoundInstance soundinstance : this.instanceBySource.get(p_120301_)) {
-+            for (SoundInstance soundinstance : this.instanceBySource.get(p_120301_)) {
-                 if (p_120300_ == null || soundinstance.getLocation().equals(p_120300_)) {
-                     this.stop(soundinstance);
-                 }
-@@ -475,7 +_,7 @@
-         } else if (p_120300_ == null) {
-             this.stopAll();
-         } else {
--            for(SoundInstance soundinstance1 : this.instanceToChannel.keySet()) {
-+            for (SoundInstance soundinstance1 : this.instanceToChannel.keySet()) {
-                 if (soundinstance1.getLocation().equals(p_120300_)) {
-                     this.stop(soundinstance1);
-                 }

@@ -1,18 +1,6 @@
 --- a/net/minecraft/world/entity/monster/Spider.java
 +++ b/net/minecraft/world/entity/monster/Spider.java
-@@ -51,11 +_,6 @@
-     }
- 
-     @Override
--    public boolean hasPotatoVariant() {
--        return true;
--    }
--
--    @Override
-     protected void registerGoals() {
-         this.goalSelector.addGoal(1, new FloatGoal(this));
-         this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Armadillo.class, 6.0F, 1.0, 1.2, p_320185_ -> !((Armadillo)p_320185_).isScared()));
-@@ -126,7 +_,12 @@
+@@ -121,7 +_,12 @@
  
      @Override
      public boolean canBeAffected(MobEffectInstance p_33809_) {

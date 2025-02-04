@@ -16,39 +16,3 @@
                  }
              } catch (ClassNotFoundException classnotfoundexception) {
              }
-@@ -79,7 +_,7 @@
-             this.isDirty = false;
-             List<SynchedEntityData.DataValue<?>> list = new ArrayList<>();
- 
--            for(SynchedEntityData.DataItem<?> dataitem : this.itemsById) {
-+            for (SynchedEntityData.DataItem<?> dataitem : this.itemsById) {
-                 if (dataitem.isDirty()) {
-                     dataitem.setDirty(false);
-                     list.add(dataitem.value());
-@@ -94,7 +_,7 @@
-     public List<SynchedEntityData.DataValue<?>> getNonDefaultValues() {
-         List<SynchedEntityData.DataValue<?>> list = null;
- 
--        for(SynchedEntityData.DataItem<?> dataitem : this.itemsById) {
-+        for (SynchedEntityData.DataItem<?> dataitem : this.itemsById) {
-             if (!dataitem.isSetToDefault()) {
-                 if (list == null) {
-                     list = new ArrayList<>();
-@@ -108,7 +_,7 @@
-     }
- 
-     public void assignValues(List<SynchedEntityData.DataValue<?>> p_135357_) {
--        for(SynchedEntityData.DataValue<?> datavalue : p_135357_) {
-+        for (SynchedEntityData.DataValue<?> datavalue : p_135357_) {
-             SynchedEntityData.DataItem<?> dataitem = this.itemsById[datavalue.id];
-             this.assignValue(dataitem, datavalue);
-             this.entity.onSyncedDataUpdated(dataitem.getAccessor());
-@@ -160,7 +_,7 @@
-         }
- 
-         public SynchedEntityData build() {
--            for(int i = 0; i < this.itemsById.length; ++i) {
-+            for (int i = 0; i < this.itemsById.length; i++) {
-                 if (this.itemsById[i] == null) {
-                     throw new IllegalStateException("Entity " + this.entity.getClass() + " has not defined synched data value " + i);
-                 }

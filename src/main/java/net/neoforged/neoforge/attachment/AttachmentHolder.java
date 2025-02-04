@@ -10,6 +10,8 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
+
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -90,6 +92,10 @@ public abstract class AttachmentHolder implements IAttachmentHolder {
         }
         return Optional.ofNullable((T) this.attachments.get(type));
     }
+
+    public abstract void canUpdate(boolean value);
+
+    public abstract boolean canUpdate();
 
     @Override
     @MustBeInvokedByOverriders
@@ -176,8 +182,43 @@ public abstract class AttachmentHolder implements IAttachmentHolder {
             return exposedHolder;
         }
 
+        @Override
+        public void canUpdate(boolean value) {
+
+        }
+
+        @Override
+        public boolean canUpdate() {
+            return false;
+        }
+
         public void deserializeInternal(HolderLookup.Provider provider, CompoundTag tag) {
             deserializeAttachments(provider, tag);
+        }
+
+        @Override
+        public <T> boolean hasData(Supplier<AttachmentType<T>> type) {
+            return super.hasData(type);
+        }
+
+        @Override
+        public <T> T getData(Supplier<AttachmentType<T>> type) {
+            return super.getData(type);
+        }
+
+        @Override
+        public <T> Optional<T> getExistingData(Supplier<AttachmentType<T>> type) {
+            return super.getExistingData(type);
+        }
+
+        @Override
+        public <T> @Nullable T setData(Supplier<AttachmentType<T>> type, T data) {
+            return super.setData(type, data);
+        }
+
+        @Override
+        public <T> @Nullable T removeData(Supplier<AttachmentType<T>> type) {
+            return super.removeData(type);
         }
     }
 }

@@ -1,14 +1,5 @@
 --- a/net/minecraft/client/renderer/Sheets.java
 +++ b/net/minecraft/client/renderer/Sheets.java
-@@ -84,7 +_,7 @@
-     public static final Material[] BED_TEXTURES = Arrays.stream(DyeColor.values())
-         .sorted(Comparator.comparingInt(DyeColor::getId))
-         .map(p_110766_ -> new Material(BED_SHEET, new ResourceLocation("entity/bed/" + p_110766_.getName())))
--        .toArray(p_110764_ -> new Material[p_110764_]);
-+        .toArray(Material[]::new);
-     public static final Material CHEST_TRAP_LOCATION = chestMaterial("trapped");
-     public static final Material CHEST_TRAP_LOCATION_LEFT = chestMaterial("trapped_left");
-     public static final Material CHEST_TRAP_LOCATION_RIGHT = chestMaterial("trapped_right");
 @@ -145,11 +_,13 @@
      }
  
@@ -25,15 +16,6 @@
      }
  
      public static Material getSignMaterial(WoodType p_173382_) {
-@@ -200,7 +_,7 @@
-     }
- 
-     private static Material chooseMaterial(ChestType p_110772_, Material p_110773_, Material p_110774_, Material p_110775_) {
--        switch(p_110772_) {
-+        switch (p_110772_) {
-             case LEFT:
-                 return p_110774_;
-             case RIGHT:
 @@ -208,6 +_,23 @@
              case SINGLE:
              default:
@@ -50,7 +32,7 @@
 +    }
 +
 +    static {
-+        if (net.neoforged.fml.ModLoader.isLoadingStateValid() && !net.neoforged.fml.ModLoader.get().hasCompletedState("LOAD_REGISTRIES")) {
++        if (net.neoforged.fml.ModLoader.isLoadingStateValid() && !net.neoforged.neoforge.internal.CommonModLoader.areRegistriesLoaded()) {
 +            com.mojang.logging.LogUtils.getLogger().error(
 +                      "net.minecraft.client.renderer.Sheets loaded too early, modded registry-based materials may not work correctly",
 +                      new IllegalStateException("net.minecraft.client.renderer.Sheets loaded too early")

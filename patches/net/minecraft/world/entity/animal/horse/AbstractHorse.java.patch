@@ -1,32 +1,6 @@
 --- a/net/minecraft/world/entity/animal/horse/AbstractHorse.java
 +++ b/net/minecraft/world/entity/animal/horse/AbstractHorse.java
-@@ -21,7 +_,6 @@
- import net.minecraft.sounds.SoundEvent;
- import net.minecraft.sounds.SoundEvents;
- import net.minecraft.sounds.SoundSource;
--import net.minecraft.tags.BlockTags;
- import net.minecraft.tags.ItemTags;
- import net.minecraft.util.Mth;
- import net.minecraft.util.RandomSource;
-@@ -313,7 +_,7 @@
-         } else {
-             this.hurt(p_149501_, (float)i);
-             if (this.isVehicle()) {
--                for(Entity entity : this.getIndirectPassengers()) {
-+                for (Entity entity : this.getIndirectPassengers()) {
-                     entity.hurt(p_149501_, (float)i);
-                 }
-             }
-@@ -339,7 +_,7 @@
-             simplecontainer.removeListener(this);
-             int i = Math.min(simplecontainer.getContainerSize(), this.inventory.getContainerSize());
- 
--            for(int j = 0; j < i; ++j) {
-+            for (int j = 0; j < i; j++) {
-                 ItemStack itemstack = simplecontainer.getItem(j);
-                 if (!itemstack.isEmpty()) {
-                     this.inventory.setItem(j, itemstack.copy());
-@@ -394,13 +_,13 @@
+@@ -388,9 +_,9 @@
      protected void playStepSound(BlockPos p_30584_, BlockState p_30585_) {
          if (!p_30585_.liquid()) {
              BlockState blockstate = this.level().getBlockState(p_30584_.above());
@@ -38,85 +12,7 @@
              }
  
              if (this.isVehicle() && this.canGallop) {
--                ++this.gallopSoundCounter;
-+                this.gallopSoundCounter++;
-                 if (this.gallopSoundCounter > 5 && this.gallopSoundCounter % 3 == 0) {
-                     this.playGallopSound(soundtype);
-                 } else if (this.gallopSoundCounter <= 5) {
-@@ -565,7 +_,7 @@
-     protected void dropEquipment() {
-         super.dropEquipment();
-         if (this.inventory != null) {
--            for(int i = 0; i < this.inventory.getContainerSize(); ++i) {
-+            for (int i = 0; i < this.inventory.getContainerSize(); i++) {
-                 ItemStack itemstack = this.inventory.getItem(i);
-                 if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack)) {
-                     this.spawnAtLocation(itemstack);
-@@ -590,7 +_,7 @@
-                 if (!this.isEating()
-                     && !this.isVehicle()
-                     && this.random.nextInt(300) == 0
--                    && this.level().getBlockState(this.blockPosition().below()).is(BlockTags.ANIMALS_SPAWNABLE_ON)) {
-+                    && this.level().getBlockState(this.blockPosition().below()).is(Blocks.GRASS_BLOCK)) {
-                     this.setEating(true);
-                 }
- 
-@@ -636,7 +_,7 @@
-         }
- 
-         if (this.sprintCounter > 0) {
--            ++this.sprintCounter;
-+            this.sprintCounter++;
-             if (this.sprintCounter > 300) {
-                 this.sprintCounter = 0;
-             }
-@@ -644,12 +_,12 @@
- 
-         this.eatAnimO = this.eatAnim;
-         if (this.isEating()) {
--            this.eatAnim += (1.0F - this.eatAnim) * 0.4F + 0.05F;
-+            this.eatAnim = this.eatAnim + (1.0F - this.eatAnim) * 0.4F + 0.05F;
-             if (this.eatAnim > 1.0F) {
-                 this.eatAnim = 1.0F;
-             }
-         } else {
--            this.eatAnim += (0.0F - this.eatAnim) * 0.4F - 0.05F;
-+            this.eatAnim = this.eatAnim + ((0.0F - this.eatAnim) * 0.4F - 0.05F);
-             if (this.eatAnim < 0.0F) {
-                 this.eatAnim = 0.0F;
-             }
-@@ -659,13 +_,13 @@
-         if (this.isStanding()) {
-             this.eatAnim = 0.0F;
-             this.eatAnimO = this.eatAnim;
--            this.standAnim += (1.0F - this.standAnim) * 0.4F + 0.05F;
-+            this.standAnim = this.standAnim + (1.0F - this.standAnim) * 0.4F + 0.05F;
-             if (this.standAnim > 1.0F) {
-                 this.standAnim = 1.0F;
-             }
-         } else {
-             this.allowStandSliding = false;
--            this.standAnim += (0.8F * this.standAnim * this.standAnim * this.standAnim - this.standAnim) * 0.6F - 0.05F;
-+            this.standAnim = this.standAnim + ((0.8F * this.standAnim * this.standAnim * this.standAnim - this.standAnim) * 0.6F - 0.05F);
-             if (this.standAnim < 0.0F) {
-                 this.standAnim = 0.0F;
-             }
-@@ -673,12 +_,12 @@
- 
-         this.mouthAnimO = this.mouthAnim;
-         if (this.getFlag(64)) {
--            this.mouthAnim += (1.0F - this.mouthAnim) * 0.7F + 0.05F;
-+            this.mouthAnim = this.mouthAnim + (1.0F - this.mouthAnim) * 0.7F + 0.05F;
-             if (this.mouthAnim > 1.0F) {
-                 this.mouthAnim = 1.0F;
-             }
-         } else {
--            this.mouthAnim += (0.0F - this.mouthAnim) * 0.7F - 0.05F;
-+            this.mouthAnim = this.mouthAnim + ((0.0F - this.mouthAnim) * 0.7F - 0.05F);
-             if (this.mouthAnim < 0.0F) {
-                 this.mouthAnim = 0.0F;
-             }
-@@ -812,6 +_,7 @@
+@@ -808,6 +_,7 @@
          this.setDeltaMovement(vec3.x, d0, vec3.z);
          this.setIsJumping(true);
          this.hasImpulse = true;
@@ -124,34 +20,7 @@
          if (p_275435_.z > 0.0) {
              float f = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
              float f1 = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
-@@ -968,7 +_,7 @@
-     protected void spawnTamingParticles(boolean p_30670_) {
-         ParticleOptions particleoptions = p_30670_ ? ParticleTypes.HEART : ParticleTypes.SMOKE;
- 
--        for(int i = 0; i < 7; ++i) {
-+        for (int i = 0; i < 7; i++) {
-             double d0 = this.random.nextGaussian() * 0.02;
-             double d1 = this.random.nextGaussian() * 0.02;
-             double d2 = this.random.nextGaussian() * 0.02;
-@@ -1059,7 +_,7 @@
-         double d2 = this.getZ() + p_30562_.z;
-         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
- 
--        for(Pose pose : p_30563_.getDismountPoses()) {
-+        for (Pose pose : p_30563_.getDismountPoses()) {
-             blockpos$mutableblockpos.set(d0, d1, d2);
-             double d3 = this.getBoundingBox().maxY + 0.75;
- 
-@@ -1079,7 +_,7 @@
-                 }
- 
-                 blockpos$mutableblockpos.move(Direction.UP);
--            } while(!((double)blockpos$mutableblockpos.getY() < d3));
-+            } while (!((double)blockpos$mutableblockpos.getY() < d3));
-         }
- 
-         return null;
-@@ -1114,6 +_,11 @@
+@@ -1110,6 +_,11 @@
  
          this.randomizeAttributes(p_30555_.getRandom());
          return super.finalizeSpawn(p_30555_, p_30556_, p_30557_, p_30558_);

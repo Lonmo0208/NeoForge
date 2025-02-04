@@ -8,30 +8,3 @@
      private final int width;
      private final int height;
      private final int max;
-@@ -104,7 +_,7 @@
-     public void drawIcon(GuiGraphics p_281370_, int p_283209_, int p_282807_, int p_282968_, ItemStack p_283383_) {
-         int i = p_283209_ + this.getX(p_282968_);
-         int j = p_282807_ + this.getY(p_282968_);
--        switch(this) {
-+        switch (this) {
-             case ABOVE:
-                 i += 6;
-                 j += 9;
-@@ -126,7 +_,7 @@
-     }
- 
-     public int getX(int p_97212_) {
--        switch(this) {
-+        switch (this) {
-             case ABOVE:
-                 return (this.width + 4) * p_97212_;
-             case BELOW:
-@@ -141,7 +_,7 @@
-     }
- 
-     public int getY(int p_97233_) {
--        switch(this) {
-+        switch (this) {
-             case ABOVE:
-                 return -this.height + 4;
-             case BELOW:

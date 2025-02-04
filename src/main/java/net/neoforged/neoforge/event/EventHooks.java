@@ -1110,4 +1110,8 @@ public class EventHooks {
         NeoForge.EVENT_BUS.post(event);
         return event;
     }
+
+
+    public static boolean checkMobDespawn(Level level, Entity p311934) {
+    }
 }

@@ -1,12 +1,6 @@
 --- a/net/minecraft/server/packs/OverlayMetadataSection.java
 +++ b/net/minecraft/server/packs/OverlayMetadataSection.java
-@@ -7,13 +_,12 @@
- import java.util.List;
- import java.util.regex.Pattern;
- import net.minecraft.server.packs.metadata.MetadataSectionType;
--import net.minecraft.util.ExtraCodecs;
- import net.minecraft.util.InclusiveRange;
- 
+@@ -12,7 +_,7 @@
  public record OverlayMetadataSection(List<OverlayMetadataSection.OverlayEntry> overlays) {
      private static final Pattern DIR_VALIDATOR = Pattern.compile("[-_a-zA-Z0-9.]+");
      private static final Codec<OverlayMetadataSection> CODEC = RecordCodecBuilder.create(
@@ -15,21 +9,3 @@
                  .apply(p_294898_, OverlayMetadataSection::new)
      );
      public static final MetadataSectionType<OverlayMetadataSection> TYPE = MetadataSectionType.fromCodec("overlays", CODEC);
-@@ -30,13 +_,14 @@
- 
-     public static record OverlayEntry(InclusiveRange<Integer> format, String overlay) {
-         public static final Codec<OverlayMetadataSection.OverlayEntry> CODEC = RecordCodecBuilder.create(
--            p_295923_ -> p_295923_.group(
-+            p_337556_ -> p_337556_.group(
-                         InclusiveRange.codec(Codec.INT).fieldOf("formats").forGetter(OverlayMetadataSection.OverlayEntry::format),
--                        ExtraCodecs.validate(Codec.STRING, OverlayMetadataSection::validateOverlayDir)
-+                        Codec.STRING
-+                            .validate(OverlayMetadataSection::validateOverlayDir)
-                             .fieldOf("directory")
-                             .forGetter(OverlayMetadataSection.OverlayEntry::overlay)
-                     )
--                    .apply(p_295923_, OverlayMetadataSection.OverlayEntry::new)
-+                    .apply(p_337556_, OverlayMetadataSection.OverlayEntry::new)
-         );
- 
-         public boolean isApplicable(int p_295083_) {

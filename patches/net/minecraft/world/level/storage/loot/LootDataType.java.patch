@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/level/storage/loot/LootDataType.java
 +++ b/net/minecraft/world/level/storage/loot/LootDataType.java
-@@ -4,7 +_,7 @@
- import com.mojang.serialization.Codec;
- import com.mojang.serialization.DataResult;
- import com.mojang.serialization.DynamicOps;
--import com.mojang.serialization.DataResult.PartialResult;
-+import com.mojang.serialization.DataResult.Error;
- import java.util.Optional;
- import java.util.stream.Stream;
- import net.minecraft.core.Registry;
 @@ -17,7 +_,7 @@
  import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
  import org.slf4j.Logger;
@@ -44,10 +35,9 @@
  
      public <V> Optional<T> deserialize(ResourceLocation p_279253_, DynamicOps<V> p_324006_, V p_324329_) {
 -        DataResult<T> dataresult = this.codec.parse(p_324006_, p_324329_);
--        dataresult.error().ifPresent(p_297991_ -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, p_279253_, p_297991_.message()));
--        return dataresult.result();
 +        var dataresult = this.conditionalCodec.parse(p_324006_, p_324329_);
-+        dataresult.error().ifPresent(p_338121_ -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, p_279253_, p_338121_.message()));
+         dataresult.error().ifPresent(p_338121_ -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, p_279253_, p_338121_.message()));
+-        return dataresult.result();
 +        return dataresult.result().map(it -> {
 +            it.ifPresent(val -> idSetter.accept(val, p_279253_));
 +            return it.orElse(defaultValue);
@@ -55,20 +45,12 @@
      }
  
      public static Stream<LootDataType<?>> values() {
-@@ -44,15 +_,18 @@
-     }
- 
-     private static <T extends LootContextUser> LootDataType.Validator<T> createSimpleValidator() {
--        return (p_335315_, p_335316_, p_335317_) -> p_335317_.validate(
--                p_335315_.enterElement("{" + p_335316_.registry() + "/" + p_335316_.location() + "}", p_335316_)
-+        return (p_339560_, p_339561_, p_339562_) -> p_339562_.validate(
-+                p_339560_.enterElement("{" + p_339561_.registry() + "/" + p_339561_.location() + "}", p_339561_)
-             );
+@@ -50,9 +_,12 @@
      }
  
      private static LootDataType.Validator<LootTable> createLootTableValidator() {
--        return (p_335318_, p_335319_, p_335320_) -> p_335320_.validate(
--                p_335318_.setParams(p_335320_.getParamSet()).enterElement("{" + p_335319_.registry() + "/" + p_335319_.location() + "}", p_335319_)
+-        return (p_339557_, p_339558_, p_339559_) -> p_339559_.validate(
+-                p_339557_.setParams(p_339559_.getParamSet()).enterElement("{" + p_339558_.registry() + "/" + p_339558_.location() + "}", p_339558_)
 +        return (p_279333_, p_279227_, p_279406_) -> {
 +            p_279406_ = net.neoforged.neoforge.event.EventHooks.loadLootTable(p_279406_.getLootTableId(), p_279406_);
 +            p_279406_.validate(

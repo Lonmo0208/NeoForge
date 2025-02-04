@@ -19,45 +19,6 @@
          this.updateConnections(railshape);
      }
  
-@@ -33,7 +_,7 @@
- 
-     private void updateConnections(RailShape p_55428_) {
-         this.connections.clear();
--        switch(p_55428_) {
-+        switch (p_55428_) {
-             case NORTH_SOUTH:
-                 this.connections.add(this.pos.north());
-                 this.connections.add(this.pos.south());
-@@ -77,7 +_,7 @@
-     }
- 
-     private void removeSoftConnections() {
--        for(int i = 0; i < this.connections.size(); ++i) {
-+        for (int i = 0; i < this.connections.size(); i++) {
-             RailState railstate = this.getRail(this.connections.get(i));
-             if (railstate != null && railstate.connectsTo(this)) {
-                 this.connections.set(i, railstate.pos);
-@@ -116,7 +_,7 @@
-     }
- 
-     private boolean hasConnection(BlockPos p_55444_) {
--        for(int i = 0; i < this.connections.size(); ++i) {
-+        for (int i = 0; i < this.connections.size(); i++) {
-             BlockPos blockpos = this.connections.get(i);
-             if (blockpos.getX() == p_55444_.getX() && blockpos.getZ() == p_55444_.getZ()) {
-                 return true;
-@@ -129,9 +_,9 @@
-     protected int countPotentialConnections() {
-         int i = 0;
- 
--        for(Direction direction : Direction.Plane.HORIZONTAL) {
-+        for (Direction direction : Direction.Plane.HORIZONTAL) {
-             if (this.hasRail(this.pos.relative(direction))) {
--                ++i;
-+                i++;
-             }
-         }
- 
 @@ -179,7 +_,7 @@
              }
          }
@@ -114,12 +75,3 @@
              railshape = p_55434_;
          }
  
-@@ -334,7 +_,7 @@
-         if (p_55433_ || this.level.getBlockState(this.pos) != this.state) {
-             this.level.setBlock(this.pos, this.state, 3);
- 
--            for(int i = 0; i < this.connections.size(); ++i) {
-+            for (int i = 0; i < this.connections.size(); i++) {
-                 RailState railstate = this.getRail(this.connections.get(i));
-                 if (railstate != null) {
-                     railstate.removeSoftConnections();

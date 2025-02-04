@@ -30,39 +30,3 @@
                      } catch (Exception exception) {
                          LOGGER.warn("Couldn't save screenshot", (Throwable)exception);
                          p_92311_.accept(Component.translatable("screenshot.failure", exception.getMessage()));
-@@ -87,13 +_,13 @@
-         String s = Util.getFilenameFormattedDateTime();
-         int i = 1;
- 
--        while(true) {
-+        while (true) {
-             File file1 = new File(p_92288_, s + (i == 1 ? "" : "_" + i) + ".png");
-             if (!file1.exists()) {
-                 return file1;
-             }
- 
--            ++i;
-+            i++;
-         }
-     }
- 
-@@ -106,8 +_,8 @@
-         String s = "huge_" + Util.getFilenameFormattedDateTime();
-         int i = 1;
- 
--        while((this.file = new File(file1, s + (i == 1 ? "" : "_" + i) + ".tga")).exists()) {
--            ++i;
-+        while ((this.file = new File(file1, s + (i == 1 ? "" : "_" + i) + ".tga")).exists()) {
-+            i++;
-         }
- 
-         byte[] abyte = new byte[18];
-@@ -135,7 +_,7 @@
- 
-         this.rowHeight = j;
- 
--        for(int k = 0; k < j; ++k) {
-+        for (int k = 0; k < j; k++) {
-             p_168610_.position((p_168614_ - j) * p_168613_ * 3 + k * p_168613_ * 3);
-             int l = (p_168611_ + k * this.width) * 3;
-             p_168610_.get(this.bytes, l, i * 3);

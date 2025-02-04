@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/animal/SnowGolem.java
 +++ b/net/minecraft/world/entity/animal/SnowGolem.java
-@@ -92,13 +_,13 @@
+@@ -92,7 +_,7 @@
                  this.hurt(this.damageSources().onFire(), 1.0F);
              }
  
@@ -9,13 +9,6 @@
                  return;
              }
  
-             BlockState blockstate = Blocks.SNOW.defaultBlockState();
- 
--            for(int i = 0; i < 4; ++i) {
-+            for (int i = 0; i < 4; i++) {
-                 int j = Mth.floor(this.getX() + (double)((float)(i % 2 * 2 - 1) * 0.25F));
-                 int k = Mth.floor(this.getY());
-                 int l = Mth.floor(this.getZ() + (double)((float)(i / 2 % 2 * 2 - 1) * 0.25F));
 @@ -127,7 +_,7 @@
      @Override
      protected InteractionResult mobInteract(Player p_29920_, InteractionHand p_29921_) {

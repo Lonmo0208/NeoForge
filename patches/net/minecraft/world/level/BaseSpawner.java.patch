@@ -1,40 +1,6 @@
 --- a/net/minecraft/world/level/BaseSpawner.java
 +++ b/net/minecraft/world/level/BaseSpawner.java
-@@ -68,7 +_,7 @@
-             p_151320_.addParticle(ParticleTypes.SMOKE, d0, d1, d2, 0.0, 0.0, 0.0);
-             p_151320_.addParticle(ParticleTypes.FLAME, d0, d1, d2, 0.0, 0.0, 0.0);
-             if (this.spawnDelay > 0) {
--                --this.spawnDelay;
-+                this.spawnDelay--;
-             }
- 
-             this.oSpin = this.spin;
-@@ -83,13 +_,13 @@
-             }
- 
-             if (this.spawnDelay > 0) {
--                --this.spawnDelay;
-+                this.spawnDelay--;
-             } else {
-                 boolean flag = false;
-                 RandomSource randomsource = p_151312_.getRandom();
-                 SpawnData spawndata = this.getOrCreateNextSpawnData(p_151312_, randomsource, p_151313_);
- 
--                for(int i = 0; i < this.spawnCount; ++i) {
-+                for (int i = 0; i < this.spawnCount; i++) {
-                     CompoundTag compoundtag = spawndata.getEntityToSpawn();
-                     Optional<EntityType<?>> optional = EntityType.by(compoundtag);
-                     if (optional.isEmpty()) {
-@@ -106,7 +_,7 @@
-                     double d2 = j >= 3
-                         ? listtag.getDouble(2)
-                         : (double)p_151313_.getZ() + (randomsource.nextDouble() - randomsource.nextDouble()) * (double)this.spawnRange + 0.5;
--                    if (p_151312_.noCollision(optional.get().getAABB(d0, d1, d2))) {
-+                    if (p_151312_.noCollision(optional.get().getSpawnAABB(d0, d1, d2))) {
-                         BlockPos blockpos = BlockPos.containing(d0, d1, d2);
-                         if (spawndata.getCustomSpawnRules().isPresent()) {
-                             if (!optional.get().getCategory().isFriendly() && p_151312_.getDifficulty() == Difficulty.PEACEFUL) {
-@@ -151,15 +_,17 @@
+@@ -151,14 +_,14 @@
  
                          entity.moveTo(entity.getX(), entity.getY(), entity.getZ(), randomsource.nextFloat() * 360.0F, 0.0F);
                          if (entity instanceof Mob mob) {
@@ -52,46 +18,9 @@
 +                            if (event != null && spawndata.getEntityToSpawn().size() == 1 && spawndata.getEntityToSpawn().contains("id", 8)) {
 +                                ((Mob)entity).finalizeSpawn(p_151312_, event.getDifficulty(), event.getSpawnType(), event.getSpawnData());
                              }
-+
-+                            spawndata.getEquipmentLootTable().ifPresent(mob::equip);
-                         }
  
-                         if (!p_151312_.tryAddFreshEntityWithPassengers(entity)) {
-@@ -192,7 +_,7 @@
-             this.spawnDelay = this.minSpawnDelay + randomsource.nextInt(this.maxSpawnDelay - this.minSpawnDelay);
-         }
- 
--        this.spawnPotentials.getRandom(randomsource).ifPresent(p_186386_ -> this.setNextSpawnData(p_151351_, p_151352_, p_186386_.getData()));
-+        this.spawnPotentials.getRandom(randomsource).ifPresent(p_337965_ -> this.setNextSpawnData(p_151351_, p_151352_, p_337965_.data()));
-         this.broadcastEvent(p_151351_, p_151352_, 1);
-     }
- 
-@@ -247,11 +_,13 @@
-         if (this.nextSpawnData != null) {
-             p_186382_.put(
-                 "SpawnData",
--                SpawnData.CODEC.encodeStart(NbtOps.INSTANCE, this.nextSpawnData).result().orElseThrow(() -> new IllegalStateException("Invalid SpawnData"))
-+                SpawnData.CODEC
-+                    .encodeStart(NbtOps.INSTANCE, this.nextSpawnData)
-+                    .getOrThrow(p_337966_ -> new IllegalStateException("Invalid SpawnData: " + p_337966_))
-             );
-         }
- 
--        p_186382_.put("SpawnPotentials", SpawnData.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.spawnPotentials).result().orElseThrow());
-+        p_186382_.put("SpawnPotentials", SpawnData.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.spawnPotentials).getOrThrow());
-         return p_186382_;
-     }
- 
-@@ -291,7 +_,7 @@
-         if (this.nextSpawnData != null) {
-             return this.nextSpawnData;
-         } else {
--            this.setNextSpawnData(p_254503_, p_254487_, this.spawnPotentials.getRandom(p_253892_).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new));
-+            this.setNextSpawnData(p_254503_, p_254487_, this.spawnPotentials.getRandom(p_253892_).map(WeightedEntry.Wrapper::data).orElseGet(SpawnData::new));
-             return this.nextSpawnData;
-         }
-     }
-@@ -305,4 +_,12 @@
+                             spawndata.getEquipment().ifPresent(mob::equip);
+@@ -309,4 +_,12 @@
      public double getoSpin() {
          return this.oSpin;
      }

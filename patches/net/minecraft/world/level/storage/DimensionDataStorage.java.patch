@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/level/storage/DimensionDataStorage.java
 +++ b/net/minecraft/world/level/storage/DimensionDataStorage.java
-@@ -45,7 +_,7 @@
-         if (t != null) {
-             return t;
-         } else {
--            T t1 = p_294124_.constructor().get();
-+            T t1 = (T)p_294124_.constructor().get();
-             this.set(p_164864_, t1);
-             return t1;
-         }
 @@ -54,16 +_,20 @@
      @Nullable
      public <T extends SavedData> T get(SavedData.Factory<T> p_295091_, String p_164860_) {

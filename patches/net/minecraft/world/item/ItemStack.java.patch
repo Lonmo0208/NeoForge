@@ -1,103 +1,26 @@
 --- a/net/minecraft/world/item/ItemStack.java
 +++ b/net/minecraft/world/item/ItemStack.java
-@@ -20,7 +_,6 @@
- import java.util.stream.Stream;
- import javax.annotation.Nullable;
- import net.minecraft.ChatFormatting;
--import net.minecraft.Util;
- import net.minecraft.advancements.CriteriaTriggers;
- import net.minecraft.core.BlockPos;
- import net.minecraft.core.Holder;
-@@ -49,7 +_,6 @@
- import net.minecraft.network.codec.StreamCodec;
- import net.minecraft.server.level.ServerPlayer;
- import net.minecraft.sounds.SoundEvent;
--import net.minecraft.sounds.SoundEvents;
- import net.minecraft.stats.Stats;
- import net.minecraft.tags.DamageTypeTags;
- import net.minecraft.tags.TagKey;
-@@ -71,7 +_,6 @@
- import net.minecraft.world.entity.item.ItemEntity;
- import net.minecraft.world.entity.player.Player;
- import net.minecraft.world.flag.FeatureFlagSet;
--import net.minecraft.world.food.FoodProperties;
- import net.minecraft.world.inventory.ClickAction;
- import net.minecraft.world.inventory.Slot;
- import net.minecraft.world.inventory.tooltip.TooltipComponent;
-@@ -91,37 +_,38 @@
+@@ -92,7 +_,7 @@
  import org.apache.commons.lang3.mutable.MutableBoolean;
  import org.slf4j.Logger;
  
 -public final class ItemStack implements DataComponentHolder {
--    private static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = ExtraCodecs.validate(
--        BuiltInRegistries.ITEM.holderByNameCodec(),
--        p_330100_ -> p_330100_.is(Items.AIR.builtInRegistryHolder()) ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(p_330100_)
--    );
--    public static final Codec<ItemStack> CODEC = ExtraCodecs.lazyInitializedCodec(
--        () -> ExtraCodecs.validate(
--                RecordCodecBuilder.create(
--                    p_332618_ -> p_332618_.group(
-+public final class ItemStack implements DataComponentHolder, net.neoforged.neoforge.common.extensions.IItemStackExtension {
-+    private static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = BuiltInRegistries.ITEM
-+        .holderByNameCodec()
-+        .validate(
-+            p_330100_ -> p_330100_.is(Items.AIR.builtInRegistryHolder())
-+                    ? DataResult.error(() -> "Item must not be minecraft:air")
-+                    : DataResult.success(p_330100_)
-+        );
-+    public static final Codec<ItemStack> CODEC = Codec.lazyInitialized(
-+        () -> RecordCodecBuilder.<ItemStack>create(
-+                    p_337932_ -> p_337932_.group(
-                                 ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-                                 ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
--                                ExtraCodecs.strictOptionalField(DataComponentPatch.CODEC, "components", DataComponentPatch.EMPTY)
-+                                DataComponentPatch.CODEC
-+                                    .optionalFieldOf("components", DataComponentPatch.EMPTY)
-                                     .forGetter(p_330103_ -> p_330103_.components.asPatch())
-                             )
--                            .apply(p_332618_, ItemStack::new)
--                ),
--                ItemStack::validate
--            )
-+                            .apply(p_337932_, ItemStack::new)
-+                )
-+                .validate(ItemStack::validate)
-     );
--    public static final Codec<ItemStack> SINGLE_ITEM_CODEC = ExtraCodecs.lazyInitializedCodec(
--        () -> ExtraCodecs.validate(
--                RecordCodecBuilder.create(
--                    p_332617_ -> p_332617_.group(
-+    public static final Codec<ItemStack> SINGLE_ITEM_CODEC = Codec.lazyInitialized(
-+        () -> RecordCodecBuilder.<ItemStack>create(
-+                    p_337931_ -> p_337931_.group(
-                                 ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
--                                ExtraCodecs.strictOptionalField(DataComponentPatch.CODEC, "components", DataComponentPatch.EMPTY)
-+                                DataComponentPatch.CODEC
-+                                    .optionalFieldOf("components", DataComponentPatch.EMPTY)
-                                     .forGetter(p_332616_ -> p_332616_.components.asPatch())
-                             )
--                            .apply(p_332617_, (p_332614_, p_332615_) -> new ItemStack(p_332614_, 1, p_332615_))
--                ),
--                ItemStack::validate
--            )
-+                            .apply(p_337931_, (p_332614_, p_332615_) -> new ItemStack(p_332614_, 1, p_332615_))
-+                )
-+                .validate(ItemStack::validate)
-     );
-     public static final Codec<ItemStack> OPTIONAL_CODEC = ExtraCodecs.optionalEmptyMap(CODEC)
-         .xmap(p_330099_ -> p_330099_.orElse(ItemStack.EMPTY), p_330101_ -> p_330101_.isEmpty() ? Optional.empty() : Optional.of(p_330101_));
-@@ -204,6 +_,10 @@
-         return (DataComponentMap)(!this.isEmpty() ? this.components : DataComponentMap.EMPTY);
-     }
- 
-+    public DataComponentMap getPrototype() {
-+        return !this.isEmpty() ? this.getItem().components() : DataComponentMap.EMPTY;
-+    }
-+
-     public DataComponentPatch getComponentsPatch() {
++public final class ItemStack implements DataComponentHolder, net.neoforged.neoforge.common.extensions.IItemStackExtension, net.neoforged.neoforge.common.MutableDataComponentHolder {
+     public static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = BuiltInRegistries.ITEM
+         .holderByNameCodec()
+         .validate(
+@@ -234,6 +_,10 @@
          return !this.isEmpty() ? this.components.asPatch() : DataComponentPatch.EMPTY;
      }
-@@ -295,7 +_,7 @@
+ 
++    public boolean isComponentsPatchEmpty() {
++        return !this.isEmpty() ? this.components.isPatchEmpty() : true;
++    }
++
+     public ItemStack(ItemLike p_41599_) {
+         this(p_41599_, 1);
+     }
+@@ -327,7 +_,7 @@
      }
  
      public boolean is(Holder<Item> p_220166_) {
@@ -106,7 +29,7 @@
      }
  
      public boolean is(HolderSet<Item> p_298683_) {
-@@ -307,13 +_,30 @@
+@@ -339,13 +_,30 @@
      }
  
      public InteractionResult useOn(UseOnContext p_41662_) {
@@ -135,30 +58,10 @@
              Item item = this.getItem();
 -            InteractionResult interactionresult = item.useOn(p_41662_);
 +            InteractionResult interactionresult = callback.apply(p_41662_);
-             if (player != null && interactionresult.shouldAwardStats()) {
+             if (player != null && interactionresult.indicateItemUse()) {
                  player.awardStat(Stats.ITEM_USED.get(item));
              }
-@@ -338,9 +_,7 @@
-         if (this.isEmpty()) {
-             throw new IllegalStateException("Cannot encode empty ItemStack");
-         } else {
--            return Util.getOrThrow(
--                CODEC.encode(this, p_331900_.createSerializationContext(NbtOps.INSTANCE), p_330830_), p_340191_ -> new IllegalStateException(p_340191_)
--            );
-+            return CODEC.encode(this, p_331900_.createSerializationContext(NbtOps.INSTANCE), p_330830_).getOrThrow();
-         }
-     }
- 
-@@ -348,7 +_,7 @@
-         if (this.isEmpty()) {
-             throw new IllegalStateException("Cannot encode empty ItemStack");
-         } else {
--            return Util.getOrThrow(CODEC.encodeStart(p_332160_.createSerializationContext(NbtOps.INSTANCE), this), IllegalStateException::new);
-+            return CODEC.encodeStart(p_332160_.createSerializationContext(NbtOps.INSTANCE), this).getOrThrow();
-         }
-     }
- 
-@@ -357,7 +_,7 @@
+@@ -387,7 +_,7 @@
      }
  
      public int getMaxStackSize() {
@@ -167,7 +70,7 @@
      }
  
      public boolean isStackable() {
-@@ -369,30 +_,35 @@
+@@ -399,23 +_,28 @@
      }
  
      public boolean isDamaged() {
@@ -200,16 +103,7 @@
              if (p_220158_ > 0) {
                  int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, this);
                  int j = 0;
- 
--                for(int k = 0; i > 0 && k < p_220158_; ++k) {
-+                for (int k = 0; i > 0 && k < p_220158_; k++) {
-                     if (DigDurabilityEnchantment.shouldIgnoreDurabilityDrop(this, i, p_220159_)) {
--                        ++j;
-+                        j++;
-                     }
-                 }
- 
-@@ -402,8 +_,8 @@
+@@ -432,8 +_,8 @@
                  }
              }
  
@@ -220,7 +114,7 @@
              }
  
              int l = this.getDamageValue() + p_220158_;
-@@ -420,7 +_,7 @@
+@@ -450,7 +_,7 @@
                  return;
              }
  
@@ -229,68 +123,7 @@
                  p_41624_.broadcastBreakEvent(p_319898_);
                  Item item = this.getItem();
                  this.shrink(1);
-@@ -516,7 +_,7 @@
-         if (p_331725_.size() != p_331113_.size()) {
-             return false;
-         } else {
--            for(int i = 0; i < p_331725_.size(); ++i) {
-+            for (int i = 0; i < p_331725_.size(); i++) {
-                 if (!matches(p_331725_.get(i), p_331113_.get(i))) {
-                     return false;
-                 }
-@@ -538,8 +_,8 @@
-         }
-     }
- 
--    public static MapCodec<ItemStack> optionalFieldOf(String p_324537_) {
--        return CODEC.optionalFieldOf(p_324537_)
-+    public static MapCodec<ItemStack> lenientOptionalFieldOf(String p_338501_) {
-+        return CODEC.lenientOptionalFieldOf(p_338501_)
-             .xmap(p_323389_ -> p_323389_.orElse(EMPTY), p_323388_ -> p_323388_.isEmpty() ? Optional.empty() : Optional.of(p_323388_));
-     }
- 
-@@ -556,7 +_,7 @@
-     public static int hashStackList(List<ItemStack> p_332135_) {
-         int i = 0;
- 
--        for(ItemStack itemstack : p_332135_) {
-+        for (ItemStack itemstack : p_332135_) {
-             i = i * 31 + hashItemAndComponents(itemstack);
-         }
- 
-@@ -574,7 +_,7 @@
- 
-     public void inventoryTick(Level p_41667_, Entity p_41668_, int p_41669_, boolean p_41670_) {
-         if (this.popTime > 0) {
--            --this.popTime;
-+            this.popTime--;
-         }
- 
-         if (this.getItem() != null) {
-@@ -640,22 +_,27 @@
- 
-     public Component getHoverName() {
-         Component component = this.get(DataComponents.CUSTOM_NAME);
--        return component != null ? component : this.getItem().getName(this);
-+        if (component != null) {
-+            return component;
-+        } else {
-+            Component component1 = this.get(DataComponents.ITEM_NAME);
-+            return component1 != null ? component1 : this.getItem().getName(this);
-+        }
-     }
- 
-     private <T extends TooltipProvider> void addToTooltip(DataComponentType<T> p_331344_, Consumer<Component> p_331885_, TooltipFlag p_331177_) {
--        T t = this.get(p_331344_);
-+        T t = (T)this.get(p_331344_);
-         if (t != null) {
-             t.addToTooltip(p_331885_, p_331177_);
-         }
-     }
- 
--    public List<Component> getTooltipLines(@Nullable Player p_41652_, TooltipFlag p_41653_) {
-+    public List<Component> getTooltipLines(Item.TooltipContext p_339637_, @Nullable Player p_41652_, TooltipFlag p_41653_) {
-         if (!p_41653_.isCreative() && this.has(DataComponents.HIDE_TOOLTIP)) {
+@@ -706,7 +_,7 @@
              return List.of();
          } else {
              List<Component> list = Lists.newArrayList();
@@ -299,86 +132,15 @@
              if (this.has(DataComponents.CUSTOM_NAME)) {
                  mutablecomponent.withStyle(ChatFormatting.ITALIC);
              }
-@@ -670,22 +_,16 @@
- 
-             Consumer<Component> consumer = list::add;
-             if (!this.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP)) {
--                this.getItem().appendHoverText(this, p_41652_ == null ? null : p_41652_.level(), list, p_41653_);
-+                this.getItem().appendHoverText(this, p_339637_, list, p_41653_);
-             }
- 
--            this.addToTooltip(DataComponents.POTATO_BANE, consumer, p_41653_);
-             this.addToTooltip(DataComponents.TRIM, consumer, p_41653_);
--            this.addToTooltip(DataComponents.RESIN, consumer, p_41653_);
--            this.addToTooltip(DataComponents.FLETCHING, consumer, p_41653_);
-             this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, consumer, p_41653_);
-             this.addToTooltip(DataComponents.ENCHANTMENTS, consumer, p_41653_);
-             this.addToTooltip(DataComponents.DYED_COLOR, consumer, p_41653_);
-             this.addToTooltip(DataComponents.LORE, consumer, p_41653_);
--            this.addToTooltip(DataComponents.XP, consumer, p_41653_);
-             this.addAttributeTooltips(consumer, p_41652_);
-             this.addToTooltip(DataComponents.UNBREAKABLE, consumer, p_41653_);
--            this.addToTooltip(DataComponents.LUBRICATION, consumer, p_41653_);
--            this.addToTooltip(DataComponents.BASE_COLOR, consumer, p_41653_);
-             AdventureModePredicate adventuremodepredicate = this.get(DataComponents.CAN_BREAK);
-             if (adventuremodepredicate != null && adventuremodepredicate.showInTooltip()) {
-                 consumer.accept(CommonComponents.EMPTY);
-@@ -716,6 +_,7 @@
+@@ -761,6 +_,7 @@
                  list.add(DISABLED_ITEM_TOOLTIP);
              }
  
-+            net.neoforged.neoforge.event.EventHooks.onItemTooltip(this, p_41652_, list, p_41653_);
++            net.neoforged.neoforge.event.EventHooks.onItemTooltip(this, p_41652_, list, p_41653_, p_339637_);
              return list;
          }
      }
-@@ -723,18 +_,16 @@
-     private void addAttributeTooltips(Consumer<Component> p_330796_, @Nullable Player p_330530_) {
-         ItemAttributeModifiers itemattributemodifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-         if (itemattributemodifiers.showInTooltip()) {
--            for(EquipmentSlot equipmentslot : EquipmentSlot.values()) {
-+            for (EquipmentSlot equipmentslot : EquipmentSlot.values()) {
-                 MutableBoolean mutableboolean = new MutableBoolean(true);
--                this.forEachModifier(equipmentslot, (p_340196_, p_340197_) -> {
--                    if (p_340197_.amount() != 0.0) {
--                        if (mutableboolean.isTrue()) {
--                            p_330796_.accept(CommonComponents.EMPTY);
--                            p_330796_.accept(Component.translatable("item.modifiers." + equipmentslot.getName()).withStyle(ChatFormatting.GRAY));
--                            mutableboolean.setFalse();
--                        }
--
--                        this.addModifierTooltip(p_330796_, p_330530_, p_340196_, p_340197_);
-+                this.forEachModifier(equipmentslot, (p_330097_, p_330098_) -> {
-+                    if (mutableboolean.isTrue()) {
-+                        p_330796_.accept(CommonComponents.EMPTY);
-+                        p_330796_.accept(Component.translatable("item.modifiers." + equipmentslot.getName()).withStyle(ChatFormatting.GRAY));
-+                        mutableboolean.setFalse();
-                     }
-+
-+                    this.addModifierTooltip(p_330796_, p_330530_, p_330097_, p_330098_);
-                 });
-             }
-         }
-@@ -807,7 +_,7 @@
-         if (!this.isEnchanted()) {
-             return rarity;
-         } else {
--            return switch(rarity) {
-+            return switch (rarity) {
-                 case COMMON, UNCOMMON -> Rarity.RARE;
-                 case RARE -> Rarity.EPIC;
-                 default -> rarity;
-@@ -832,6 +_,10 @@
-         return !this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
-     }
- 
-+    public ItemEnchantments getEnchantments() {
-+        return this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
-+    }
-+
-     public boolean isFramed() {
-         return this.entityRepresentation instanceof ItemFrame;
-     }
-@@ -854,11 +_,15 @@
+@@ -901,11 +_,15 @@
  
      public void forEachModifier(EquipmentSlot p_332001_, BiConsumer<Holder<Attribute>, AttributeModifier> p_330882_) {
          ItemAttributeModifiers itemattributemodifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
@@ -388,7 +150,7 @@
 -            itemattributemodifiers.forEach(p_332001_, p_330882_);
 +            itemattributemodifiers.forEach(p_332001_, multimap::put);
          } else {
--            this.getItem().getDefaultAttributeModifiers(p_332001_).forEach(p_330882_);
+-            this.getItem().getDefaultAttributeModifiers().forEach(p_332001_, p_330882_);
 +            this.getItem().getAttributeModifiers(this).forEach(p_332001_, multimap::put);
          }
 +        multimap = net.neoforged.neoforge.common.CommonHooks.getAttributeModifiers(this, p_332001_, multimap);
@@ -396,7 +158,7 @@
      }
  
      public Component getDisplayName() {
-@@ -869,7 +_,7 @@
+@@ -916,7 +_,7 @@
  
          MutableComponent mutablecomponent1 = ComponentUtils.wrapInSquareBrackets(mutablecomponent);
          if (!this.isEmpty()) {
@@ -405,7 +167,7 @@
                  .withStyle(p_220170_ -> p_220170_.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(this))));
          }
  
-@@ -926,6 +_,8 @@
+@@ -973,6 +_,8 @@
          this.getItem().onUseTick(p_41732_, p_41733_, this, p_41734_);
      }
  
@@ -414,24 +176,3 @@
      public void onDestroyed(ItemEntity p_150925_) {
          this.getItem().onDestroyed(p_150925_);
      }
-@@ -935,8 +_,7 @@
-     }
- 
-     public SoundEvent getEatingSound() {
--        FoodProperties foodproperties = this.get(DataComponents.FOOD);
--        return foodproperties == null ? SoundEvents.GENERIC_EAT.value() : foodproperties.eatSound().value();
-+        return this.getItem().getEatingSound();
-     }
- 
-     public SoundEvent getBreakingSound() {
-@@ -945,10 +_,5 @@
- 
-     public boolean canBeHurtBy(DamageSource p_335431_) {
-         return !this.has(DataComponents.FIRE_RESISTANT) || !p_335431_.is(DamageTypeTags.IS_FIRE);
--    }
--
--    public ItemStack makeFoil() {
--        this.set(DataComponents.EXPLICIT_FOIL, true);
--        return this;
-     }
- }

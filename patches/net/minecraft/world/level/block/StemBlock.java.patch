@@ -1,12 +1,6 @@
 --- a/net/minecraft/world/level/block/StemBlock.java
 +++ b/net/minecraft/world/level/block/StemBlock.java
-@@ -74,24 +_,23 @@
- 
-     @Override
-     protected boolean mayPlaceOn(BlockState p_57053_, BlockGetter p_57054_, BlockPos p_57055_) {
--        return p_57053_.is(Blocks.FARMLAND) || p_57053_.is(Blocks.POISON_FARMLAND);
-+        return p_57053_.is(Blocks.FARMLAND);
-     }
+@@ -79,18 +_,18 @@
  
      @Override
      protected void randomTick(BlockState p_222538_, ServerLevel p_222539_, BlockPos p_222540_, RandomSource p_222541_) {
@@ -24,13 +18,12 @@
                      Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(p_222541_);
                      BlockPos blockpos = p_222540_.relative(direction);
                      BlockState blockstate = p_222539_.getBlockState(blockpos.below());
--                    if (p_222539_.getBlockState(blockpos).isAir()
--                        && (blockstate.is(Blocks.FARMLAND) || blockstate.is(BlockTags.DIRT) || blockstate.is(Blocks.POISON_FARMLAND))) {
+-                    if (p_222539_.getBlockState(blockpos).isAir() && (blockstate.is(Blocks.FARMLAND) || blockstate.is(BlockTags.DIRT))) {
 +                    if (p_222539_.isEmptyBlock(blockpos) && (blockstate.is(Blocks.FARMLAND) || blockstate.is(BlockTags.DIRT))) { // TODO 1.20.3 PORTING: reimplement canSustainPlant check
                          Registry<Block> registry = p_222539_.registryAccess().registryOrThrow(Registries.BLOCK);
                          Optional<Block> optional = registry.getOptional(this.fruit);
                          Optional<Block> optional1 = registry.getOptional(this.attachedStem);
-@@ -101,6 +_,7 @@
+@@ -100,6 +_,7 @@
                          }
                      }
                  }
@@ -38,7 +31,7 @@
              }
          }
      }
-@@ -133,5 +_,11 @@
+@@ -132,5 +_,11 @@
      @Override
      protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57040_) {
          p_57040_.add(AGE);

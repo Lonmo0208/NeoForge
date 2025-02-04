@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/entity/npc/CatSpawner.java
 +++ b/net/minecraft/world/entity/npc/CatSpawner.java
-@@ -24,7 +_,7 @@
-     @Override
-     public int tick(ServerLevel p_35330_, boolean p_35331_, boolean p_35332_) {
-         if (p_35332_ && p_35330_.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
--            --this.nextTick;
-+            this.nextTick--;
-             if (this.nextTick > 0) {
-                 return 0;
-             } else {
 @@ -83,8 +_,8 @@
          if (cat == null) {
              return 0;

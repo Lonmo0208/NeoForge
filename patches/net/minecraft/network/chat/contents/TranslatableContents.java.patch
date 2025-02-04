@@ -1,84 +1,14 @@
 --- a/net/minecraft/network/chat/contents/TranslatableContents.java
 +++ b/net/minecraft/network/chat/contents/TranslatableContents.java
-@@ -31,19 +_,19 @@
+@@ -140,6 +_,11 @@
+                 j = l;
+             }
  
- public class TranslatableContents implements ComponentContents {
-     public static final Object[] NO_ARGS = new Object[0];
--    private static final Codec<Object> PRIMITIVE_ARG_CODEC = ExtraCodecs.validate(ExtraCodecs.JAVA, TranslatableContents::filterAllowedArguments);
-+    private static final Codec<Object> PRIMITIVE_ARG_CODEC = ExtraCodecs.JAVA.validate(TranslatableContents::filterAllowedArguments);
-     private static final Codec<Object> ARG_CODEC = Codec.either(PRIMITIVE_ARG_CODEC, ComponentSerialization.CODEC)
-         .xmap(
-             p_304564_ -> p_304564_.map(p_304446_ -> p_304446_, p_304596_ -> Objects.requireNonNullElse(p_304596_.tryCollapseToString(), p_304596_)),
-             p_304615_ -> p_304615_ instanceof Component component ? Either.right(component) : Either.left(p_304615_)
-         );
-     public static final MapCodec<TranslatableContents> CODEC = RecordCodecBuilder.mapCodec(
--        p_304845_ -> p_304845_.group(
-+        p_337512_ -> p_337512_.group(
-                     Codec.STRING.fieldOf("translate").forGetter(p_304759_ -> p_304759_.key),
--                    Codec.STRING.optionalFieldOf("fallback").forGetter(p_304865_ -> Optional.ofNullable(p_304865_.fallback)),
--                    ExtraCodecs.strictOptionalField(ARG_CODEC.listOf(), "with").forGetter(p_304814_ -> adjustArgs(p_304814_.args))
-+                    Codec.STRING.lenientOptionalFieldOf("fallback").forGetter(p_304865_ -> Optional.ofNullable(p_304865_.fallback)),
-+                    ARG_CODEC.listOf().optionalFieldOf("with").forGetter(p_304814_ -> adjustArgs(p_304814_.args))
-                 )
--                .apply(p_304845_, TranslatableContents::create)
-+                .apply(p_337512_, TranslatableContents::create)
-     );
-     public static final ComponentContents.Type<TranslatableContents> TYPE = new ComponentContents.Type<>(CODEC, "translatable");
-     private static final FormattedText TEXT_PERCENT = FormattedText.of("%");
-@@ -109,12 +_,11 @@
- 
-         try {
-             int i = 0;
-+            int j = 0;
- 
--            int j;
--            int l;
--            for(j = 0; matcher.find(j); j = l) {
-+            while (matcher.find(j)) {
-                 int k = matcher.start();
--                l = matcher.end();
-+                int l = matcher.end();
-                 if (k > j) {
-                     String s = p_237516_.substring(j, k);
-                     if (s.indexOf(37) != -1) {
-@@ -137,6 +_,13 @@
-                     int i1 = s2 != null ? Integer.parseInt(s2) - 1 : i++;
-                     p_237517_.accept(this.getArgument(i1));
-                 }
-+
-+                j = l;
-+            }
-+
 +            if (j == 0) {
 +                // Neo has some special formatting handlers defined in I18nExtension, use those if no %s replacements present.
 +                j = net.neoforged.neoforge.internal.TextComponentMessageFormatHandler.handle(this, p_237517_, this.args, p_237516_);
-             }
- 
++            }
++
              if (j < p_237516_.length()) {
-@@ -169,7 +_,7 @@
-     public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> p_237521_, Style p_237522_) {
-         this.decompose();
- 
--        for(FormattedText formattedtext : this.decomposedParts) {
-+        for (FormattedText formattedtext : this.decomposedParts) {
-             Optional<T> optional = formattedtext.visit(p_237521_, p_237522_);
-             if (optional.isPresent()) {
-                 return optional;
-@@ -183,7 +_,7 @@
-     public <T> Optional<T> visit(FormattedText.ContentConsumer<T> p_237519_) {
-         this.decompose();
- 
--        for(FormattedText formattedtext : this.decomposedParts) {
-+        for (FormattedText formattedtext : this.decomposedParts) {
-             Optional<T> optional = formattedtext.visit(p_237519_);
-             if (optional.isPresent()) {
-                 return optional;
-@@ -197,7 +_,7 @@
-     public MutableComponent resolve(@Nullable CommandSourceStack p_237512_, @Nullable Entity p_237513_, int p_237514_) throws CommandSyntaxException {
-         Object[] aobject = new Object[this.args.length];
- 
--        for(int i = 0; i < aobject.length; ++i) {
-+        for (int i = 0; i < aobject.length; i++) {
-             Object object = this.args[i];
-             if (object instanceof Component component) {
-                 aobject[i] = ComponentUtils.updateForEntity(p_237512_, component, p_237513_, p_237514_);
+                 String s3 = p_237516_.substring(j);
+                 if (s3.indexOf(37) != -1) {

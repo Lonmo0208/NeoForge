@@ -1,23 +1,11 @@
 --- a/net/minecraft/world/entity/monster/CrossbowAttackMob.java
 +++ b/net/minecraft/world/entity/monster/CrossbowAttackMob.java
-@@ -5,7 +_,6 @@
- import net.minecraft.world.entity.LivingEntity;
- import net.minecraft.world.entity.projectile.ProjectileUtil;
- import net.minecraft.world.item.CrossbowItem;
--import net.minecraft.world.item.Item;
- import net.minecraft.world.item.ItemStack;
- import net.minecraft.world.item.Items;
- 
-@@ -18,10 +_,9 @@
+@@ -17,7 +_,7 @@
      void onCrossbowAttackPerformed();
  
      default void performCrossbowAttack(LivingEntity p_32337_, float p_32338_) {
 -        InteractionHand interactionhand = ProjectileUtil.getWeaponHoldingHand(p_32337_, Items.CROSSBOW);
 +        InteractionHand interactionhand = ProjectileUtil.getWeaponHoldingHand(p_32337_, item -> item instanceof CrossbowItem);
          ItemStack itemstack = p_32337_.getItemInHand(interactionhand);
--        Item item = itemstack.getItem();
--        if (item instanceof CrossbowItem crossbowitem) {
-+        if (itemstack.getItem() instanceof CrossbowItem crossbowitem) {
+         if (itemstack.getItem() instanceof CrossbowItem crossbowitem) {
              crossbowitem.performShooting(
-                 p_32337_.level(), p_32337_, interactionhand, itemstack, p_32338_, (float)(14 - p_32337_.level().getDifficulty().getId() * 4), this.getTarget()
-             );

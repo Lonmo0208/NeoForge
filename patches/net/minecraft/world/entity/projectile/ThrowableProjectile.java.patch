@@ -1,22 +1,11 @@
 --- a/net/minecraft/world/entity/projectile/ThrowableProjectile.java
 +++ b/net/minecraft/world/entity/projectile/ThrowableProjectile.java
-@@ -60,8 +_,8 @@
+@@ -60,7 +_,7 @@
              }
          }
  
 -        if (hitresult.getType() != HitResult.Type.MISS && !flag) {
--            this.onHit(hitresult);
 +        if (hitresult.getType() != HitResult.Type.MISS && !flag && !net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hitresult)) {
-+            this.hitOrDeflect(hitresult);
+             this.hitTargetOrDeflectSelf(hitresult);
          }
  
-         this.checkInsideBlocks();
-@@ -72,7 +_,7 @@
-         this.updateRotation();
-         float f;
-         if (this.isInWater()) {
--            for(int i = 0; i < 4; ++i) {
-+            for (int i = 0; i < 4; i++) {
-                 float f1 = 0.25F;
-                 this.level().addParticle(ParticleTypes.BUBBLE, d2 - vec3.x * 0.25, d0 - vec3.y * 0.25, d1 - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
-             }

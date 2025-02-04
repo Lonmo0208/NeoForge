@@ -1,63 +1,15 @@
 --- a/net/minecraft/world/item/enchantment/Enchantment.java
 +++ b/net/minecraft/world/item/enchantment/Enchantment.java
-@@ -17,10 +_,13 @@
- import net.minecraft.world.entity.EntityType;
- import net.minecraft.world.entity.EquipmentSlot;
- import net.minecraft.world.entity.LivingEntity;
-+import net.minecraft.world.flag.FeatureElement;
-+import net.minecraft.world.flag.FeatureFlagSet;
-+import net.minecraft.world.flag.FeatureFlags;
+@@ -23,7 +_,7 @@
  import net.minecraft.world.item.Item;
  import net.minecraft.world.item.ItemStack;
  
--public class Enchantment {
+-public class Enchantment implements FeatureElement {
 +public class Enchantment implements FeatureElement, net.neoforged.neoforge.common.extensions.IEnchantmentExtension {
      private final Enchantment.EnchantmentDefinition definition;
      @Nullable
      protected String descriptionId;
-@@ -44,13 +_,30 @@
-         int p_335569_,
-         EquipmentSlot... p_335470_
-     ) {
--        return new Enchantment.EnchantmentDefinition(p_335552_, Optional.of(p_336174_), p_335557_, p_336051_, p_336176_, p_335380_, p_335569_, p_335470_);
-+        return new Enchantment.EnchantmentDefinition(
-+            p_335552_, Optional.of(p_336174_), p_335557_, p_336051_, p_336176_, p_335380_, p_335569_, FeatureFlags.DEFAULT_FLAGS, p_335470_
-+        );
-     }
- 
-     public static Enchantment.EnchantmentDefinition definition(
-         TagKey<Item> p_335812_, int p_335506_, int p_335598_, Enchantment.Cost p_336185_, Enchantment.Cost p_335768_, int p_335409_, EquipmentSlot... p_335583_
-     ) {
--        return new Enchantment.EnchantmentDefinition(p_335812_, Optional.empty(), p_335506_, p_335598_, p_336185_, p_335768_, p_335409_, p_335583_);
-+        return new Enchantment.EnchantmentDefinition(
-+            p_335812_, Optional.empty(), p_335506_, p_335598_, p_336185_, p_335768_, p_335409_, FeatureFlags.DEFAULT_FLAGS, p_335583_
-+        );
-+    }
-+
-+    public static Enchantment.EnchantmentDefinition definition(
-+        TagKey<Item> p_338699_,
-+        int p_338488_,
-+        int p_338497_,
-+        Enchantment.Cost p_338563_,
-+        Enchantment.Cost p_338689_,
-+        int p_338253_,
-+        FeatureFlagSet p_338531_,
-+        EquipmentSlot... p_338705_
-+    ) {
-+        return new Enchantment.EnchantmentDefinition(p_338699_, Optional.empty(), p_338488_, p_338497_, p_338563_, p_338689_, p_338253_, p_338531_, p_338705_);
-     }
- 
-     @Nullable
-@@ -65,7 +_,7 @@
-     public Map<EquipmentSlot, ItemStack> getSlotItems(LivingEntity p_44685_) {
-         Map<EquipmentSlot, ItemStack> map = Maps.newEnumMap(EquipmentSlot.class);
- 
--        for(EquipmentSlot equipmentslot : this.definition.slots()) {
-+        for (EquipmentSlot equipmentslot : this.definition.slots()) {
-             ItemStack itemstack = p_44685_.getItemBySlot(equipmentslot);
-             if (!itemstack.isEmpty()) {
-                 map.put(equipmentslot, itemstack);
-@@ -111,6 +_,7 @@
+@@ -131,6 +_,7 @@
          return 0;
      }
  
@@ -65,7 +17,7 @@
      public float getDamageBonus(int p_44682_, @Nullable EntityType<?> p_320800_) {
          return 0.0F;
      }
-@@ -151,7 +_,7 @@
+@@ -171,7 +_,7 @@
      }
  
      public boolean canEnchant(ItemStack p_44689_) {
@@ -74,20 +26,13 @@
      }
  
      public void doPostAttack(LivingEntity p_44686_, Entity p_44687_, int p_44688_) {
-@@ -160,6 +_,9 @@
-     public void doPostHurt(LivingEntity p_44692_, Entity p_44693_, int p_44694_) {
+@@ -196,6 +_,24 @@
      }
  
-+    public void doPostItemStackHurt(LivingEntity p_338405_, Entity p_338648_, int p_338725_) {
+     public boolean isDiscoverable() {
++        return true;
 +    }
 +
-     public boolean isTreasureOnly() {
-         return false;
-     }
-@@ -176,11 +_,34 @@
-         return true;
-     }
- 
 +    /**
 +     * This applies specifically to applying at the enchanting table. The other method {@link #canEnchant(ItemStack)}
 +     * applies for <i>all possible</i> enchantments.
@@ -103,27 +48,6 @@
 +     * @return false to disable the vanilla feature
 +     */
 +    public boolean isAllowedOnBooks() {
-+        return true;
-+    }
-+
-     @Deprecated
-     public Holder.Reference<Enchantment> builtInRegistryHolder() {
-         return this.builtInRegistryHolder;
+         return true;
      }
  
-+    @Override
-+    public FeatureFlagSet requiredFeatures() {
-+        return this.definition.requiredFeatures();
-+    }
-+
-     public static record Cost(int base, int perLevel) {
-         public int calculate(int p_335917_) {
-             return this.base + this.perLevel * (p_335917_ - 1);
-@@ -195,6 +_,7 @@
-         Enchantment.Cost minCost,
-         Enchantment.Cost maxCost,
-         int anvilCost,
-+        FeatureFlagSet requiredFeatures,
-         EquipmentSlot[] slots
-     ) {
-     }

@@ -1,19 +1,5 @@
 --- a/net/minecraft/client/MouseHandler.java
 +++ b/net/minecraft/client/MouseHandler.java
-@@ -50,11 +_,11 @@
-                 if (flag) {
-                     if ((p_91534_ & 2) == 2) {
-                         p_91532_ = 1;
--                        ++this.fakeRightMouse;
-+                        this.fakeRightMouse++;
-                     }
-                 } else if (this.fakeRightMouse > 0) {
-                     p_91532_ = 1;
--                    --this.fakeRightMouse;
-+                    this.fakeRightMouse--;
-                 }
-             }
- 
 @@ -74,6 +_,7 @@
                  this.activeButton = -1;
              }
@@ -79,26 +65,6 @@
                      if (this.minecraft.player.isSpectator()) {
                          if (this.minecraft.gui.getSpectatorGui().isMenuActive()) {
                              this.minecraft.gui.getSpectatorGui().onMouseScrolled(-k);
-@@ -180,7 +_,7 @@
-             (p_91536_, p_91537_, p_91538_) -> {
-                 Path[] apath = new Path[p_91537_];
-     
--                for(int i = 0; i < p_91537_; ++i) {
-+                for (int i = 0; i < p_91537_; i++) {
-                     apath[i] = Paths.get(GLFWDropCallback.getName(p_91538_, i));
-                 }
-     
-@@ -197,8 +_,8 @@
-                 this.ignoreFirstMove = false;
-             } else {
-                 if (this.minecraft.isWindowActive()) {
--                    this.accumulatedDX += p_91563_ - this.xpos;
--                    this.accumulatedDY += p_91564_ - this.ypos;
-+                    this.accumulatedDX = this.accumulatedDX + (p_91563_ - this.xpos);
-+                    this.accumulatedDY = this.accumulatedDY + (p_91564_ - this.ypos);
-                 }
- 
-                 this.xpos = p_91563_;
 @@ -224,9 +_,11 @@
                      double d5 = this.accumulatedDY
                          * (double)this.minecraft.getWindow().getGuiScaledHeight()

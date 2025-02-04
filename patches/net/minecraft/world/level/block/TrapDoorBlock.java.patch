@@ -1,28 +1,9 @@
 --- a/net/minecraft/world/level/block/TrapDoorBlock.java
 +++ b/net/minecraft/world/level/block/TrapDoorBlock.java
-@@ -74,7 +_,7 @@
-         if (!p_57563_.getValue(OPEN)) {
-             return p_57563_.getValue(HALF) == Half.TOP ? TOP_AABB : BOTTOM_AABB;
-         } else {
--            switch((Direction)p_57563_.getValue(FACING)) {
-+            switch ((Direction)p_57563_.getValue(FACING)) {
-                 case NORTH:
-                 default:
-                     return NORTH_OPEN_AABB;
-@@ -90,7 +_,7 @@
- 
-     @Override
-     protected boolean isPathfindable(BlockState p_57535_, PathComputationType p_57538_) {
--        switch(p_57538_) {
-+        switch (p_57538_) {
-             case LAND:
-                 return p_57535_.getValue(OPEN);
-             case WATER:
-@@ -202,6 +_,19 @@
- 
+@@ -203,6 +_,19 @@
          return super.updateShape(p_57554_, p_57555_, p_57556_, p_57557_, p_57558_, p_57559_);
      }
-+
+ 
 +    //Forge Start
 +    @Override
 +    public boolean isLadder(BlockState state, net.minecraft.world.level.LevelReader world, BlockPos pos, net.minecraft.world.entity.LivingEntity entity) {
@@ -35,6 +16,7 @@
 +    }
 +    //Forge End
 +
- 
++
      protected BlockSetType getType() {
          return this.type;
+     }

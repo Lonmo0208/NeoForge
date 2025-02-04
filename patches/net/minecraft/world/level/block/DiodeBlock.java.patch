@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/level/block/DiodeBlock.java
 +++ b/net/minecraft/world/level/block/DiodeBlock.java
-@@ -86,7 +_,7 @@
-             dropResources(p_52525_, p_52526_, p_52527_, blockentity);
-             p_52526_.removeBlock(p_52527_, false);
- 
--            for(Direction direction : Direction.values()) {
-+            for (Direction direction : Direction.values()) {
-                 p_52526_.updateNeighborsAt(p_52527_.relative(direction), this);
-             }
-         }
 @@ -173,6 +_,8 @@
      protected void updateNeighborsInFront(Level p_52581_, BlockPos p_52582_, BlockState p_52583_) {
          Direction direction = p_52583_.getValue(FACING);

@@ -40,15 +40,6 @@
      public static AbstractMinecart createMinecart(
          ServerLevel p_305794_,
          double p_38121_,
-@@ -106,7 +_,7 @@
-         ItemStack p_305892_,
-         @Nullable Player p_306203_
-     ) {
--        AbstractMinecart abstractminecart = (AbstractMinecart)(switch(p_38124_) {
-+        AbstractMinecart abstractminecart = (AbstractMinecart)(switch (p_38124_) {
-             case CHEST -> new MinecartChest(p_305794_, p_38121_, p_38122_, p_38123_);
-             case FURNACE -> new MinecartFurnace(p_305794_, p_38121_, p_38122_, p_38123_);
-             case TNT -> new MinecartTNT(p_305794_, p_38121_, p_38122_, p_38123_);
 @@ -139,7 +_,7 @@
  
      @Override
@@ -58,53 +49,7 @@
      }
  
      @Override
-@@ -164,12 +_,12 @@
-             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-             ImmutableList<Pose> immutablelist = p_38145_.getDismountPoses();
- 
--            for(Pose pose : immutablelist) {
-+            for (Pose pose : immutablelist) {
-                 EntityDimensions entitydimensions = p_38145_.getDimensions(pose);
-                 float f = Math.min(entitydimensions.width(), 1.0F) / 2.0F;
- 
--                for(int i : POSE_DISMOUNT_HEIGHTS.get(pose)) {
--                    for(int[] aint1 : aint) {
-+                for (int i : POSE_DISMOUNT_HEIGHTS.get(pose)) {
-+                    for (int[] aint1 : aint) {
-                         blockpos$mutableblockpos.set(blockpos.getX() + aint1[0], blockpos.getY() + i, blockpos.getZ() + aint1[1]);
-                         double d0 = this.level()
-                             .getBlockFloorHeight(
-@@ -191,11 +_,11 @@
-             double d1 = this.getBoundingBox().maxY;
-             blockpos$mutableblockpos.set((double)blockpos.getX(), d1, (double)blockpos.getZ());
- 
--            for(Pose pose1 : immutablelist) {
-+            for (Pose pose1 : immutablelist) {
-                 double d2 = (double)p_38145_.getDimensions(pose1).height();
-                 int j = Mth.ceil(d1 - (double)blockpos$mutableblockpos.getY() + d2);
-                 double d3 = DismountHelper.findCeilingFrom(
--                    blockpos$mutableblockpos, j, p_340172_ -> this.level().getBlockState(p_340172_).getCollisionShape(this.level(), p_340172_)
-+                    blockpos$mutableblockpos, j, p_337889_ -> this.level().getBlockState(p_337889_).getCollisionShape(this.level(), p_337889_)
-                 );
-                 if (d1 + d2 <= d3) {
-                     p_38145_.setPose(pose1);
-@@ -254,7 +_,7 @@
-         if (this.level().isClientSide) {
-             if (this.lerpSteps > 0) {
-                 this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
--                --this.lerpSteps;
-+                this.lerpSteps--;
-             } else {
-                 this.reapplyPosition();
-                 this.setRot(this.getYRot(), this.getXRot());
-@@ -265,15 +_,15 @@
-             int j = Mth.floor(this.getY());
-             int k = Mth.floor(this.getZ());
-             if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
--                --j;
-+                j--;
-             }
- 
+@@ -271,9 +_,9 @@
              BlockPos blockpos = new BlockPos(i, j, k);
              BlockState blockstate = this.level().getBlockState(blockpos);
              this.onRails = BaseRailBlock.isRail(blockstate);
@@ -116,7 +61,7 @@
                      this.activateMinecart(i, j, k, blockstate.getValue(PoweredRailBlock.POWERED));
                  }
              } else {
-@@ -298,10 +_,13 @@
+@@ -298,8 +_,11 @@
              }
  
              this.setRot(this.getYRot(), this.getXRot());
@@ -128,16 +73,13 @@
 +            if (canBeRidden() && this.getDeltaMovement().horizontalDistanceSqr() > 0.01D) {
 +                List<Entity> list = this.level().getEntities(this, box, EntitySelector.pushableBy(this));
                  if (!list.isEmpty()) {
--                    for(Entity entity1 : list) {
-+                    for (Entity entity1 : list) {
+                     for (Entity entity1 : list) {
                          if (!(entity1 instanceof Player)
-                             && !(entity1 instanceof IronGolem)
-                             && !(entity1 instanceof AbstractMinecart)
 @@ -314,7 +_,7 @@
                      }
                  }
              } else {
--                for(Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F))) {
+-                for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F))) {
 +                for(Entity entity : this.level().getEntities(this, box)) {
                      if (!this.hasPassenger(entity) && entity.isPushable() && entity instanceof AbstractMinecart) {
                          entity.push(this);
@@ -168,7 +110,7 @@
          }
      }
  
-@@ -361,34 +_,35 @@
+@@ -361,18 +_,19 @@
          d1 = (double)p_38156_.getY();
          boolean flag = false;
          boolean flag1 = false;
@@ -187,31 +129,10 @@
  
          Vec3 vec31 = this.getDeltaMovement();
 -        RailShape railshape = p_38157_.getValue(((BaseRailBlock)p_38157_.getBlock()).getShapeProperty());
--        switch(railshape) {
 +        RailShape railshape = ((BaseRailBlock)p_38157_.getBlock()).getRailDirection(p_38157_, this.level(), p_38156_, this);
-+        switch (railshape) {
+         switch (railshape) {
              case ASCENDING_EAST:
                  this.setDeltaMovement(vec31.add(-d3, 0.0, 0.0));
--                ++d1;
-+                d1++;
-                 break;
-             case ASCENDING_WEST:
-                 this.setDeltaMovement(vec31.add(d3, 0.0, 0.0));
--                ++d1;
-+                d1++;
-                 break;
-             case ASCENDING_NORTH:
-                 this.setDeltaMovement(vec31.add(0.0, 0.0, d3));
--                ++d1;
-+                d1++;
-                 break;
-             case ASCENDING_SOUTH:
-                 this.setDeltaMovement(vec31.add(0.0, 0.0, -d3));
--                ++d1;
-+                d1++;
-         }
- 
-         vec31 = this.getDeltaMovement();
 @@ -418,7 +_,7 @@
              }
          }
@@ -245,13 +166,7 @@
              Vec3 vec36 = this.getDeltaMovement();
              double d27 = vec36.horizontalDistance();
              if (d27 > 0.01) {
-@@ -539,12 +_,12 @@
-         int j = Mth.floor(p_38098_);
-         int k = Mth.floor(p_38099_);
-         if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
--            --j;
-+            j--;
-         }
+@@ -544,7 +_,7 @@
  
          BlockState blockstate = this.level().getBlockState(new BlockPos(i, j, k));
          if (BaseRailBlock.isRail(blockstate)) {
@@ -260,13 +175,7 @@
              p_38098_ = (double)j;
              if (railshape.isAscending()) {
                  p_38098_ = (double)(j + 1);
-@@ -578,12 +_,12 @@
-         int j = Mth.floor(p_38181_);
-         int k = Mth.floor(p_38182_);
-         if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
--            --j;
-+            j--;
-         }
+@@ -583,7 +_,7 @@
  
          BlockState blockstate = this.level().getBlockState(new BlockPos(i, j, k));
          if (BaseRailBlock.isRail(blockstate)) {
@@ -275,15 +184,6 @@
              Pair<Vec3i, Vec3i> pair = exits(railshape);
              Vec3i vec3i = pair.getFirst();
              Vec3i vec3i1 = pair.getSecond();
-@@ -611,7 +_,7 @@
-             p_38181_ = d1 + d7 * d9;
-             p_38182_ = d2 + d8 * d9;
-             if (d7 < 0.0) {
--                ++p_38181_;
-+                p_38181_++;
-             } else if (d7 > 0.0) {
-                 p_38181_ += 0.5;
-             }
 @@ -647,6 +_,10 @@
  
      @Override
@@ -311,10 +211,11 @@
                                  p_38165_.setDeltaMovement(vec33.multiply(0.2, 1.0, 0.2));
                                  p_38165_.push(vec32.x + d0, 0.0, vec32.z + d1);
                                  this.setDeltaMovement(vec32.multiply(0.95, 1.0, 0.95));
-@@ -791,9 +_,45 @@
+@@ -790,6 +_,42 @@
+     public void setCustomDisplay(boolean p_38139_) {
          this.getEntityData().set(DATA_ID_CUSTOM_DISPLAY, p_38139_);
      }
- 
++
 +    // Forge Start
 +    private boolean canUseRail = true;
 +    @Override public boolean canUseRail() { return canUseRail; }
@@ -350,11 +251,6 @@
 +        mc.move(MoverType.SELF, new Vec3(Mth.clamp(d24 * vec3d1.x, -d25, d25), 0.0D, Mth.clamp(d24 * vec3d1.z, -d25, d25)));
 +    }
 +    // Forge end
-+
+ 
      @Override
      public ItemStack getPickResult() {
--        return new ItemStack(switch(this.getMinecartType()) {
-+        return new ItemStack(switch (this.getMinecartType()) {
-             case CHEST -> Items.CHEST_MINECART;
-             case FURNACE -> Items.FURNACE_MINECART;
-             case TNT -> Items.TNT_MINECART;

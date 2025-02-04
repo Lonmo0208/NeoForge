@@ -1,14 +1,5 @@
 --- a/net/minecraft/nbt/NbtIo.java
 +++ b/net/minecraft/nbt/NbtIo.java
-@@ -137,7 +_,7 @@
-                 p_197511_.visitEnd();
-             }
-         } else {
--            switch(p_197511_.visitRootEntry(tagtype)) {
-+            switch (p_197511_.visitRootEntry(tagtype)) {
-                 case HALT:
-                 default:
-                     break;
 @@ -178,10 +_,12 @@
  
      private static Tag readUnnamedTag(DataInput p_128931_, NbtAccounter p_128933_) throws IOException {

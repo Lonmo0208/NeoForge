@@ -1,59 +1,5 @@
 --- a/net/minecraft/world/level/block/BaseFireBlock.java
 +++ b/net/minecraft/world/level/block/BaseFireBlock.java
-@@ -70,7 +_,7 @@
-         BlockState blockstate = p_220764_.getBlockState(blockpos);
-         if (!this.canBurn(blockstate) && !blockstate.isFaceSturdy(p_220764_, blockpos, Direction.UP)) {
-             if (this.canBurn(p_220764_.getBlockState(p_220765_.west()))) {
--                for(int j = 0; j < 2; ++j) {
-+                for (int j = 0; j < 2; j++) {
-                     double d3 = (double)p_220765_.getX() + p_220766_.nextDouble() * 0.1F;
-                     double d8 = (double)p_220765_.getY() + p_220766_.nextDouble();
-                     double d13 = (double)p_220765_.getZ() + p_220766_.nextDouble();
-@@ -79,7 +_,7 @@
-             }
- 
-             if (this.canBurn(p_220764_.getBlockState(p_220765_.east()))) {
--                for(int k = 0; k < 2; ++k) {
-+                for (int k = 0; k < 2; k++) {
-                     double d4 = (double)(p_220765_.getX() + 1) - p_220766_.nextDouble() * 0.1F;
-                     double d9 = (double)p_220765_.getY() + p_220766_.nextDouble();
-                     double d14 = (double)p_220765_.getZ() + p_220766_.nextDouble();
-@@ -88,7 +_,7 @@
-             }
- 
-             if (this.canBurn(p_220764_.getBlockState(p_220765_.north()))) {
--                for(int l = 0; l < 2; ++l) {
-+                for (int l = 0; l < 2; l++) {
-                     double d5 = (double)p_220765_.getX() + p_220766_.nextDouble();
-                     double d10 = (double)p_220765_.getY() + p_220766_.nextDouble();
-                     double d15 = (double)p_220765_.getZ() + p_220766_.nextDouble() * 0.1F;
-@@ -97,7 +_,7 @@
-             }
- 
-             if (this.canBurn(p_220764_.getBlockState(p_220765_.south()))) {
--                for(int i1 = 0; i1 < 2; ++i1) {
-+                for (int i1 = 0; i1 < 2; i1++) {
-                     double d6 = (double)p_220765_.getX() + p_220766_.nextDouble();
-                     double d11 = (double)p_220765_.getY() + p_220766_.nextDouble();
-                     double d16 = (double)(p_220765_.getZ() + 1) - p_220766_.nextDouble() * 0.1F;
-@@ -106,7 +_,7 @@
-             }
- 
-             if (this.canBurn(p_220764_.getBlockState(p_220765_.above()))) {
--                for(int j1 = 0; j1 < 2; ++j1) {
-+                for (int j1 = 0; j1 < 2; j1++) {
-                     double d7 = (double)p_220765_.getX() + p_220766_.nextDouble();
-                     double d12 = (double)(p_220765_.getY() + 1) - p_220766_.nextDouble() * 0.1F;
-                     double d17 = (double)p_220765_.getZ() + p_220766_.nextDouble();
-@@ -114,7 +_,7 @@
-                 }
-             }
-         } else {
--            for(int i = 0; i < 3; ++i) {
-+            for (int i = 0; i < 3; i++) {
-                 double d0 = (double)p_220765_.getX() + p_220766_.nextDouble();
-                 double d1 = (double)p_220765_.getY() + p_220766_.nextDouble() * 0.5 + 0.5;
-                 double d2 = (double)p_220765_.getZ() + p_220766_.nextDouble();
 @@ -143,6 +_,7 @@
          if (!p_49282_.is(p_49279_.getBlock())) {
              if (inPortalDimension(p_49280_)) {
@@ -62,26 +8,11 @@
                  if (optional.isPresent()) {
                      optional.get().createPortalBlocks();
                      return;
-@@ -174,11 +_,7 @@
- 
-     public static boolean canBePlacedAt(Level p_49256_, BlockPos p_49257_, Direction p_49258_) {
-         BlockState blockstate = p_49256_.getBlockState(p_49257_);
--        if (!blockstate.isAir()) {
--            return false;
--        } else {
--            return getState(p_49256_, p_49257_).canSurvive(p_49256_, p_49257_) || isPortal(p_49256_, p_49257_, p_49258_);
--        }
-+        return !blockstate.isAir() ? false : getState(p_49256_, p_49257_).canSurvive(p_49256_, p_49257_) || isPortal(p_49256_, p_49257_, p_49258_);
-     }
- 
-     private static boolean isPortal(Level p_49270_, BlockPos p_49271_, Direction p_49272_) {
-@@ -188,8 +_,8 @@
-             BlockPos.MutableBlockPos blockpos$mutableblockpos = p_49271_.mutable();
+@@ -185,7 +_,7 @@
              boolean flag = false;
  
--            for(Direction direction : Direction.values()) {
+             for (Direction direction : Direction.values()) {
 -                if (p_49270_.getBlockState(blockpos$mutableblockpos.set(p_49271_).move(direction)).is(Blocks.OBSIDIAN)) {
-+            for (Direction direction : Direction.values()) {
 +                if (p_49270_.getBlockState(blockpos$mutableblockpos.set(p_49271_).move(direction)).isPortalFrame(p_49270_, blockpos$mutableblockpos)) {
                      flag = true;
                      break;

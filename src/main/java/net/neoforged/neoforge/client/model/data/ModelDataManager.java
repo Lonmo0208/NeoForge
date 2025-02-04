@@ -171,4 +171,11 @@ public class ModelDataManager {
             }
         }
     }
+
+    public static class Active {
+    }
+
+    public class Snapshot {
+        public static final String EMPTY = "Active";
+    }
 }

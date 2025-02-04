@@ -49,20 +49,7 @@
      }
  
      public int getFogColor() {
-@@ -219,12 +_,6 @@
-         return FoliageColor.get(d0, d1);
-     }
- 
--    public int getNoisedColorFromTexture(float p_341633_, float p_342564_) {
--        double d0 = (double)Mth.clamp(this.climateSettings.temperature + p_341633_, 0.0F, 1.0F);
--        double d1 = (double)Mth.clamp(this.climateSettings.downfall + p_342564_, 0.0F, 1.0F);
--        return FoliageColor.get(d0, d1);
--    }
--
-     public float getBaseTemperature() {
-         return this.climateSettings.temperature;
-     }
-@@ -421,4 +_,34 @@
+@@ -415,4 +_,34 @@
              return this.name;
          }
      }

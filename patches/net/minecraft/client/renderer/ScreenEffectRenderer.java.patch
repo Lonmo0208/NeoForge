@@ -26,7 +26,7 @@
                  renderFire(p_110719_, p_110720_);
              }
          }
-@@ -49,16 +_,21 @@
+@@ -49,6 +_,11 @@
  
      @Nullable
      private static BlockState getViewBlockingState(Player p_110717_) {
@@ -37,11 +37,8 @@
 +    private static org.apache.commons.lang3.tuple.Pair<BlockState, BlockPos> getOverlayBlock(Player p_110717_) {
          BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
  
--        for(int i = 0; i < 8; ++i) {
-+        for (int i = 0; i < 8; i++) {
-             double d0 = p_110717_.getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * p_110717_.getBbWidth() * 0.8F);
-             double d1 = p_110717_.getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F * p_110717_.getScale());
-             double d2 = p_110717_.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * p_110717_.getBbWidth() * 0.8F);
+         for (int i = 0; i < 8; i++) {
+@@ -58,7 +_,7 @@
              blockpos$mutableblockpos.set(d0, d1, d2);
              BlockState blockstate = p_110717_.level().getBlockState(blockpos$mutableblockpos);
              if (blockstate.getRenderShape() != RenderShape.INVISIBLE && blockstate.isViewBlocking(p_110717_.level(), blockpos$mutableblockpos)) {
@@ -64,12 +61,3 @@
          BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
          BlockPos blockpos = BlockPos.containing(p_110726_.player.getX(), p_110726_.player.getEyeY(), p_110726_.player.getZ());
          float f = LightTexture.getBrightness(p_110726_.player.level().dimensionType(), p_110726_.player.level().getMaxLocalRawBrightness(blockpos));
-@@ -136,7 +_,7 @@
-         float f10 = Mth.lerp(f6, f4, f5);
-         float f11 = 1.0F;
- 
--        for(int i = 0; i < 2; ++i) {
-+        for (int i = 0; i < 2; i++) {
-             p_110730_.pushPose();
-             float f12 = -0.5F;
-             float f13 = 0.5F;

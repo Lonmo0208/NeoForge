@@ -1,51 +1,6 @@
 --- a/com/mojang/blaze3d/vertex/VertexFormat.java
 +++ b/com/mojang/blaze3d/vertex/VertexFormat.java
-@@ -25,7 +_,7 @@
-         this.elements = p_166910_.values().asList();
-         int i = 0;
- 
--        for(VertexFormatElement vertexformatelement : p_166910_.values()) {
-+        for (VertexFormatElement vertexformatelement : p_166910_.values()) {
-             this.offsets.add(i);
-             i += vertexformatelement.getByteSize();
-         }
-@@ -38,7 +_,7 @@
-         return "format: "
-             + this.elementMapping.size()
-             + " elements: "
--            + (String)this.elementMapping.entrySet().stream().map(Object::toString).collect(Collectors.joining(" "));
-+            + this.elementMapping.entrySet().stream().map(Object::toString).collect(Collectors.joining(" "));
-     }
- 
-     public int getIntegerSize() {
-@@ -86,7 +_,7 @@
-         int i = this.getVertexSize();
-         List<VertexFormatElement> list = this.getElements();
- 
--        for(int j = 0; j < list.size(); ++j) {
-+        for (int j = 0; j < list.size(); j++) {
-             list.get(j).setupBufferState(j, (long)this.offsets.getInt(j), i);
-         }
-     }
-@@ -102,7 +_,7 @@
-     private void _clearBufferState() {
-         ImmutableList<VertexFormatElement> immutablelist = this.getElements();
- 
--        for(int i = 0; i < immutablelist.size(); ++i) {
-+        for (int i = 0; i < immutablelist.size(); i++) {
-             VertexFormatElement vertexformatelement = immutablelist.get(i);
-             vertexformatelement.clearBufferState(i);
-         }
-@@ -159,11 +_,18 @@
-         }
- 
-         public int indexCount(int p_166959_) {
--            return switch(this) {
--                case LINE_STRIP, DEBUG_LINES, DEBUG_LINE_STRIP, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN -> p_166959_;
-+            return switch (this) {
-                 case LINES, QUADS -> p_166959_ / 4 * 6;
-+                case LINE_STRIP, DEBUG_LINES, DEBUG_LINE_STRIP, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN -> p_166959_;
-                 default -> 0;
+@@ -166,4 +_,11 @@
              };
          }
      }

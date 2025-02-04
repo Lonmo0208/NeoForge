@@ -9,15 +9,6 @@
      public BushBlock(BlockBehaviour.Properties p_51021_) {
          super(p_51021_);
      }
-@@ -20,7 +_,7 @@
-     protected abstract MapCodec<? extends BushBlock> codec();
- 
-     protected boolean mayPlaceOn(BlockState p_51042_, BlockGetter p_51043_, BlockPos p_51044_) {
--        return p_51042_.is(BlockTags.DIRT) || p_51042_.is(Blocks.FARMLAND) || p_51042_.is(Blocks.POISON_FARMLAND);
-+        return p_51042_.is(BlockTags.DIRT) || p_51042_.is(Blocks.FARMLAND);
-     }
- 
-     @Override
 @@ -33,6 +_,8 @@
      @Override
      protected boolean canSurvive(BlockState p_51028_, LevelReader p_51029_, BlockPos p_51030_) {

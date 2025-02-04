@@ -1,21 +1,11 @@
 --- a/net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener.java
 +++ b/net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener.java
-@@ -34,7 +_,7 @@
-     public static void scanDirectory(ResourceManager p_279308_, String p_279131_, Gson p_279261_, Map<ResourceLocation, JsonElement> p_279404_) {
-         FileToIdConverter filetoidconverter = FileToIdConverter.json(p_279131_);
- 
--        for(Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_279308_).entrySet()) {
-+        for (Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(p_279308_).entrySet()) {
-             ResourceLocation resourcelocation = entry.getKey();
-             ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
- 
-@@ -48,5 +_,9 @@
-                 LOGGER.error("Couldn't parse data file {} from {}", resourcelocation1, resourcelocation, jsonparseexception);
+@@ -49,4 +_,8 @@
              }
          }
-+    }
+     }
 +
 +    protected ResourceLocation getPreparedPath(ResourceLocation rl) {
 +        return rl.withPath(this.directory + "/" + rl.getPath() + ".json");
-     }
++    }
  }

@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/Rarity.java
 +++ b/net/minecraft/world/item/Rarity.java
-@@ -9,12 +_,11 @@
+@@ -9,7 +_,7 @@
  import net.minecraft.util.ByIdMap;
  import net.minecraft.util.StringRepresentable;
  
@@ -9,13 +9,7 @@
      COMMON(0, "common", ChatFormatting.WHITE),
      UNCOMMON(1, "uncommon", ChatFormatting.YELLOW),
      RARE(2, "rare", ChatFormatting.AQUA),
--    EPIC(3, "epic", ChatFormatting.LIGHT_PURPLE),
--    POTATO(4, "potato", ChatFormatting.GREEN);
-+    EPIC(3, "epic", ChatFormatting.LIGHT_PURPLE);
- 
-     public static final Codec<Rarity> CODEC = StringRepresentable.fromValues(Rarity::values);
-     public static final IntFunction<Rarity> BY_ID = ByIdMap.continuous(p_335877_ -> p_335877_.id, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
-@@ -22,19 +_,46 @@
+@@ -21,19 +_,46 @@
      private final int id;
      private final String name;
      private final ChatFormatting color;

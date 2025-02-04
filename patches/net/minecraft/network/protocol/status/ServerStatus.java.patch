@@ -1,6 +1,6 @@
 --- a/net/minecraft/network/protocol/status/ServerStatus.java
 +++ b/net/minecraft/network/protocol/status/ServerStatus.java
-@@ -21,17 +_,19 @@
+@@ -21,7 +_,8 @@
      Optional<ServerStatus.Players> players,
      Optional<ServerStatus.Version> version,
      Optional<ServerStatus.Favicon> favicon,
@@ -9,38 +9,14 @@
 +    boolean isModded
  ) {
      public static final Codec<ServerStatus> CODEC = RecordCodecBuilder.create(
--        p_304170_ -> p_304170_.group(
--                    ComponentSerialization.CODEC.optionalFieldOf("description", CommonComponents.EMPTY).forGetter(ServerStatus::description),
--                    ServerStatus.Players.CODEC.optionalFieldOf("players").forGetter(ServerStatus::players),
--                    ServerStatus.Version.CODEC.optionalFieldOf("version").forGetter(ServerStatus::version),
--                    ServerStatus.Favicon.CODEC.optionalFieldOf("favicon").forGetter(ServerStatus::favicon),
--                    Codec.BOOL.optionalFieldOf("enforcesSecureChat", Boolean.valueOf(false)).forGetter(ServerStatus::enforcesSecureChat)
-+        p_337519_ -> p_337519_.group(
-+                    ComponentSerialization.CODEC.lenientOptionalFieldOf("description", CommonComponents.EMPTY).forGetter(ServerStatus::description),
-+                    ServerStatus.Players.CODEC.lenientOptionalFieldOf("players").forGetter(ServerStatus::players),
-+                    ServerStatus.Version.CODEC.lenientOptionalFieldOf("version").forGetter(ServerStatus::version),
-+                    ServerStatus.Favicon.CODEC.lenientOptionalFieldOf("favicon").forGetter(ServerStatus::favicon),
+         p_337519_ -> p_337519_.group(
+@@ -29,7 +_,8 @@
+                     ServerStatus.Players.CODEC.lenientOptionalFieldOf("players").forGetter(ServerStatus::players),
+                     ServerStatus.Version.CODEC.lenientOptionalFieldOf("version").forGetter(ServerStatus::version),
+                     ServerStatus.Favicon.CODEC.lenientOptionalFieldOf("favicon").forGetter(ServerStatus::favicon),
+-                    Codec.BOOL.lenientOptionalFieldOf("enforcesSecureChat", Boolean.valueOf(false)).forGetter(ServerStatus::enforcesSecureChat)
 +                    Codec.BOOL.optionalFieldOf("enforcesSecureChat", Boolean.valueOf(false)).forGetter(ServerStatus::enforcesSecureChat),
 +                    Codec.BOOL.optionalFieldOf("isModded", Boolean.FALSE).forGetter(ServerStatus::isModded)
                  )
--                .apply(p_304170_, ServerStatus::new)
-+                .apply(p_337519_, ServerStatus::new)
+                 .apply(p_337519_, ServerStatus::new)
      );
- 
-     public static record Favicon(byte[] iconBytes) {
-@@ -59,12 +_,12 @@
-                     .apply(p_272926_, GameProfile::new)
-         );
-         public static final Codec<ServerStatus.Players> CODEC = RecordCodecBuilder.create(
--            p_273295_ -> p_273295_.group(
-+            p_337520_ -> p_337520_.group(
-                         Codec.INT.fieldOf("max").forGetter(ServerStatus.Players::max),
-                         Codec.INT.fieldOf("online").forGetter(ServerStatus.Players::online),
--                        PROFILE_CODEC.listOf().optionalFieldOf("sample", List.of()).forGetter(ServerStatus.Players::sample)
-+                        PROFILE_CODEC.listOf().lenientOptionalFieldOf("sample", List.of()).forGetter(ServerStatus.Players::sample)
-                     )
--                    .apply(p_273295_, ServerStatus.Players::new)
-+                    .apply(p_337520_, ServerStatus.Players::new)
-         );
-     }
- 
