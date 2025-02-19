@@ -29,8 +29,12 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -47,6 +51,11 @@ public final class ForgeRecipeProvider extends VanillaRecipeProvider
     private void exclude(ItemLike item)
     {
         excludes.add(ForgeRegistries.ITEMS.getKey(item.asItem()));
+    }
+
+    private void exclude(String name)
+    {
+        excludes.add(new ResourceLocation(name));
     }
 
     private void replace(ItemLike item, TagKey<Item> tag)
@@ -68,6 +77,9 @@ public final class ForgeRecipeProvider extends VanillaRecipeProvider
         replace(Items.CHEST, Tags.Items.CHESTS_WOODEN);
         replace(Blocks.COBBLESTONE, Tags.Items.COBBLESTONE_NORMAL);
         replace(Blocks.COBBLED_DEEPSLATE, Tags.Items.COBBLESTONE_DEEPSLATE);
+
+        replace(Items.STRING, Tags.Items.STRING);
+        exclude(getConversionRecipeName(Blocks.WHITE_WOOL, Items.STRING));
 
         exclude(Blocks.GOLD_BLOCK);
         exclude(Items.GOLD_NUGGET);
@@ -122,14 +134,14 @@ public final class ForgeRecipeProvider extends VanillaRecipeProvider
 
     @Nullable
     @Override
-    protected CompletableFuture<?> saveAdvancement(CachedOutput output, FinishedRecipe finishedRecipe, JsonObject advancementJson)
+    protected CompletableFuture<?> saveAdvancement(CachedOutput output, FinishedRecipe recipe, JsonObject json)
     {
         // NOOP - We don't replace any of the advancement things yet...
         return null;
     }
 
     @Override
-    protected CompletableFuture<?> buildAdvancement(CachedOutput p_253674_, ResourceLocation p_254102_, Advancement.Builder p_253712_)
+    protected CompletableFuture<?> buildAdvancement(CachedOutput output, ResourceLocation name, Advancement.Builder builder)
     {
         // NOOP - We don't replace any of the advancement things yet...
         return CompletableFuture.allOf();
@@ -160,7 +172,8 @@ public final class ForgeRecipeProvider extends VanillaRecipeProvider
 
         boolean modified = false;
         List<Value> items = new ArrayList<>();
-        Value[] vanillaItems = getField(Ingredient.class, vanilla, 2); //This will probably crash between versions, if null fix index
+        // This will probably crash between versions, if null fix index
+        Value[] vanillaItems = getField(Ingredient.class, vanilla, 2);
         for (Value entry : vanillaItems)
         {
             if (entry instanceof ItemValue)
@@ -171,9 +184,11 @@ public final class ForgeRecipeProvider extends VanillaRecipeProvider
                 {
                     items.add(new TagValue(replacement));
                     modified = true;
-                } else
+                }
+                else
                     items.add(entry);
-            } else
+            }
+            else
                 items.add(entry);
         }
         return modified ? Ingredient.fromValues(items.stream()) : null;
@@ -187,7 +202,8 @@ public final class ForgeRecipeProvider extends VanillaRecipeProvider
         try
         {
             return (R) fld.get(inst);
-        } catch (IllegalArgumentException | IllegalAccessException e)
+        }
+        catch (IllegalArgumentException | IllegalAccessException e)
         {
             throw new RuntimeException(e);
         }

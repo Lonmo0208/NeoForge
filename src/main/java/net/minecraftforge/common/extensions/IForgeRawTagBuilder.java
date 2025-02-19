@@ -5,9 +5,6 @@
 
 package net.minecraftforge.common.extensions;
 
-import java.util.stream.Stream;
-
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import net.minecraft.resources.ResourceLocation;
@@ -18,29 +15,22 @@ public interface IForgeRawTagBuilder
 {
     default TagBuilder getRawBuilder()
     {
-        return (TagBuilder)this;
+        return (TagBuilder) this;
     }
 
     /**
-     * internal, called when a raw builder is written to json to add forge additions (e.g. the remove list)
+     * @deprecated Never used, tags use a Codec now, so remove this later.
      */
+    @Deprecated(forRemoval = true, since = "1.20.1")
     default void serializeTagAdditions(final JsonObject tagJson)
     {
-        TagBuilder rawBuilder = this.getRawBuilder();
-        Stream<TagEntry> removeEntries = rawBuilder.getRemoveEntries();
-        JsonArray removeEntriesAsJsonArray = new JsonArray();
-        //removeEntries.forEach(proxy ->proxy.serializeTo(removeEntriesAsJsonArray)); // TODO: Figure out what the replacement for this is. -C
-        if (removeEntriesAsJsonArray.size() > 0)
-        {
-            tagJson.add("remove", removeEntriesAsJsonArray);
-        }
-
     }
 
     /**
      * Adds a tag entry to the remove list.
+     * 
      * @param tagEntry The tag entry to add to the remove list
-     * @param source The source of the caller for logging purposes (generally a modid)
+     * @param source   The source of the caller for logging purposes (generally a modid)
      * @return The builder for chaining purposes
      */
     default TagBuilder remove(final TagEntry tagEntry, final String source)
@@ -50,8 +40,9 @@ public interface IForgeRawTagBuilder
 
     /**
      * Adds a single-element entry to the remove list.
+     * 
      * @param elementID The ID of the element to add to the remove list
-     * @param source The source of the caller for logging purposes (generally a modid)
+     * @param source    The source of the caller for logging purposes (generally a modid)
      * @return The builder for chaining purposes
      */
     default TagBuilder removeElement(final ResourceLocation elementID, final String source)
@@ -59,10 +50,10 @@ public interface IForgeRawTagBuilder
         return this.remove(TagEntry.element(elementID), source);
     }
 
-
     /**
      * Adds a tag to the remove list.
-     * @param tagID The ID of the tag to add to the remove list
+     * 
+     * @param tagID  The ID of the tag to add to the remove list
      * @param source The source of the caller for logging purposes (generally a modid)
      * @return The builder for chaining purposes
      */

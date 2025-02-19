@@ -45,9 +45,9 @@ ext {
     }
     MAPPING_CHANNEL = 'parchment'
     MAPPING_VERSION = '2023.07.16-1.20.1'
-    MC_VERSION = '23w13a_or_b'
+    MC_VERSION = '1.20.1'
     MC_NEXT_VERSION = '1.21'
-    MCP_VERSION = '20230416.122240'
+    MCP_VERSION = '20230612.114412'
     SNAPSHOT = false
 
     SPI_VERSION = '7.1.5'
@@ -98,7 +98,7 @@ gradleutils.version {
 ext {
     GIT_INFO = gradleutils.gitInfo
     VERSION = gradleutils.version.toString()
-    FORGE_VERSION = VERSION.substring(MC_VERSION.length() + 1)
+    FORGE_VERSION = VERSION.substring(MC_VERSION.length() + 9)
 }
 
 logger.lifecycle('NeoForge version: {}', VERSION)
@@ -574,7 +574,7 @@ project(':forge') {
                 'Specification-Vendor':     'Forge Development LLC',
                 'Specification-Version':    SPEC_VERSION,
                 'Implementation-Title':     project.group,
-                'Implementation-Version':   project.version.substring(MC_VERSION.length() + 1),
+                'Implementation-Version':   project.version.substring(MC_VERSION.length() + 9),
                 'Implementation-Vendor':    'Forge Development LLC'
             ] as LinkedHashMap,
             'net/minecraftforge/versions/mcp/': [

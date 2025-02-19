@@ -5,8 +5,6 @@
 
 package net.minecraftforge.server;
 
-import static net.minecraftforge.fml.Logging.CORE;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +28,7 @@ import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.common.world.StructureModifier;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.Logging;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.fml.ModLoader;
@@ -165,12 +164,12 @@ public class ServerLifecycleHooks
             final int versionNumber = connectionType.getFMLVersionNumber(packet.getFMLVersion());
 
             if (connectionType == ConnectionType.MODDED && versionNumber != NetworkConstants.FMLNETVERSION) {
-                rejectConnection(manager, connectionType, "This modded server is not impl compatible with your modded client. Please verify your Forge version closely matches the server. Got net version " + versionNumber + " this server is net version " + NetworkConstants.FMLNETVERSION);
+                rejectConnection(manager, connectionType, "This modded server is not impl compatible with your modded client. Please verify your NeoForge version closely matches the server. Got net version " + versionNumber + " this server is net version " + NetworkConstants.FMLNETVERSION);
                 return false;
             }
 
             if (connectionType == ConnectionType.VANILLA && !NetworkRegistry.acceptsVanillaClientConnections()) {
-                rejectConnection(manager, connectionType, "This server has mods that require Forge to be installed on the client. Contact your server admin for more details.");
+                rejectConnection(manager, connectionType, "This server has mods that require NeoForge to be installed on the client. Contact your server admin for more details.");
                 return false;
             }
         }
@@ -184,7 +183,10 @@ public class ServerLifecycleHooks
 
     private static void rejectConnection(final Connection manager, ConnectionType type, String message) {
         manager.setProtocol(ConnectionProtocol.LOGIN);
-        LOGGER.info(SERVERHOOKS, "Disconnecting {} connection attempt: {}", type, message);
+        String ip = "local";
+        if (manager.getRemoteAddress() != null)
+           ip = manager.getRemoteAddress().toString();
+        LOGGER.info(SERVERHOOKS, "[{}] Disconnecting {} connection attempt: {}", ip, type, message);
         MutableComponent text = Component.literal(message);
         manager.send(new ClientboundLoginDisconnectPacket(text));
         manager.disconnect(text);
@@ -212,7 +214,7 @@ public class ServerLifecycleHooks
                 ModLoader.get().addWarning(new ModLoadingWarning(mod, ModLoadingStage.ERROR, "fml.modloading.brokenresources", e.getKey()));
                 continue;
             }
-            LOGGER.debug(CORE, "Generating PackInfo named {} for mod file {}", name, e.getKey().getFilePath());
+            LOGGER.debug(Logging.CORE, "Generating PackInfo named {} for mod file {}", name, e.getKey().getFilePath());
             packAcceptor.accept(modPack);
         }
     }

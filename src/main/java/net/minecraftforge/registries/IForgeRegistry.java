@@ -95,6 +95,16 @@ public interface IForgeRegistry<V> extends Iterable<V>
     <T> T getSlaveMap(ResourceLocation slaveMapName, Class<T> type);
 
     /**
+     * Adds an alias that maps from the name specified by <code>src</code> to the name specified by <code>dst</code>.
+     * <p>
+     * Any registry lookups that target the first name will resolve as the second name, if the first name is not present.
+     * 
+     * @param src The source registry name to alias from.
+     * @param dst The target registry name to alias to.
+     */
+    public void addAlias(ResourceLocation src, ResourceLocation dst);
+
+    /**
      * Callback fired when objects are added to the registry. This will fire when the registry is rebuilt
      * on the client side from a server side synchronization, or when a world is loaded.
      */
@@ -141,20 +151,6 @@ public interface IForgeRegistry<V> extends Iterable<V>
         void onBake(IForgeRegistryInternal<V> owner, RegistryManager stage);
     }
 
-    /**
-     * Factory for creating dummy entries, allowing worlds to be loaded and keep the missing block references.
-     * @deprecated Dummies are being removed due to lack of use and high maintenance cost. There will not be an equivalent replacement feature added.
-     */
-    @FunctionalInterface
-    @Deprecated(forRemoval = true, since = "1.19.4")
-    interface DummyFactory<V>
-    {
-        V createDummy(ResourceLocation key);
-    }
-
-    /**
-     *
-     */
     @FunctionalInterface
     interface MissingFactory<V>
     {

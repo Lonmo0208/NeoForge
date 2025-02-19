@@ -43,6 +43,7 @@ import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.items.wrapper.ShulkerItemStackInvWrapper;
 import net.minecraftforge.registries.IForgeRegistry;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -187,20 +188,6 @@ public interface IForgeItem
     default boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, Player player)
     {
         return false;
-    }
-
-    /**
-     * Called each tick while using an item.
-     *
-     * @param stack  The Item being used
-     * @param player The Player using the item
-     * @param count  The amount of time in tick the item has been used for
-     *               continuously
-     * @deprecated {@link net.minecraft.world.item.Item#onUseTick(Level, LivingEntity, ItemStack, int) Implement Vanilla's Version}
-     */
-    @Deprecated(since = "1.19.4", forRemoval = true)
-    default void onUsingTick(ItemStack stack, LivingEntity player, int count)
-    {
     }
 
     /**
@@ -538,13 +525,15 @@ public interface IForgeItem
     /**
      * Gets the level of the enchantment currently present on the stack. By default, returns the enchantment level present in NBT.
      * Most enchantment implementations rely upon this method.
-     * For consistency, results of this method should be the same as getting the enchantment from {@link #getAllEnchantments(ItemStack)}
+     * The returned value must be the same as getting the enchantment from {@link #getAllEnchantments(ItemStack)}
      *
-     * @param stack        the item stack being checked
-     * @param enchantment  the enchantment being checked for
-     * @return  Level of the enchantment, or 0 if not present
+     * @param stack       The item stack being checked
+     * @param enchantment The enchantment being checked for
+     * @return Level of the enchantment, or 0 if not present
      * @see #getAllEnchantments(ItemStack)
+     * @apiNote Call via {@link IForgeItemStack#getEnchantmentLevel(Enchantment)}.
      */
+    @ApiStatus.OverrideOnly
     default int getEnchantmentLevel(ItemStack stack, Enchantment enchantment)
     {
         return EnchantmentHelper.getTagEnchantmentLevel(enchantment, stack);
@@ -553,12 +542,14 @@ public interface IForgeItem
     /**
      * Gets a map of all enchantments present on the stack. By default, returns the enchantments present in NBT.
      * Used in several places in code including armor enchantment hooks.
-     * For consistency, any enchantments in the returned map should include the same level in {@link #getEnchantmentLevel(ItemStack, Enchantment)}
+     * The returned value(s) must have the same level as {@link #getEnchantmentLevel(ItemStack, Enchantment)}.
      *
-     * @param stack        the item stack being checked
-     * @return  Map of all enchantments on the stack, empty if no enchantments are present
+     * @param stack The item stack being checked
+     * @return Map of all enchantments on the stack, empty if no enchantments are present
      * @see #getEnchantmentLevel(ItemStack, Enchantment)
+     * @apiNote Call via {@link IForgeItemStack#getAllEnchantments()}.
      */
+    @ApiStatus.OverrideOnly
     default Map<Enchantment, Integer> getAllEnchantments(ItemStack stack)
     {
         return EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
@@ -595,7 +586,7 @@ public interface IForgeItem
             return true;
 
         if (!newStack.isDamageableItem() || !oldStack.isDamageableItem())
-            return !ItemStack.tagMatches(newStack, oldStack);
+            return !ItemStack.isSameItemSameTags(newStack, oldStack);
 
         CompoundTag newTag = newStack.getTag();
         CompoundTag oldTag = oldStack.getTag();
@@ -628,7 +619,11 @@ public interface IForgeItem
      */
     default boolean canContinueUsing(ItemStack oldStack, ItemStack newStack)
     {
-        return ItemStack.isSame(oldStack, newStack);
+        if (oldStack == newStack) {
+            return true;
+        } else {
+            return !oldStack.isEmpty() && !newStack.isEmpty() && ItemStack.isSameItem(newStack, oldStack);
+        }
     }
 
     /**
@@ -862,7 +857,6 @@ public interface IForgeItem
      */
     default boolean canGrindstoneRepair(ItemStack stack)
     {
-        // TODO 1.20: Change to return false; this changes the default behavior for all items from opt-out to opt-in.
-        return true;
+        return false;
     }
 }

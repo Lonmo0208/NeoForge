@@ -18,6 +18,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.level.ChunkHolder;
@@ -29,9 +30,12 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.TooltipFlag;
@@ -40,6 +44,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -54,8 +59,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.InteractionResultHolder;
@@ -75,8 +80,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -86,6 +91,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.capabilities.CapabilityDispatcher;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.extensions.IForgeItemStack;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.brewing.PlayerBrewedPotionEvent;
 import net.minecraftforge.event.brewing.PotionBrewEvent;
@@ -105,6 +111,8 @@ import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingPackSizeEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent.AllowDespawn;
+import net.minecraftforge.event.entity.living.MobSpawnEvent.PositionCheck;
+import net.minecraftforge.event.entity.living.MobSpawnEvent.SpawnPlacementCheck;
 import net.minecraftforge.event.entity.living.ZombieEvent.SummonAidEvent;
 import net.minecraftforge.event.entity.player.AdvancementEvent.AdvancementEarnEvent;
 import net.minecraftforge.event.entity.player.AdvancementEvent.AdvancementProgressEvent;
@@ -121,10 +129,13 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.event.entity.player.PlayerSetSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
+import net.minecraftforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
 import net.minecraftforge.event.entity.player.SleepingLocationCheckEvent;
 import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
 import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
+import net.minecraftforge.event.level.AlterGroundEvent;
+import net.minecraftforge.event.level.AlterGroundEvent.StateProvider;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.BlockEvent.BlockToolModificationEvent;
 import net.minecraftforge.event.level.BlockEvent.CreateFluidSourceEvent;
@@ -190,6 +201,55 @@ public class ForgeEventFactory
     }
 
     /**
+     * Internal, should only be called via {@link SpawnPlacements#checkSpawnRules}.
+     * @see SpawnPlacementCheck
+     */
+    @ApiStatus.Internal
+    public static boolean checkSpawnPlacements(EntityType<?> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random, boolean defaultResult)
+    {
+        var event = new SpawnPlacementCheck(entityType, level, spawnType, pos, random, defaultResult);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event.getResult() == Result.DEFAULT ? defaultResult : event.getResult() == Result.ALLOW;
+    }
+
+    /**
+     * Checks if the current position of the passed mob is valid for spawning, by firing {@link PositionCheck}.<br>
+     * The default check is to perform the logical and of {@link Mob#checkSpawnRules} and {@link Mob#checkSpawnObstruction}.<br>
+     * @param mob The mob being spawned.
+     * @param level The level the mob will be added to, if successful.
+     * @param spawnType The spawn type of the spawn.
+     * @return True, if the position is valid, as determined by the contract of {@link PositionCheck}.
+     * @see PositionCheck
+     */
+    public static boolean checkSpawnPosition(Mob mob, ServerLevelAccessor level, MobSpawnType spawnType)
+    {
+        var event = new PositionCheck(mob, level, spawnType, null);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (event.getResult() == Result.DEFAULT)
+        {
+            return mob.checkSpawnRules(level, spawnType) && mob.checkSpawnObstruction(level);
+        }
+        return event.getResult() == Result.ALLOW;
+    }
+
+    /**
+     * Specialized variant of {@link #checkSpawnPosition} for spawners, as they have slightly different checks.
+     * @see #CheckSpawnPosition
+     * @implNote See in-line comments about custom spawn rules.
+     */
+    public static boolean checkSpawnPositionSpawner(Mob mob, ServerLevelAccessor level, MobSpawnType spawnType, SpawnData spawnData, BaseSpawner spawner)
+    {
+        var event = new PositionCheck(mob, level, spawnType, null);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (event.getResult() == Result.DEFAULT)
+        {
+            // Spawners do not evaluate Mob#checkSpawnRules if any custom rules are present. This is despite the fact that these two methods do not check the same things.
+            return (spawnData.getCustomSpawnRules().isPresent() || mob.checkSpawnRules(level, spawnType)) && mob.checkSpawnObstruction(level);
+        }
+        return event.getResult() == Result.ALLOW;
+    }
+
+    /**
      * Vanilla calls to {@link Mob#finalizeSpawn} are replaced with calls to this method via coremod.<br>
      * Mods should call this method in place of calling {@link Mob#finalizeSpawn}. Super calls (from within overrides) should not be wrapped.
      * <p>
@@ -238,7 +298,7 @@ public class ForgeEventFactory
      * Returns the FinalizeSpawn event instance, or null if it was canceled.<br>
      * This is separate since mob spawners perform special finalizeSpawn handling when NBT data is present, but we still want to fire the event.<br>
      * This overload is also the only way to pass through a {@link BaseSpawner} instance.
-     * @see MobSpawnEvent.FinalizeSpawn
+     * @see #onFinalizeSpawn
      */
     @Nullable
     public static MobSpawnEvent.FinalizeSpawn onFinalizeSpawnSpawner(Mob mob, ServerLevelAccessor level, DifficultyInstance difficulty, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag spawnTag, BaseSpawner spawner)
@@ -246,6 +306,13 @@ public class ForgeEventFactory
         var event = new MobSpawnEvent.FinalizeSpawn(mob, level, mob.getX(), mob.getY(), mob.getZ(), difficulty, MobSpawnType.SPAWNER, spawnData, spawnTag, spawner);
         boolean cancel = MinecraftForge.EVENT_BUS.post(event);
         return cancel ? null : event;
+    }
+
+    public static PlayerSpawnPhantomsEvent onPhantomSpawn(ServerPlayer player, int phantomsToSpawn)
+    {
+        var event = new PlayerSpawnPhantomsEvent(player, phantomsToSpawn);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event;
     }
 
     public static Result canEntityDespawn(Mob entity, ServerLevelAccessor level)
@@ -429,7 +496,7 @@ public class ForgeEventFactory
     public static int onItemExpire(ItemEntity entity, @NotNull ItemStack item)
     {
         if (item.isEmpty()) return -1;
-        ItemExpireEvent event = new ItemExpireEvent(entity, (item.isEmpty() ? 6000 : item.getItem().getEntityLifespan(item, entity.level)));
+        ItemExpireEvent event = new ItemExpireEvent(entity, (item.isEmpty() ? 6000 : item.getItem().getEntityLifespan(item, entity.level())));
         if (!MinecraftForge.EVENT_BUS.post(event)) return -1;
         return event.getExtraLife();
     }
@@ -443,7 +510,7 @@ public class ForgeEventFactory
 
     public static boolean canMountEntity(Entity entityMounting, Entity entityBeingMounted, boolean isMounting)
     {
-        boolean isCanceled = MinecraftForge.EVENT_BUS.post(new EntityMountEvent(entityMounting, entityBeingMounted, entityMounting.level, isMounting));
+        boolean isCanceled = MinecraftForge.EVENT_BUS.post(new EntityMountEvent(entityMounting, entityBeingMounted, entityMounting.level(), isMounting));
 
         if(isCanceled)
         {
@@ -579,8 +646,8 @@ public class ForgeEventFactory
         if (canContinueSleep == Result.DEFAULT)
         {
             return player.getSleepingPos().map(pos-> {
-                BlockState state = player.level.getBlockState(pos);
-                return state.getBlock().isBed(state, player.level, pos, player);
+                BlockState state = player.level().getBlockState(pos);
+                return state.getBlock().isBed(state, player.level(), pos, player);
             }).orElse(false);
         }
         else
@@ -594,7 +661,7 @@ public class ForgeEventFactory
 
         Result canContinueSleep = evt.getResult();
         if (canContinueSleep == Result.DEFAULT)
-            return !player.level.isDay();
+            return !player.level().isDay();
         else
             return canContinueSleep == Result.ALLOW;
     }
@@ -620,9 +687,9 @@ public class ForgeEventFactory
         return MinecraftForge.EVENT_BUS.post(new ProjectileImpactEvent(projectile, ray));
     }
 
-    public static LootTable loadLootTable(ResourceLocation name, LootTable table, LootTables lootTableManager)
+    public static LootTable loadLootTable(ResourceLocation name, LootTable table)
     {
-        LootTableLoadEvent event = new LootTableLoadEvent(name, table, lootTableManager);
+        LootTableLoadEvent event = new LootTableLoadEvent(name, table);
         if (MinecraftForge.EVENT_BUS.post(event))
             return LootTable.EMPTY;
         return event.getTable();
@@ -667,17 +734,27 @@ public class ForgeEventFactory
         return result == Result.DEFAULT ? level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) : result == Result.ALLOW;
     }
 
-    @Deprecated(forRemoval = true, since = "1.19.2")
-    public static boolean saplingGrowTree(LevelAccessor level, RandomSource randomSource, BlockPos pos)
-    {
-        return !blockGrowFeature(level, randomSource, pos, null).getResult().equals(Result.DENY);
-    }
-
     public static SaplingGrowTreeEvent blockGrowFeature(LevelAccessor level, RandomSource randomSource, BlockPos pos, @Nullable Holder<ConfiguredFeature<?, ?>> holder)
     {
         SaplingGrowTreeEvent event = new SaplingGrowTreeEvent(level, randomSource, pos, holder);
         MinecraftForge.EVENT_BUS.post(event);
         return event;
+    }
+
+    /**
+     * Fires the {@link AlterGroundEvent} and retrieves the resulting {@link StateProvider}.
+     * @param ctx The tree decoration context for the current alteration.
+     * @param positions The list of positions that are considered roots.
+     * @param provider The original {@link BlockStateProvider} from the {@link AlterGroundDecorator}.
+     * @return The (possibly event-modified) {@link StateProvider} to be used for ground alteration.
+     * @apiNote This method is called off-thread during world generation.
+     */
+    public static StateProvider alterGround(TreeDecorator.Context ctx, List<BlockPos> positions, StateProvider provider)
+    {
+        if (positions.isEmpty()) return provider; // I don't think this list is ever empty, but if it is, firing the event is pointless anyway.
+        AlterGroundEvent event = new AlterGroundEvent(ctx, positions, provider);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event.getStateProvider();
     }
 
     public static void fireChunkTicketLevelUpdated(ServerLevel level, long chunkPos, int oldTicketLevel, int newTicketLevel, @Nullable ChunkHolder chunkHolder)
@@ -713,9 +790,9 @@ public class ForgeEventFactory
         return event.getNewTime();
     }
 
-    public static List<PreparableReloadListener> onResourceReload(ReloadableServerResources serverResources)
+    public static List<PreparableReloadListener> onResourceReload(ReloadableServerResources serverResources, RegistryAccess registryAccess)
     {
-        AddReloadListenerEvent event = new AddReloadListenerEvent(serverResources);
+        AddReloadListenerEvent event = new AddReloadListenerEvent(serverResources, registryAccess);
         MinecraftForge.EVENT_BUS.post(event);
         return event.getListeners();
     }
@@ -771,18 +848,8 @@ public class ForgeEventFactory
         return event;
     }
 
-    /**
-     * @deprecated Use {@linkplain #onEnderPearlLand(ServerPlayer, double, double, double, ThrownEnderpearl, float, HitResult) the hit result-sensitive version}.
-     */
     @ApiStatus.Internal
-    @Deprecated(forRemoval = true, since = "1.19.2")
-    public static EntityTeleportEvent.EnderPearl onEnderPearlLand(ServerPlayer entity, double targetX, double targetY, double targetZ, ThrownEnderpearl pearlEntity, float attackDamage)
-    {
-        return onEnderPearlLand(entity, targetX, targetY, targetZ, pearlEntity, attackDamage, null);
-    }
-
-    @ApiStatus.Internal // TODO - 1.20: remove the nullable
-    public static EntityTeleportEvent.EnderPearl onEnderPearlLand(ServerPlayer entity, double targetX, double targetY, double targetZ, ThrownEnderpearl pearlEntity, float attackDamage, @Nullable HitResult hitResult)
+    public static EntityTeleportEvent.EnderPearl onEnderPearlLand(ServerPlayer entity, double targetX, double targetY, double targetZ, ThrownEnderpearl pearlEntity, float attackDamage, HitResult hitResult)
     {
         EntityTeleportEvent.EnderPearl event = new EntityTeleportEvent.EnderPearl(entity, targetX, targetY, targetZ, pearlEntity, attackDamage, hitResult);
         MinecraftForge.EVENT_BUS.post(event);
@@ -910,5 +977,35 @@ public class ForgeEventFactory
     public static void onAdvancementProgressedEvent(Player player, Advancement progressed, AdvancementProgress advancementProgress, String criterion, ProgressType progressType)
     {
         MinecraftForge.EVENT_BUS.post(new AdvancementProgressEvent(player, progressed, advancementProgress, criterion, progressType));
+    }
+
+    /**
+     * Fires {@link GetEnchantmentLevelEvent} and for a single enchantment, returning the (possibly event-modified) level.
+     * 
+     * @param level The original level of the enchantment as provided by the Item.
+     * @param stack The stack being queried against.
+     * @param ench  The enchantment being queried for.
+     * @return The new level of the enchantment.
+     */
+    public static int getEnchantmentLevelSpecific(int level, ItemStack stack, Enchantment ench) {
+        Map<Enchantment, Integer> map = new HashMap<>();
+        map.put(ench, level);
+        var event = new GetEnchantmentLevelEvent(stack, map, ench);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event.getEnchantments().getOrDefault(ench, 0);
+    }
+
+    /**
+     * Fires {@link GetEnchantmentLevelEvent} and for all enchantments, returning the (possibly event-modified) enchantment map.
+     * 
+     * @param enchantments The original enchantment map as provided by the Item.
+     * @param stack        The stack being queried against.
+     * @return The new enchantment map.
+     */
+    public static Map<Enchantment, Integer> getEnchantmentLevel(Map<Enchantment, Integer> enchantments, ItemStack stack) {
+        enchantments = new HashMap<>(enchantments);
+        var event = new GetEnchantmentLevelEvent(stack, enchantments, null);
+        MinecraftForge.EVENT_BUS.post(event);
+        return enchantments;
     }
 }
