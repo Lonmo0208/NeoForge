@@ -20,7 +20,7 @@ buildscript {
     dependencies {
         classpath('com.google.code.gson:gson') {
             version {
-                strictly '2.10.1'
+                 strictly '2.10.1'
             }
         }
     }
