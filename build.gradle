@@ -50,15 +50,15 @@ ext {
     MCP_VERSION = '20230612.114412'
     SNAPSHOT = false
 
-    SPI_VERSION = '7.0.1'
+    SPI_VERSION = '7.1.5'
     MERGETOOL_VERSION = '1.1.5'
-    ACCESSTRANSFORMERS_VERSION = '8.0.4'
-    COREMODS_VERSION = '5.0.1'
+    ACCESSTRANSFORMERS_VERSION = '8.0.7'
+    COREMODS_VERSION = '5.2.6'
     EVENTBUS_VERSION = '6.0.5'
     MODLAUNCHER_VERSION = '10.0.9'
     SECUREJARHANDLER_VERSION = '2.1.10'
     BOOTSTRAPLAUNCHER_VERSION = '1.1.2'
-    ASM_VERSION = '9.5'
+    ASM_VERSION = '9.7'
     INSTALLER_VERSION = '3.+'
     MIXIN_VERSION = '0.8.5'
     TERMINALCONSOLEAPPENDER_VERSION = '1.2.0'
@@ -68,7 +68,7 @@ ext {
     SLF4J_API_VERSION = '1.8.0-beta4'
     APACHE_MAVEN_ARTIFACT_VERSION = '3.8.5'
     JARJAR_VERSION = '0.3.19'
-    FANCY_MOD_LOADER_VERSION = '47.2.2'
+    FANCY_MOD_LOADER_VERSION = '47.2.3'
 
     // These versions should be kept in sync with the version manifest JSON
     // To use a version newer than the version manifest JSON, the dependency must be added to the installer configuration
@@ -165,6 +165,8 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        maven{url = 'https://maven.minecraftforge.net/'}
+
         maven {
             name = 'forge'
             url = 'https://maven.neoforged.net/releases'

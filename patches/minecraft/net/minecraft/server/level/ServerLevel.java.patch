@@ -85,6 +85,14 @@
        }
  
     }
+@@ -681,6 +_,7 @@
+          return BuiltInRegistries.f_256780_.m_7981_(p_8648_.m_6095_()).toString();
+       });
+       profilerfiller.m_6174_("tickNonPassenger");
++      if (p_8648_.canUpdate())
+       p_8648_.m_8119_();
+       this.m_46473_().m_7238_();
+ 
 @@ -700,6 +_,7 @@
                 return BuiltInRegistries.f_256780_.m_7981_(p_8664_.m_6095_()).toString();
              });

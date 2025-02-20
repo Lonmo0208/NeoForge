@@ -14,6 +14,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Either;
+import com.mojang.math.Constants;
 import net.minecraft.FileUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
@@ -74,7 +75,6 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
@@ -97,7 +97,6 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackLinkedSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.GameType;
@@ -146,12 +145,7 @@ import net.minecraftforge.client.gui.overlay.GuiOverlayManager;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.textures.ForgeTextureMetadata;
 import net.minecraftforge.client.textures.TextureAtlasSpriteLoaderManager;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ForgeI18n;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.MutableHashedLinkedMap;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.common.*;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -501,7 +495,7 @@ public class ForgeHooksClient
      * internal, relies on fixed format of FaceBakery
      */
     // TODO Do we need this?
-    public static void fillNormal(int[] faceData, Direction facing)
+    public static void fillNormal(int[] faceData, Direction facing, Object o)
     {
         Vector3f v1 = getVertexPos(faceData, 3);
         Vector3f t1 = getVertexPos(faceData, 1);
@@ -989,6 +983,79 @@ public class ForgeHooksClient
     {
         return RenderTypeHelper.getEntityRenderType(chunkRenderType, cull);
     }
+
+    public static Direction getNearestStable(float nX, float nY, float nZ)
+    {
+        if (ForgeConfig.CLIENT.stabilizeDirectionGetNearest.get()) {
+            Direction ret = Direction.NORTH;
+            float sum = Float.MIN_VALUE;
+            for(Direction dir : Direction.values()) {
+                float newSum = nX * (float)dir.getNormal().getX() + nY * (float)dir.getNormal().getY() + nZ * (float)dir.getNormal().getZ();
+                if (newSum > sum + Constants.EPSILON) {
+                    sum = newSum;
+                    ret = dir;
+                }
+            }
+            return ret;
+        } else {
+            return Direction.getNearest(nX, nY, nZ);
+        }
+    }
+
+    public static List<ClientTooltipComponent> gatherTooltipComponentsFromElements(ItemStack stack, List<Either<FormattedText, TooltipComponent>> elements, int mouseX, int screenWidth, int screenHeight, Font fallbackFont)
+    {
+        Font font = getTooltipFont(stack, fallbackFont);
+
+        var event = new RenderTooltipEvent.GatherComponents(stack, screenWidth, screenHeight, elements, -1);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (event.isCanceled()) return List.of();
+
+        // text wrapping
+        int tooltipTextWidth = event.getTooltipElements().stream()
+                .mapToInt(either -> either.map(font::width, component -> 0))
+                .max()
+                .orElse(0);
+
+        boolean needsWrap = false;
+
+        int tooltipX = mouseX + 12;
+        if (tooltipX + tooltipTextWidth + 4 > screenWidth)
+        {
+            tooltipX = mouseX - 16 - tooltipTextWidth;
+            if (tooltipX < 4) // if the tooltip doesn't fit on the screen
+            {
+                if (mouseX > screenWidth / 2)
+                    tooltipTextWidth = mouseX - 12 - 8;
+                else
+                    tooltipTextWidth = screenWidth - 16 - mouseX;
+                needsWrap = true;
+            }
+        }
+
+        if (event.getMaxWidth() > 0 && tooltipTextWidth > event.getMaxWidth())
+        {
+            tooltipTextWidth = event.getMaxWidth();
+            needsWrap = true;
+        }
+
+        int tooltipTextWidthF = tooltipTextWidth;
+        if (needsWrap)
+        {
+            return event.getTooltipElements().stream()
+                    .flatMap(either -> either.map(
+                            text -> splitLine(text, font, tooltipTextWidthF),
+                            component -> Stream.of(ClientTooltipComponent.create(component))
+                    ))
+                    .toList();
+        }
+        return event.getTooltipElements().stream()
+                .map(either -> either.map(
+                        text -> ClientTooltipComponent.create(text instanceof Component ? ((Component) text).getVisualOrderText() : Language.getInstance().getVisualOrder(text)),
+                        ClientTooltipComponent::create
+                ))
+                .toList();
+    }
+
 
     @Mod.EventBusSubscriber(value = Dist.CLIENT, modid="forge", bus= Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientEvents

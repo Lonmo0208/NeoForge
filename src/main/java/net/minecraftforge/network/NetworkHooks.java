@@ -242,4 +242,9 @@ public class NetworkHooks
     {
         return mgr.channel().attr(NetworkConstants.FML_MC_REGISTRY).get();
     }
+
+    public static void init()
+    {
+        LOGGER.debug("Loading Network data for FML net version: {}", NetworkConstants.init());
+    }
 }

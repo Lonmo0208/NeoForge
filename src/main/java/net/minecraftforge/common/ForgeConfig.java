@@ -5,6 +5,7 @@
 
 package net.minecraftforge.common;
 
+import net.minecraftforge.client.EntitySpectatorShaderManager;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -29,6 +30,8 @@ public class ForgeConfig {
         public final ConfigValue<String> permissionHandler;
 
         public final BooleanValue advertiseDedicatedServerToLan;
+
+        public final BooleanValue useItemWithDurationZero;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Server configuration settings")
@@ -74,7 +77,17 @@ public class ForgeConfig {
                     .translation("forge.configgui.advertiseDedicatedServerToLan")
                     .define("advertiseDedicatedServerToLan", true);
 
+            useItemWithDurationZero = builder
+                    .comment("Set this to true to enable living entities to use items with durations of 0. Fixes being able to use Eyes of Ender repeatedly by holding down the use button. Disabled by default as it could change interactions with items of existing mods.")
+                    .translation("forge.configgui.useItemWithDurationZero")
+                    .define("useItemWithDurationZero", false);
+
+
             builder.pop();
+        }
+
+        public final int getUseItemDuration() {
+            return useItemWithDurationZero.get() ? 0 : 1;
         }
     }
 
@@ -105,6 +118,11 @@ public class ForgeConfig {
 
         @Deprecated(since = "1.20.1", forRemoval = true) // Config option ignored.
         public final BooleanValue compressLanIPv6Addresses;
+
+        public final BooleanValue allowMipmapLowering;
+        public final BooleanValue stabilizeDirectionGetNearest;
+
+
 
         Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client only settings, mostly things related to rendering")
@@ -137,7 +155,23 @@ public class ForgeConfig {
                     .translation("forge.configgui.compressLanIPv6Addresses")
                     .define("compressLanIPv6Addresses", true);
 
+            allowMipmapLowering = builder
+                    .comment("When enabled, Forge will allow mipmaps to be lowered in real-time. This is the default behavior in vanilla. Use this if you experience issues with resource packs that use textures lower than 8x8.")
+                    .translation("forge.configgui.allowMipmapLowering")
+                    .define("allowMipmapLowering", false);
+
+            stabilizeDirectionGetNearest = builder
+                    .comment("When enabled, a slightly biased Direction#getNearest calculation will be used to prevent normal fighting on 45 degree angle faces.")
+                    .translation("forge.configgui.stabilizeDirectionGetNearest")
+                    .define("stabilizeDirectionGetNearest", true);
+
+
+
             builder.pop();
+        }
+
+        public final boolean allowMipmapLowering() {
+            return clientSpec.isLoaded() ? allowMipmapLowering.get() : allowMipmapLowering.getDefault();
         }
     }
 

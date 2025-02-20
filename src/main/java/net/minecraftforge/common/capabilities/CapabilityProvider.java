@@ -10,7 +10,11 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
@@ -34,16 +38,22 @@ public abstract class CapabilityProvider<B extends ICapabilityProviderImpl<B>> i
     private Supplier<ICapabilityProvider> lazyParentSupplier = null;
     private CompoundTag                   lazyData           = null;
     private boolean initialized = false;
-
-    protected CapabilityProvider(Class<B> baseClass)
-    {
-        this(baseClass, false);
-    }
+    
 
     protected CapabilityProvider(final Class<B> baseClass, final boolean isLazy)
     {
         this.baseClass = baseClass;
         this.isLazy = SUPPORTS_LAZY_CAPABILITIES && isLazy;
+    }
+
+    public CapabilityProvider(@NotNull Class<B> baseClass) {
+
+        this.baseClass = baseClass;
+    }
+
+    public CapabilityProvider() {
+
+        baseClass = null;
     }
 
     protected final void gatherCapabilities()
@@ -183,6 +193,13 @@ public abstract class CapabilityProvider<B extends ICapabilityProviderImpl<B>> i
         return !valid || disp == null ? LazyOptional.empty() : disp.getCapability(cap, side);
     }
 
+    protected boolean shouldUpdateFluidWhileBoating(FluidState state, Boat boat) {
+        return false;
+    }
+
+    public void onInventoryTick(Level level, Player player, int idx, int selected) {
+    }
+
     /**
      * Special implementation for cases which have a superclass and can't extend CapabilityProvider directly.
      * See {@link LevelChunk}
@@ -225,6 +242,6 @@ public abstract class CapabilityProvider<B extends ICapabilityProviderImpl<B>> i
         {
             return owner;
         }
-    };
+    }
 
 }

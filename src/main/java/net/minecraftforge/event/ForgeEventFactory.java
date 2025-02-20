@@ -28,6 +28,7 @@ import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.LevelSimulatedReader;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,6 +51,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -234,7 +237,6 @@ public class ForgeEventFactory
 
     /**
      * Specialized variant of {@link #checkSpawnPosition} for spawners, as they have slightly different checks.
-     * @see #CheckSpawnPosition
      * @implNote See in-line comments about custom spawn rules.
      */
     public static boolean checkSpawnPositionSpawner(Mob mob, ServerLevelAccessor level, MobSpawnType spawnType, SpawnData spawnData, BaseSpawner spawner)
@@ -277,7 +279,7 @@ public class ForgeEventFactory
      * @see MobSpawnEvent.FinalizeSpawn
      * @see Mob#finalizeSpawn(ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag)
      * @apiNote Callers do not need to check if the entity's spawn was cancelled, as the spawn will be blocked by Forge.
-     * @implNote Changes to the signature of this method must be reflected in the method redirector coremod. 
+     * @implNote Changes to the signature of this method must be reflected in the method redirector coremod.
      */
     @Nullable
     @SuppressWarnings("deprecation") // Call to deprecated Mob#finalizeSpawn is expected.
@@ -288,7 +290,7 @@ public class ForgeEventFactory
 
         if (!cancel)
         {
-            mob.finalizeSpawn(level, event.getDifficulty(), event.getSpawnType(), event.getSpawnData(), event.getSpawnTag());
+            return mob.finalizeSpawn(level, event.getDifficulty(), event.getSpawnType(), event.getSpawnData(), event.getSpawnTag());
         }
 
         return cancel ? null : event.getSpawnData();
@@ -331,12 +333,12 @@ public class ForgeEventFactory
 
     public static int getExperienceDrop(LivingEntity entity, Player attackingPlayer, int originalExperience)
     {
-       LivingExperienceDropEvent event = new LivingExperienceDropEvent(entity, attackingPlayer, originalExperience);
-       if (MinecraftForge.EVENT_BUS.post(event))
-       {
-           return 0;
-       }
-       return event.getDroppedExperience();
+        LivingExperienceDropEvent event = new LivingExperienceDropEvent(entity, attackingPlayer, originalExperience);
+        if (MinecraftForge.EVENT_BUS.post(event))
+        {
+            return 0;
+        }
+        return event.getDroppedExperience();
     }
 
     public static int getMaxSpawnPackSize(Mob entity)
@@ -634,7 +636,7 @@ public class ForgeEventFactory
     private static CapabilityDispatcher gatherCapabilities(AttachCapabilitiesEvent<?> event, @Nullable ICapabilityProvider parent)
     {
         MinecraftForge.EVENT_BUS.post(event);
-        return event.getCapabilities().size() > 0 || parent != null ? new CapabilityDispatcher(event.getCapabilities(), event.getListeners(), parent) : null;
+        return !event.getCapabilities().isEmpty() || parent != null ? new CapabilityDispatcher(event.getCapabilities(), event.getListeners(), parent) : null;
     }
 
     public static boolean fireSleepingLocationCheck(LivingEntity player, BlockPos sleepingLocation)
@@ -803,16 +805,18 @@ public class ForgeEventFactory
         MinecraftForge.EVENT_BUS.post(event);
     }
 
+    @Deprecated(forRemoval = true, since = "1.20.1") // Remove Entity Eye/Size hooks, as they need to be redesigned
     public static net.minecraftforge.event.entity.EntityEvent.Size getEntitySizeForge(Entity entity, Pose pose, EntityDimensions size, float eyeHeight)
     {
-        EntityEvent.Size evt = new EntityEvent.Size(entity, pose, size, eyeHeight);
+        var evt = new EntityEvent.Size(entity, pose, size, eyeHeight);
         MinecraftForge.EVENT_BUS.post(evt);
         return evt;
     }
 
+    @Deprecated(forRemoval = true, since = "1.20.1") // Remove Entity Eye/Size hooks, as they need to be redesigned
     public static net.minecraftforge.event.entity.EntityEvent.Size getEntitySizeForge(Entity entity, Pose pose, EntityDimensions oldSize, EntityDimensions newSize, float newEyeHeight)
     {
-        EntityEvent.Size evt = new EntityEvent.Size(entity, pose, oldSize, newSize, entity.getEyeHeight(), newEyeHeight);
+        var evt = new EntityEvent.Size(entity, pose, oldSize, newSize, entity.getEyeHeight(), newEyeHeight);
         MinecraftForge.EVENT_BUS.post(evt);
         return evt;
     }
@@ -981,7 +985,7 @@ public class ForgeEventFactory
 
     /**
      * Fires {@link GetEnchantmentLevelEvent} and for a single enchantment, returning the (possibly event-modified) level.
-     * 
+     *
      * @param level The original level of the enchantment as provided by the Item.
      * @param stack The stack being queried against.
      * @param ench  The enchantment being queried for.
@@ -997,7 +1001,7 @@ public class ForgeEventFactory
 
     /**
      * Fires {@link GetEnchantmentLevelEvent} and for all enchantments, returning the (possibly event-modified) enchantment map.
-     * 
+     *
      * @param enchantments The original enchantment map as provided by the Item.
      * @param stack        The stack being queried against.
      * @return The new enchantment map.
@@ -1007,5 +1011,13 @@ public class ForgeEventFactory
         var event = new GetEnchantmentLevelEvent(stack, enchantments, null);
         MinecraftForge.EVENT_BUS.post(event);
         return enchantments;
+    }
+
+    public static int onProjectileImpactResult(AbstractArrow abstractArrow, HitResult hitresult) {
+        return 0;
+    }
+
+    public static Object alterGround(LevelSimulatedReader level, RandomSource random, BlockPos blockpos, BlockState state) {
+        return null;
     }
 }
