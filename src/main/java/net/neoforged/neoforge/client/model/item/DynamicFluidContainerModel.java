@@ -10,21 +10,24 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.item.CompositeModel;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.item.ModelRenderProperties;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -38,9 +41,8 @@ import net.neoforged.neoforge.client.NeoForgeRenderTypes;
 import net.neoforged.neoforge.client.RenderTypeGroup;
 import net.neoforged.neoforge.client.color.item.FluidContentsTint;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.model.ComposedModelState;
 import net.neoforged.neoforge.client.model.QuadTransformers;
-import net.neoforged.neoforge.client.model.SimpleModelState;
-import net.neoforged.neoforge.client.model.UnbakedCompositeModel;
 import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
@@ -58,6 +60,7 @@ public class DynamicFluidContainerModel implements ItemModel {
     // Depth offsets to prevent Z-fighting
     private static final Transformation FLUID_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1, 1, 1.002f), new Quaternionf());
     private static final Transformation COVER_TRANSFORM = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(1, 1, 1.004f), new Quaternionf());
+    private static final ModelDebugName DEBUG_NAME = () -> "DynamicFluidContainerModel";
 
     private static RenderTypeGroup getLayerRenderTypes(boolean unlit) {
         return new RenderTypeGroup(RenderType.translucent(), unlit ? NeoForgeRenderTypes.ITEM_UNSORTED_UNLIT_TRANSLUCENT.get() : NeoForgeRenderTypes.ITEM_UNSORTED_TRANSLUCENT.get());
@@ -76,7 +79,7 @@ public class DynamicFluidContainerModel implements ItemModel {
         if (baseItemModel == null) {
             throw new IllegalStateException("Failed to access item/generated model");
         }
-        this.itemTransforms = baseItemModel.getTransforms();
+        this.itemTransforms = baseItemModel.getTopTransforms();
     }
 
     private ItemModel bakeModelForFluid(Fluid fluid) {
@@ -87,11 +90,11 @@ public class DynamicFluidContainerModel implements ItemModel {
         Material fluidMaskLocation = unbakedModel.textures.fluid.map(ClientHooks::getBlockMaterial).orElse(null);
         Material coverLocation = unbakedModel.textures.cover.map(ClientHooks::getBlockMaterial).orElse(null);
 
-        TextureAtlasSprite baseSprite = baseLocation != null ? sprites.get(baseLocation) : null;
-        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? sprites.get(ClientHooks.getBlockMaterial(IClientFluidTypeExtensions.of(fluid).getStillTexture())) : null;
-        TextureAtlasSprite coverSprite = (coverLocation != null && (!unbakedModel.coverIsMask || baseLocation != null)) ? sprites.get(coverLocation) : null;
+        TextureAtlasSprite baseSprite = baseLocation != null ? sprites.get(baseLocation, DEBUG_NAME) : null;
+        TextureAtlasSprite fluidSprite = fluid != Fluids.EMPTY ? sprites.get(ClientHooks.getBlockMaterial(IClientFluidTypeExtensions.of(fluid).getStillTexture()), DEBUG_NAME) : null;
+        TextureAtlasSprite coverSprite = (coverLocation != null && (!unbakedModel.coverIsMask || baseLocation != null)) ? sprites.get(coverLocation, DEBUG_NAME) : null;
 
-        TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation) : null;
+        TextureAtlasSprite particleSprite = particleLocation != null ? sprites.get(particleLocation, DEBUG_NAME) : null;
 
         if (particleSprite == null) particleSprite = fluidSprite;
         if (particleSprite == null) particleSprite = baseSprite;
@@ -100,13 +103,11 @@ public class DynamicFluidContainerModel implements ItemModel {
         // If the fluid is lighter than air, rotate 180deg to turn it upside down
         ModelState state = BlockModelRotation.X0_Y0;
         if (unbakedModel.flipGas && fluid != Fluids.EMPTY && fluid.getFluidType().isLighterThanAir()) {
-            state = new SimpleModelState(
-                    state.getRotation().compose(
-                            new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)));
+            state = new ComposedModelState(state, new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null));
         }
 
-        // We need to disable GUI 3D and block lighting for this to render properly
-        var modelBuilder = UnbakedCompositeModel.Baked.builder(true, false, false, particleSprite, itemTransforms);
+        List<ItemModel> subModels = new ArrayList<>();
+        ModelRenderProperties renderProperties = new ModelRenderProperties(false, particleSprite, itemTransforms);
 
         var normalRenderTypes = getLayerRenderTypes(false);
 
@@ -114,35 +115,33 @@ public class DynamicFluidContainerModel implements ItemModel {
             // Base texture
             var unbaked = UnbakedElementsHelper.createUnbakedItemElements(0, baseSprite);
             var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> baseSprite, state);
-            modelBuilder.addQuads(normalRenderTypes, quads);
+            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, normalRenderTypes.entity()));
         }
 
         if (fluidMaskLocation != null && fluidSprite != null) {
-            TextureAtlasSprite templateSprite = sprites.get(fluidMaskLocation);
+            TextureAtlasSprite templateSprite = sprites.get(fluidMaskLocation, DEBUG_NAME);
             // Fluid layer
-            var transformedState = new SimpleModelState(state.getRotation().compose(FLUID_TRANSFORM), state.isUvLocked());
-            var unbaked = UnbakedElementsHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
+            var transformedState = new ComposedModelState(state, FLUID_TRANSFORM);
+            var unbaked = UnbakedElementsHelper.createUnbakedItemMaskElements(0, templateSprite); // Use template as mask
             var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState); // Bake with fluid texture
 
             var emissive = unbakedModel.applyFluidLuminosity && fluid.getFluidType().getLightLevel() > 0;
             var renderTypes = getLayerRenderTypes(emissive);
             if (emissive) QuadTransformers.settingMaxEmissivity().processInPlace(quads);
 
-            modelBuilder.addQuads(renderTypes, quads);
+            subModels.add(new BlockModelWrapper(List.of(FluidContentsTint.INSTANCE), quads, renderProperties, renderTypes.entity()));
         }
 
         if (coverSprite != null) {
             var sprite = unbakedModel.coverIsMask ? baseSprite : coverSprite;
             // Cover/overlay
-            var transformedState = new SimpleModelState(state.getRotation().compose(COVER_TRANSFORM), state.isUvLocked());
-            var unbaked = UnbakedElementsHelper.createUnbakedItemMaskElements(2, coverSprite); // Use cover as mask
+            var transformedState = new ComposedModelState(state, COVER_TRANSFORM);
+            var unbaked = UnbakedElementsHelper.createUnbakedItemMaskElements(0, coverSprite); // Use cover as mask
             var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> sprite, transformedState); // Bake with selected texture
-            modelBuilder.addQuads(normalRenderTypes, quads);
+            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, normalRenderTypes.entity()));
         }
 
-        modelBuilder.setParticle(particleSprite);
-
-        return new BlockModelWrapper(modelBuilder.build(), List.of(new Constant(-1), FluidContentsTint.INSTANCE));
+        return new CompositeModel(subModels);
     }
 
     @Override

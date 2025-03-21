@@ -6,7 +6,6 @@
 package net.neoforged.neoforge.client.gui;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.logging.LogUtils;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -228,7 +227,7 @@ public class ModMismatchDisconnectedScreen extends Screen {
         }
 
         @Override
-        protected void drawPanel(GuiGraphics guiGraphics, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY) {
+        protected void drawPanel(GuiGraphics guiGraphics, int entryRight, int relativeY, int mouseX, int mouseY) {
             int i = 0;
 
             for (Pair<FormattedCharSequence, FormattedCharSequence> line : lineTable) {

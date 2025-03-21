@@ -5,16 +5,10 @@
 
 package net.neoforged.neoforge.client.loading;
 
-import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.platform.GlConst;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlDevice;
+import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.textures.GpuTexture;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -22,31 +16,34 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadInstance;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.neoforged.fml.earlydisplay.ColourScheme;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.earlydisplay.DisplayWindow;
 import net.neoforged.fml.loading.progress.ProgressMeter;
 import net.neoforged.fml.loading.progress.StartupNotificationManager;
-import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL30C;
 
 /**
  * This is an implementation of the LoadingOverlay that calls back into the early window rendering, as part of the
  * game loading cycle. We completely replace the {@link #render(GuiGraphics, int, int, float)} call from the parent
  * with one of our own, that allows us to blend our early loading screen into the main window, in the same manner as
  * the Mojang screen. It also allows us to see and tick appropriately as the later stages of the loading system run.
- *
+ * <p>
  * It is somewhat a copy of the superclass render method.
  */
 public class NeoForgeLoadingOverlay extends LoadingOverlay {
+    public static final ResourceLocation LOADING_OVERLAY_TEXTURE_ID = ResourceLocation.parse("neoforge:loading_overlay");
     private final Minecraft minecraft;
     private final ReloadInstance reload;
     private final Consumer<Optional<Throwable>> onFinish;
     private final DisplayWindow displayWindow;
     private final ProgressMeter progressMeter;
+    private final GpuTexture framebuffer;
     private float currentProgress;
     private long fadeOutStart = -1L;
 
@@ -56,8 +53,11 @@ public class NeoForgeLoadingOverlay extends LoadingOverlay {
         this.reload = reloader;
         this.onFinish = errorConsumer;
         this.displayWindow = displayWindow;
-        displayWindow.addMojangTexture(mc.getTextureManager().getTexture(ResourceLocation.withDefaultNamespace("textures/gui/title/mojangstudios.png")).getId());
+        var logoGpuTexture = (GlTexture) mc.getTextureManager().getTexture(MOJANG_STUDIOS_LOGO_LOCATION).getTexture();
+        displayWindow.addMojangTexture(logoGpuTexture.glId());
         this.progressMeter = StartupNotificationManager.prependProgressBar("Minecraft Progress", 1000);
+        this.framebuffer = ((GlDevice) RenderSystem.getDevice()).createExternalTexture("loading overlay framebuffer", displayWindow.getFramebufferTextureId());
+        Minecraft.getInstance().getTextureManager().register(LOADING_OVERLAY_TEXTURE_ID, new ExternalTexture(framebuffer));
     }
 
     public static Supplier<LoadingOverlay> newInstance(Supplier<Minecraft> mc, Supplier<ReloadInstance> ri, Consumer<Optional<Throwable>> handler, DisplayWindow window) {
@@ -70,72 +70,31 @@ public class NeoForgeLoadingOverlay extends LoadingOverlay {
         float fadeouttimer = this.fadeOutStart > -1L ? (float) (millis - this.fadeOutStart) / 1000.0F : -1.0F;
         this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + this.reload.getActualProgress() * 0.05F, 0.0F, 1.0F);
         progressMeter.setAbsolute(Mth.ceil(this.currentProgress * 1000));
+
+        graphics.flush(); // Ensure no draws are queued before we go and render externally
+
+        // This updates the EarlyDisplay screen in the off-screen framebuffer
+        displayWindow.render(0xff);
+
+        var fbWidth = this.minecraft.getWindow().getWidth();
+        var fbHeight = this.minecraft.getWindow().getHeight();
+
         var fade = 1.0F - Mth.clamp(fadeouttimer - 1.0F, 0.0F, 1.0F);
-        var colour = this.displayWindow.context().colourScheme().background();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, fade);
         if (fadeouttimer >= 1.0F) {
             if (this.minecraft.screen != null) {
                 this.minecraft.screen.render(graphics, 0, 0, partialTick);
             }
-            displayWindow.render(0xff);
-        } else {
-            GlStateManager._clearColor(colour.redf(), colour.greenf(), colour.bluef(), 1f);
-            GlStateManager._clear(GlConst.GL_COLOR_BUFFER_BIT);
-            displayWindow.render(0xFF);
         }
-        // EarlyWindow will call glBindTexture with 0. Make sure the GlStateManager's cache is aware of it.
-        RenderSystem.bindTexture(0);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA);
-        var fbWidth = this.minecraft.getWindow().getWidth();
-        var fbHeight = this.minecraft.getWindow().getHeight();
-        GL30C.glViewport(0, 0, fbWidth, fbHeight);
-        final var twidth = this.displayWindow.context().width();
-        final var theight = this.displayWindow.context().height();
-        var wscale = (float) fbWidth / twidth;
-        var hscale = (float) fbHeight / theight;
-        var scale = this.displayWindow.context().scale() * Math.min(wscale, hscale) / 2f;
-        var wleft = Mth.clamp(fbWidth * 0.5f - scale * twidth, 0, fbWidth);
-        var wtop = Mth.clamp(fbHeight * 0.5f - scale * theight, 0, fbHeight);
-        var wright = Mth.clamp(fbWidth * 0.5f + scale * twidth, 0, fbWidth);
-        var wbottom = Mth.clamp(fbHeight * 0.5f + scale * theight, 0, fbHeight);
-        GlStateManager.glActiveTexture(GlConst.GL_TEXTURE0);
-        RenderSystem.disableCull();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, fade);
-        RenderSystem.getModelViewMatrix().identity();
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0.0F, fbWidth, 0.0F, fbHeight, 0.1f, -0.1f), ProjectionType.ORTHOGRAPHIC);
-        RenderSystem.setShader(CoreShaders.RENDERTYPE_GUI_OVERLAY);
-        // This is fill in around the edges - it's empty solid colour
-        // top box from hpos
-        addQuad(bufferbuilder, 0, fbWidth, wtop, fbHeight, colour, fade);
-        // bottom box to hpos
-        addQuad(bufferbuilder, 0, fbWidth, 0, wtop, colour, fade);
-        // left box to wpos
-        addQuad(bufferbuilder, 0, wleft, wtop, wbottom, colour, fade);
-        // right box from wpos
-        addQuad(bufferbuilder, wright, fbWidth, wtop, wbottom, colour, fade);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
-        // This is the actual screen data from the loading screen
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA);
-        RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
-        RenderSystem.setShaderTexture(0, displayWindow.getFramebufferTextureId());
-        bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(wleft, wbottom, 0f).setUv(0, 0).setColor(1f, 1f, 1f, fade);
-        bufferbuilder.addVertex(wright, wbottom, 0f).setUv(1, 0).setColor(1f, 1f, 1f, fade);
-        bufferbuilder.addVertex(wright, wtop, 0f).setUv(1, 1).setColor(1f, 1f, 1f, fade);
-        bufferbuilder.addVertex(wleft, wtop, 0f).setUv(0, 1).setColor(1f, 1f, 1f, fade);
-        GL30C.glTexParameterIi(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_MIN_FILTER, GlConst.GL_NEAREST);
-        GL30C.glTexParameterIi(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_MAG_FILTER, GlConst.GL_NEAREST);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1f);
+        var width = this.minecraft.getWindow().getGuiScaledWidth();
+        var height = this.minecraft.getWindow().getGuiScaledHeight();
+        int color = ARGB.colorFromFloat(fade, 1, 1, 1);
+        graphics.blit(RenderType::guiTexturedOverlay, LOADING_OVERLAY_TEXTURE_ID, 0, 0, 0, 0, fbWidth, fbHeight, fbWidth, fbHeight, width, height, color);
 
         if (fadeouttimer >= 2.0F) {
             progressMeter.complete();
+            graphics.flush(); // Ensure drawing is done before releasing the texture
+            Minecraft.getInstance().getTextureManager().release(LOADING_OVERLAY_TEXTURE_ID);
             this.minecraft.setOverlay(null);
             this.displayWindow.close();
         }
@@ -150,15 +109,16 @@ public class NeoForgeLoadingOverlay extends LoadingOverlay {
             }
 
             if (this.minecraft.screen != null) {
-                this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
+                this.minecraft.screen.init(this.minecraft, graphics.guiWidth(), graphics.guiHeight());
             }
         }
     }
 
-    private static void addQuad(VertexConsumer bufferbuilder, float x0, float x1, float y0, float y1, ColourScheme.Colour colour, float fade) {
-        bufferbuilder.addVertex(x0, y0, 0f).setColor(colour.redf(), colour.greenf(), colour.bluef(), fade);
-        bufferbuilder.addVertex(x0, y1, 0f).setColor(colour.redf(), colour.greenf(), colour.bluef(), fade);
-        bufferbuilder.addVertex(x1, y1, 0f).setColor(colour.redf(), colour.greenf(), colour.bluef(), fade);
-        bufferbuilder.addVertex(x1, y0, 0f).setColor(colour.redf(), colour.greenf(), colour.bluef(), fade);
+    @OnlyIn(Dist.CLIENT)
+    static class ExternalTexture extends AbstractTexture {
+        public ExternalTexture(GpuTexture texture) {
+            this.texture = texture;
+            this.setFilter(false, false);
+        }
     }
 }

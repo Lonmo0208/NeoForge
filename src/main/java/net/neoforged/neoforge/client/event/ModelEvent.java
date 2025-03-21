@@ -8,7 +8,6 @@ package net.neoforged.neoforge.client.event;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
@@ -20,6 +19,8 @@ import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.neoforge.client.model.UnbakedModelLoader;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelBaker;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -101,12 +102,11 @@ public abstract class ModelEvent extends Event {
         public BakingCompleted(ModelManager modelManager, ModelBakery.BakingResult bakingResult, ModelBakery modelBakery) {
             this.modelManager = modelManager;
             this.bakingResult = new ModelBakery.BakingResult(
-                    bakingResult.missingModel(),
+                    bakingResult.missingModels(),
                     Collections.unmodifiableMap(bakingResult.blockStateModels()),
-                    bakingResult.missingItemModel(),
                     Collections.unmodifiableMap(bakingResult.itemStackModels()),
                     Collections.unmodifiableMap(bakingResult.itemProperties()),
-                    Collections.unmodifiableMap(bakingResult.standaloneModels()));
+                    bakingResult.standaloneModels().unmodifiable());
             this.modelBakery = modelBakery;
         }
 
@@ -134,25 +134,25 @@ public abstract class ModelEvent extends Event {
 
     /**
      * Fired when the {@link net.minecraft.client.resources.model.ModelDiscovery} is notified of dependency discovery of its top models.
-     * Allows developers to register models to be loaded, along with their dependencies.
+     * Allows developers to register standalone models to be loaded, along with their dependencies.
      *
      * <p>This event is not {@linkplain ICancellableEvent cancellable}.</p>
      *
      * <p>This event is fired on the mod-specific event bus, only on the {@linkplain LogicalSide#CLIENT logical client}.</p>
      */
-    public static class RegisterAdditional extends ModelEvent implements IModBusEvent {
-        private final Consumer<ResourceLocation> registrar;
+    public static class RegisterStandalone extends ModelEvent implements IModBusEvent {
+        private final Map<StandaloneModelKey<?>, StandaloneModelBaker<?>> modelMap;
 
         @ApiStatus.Internal
-        public RegisterAdditional(Consumer<ResourceLocation> registrar) {
-            this.registrar = registrar;
+        public RegisterStandalone(Map<StandaloneModelKey<?>, StandaloneModelBaker<?>> modelMap) {
+            this.modelMap = modelMap;
         }
 
         /**
          * Registers a model to be loaded, along with its dependencies.
          */
-        public void register(ResourceLocation model) {
-            registrar.accept(model);
+        public <T> void register(StandaloneModelKey<T> modelKey, StandaloneModelBaker<T> baker) {
+            modelMap.put(modelKey, baker);
         }
     }
 

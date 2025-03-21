@@ -7,7 +7,6 @@ package net.neoforged.neoforge.client.gui;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -180,9 +179,8 @@ public class ModListScreen extends Screen {
         }
 
         @Override
-        protected void drawPanel(GuiGraphics guiGraphics, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY) {
+        protected void drawPanel(GuiGraphics guiGraphics, int entryRight, int relativeY, int mouseX, int mouseY) {
             if (logoPath != null) {
-                RenderSystem.enableBlend();
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 // Draw the logo image inscribed in a rectangle with width entryWidth (minus some padding) and height 50
                 int headerHeight = 50;
@@ -192,9 +190,7 @@ public class ModListScreen extends Screen {
 
             for (FormattedCharSequence line : lines) {
                 if (line != null) {
-                    RenderSystem.enableBlend();
                     guiGraphics.drawString(ModListScreen.this.font, line, left + PADDING, relativeY, 0xFFFFFF);
-                    RenderSystem.disableBlend();
                 }
                 relativeY += font.lineHeight;
             }
@@ -391,14 +387,12 @@ public class ModListScreen extends Screen {
                         logo = NativeImage.read(logoResource.get());
                     if (logo != null) {
                         var textureId = ResourceLocation.fromNamespaceAndPath("neoforge", "modlogo");
-                        tm.register(textureId, new DynamicTexture(logo) {
+                        tm.register(textureId, new DynamicTexture(textureId::toString, logo) {
                             @Override
                             public void upload() {
-                                this.bind();
-                                NativeImage td = this.getPixels();
                                 // Use custom "blur" value which controls texture filtering (nearest-neighbor vs linear)
-                                // TODO 1.21.4 restore selectedMod.getLogoBlur() check
-                                this.getPixels().upload(0, 0, 0, 0, 0, td.getWidth(), td.getHeight(), false);
+                                this.setFilter(selectedMod.getLogoBlur(), false);
+                                super.upload();
                             }
                         });
 

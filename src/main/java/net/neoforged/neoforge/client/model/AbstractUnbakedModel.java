@@ -8,8 +8,11 @@ package net.neoforged.neoforge.client.model;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.TextureSlots;
 import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.UnbakedGeometry;
 import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.context.ContextMap;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,54 +21,46 @@ import org.jetbrains.annotations.Nullable;
  * added by vanilla and NeoForge except elements but create the quads from something other
  * than the vanilla elements spec.
  */
-public abstract class AbstractUnbakedModel implements ExtendedUnbakedModel {
+public abstract class AbstractUnbakedModel implements UnbakedModel {
     /**
      * Holds the standard top-level model parameters except elements.
-     * {@link UnbakedModel#bake(TextureSlots, ModelBaker, ModelState, boolean, boolean, ItemTransforms, ContextMap)}
+     * {@link UnbakedGeometry#bake(TextureSlots, ModelBaker, ModelState, ModelDebugName, ContextMap)}
      * must always use the values given as parameters instead of accessing this parameter directly in order to
      * take values collected along the model's parent chain into account.
      */
     protected final StandardModelParameters parameters;
-    private UnbakedModel parent;
 
     protected AbstractUnbakedModel(StandardModelParameters parameters) {
         this.parameters = parameters;
     }
 
-    @Override
-    public void resolveDependencies(Resolver resolver) {
-        if (this.parameters.parent() != null) {
-            this.parent = resolver.resolve(this.parameters.parent());
-        }
-    }
-
     @Nullable
     @Override
-    public Boolean getAmbientOcclusion() {
+    public Boolean ambientOcclusion() {
         return this.parameters.ambientOcclusion();
     }
 
     @Nullable
     @Override
-    public GuiLight getGuiLight() {
+    public GuiLight guiLight() {
         return this.parameters.guiLight();
     }
 
     @Nullable
     @Override
-    public ItemTransforms getTransforms() {
+    public ItemTransforms transforms() {
         return this.parameters.itemTransforms();
     }
 
     @Override
-    public TextureSlots.Data getTextureSlots() {
+    public TextureSlots.Data textureSlots() {
         return this.parameters.textures();
     }
 
     @Nullable
     @Override
-    public UnbakedModel getParent() {
-        return this.parent;
+    public ResourceLocation parent() {
+        return this.parameters.parent();
     }
 
     @Override

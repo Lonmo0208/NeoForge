@@ -172,6 +172,18 @@ generateAccessTransformers {
             named('net/minecraft/client/renderer/RenderStateShard'),
             fieldsOfType(classesWithSuperclass('net/minecraft/client/renderer/RenderStateShard'))
     )
+    // Make all composite state builder methods public
+    methodGroup(
+            'composite state builder methods', PUBLIC,
+            named('net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder'),
+            not(named('<init>'))
+    )
+    // Make all render pipeline snippet fields public
+    fieldGroup(
+            'render pipeline snippets', PUBLIC,
+            named('net/minecraft/client/renderer/RenderPipelines'),
+            fieldsOfType(named('com/mojang/blaze3d/pipeline/RenderPipeline$Snippet'))
+    )
 
     // Make all block constructors public so they can be used by mods
     methodGroup(

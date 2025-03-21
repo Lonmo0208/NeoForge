@@ -6,8 +6,8 @@
 package net.neoforged.neoforge.client.model.lighting;
 
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,14 +37,14 @@ public class SmoothQuadLighter extends QuadLighter {
     }
 
     @Override
-    protected void computeLightingAt(BlockAndTintGetter level, BlockPos origin, BlockState state) {
+    protected void computeLightingAt(BlockAndTintGetter level, BlockPos origin, BlockState state, ModelBlockRenderer.Cache cache) {
         for (int x = 0; x <= 2; x++) {
             for (int y = 0; y <= 2; y++) {
                 for (int z = 0; z <= 2; z++) {
                     pos.setWithOffset(origin, x - 1, y - 1, z - 1);
                     BlockState neighborState = level.getBlockState(pos);
                     t[x][y][z] = neighborState.getLightBlock() < 15;
-                    int brightness = LevelRenderer.getLightColor(level, neighborState, pos);
+                    int brightness = cache.getLightColor(neighborState, level, pos);
                     s[x][y][z] = LightTexture.sky(brightness);
                     b[x][y][z] = LightTexture.block(brightness);
                     ao[x][y][z] = neighborState.getShadeBrightness(level, pos);

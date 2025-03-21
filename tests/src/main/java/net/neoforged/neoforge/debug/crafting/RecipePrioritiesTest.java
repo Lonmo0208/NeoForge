@@ -13,7 +13,6 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -26,6 +25,7 @@ import net.neoforged.testframework.DynamicTest;
 import net.neoforged.testframework.annotation.ForEachTest;
 import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.gametest.EmptyTemplate;
+import net.neoforged.testframework.gametest.GameTest;
 import net.neoforged.testframework.registration.RegistrationHelper;
 
 @ForEachTest(groups = "crafting.recipe_priorities")
@@ -47,7 +47,7 @@ public class RecipePrioritiesTest {
                 .thenExecute(() -> helper.setBlock(1, 2, 1, Blocks.CHEST))
 
                 // Try to craft default bed recipe
-                .thenMap(() -> helper.requireBlockEntity(1, 1, 1, CrafterBlockEntity.class))
+                .thenMap(() -> helper.getBlockEntity(1, 1, 1, CrafterBlockEntity.class))
                 .thenExecute(crafter -> crafter.setItem(3, Items.YELLOW_WOOL.getDefaultInstance()))
                 .thenExecute(crafter -> crafter.setItem(4, Items.YELLOW_WOOL.getDefaultInstance()))
                 .thenExecute(crafter -> crafter.setItem(5, Items.YELLOW_WOOL.getDefaultInstance()))

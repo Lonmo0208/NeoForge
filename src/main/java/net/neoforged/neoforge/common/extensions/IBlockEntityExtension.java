@@ -5,7 +5,7 @@
 
 package net.neoforged.neoforge.common.extensions;
 
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -32,10 +32,7 @@ public interface IBlockEntityExtension {
      * @param pkt The data packet
      */
     default void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
-        CompoundTag compoundtag = pkt.getTag();
-        if (!compoundtag.isEmpty()) {
-            self().loadWithComponents(compoundtag, lookupProvider);
-        }
+        self().loadWithComponents(pkt.getTag(), lookupProvider);
     }
 
     /**
@@ -85,7 +82,7 @@ public interface IBlockEntityExtension {
 
     /**
      * Allows you to return additional model data.
-     * This data can be used to provide additional functionality in your {@link BakedModel}.
+     * This data can be used to provide additional functionality in your {@link BlockStateModel}.
      * You need to schedule a refresh of you model data via {@link #requestModelDataUpdate()} if the result of this function changes.
      *
      * <p>This method is always called on the main client thread.

@@ -27,8 +27,8 @@
              .stream()
 @@ -260,6 +_,16 @@
          return p_380850_ -> p_380850_.getType() == p_381108_ && p_380850_ instanceof SingleItemRecipe singleitemrecipe
-                 ? Optional.of(singleitemrecipe.input())
-                 : Optional.empty();
+             ? Optional.of(singleitemrecipe.input())
+             : Optional.empty();
 +    }
 +
 +    // Neo: expose recipe map

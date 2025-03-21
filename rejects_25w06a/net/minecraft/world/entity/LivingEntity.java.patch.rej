@@ -1,0 +1,42 @@
+++++ REJECTED HUNK: 18
+@@ -1111,15 +1153,19 @@
+             float f = p_376610_;
+             boolean flag = false;
+             float f1 = 0.0F;
+-            if (p_376610_ > 0.0F && this.isDamageSourceBlocked(p_376460_)) {
+-                this.hurtCurrentlyUsedShield(p_376610_);
+-                f1 = p_376610_;
+-                p_376610_ = 0.0F;
++            net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent ev;
++            if (p_376610_ > 0.0F && (ev = net.neoforged.neoforge.common.CommonHooks.onDamageBlock(this, this.damageContainers.peek(), this.isDamageSourceBlocked(p_376460_))).getBlocked()) {
++                this.damageContainers.peek().setBlockedDamage(ev);
++                if (ev.shieldDamage() > 0) {
++                    this.hurtCurrentlyUsedShield(ev.shieldDamage());
++                }
++                f1 = ev.getBlockedDamage();
++                p_376610_ = ev.getDamageContainer().getNewDamage();
+                 if (!p_376460_.is(DamageTypeTags.IS_PROJECTILE) && p_376460_.getDirectEntity() instanceof LivingEntity livingentity) {
+                     this.blockUsingShield(livingentity);
+                 }
+ 
+-                flag = true;
++                flag = p_376610_ <= 0;
+             }
+ 
+             if (p_376460_.is(DamageTypeTags.IS_FREEZING) && this.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)) {
+++++ END HUNK
+
+++++ REJECTED HUNK: 42
+@@ -2193,8 +2270,9 @@
+     public void travel(Vec3 p_21280_) {
+         if (this.isControlledByLocalInstance()) {
+             FluidState fluidstate = this.level().getFluidState(this.blockPosition());
+-            if ((this.isInWater() || this.isInLava()) && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
+-                this.travelInFluid(p_21280_);
++            // Neo: Call (patched-in overload of) #travelInFluid for custom fluid types
++            if ((this.isInWater() || this.isInLava() || this.isInFluidType(fluidstate)) && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
++                this.travelInFluid(p_21280_, fluidstate);
+             } else if (this.isFallFlying()) {
+                 this.travelFallFlying();
+             } else {
+++++ END HUNK

@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -23,15 +23,15 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A container for data to be passed to {@link BakedModel} instances.
+ * A container for data to be passed to {@link BlockStateModel} instances.
  * <p>
  * All objects stored in here <b>MUST BE IMMUTABLE OR THREAD-SAFE</b>.
  * Properties will be accessed from another thread.
  *
  * @see ModelProperty
  * @see BlockEntity#getModelData()
- * @see BakedModel#getQuads(BlockState, Direction, RandomSource, ModelData, RenderType)
- * @see BakedModel#getModelData(BlockAndTintGetter, BlockPos, BlockState, ModelData)
+ * @see BlockStateModel#getQuads(BlockState, Direction, RandomSource, ModelData, RenderType)
+ * @see BlockStateModel#getModelData(BlockAndTintGetter, BlockPos, BlockState, ModelData)
  */
 public final class ModelData {
     public static final ModelData EMPTY = ModelData.builder().build();

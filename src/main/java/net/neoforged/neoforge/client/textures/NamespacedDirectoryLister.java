@@ -9,7 +9,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
-import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
 import net.minecraft.client.renderer.texture.atlas.sources.DirectoryLister;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
@@ -23,12 +22,11 @@ import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
  */
 public record NamespacedDirectoryLister(String namespace, String sourcePath, String idPrefix) implements SpriteSource {
 
-    private static final MapCodec<NamespacedDirectoryLister> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+    public static final MapCodec<NamespacedDirectoryLister> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Codec.STRING.fieldOf("namespace").forGetter(lister -> lister.namespace),
             Codec.STRING.fieldOf("source").forGetter(lister -> lister.sourcePath),
             Codec.STRING.fieldOf("prefix").forGetter(lister -> lister.idPrefix)).apply(inst, NamespacedDirectoryLister::new));
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(NeoForgeVersion.MOD_ID, "namespaced_directory");
-    public static final SpriteSourceType TYPE = new SpriteSourceType(CODEC);
     @Override
     public void run(ResourceManager resourceManager, Output output) {
         FileToIdConverter converter = new FileToIdConverter("textures/" + this.sourcePath, ".png");
@@ -39,7 +37,7 @@ public record NamespacedDirectoryLister(String namespace, String sourcePath, Str
     }
 
     @Override
-    public SpriteSourceType type() {
-        return TYPE;
+    public MapCodec<? extends SpriteSource> codec() {
+        return CODEC;
     }
 }

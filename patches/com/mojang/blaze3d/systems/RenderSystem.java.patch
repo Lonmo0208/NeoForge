@@ -1,17 +1,27 @@
 --- a/com/mojang/blaze3d/systems/RenderSystem.java
 +++ b/com/mojang/blaze3d/systems/RenderSystem.java
-@@ -818,4 +_,14 @@
-             void accept(it.unimi.dsi.fastutil.ints.IntConsumer p_157488_, int p_157489_);
-         }
+@@ -45,6 +_,8 @@
+ @DontObfuscate
+ public class RenderSystem {
+     public static final ScissorState SCISSOR_STATE = new ScissorState();
++    @Nullable
++    public static net.neoforged.neoforge.client.stencil.StencilTest STENCIL_TEST = null;
+     static final Logger LOGGER = LogUtils.getLogger();
+     public static final int MINIMUM_ATLAS_TEXTURE_SIZE = 1024;
+     @Nullable
+@@ -152,6 +_,15 @@
+ 
+     public static void disableScissor() {
+         SCISSOR_STATE.disable();
++    }
++
++
++    public static void enableStencil(net.neoforged.neoforge.client.stencil.StencilTest stencilTest) {
++        STENCIL_TEST = stencilTest;
++    }
++
++    public static void disableStencil() {
++        STENCIL_TEST = null;
      }
-+
-+    public static void backupGlState(net.neoforged.neoforge.client.GlStateBackup state) {
-+        assertOnRenderThread();
-+        GlStateManager._backupGlState(state);
-+    }
-+
-+    public static void restoreGlState(net.neoforged.neoforge.client.GlStateBackup state) {
-+        assertOnRenderThread();
-+        GlStateManager._restoreGlState(state);
-+    }
- }
+ 
+     public static void setShaderFog(FogParameters p_360454_) {

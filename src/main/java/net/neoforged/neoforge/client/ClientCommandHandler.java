@@ -186,7 +186,7 @@ public class ClientCommandHandler {
                 MutableComponent details = Component.literal("")
                         .withStyle(ChatFormatting.GRAY)
                         .withStyle((style) -> style
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, reader.getString())));
+                                .withClickEvent(new ClickEvent.SuggestCommand(reader.getString())));
                 if (position > 10) {
                     details.append("...");
                 }
@@ -203,7 +203,7 @@ public class ClientCommandHandler {
             Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("command.failed")
                     .withStyle(ChatFormatting.RED)
                     .withStyle((style) -> style
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, message))));
+                            .withHoverEvent(new HoverEvent.ShowText(message))));
             LOGGER.error("Error executing client command \"{}\"", command, generic);
         }
         return true;

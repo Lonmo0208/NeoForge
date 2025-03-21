@@ -30,17 +30,19 @@ import net.neoforged.neoforge.client.entity.animation.json.AnimationLoader;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterNamedRenderTypesEvent;
-import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
+import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.loading.ClientModLoader;
+import net.neoforged.neoforge.client.model.CompositeUnbakedModel;
 import net.neoforged.neoforge.client.model.EmptyModel;
-import net.neoforged.neoforge.client.model.UnbakedCompositeModel;
+import net.neoforged.neoforge.client.model.block.CompositeBlockModel;
 import net.neoforged.neoforge.client.model.item.DynamicFluidContainerModel;
 import net.neoforged.neoforge.client.model.obj.ObjLoader;
 import net.neoforged.neoforge.client.resources.VanillaClientListeners;
@@ -131,7 +133,7 @@ public class ClientNeoForgeMod {
     static void onRegisterModelLoaders(ModelEvent.RegisterLoaders event) {
         event.register(neoForgeId("empty"), EmptyModel.LOADER);
         event.register(neoForgeId("obj"), ObjLoader.INSTANCE);
-        event.register(neoForgeId("composite"), UnbakedCompositeModel.Loader.INSTANCE);
+        event.register(neoForgeId("composite"), CompositeUnbakedModel.Loader.INSTANCE);
     }
 
     @SubscribeEvent
@@ -153,8 +155,8 @@ public class ClientNeoForgeMod {
     }
 
     @SubscribeEvent
-    static void onRegisterSpriteSourceTypes(RegisterSpriteSourceTypesEvent event) {
-        event.register(NamespacedDirectoryLister.ID, NamespacedDirectoryLister.TYPE);
+    static void onRegisterSpriteSourceTypes(RegisterSpriteSourcesEvent event) {
+        event.register(NamespacedDirectoryLister.ID, NamespacedDirectoryLister.CODEC);
     }
 
     @SubscribeEvent
@@ -235,6 +237,11 @@ public class ClientNeoForgeMod {
     @SubscribeEvent
     static void registerItemModels(RegisterItemModelsEvent event) {
         event.register(neoForgeId("fluid_container"), DynamicFluidContainerModel.Unbaked.MAP_CODEC);
+    }
+
+    @SubscribeEvent
+    static void registerBlockStateModels(RegisterBlockStateModels event) {
+        event.register(neoForgeId("composite"), CompositeBlockModel.Unbaked.MAP_CODEC);
     }
 
     // TODO 1.21.4

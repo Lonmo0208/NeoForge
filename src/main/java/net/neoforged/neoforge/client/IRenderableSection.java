@@ -21,7 +21,7 @@ public interface IRenderableSection {
     /**
      * {@return the block position at the origin of the section}
      */
-    BlockPos getOrigin();
+    BlockPos getRenderOrigin();
 
     /**
      * {@return the bounding box of the section}

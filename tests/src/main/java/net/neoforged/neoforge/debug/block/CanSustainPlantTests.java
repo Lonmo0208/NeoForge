@@ -8,7 +8,8 @@ package net.neoforged.neoforge.debug.block;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -20,11 +21,11 @@ import net.minecraft.world.level.block.ChorusPlantBlock;
 import net.minecraft.world.level.block.MangrovePropaguleBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.testframework.DynamicTest;
 import net.neoforged.testframework.annotation.ForEachTest;
 import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.gametest.EmptyTemplate;
+import net.neoforged.testframework.gametest.GameTest;
 import net.neoforged.testframework.registration.RegistrationHelper;
 
 @ForEachTest(groups = { "level.block.survivability" })
@@ -43,7 +44,7 @@ public class CanSustainPlantTests {
 
         final BlockPos belowBlock = new BlockPos(1, 1, 1);
         test.onGameTest(helper -> helper.startSequence(() -> helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL))
-                .thenExecute(player -> player.moveTo(helper.absolutePos(belowBlock).north().getCenter()))
+                .thenExecute(player -> player.snapTo(helper.absolutePos(belowBlock).north().getCenter()))
                 .thenExecute(player -> player.lookAt(EntityAnchorArgument.Anchor.EYES, helper.absolutePos(belowBlock).getCenter()))
 
                 .thenExecute(() -> helper.setBlock(belowBlock, Blocks.WATER))
@@ -604,10 +605,10 @@ public class CanSustainPlantTests {
         test.onGameTest(helper -> helper.startSequence(() -> helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL))
                 .thenExecute(() -> helper.setBlock(belowBlock, Blocks.END_STONE))
                 .thenExecute(player -> helper.useBlock(belowBlock, player, new ItemStack(Items.CHORUS_PLANT), Direction.UP))
-                .thenExecute(() -> helper.assertBlockState(belowBlock.above(), (state) -> state.getValue(ChorusPlantBlock.DOWN), () -> "Chorus Plant not found with down property"))
+                .thenExecute(() -> helper.assertBlockState(belowBlock.above(), (state) -> state.getValue(ChorusPlantBlock.DOWN), $ -> Component.literal("Chorus Plant not found with down property")))
 
                 .thenExecute(player -> helper.useBlock(belowBlock.above(), player, new ItemStack(Items.CHORUS_PLANT), Direction.UP))
-                .thenExecute(() -> helper.assertBlockState(belowBlock.above(2), (state) -> state.getValue(ChorusPlantBlock.DOWN), () -> "Chorus Plant not found with down property"))
+                .thenExecute(() -> helper.assertBlockState(belowBlock.above(2), (state) -> state.getValue(ChorusPlantBlock.DOWN), $ -> Component.literal("Chorus Plant not found with down property")))
 
                 .thenExecute(() -> helper.setBlock(belowBlock.above(2), Blocks.AIR))
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR))
@@ -623,7 +624,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR))
                 .thenExecute(() -> helper.setBlock(belowBlock, sustainingBlock.get()))
                 .thenExecute(player -> helper.useBlock(belowBlock, player, new ItemStack(Items.CHORUS_PLANT), Direction.UP))
-                .thenExecute(() -> helper.assertBlockState(belowBlock.above(), (state) -> state.getValue(ChorusPlantBlock.DOWN), () -> "Chorus Plant not found with down property"))
+                .thenExecute(() -> helper.assertBlockState(belowBlock.above(), (state) -> state.getValue(ChorusPlantBlock.DOWN), $ -> Component.literal("Chorus Plant not found with down property")))
 
                 .thenSucceed());
     }

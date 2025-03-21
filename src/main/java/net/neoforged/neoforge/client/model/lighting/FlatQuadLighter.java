@@ -6,7 +6,7 @@
 package net.neoforged.neoforge.client.model.lighting;
 
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,12 +31,12 @@ public class FlatQuadLighter extends QuadLighter {
     }
 
     @Override
-    protected void computeLightingAt(BlockAndTintGetter level, BlockPos pos, BlockState state) {
+    protected void computeLightingAt(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelBlockRenderer.Cache cache) {
         isFullCube = Block.isShapeFullBlock(state.getCollisionShape(level, pos));
         for (Direction side : SIDES) {
-            packedLight[side.ordinal()] = LevelRenderer.getLightColor(level, state, pos.relative(side));
+            packedLight[side.ordinal()] = cache.getLightColor(state, level, pos.relative(side));
         }
-        packedLight[6] = LevelRenderer.getLightColor(level, state, pos);
+        packedLight[6] = cache.getLightColor(state, level, pos);
     }
 
     @Override

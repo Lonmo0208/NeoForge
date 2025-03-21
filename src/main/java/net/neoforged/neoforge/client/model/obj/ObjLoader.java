@@ -29,14 +29,14 @@ import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 public class ObjLoader implements UnbakedModelLoader<ObjModel>, ResourceManagerReloadListener {
     public static ObjLoader INSTANCE = new ObjLoader();
 
-    private final Map<ObjModel.ModelSettings, ObjModel> modelCache = Maps.newConcurrentMap();
+    private final Map<ObjGeometry.Settings, ObjGeometry> geometryCache = Maps.newConcurrentMap();
     private final Map<ResourceLocation, ObjMaterialLibrary> materialCache = Maps.newConcurrentMap();
 
     private final ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
-        modelCache.clear();
+        geometryCache.clear();
         materialCache.clear();
     }
 
@@ -54,14 +54,15 @@ public class ObjLoader implements UnbakedModelLoader<ObjModel>, ResourceManagerR
         String mtlOverride = GsonHelper.getAsString(jsonObject, "mtl_override", null);
         StandardModelParameters parameters = StandardModelParameters.parse(jsonObject, jsonDeserializationContext);
 
-        return loadModel(new ObjModel.ModelSettings(ResourceLocation.parse(modelLocation), automaticCulling, shadeQuads, flipV, emissiveAmbient, mtlOverride, parameters));
+        var geometry = loadGeometry(new ObjGeometry.Settings(ResourceLocation.parse(modelLocation), automaticCulling, shadeQuads, flipV, emissiveAmbient, mtlOverride));
+        return new ObjModel(parameters, geometry);
     }
 
-    public ObjModel loadModel(ObjModel.ModelSettings settings) {
-        return modelCache.computeIfAbsent(settings, (data) -> {
+    public ObjGeometry loadGeometry(ObjGeometry.Settings settings) {
+        return geometryCache.computeIfAbsent(settings, (data) -> {
             Resource resource = manager.getResource(settings.modelLocation()).orElseThrow();
             try (ObjTokenizer tokenizer = new ObjTokenizer(resource.open())) {
-                return ObjModel.parse(tokenizer, settings);
+                return ObjGeometry.parse(tokenizer, data);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("Could not find OBJ model", e);
             } catch (Exception e) {

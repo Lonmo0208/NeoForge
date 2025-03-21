@@ -65,7 +65,7 @@
  
 @@ -409,5 +_,10 @@
          @OnlyIn(Dist.CLIENT)
-         static record PendingRequest(UUID id, URL url, String hash) {
+         record PendingRequest(UUID id, URL url, String hash) {
          }
 +    }
 +

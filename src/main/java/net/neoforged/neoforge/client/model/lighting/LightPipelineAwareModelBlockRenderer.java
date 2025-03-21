@@ -8,19 +8,17 @@ package net.neoforged.neoforge.client.model.lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
+import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -40,68 +38,86 @@ public class LightPipelineAwareModelBlockRenderer extends ModelBlockRenderer {
     }
 
     @Override
-    public void tesselateWithoutAO(BlockAndTintGetter level, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer vertexConsumer, boolean checkSides, RandomSource rand, long seed, int packedOverlay, ModelData modelData, RenderType renderType) {
+    public void tesselateWithoutAO(BlockAndTintGetter level, List<BlockModelPart> modelParts, BlockState state, BlockPos pos, PoseStack poseStack, Function<RenderType, VertexConsumer> bufferLookup, boolean checkSides, int packedOverlay) {
         if (NeoForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get()) {
-            render(vertexConsumer, flatLighter.get(), level, model, state, pos, poseStack, checkSides, rand, seed, packedOverlay, modelData, renderType);
+            render(bufferLookup, flatLighter.get(), level, modelParts, state, pos, poseStack, checkSides, packedOverlay);
         } else {
-            super.tesselateWithoutAO(level, model, state, pos, poseStack, vertexConsumer, checkSides, rand, seed, packedOverlay, modelData, renderType);
+            super.tesselateWithoutAO(level, modelParts, state, pos, poseStack, bufferLookup, checkSides, packedOverlay);
         }
     }
 
     @Override
-    public void tesselateWithAO(BlockAndTintGetter level, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer vertexConsumer, boolean checkSides, RandomSource rand, long seed, int packedOverlay, ModelData modelData, RenderType renderType) {
+    public void tesselateWithAO(BlockAndTintGetter level, List<BlockModelPart> modelParts, BlockState state, BlockPos pos, PoseStack poseStack, Function<RenderType, VertexConsumer> bufferLookup, boolean checkSides, int packedOverlay) {
         if (NeoForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get()) {
-            render(vertexConsumer, smoothLighter.get(), level, model, state, pos, poseStack, checkSides, rand, seed, packedOverlay, modelData, renderType);
+            render(bufferLookup, smoothLighter.get(), level, modelParts, state, pos, poseStack, checkSides, packedOverlay);
         } else {
-            super.tesselateWithAO(level, model, state, pos, poseStack, vertexConsumer, checkSides, rand, seed, packedOverlay, modelData, renderType);
+            super.tesselateWithAO(level, modelParts, state, pos, poseStack, bufferLookup, checkSides, packedOverlay);
         }
     }
 
-    public static boolean render(VertexConsumer vertexConsumer, QuadLighter lighter, BlockAndTintGetter level, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, boolean checkSides, RandomSource rand, long seed, int packedOverlay, ModelData modelData, RenderType renderType) {
+    public static boolean render(Function<RenderType, VertexConsumer> bufferLookup, QuadLighter lighter, BlockAndTintGetter level, List<BlockModelPart> modelParts, BlockState state, BlockPos pos, PoseStack poseStack, boolean checkSides, int packedOverlay) {
         LightPipelineAwareModelBlockRenderer renderer = (LightPipelineAwareModelBlockRenderer) Minecraft.getInstance().getBlockRenderer().getModelRenderer();
+        ModelBlockRenderer.Cache cache = ModelBlockRenderer.CACHE.get();
         var pose = poseStack.last();
         var empty = true;
         var smoothLighter = lighter instanceof SmoothQuadLighter;
         QuadLighter flatLighter = null;
+        BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
+        int checkedSides = 0;
+        int visibleSides = 0;
 
-        rand.setSeed(seed);
-        List<BakedQuad> quads = model.getQuads(state, null, rand, modelData, renderType);
-        if (!quads.isEmpty()) {
-            empty = false;
-            lighter.setup(level, pos, state);
-            for (BakedQuad quad : quads) {
-                if (smoothLighter && !quad.hasAmbientOcclusion()) {
-                    if (flatLighter == null) {
-                        flatLighter = renderer.flatLighter.get();
-                        flatLighter.setup(level, pos, state);
-                    }
-                    flatLighter.process(vertexConsumer, pose, quad, packedOverlay);
-                } else {
-                    lighter.process(vertexConsumer, pose, quad, packedOverlay);
-                }
-            }
-        }
+        for (BlockModelPart part : modelParts) {
+            VertexConsumer vertexConsumer = bufferLookup.apply(part.getRenderType(state));
 
-        for (Direction side : SIDES) {
-            if (checkSides && !Block.shouldRenderFace(level, pos, state, level.getBlockState(pos.relative(side)), side)) {
-                continue;
-            }
-            rand.setSeed(seed);
-            quads = model.getQuads(state, side, rand, modelData, renderType);
+            List<BakedQuad> quads = part.getQuads(null);
             if (!quads.isEmpty()) {
-                if (empty) {
-                    empty = false;
-                    lighter.setup(level, pos, state);
-                }
+                empty = false;
+                lighter.setup(level, pos, state, cache);
                 for (BakedQuad quad : quads) {
                     if (smoothLighter && !quad.hasAmbientOcclusion()) {
                         if (flatLighter == null) {
                             flatLighter = renderer.flatLighter.get();
-                            flatLighter.setup(level, pos, state);
+                            flatLighter.setup(level, pos, state, cache);
                         }
                         flatLighter.process(vertexConsumer, pose, quad, packedOverlay);
                     } else {
                         lighter.process(vertexConsumer, pose, quad, packedOverlay);
+                    }
+                }
+            }
+
+            for (Direction side : SIDES) {
+                int sideOrdinal = 1 << side.ordinal();
+                boolean sideChecked = (checkedSides & sideOrdinal) == 1;
+                boolean sideVisible = (visibleSides & sideOrdinal) == 1;
+                if (sideChecked && !sideVisible) {
+                    continue;
+                }
+
+                if (!sideChecked) {
+                    checkedSides |= sideOrdinal;
+                    if (!shouldRenderFace(level, pos, state, checkSides, side, scratchPos.setWithOffset(pos, side))) {
+                        continue;
+                    }
+                    visibleSides |= sideOrdinal;
+                }
+
+                quads = part.getQuads(side);
+                if (!quads.isEmpty()) {
+                    if (empty) {
+                        empty = false;
+                        lighter.setup(level, pos, state, cache);
+                    }
+                    for (BakedQuad quad : quads) {
+                        if (smoothLighter && !quad.hasAmbientOcclusion()) {
+                            if (flatLighter == null) {
+                                flatLighter = renderer.flatLighter.get();
+                                flatLighter.setup(level, pos, state, cache);
+                            }
+                            flatLighter.process(vertexConsumer, pose, quad, packedOverlay);
+                        } else {
+                            lighter.process(vertexConsumer, pose, quad, packedOverlay);
+                        }
                     }
                 }
             }

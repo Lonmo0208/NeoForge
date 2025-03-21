@@ -55,7 +55,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -140,7 +139,6 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
@@ -368,10 +366,9 @@ public class CommonHooks {
         return NeoForge.EVENT_BUS.post(new LivingDropsEvent(entity, source, drops, recentlyHit)).isCanceled();
     }
 
-    @Nullable
-    public static float[] onLivingFall(LivingEntity entity, float distance, float damageMultiplier) {
+    public static LivingFallEvent onLivingFall(LivingEntity entity, double distance, float damageMultiplier) {
         LivingFallEvent event = new LivingFallEvent(entity, distance, damageMultiplier);
-        return (NeoForge.EVENT_BUS.post(event).isCanceled() ? null : new float[] { event.getDistance(), event.getDamageMultiplier() });
+        return NeoForge.EVENT_BUS.post(event);
     }
 
     public static double getEntityVisibilityMultiplier(LivingEntity entity, Entity lookingEntity, double originalMultiplier) {
@@ -487,8 +484,9 @@ public class CommonHooks {
             MutableComponent link = Component.literal(url);
 
             try {
+                URI uri = new URI(url);
                 // Add schema so client doesn't crash.
-                if ((new URI(url)).getScheme() == null) {
+                if (uri.getScheme() == null) {
                     if (!allowMissingHeader) {
                         if (ichat == null)
                             ichat = Component.literal(url);
@@ -496,8 +494,11 @@ public class CommonHooks {
                             ichat.append(url);
                         continue;
                     }
-                    url = "http://" + url;
+                    uri = new URI("http://" + url);
                 }
+                // Set the click event
+                ClickEvent click = new ClickEvent.OpenUrl(uri);
+                link.setStyle(link.getStyle().withClickEvent(click).withUnderlined(true).withColor(TextColor.fromLegacyFormat(ChatFormatting.BLUE)));
             } catch (URISyntaxException e) {
                 // Bad syntax bail out!
                 if (ichat == null)
@@ -507,9 +508,7 @@ public class CommonHooks {
                 continue;
             }
 
-            // Set the click event and append the link.
-            ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
-            link.setStyle(link.getStyle().withClickEvent(click).withUnderlined(true).withColor(TextColor.fromLegacyFormat(ChatFormatting.BLUE)));
+            // Append the link.
             if (ichat == null)
                 ichat = Component.literal("");
             ichat.append(link);
@@ -567,7 +566,7 @@ public class CommonHooks {
         boolean preCancelEvent = false;
 
         ItemStack itemstack = player.getMainHandItem();
-        if (!itemstack.isEmpty() && !itemstack.getItem().canAttackBlock(state, level, pos, player)) {
+        if (!itemstack.isEmpty() && !itemstack.canDestroyBlock(state, level, pos, player)) {
             preCancelEvent = true;
         }
 
@@ -988,7 +987,7 @@ public class CommonHooks {
         return modId;
     }
 
-    public static boolean onFarmlandTrample(ServerLevel level, BlockPos pos, BlockState state, float fallDistance, Entity entity) {
+    public static boolean onFarmlandTrample(ServerLevel level, BlockPos pos, BlockState state, double fallDistance, Entity entity) {
         if (entity.canTrample(level, state, pos, fallDistance)) {
             BlockEvent.FarmlandTrampleEvent event = new BlockEvent.FarmlandTrampleEvent(level, pos, state, fallDistance, entity);
             NeoForge.EVENT_BUS.post(event);
@@ -1161,19 +1160,19 @@ public class CommonHooks {
      */
     @ApiStatus.Internal
     public static void readAdditionalLevelSaveData(CompoundTag rootTag, LevelStorageSource.LevelDirectory levelDirectory) {
-        CompoundTag tag = rootTag.getCompound("fml");
+        CompoundTag tag = rootTag.getCompoundOrEmpty("fml");
         if (tag.contains("LoadingModList")) {
-            ListTag modList = tag.getList("LoadingModList", Tag.TAG_COMPOUND);
+            ListTag modList = tag.getListOrEmpty("LoadingModList");
             Map<String, ArtifactVersion> mismatchedVersions = new HashMap<>(modList.size());
             Map<String, ArtifactVersion> missingVersions = new HashMap<>(modList.size());
             for (int i = 0; i < modList.size(); i++) {
-                CompoundTag mod = modList.getCompound(i);
-                String modId = mod.getString("ModId");
+                CompoundTag mod = modList.getCompoundOrEmpty(i);
+                String modId = mod.getStringOr("ModId", "");
                 if (Objects.equals("minecraft", modId)) {
                     continue;
                 }
 
-                String modVersion = mod.getString("ModVersion");
+                String modVersion = mod.getStringOr("ModVersion", "");
                 final var previousVersion = new DefaultArtifactVersion(modVersion);
                 ModList.get().getModContainerById(modId).ifPresentOrElse(container -> {
                     final var loadingVersion = container.getModInfo().getVersion();
@@ -1259,7 +1258,7 @@ public class CommonHooks {
 
     @Nullable
     public static MobEffect loadMobEffect(CompoundTag nbt, String key, @Nullable MobEffect fallback) {
-        var registryName = nbt.getString(key);
+        var registryName = nbt.getStringOr(key, "");
         if (Strings.isNullOrEmpty(registryName)) {
             return fallback;
         }
@@ -1422,9 +1421,6 @@ public class CommonHooks {
     }
 
     static {
-        // Mark common singletons as valid
-        markComponentClassAsValid(BlockState.class);
-        markComponentClassAsValid(FluidState.class);
         // Block, Fluid, Item, etc. are handled via the registry check further down
 
         // Mark common interned classes as valid

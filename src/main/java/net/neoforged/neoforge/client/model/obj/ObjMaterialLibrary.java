@@ -36,7 +36,7 @@ public class ObjMaterialLibrary {
                 }
 
                 case "Ka":
-                    currentMaterial.ambientColor = ObjModel.parseVector4(line);
+                    currentMaterial.ambientColor = ObjGeometry.parseVector4(line);
                     break;
 
                 case "map_Ka":
@@ -45,7 +45,7 @@ public class ObjMaterialLibrary {
                     break;
 
                 case "Kd":
-                    currentMaterial.diffuseColor = ObjModel.parseVector4(line);
+                    currentMaterial.diffuseColor = ObjGeometry.parseVector4(line);
                     break;
 
                 case "forge_TintIndex":
@@ -59,7 +59,7 @@ public class ObjMaterialLibrary {
                     break;
 
                 case "Ks":
-                    currentMaterial.specularColor = ObjModel.parseVector4(line);
+                    currentMaterial.specularColor = ObjGeometry.parseVector4(line);
                     break;
 
                 case "Ns":

@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.bus.api.Event;
 import net.neoforged.neoforge.common.util.AttributeTooltipContext;
 import net.neoforged.neoforge.common.util.AttributeUtil;
@@ -61,6 +60,6 @@ public class AddAttributeTooltipsEvent extends Event {
      * This event is fired even if the component would prevent the normal tooltip lines from showing.
      */
     public boolean shouldShow() {
-        return this.stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).showInTooltip();
+        return this.ctx.tooltipDisplay().shows(DataComponents.ATTRIBUTE_MODIFIERS);
     }
 }

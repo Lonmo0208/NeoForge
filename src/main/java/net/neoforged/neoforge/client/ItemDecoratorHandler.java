@@ -7,7 +7,6 @@ package net.neoforged.neoforge.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public final class ItemDecoratorHandler {
     private final List<IItemDecorator> itemDecorators;
-    private final GlStateBackup stateBackup = new GlStateBackup();
 
     private static Map<Item, ItemDecoratorHandler> DECORATOR_LOOKUP = ImmutableMap.of();
 
@@ -54,20 +52,8 @@ public final class ItemDecoratorHandler {
             return;
         }
 
-        RenderSystem.backupGlState(stateBackup);
-
-        resetRenderState();
         for (IItemDecorator itemDecorator : itemDecorators) {
-            if (itemDecorator.render(guiGraphics, font, stack, xOffset, yOffset))
-                resetRenderState();
+            itemDecorator.render(guiGraphics, font, stack, xOffset, yOffset);
         }
-
-        RenderSystem.restoreGlState(stateBackup);
-    }
-
-    private void resetRenderState() {
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
     }
 }

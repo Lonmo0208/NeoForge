@@ -39,7 +39,7 @@ public final class QuadTransformers {
         if (transform.isIdentity())
             return empty();
         return quad -> {
-            var vertices = quad.getVertices();
+            var vertices = quad.vertices();
             for (int i = 0; i < 4; i++) {
                 int offset = i * IQuadTransformer.STRIDE + IQuadTransformer.POSITION;
                 float x = Float.intBitsToFloat(vertices[offset]);
@@ -81,7 +81,7 @@ public final class QuadTransformers {
      */
     public static IQuadTransformer applyingLightmap(int packedLight) {
         return quad -> {
-            var vertices = quad.getVertices();
+            var vertices = quad.vertices();
             for (int i = 0; i < 4; i++)
                 vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.UV2] = packedLight;
         };
@@ -116,7 +116,7 @@ public final class QuadTransformers {
     public static IQuadTransformer applyingColor(int color) {
         final int fixedColor = toABGR(color);
         return quad -> {
-            var vertices = quad.getVertices();
+            var vertices = quad.vertices();
             for (int i = 0; i < 4; i++)
                 vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.COLOR] = fixedColor;
         };
@@ -149,7 +149,7 @@ public final class QuadTransformers {
      * Converts an ARGB color to an ABGR color, as the commonly used color format is not the format colors end up packed into.
      * This function doubles as its own inverse.
      * 
-     * @param color ARGB color
+     * @param argb ARGB color
      * @return ABGR color
      */
     public static int toABGR(int argb) {

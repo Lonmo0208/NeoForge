@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/item/component/BlocksAttacks.java
++++ b/net/minecraft/world/item/component/BlocksAttacks.java
+@@ -118,8 +_,12 @@
+             }
+ 
+             int i = this.itemDamage.apply(p_399754_);
+-            if (i > 0) {
+-                p_399533_.hurtAndBreak(i, p_400149_, LivingEntity.getSlotForHand(p_400151_));
++            if (i > 0 && p_400285_ instanceof ServerLevel serverLevel) {
++                p_399533_.hurtAndBreak(i, serverLevel, p_400149_, item -> {
++                    p_400149_.onEquippedItemBroken(item, LivingEntity.getSlotForHand(p_400151_));
++                    net.neoforged.neoforge.event.EventHooks.onPlayerDestroyItem(player, player.getUseItem(), p_400151_);
++                    player.stopUsingItem(); // Neo: Fix MC-168573 ("After breaking a shield, the player's off-hand can't finish using some items")
++                });
+             }
+         }
+     }

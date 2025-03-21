@@ -5,19 +5,17 @@
 
 package net.neoforged.neoforge.client;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.pipeline.MainTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.textures.TextureFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Either;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,12 +70,15 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderDefines;
-import net.minecraft.client.renderer.ShaderProgram;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElement;
+import net.minecraft.client.renderer.block.model.BlockElementFace;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.RenderChunkRegion;
@@ -85,10 +86,8 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.AtlasSet;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -133,11 +132,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoader;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.asm.enumextension.ExtensionInfo;
 import net.neoforged.neoforge.client.entity.animation.json.AnimationTypeManager;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -163,8 +159,6 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMaterialAtlasesEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
-import net.neoforged.neoforge.client.event.RegisterShadersEvent;
-import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.event.RenderBlockScreenEffectEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
@@ -186,14 +180,14 @@ import net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtension
 import net.neoforged.neoforge.client.gui.ClientTooltipComponentManager;
 import net.neoforged.neoforge.client.gui.GuiLayerManager;
 import net.neoforged.neoforge.client.gui.map.MapDecorationRendererManager;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.block.BlockStateModelHooks;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.forge.snapshots.ForgeSnapshotsModClient;
-import net.neoforged.neoforge.gametest.GameTestHooks;
 import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -203,7 +197,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL32;
 
 /**
  * Class for various client-side-only hooks.
@@ -510,14 +503,14 @@ public class ClientHooks {
         return new Vector3f(x, y, z);
     }
 
-    public static boolean calculateFaceWithoutAO(BlockAndTintGetter getter, BlockState state, BlockPos pos, BakedQuad quad, boolean isFaceCubic, float[] brightness, int[] lightmap) {
+    public static boolean calculateFaceWithoutAO(BlockAndTintGetter getter, BlockState state, BlockPos pos, BakedQuad quad, ModelBlockRenderer.Cache cache, boolean isFaceCubic, float[] brightness, int[] lightmap) {
         if (quad.hasAmbientOcclusion())
             return false;
 
-        BlockPos lightmapPos = isFaceCubic ? pos.relative(quad.getDirection()) : pos;
+        BlockPos lightmapPos = isFaceCubic ? pos.relative(quad.direction()) : pos;
 
-        brightness[0] = brightness[1] = brightness[2] = brightness[3] = getter.getShade(quad.getDirection(), quad.isShade());
-        lightmap[0] = lightmap[1] = lightmap[2] = lightmap[3] = LevelRenderer.getLightColor(getter, state, lightmapPos);
+        brightness[0] = brightness[1] = brightness[2] = brightness[3] = getter.getShade(quad.direction(), quad.shade());
+        lightmap[0] = lightmap[1] = lightmap[2] = lightmap[3] = cache.getLightColor(state, getter, lightmapPos);
         return true;
     }
 
@@ -677,14 +670,6 @@ public class ClientHooks {
         return !(squareDistance > value * value);
     }
 
-    public static void renderPistonMovedBlocks(BlockPos pos, BlockState state, PoseStack stack, MultiBufferSource bufferSource, Level level, boolean checkSides, int packedOverlay, BlockRenderDispatcher blockRenderer) {
-        var model = blockRenderer.getBlockModel(state);
-        for (var renderType : model.getRenderTypes(state, RandomSource.create(state.getSeed(pos)), ModelData.EMPTY)) {
-            VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderTypeHelper.getMovingBlockRenderType(renderType));
-            blockRenderer.getModelRenderer().tesselateBlock(level, model, state, pos, stack, vertexConsumer, checkSides, RandomSource.create(), state.getSeed(pos), packedOverlay, ModelData.EMPTY, renderType);
-        }
-    }
-
     public static boolean shouldRenderEffect(MobEffectInstance effectInstance) {
         return IClientMobEffectExtensions.of(effectInstance).isVisibleInInventory(effectInstance);
     }
@@ -728,10 +713,6 @@ public class ClientHooks {
         ModLoader.postEvent(new RegisterKeyMappingsEvent(options));
     }
 
-    public static void onRegisterAdditionalModels(Consumer<ResourceLocation> registrar) {
-        ModLoader.postEvent(new ModelEvent.RegisterAdditional(registrar));
-    }
-
     @Nullable
     public static Component onClientChat(ChatType.Bound boundChatType, Component message, UUID sender) {
         ClientChatReceivedEvent event = new ClientChatReceivedEvent(boundChatType, message, sender);
@@ -764,19 +745,6 @@ public class ClientHooks {
             // Notify client mods that they're connected to a Vanilla server, which will never give them recipe data
             var event = new net.neoforged.neoforge.client.event.RecipesReceivedEvent(java.util.Set.of(), net.minecraft.world.item.crafting.RecipeMap.create(java.util.List.of()));
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);
-        }
-    }
-
-    @EventBusSubscriber(value = Dist.CLIENT, modid = "neoforge", bus = EventBusSubscriber.Bus.MOD)
-    public static class ClientEvents {
-        public static final ShaderProgram RENDERTYPE_ENTITY_TRANSLUCENT_UNLIT_SHADER = new ShaderProgram(
-                ResourceLocation.fromNamespaceAndPath(NeoForgeVersion.MOD_ID, "core/rendertype_entity_unlit_translucent"),
-                DefaultVertexFormat.NEW_ENTITY,
-                ShaderDefines.EMPTY);
-
-        @SubscribeEvent
-        public static void registerShaders(RegisterShadersEvent event) {
-            event.registerShader(RENDERTYPE_ENTITY_TRANSLUCENT_UNLIT_SHADER);
         }
     }
 
@@ -888,11 +856,6 @@ public class ClientHooks {
         return NeoForge.EVENT_BUS.post(new ToastAddEvent(toast)).isCanceled();
     }
 
-    public static boolean isBlockInSolidLayer(BlockState state) {
-        var model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
-        return model.getRenderTypes(state, RandomSource.create(), ModelData.EMPTY).contains(RenderType.solid());
-    }
-
     public static boolean renderFireOverlay(Player player, PoseStack mat) {
         return renderBlockOverlay(player, mat, RenderBlockScreenEffectEvent.OverlayType.FIRE, Blocks.FIRE.defaultBlockState(), player.blockPosition());
     }
@@ -909,17 +872,6 @@ public class ClientHooks {
         return Math.min(
                 Mth.log2(Math.max(1, width)),
                 Mth.log2(Math.max(1, height)));
-    }
-
-    private static final BiMap<ResourceLocation, SpriteSourceType> SPRITE_SOURCE_TYPES_MAP = HashBiMap.create();
-
-    public static BiMap<ResourceLocation, SpriteSourceType> makeSpriteSourceTypesMap() {
-        return SPRITE_SOURCE_TYPES_MAP;
-    }
-
-    @ApiStatus.Internal
-    public static void registerSpriteSourceTypes() {
-        ModLoader.postEvent(new RegisterSpriteSourceTypesEvent(SPRITE_SOURCE_TYPES_MAP));
     }
 
     @ApiStatus.Internal
@@ -939,31 +891,47 @@ public class ClientHooks {
      */
     public static List<BlockElement> fixItemModelSeams(List<BlockElement> elements, TextureAtlasSprite sprite) {
         float expand = -sprite.uvShrinkRatio();
-        for (BlockElement element : elements) {
+        elements.replaceAll(element -> {
             // Edge elements are guaranteed to have exactly one face, anything else is either invalid or the front/back
-            if (element.faces.size() != 1) continue;
+            if (element.faces().size() != 1) return element;
 
-            var faceEntry = element.faces.entrySet().iterator().next();
-            if (faceEntry.getKey().getAxis() == Direction.Axis.Z) continue;
+            var faceEntry = element.faces().entrySet().iterator().next();
+            if (faceEntry.getKey().getAxis() == Direction.Axis.Z) return element;
 
             // Move edge quads to account for sprite expansion of the front and back quads
-            element.from.x = Mth.clamp(Mth.lerp(expand, element.from.x, 8F), 0F, 16F);
-            element.from.y = Mth.clamp(Mth.lerp(expand, element.from.y, 8F), 0F, 16F);
-            element.to.x = Mth.clamp(Mth.lerp(expand, element.to.x, 8F), 0F, 16F);
-            element.to.y = Mth.clamp(Mth.lerp(expand, element.to.y, 8F), 0F, 16F);
+            Vector3f from = new Vector3f(
+                    Mth.clamp(Mth.lerp(expand, element.from().x(), 8F), 0F, 16F),
+                    Mth.clamp(Mth.lerp(expand, element.from().y(), 8F), 0F, 16F),
+                    element.from().z());
+            Vector3f to = new Vector3f(
+                    Mth.clamp(Mth.lerp(expand, element.to().x(), 8F), 0F, 16F),
+                    Mth.clamp(Mth.lerp(expand, element.to().y(), 8F), 0F, 16F),
+                    element.to().z());
 
-            float[] uv = faceEntry.getValue().uv().uvs;
+            BlockElementFace face = faceEntry.getValue();
+            BlockElementFace.UVs uvs = face.uvs();
+            if (uvs == null) {
+                uvs = FaceBakery.defaultFaceUV(element.from(), element.to(), faceEntry.getKey());
+            }
+            float minU = uvs.minU();
+            float minV = uvs.minV();
+            float maxU = uvs.maxU();
+            float maxV = uvs.maxV();
             // Counteract sprite expansion on edge quads to ensure alignment with pixels on the front and back quads
             if (faceEntry.getKey().getAxis() == Direction.Axis.Y) {
-                float centerU = (uv[0] + uv[0] + uv[2] + uv[2]) / 4.0F;
-                uv[0] = Mth.clamp(Mth.lerp(expand, uv[0], centerU), 0F, 16F);
-                uv[2] = Mth.clamp(Mth.lerp(expand, uv[2], centerU), 0F, 16F);
+                float centerU = (minU + minU + maxU + maxU) / 4.0F;
+                minU = Mth.clamp(Mth.lerp(expand, minU, centerU), 0F, 16F);
+                maxU = Mth.clamp(Mth.lerp(expand, maxU, centerU), 0F, 16F);
             } else {
-                float centerV = (uv[1] + uv[1] + uv[3] + uv[3]) / 4.0F;
-                uv[1] = Mth.clamp(Mth.lerp(expand, uv[1], centerV), 0F, 16F);
-                uv[3] = Mth.clamp(Mth.lerp(expand, uv[3], centerV), 0F, 16F);
+                float centerV = (minV + minV + maxV + maxV) / 4.0F;
+                minV = Mth.clamp(Mth.lerp(expand, minV, centerV), 0F, 16F);
+                maxV = Mth.clamp(Mth.lerp(expand, maxV, centerV), 0F, 16F);
             }
-        }
+            uvs = new BlockElementFace.UVs(minU, minV, maxU, maxV);
+            face = new BlockElementFace(face.cullForDirection(), face.tintIndex(), face.texture(), uvs, face.rotation(), face.faceData(), new MutableObject<>());
+
+            return new BlockElement(from, to, Map.of(faceEntry.getKey(), face), element.rotation(), element.shade(), element.lightEmission(), element.faceData());
+        });
         return elements;
     }
 
@@ -1000,8 +968,8 @@ public class ClientHooks {
         initializedClientHooks = true;
 
         ClientExtensionsManager.init();
-        GameTestHooks.registerGametests();
-        registerSpriteSourceTypes();
+        // TODO: Porting 1.21.5 too early for registering gametests
+        //GameTestHooks.registerGametests();
         MenuScreens.init();
 
         var rlEvent = new AddClientReloadListenersEvent(resourceManager);
@@ -1025,7 +993,8 @@ public class ClientHooks {
         MapDecorationRendererManager.init();
         DimensionTransitionScreenManager.init();
         AnimationTypeManager.init();
-        CoreShaderManager.init();
+        RenderPipelines.registerCustomPipelines();
+        BlockStateModelHooks.init();
     }
 
     /**
@@ -1110,12 +1079,21 @@ public class ClientHooks {
     }
 
     private static final RandomSource OUTLINE_PASS_RANDOM = RandomSource.create();
+    private static final List<BlockModelPart> OUTLINE_PART_SCRATCH_LIST = new ObjectArrayList<>();
 
     public static boolean isInTranslucentBlockOutlinePass(Level level, BlockPos pos, BlockState state) {
-        BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
         OUTLINE_PASS_RANDOM.setSeed(42);
-        ChunkRenderTypeSet renderTypes = model.getRenderTypes(state, OUTLINE_PASS_RANDOM, level.getModelData(pos));
-        return renderTypes.contains(RenderType.TRANSLUCENT) || renderTypes.contains(RenderType.TRIPWIRE);
+        OUTLINE_PART_SCRATCH_LIST.clear();
+
+        BlockStateModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+        model.collectParts(level, pos, state, OUTLINE_PASS_RANDOM, OUTLINE_PART_SCRATCH_LIST);
+        for (BlockModelPart part : OUTLINE_PART_SCRATCH_LIST) {
+            RenderType renderType = part.getRenderType(state);
+            if (renderType == RenderType.translucent() || renderType == RenderType.tripwire()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void reloadRenderer() {
@@ -1139,22 +1117,9 @@ public class ClientHooks {
         return new MainTarget(width, height, e.isStencilEnabled());
     }
 
-    /**
-     * Called by our stencil hooks to specify the depth+stencil texture.
-     */
     @ApiStatus.Internal
-    public static void texImageDepthStencil(int width, int height) {
+    public static TextureFormat getStencilFormat() {
         var reducedPrecision = NeoForgeConfig.CLIENT.reducedDepthStencilFormat.getAsBoolean();
-        GlStateManager._texImage2D(
-                GL32.GL_TEXTURE_2D,
-                0,
-                reducedPrecision ? GL32.GL_DEPTH24_STENCIL8 : GL32.GL_DEPTH32F_STENCIL8,
-                width, height,
-                0,
-                GL32.GL_DEPTH_STENCIL,
-                // Since data is null, the format here does not matter as long as it matches internalFormat.
-                // So the usage, for depth, of unsigned int in one case and float in the other case, is not a problem.
-                reducedPrecision ? GL32.GL_UNSIGNED_INT_24_8 : GL32.GL_FLOAT_32_UNSIGNED_INT_24_8_REV,
-                null);
+        return reducedPrecision ? TextureFormat.DEPTH24_STENCIL8 : TextureFormat.DEPTH32_STENCIL8;
     }
 }

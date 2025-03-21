@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.DryFoliageColorReloadListener;
 import net.minecraft.client.resources.FoliageColorReloadListener;
 import net.minecraft.client.resources.GrassColorReloadListener;
 import net.minecraft.client.resources.MapDecorationTextureManager;
@@ -62,6 +63,8 @@ public class VanillaClientListeners {
     public static final ResourceLocation GRASS_COLOR = key(GrassColorReloadListener.class);
 
     public static final ResourceLocation FOLIAGE_COLOR = key(FoliageColorReloadListener.class);
+
+    public static final ResourceLocation DRY_FOLIAGE_COLOR = key(DryFoliageColorReloadListener.class);
 
     public static final ResourceLocation MODELS = key(ModelManager.class);
 

@@ -6,10 +6,9 @@
 package net.neoforged.neoforge.client.model.generators.template;
 
 import com.google.common.base.Preconditions;
-import java.util.Arrays;
+import com.mojang.math.Quadrant;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
-import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.core.Direction;
 import net.neoforged.neoforge.client.model.ExtraFaceData;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -21,8 +20,9 @@ public final class FaceBuilder {
     private int tintindex = -1;
     @Nullable
     private TextureSlot texture = null;
-    private float @Nullable [] uvs;
-    private FaceRotation rotation = FaceRotation.ZERO;
+    @Nullable
+    private BlockElementFace.UVs uvs;
+    private Quadrant rotation = Quadrant.R0;
     private int color = 0xFFFFFFFF;
     private int blockLight = 0;
     private int skyLight = 0;
@@ -61,7 +61,7 @@ public final class FaceBuilder {
      * Sets the texture uv mapping for this face.
      */
     public FaceBuilder uvs(float u1, float v1, float u2, float v2) {
-        this.uvs = new float[] { u1, v1, u2, v2 };
+        this.uvs = new BlockElementFace.UVs(u1, v1, u2, v2);
         return this;
     }
 
@@ -72,7 +72,7 @@ public final class FaceBuilder {
      * @return this builder
      * @throws NullPointerException if {@code rot} is {@code null}
      */
-    public FaceBuilder rotation(FaceRotation rot) {
+    public FaceBuilder rotation(Quadrant rot) {
         Preconditions.checkNotNull(rot, "Rotation must not be null");
         this.rotation = rot;
         return this;
@@ -118,7 +118,7 @@ public final class FaceBuilder {
         if (this.texture == null) {
             throw new IllegalStateException("A model face must have a texture");
         }
-        return new BlockElementFace(cullface, tintindex, texture.toString(), new BlockFaceUV(uvs, rotation.rotation), new ExtraFaceData(this.color, this.blockLight, this.skyLight, this.hasAmbientOcclusion), new MutableObject<>());
+        return new BlockElementFace(cullface, tintindex, texture.toString(), uvs, rotation, new ExtraFaceData(this.color, this.blockLight, this.skyLight, this.hasAmbientOcclusion), new MutableObject<>());
     }
 
     FaceBuilder copy() {
@@ -127,7 +127,7 @@ public final class FaceBuilder {
         builder.color = this.color;
         builder.cullface = this.cullface;
         builder.tintindex = this.tintindex;
-        builder.uvs = this.uvs != null ? Arrays.copyOf(this.uvs, this.uvs.length) : null;
+        builder.uvs = this.uvs;
         builder.rotation = this.rotation;
         builder.blockLight = this.blockLight;
         builder.skyLight = this.skyLight;

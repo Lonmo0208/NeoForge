@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Objects;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -52,7 +53,7 @@ public abstract class QuadLighter {
         this.colors = colors;
     }
 
-    protected abstract void computeLightingAt(BlockAndTintGetter level, BlockPos pos, BlockState state);
+    protected abstract void computeLightingAt(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelBlockRenderer.Cache cache);
 
     protected abstract float calculateBrightness(float[] position);
 
@@ -65,7 +66,7 @@ public abstract class QuadLighter {
      * @param pos   the position of the block in the given region
      * @param state the block state at this position
      */
-    public final void setup(BlockAndTintGetter level, BlockPos pos, BlockState state) {
+    public final void setup(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelBlockRenderer.Cache cache) {
         var hash = Objects.hash(level, pos, state);
         if (this.level != null && this.currentHash == hash) {
             return; // If we are drawing a block at the same position as before, don't re-compute anything
@@ -75,7 +76,7 @@ public abstract class QuadLighter {
         this.pos = pos;
         this.state = state;
         this.cachedTintIndex = -1;
-        computeLightingAt(level, pos, state);
+        computeLightingAt(level, pos, state, cache);
     }
 
     /**
@@ -92,7 +93,7 @@ public abstract class QuadLighter {
      * @param quad the quad to compute lightmap values for
      */
     public final void computeLightingForQuad(BakedQuad quad) {
-        computeLightingForQuad(quad.getVertices(), quad.isShade());
+        computeLightingForQuad(quad.vertices(), quad.shade());
     }
 
     /**
@@ -102,7 +103,7 @@ public abstract class QuadLighter {
      * This overload allows cleanly reusing the same vertex data array many times.
      *
      * @param vertices the vertex data for the quad (must be in {@link DefaultVertexFormat#BLOCK} format)
-     * @param isShade  whether the quad should be shaded (same semantics as {@link BakedQuad#isShade()})
+     * @param isShade  whether the quad should be shaded (same semantics as {@link BakedQuad#shade()})
      */
     public final void computeLightingForQuad(int[] vertices, boolean isShade) {
         for (int i = 0; i < 4; i++) {
@@ -169,7 +170,7 @@ public abstract class QuadLighter {
     public final void process(VertexConsumer consumer, PoseStack.Pose pose, BakedQuad quad, int overlay) {
         computeLightingForQuad(quad);
 
-        var color = quad.isTinted() ? getColorFast(quad.getTintIndex()) : WHITE;
+        var color = quad.isTinted() ? getColorFast(quad.tintIndex()) : WHITE;
         consumer.putBulkData(pose, quad, brightness, color[0], color[1], color[2], 1.0f, lightmap, overlay, true);
     }
 

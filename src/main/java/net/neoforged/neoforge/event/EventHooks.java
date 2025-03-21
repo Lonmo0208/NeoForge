@@ -46,7 +46,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
-import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -397,7 +397,7 @@ public class EventHooks {
         return event.getBurnTime();
     }
 
-    public static int getExperienceDrop(LivingEntity entity, Player attackingPlayer, int originalExperience) {
+    public static int getExperienceDrop(LivingEntity entity, @Nullable Player attackingPlayer, int originalExperience) {
         LivingExperienceDropEvent event = new LivingExperienceDropEvent(entity, attackingPlayer, originalExperience);
         if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
             return 0;
@@ -555,7 +555,7 @@ public class EventHooks {
         boolean isCanceled = NeoForge.EVENT_BUS.post(new EntityMountEvent(entityMounting, entityBeingMounted, entityMounting.level(), isMounting)).isCanceled();
 
         if (isCanceled) {
-            entityMounting.absMoveTo(entityMounting.getX(), entityMounting.getY(), entityMounting.getZ(), entityMounting.yRotO, entityMounting.xRotO);
+            entityMounting.absSnapTo(entityMounting.getX(), entityMounting.getY(), entityMounting.getZ(), entityMounting.yRotO, entityMounting.xRotO);
             return false;
         } else
             return true;
@@ -579,8 +579,8 @@ public class EventHooks {
         NeoForge.EVENT_BUS.post(new PlayerFlyableFallEvent(player, distance, multiplier));
     }
 
-    public static boolean onPlayerSpawnSet(Player player, ResourceKey<Level> levelKey, BlockPos pos, boolean forced) {
-        return NeoForge.EVENT_BUS.post(new PlayerSetSpawnEvent(player, levelKey, pos, forced)).isCanceled();
+    public static boolean onPlayerSpawnSet(Player player, @Nullable ServerPlayer.RespawnConfig respawnConfig) {
+        return NeoForge.EVENT_BUS.post(new PlayerSetSpawnEvent(player, respawnConfig)).isCanceled();
     }
 
     public static void onPlayerClone(Player player, Player oldPlayer, boolean wasDeath) {
@@ -1014,15 +1014,15 @@ public class EventHooks {
         NeoForge.EVENT_BUS.post(new ServerTickEvent.Post(haveTime, server));
     }
 
-    private static final WeightedRandomList<MobSpawnSettings.SpawnerData> NO_SPAWNS = WeightedRandomList.create();
+    private static final WeightedList<MobSpawnSettings.SpawnerData> NO_SPAWNS = WeightedList.of();
 
-    public static WeightedRandomList<MobSpawnSettings.SpawnerData> getPotentialSpawns(LevelAccessor level, MobCategory category, BlockPos pos, WeightedRandomList<MobSpawnSettings.SpawnerData> oldList) {
+    public static WeightedList<MobSpawnSettings.SpawnerData> getPotentialSpawns(LevelAccessor level, MobCategory category, BlockPos pos, WeightedList<MobSpawnSettings.SpawnerData> oldList) {
         LevelEvent.PotentialSpawns event = new LevelEvent.PotentialSpawns(level, category, pos, oldList);
         if (NeoForge.EVENT_BUS.post(event).isCanceled())
             return NO_SPAWNS;
         else if (event.getSpawnerDataList() == oldList.unwrap())
             return oldList;
-        return WeightedRandomList.create(event.getSpawnerDataList());
+        return WeightedList.of(event.getSpawnerDataList());
     }
 
     public static StatAwardEvent onStatAward(Player player, Stat<?> stat, int value) {

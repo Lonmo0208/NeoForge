@@ -37,7 +37,6 @@ import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
@@ -121,7 +120,6 @@ public class DataGeneratorTest {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent.Client event) {
         GSON = new GsonBuilder()
-                .registerTypeAdapter(Variant.class, new Variant.Deserializer())
                 .registerTypeAdapter(ItemTransforms.class, new ItemTransforms.Deserializer())
                 .registerTypeAdapter(ItemTransform.class, new ItemTransform.Deserializer())
                 .create();
