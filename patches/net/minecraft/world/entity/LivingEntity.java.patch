@@ -659,9 +659,9 @@
      public Direction getBedOrientation() {
          BlockPos blockpos = this.getSleepingPos().orElse(null);
 -        return blockpos != null ? BedBlock.getBedOrientation(this.level(), blockpos) : null;
-+        if (blockpos == null) return Direction.UP;
++        if (blockpos == null) return null;
 +        BlockState state = this.level().getBlockState(blockpos);
-+        return !state.isBed(level(), blockpos, this) ? Direction.UP : state.getBedDirection(level(), blockpos);
++        return !state.isBed(level(), blockpos, this) ? null : state.getBedDirection(level(), blockpos);
      }
  
      @Override
