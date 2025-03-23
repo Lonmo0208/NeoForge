@@ -404,7 +404,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockPresent(Blocks.OAK_SAPLING, belowBlock.above()))
 
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
@@ -438,7 +438,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockPresent(Blocks.MANGROVE_PROPAGULE, aboveBlock.below()))
 
                 .thenExecute(() -> helper.setBlock(aboveBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
@@ -496,7 +496,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockNotPresent(Blocks.SUGAR_CANE, belowBlock.above()))
 
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
@@ -554,7 +554,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockNotPresent(Blocks.SMALL_DRIPLEAF, belowBlock.above()))
 
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
@@ -608,7 +608,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockPresent(Blocks.BIG_DRIPLEAF, belowBlock.above(2)))
 
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
@@ -650,7 +650,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockState(belowBlock.above(), (state) -> state.getValue(ChorusPlantBlock.DOWN), $ -> Component.literal("Chorus Plant not found with down property")))
 
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
@@ -693,7 +693,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockPresent(Blocks.CHORUS_FLOWER, belowBlock.above()))
 
                 .thenExecute(() -> helper.setBlock(belowBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
@@ -726,7 +726,7 @@ public class CanSustainPlantTests {
                 .thenExecute(() -> helper.assertBlockPresent(Blocks.COCOA, centerBlock))
 
                 .thenExecute(() -> helper.setBlock(centerBlock.above(), Blocks.AIR)) // Clear the plant so that it doesn't try to randomly tick to grow and crash because of the side check
-                
+
                 .thenSucceed());
     }
 
