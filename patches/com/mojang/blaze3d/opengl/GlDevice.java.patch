@@ -58,7 +58,7 @@
 +        if (label == null) {
 +            label = String.valueOf(nativeId);
 +        }
-+        GlTexture gltexture = new GlTexture(label, format, width, height, mipLevels, nativeId);
++        GlTexture gltexture = new GlTexture(label, format, width, height, mipLevels, nativeId, true);
 +        this.debugLabels.applyLabel(gltexture);
 +        return gltexture;
 +    }
