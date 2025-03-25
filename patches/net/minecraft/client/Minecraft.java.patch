@@ -1,13 +1,5 @@
 --- a/net/minecraft/client/Minecraft.java
 +++ b/net/minecraft/client/Minecraft.java
-@@ -398,6 +_,7 @@
-     public Minecraft(final GameConfig p_91084_) {
-         super("Client");
-         instance = this;
-+        net.neoforged.neoforge.common.util.LogicalSidedProvider.setClient(() -> this);
-         this.clientStartTimeMs = System.currentTimeMillis();
-         this.gameDirectory = p_91084_.location.gameDirectory;
-         File file1 = p_91084_.location.assetDirectory;
 @@ -430,7 +_,6 @@
              }
          }, Util.nonCriticalIoPool());

@@ -67,7 +67,6 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -152,8 +151,6 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.asm.enumextension.ExtensionInfo;
 import net.neoforged.fml.i18n.MavenVersionTranslator;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.common.extensions.IBlockExtension;
@@ -208,11 +205,11 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.NoteBlockEvent;
 import net.neoforged.neoforge.event.level.block.CropGrowEvent;
 import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.internal.NeoForgeProxy;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.payload.RecipeContentPayload;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.resource.ResourcePackLoader;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.neoforged.neoforge.server.permission.PermissionAPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1517,13 +1514,7 @@ public class CommonHooks {
      */
     @Nullable
     public static <T> RegistryLookup<T> resolveLookup(ResourceKey<? extends Registry<T>> key) {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (server != null) {
-            return server.registryAccess().lookup(key).orElse(null);
-        } else if (FMLEnvironment.dist.isClient()) {
-            return ClientHooks.resolveLookup(key);
-        }
-        return null;
+        return NeoForgeProxy.INSTANCE.resolveLookup(key);
     }
 
     /**
@@ -1589,13 +1580,6 @@ public class CommonHooks {
             vanillaMap = Map.copyOf(vanillaMap);
         }
         return vanillaMap;
-    }
-
-    public static RecipeBookType[] getFilteredRecipeBookTypeValues() {
-        if (FMLEnvironment.dist.isClient()) {
-            return ClientHooks.getFilteredRecipeBookTypeValues();
-        }
-        return RecipeBookType.values();
     }
 
     /**

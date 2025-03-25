@@ -5,7 +5,6 @@
 
 package net.neoforged.neoforge.common.extensions;
 
-import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -14,7 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelData;
 import org.jetbrains.annotations.ApiStatus;
 
 public interface IBlockEntityExtension {
@@ -82,7 +81,7 @@ public interface IBlockEntityExtension {
 
     /**
      * Allows you to return additional model data.
-     * This data can be used to provide additional functionality in your {@link BlockStateModel}.
+     * This data can be used to provide additional functionality in your {@code BlockStateModel}.
      * You need to schedule a refresh of you model data via {@link #requestModelDataUpdate()} if the result of this function changes.
      *
      * <p>This method is always called on the main client thread.

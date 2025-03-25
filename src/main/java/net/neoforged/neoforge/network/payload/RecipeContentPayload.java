@@ -13,7 +13,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeMap;
@@ -27,7 +26,7 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public record RecipeContentPayload(
         Set<RecipeType<?>> recipeTypes,
-        List<RecipeHolder<?>> recipes) implements CustomPacketPayload {
+        List<RecipeHolder<?>> recipes) implements ClientDispatchPayload {
     public static final Type<RecipeContentPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(NeoForgeVersion.MOD_ID, "recipe_content"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, RecipeContentPayload> STREAM_CODEC = StreamCodec.composite(

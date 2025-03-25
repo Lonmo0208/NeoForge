@@ -37,12 +37,9 @@
          this.load();
      }
  
-@@ -1240,11 +_,17 @@
-         p_168428_.process("menuBackgroundBlurriness", this.menuBackgroundBlurriness);
+@@ -1241,10 +_,14 @@
          this.startedCleanly = p_168428_.process("startedCleanly", this.startedCleanly);
  
-+        net.neoforged.neoforge.forge.snapshots.ForgeSnapshotsMod.processOptions(p_168428_);
-+
          for (KeyMapping keymapping : this.keyMappings) {
 -            String s = keymapping.saveString();
 +            String s = keymapping.saveString() + (keymapping.getKeyModifier() != net.neoforged.neoforge.client.settings.KeyModifier.NONE ? ":" + keymapping.getKeyModifier() : "");
