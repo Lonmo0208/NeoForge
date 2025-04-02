@@ -49,7 +49,7 @@ public final class TagConventionLogWarningClient {
 
                 if (!FMLLoader.isProduction() == isConfigSetToDev) {
                     List<TagKey<?>> untranslatedTags = new ObjectArrayList<>();
-                    RegistryAccess.Frozen registryAccess = serverStartingEvent.getServer().registryAccess();
+                    RegistryAccess.Frozen registryAccess = serverStartingEvent.getServer().theGame().registryAccess();
                     extractUnregisteredModdedTags(registryAccess.lookupOrThrow(Registries.ITEM), untranslatedTags);
 
                     if (!untranslatedTags.isEmpty()) {

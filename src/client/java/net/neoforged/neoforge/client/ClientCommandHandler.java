@@ -49,7 +49,7 @@ public class ClientCommandHandler {
         final ClientPacketListener connection = event.getPlayer().connection;
         // Some custom server implementations do not send ClientboundCommandsPacket, so we provide a fallback:
         // Must set this, so that suggestions for client-only commands work, if server never sends commands packet
-        connection.commands = mergeServerCommands(new CommandDispatcher<>(), CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures()));
+        // connection.commands = mergeServerCommands(new CommandDispatcher<>(), CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures())); TODO: -C
     }
 
     /*
@@ -128,7 +128,7 @@ public class ClientCommandHandler {
             }
         };
         return new ClientCommandSourceStack(commandSource, player.position(), player.getRotationVector(), player.getPermissionLevel(),
-                player.getName().getString(), player.getDisplayName(), player);
+                player.getName().getString(), player.getDisplayName(), player.theGame(), player);
     }
 
     /**

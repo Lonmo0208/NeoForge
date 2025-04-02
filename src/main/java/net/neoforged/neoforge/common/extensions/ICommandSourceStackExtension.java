@@ -24,7 +24,7 @@ public interface ICommandSourceStackExtension {
      * @return the scoreboard
      */
     default Scoreboard getScoreboard() {
-        return self().getServer().getScoreboard();
+        return self().theGame().getScoreboard();
     }
 
     /**
@@ -32,7 +32,7 @@ public interface ICommandSourceStackExtension {
      */
     @Nullable
     default AdvancementHolder getAdvancement(ResourceLocation id) {
-        return self().getServer().getAdvancements().get(id);
+        return self().theGame().getAdvancements().get(id);
     }
 
     /**

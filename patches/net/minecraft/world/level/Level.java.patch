@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -83,7 +_,7 @@
+@@ -85,7 +_,7 @@
  import net.minecraft.world.phys.Vec3;
  import net.minecraft.world.scores.Scoreboard;
  
 -public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCloseable, net.neoforged.neoforge.common.extensions.ILevelExtension {
 +public abstract class Level extends net.neoforged.neoforge.attachment.AttachmentHolder implements LevelAccessor, UUIDLookup<Entity>, AutoCloseable, net.neoforged.neoforge.common.extensions.ILevelExtension {
-     public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceKey.codec(Registries.DIMENSION);
-     public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registries.DIMENSION, ResourceLocation.withDefaultNamespace("overworld"));
-     public static final ResourceKey<Level> NETHER = ResourceKey.create(Registries.DIMENSION, ResourceLocation.withDefaultNamespace("the_nether"));
-@@ -120,6 +_,11 @@
+     public static final int TIME_DAY = 1000;
+     public static final int TIME_NOON = 6000;
+     public static final int TIME_NIGHT = 13000;
+@@ -128,6 +_,11 @@
      private final RegistryAccess registryAccess;
      private final DamageSources damageSources;
      private long subTickCount;
@@ -21,7 +21,7 @@
  
      protected Level(
          WritableLevelData p_270739_,
-@@ -220,11 +_,36 @@
+@@ -233,11 +_,36 @@
          } else {
              LevelChunk levelchunk = this.getChunkAt(p_46605_);
              Block block = p_46606_.getBlock();
@@ -58,7 +58,7 @@
                  if (blockstate1 == p_46606_) {
                      if (blockstate != blockstate1) {
                          this.setBlocksDirty(p_46605_, blockstate, blockstate1);
-@@ -251,9 +_,8 @@
+@@ -264,9 +_,8 @@
                      }
  
                      this.updatePOIOnBlockStateChange(p_46605_, blockstate, blockstate1);
@@ -69,7 +69,7 @@
              }
          }
      }
-@@ -305,6 +_,7 @@
+@@ -318,6 +_,7 @@
      }
  
      public void updateNeighborsAt(BlockPos p_365514_, Block p_364886_, @Nullable Orientation p_363337_) {
@@ -77,7 +77,7 @@
      }
  
      public void updateNeighborsAtExceptFromFacing(BlockPos p_46591_, Block p_46592_, Direction p_46593_, @Nullable Orientation p_362952_) {
-@@ -505,10 +_,26 @@
+@@ -518,10 +_,26 @@
          (this.tickingBlockEntities ? this.pendingBlockEntityTickers : this.blockEntityTickers).add(p_151526_);
      }
  
@@ -104,7 +104,7 @@
          if (!this.pendingBlockEntityTickers.isEmpty()) {
              this.blockEntityTickers.addAll(this.pendingBlockEntityTickers);
              this.pendingBlockEntityTickers.clear();
-@@ -532,12 +_,19 @@
+@@ -545,12 +_,19 @@
  
      public <T extends Entity> void guardEntityTick(Consumer<T> p_46654_, T p_46655_) {
          try {
@@ -124,7 +124,7 @@
          }
      }
  
-@@ -687,6 +_,7 @@
+@@ -704,6 +_,7 @@
          if (!this.isOutsideBuildHeight(p_46748_)) {
              this.getChunkAt(p_46748_).removeBlockEntity(p_46748_);
          }
@@ -132,7 +132,7 @@
      }
  
      public boolean isLoaded(BlockPos p_46750_) {
-@@ -766,9 +_,9 @@
+@@ -783,9 +_,9 @@
              }
          });
  
@@ -144,7 +144,7 @@
                  && p_46538_.test(enderdragonpart)
                  && p_46537_.intersects(enderdragonpart.getBoundingBox())) {
                  list.add(enderdragonpart);
-@@ -801,6 +_,8 @@
+@@ -818,6 +_,8 @@
                  }
              }
  
@@ -153,7 +153,7 @@
              if (p_261454_ instanceof EnderDragon enderdragon) {
                  for (EnderDragonPart enderdragonpart : enderdragon.getSubEntities()) {
                      T t = p_261885_.tryCast(enderdragonpart);
-@@ -815,6 +_,15 @@
+@@ -832,6 +_,15 @@
  
              return AbortableIterationConsumer.Continuation.CONTINUE;
          });
@@ -169,7 +169,7 @@
      }
  
      public List<Entity> getPushableEntities(Entity p_394578_, AABB p_394614_) {
-@@ -829,7 +_,7 @@
+@@ -846,7 +_,7 @@
          return this.getEntities().get(p_394067_);
      }
  
@@ -178,7 +178,7 @@
  
      public void blockEntityChanged(BlockPos p_151544_) {
          if (this.hasChunkAt(p_151544_)) {
-@@ -948,16 +_,15 @@
+@@ -975,16 +_,15 @@
      public abstract Scoreboard getScoreboard();
  
      public void updateNeighbourForOutputSignal(BlockPos p_46718_, Block p_46719_) {
@@ -199,7 +199,7 @@
                          this.neighborChanged(blockstate, blockpos, p_46719_, null, false);
                      }
                  }
-@@ -1039,6 +_,18 @@
+@@ -1066,6 +_,18 @@
          return this.biomeManager;
      }
  
@@ -218,7 +218,7 @@
      public final boolean isDebug() {
          return this.isDebug;
      }
-@@ -1085,5 +_,38 @@
+@@ -1128,5 +_,38 @@
          public String getSerializedName() {
              return this.id;
          }

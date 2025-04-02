@@ -47,8 +47,8 @@ final class ConsoleCommandCompleter implements Completer {
             stringReader.skip();
 
         try {
-            ParseResults<CommandSourceStack> results = this.server.getCommands().getDispatcher().parse(stringReader, this.server.createCommandSourceStack());
-            Suggestions tabComplete = this.server.getCommands().getDispatcher().getCompletionSuggestions(results).get();
+            ParseResults<CommandSourceStack> results = this.server.theGame().getCommands().getDispatcher().parse(stringReader, this.server.theGame().createCommandSourceStack());
+            Suggestions tabComplete = this.server.theGame().getCommands().getDispatcher().getCompletionSuggestions(results).get();
             for (Suggestion suggestion : tabComplete.getList()) {
                 String completion = suggestion.getText();
                 if (!completion.isEmpty()) {

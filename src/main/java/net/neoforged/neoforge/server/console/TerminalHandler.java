@@ -47,7 +47,7 @@ public final class TerminalHandler {
 
                 line = line.trim();
                 if (!line.isEmpty()) {
-                    server.handleConsoleInput(line, server.createCommandSourceStack());
+                    server.handleConsoleInput(line, server.theGame().createCommandSourceStack());
                 }
             }
         } catch (UserInterruptException e) {

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/Gui.java
 +++ b/net/minecraft/client/gui/Gui.java
-@@ -72,6 +_,9 @@
+@@ -77,6 +_,9 @@
  import net.neoforged.api.distmarker.OnlyIn;
  import org.joml.Matrix4fStack;
  
@@ -10,7 +10,7 @@
  @OnlyIn(Dist.CLIENT)
  public class Gui {
      private static final ResourceLocation CROSSHAIR_SPRITE = ResourceLocation.withDefaultNamespace("hud/crosshair");
-@@ -176,9 +_,21 @@
+@@ -181,9 +_,21 @@
      private int lastBubblePopSoundPlayed;
      private float autosaveIndicatorValue;
      private float lastAutosaveIndicatorValue;
@@ -32,7 +32,7 @@
      public Gui(Minecraft p_232355_) {
          this.minecraft = p_232355_;
          this.debugOverlay = new DebugScreenOverlay(p_232355_);
-@@ -188,27 +_,40 @@
+@@ -193,28 +_,40 @@
          this.bossOverlay = new BossHealthOverlay(p_232355_);
          this.subtitleOverlay = new SubtitleOverlay(p_232355_);
          this.resetTitleTimes();
@@ -42,6 +42,7 @@
 -            .add(this::renderHotbarAndDecorations)
 -            .add(this::renderExperienceLevel)
 -            .add(this::renderEffects)
+-            .add(this::renderActiveWorldEffects)
 -            .add((p_315814_, p_348661_) -> this.bossOverlay.render(p_315814_));
 -        LayeredDraw layereddraw1 = new LayeredDraw()
 -            .add(this::renderDemoOverlay)
@@ -90,7 +91,7 @@
      }
  
      public void resetTitleTimes() {
-@@ -218,7 +_,9 @@
+@@ -224,7 +_,9 @@
      }
  
      public void render(GuiGraphics p_282884_, DeltaTracker p_348630_) {
@@ -101,7 +102,7 @@
      }
  
      private void renderCameraOverlays(GuiGraphics p_316735_, DeltaTracker p_348538_) {
-@@ -238,8 +_,12 @@
+@@ -244,8 +_,12 @@
                  for (EquipmentSlot equipmentslot : EquipmentSlot.values()) {
                      ItemStack itemstack = localplayer.getItemBySlot(equipmentslot);
                      Equippable equippable = itemstack.get(DataComponents.EQUIPPABLE);
@@ -116,7 +117,7 @@
                      }
                  }
              }
-@@ -289,8 +_,12 @@
+@@ -295,14 +_,17 @@
              }
  
              if (i > 8) {
@@ -124,13 +125,19 @@
 +                // renders at (59) and the height that the overlay/status bar renders at (68) by default
 +                int yShift = Math.max(leftHeight, rightHeight) + (68 - 59);
                  p_316291_.pose().pushPose();
--                p_316291_.pose().translate((float)(p_316291_.guiWidth() / 2), (float)(p_316291_.guiHeight() - 68), 0.0F);
-+                //If y shift is smaller less than the default y level, just render it at the base y level
-+                p_316291_.pose().translate((float)(p_316291_.guiWidth() / 2), (float)(p_316291_.guiHeight() - Math.max(yShift, 68)), 0.0F);
                  int j;
+                 if (this.overlayMessageString.getStyle().isMega()) {
+                     j = (int)(p_316291_.guiHeight() * 0.5F);
+                 } else {
+-                    j = p_316291_.guiHeight() - 68;
++                    //If y shift is smaller less than the default y level, just render it at the base y level
++                    j = p_316291_.guiHeight() - Math.max(yShift, 68);
+                 }
+-
+                 p_316291_.pose().translate((float)(p_316291_.guiWidth() / 2), (float)j, 0.0F);
+                 int k;
                  if (this.animateOverlayMessageColor) {
-                     j = Mth.hsvToArgb(f / 50.0F, 0.7F, 0.6F, i);
-@@ -350,9 +_,18 @@
+@@ -384,9 +_,18 @@
      private void renderChat(GuiGraphics p_316307_, DeltaTracker p_348631_) {
          if (!this.chat.isChatFocused()) {
              Window window = this.minecraft.getWindow();
@@ -149,7 +156,7 @@
          }
      }
  
-@@ -449,6 +_,8 @@
+@@ -483,6 +_,8 @@
              List<Runnable> list = Lists.newArrayListWithExpectedSize(collection.size());
  
              for (MobEffectInstance mobeffectinstance : Ordering.natural().reverse().sortedCopy(collection)) {
@@ -158,7 +165,7 @@
                  Holder<MobEffect> holder = mobeffectinstance.getEffect();
                  if (mobeffectinstance.showIcon()) {
                      int k = p_282812_.guiWidth();
-@@ -480,6 +_,7 @@
+@@ -514,6 +_,7 @@
                          }
                      }
  
@@ -166,7 +173,7 @@
                      TextureAtlasSprite textureatlassprite = mobeffecttexturemanager.get(holder);
                      int l1 = k;
                      int k1 = l;
-@@ -495,29 +_,59 @@
+@@ -583,31 +_,61 @@
          }
      }
  
@@ -194,6 +201,8 @@
          PlayerRideableJumping playerrideablejumping = this.minecraft.player.jumpableVehicle();
          if (playerrideablejumping != null) {
              this.renderJumpMeter(playerrideablejumping, p_316628_, i);
+         } else if (this.minecraft.player.hasEffect(MobEffects.SHAZBOOTS) && this.minecraft.player.input.keyPresses.jump()) {
+             this.renderShazbootJumpMeter(p_316628_, i);
 -        } else if (this.isExperienceBarVisible()) {
 +        }
 +
@@ -229,7 +238,7 @@
              this.spectatorGui.renderTooltip(p_316628_);
          }
      }
-@@ -637,18 +_,23 @@
+@@ -736,18 +_,23 @@
      }
  
      private void renderSelectedItemName(GuiGraphics p_283501_) {
@@ -256,7 +265,7 @@
              if (!this.minecraft.gameMode.canHurtPlayer()) {
                  k += 14;
              }
-@@ -659,7 +_,13 @@
+@@ -758,7 +_,13 @@
              }
  
              if (l > 0) {
@@ -271,7 +280,7 @@
              }
          }
  
-@@ -667,7 +_,7 @@
+@@ -766,7 +_,7 @@
      }
  
      private void renderDemoOverlay(GuiGraphics p_281825_, DeltaTracker p_348679_) {
@@ -280,7 +289,7 @@
              Profiler.get().push("demo");
              Component component;
              if (this.minecraft.level.getGameTime() >= 120500L) {
-@@ -779,7 +_,15 @@
+@@ -878,7 +_,15 @@
          return (int)Math.ceil(p_93013_ / 10.0);
      }
  
@@ -296,7 +305,7 @@
          Player player = this.getCameraPlayer();
          if (player != null) {
              int i = Mth.ceil(player.getHealth());
-@@ -803,31 +_,59 @@
+@@ -902,31 +_,59 @@
              this.random.setSeed(this.tickCount * 312871);
              int l = p_283143_.guiWidth() / 2 - 91;
              int i1 = p_283143_.guiWidth() / 2 + 91;
@@ -365,7 +374,7 @@
              Profiler.get().pop();
          }
      }
-@@ -941,6 +_,8 @@
+@@ -1040,6 +_,8 @@
                      p_381066_.blitSprite(RenderType::guiTextured, AIR_EMPTY_SPRITE, k1, p_381100_ + l1, 9, 9);
                  }
              }
@@ -374,7 +383,7 @@
          }
      }
  
-@@ -1008,7 +_,7 @@
+@@ -1107,7 +_,7 @@
              if (i != 0) {
                  int j = (int)Math.ceil(livingentity.getHealth());
                  Profiler.get().popPush("mountHealth");
@@ -383,7 +392,7 @@
                  int l = p_283368_.guiWidth() / 2 + 91;
                  int i1 = k;
  
-@@ -1029,6 +_,7 @@
+@@ -1128,6 +_,7 @@
                      }
  
                      i1 -= 10;
@@ -391,7 +400,7 @@
                  }
              }
          }
-@@ -1195,7 +_,7 @@
+@@ -1294,7 +_,7 @@
                  this.toolHighlightTimer = 0;
              } else if (this.lastToolHighlight.isEmpty()
                  || !itemstack.is(this.lastToolHighlight.getItem())
@@ -400,7 +409,7 @@
                  this.toolHighlightTimer = (int)(40.0 * this.minecraft.options.notificationDisplayTime().get());
              } else if (this.toolHighlightTimer > 0) {
                  this.toolHighlightTimer--;
-@@ -1326,6 +_,15 @@
+@@ -1425,6 +_,15 @@
          }
      }
  
@@ -416,7 +425,7 @@
      @OnlyIn(Dist.CLIENT)
      public static enum HeartType implements net.neoforged.fml.common.asm.enumextension.IExtensibleEnum {
          CONTAINER(
-@@ -1443,8 +_,13 @@
+@@ -1542,8 +_,13 @@
              } else {
                  gui$hearttype = NORMAL;
              }

@@ -95,7 +95,7 @@ public class FluidIngredientTests {
         var ingredient2 = FluidIngredient.of(Fluids.LAVA);
         var intersection = IntersectionFluidIngredient.of(ingredient1, ingredient2);
 
-        var ops = server.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+        var ops = server.theGame().registryAccess().createSerializationContext(JsonOps.INSTANCE);
         var result = FluidIngredient.CODEC.encodeStart(ops, intersection)
                 .getOrThrow(error -> new RuntimeException("Failed to serialize ingredient: " + error));
 

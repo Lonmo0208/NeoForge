@@ -869,8 +869,8 @@ public class EventHooks {
     }
 
     public static boolean onPermissionChanged(GameProfile gameProfile, int newLevel, PlayerList playerList) {
-        int oldLevel = playerList.getServer().getProfilePermissions(gameProfile);
         ServerPlayer player = playerList.getPlayer(gameProfile.getId());
+        int oldLevel = player.serverLevel().theGame().server().getProfilePermissions(gameProfile);
         if (newLevel != oldLevel && player != null) {
             return NeoForge.EVENT_BUS.post(new PermissionsChangedEvent(player, newLevel, oldLevel)).isCanceled();
         }

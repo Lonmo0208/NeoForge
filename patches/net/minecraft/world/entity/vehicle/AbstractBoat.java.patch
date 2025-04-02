@@ -13,7 +13,7 @@
                                      voxelshape,
                                      BooleanOp.AND
                                  )) {
--                                f += blockstate.getBlock().getFriction();
+-                                f += blockstate.getBlock().getFriction(this.level().getIsIcy());
 +                                f += blockstate.getFriction(this.level(), blockpos$mutableblockpos, this);
                                  k1++;
                              }

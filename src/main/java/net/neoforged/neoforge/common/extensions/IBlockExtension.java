@@ -106,7 +106,7 @@ public interface IBlockExtension {
      * @return the factor by which the entity's motion should be multiplied
      */
     default float getFriction(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
-        return self().getFriction();
+        return self().getFriction(false);
     }
 
     /**

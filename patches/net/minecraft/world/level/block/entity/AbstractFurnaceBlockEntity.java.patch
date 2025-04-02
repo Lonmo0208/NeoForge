@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity.java
-@@ -68,9 +_,14 @@
+@@ -70,9 +_,14 @@
          public int get(int p_58431_) {
              switch (p_58431_) {
                  case 0:
@@ -16,7 +16,7 @@
                  case 2:
                      return AbstractFurnaceBlockEntity.this.cookingTimer;
                  case 3:
-@@ -104,12 +_,14 @@
+@@ -111,12 +_,14 @@
      };
      private final Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed = new Reference2IntOpenHashMap<>();
      private final RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
@@ -31,7 +31,7 @@
      }
  
      private boolean isLit() {
-@@ -121,10 +_,10 @@
+@@ -128,11 +_,11 @@
          super.loadAdditional(p_155025_, p_323468_);
          this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
          ContainerHelper.loadAllItems(p_155025_, this.items, p_323468_);
@@ -39,6 +39,7 @@
 -        this.cookingTotalTime = p_155025_.getShortOr("cooking_total_time", (short)0);
 -        this.litTimeRemaining = p_155025_.getShortOr("lit_time_remaining", (short)0);
 -        this.litTotalTime = p_155025_.getShortOr("lit_total_time", (short)0);
+         this.superChargeLevel = p_155025_.getShortOr("super_charge_level", (short)0);
 +        this.cookingTimer = p_155025_.getIntOr("cooking_time_spent", (short)0);
 +        this.cookingTotalTime = p_155025_.getIntOr("cooking_total_time", (short)0);
 +        this.litTimeRemaining = p_155025_.getIntOr("lit_time_remaining", (short)0);
@@ -46,7 +47,7 @@
          this.recipesUsed.clear();
          this.recipesUsed.putAll(p_155025_.read("RecipesUsed", RECIPES_USED_CODEC).orElse(Map.of()));
      }
-@@ -132,10 +_,10 @@
+@@ -140,11 +_,11 @@
      @Override
      protected void saveAdditional(CompoundTag p_187452_, HolderLookup.Provider p_323656_) {
          super.saveAdditional(p_187452_, p_323656_);
@@ -54,6 +55,7 @@
 -        p_187452_.putShort("cooking_total_time", (short)this.cookingTotalTime);
 -        p_187452_.putShort("lit_time_remaining", (short)this.litTimeRemaining);
 -        p_187452_.putShort("lit_total_time", (short)this.litTotalTime);
+         p_187452_.putShort("super_charge_level", (short)this.superChargeLevel);
 +        p_187452_.putInt("cooking_time_spent", this.cookingTimer);
 +        p_187452_.putInt("cooking_total_time", this.cookingTotalTime);
 +        p_187452_.putInt("lit_time_remaining", this.litTimeRemaining);
@@ -61,7 +63,7 @@
          ContainerHelper.saveAllItems(p_187452_, this.items, p_323656_);
          p_187452_.store("RecipesUsed", RECIPES_USED_CODEC, this.recipesUsed);
      }
-@@ -166,11 +_,15 @@
+@@ -175,11 +_,15 @@
                  p_155017_.litTotalTime = p_155017_.litTimeRemaining;
                  if (p_155017_.isLit()) {
                      flag1 = true;
@@ -78,7 +80,7 @@
                          }
                      }
                  }
-@@ -223,9 +_,9 @@
+@@ -232,9 +_,9 @@
                  } else if (!ItemStack.isSameItemSameComponents(itemstack1, itemstack)) {
                      return false;
                  } else {
@@ -90,7 +92,7 @@
                  }
              }
          } else {
-@@ -247,7 +_,7 @@
+@@ -256,7 +_,7 @@
              if (itemstack2.isEmpty()) {
                  p_267073_.set(2, itemstack1.copy());
              } else if (ItemStack.isSameItemSameComponents(itemstack2, itemstack1)) {
@@ -99,7 +101,7 @@
              }
  
              if (itemstack.is(Blocks.WET_SPONGE.asItem()) && !p_267073_.get(1).isEmpty() && p_267073_.get(1).is(Items.BUCKET)) {
-@@ -262,7 +_,7 @@
+@@ -271,7 +_,7 @@
      }
  
      protected int getBurnDuration(FuelValues p_363501_, ItemStack p_58343_) {
@@ -108,7 +110,7 @@
      }
  
      private static int getTotalCookTime(ServerLevel p_380169_, AbstractFurnaceBlockEntity p_222694_) {
-@@ -325,7 +_,7 @@
+@@ -335,7 +_,7 @@
              return true;
          } else {
              ItemStack itemstack = this.items.get(1);

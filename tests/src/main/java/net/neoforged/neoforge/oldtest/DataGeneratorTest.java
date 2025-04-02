@@ -80,6 +80,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.mines.MineSpawnStrategy;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.EventBusSubscriber.Bus;
@@ -155,7 +156,7 @@ public class DataGeneratorTest {
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
         Holder<DimensionType> holder2 = dimensionTypes.getOrThrow(BuiltinDimensionTypes.END);
         Holder<NoiseGeneratorSettings> holder3 = noiseGeneratorSettings.getOrThrow(NoiseGeneratorSettings.END);
-        LevelStem levelStem = new LevelStem(holder2, new NoiseBasedChunkGenerator(TheEndBiomeSource.create(biomes), holder3));
+        LevelStem levelStem = new LevelStem(holder2, Optional.of(new NoiseBasedChunkGenerator(TheEndBiomeSource.create(biomes), holder3)), List.of(), Optional.empty(), MineSpawnStrategy.SURFACE);
         context.register(TEST_LEVEL_STEM, levelStem);
     }
 

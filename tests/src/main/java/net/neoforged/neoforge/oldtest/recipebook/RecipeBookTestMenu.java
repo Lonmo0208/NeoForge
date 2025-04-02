@@ -50,7 +50,7 @@ public class RecipeBookTestMenu extends RecipeBookMenu {
     public RecipeBookTestMenu(int id, Inventory inv, ContainerLevelAccess access) {
         super(RecipeBookExtensionTest.RECIPE_BOOK_TEST_MENU_TYPE.get(), id);
         this.access = access;
-        this.player = inv.player;
+        this.player = inv.getPlayer();
 
         /**
          * Copied from {@link ResultSlot} but not limited to {@link CraftingContainer}
@@ -177,7 +177,7 @@ public class RecipeBookTestMenu extends RecipeBookMenu {
         CraftingInput craftinginput = p_150550_.asCraftingInput();
         ServerPlayer serverplayer = (ServerPlayer) p_150549_;
         ItemStack itemstack = ItemStack.EMPTY;
-        Optional<RecipeHolder<RecipeBookTestRecipe>> optional = p_379963_.getServer()
+        Optional<RecipeHolder<RecipeBookTestRecipe>> optional = p_379963_.theGame()
                 .getRecipeManager()
                 .getRecipeFor(RecipeBookExtensionTest.RECIPE_BOOK_TEST_RECIPE_TYPE.get(), craftinginput, p_379963_, p_345124_);
         if (optional.isPresent()) {

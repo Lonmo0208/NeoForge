@@ -1,10 +1,10 @@
 --- a/net/minecraft/client/gui/screens/MenuScreens.java
 +++ b/net/minecraft/client/gui/screens/MenuScreens.java
-@@ -41,12 +_,17 @@
-     private static final Map<MenuType<?>, MenuScreens.ScreenConstructor<?, ?>> SCREENS = Maps.newHashMap();
- 
-     public static <T extends AbstractContainerMenu> void create(MenuType<T> p_96202_, Minecraft p_96203_, int p_96204_, Component p_96205_) {
-+        getScreenFactory(p_96202_).ifPresent(f -> f.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_));
+@@ -46,12 +_,18 @@
+     public static <T extends AbstractContainerMenu> void create(
+         MenuType<T> p_96202_, Minecraft p_96203_, int p_96204_, Component p_96205_, List<Integer> p_420892_
+     ) {
++        getScreenFactory(p_96202_).ifPresent(f -> f.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_, p_420892_));
 +    }
 +
 +    public static <T extends AbstractContainerMenu> java.util.Optional<ScreenConstructor<T, ?>> getScreenFactory(MenuType<T> p_96202_) {
@@ -12,14 +12,15 @@
          if (screenconstructor == null) {
              LOGGER.warn("Failed to create screen for menu type: {}", BuiltInRegistries.MENU.getKey(p_96202_));
          } else {
--            screenconstructor.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_);
+-            screenconstructor.fromPacket(p_96205_, p_96202_, p_96203_, p_96204_, p_420892_);
 +            return java.util.Optional.of(screenconstructor);
          }
++
 +        return java.util.Optional.empty();
      }
  
      @Nullable
-@@ -54,6 +_,10 @@
+@@ -59,6 +_,10 @@
          return (MenuScreens.ScreenConstructor<T, ?>)SCREENS.get(p_96200_);
      }
  
@@ -30,7 +31,7 @@
      private static <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void register(
          MenuType<? extends M> p_96207_, MenuScreens.ScreenConstructor<M, U> p_96208_
      ) {
-@@ -61,6 +_,12 @@
+@@ -66,6 +_,12 @@
          if (screenconstructor != null) {
              throw new IllegalStateException("Duplicate registration for " + BuiltInRegistries.MENU.getKey(p_96207_));
          }

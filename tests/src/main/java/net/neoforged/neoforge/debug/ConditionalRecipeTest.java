@@ -50,7 +50,7 @@ public interface ConditionalRecipeTest {
         });
 
         test.eventListeners().forge().addListener((ServerStartedEvent event) -> {
-            var recipe = event.getServer().getRecipeManager().recipeMap().byKey(recipeName);
+            var recipe = event.getTheGame().getRecipeManager().recipeMap().byKey(recipeName);
 
             if (recipe == null)
                 test.pass();

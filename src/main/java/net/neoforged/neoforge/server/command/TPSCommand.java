@@ -36,7 +36,7 @@ class TPSCommand {
                 .then(Commands.argument("dimension", DimensionArgument.dimension())
                         .executes(ctx -> sendTime(ctx, DimensionArgument.getDimension(ctx, "dimension"))))
                 .executes(ctx -> {
-                    for (ServerLevel dimension : ctx.getSource().getServer().getAllLevels()) {
+                    for (ServerLevel dimension : ctx.getSource().theGame().getAllLevels()) {
                         sendTime(ctx, dimension);
                     }
 
@@ -47,7 +47,7 @@ class TPSCommand {
 
     private static int sendTime(CommandContext<CommandSourceStack> context, @Nullable ServerLevel dimension) throws CommandSyntaxException {
         var src = context.getSource();
-        src.sendSuccess(() -> createComponent(src.getServer(), dimension), false);
+        src.sendSuccess(() -> createComponent(src.theGame().server(), dimension), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -57,7 +57,7 @@ class TPSCommand {
 
         if (dimension == null) {
             times = server.getTickTimesNanos();
-            tickRateManager = server.tickRateManager();
+            tickRateManager = server.theGame().tickRateManager();
         } else {
             var dimensionTimes = server.getTickTime(dimension.dimension());
             times = dimensionTimes == null ? UNLOADED : dimensionTimes;

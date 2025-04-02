@@ -1,14 +1,14 @@
 --- a/net/minecraft/world/level/storage/PrimaryLevelData.java
 +++ b/net/minecraft/world/level/storage/PrimaryLevelData.java
-@@ -73,6 +_,7 @@
-     private boolean wasModded;
-     private final Set<String> removedFeatureFlags;
-     private final TimerQueue<MinecraftServer> scheduledEvents;
+@@ -103,6 +_,7 @@
+     private int mineCrafterExp;
+     private int levelCount;
+     private final Map<ResourceKey<Level>, MineEventData> events;
 +    private boolean confirmedExperimentalWarning = false;
  
      private PrimaryLevelData(
          @Nullable CompoundTag p_277888_,
-@@ -168,7 +_,7 @@
+@@ -236,7 +_,7 @@
          Dynamic<T> p_78531_, LevelSettings p_78535_, PrimaryLevelData.SpecialWorldProperty p_250651_, WorldOptions p_251864_, Lifecycle p_78538_
      ) {
          long i = p_78531_.get("Time").asLong(0L);
@@ -17,7 +17,7 @@
              p_78531_.get("Player").flatMap(CompoundTag.CODEC::parse).result().orElse(null),
              p_78531_.get("WasModded").asBoolean(false),
              new BlockPos(p_78531_.get("SpawnX").asInt(0), p_78531_.get("SpawnY").asInt(0), p_78531_.get("SpawnZ").asInt(0)),
-@@ -191,7 +_,8 @@
+@@ -259,7 +_,8 @@
                  .asStream()
                  .flatMap(p_338118_ -> p_338118_.asString().result().stream())
                  .collect(Collectors.toCollection(Sets::newLinkedHashSet)),
@@ -27,24 +27,22 @@
              new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS, p_78531_.get("ScheduledEvents").asStream()),
              (CompoundTag)p_78531_.get("CustomBossEvents").orElseEmptyMap().getValue(),
              p_78531_.get("DragonFight").read(EndDragonFight.Data.CODEC).resultOrPartial(LOGGER::error).orElse(EndDragonFight.Data.DEFAULT),
-@@ -199,7 +_,11 @@
-             p_251864_,
-             p_250651_,
-             p_78538_
+@@ -289,7 +_,10 @@
+             p_78531_.get("mine_crafter_exp").asInt(0),
+             p_78531_.get("level_count").asInt(0),
+             p_78531_.get("events").read(Codec.unboundedMap(ResourceKey.codec(Registries.DIMENSION), MineEventData.CODEC)).result().orElse(Map.of())
 -        );
 +        ).withConfirmedWarning(p_78538_ != Lifecycle.stable() && p_78531_.get("confirmedExperimentalSettings").asBoolean(false));
-+        // Neo:
 +        result.setDayTimeFraction(p_78531_.get("neoDayTimeFraction").asFloat(0f));
 +        result.setDayTimePerTick(p_78531_.get("neoDayTimePerTick").asFloat(-1f));
 +        return result;
      }
  
      @Override
-@@ -267,6 +_,12 @@
-         p_78547_.putInt("WanderingTraderSpawnDelay", this.wanderingTraderSpawnDelay);
-         p_78547_.putInt("WanderingTraderSpawnChance", this.wanderingTraderSpawnChance);
-         p_78547_.storeNullable("WanderingTraderId", UUIDUtil.CODEC, this.wanderingTraderId);
-+
+@@ -365,6 +_,11 @@
+         p_78547_.putInt("mine_crafter_level", this.mineCrafterLevel);
+         p_78547_.putInt("mine_crafter_exp", this.mineCrafterExp);
+         p_78547_.putInt("level_count", this.levelCount);
 +        // Neo:
 +        p_78547_.putString("forgeLifecycle", net.neoforged.neoforge.common.CommonHooks.encodeLifecycle(this.settings.getLifecycle()));
 +        p_78547_.putBoolean("confirmedExperimentalSettings", this.confirmedExperimentalWarning);
@@ -53,7 +51,7 @@
      }
  
      private static ListTag stringCollectionToTag(Set<String> p_277880_) {
-@@ -566,10 +_,58 @@
+@@ -759,10 +_,58 @@
          return this.settings.copy();
      }
  

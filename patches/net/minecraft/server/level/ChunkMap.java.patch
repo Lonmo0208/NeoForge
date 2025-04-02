@@ -38,8 +38,8 @@
                  SerializableChunkData serializablechunkdata = SerializableChunkData.copyOf(this.level, p_140259_);
 +                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.ChunkDataEvent.Save(p_140259_, this.level, serializablechunkdata));
                  CompletableFuture<CompoundTag> completablefuture = CompletableFuture.supplyAsync(serializablechunkdata::write, Util.backgroundExecutor());
-                 this.write(chunkpos, completablefuture::join).handle((p_381690_, p_381691_) -> {
-                     if (p_381691_ != null) {
+                 this.write(chunkpos, completablefuture::join).handle((p_418804_, p_418805_) -> {
+                     if (p_418805_ != null) {
 @@ -844,9 +_,11 @@
  
      private static void markChunkPendingToSend(ServerPlayer p_295834_, LevelChunk p_296281_) {

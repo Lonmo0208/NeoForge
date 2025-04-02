@@ -1,32 +1,41 @@
 --- a/net/minecraft/world/item/FlintAndSteelItem.java
 +++ b/net/minecraft/world/item/FlintAndSteelItem.java
-@@ -29,7 +_,8 @@
-         Level level = p_41297_.getLevel();
-         BlockPos blockpos = p_41297_.getClickedPos();
+@@ -17,6 +_,8 @@
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+ import net.minecraft.world.level.gameevent.GameEvent;
++import net.neoforged.neoforge.common.ItemAbilities;
++import net.neoforged.neoforge.common.ItemAbility;
+ 
+ public class FlintAndSteelItem extends Item {
+     public FlintAndSteelItem(Item.Properties p_41295_) {
+@@ -33,7 +_,8 @@
+         Level level = p_421800_.getLevel();
+         BlockPos blockpos = p_421800_.getClickedPos();
          BlockState blockstate = level.getBlockState(blockpos);
 -        if (!CampfireBlock.canLight(blockstate) && !CandleBlock.canLight(blockstate) && !CandleCakeBlock.canLight(blockstate)) {
-+        BlockState blockstate2 = blockstate.getToolModifiedState(p_41297_, net.neoforged.neoforge.common.ItemAbilities.FIRESTARTER_LIGHT, false);
++        BlockState blockstate2 = blockstate.getToolModifiedState(p_421800_, net.neoforged.neoforge.common.ItemAbilities.FIRESTARTER_LIGHT, false);
 +        if (blockstate2 == null) {
-             BlockPos blockpos1 = blockpos.relative(p_41297_.getClickedFace());
-             if (BaseFireBlock.canBePlacedAt(level, blockpos1, p_41297_.getHorizontalDirection())) {
+             BlockPos blockpos1 = blockpos.relative(p_421800_.getClickedFace());
+             if (BaseFireBlock.canBePlacedAt(level, blockpos1, p_421800_.getHorizontalDirection())) {
                  level.playSound(player, blockpos1, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
-@@ -48,7 +_,7 @@
+@@ -52,7 +_,7 @@
              }
          } else {
              level.playSound(player, blockpos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
 -            level.setBlock(blockpos, blockstate.setValue(BlockStateProperties.LIT, true), 11);
 +            level.setBlock(blockpos, blockstate2, 11);
              level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockpos);
-             if (player != null) {
-                 p_41297_.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(p_41297_.getHand()));
-@@ -56,5 +_,10 @@
+             if (player != null && !p_421800_.getItemInHand().isEmpty()) {
+                 p_421800_.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(p_421800_.getHand()));
+@@ -60,5 +_,10 @@
  
-             return InteractionResult.SUCCESS;
+             return true;
          }
 +    }
 +
 +    @Override
-+    public boolean canPerformAction(ItemStack stack, net.neoforged.neoforge.common.ItemAbility itemAbility) {
-+        return net.neoforged.neoforge.common.ItemAbilities.DEFAULT_FLINT_ACTIONS.contains(itemAbility);
++    public boolean canPerformAction(ItemStack stack, ItemAbility itemAbility) {
++        return ItemAbilities.DEFAULT_FLINT_ACTIONS.contains(itemAbility);
      }
  }

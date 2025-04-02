@@ -1,0 +1,130 @@
+--- a/net/minecraft/server/TheGame.java
++++ b/net/minecraft/server/TheGame.java
+@@ -95,6 +_,7 @@
+ import net.minecraft.world.level.storage.WorldData;
+ import net.minecraft.world.phys.Vec2;
+ import net.minecraft.world.phys.Vec3;
++import net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload;
+ import org.slf4j.Logger;
+ 
+ public class TheGame implements AutoCloseable {
+@@ -144,9 +_,9 @@
+                 .lookupOrThrow(Registries.BLOCK)
+                 .filterFeatures(this.worldData.enabledFeatures());
+             this.structureTemplateManager = new StructureTemplateManager(p_419528_.resourceManager(), p_420183_, p_421861_.getFixerUpper(), holdergetter);
+-            this.potionBrewing = PotionBrewing.bootstrap(this.worldData.enabledFeatures());
++            this.potionBrewing = PotionBrewing.bootstrap(this.worldData.enabledFeatures(), this.registryAccess());
+             this.resources.managers.getRecipeManager().finalizeRecipeLoading(this.worldData.enabledFeatures());
+-            this.fuelValues = FuelValues.vanillaBurnTimes(this.registries.compositeAccess(), this.worldData.enabledFeatures());
++            this.fuelValues = net.neoforged.neoforge.common.DataMapHooks.populateFuelValues(this.registries.compositeAccess(), this.worldData.enabledFeatures());
+             this.tickRateManager = new ServerTickRateManager(this);
+         }
+     }
+@@ -172,6 +_,7 @@
+         for (ServerLevel serverlevel : this.levels.values()) {
+             if (serverlevel != null) {
+                 try {
++                    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Unload(serverlevel));
+                     serverlevel.close();
+                 } catch (IOException ioexception) {
+                     LOGGER.error("Exception closing the level", (Throwable)ioexception);
+@@ -235,6 +_,9 @@
+         return this.worldData;
+     }
+ 
++    public TheGame.ReloadableResources getServerResources() {
++        return resources;
++    }
+     public RegistryAccess.Frozen registryAccess() {
+         return this.registries.compositeAccess();
+     }
+@@ -304,6 +_,7 @@
+         Function<TheGame, PlayerList> p_420277_
+     ) {
+         TheGame thegame = new TheGame(p_420566_, p_422392_, p_419529_, p_420166_, p_420277_);
++        net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerAboutToStart(thegame);
+         if (!JvmProfiler.INSTANCE.isRunning()) {
+         }
+ 
+@@ -349,6 +_,7 @@
+         this.readScoreboard(dimensiondatastorage);
+         this.commandStorage = new CommandStorage(dimensiondatastorage);
+         WorldBorder worldborder = serverlevel.getWorldBorder();
++        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Load(levels.get(Level.OVERWORLD)));
+         if (!serverleveldata.isInitialized()) {
+             try {
+                 setInitialSpawn(serverlevel, serverleveldata, worldoptions.generateBonusChest(), flag);
+@@ -398,6 +_,7 @@
+                 );
+                 worldborder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
+                 this.levels.put(resourcekey1, serverlevel1);
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Load(levels.get(resourcekey)));
+             }
+         }
+ 
+@@ -412,6 +_,7 @@
+         p_422996_.setSpawn(DEFAULT_SPAWN, 90.0F);
+         if (p_419822_) {
+             ServerChunkCache serverchunkcache = p_422142_.getChunkSource();
++            if (net.neoforged.neoforge.event.EventHooks.onCreateWorldSpawn(p_422142_, p_422996_)) return;
+             p_422142_.registryAccess()
+                 .lookup(Registries.CONFIGURED_FEATURE)
+                 .flatMap(p_420268_ -> p_420268_.get(MiscOverworldFeatures.BONUS_CHEST))
+@@ -438,6 +_,7 @@
+         p_420954_.theGameButSuperSpecialOneForLoading = this;
+         ServerChunkCache serverchunkcache = serverlevel.getChunkSource();
+         p_420954_.runNextTickNow();
++        if (net.neoforged.neoforge.event.EventHooks.onCreateWorldSpawn(serverlevel, serverlevel.serverLevelData)) return;
+         serverlevel.setDefaultSpawnPos(blockpos, serverlevel.getSharedSpawnAngle());
+         int i = this.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS);
+         int j = i > 0 ? Mth.square(ChunkProgressListener.calculateDiameter(i)) : 0;
+@@ -452,6 +_,7 @@
+             TicketStorage ticketstorage = serverlevel1.getDataStorage().get(TicketStorage.TYPE);
+             if (ticketstorage != null) {
+                 ticketstorage.activateAllDeactivatedTickets();
++                net.neoforged.neoforge.common.world.chunk.ForcedChunkManager.activateAllDeactivatedTickets(serverlevel1, ticketstorage);
+             }
+         }
+ 
+@@ -562,7 +_,7 @@
+ 
+     public CompletableFuture<Void> reloadResources(Collection<String> p_422352_) {
+         CompletableFuture<Void> completablefuture = CompletableFuture.<ImmutableList>supplyAsync(
+-                () -> p_422352_.stream().map(this.packRepository::getPack).filter(Objects::nonNull).map(Pack::open).collect(ImmutableList.toImmutableList()),
++                () -> this.packRepository.rebuildSelected(p_422352_).stream().map(Pack::open).collect(ImmutableList.toImmutableList()),
+                 this.server
+             )
+             .thenCompose(
+@@ -602,7 +_,8 @@
+                     this.playerList().reloadResources(this);
+                     this.functionManager.replaceLibrary(this.resources.managers.getFunctionLibrary());
+                     this.structureTemplateManager.onResourceManagerReload(this.resources.resourceManager);
+-                    this.fuelValues = FuelValues.vanillaBurnTimes(this.registries.compositeAccess(), this.worldData.enabledFeatures());
++                    this.fuelValues = net.neoforged.neoforge.common.DataMapHooks.populateFuelValues(this.registries.compositeAccess(), this.worldData.enabledFeatures());
++                    this.playerList().getPlayers().forEach(this.playerList()::sendPlayerPermissionLevel); //Forge: Fix newly added/modified commands not being sent to the client when commands reload.
+                 },
+                 this.server
+             );
+@@ -629,11 +_,17 @@
+     }
+ 
+     public void synchronizeTime(ServerLevel p_419872_) {
+-        this.playerList()
+-            .broadcastAll(
+-                new ClientboundSetTimePacket(p_419872_.getGameTime(), p_419872_.getDayTime(), p_419872_.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)),
+-                p_419872_.dimension()
+-            );
++        ClientboundSetTimePacket vanillaPacket = new ClientboundSetTimePacket(p_419872_.getGameTime(), p_419872_.getDayTime(), p_419872_.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT));
++        net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload neoPacket = new net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload(p_419872_.getGameTime(), p_419872_.getDayTime(), p_419872_.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT), p_419872_.getDayTimeFraction(), p_419872_.getDayTimePerTick());
++        for (ServerPlayer serverplayer : playerList.getPlayers()) {
++            if (serverplayer.level().dimension() == p_419872_.dimension()) {
++                if (serverplayer.connection.hasChannel(ClientboundCustomSetTimePayload.TYPE)) {
++                    serverplayer.connection.send(neoPacket);
++                } else {
++                    serverplayer.connection.send(vanillaPacket);
++                }
++            }
++        }
+     }
+ 
+     public void forceTimeSynchronization() {

@@ -1,0 +1,23 @@
+--- a/net/minecraft/server/PackStuff.java
++++ b/net/minecraft/server/PackStuff.java
+@@ -26,8 +_,10 @@
+         FeatureFlagSet featureflagset = p_423263_ ? FeatureFlagSet.of() : p_420695_.enabledFeatures();
+         FeatureFlagSet featureflagset1 = p_423263_ ? FeatureFlags.REGISTRY.allFlags() : p_420695_.enabledFeatures();
+         p_422189_.reload();
++        DataPackConfig.DEFAULT.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
++        datapackconfig.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
+         if (p_422117_) {
+-            return configureRepositoryWithSelection(p_422189_, List.of("vanilla"), featureflagset, false);
++            return configureRepositoryWithSelection(p_422189_, net.neoforged.neoforge.common.CommonHooks.getModDataPacksWithVanilla(), featureflagset, false);
+         } else {
+             Set<String> set = Sets.newLinkedHashSet();
+ 
+@@ -72,7 +_,7 @@
+                 LOGGER.info("No datapacks selected, forcing vanilla");
+                 set.add("vanilla");
+             }
+-
++            net.neoforged.neoforge.resource.ResourcePackLoader.reorderNewlyDiscoveredPacks(set, datapackconfig.getEnabled(), p_422189_);
+             return configureRepositoryWithSelection(p_422189_, set, featureflagset, true);
+         }
+     }

@@ -123,10 +123,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeGenerationSettings;
-import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.biome.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -408,7 +405,7 @@ public class CommonHooks {
     @Nullable
     public static ItemEntity onPlayerTossEvent(Player player, ItemStack item, boolean includeName) {
         player.captureDrops(Lists.newArrayList());
-        ItemEntity ret = player.drop(item, false, includeName);
+        ItemEntity ret = player.drop(item, false, includeName, false); // TODO: i assume that the 4th parameter here is "should remain in inventory", like MineIngredients. -C
         player.captureDrops(null);
 
         if (ret == null)
@@ -887,7 +884,7 @@ public class CommonHooks {
 
     @FunctionalInterface
     public interface BiomeCallbackFunction {
-        Biome apply(final Biome.ClimateSettings climate, final BiomeSpecialEffects effects, final BiomeGenerationSettings gen, final MobSpawnSettings spawns);
+        Biome apply(final ClimateSettings climate, final BiomeSpecialEffects effects, final BiomeGenerationSettings gen, final MobSpawnSettings spawns);
     }
 
     /**

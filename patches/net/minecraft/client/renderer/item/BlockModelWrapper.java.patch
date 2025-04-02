@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/item/BlockModelWrapper.java
 +++ b/net/minecraft/client/renderer/item/BlockModelWrapper.java
-@@ -36,12 +_,19 @@
+@@ -37,12 +_,19 @@
      private final List<BakedQuad> quads;
      private final Supplier<Vector3f[]> extents;
      private final ModelRenderProperties properties;
@@ -20,7 +20,7 @@
      }
  
      public static Vector3f[] computeExtents(List<BakedQuad> p_404655_) {
-@@ -79,7 +_,7 @@
+@@ -88,7 +_,7 @@
          }
  
          itemstackrenderstate$layerrenderstate.setExtents(this.extents);
@@ -29,7 +29,7 @@
          this.properties.applyToLayer(itemstackrenderstate$layerrenderstate, p_388231_);
          itemstackrenderstate$layerrenderstate.prepareQuadList().addAll(this.quads);
      }
-@@ -110,7 +_,10 @@
+@@ -119,7 +_,10 @@
              TextureSlots textureslots = resolvedmodel.getTopTextureSlots();
              List<BakedQuad> list = resolvedmodel.bakeTopGeometry(textureslots, modelbaker, BlockModelRotation.X0_Y0).getAll();
              ModelRenderProperties modelrenderproperties = ModelRenderProperties.fromResolvedModel(modelbaker, resolvedmodel, textureslots);

@@ -16,6 +16,7 @@
     "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
     "description": "You obtained a DiamondBlock",
     "frame": "challenge",
+    "hint": "You obtained a DiamondBlock",
     "icon": {
       "count": 1,
       "id": "minecraft:diamond_block"

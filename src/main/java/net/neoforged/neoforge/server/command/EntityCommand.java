@@ -61,7 +61,7 @@ class EntityCommand {
             if (names.isEmpty())
                 throw INVALID_FILTER.create();
 
-            ServerLevel level = sender.getServer().getLevel(dim); //TODO: DimensionManager so we can hotload? DimensionManager.getWorld(sender.getServer(), dim, false, false);
+            ServerLevel level = sender.theGame().getLevel(dim); //TODO: DimensionManager so we can hotload? DimensionManager.getWorld(sender.getServer(), dim, false, false);
             if (level == null)
                 throw INVALID_DIMENSION.create(dim);
 

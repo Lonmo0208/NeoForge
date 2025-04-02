@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/inventory/ResultSlot.java
 +++ b/net/minecraft/world/inventory/ResultSlot.java
-@@ -51,6 +_,7 @@
+@@ -54,6 +_,7 @@
      protected void checkTakeAchievements(ItemStack p_40185_) {
          if (this.removeCount > 0) {
              p_40185_.onCraftedBy(this.player, this.removeCount);
@@ -8,12 +8,13 @@
          }
  
          if (this.container instanceof RecipeCraftingHolder recipecraftingholder) {
-@@ -86,7 +_,9 @@
+@@ -93,8 +_,10 @@
          CraftingInput craftinginput = craftinginput$positioned.input();
          int i = craftinginput$positioned.left();
          int j = craftinginput$positioned.top();
 +        net.neoforged.neoforge.common.CommonHooks.setCraftingPlayer(p_150638_);
          NonNullList<ItemStack> nonnulllist = this.getRemainingItems(craftinginput, p_150638_.level());
+         boolean flag = p_150638_.isActive(PlayerUnlocks.CRAFTING_EFFICIENCY);
 +        net.neoforged.neoforge.common.CommonHooks.setCraftingPlayer(null);
  
          for (int k = 0; k < craftinginput.height(); k++) {

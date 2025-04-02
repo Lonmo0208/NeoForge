@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/item/ItemStackRenderState.java
 +++ b/net/minecraft/client/renderer/item/ItemStackRenderState.java
-@@ -140,6 +_,13 @@
+@@ -142,6 +_,13 @@
          }
  
          public void setRenderType(RenderType p_405446_) {

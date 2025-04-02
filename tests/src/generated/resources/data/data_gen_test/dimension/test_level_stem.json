@@ -1,5 +1,6 @@
 {
   "type": "minecraft:the_end",
+  "effects": [],
   "generator": {
     "type": "minecraft:noise",
     "biome_source": {

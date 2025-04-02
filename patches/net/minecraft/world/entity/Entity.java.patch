@@ -283,7 +283,7 @@
          if (this.level() instanceof ServerLevel serverlevel && !this.isRemoved()) {
              ServerLevel serverlevel1 = p_379899_.newLevel();
              boolean flag = serverlevel1.dimension() != serverlevel.dimension();
-@@ -2883,6 +_,7 @@
+@@ -2892,6 +_,7 @@
          return this.stringUUID;
      }
  
@@ -291,7 +291,7 @@
      public boolean isPushedByFluid() {
          return true;
      }
-@@ -2992,6 +_,8 @@
+@@ -3001,6 +_,8 @@
          EntityDimensions entitydimensions = this.dimensions;
          Pose pose = this.getPose();
          EntityDimensions entitydimensions1 = this.getDimensions(pose);
@@ -300,7 +300,7 @@
          this.dimensions = entitydimensions1;
          this.eyeHeight = entitydimensions1.eyeHeight();
          this.reapplyPosition();
-@@ -3298,9 +_,17 @@
+@@ -3307,9 +_,17 @@
          return Mth.lerp(p_352259_, this.yRotO, this.yRot);
      }
  
@@ -319,7 +319,7 @@
          } else {
              AABB aabb = this.getBoundingBox().deflate(0.001);
              int i = Mth.floor(aabb.minX);
-@@ -3315,25 +_,36 @@
+@@ -3324,25 +_,36 @@
              Vec3 vec3 = Vec3.ZERO;
              int k1 = 0;
              BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
@@ -363,7 +363,7 @@
                                  }
                              }
                          }
-@@ -3341,27 +_,30 @@
+@@ -3350,27 +_,30 @@
                  }
              }
  
@@ -404,7 +404,7 @@
          }
      }
  
-@@ -3374,7 +_,10 @@
+@@ -3383,7 +_,10 @@
          return !this.level().hasChunksAt(i, k, j, l);
      }
  
@@ -415,7 +415,7 @@
          return this.fluidHeight.getDouble(p_204037_);
      }
  
-@@ -3511,6 +_,7 @@
+@@ -3520,6 +_,7 @@
  
              this.levelCallback.onMove();
          }
@@ -423,7 +423,7 @@
      }
  
      public void checkDespawn() {
-@@ -3639,6 +_,129 @@
+@@ -3648,6 +_,129 @@
  
      public boolean mayInteract(ServerLevel p_376870_, BlockPos p_146844_) {
          return true;

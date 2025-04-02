@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/CropBlock.java
 +++ b/net/minecraft/world/level/block/CropBlock.java
-@@ -46,7 +_,7 @@
+@@ -50,7 +_,7 @@
  
      @Override
      protected boolean mayPlaceOn(BlockState p_52302_, BlockGetter p_52303_, BlockPos p_52304_) {
@@ -9,7 +9,7 @@
      }
  
      protected IntegerProperty getAgeProperty() {
-@@ -76,12 +_,14 @@
+@@ -80,12 +_,14 @@
  
      @Override
      protected void randomTick(BlockState p_221050_, ServerLevel p_221051_, BlockPos p_221052_, RandomSource p_221053_) {
@@ -26,7 +26,7 @@
                  }
              }
          }
-@@ -96,7 +_,8 @@
+@@ -100,7 +_,8 @@
          return Mth.nextInt(p_52262_.random, 2, 5);
      }
  
@@ -36,7 +36,7 @@
          float f = 1.0F;
          BlockPos blockpos = p_52275_.below();
  
-@@ -104,9 +_,10 @@
+@@ -108,9 +_,10 @@
              for (int j = -1; j <= 1; j++) {
                  float f1 = 0.0F;
                  BlockState blockstate = p_52274_.getBlockState(blockpos.offset(i, 0, j));
@@ -49,7 +49,7 @@
                          f1 = 3.0F;
                      }
                  }
-@@ -142,6 +_,8 @@
+@@ -146,6 +_,8 @@
  
      @Override
      protected boolean canSurvive(BlockState p_52282_, LevelReader p_52283_, BlockPos p_52284_) {
@@ -58,7 +58,7 @@
          return hasSufficientLight(p_52283_, p_52284_) && super.canSurvive(p_52282_, p_52283_, p_52284_);
      }
  
-@@ -151,7 +_,7 @@
+@@ -155,7 +_,7 @@
  
      @Override
      protected void entityInside(BlockState p_52277_, Level p_52278_, BlockPos p_52279_, Entity p_52280_, InsideBlockEffectApplier p_405324_) {

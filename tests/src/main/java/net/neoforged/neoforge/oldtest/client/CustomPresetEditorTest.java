@@ -5,7 +5,9 @@
 
 package net.neoforged.neoforge.oldtest.client;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.client.gui.components.Button;
@@ -35,6 +37,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.mines.MineSpawnStrategy;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -76,7 +79,7 @@ public class CustomPresetEditorTest {
                     .getOrThrow(BuiltinDimensionTypes.OVERWORLD);
             BiomeSource biomeSource = new FixedBiomeSource(plains);
             ChunkGenerator chunkGenerator = new NoiseBasedChunkGenerator(biomeSource, overworldNoise);
-            LevelStem levelStem = new LevelStem(overworldDimensionType, chunkGenerator);
+            LevelStem levelStem = new LevelStem(overworldDimensionType, Optional.of(chunkGenerator), List.of(), Optional.empty(), MineSpawnStrategy.SURFACE);
             return new WorldPreset(Map.of(LevelStem.OVERWORLD, levelStem));
         }
     }

@@ -34,7 +34,7 @@ public record ChangeStatusPayload(MutableTestFramework framework, String testId,
             case CLIENT -> framework.tests().setStatus(testId, status);
             case SERVER -> {
                 Player player = context.player();
-                if (framework.configuration().isEnabled(Feature.CLIENT_MODIFICATIONS) && Objects.requireNonNull(player.getServer()).getPlayerList().isOp(player.getGameProfile())) {
+                if (framework.configuration().isEnabled(Feature.CLIENT_MODIFICATIONS) && Objects.requireNonNull(player.theGame()).playerList().isOp(player.getGameProfile())) {
                     framework.tests().byId(testId).ifPresent(test -> framework.changeStatus(test, status, player));
                 }
             }

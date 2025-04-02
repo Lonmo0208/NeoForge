@@ -26,10 +26,13 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTestServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Services;
+import net.minecraft.server.TheGame;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.WorldStem;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
@@ -37,6 +40,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.TpsDebugDimensions;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.DataPackConfig;
@@ -111,11 +115,11 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
                 LevelStorageSource storage = LevelStorageSource.createDefault(tempDir.resolve("world"));
                 LevelStorageSource.LevelStorageAccess storageAccess = storage.validateAndCreateAccess("main");
                 PackRepository packrepository = ServerPacksSource.createPackRepository(storageAccess);
-                final MinecraftServer server = MinecraftServer.spin(
+                final MinecraftServer server = MinecraftServer.spin(packrepository, GameTestServer.createWorldStem(packrepository), (access, packs, stem, nbt) -> stem, LoggerChunkProgressListener::createFromGameruleRadius,
                         thread -> JUnitServer.create(thread, tempDir, storageAccess, packrepository));
 
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    server.stopServer();
+                    server.stopServer(server.theGame());
                     LogManager.shutdown();
                 }));
             } catch (Exception ex) {
@@ -195,37 +199,38 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
                 PackRepository pack,
                 WorldStem stem,
                 Path tempDir) {
-            super(thread, access, pack, stem, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES, LoggerChunkProgressListener::createFromGameruleRadius);
+            super(thread, access, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES);
+            try {
+                this.initGame(pack, stem, LoggerChunkProgressListener::createFromGameruleRadius);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             this.tempDir = tempDir;
         }
 
         @Override
         public boolean initServer() {
-            this.setPlayerList(new PlayerList(this, this.registries(), this.playerDataStorage, 1) {});
-            net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerAboutToStart(this);
             LOGGER.info("Started ephemeral JUnit server");
-            net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerStarting(this);
             return true;
         }
 
         @Override
-        public void tickServer(BooleanSupplier sup) {
-            super.tickServer(sup);
+        public void tickServer(TheGame game, BooleanSupplier sup) {
+            super.tickServer(game, sup);
             // Consider the server started the first time it ticks
             SERVER.set(this);
         }
 
         @Override
-        public boolean saveEverything(boolean p_195515_, boolean p_195516_, boolean p_195517_) {
+        public boolean saveEverything(TheGame game, boolean p_195515_, boolean p_195516_, boolean p_195517_) {
             // The server is ephemeral
             return false;
         }
 
         @Override
-        public void stopServer() {
+        public void stopServer(TheGame game) {
             LOGGER.info("Stopping server");
             this.getConnection().stop();
-            getPlayerList().removeAll();
 
             try {
                 storageSource.deleteLevel();
@@ -246,11 +251,6 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         public SystemReport fillServerSystemReport(SystemReport report) {
             report.setDetail("Type", "Test ephemeral server");
             return report;
-        }
-
-        @Override
-        public boolean isHardcore() {
-            return false;
         }
 
         @Override
@@ -303,16 +303,17 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
             return false;
         }
 
-        private final LocalSampleLogger sampleLogger = new LocalSampleLogger(1);
+        private final LocalSampleLogger sampleLogger = new LocalSampleLogger(TpsDebugDimensions.values().length);
 
         @Override
-        protected SampleLogger getTickTimeLogger() {
-            return sampleLogger;
+        protected TheGame initGame(PackRepository p_420852_, WorldStem p_419940_, ChunkProgressListenerFactory p_422003_) throws IOException {
+            return TheGame.create(this, p_420852_, p_419940_, this.storageSource, p_422003_, game -> new PlayerList(game, this.playerDataStorage, 1) {
+            });
         }
 
         @Override
-        public boolean isTickTimeLoggingEnabled() {
-            return false;
+        protected SampleLogger getTickTimeLoggerIfEnabled() {
+            return sampleLogger;
         }
     }
 }

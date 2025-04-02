@@ -89,8 +89,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class FakePlayer extends ServerPlayer {
     public FakePlayer(ServerLevel level, GameProfile name) {
-        super(level.getServer(), level, name, ClientInformation.createDefault());
-        this.connection = new FakePlayerNetHandler(level.getServer(), this);
+        super(level.theGame(), level, name, ClientInformation.createDefault());
+        this.connection = new FakePlayerNetHandler(level.theGame().server(), this);
         this.setInvulnerable(true);
     }
 
@@ -127,7 +127,6 @@ public class FakePlayer extends ServerPlayer {
         return false;
     }
 
-    @Override
     @Nullable
     public MinecraftServer getServer() {
         return ServerLifecycleHooks.getCurrentServer();
@@ -143,7 +142,7 @@ public class FakePlayer extends ServerPlayer {
         private static final Connection DUMMY_CONNECTION = new FakeConnection();
 
         public FakePlayerNetHandler(MinecraftServer server, ServerPlayer player) {
-            super(server, DUMMY_CONNECTION, player, CommonListenerCookie.createInitial(player.getGameProfile(), false));
+            super(server.theGame(), DUMMY_CONNECTION, player, CommonListenerCookie.createInitial(player.getGameProfile(), false));
         }
 
         @Override

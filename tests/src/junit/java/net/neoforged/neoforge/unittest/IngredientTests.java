@@ -45,7 +45,7 @@ public class IngredientTests {
 
     @Test
     void testDifferenceIngredients(MinecraftServer server) {
-        final var logs = Ingredient.of(server.registryAccess().lookupOrThrow(Registries.ITEM).getOrThrow(ItemTags.LOGS));
+        final var logs = Ingredient.of(server.theGame().registryAccess().lookupOrThrow(Registries.ITEM).getOrThrow(ItemTags.LOGS));
         final var acacia = Ingredient.of(Items.ACACIA_LOG);
         final var ingredient = DifferenceIngredient.of(logs, acacia);
 
@@ -57,7 +57,7 @@ public class IngredientTests {
     @Test
     void testIntersectionIngredient(MinecraftServer server) {
         final var second = Ingredient.of(Items.BIRCH_LOG, Items.SPRUCE_LOG, Items.DISPENSER);
-        final var ingredient = IntersectionIngredient.of(Ingredient.of(server.registryAccess().lookupOrThrow(Registries.ITEM).getOrThrow(ItemTags.LOGS)), second);
+        final var ingredient = IntersectionIngredient.of(Ingredient.of(server.theGame().registryAccess().lookupOrThrow(Registries.ITEM).getOrThrow(ItemTags.LOGS)), second);
 
         Assertions.assertThat(ingredient.items().map(Holder::value).distinct())
                 .containsExactlyInAnyOrder(Items.BIRCH_LOG, Items.SPRUCE_LOG);
@@ -83,7 +83,7 @@ public class IngredientTests {
         final List<Ingredient> matrix = List.of(
                 Ingredient.of(Items.DISPENSER),
                 Ingredient.of(Items.ACACIA_DOOR),
-                Ingredient.of(server.registryAccess().lookupOrThrow(Registries.ITEM).getOrThrow(ItemTags.ANVIL)));
+                Ingredient.of(server.theGame().registryAccess().lookupOrThrow(Registries.ITEM).getOrThrow(ItemTags.ANVIL)));
 
         return matrix.stream()
                 .flatMap(i -> matrix.stream().map(i2 -> Arguments.of(i, i2)));

@@ -45,7 +45,6 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.advancements.AdvancementProvider;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.data.advancements.packs.VanillaAdvancementProvider;
-import net.minecraft.data.advancements.packs.VanillaHusbandryAdvancements;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
@@ -76,7 +75,6 @@ public class NeoForgeAdvancementProvider extends AdvancementProvider {
 
     private static List<AdvancementSubProvider> getVanillaAdvancementProviders(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         List<BiFunction<Criterion<?>, HolderLookup.Provider, Criterion<?>>> criteriaReplacers = new ArrayList<>();
-        criteriaReplacers.add(replaceMatchToolCriteria(ItemAbilities.AXE_WAX_OFF, getPrivateValue(VanillaHusbandryAdvancements.class, null, "WAX_SCRAPING_TOOLS")));
         criteriaReplacers.add(replaceInteractCriteria(ItemPredicate.Builder.item().withComponents(DataComponentMatchers.Builder.components().partial(ItemAbilityPredicate.TYPE, new ItemAbilityPredicate(ItemAbilities.SHEARS_REMOVE_ARMOR)).build()).build(), Items.SHEARS));
         criteriaReplacers.add(replaceInteractCriteria(ItemPredicate.Builder.item().withComponents(DataComponentMatchers.Builder.components().partial(PiglinCurrencyItemPredicate.TYPE, PiglinCurrencyItemPredicate.INSTANCE).build()).build(), PiglinAi.BARTERING_ITEM));
         criteriaReplacers.add(replaceLootEntityPredicate(helper -> {
@@ -354,6 +352,7 @@ public class NeoForgeAdvancementProvider extends AdvancementProvider {
             if (!hasReplaced) {
                 return null;
             }
+            // TODO: turn advancement.parent() to an AdvancementHolder so we can pass it to builder::parent without it complaining -C
             advancement.parent().ifPresent(builder::parent);
             advancement.display().ifPresent(builder::display);
             builder.rewards(advancement.rewards());

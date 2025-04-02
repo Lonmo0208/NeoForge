@@ -122,7 +122,7 @@ public class BlockSnapshot {
     public LevelAccessor getLevel() {
         LevelAccessor level = this.level.get();
         if (level == null) {
-            level = ServerLifecycleHooks.getCurrentServer().getLevel(this.dim);
+            level = ServerLifecycleHooks.getCurrentServer().theGame().getLevel(this.dim);
             this.level = new WeakReference<LevelAccessor>(level);
         }
         return level;

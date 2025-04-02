@@ -101,8 +101,8 @@
                  throw new IllegalStateException("Missing blockstate definitions for: " + list);
 @@ -97,6 +_,16 @@
      static class ItemInfoCollector implements ItemModelOutput {
-         private final Map<Item, ClientItem> itemInfos = new HashMap<>();
-         private final Map<Item, Item> copies = new HashMap<>();
+         private final Map<ResourceLocation, ClientItem> itemInfos = new HashMap<>();
+         private final Map<ResourceLocation, ResourceLocation> copies = new HashMap<>();
 +        private final Supplier<Stream<? extends Holder<Item>>> knownItems;
 +
 +        public ItemInfoCollector(Supplier<Stream<? extends Holder<Item>>> knownItems) {
@@ -116,24 +116,25 @@
  
          @Override
          public void accept(Item p_387063_, ItemModel.Unbaked p_388578_) {
-@@ -116,7 +_,7 @@
+@@ -121,7 +_,7 @@
          }
  
          public void finalizeAndValidate() {
--            BuiltInRegistries.ITEM.forEach(p_388426_ -> {
-+            knownItems.get().map(Holder::value).forEach(p_388426_ -> {
-                 if (!this.copies.containsKey(p_388426_)) {
-                     if (p_388426_ instanceof BlockItem blockitem && !this.itemInfos.containsKey(blockitem)) {
+-            BuiltInRegistries.ITEM.forEach(p_418495_ -> {
++            knownItems.get().map(Holder::value).forEach(p_418495_ -> {
+                 if (!this.copies.containsKey(p_418495_.builtInRegistryHolder().key().location())) {
+                     if (p_418495_ instanceof BlockItem blockitem && !this.itemInfos.containsKey(blockitem.builtInRegistryHolder().key().location())) {
                          ResourceLocation resourcelocation = ModelLocationUtils.getModelLocation(blockitem.getBlock());
-@@ -132,10 +_,9 @@
-                     this.register(p_386494_, clientitem);
+@@ -137,10 +_,9 @@
+                     this.register(p_418493_, clientitem);
                  }
              });
 -            List<ResourceLocation> list = BuiltInRegistries.ITEM
 -                .listElements()
-+            List<ResourceLocation> list = knownItems.get()
-                 .filter(p_388636_ -> !this.itemInfos.containsKey(p_388636_.value()))
+-                .filter(p_418492_ -> !this.itemInfos.containsKey(p_418492_.key().location()))
 -                .map(p_388278_ -> p_388278_.key().location())
++            List<ResourceLocation> list = knownItems.get()
++                .filter(p_418492_ -> !this.itemInfos.containsKey(p_418492_.unwrapKey().orElseThrow().location()))
 +                .map(p_388278_ -> p_388278_.unwrapKey().orElseThrow().location())
                  .toList();
              if (!list.isEmpty()) {

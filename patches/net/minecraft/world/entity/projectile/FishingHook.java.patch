@@ -22,7 +22,7 @@
      @Override
 @@ -441,6 +_,7 @@
          Player player = this.getPlayerOwner();
-         if (!this.level().isClientSide && player != null && !this.shouldStopFishing(player)) {
+         if (this.level() instanceof ServerLevel serverlevel && player != null && !this.shouldStopFishing(player)) {
              int i = 0;
 +            net.neoforged.neoforge.event.entity.player.ItemFishedEvent event = null;
              if (this.hookedIn != null) {
@@ -35,7 +35,7 @@
 +                    .withParameter(LootContextParams.ATTACKING_ENTITY, this.getOwner())
                      .withLuck(this.luck + player.getLuck())
                      .create(LootContextParamSets.FISHING);
-                 LootTable loottable = this.level().getServer().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING);
+                 LootTable loottable = serverlevel.theGame().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING);
                  List<ItemStack> list = loottable.getRandomItems(lootparams);
 +                event = new net.neoforged.neoforge.event.entity.player.ItemFishedEvent(list, this.onGround() ? 2 : 1, this);
 +                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);

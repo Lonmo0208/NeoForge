@@ -146,7 +146,7 @@ public class GlobalLootModifiersTest {
             builder.withParameter(LootContextParams.TOOL, fakeTool);
             return context.getOptionalParameter(LootContextParams.BLOCK_STATE).getBlock().getLootTable()
                     .map(key -> {
-                        var loottable = context.getLevel().getServer().reloadableRegistries().getLootTable(key);
+                        var loottable = context.getLevel().theGame().reloadableRegistries().getLootTable(key);
                         return loottable.getRandomItems(builder.create(LootContextParamSets.EMPTY));
                     })
                     .orElseGet(ObjectArrayList::of);
@@ -356,7 +356,7 @@ public class GlobalLootModifiersTest {
                         .collect(Collectors.toMap(ItemStack::getItem, ItemStack::getCount, Integer::sum)))
 
                 .thenMapToSequence(stacks -> helper
-                        .startSequence(() -> helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace("chests/simple_dungeon")))
+                        .startSequence(() -> helper.getLevel().theGame().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace("chests/simple_dungeon")))
                                 .getRandomItems(new LootParams.Builder(helper.getLevel())
                                         .withParameter(LootContextParams.ORIGIN, helper.absoluteVec(new Vec3(1, 3, 1)))
                                         .create(LootContextParamSets.CHEST), 124424))

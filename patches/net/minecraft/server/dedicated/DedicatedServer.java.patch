@@ -1,37 +1,23 @@
 --- a/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -79,6 +_,8 @@
+@@ -78,6 +_,8 @@
      @Nullable
-     private DebugSampleSubscriptionTracker debugSampleSubscriptionTracker;
+     private RemoteSampleLogger tickTimeLogger;
      private final ServerLinks serverLinks;
 +    @Nullable
 +    private net.minecraft.client.server.LanServerPinger dediLanPinger;
  
      public DedicatedServer(
-         Thread p_214789_,
-@@ -102,6 +_,7 @@
+         Thread p_214789_, LevelStorageSource.LevelStorageAccess p_214790_, DedicatedServerSettings p_214793_, DataFixer p_214794_, Services p_214795_
+@@ -94,6 +_,7 @@
          Thread thread = new Thread("Server console handler") {
              @Override
              public void run() {
 +                if (net.neoforged.neoforge.server.console.TerminalHandler.handleCommands(DedicatedServer.this)) return;
                  BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
  
-                 String s1;
-@@ -184,11 +_,13 @@
-             long i = Util.getNanos();
-             SkullBlockEntity.setup(this.services, this);
-             GameProfileCache.setUsesAuthentication(this.usesAuthentication());
-+            net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerAboutToStart(this);
-             LOGGER.info("Preparing level \"{}\"", this.getLevelIdName());
-             this.loadLevel();
-             long j = Util.getNanos() - i;
-             String s = String.format(Locale.ROOT, "%.3fs", j / 1.0E9);
-             LOGGER.info("Done ({})! For help, type \"help\"", s);
-+            this.nextTickTimeNanos = Util.getNanos(); // Neo: Update server time to prevent watchdog/spaming during long load.
-             if (dedicatedserverproperties.announcePlayerAchievements != null) {
-                 this.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(dedicatedserverproperties.announcePlayerAchievements, this);
-             }
-@@ -216,6 +_,12 @@
+                 String s;
+@@ -187,6 +_,11 @@
                  LOGGER.info("JMX monitoring enabled");
              }
  
@@ -40,11 +26,22 @@
 +                this.dediLanPinger.start();
 +            }
 +
-+            net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerStarting(this);
              return true;
          }
      }
-@@ -277,6 +_,13 @@
+@@ -208,9 +_,11 @@
+         long j = Util.getNanos() - i;
+         String s = String.format(Locale.ROOT, "%.3fs", j / 1.0E9);
+         LOGGER.info("Done ({})! For help, type \"help\"", s);
++        this.nextTickTimeNanos = Util.getNanos(); // Neo: Update server time to prevent watchdog/spaming during long load.
+         if (dedicatedserverproperties.announcePlayerAchievements != null) {
+             thegame.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(dedicatedserverproperties.announcePlayerAchievements, thegame);
+         }
++        net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerStarting(thegame);
+ 
+         long k = this.getMaxTickLength();
+         if (k > 0L) {
+@@ -281,6 +_,13 @@
          if (this.queryThreadGs4 != null) {
              this.queryThreadGs4.stop();
          }
@@ -61,9 +58,9 @@
 @@ -530,7 +_,12 @@
  
      @Override
-     public void stopServer() {
+     public void stopServer(TheGame p_421148_) {
 +        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.GameShuttingDownEvent());
-         super.stopServer();
+         super.stopServer(p_421148_);
 +        if (this.dediLanPinger != null) {
 +            this.dediLanPinger.interrupt();
 +            this.dediLanPinger = null;

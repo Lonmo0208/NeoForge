@@ -73,7 +73,7 @@ public class NeoForgeProxy {
     public <T> HolderLookup.RegistryLookup<T> resolveLookup(ResourceKey<? extends Registry<T>> key) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
-            return server.registryAccess().lookup(key).orElse(null);
+            return server.theGame().registryAccess().lookup(key).orElse(null);
         }
         return null;
     }

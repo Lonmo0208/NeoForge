@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "#": "#c:cobblestones/normal",
+    "#": "#minecraft:stone_tool_materials",
     "R": "minecraft:redstone",
     "T": "#minecraft:planks",
     "X": "#c:ingots/iron"

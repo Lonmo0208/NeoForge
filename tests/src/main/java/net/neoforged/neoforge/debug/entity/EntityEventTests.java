@@ -150,7 +150,7 @@ public class EntityEventTests {
                             helper.assertEntityPresent(EntityType.PIG, 0, 2, 0);
                             helper.assertEntityNotPresent(EntityType.PIG, 1, 2, 0);
                         })
-                        .thenExecute(pig -> pig.teleport(new TeleportTransition(helper.getLevel().getServer().getLevel(Level.NETHER), Vec3.ZERO, Vec3.ZERO, 0.0f, 0.0f, TeleportTransition.DO_NOTHING)))
+                        .thenExecute(pig -> pig.teleport(new TeleportTransition(helper.getLevel().theGame().getLevel(Level.NETHER), Vec3.ZERO, Vec3.ZERO, 0.0f, 0.0f, TeleportTransition.DO_NOTHING)))
                         .thenExecute(pig -> helper.assertTrue(pig.level().dimension() == Level.OVERWORLD, "Dimension change was not prevented")))
 
                 .thenSequence(seq -> seq
@@ -161,7 +161,7 @@ public class EntityEventTests {
                             helper.assertEntityPresent(EntityType.PLAYER, 0, 2, 0);
                             helper.assertEntityNotPresent(EntityType.PLAYER, 1, 2, 0);
                         })
-                        .thenExecute(player -> player.teleport(new TeleportTransition(helper.getLevel().getServer().getLevel(Level.NETHER), Vec3.ZERO, Vec3.ZERO, 0.0f, 0.0f, TeleportTransition.DO_NOTHING)))
+                        .thenExecute(player -> player.teleport(new TeleportTransition(helper.getLevel().theGame().getLevel(Level.NETHER), Vec3.ZERO, Vec3.ZERO, 0.0f, 0.0f, TeleportTransition.DO_NOTHING)))
                         .thenExecute(player -> {
                             helper.assertEntityPresent(EntityType.PLAYER, 0, 2, 0);
                             helper.assertTrue(player.level().dimension() == Level.OVERWORLD, "Dimension change was not prevented");

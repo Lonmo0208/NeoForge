@@ -56,7 +56,9 @@ public class NeoForgeRegistriesSetup {
             BuiltInRegistries.RECIPE_DISPLAY, // RecipeDisplay.STREAM_CODEC
             BuiltInRegistries.SLOT_DISPLAY, // SlotDisplay.STREAM_CODEC
             BuiltInRegistries.RECIPE_BOOK_CATEGORY, // RecipeDisplayEntry.STREAM_CODEC
-            BuiltInRegistries.RECIPE_TYPE // RecipeContentPayload.STREAM_CODEC
+            BuiltInRegistries.RECIPE_TYPE, // RecipeContentPayload.STREAM_CODEC
+            BuiltInRegistries.WORLD_EFFECT, // WorldEffect.STREAM_CODEC
+            BuiltInRegistries.PLAYER_UNLOCK // PlayerUnlock.STEAM_CODEC
     );
 
     private static void registerRegistries(NewRegistryEvent event) {

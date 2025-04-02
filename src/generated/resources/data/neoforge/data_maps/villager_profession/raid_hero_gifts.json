@@ -36,6 +36,9 @@
     "minecraft:toolsmith": {
       "loot_table": "minecraft:gameplay/hero_of_the_village/toolsmith_gift"
     },
+    "minecraft:traitor": {
+      "loot_table": "minecraft:gameplay/hero_of_the_village/weaponsmith_gift"
+    },
     "minecraft:weaponsmith": {
       "loot_table": "minecraft:gameplay/hero_of_the_village/weaponsmith_gift"
     }

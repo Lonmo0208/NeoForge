@@ -47,7 +47,7 @@ public final class PacketDistributor {
      * Send the given payload(s) to all players in the given dimension
      */
     public static void sendToPlayersInDimension(ServerLevel level, CustomPacketPayload payload, CustomPacketPayload... payloads) {
-        level.getServer().getPlayerList().broadcastAll(makeClientboundPacket(payload, payloads), level.dimension());
+        level.theGame().playerList().broadcastAll(makeClientboundPacket(payload, payloads), level.dimension());
     }
 
     /**
@@ -64,7 +64,7 @@ public final class PacketDistributor {
             CustomPacketPayload payload,
             CustomPacketPayload... payloads) {
         Packet<?> packet = makeClientboundPacket(payload, payloads);
-        level.getServer().getPlayerList().broadcast(excluded, x, y, z, radius, level.dimension(), packet);
+        level.theGame().playerList().broadcast(excluded, x, y, z, radius, level.dimension(), packet);
     }
 
     /**
@@ -72,7 +72,7 @@ public final class PacketDistributor {
      */
     public static void sendToAllPlayers(CustomPacketPayload payload, CustomPacketPayload... payloads) {
         MinecraftServer server = Objects.requireNonNull(ServerLifecycleHooks.getCurrentServer(), "Cannot send clientbound payloads on the client");
-        server.getPlayerList().broadcastAll(makeClientboundPacket(payload, payloads));
+        server.theGame().playerList().broadcastAll(makeClientboundPacket(payload, payloads));
     }
 
     /**

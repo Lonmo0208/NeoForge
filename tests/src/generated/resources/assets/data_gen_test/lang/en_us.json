@@ -2,6 +2,6 @@
   "block.minecraft.stone": "Stone",
   "data_gen_test.test.unicode": "ʇsǝ┴ ǝpoɔᴉu∩",
   "effect.minecraft.poison": "Poison",
-  "entity.minecraft.cat": "Cat",
+  "entity.minecraft.pet_cat": "Cat",
   "item.minecraft.diamond": "Diamond"
 }

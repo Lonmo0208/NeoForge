@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/player/LocalPlayer.java
 +++ b/net/minecraft/client/player/LocalPlayer.java
-@@ -303,6 +_,7 @@
+@@ -365,6 +_,7 @@
          ServerboundPlayerActionPacket.Action serverboundplayeractionpacket$action = p_108701_
              ? ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS
              : ServerboundPlayerActionPacket.Action.DROP_ITEM;
@@ -8,7 +8,7 @@
          ItemStack itemstack = this.getInventory().removeFromSelected(p_108701_);
          this.connection.send(new ServerboundPlayerActionPacket(serverboundplayeractionpacket$action, BlockPos.ZERO, Direction.DOWN));
          return !itemstack.isEmpty();
-@@ -480,7 +_,14 @@
+@@ -542,7 +_,14 @@
  
      @Override
      public void playSound(SoundEvent p_108651_, float p_108652_, float p_108653_) {
@@ -24,7 +24,15 @@
      }
  
      @Override
-@@ -715,6 +_,7 @@
+@@ -754,6 +_,7 @@
+ 
+         this.setHealth(this.getMaxHealth());
+         this.deathTime = 0;
++        this.theGame();
+     }
+ 
+     @Override
+@@ -777,6 +_,7 @@
              && this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING)
              && (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
          this.input.tick();
@@ -32,7 +40,7 @@
          this.minecraft.getTutorial().onInput(this.input);
          boolean flag3 = false;
          if (this.autoJumpTime > 0) {
-@@ -759,7 +_,7 @@
+@@ -821,7 +_,7 @@
          }
  
          boolean flag4 = false;
@@ -41,7 +49,7 @@
              if (this.minecraft.gameMode.isAlwaysFlying()) {
                  if (!abilities.flying) {
                      abilities.flying = true;
-@@ -855,13 +_,14 @@
+@@ -936,13 +_,14 @@
              || !this.input.hasForwardImpulse()
              || !this.hasEnoughFoodToSprint()
              || this.horizontalCollision && !this.minorHorizontalCollision
@@ -58,7 +66,7 @@
              || !this.input.hasForwardImpulse() && !this.onGround() && !this.input.keyPresses.shift()
              || !this.hasEnoughFoodToSprint();
      }
-@@ -915,6 +_,10 @@
+@@ -996,6 +_,10 @@
      @Override
      public void rideTick() {
          super.rideTick();
@@ -69,7 +77,7 @@
          this.handsBusy = false;
          if (this.getControlledVehicle() instanceof AbstractBoat abstractboat) {
              abstractboat.setInput(
-@@ -1089,7 +_,7 @@
+@@ -1170,7 +_,7 @@
              && (!this.isPassenger() || this.vehicleCanSprint(this.getVehicle()))
              && (!this.isFallFlying() || this.isUnderWater())
              && (!this.isMovingSlowly() || this.isUnderWater())
@@ -78,7 +86,7 @@
      }
  
      private boolean vehicleCanSprint(Entity p_265184_) {
-@@ -1097,7 +_,7 @@
+@@ -1178,7 +_,7 @@
      }
  
      private boolean hasEnoughFoodToSprint() {

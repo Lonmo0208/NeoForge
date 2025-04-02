@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/entity/player/PlayerRenderer.java
 +++ b/net/minecraft/client/renderer/entity/player/PlayerRenderer.java
-@@ -96,6 +_,11 @@
+@@ -97,6 +_,11 @@
      }
  
      private static HumanoidModel.ArmPose getArmPose(Player p_386775_, ItemStack p_388403_, InteractionHand p_117796_) {
@@ -12,7 +12,7 @@
          if (p_388403_.isEmpty()) {
              return HumanoidModel.ArmPose.EMPTY;
          } else if (!p_386775_.swinging && p_388403_.is(Items.CROSSBOW) && CrossbowItem.isCharged(p_388403_)) {
-@@ -145,6 +_,13 @@
+@@ -146,6 +_,13 @@
          p_117799_.scale(0.9375F, 0.9375F, 0.9375F);
      }
  
@@ -26,7 +26,7 @@
      protected void renderNameTag(PlayerRenderState p_363185_, Component p_117809_, PoseStack p_117810_, MultiBufferSource p_117811_, int p_117812_) {
          p_117810_.pushPose();
          if (p_363185_.scoreText != null) {
-@@ -252,11 +_,29 @@
+@@ -254,11 +_,29 @@
          }
      }
  

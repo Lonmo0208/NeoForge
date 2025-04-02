@@ -5,27 +5,18 @@
  @OnlyIn(Dist.CLIENT)
  public class ItemBlockRenderTypes {
 +    @Deprecated
-     private static final Map<Block, RenderType> TYPE_BY_BLOCK = Util.make(Maps.newHashMap(), p_401711_ -> {
+     private static final Map<Block, RenderType> TYPE_BY_BLOCK = Util.make(Maps.newHashMap(), p_418540_ -> {
          RenderType rendertype = RenderType.tripwire();
-         p_401711_.put(Blocks.TRIPWIRE, rendertype);
-@@ -352,6 +_,7 @@
-         p_401711_.put(Blocks.BUBBLE_COLUMN, rendertype3);
-         p_401711_.put(Blocks.TINTED_GLASS, rendertype3);
+         p_418540_.put(Blocks.TRIPWIRE, rendertype);
+@@ -356,6 +_,7 @@
+         p_418540_.put(Blocks.BUBBLE_COLUMN, rendertype3);
+         p_418540_.put(Blocks.TINTED_GLASS, rendertype3);
      });
 +    @Deprecated
      private static final Map<Fluid, RenderType> TYPE_BY_FLUID = Util.make(Maps.newHashMap(), p_109290_ -> {
          RenderType rendertype = RenderType.translucent();
          p_109290_.put(Fluids.FLOWING_WATER, rendertype);
-@@ -359,6 +_,8 @@
-     });
-     private static boolean renderCutout;
- 
-+    /** @deprecated Neo: Use {@link net.minecraft.client.renderer.block.model.BlockModelPart#getRenderType(BlockState)}. */
-+    @Deprecated // Note: this method does NOT support model-based render types
-     public static RenderType getChunkRenderType(BlockState p_109283_) {
-         Block block = p_109283_.getBlock();
-         if (block instanceof LeavesBlock) {
-@@ -369,6 +_,8 @@
+@@ -375,6 +_,8 @@
          }
      }
  
@@ -34,7 +25,7 @@
      public static RenderType getMovingBlockRenderType(BlockState p_109294_) {
          Block block = p_109294_.getBlock();
          if (block instanceof LeavesBlock) {
-@@ -383,11 +_,15 @@
+@@ -389,11 +_,15 @@
          }
      }
  
@@ -50,7 +41,7 @@
      public static RenderType getRenderType(ItemStack p_366701_) {
          if (p_366701_.getItem() instanceof BlockItem blockitem) {
              Block block = blockitem.getBlock();
-@@ -404,5 +_,32 @@
+@@ -410,5 +_,32 @@
  
      public static void setFancy(boolean p_109292_) {
          renderCutout = p_109292_;

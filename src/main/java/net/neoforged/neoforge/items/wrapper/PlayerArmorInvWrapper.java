@@ -27,7 +27,7 @@ public class PlayerArmorInvWrapper extends RangedWrapper {
             }
         }
         // check if it's valid for the armor slot
-        if (equ != null && slot < 4 && !stack.isEmpty() && stack.canEquip(equ, getInventoryPlayer().player)) {
+        if (equ != null && slot < 4 && !stack.isEmpty() && stack.canEquip(equ, getInventoryPlayer().getPlayer())) {
             return super.insertItem(slot, stack, simulate);
         }
         return stack;

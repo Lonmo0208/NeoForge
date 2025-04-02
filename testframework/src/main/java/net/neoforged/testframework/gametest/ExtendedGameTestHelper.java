@@ -115,7 +115,7 @@ public class ExtendedGameTestHelper extends GameTestHelper {
 
     public GameTestPlayer makeTickingMockServerPlayerInLevel(GameType gameType) {
         final CommonListenerCookie commonlistenercookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
-        final GameTestPlayer serverplayer = new GameTestPlayer(this.getLevel().getServer(), this.getLevel(), commonlistenercookie.gameProfile(), commonlistenercookie.clientInformation(), this);
+        final GameTestPlayer serverplayer = new GameTestPlayer(this.getLevel().theGame(), this.getLevel(), commonlistenercookie.gameProfile(), commonlistenercookie.clientInformation(), this);
         final Connection connection = new Connection(PacketFlow.SERVERBOUND) {
             @Override
             public void tick() {
@@ -133,9 +133,9 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         // embeddedchannel.attr(Connection.ATTRIBUTE_SERVERBOUND_PROTOCOL).set(ConnectionProtocol.PLAY.codec(PacketFlow.SERVERBOUND));
         // embeddedchannel.attr(Connection.ATTRIBUTE_CLIENTBOUND_PROTOCOL).set(ConnectionProtocol.PLAY.codec(PacketFlow.CLIENTBOUND));
         NetworkRegistry.configureMockConnection(connection);
-        this.getLevel().getServer().getPlayerList().placeNewPlayer(connection, serverplayer, commonlistenercookie);
-        this.getLevel().getServer().getConnection().getConnections().add(connection);
-        connection.setupInboundProtocol((ProtocolInfo<ServerGamePacketListener>) connection.getInboundProtocol(), new ServerGamePacketListenerImpl(serverplayer.getServer(), connection, serverplayer, commonlistenercookie) {
+        this.getLevel().theGame().playerList().placeNewPlayer(connection, serverplayer, commonlistenercookie);
+        this.getLevel().theGame().server().getConnection().getConnections().add(connection);
+        connection.setupInboundProtocol((ProtocolInfo<ServerGamePacketListener>) connection.getInboundProtocol(), new ServerGamePacketListenerImpl(serverplayer.theGame(), connection, serverplayer, commonlistenercookie) {
             @Override
             protected void keepConnectionAlive() {}
         });
@@ -267,10 +267,10 @@ public class ExtendedGameTestHelper extends GameTestHelper {
     }
 
     public void requireDifficulty(final Difficulty difficulty) {
-        final var oldDifficulty = getLevel().getServer().getWorldData().getDifficulty();
+        final var oldDifficulty = getLevel().theGame().getWorldData().getDifficulty();
         if (oldDifficulty != difficulty) {
-            getLevel().getServer().setDifficulty(difficulty, true);
-            addEndListener(passed -> getLevel().getServer().setDifficulty(oldDifficulty, true));
+            getLevel().theGame().setDifficulty(difficulty, true);
+            addEndListener(passed -> getLevel().theGame().setDifficulty(oldDifficulty, true));
         }
     }
 

@@ -20,7 +20,7 @@
      }
  
      @Override
-@@ -44,14 +_,17 @@
+@@ -44,12 +_,18 @@
              Optional<HolderGetter<E>> optional = registryops.getter(this.registryKey);
              if (optional.isPresent()) {
                  HolderGetter<E> holdergetter = optional.get();
@@ -31,16 +31,18 @@
                      .flatMap(
                          p_337522_ -> {
                              DataResult<HolderSet<E>> dataresult = p_337522_.getFirst()
-                                 .map(
-+                                    DataResult::success,
-+                                    tagOrList -> tagOrList.map(
-                                     p_332559_ -> lookupTag(holdergetter, (TagKey<E>)p_332559_),
-                                     p_332564_ -> DataResult.success(HolderSet.direct((List<? extends Holder<E>>)p_332564_))
-+                                    )
-                                 );
+-                                .map(p_332559_ -> lookupTag(holdergetter, (TagKey<E>)p_332559_), p_418635_ -> DataResult.success(HolderSet.direct(p_418635_)));
++                                .map(
++                                        DataResult::success,
++                                        tagOrList -> tagOrList.map(
++                                                p_332559_ -> lookupTag(holdergetter, (TagKey<E>)p_332559_),
++                                                p_418635_ -> DataResult.success(HolderSet.direct(p_418635_))
++                                        )
++                                );
                              return dataresult.map(p_332563_ -> Pair.of((HolderSet<E>)p_332563_, (T)p_337522_.getSecond()));
                          }
-@@ -76,6 +_,9 @@
+                     );
+@@ -73,6 +_,9 @@
                      return DataResult.error(() -> "HolderSet " + p_206674_ + " is not valid in current registry set");
                  }
  

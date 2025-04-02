@@ -121,7 +121,7 @@ public class DataPackRegistriesTest {
 
     private void onServerStarting(final ServerStartingEvent event) {
         // Assert existence of json objects and tags.
-        final RegistryAccess registries = event.getServer().registryAccess();
+        final RegistryAccess registries = event.getTheGame().registryAccess();
         final Registry<Unsyncable> registry = registries.lookupOrThrow(Unsyncable.REGISTRY_KEY);
         final ResourceKey<Unsyncable> key = ResourceKey.create(Unsyncable.REGISTRY_KEY, TEST_RL);
         final Holder<Unsyncable> holder = registry.getOrThrow(key);

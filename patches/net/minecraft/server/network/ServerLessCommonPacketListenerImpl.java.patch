@@ -1,0 +1,37 @@
+--- a/net/minecraft/server/network/ServerLessCommonPacketListenerImpl.java
++++ b/net/minecraft/server/network/ServerLessCommonPacketListenerImpl.java
+@@ -112,6 +_,7 @@
+     }
+ 
+     public void send(Packet<?> p_421134_, @Nullable PacketSendListener p_423019_) {
++        net.neoforged.neoforge.network.registration.NetworkRegistry.checkPacket(p_421134_, this);
+         if (p_421134_.isTerminal()) {
+             this.close();
+         }
+@@ -149,7 +_,26 @@
+         return this.latency;
+     }
+ 
++    /**
++      * Creates a new cookie for this connection.
++      *
++      * @param p_421392_ The client information.
++      * @return The cookie.
++      * @deprecated Use {@link #createCookie(ClientInformation, net.neoforged.neoforge.network.connection.ConnectionType)} instead, keeping the connection type information available.
++      */
++    @Deprecated
+     protected CommonListenerCookie createCookie(ClientInformation p_421392_) {
+         return new CommonListenerCookie(this.playerProfile(), this.latency, p_421392_, this.transferred);
++    }
++
++    /**
++     * Creates a new cookie for this connection.
++     *
++     * @param p_301973_ The client information.
++     * @param connectionType Whether the connection is modded.
++     * @return The cookie.
++     */
++    protected CommonListenerCookie createCookie(ClientInformation p_301973_, net.neoforged.neoforge.network.connection.ConnectionType connectionType) {
++        return new CommonListenerCookie(this.playerProfile(), this.latency, p_301973_, this.transferred, connectionType);
+     }
+ }

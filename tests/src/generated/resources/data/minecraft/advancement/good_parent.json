@@ -16,6 +16,7 @@
     "announce_to_chat": false,
     "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
     "description": "You got cobblestone",
+    "hint": "You got cobblestone",
     "icon": {
       "count": 1,
       "id": "minecraft:cobblestone"

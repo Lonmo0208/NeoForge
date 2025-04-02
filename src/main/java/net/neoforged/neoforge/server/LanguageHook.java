@@ -48,7 +48,7 @@ public class LanguageHook {
     private static void loadLanguage(String langName, MinecraftServer server) {
         String langFile = String.format(Locale.ROOT, "lang/%s.json", langName);
         // noinspection resource
-        ResourceManager resourceManager = server.getServerResources().resourceManager();
+        ResourceManager resourceManager = server.theGame().getServerResources().resourceManager();
         // We cannot use the resource manager itself, because it is specifically scoped to data packs
         // (the PackType given to MultiPackResourceManager is SERVER_DATA)
         // Instead, we create a MultiPackResourceManager configured for PackType.CLIENT_RESOURCES

@@ -107,7 +107,7 @@ public interface ICondition {
             // lookup the active enabledFeatures from the current server
             // if no server exists, delegating back to 'VANILLA_SET' should be fine (should rarely ever happen)
             var server = ServerLifecycleHooks.getCurrentServer();
-            return server == null ? FeatureFlags.VANILLA_SET : server.getWorldData().enabledFeatures();
+            return server == null ? FeatureFlags.VANILLA_SET : server.theGame().getWorldData().enabledFeatures();
         }
     }
 }

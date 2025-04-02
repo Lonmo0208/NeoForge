@@ -60,7 +60,7 @@ public class GenerationTask {
     private volatile boolean stopped;
 
     public GenerationTask(ServerLevel serverLevel, int x, int z, int radius) {
-        this.server = serverLevel.getServer();
+        this.server = serverLevel.theGame().server();
         this.chunkSource = serverLevel.getChunkSource();
         this.serverLevel = serverLevel;
 

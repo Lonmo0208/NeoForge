@@ -164,7 +164,7 @@
          if (this.has(DataComponents.CUSTOM_NAME)) {
              mutablecomponent.withStyle(ChatFormatting.ITALIC);
          }
-@@ -842,6 +_,7 @@
+@@ -847,6 +_,7 @@
              List<Component> list = Lists.newArrayList();
              list.add(this.getStyledHoverName());
              this.addDetailsToTooltip(p_339637_, tooltipdisplay, p_41652_, p_41653_, list::add);
@@ -172,17 +172,17 @@
              return list;
          }
      }
-@@ -869,7 +_,8 @@
-         this.addToTooltip(DataComponents.ENCHANTMENTS, p_400057_, p_400252_, p_399603_, p_400174_);
-         this.addToTooltip(DataComponents.DYED_COLOR, p_400057_, p_400252_, p_399603_, p_400174_);
-         this.addToTooltip(DataComponents.LORE, p_400057_, p_400252_, p_399603_, p_400174_);
+@@ -879,7 +_,8 @@
+         this.addToTooltip(DataComponents.DYED_COLOR, p_400057_, p_400252_, p_399628_, p_399603_, p_400174_);
+         this.addToTooltip(DataComponents.TROPHY_TYPE, p_400057_, p_400252_, p_399628_, p_399603_, p_400174_);
+         this.addToTooltip(DataComponents.LORE, p_400057_, p_400252_, p_399628_, p_399603_, p_400174_);
 -        this.addAttributeTooltips(p_399603_, p_400252_, p_399628_);
 +        // Neo: Replace attribute tooltips with custom handling
 +        net.neoforged.neoforge.common.util.AttributeUtil.addAttributeTooltips(this, p_399603_, p_400252_, net.neoforged.neoforge.common.util.AttributeTooltipContext.of(p_399628_, p_400057_, p_400252_, p_400174_));
          if (this.has(DataComponents.UNBREAKABLE) && p_400252_.shows(DataComponents.UNBREAKABLE)) {
              p_399603_.accept(UNBREAKABLE_TOOLTIP);
          }
-@@ -917,7 +_,10 @@
+@@ -932,7 +_,10 @@
              OP_NBT_WARNING.forEach(p_399603_);
          }
      }
@@ -194,7 +194,7 @@
      private void addAttributeTooltips(Consumer<Component> p_330796_, TooltipDisplay p_400175_, @Nullable Player p_330530_) {
          if (p_400175_.shows(DataComponents.ATTRIBUTE_MODIFIERS)) {
              for (EquipmentSlotGroup equipmentslotgroup : EquipmentSlotGroup.values()) {
-@@ -1026,6 +_,17 @@
+@@ -1041,6 +_,17 @@
          return !this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
      }
  
@@ -212,7 +212,7 @@
      public ItemEnchantments getEnchantments() {
          return this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
      }
-@@ -1051,14 +_,26 @@
+@@ -1066,14 +_,26 @@
      }
  
      public void forEachModifier(EquipmentSlotGroup p_348610_, BiConsumer<Holder<Attribute>, AttributeModifier> p_348516_) {
@@ -239,7 +239,7 @@
          EnchantmentHelper.forEachModifier(this, p_332001_, p_330882_);
      }
  
-@@ -1070,7 +_,7 @@
+@@ -1085,7 +_,7 @@
  
          MutableComponent mutablecomponent1 = ComponentUtils.wrapInSquareBrackets(mutablecomponent);
          if (!this.isEmpty()) {
@@ -248,7 +248,7 @@
          }
  
          return mutablecomponent1;
-@@ -1137,11 +_,14 @@
+@@ -1152,11 +_,14 @@
          this.getItem().onUseTick(p_41732_, p_41733_, this, p_41734_);
      }
  

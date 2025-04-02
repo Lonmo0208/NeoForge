@@ -8,6 +8,7 @@ package net.neoforged.neoforge.common.world;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.core.HolderSet;
@@ -15,6 +16,7 @@ import net.minecraft.util.random.Weighted;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.structure.Structure.StructureSettings;
@@ -23,7 +25,7 @@ import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
 import org.jetbrains.annotations.Nullable;
 
 public class StructureSettingsBuilder {
-    private HolderSet<Biome> biomes;
+    private Optional<HolderSet<Biome>> biomes;
     private final Map<MobCategory, StructureSpawnOverrideBuilder> spawnOverrides;
     private GenerationStep.Decoration step;
     private TerrainAdjustment terrainAdaptation;
@@ -36,7 +38,7 @@ public class StructureSettingsBuilder {
         return new StructureSettingsBuilder(settings.biomes(), settings.spawnOverrides(), settings.step(), settings.terrainAdaptation());
     }
 
-    private StructureSettingsBuilder(HolderSet<Biome> biomes, Map<MobCategory, StructureSpawnOverride> spawnOverrides, GenerationStep.Decoration step, TerrainAdjustment terrainAdaptation) {
+    private StructureSettingsBuilder(Optional<HolderSet<Biome>> biomes, Map<MobCategory, StructureSpawnOverride> spawnOverrides, GenerationStep.Decoration step, TerrainAdjustment terrainAdaptation) {
         this.biomes = biomes;
         this.spawnOverrides = spawnOverrides.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> StructureSpawnOverrideBuilder.copyOf(entry.getValue())));
         this.step = step;
@@ -49,14 +51,14 @@ public class StructureSettingsBuilder {
     public StructureSettings build() {
         Map<MobCategory, StructureSpawnOverride> overrides = Collections.unmodifiableMap(
                 this.spawnOverrides.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build())));
-        return new StructureSettings(this.biomes, overrides, this.step, this.terrainAdaptation);
+        return new StructureSettings(this.biomes, BiomeSpecialEffects.ExitType.NONE, overrides, this.step, this.terrainAdaptation);
     }
 
-    public HolderSet<Biome> getBiomes() {
+    public Optional<HolderSet<Biome>> getBiomes() {
         return biomes;
     }
 
-    public void setBiomes(HolderSet<Biome> biomes) {
+    public void setBiomes(Optional<HolderSet<Biome>> biomes) {
         this.biomes = biomes;
     }
 

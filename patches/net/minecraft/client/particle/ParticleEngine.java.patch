@@ -13,7 +13,7 @@
      private final Queue<Particle> particlesToAdd = Queues.newArrayDeque();
      private final Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets = Maps.newHashMap();
      private final TextureAtlas textureAtlas;
-@@ -207,10 +_,14 @@
+@@ -208,10 +_,14 @@
          this.register(ParticleTypes.FIREFLY, FireflyParticle.FireflyProvider::new);
      }
  
@@ -29,7 +29,7 @@
      public <T extends ParticleOptions> void register(ParticleType<T> p_273423_, ParticleProvider.Sprite<T> p_273134_) {
          this.register(
              p_273423_,
-@@ -227,10 +_,12 @@
+@@ -228,10 +_,12 @@
          );
      }
  
@@ -43,7 +43,7 @@
      }
  
      @Override
-@@ -350,7 +_,7 @@
+@@ -351,7 +_,7 @@
      private <T extends ParticleOptions> Particle makeParticle(
          T p_107396_, double p_107397_, double p_107398_, double p_107399_, double p_107400_, double p_107401_, double p_107402_
      ) {
@@ -52,7 +52,7 @@
          return particleprovider == null
              ? null
              : particleprovider.createParticle(p_107396_, this.level, p_107397_, p_107398_, p_107399_, p_107400_, p_107401_, p_107402_);
-@@ -426,28 +_,45 @@
+@@ -427,28 +_,45 @@
          }
      }
  
@@ -103,7 +103,7 @@
              try {
                  particle.render(vertexconsumer, p_382847_, p_383032_);
              } catch (Throwable throwable) {
-@@ -460,10 +_,19 @@
+@@ -461,10 +_,19 @@
          }
      }
  
@@ -123,7 +123,7 @@
              try {
                  particle.renderCustom(posestack, p_382990_, p_383089_, p_383167_);
              } catch (Throwable throwable) {
-@@ -483,7 +_,7 @@
+@@ -484,7 +_,7 @@
      }
  
      public void destroy(BlockPos p_107356_, BlockState p_107357_) {
@@ -132,7 +132,7 @@
              VoxelShape voxelshape = p_107357_.getShape(this.level, p_107356_);
              double d0 = 0.25;
              voxelshape.forAllBoxes(
-@@ -515,7 +_,7 @@
+@@ -516,7 +_,7 @@
                                          d6 - 0.5,
                                          p_107357_,
                                          p_107356_
@@ -141,7 +141,7 @@
                                  );
                              }
                          }
-@@ -560,12 +_,28 @@
+@@ -561,12 +_,28 @@
                  d0 = i + aabb.maxX + 0.1F;
              }
  

@@ -112,7 +112,7 @@ public class TestFrameworkImpl implements MutableTestFramework {
             tests.initialiseDefaultEnabledTests();
 
             try {
-                structures.setup(event.getServer().getStructureManager());
+                structures.setup(event.getServer().theGame().getStructureManager());
             } catch (Throwable exception) {
                 throw new RuntimeException(exception);
             }
@@ -196,7 +196,7 @@ public class TestFrameworkImpl implements MutableTestFramework {
 
     @Override
     public PlayerTestStore playerTestStore() {
-        return server.overworld().getDataStorage().computeIfAbsent(playerTestStoreType);
+        return server.theGame().overworld().getDataStorage().computeIfAbsent(playerTestStoreType);
     }
 
     @Override

@@ -28,7 +28,7 @@ class DimensionsCommand {
                     final Registry<DimensionType> reg = ctx.getSource().registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
 
                     Map<ResourceLocation, List<Component>> types = new HashMap<>();
-                    for (ServerLevel dim : ctx.getSource().getServer().getAllLevels()) {
+                    for (ServerLevel dim : ctx.getSource().theGame().getAllLevels()) {
                         types.computeIfAbsent(reg.getKey(dim.dimensionType()), k -> new ArrayList<>()).add(dim.getDescription());
                     }
 

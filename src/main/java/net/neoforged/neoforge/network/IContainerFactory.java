@@ -10,11 +10,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 
+import java.util.List;
+
 public interface IContainerFactory<T extends AbstractContainerMenu> extends MenuType.MenuSupplier<T> {
     T create(int windowId, Inventory inv, RegistryFriendlyByteBuf data);
 
     @Override
-    default T create(int p_create_1_, Inventory p_create_2_) {
-        return create(p_create_1_, p_create_2_, null);
+    default T create(int p_create_1_, Inventory p_create_2_, List<Integer> p_create_3_) {
+        return create(p_create_1_, p_create_2_, p_create_3_);
     }
 }

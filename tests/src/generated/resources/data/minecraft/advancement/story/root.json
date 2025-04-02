@@ -15,6 +15,7 @@
     "announce_to_chat": false,
     "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
     "description": "Changed Description",
+    "hint": "Changed Description",
     "icon": {
       "count": 1,
       "id": "minecraft:grass_block"

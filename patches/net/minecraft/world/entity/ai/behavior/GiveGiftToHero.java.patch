@@ -9,7 +9,7 @@
      private static final Map<ResourceKey<VillagerProfession>, ResourceKey<LootTable>> GIFTS = ImmutableMap.<ResourceKey<VillagerProfession>, ResourceKey<LootTable>>builder()
          .put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT)
          .put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT)
-@@ -111,6 +_,8 @@
+@@ -112,6 +_,8 @@
          if (p_372869_.isBaby()) {
              return BuiltInLootTables.BABY_VILLAGER_GIFT;
          } else {

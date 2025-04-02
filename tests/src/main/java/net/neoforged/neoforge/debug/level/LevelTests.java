@@ -51,8 +51,8 @@ public class LevelTests {
 
         test.eventListeners().forge().addListener((EntityTickEvent.Pre event) -> {
             if (event.getEntity() instanceof ServerPlayer player && player.getGameProfile().getName().equals("test-mock-player")) {
-                if (player.getServer().getGameRules().getBoolean(booleanGameRule)) {
-                    player.setHealth(player.getHealth() - player.getServer().getGameRules().getInt(integerGameRule));
+                if (player.theGame().getGameRules().getBoolean(booleanGameRule)) {
+                    player.setHealth(player.getHealth() - player.theGame().getGameRules().getInt(integerGameRule));
                 }
             }
         });
@@ -60,21 +60,21 @@ public class LevelTests {
         test.onGameTest(helper -> {
             final ServerPlayer player = helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL);
 
-            final var boolRule = player.getServer().getGameRules().getRule(booleanGameRule);
-            final var intRule = player.getServer().getGameRules().getRule(integerGameRule);
+            final var boolRule = player.theGame().getGameRules().getRule(booleanGameRule);
+            final var intRule = player.theGame().getGameRules().getRule(integerGameRule);
 
             final var oldBool = boolRule.get();
             final var oldInt = intRule.get();
 
             helper.startSequence()
-                    .thenExecute(() -> boolRule.set(true, player.server))
-                    .thenExecute(() -> intRule.set(12, player.server))
+                    .thenExecute(() -> boolRule.set(true, player.theGame()))
+                    .thenExecute(() -> intRule.set(12, player.theGame()))
 
                     .thenIdle(1)
                     .thenExecute(() -> helper.assertEntityProperty(player, ServerPlayer::getHealth, "player health", 8f))
 
-                    .thenExecute(() -> boolRule.set(oldBool, player.server))
-                    .thenExecute(() -> intRule.set(oldInt, player.server))
+                    .thenExecute(() -> boolRule.set(oldBool, player.theGame()))
+                    .thenExecute(() -> intRule.set(oldInt, player.theGame()))
                     .thenSucceed();
         });
     }

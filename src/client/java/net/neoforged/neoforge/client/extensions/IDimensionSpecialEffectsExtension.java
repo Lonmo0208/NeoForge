@@ -7,16 +7,18 @@ package net.neoforged.neoforge.client.extensions;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
+import net.minecraft.world.level.dimension.DimensionSpecialEffects;
 import org.joml.Matrix4f;
 
 /**
  * Extension interface for {@link DimensionSpecialEffects}.
+ *
+ * TODO: this probably needs to be in a DimensionSpecialRenderer or something. We can't add this directly onto DimensionSpecialEffects because this is in an incompatible client-only sourceset.
  */
 public interface IDimensionSpecialEffectsExtension {
-    private DimensionSpecialEffects self() {
-        return (DimensionSpecialEffects) this;
-    }
+    //private DimensionSpecialEffects self() {
+    //    return (DimensionSpecialEffects) this;
+    //}
 
     /**
      * Renders the clouds of this dimension.

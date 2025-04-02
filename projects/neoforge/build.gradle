@@ -386,9 +386,9 @@ configurations {
             attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType, "changelog"))
         }
         // Publish it, but only for release versions
-        if (!rootProject.isPreReleaseVersion) {
-            javaComponent.addVariantsFromConfiguration(it) {}
-        }
+        //if (!rootProject.isPreReleaseVersion) {
+            //javaComponent.addVariantsFromConfiguration(it) {}
+        //}
     }
     modDevApiElements {
         canBeDeclared = false

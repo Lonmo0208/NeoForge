@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
 +++ b/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
-@@ -122,6 +_,8 @@
+@@ -128,6 +_,8 @@
                  Vec3 vec3 = this.oldPosition();
                  if (entity instanceof ServerPlayer serverplayer) {
                      if (serverplayer.connection.isAcceptingMessages()) {
 +                        net.neoforged.neoforge.event.entity.EntityTeleportEvent.EnderPearl event = net.neoforged.neoforge.event.EventHooks.onEnderPearlLand(serverplayer, this.getX(), this.getY(), this.getZ(), this, 5.0F, p_37504_);
 +                        if (!event.isCanceled()) { // Don't indent to lower patch size
-                         if (this.random.nextFloat() < 0.05F && serverlevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
+                         if (!this.wand && this.random.nextFloat() < 0.05F && serverlevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
                              Endermite endermite = EntityType.ENDERMITE.create(serverlevel, EntitySpawnReason.TRIGGERED);
                              if (endermite != null) {
-@@ -136,16 +_,17 @@
+@@ -142,18 +_,19 @@
  
                          ServerPlayer serverplayer1 = serverplayer.teleport(
                              new TeleportTransition(
@@ -20,7 +20,9 @@
                          if (serverplayer1 != null) {
                              serverplayer1.resetFallDistance();
                              serverplayer1.resetCurrentImpulseContext();
--                            serverplayer1.hurtServer(serverplayer.serverLevel(), this.damageSources().enderPearl(), 5.0F);
+                             if (!this.wand) {
+-                                serverplayer1.hurtServer(serverplayer.serverLevel(), this.damageSources().enderPearl(), 5.0F);
+                             }
 +                            serverplayer1.hurtServer(serverplayer.serverLevel(), this.damageSources().fall(), event.getAttackDamage());
                          }
  

@@ -24,6 +24,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestServer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TheGame;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -89,23 +90,23 @@ public class ServerLifecycleHooks {
         return serverConfig;
     }
 
-    public static void handleServerAboutToStart(final MinecraftServer server) {
-        currentServer = server;
+    public static void handleServerAboutToStart(final TheGame game) {
+        currentServer = game.server();
         // on the dedi server we need to force the stuff to setup properly
-        ConfigTracker.INSTANCE.loadConfigs(ModConfig.Type.SERVER, FMLPaths.CONFIGDIR.get(), getServerConfigPath(server));
-        runModifiers(server);
-        NeoForge.EVENT_BUS.post(new ServerAboutToStartEvent(server));
+        ConfigTracker.INSTANCE.loadConfigs(ModConfig.Type.SERVER, FMLPaths.CONFIGDIR.get(), getServerConfigPath(game.server()));
+        //runModifiers(server);
+        NeoForge.EVENT_BUS.post(new ServerAboutToStartEvent(game));
     }
 
-    public static void handleServerStarting(final MinecraftServer server) {
+    public static void handleServerStarting(final TheGame game) {
         if (FMLEnvironment.dist.isDedicatedServer()) {
-            LanguageHook.loadModLanguages(server);
+            LanguageHook.loadModLanguages(game.server());
             // GameTestServer requires the gametests to be registered earlier, so it is done in main and should not be done twice.
-            if (!(server instanceof GameTestServer))
-                GameTestHooks.registerGametests(server.registryAccess());
+            if (!(game.server() instanceof GameTestServer))
+                GameTestHooks.registerGametests(game.registryAccess());
         }
         PermissionAPI.initializePermissionAPI();
-        NeoForge.EVENT_BUS.post(new ServerStartingEvent(server));
+        NeoForge.EVENT_BUS.post(new ServerStartingEvent(game));
     }
 
     public static void handleServerStarted(final MinecraftServer server) {
@@ -154,7 +155,7 @@ public class ServerLifecycleHooks {
     }
 
     private static void runModifiers(final MinecraftServer server) {
-        final RegistryAccess registries = server.registryAccess();
+        final RegistryAccess registries = server.theGame().registryAccess();
 
         // The order of holders() is the order modifiers were loaded in.
         final List<BiomeModifier> biomeModifiers = registries.lookupOrThrow(NeoForgeRegistries.Keys.BIOME_MODIFIERS)
@@ -206,7 +207,7 @@ public class ServerLifecycleHooks {
         });
         // Rebuild the indexed feature list
         registries.lookupOrThrow(Registries.LEVEL_STEM).forEach(levelStem -> {
-            levelStem.generator().refreshFeaturesPerStep();
+            levelStem.generator().orElseThrow().refreshFeaturesPerStep();
         });
 
         // Apply sorted structure modifiers to each structure.

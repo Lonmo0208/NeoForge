@@ -25,7 +25,7 @@ import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TheGame;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,8 +37,8 @@ import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 public class GameTestPlayer extends ServerPlayer implements GameTestListener {
     private final GameTestHelper helper;
 
-    public GameTestPlayer(MinecraftServer server, ServerLevel level, GameProfile profile, ClientInformation information, GameTestHelper helper) {
-        super(server, level, profile, information);
+    public GameTestPlayer(TheGame game, ServerLevel level, GameProfile profile, ClientInformation information, GameTestHelper helper) {
+        super(game, level, profile, information);
         this.helper = helper;
     }
 

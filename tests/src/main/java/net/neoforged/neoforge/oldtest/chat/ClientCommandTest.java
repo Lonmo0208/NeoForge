@@ -45,7 +45,7 @@ public class ClientCommandTest {
                         // Used for checking if attempting to get the server on the client side errors
                         .then(Commands.literal("server")
                                 .executes((context) -> {
-                                    context.getSource().getServer();
+                                    context.getSource().theGame();
                                     context.getSource().sendSuccess(() -> Component.literal("Successfully called getServer should have errored"), false);
                                     return 1;
                                 }))

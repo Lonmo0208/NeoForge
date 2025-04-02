@@ -6,6 +6,7 @@
 package net.neoforged.neoforge.event.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TheGame;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 
 /**
@@ -17,7 +18,7 @@ import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
  * @author cpw
  */
 public class ServerAboutToStartEvent extends ServerLifecycleEvent {
-    public ServerAboutToStartEvent(MinecraftServer server) {
-        super(server);
+    public ServerAboutToStartEvent(TheGame game) {
+        super(game);
     }
 }

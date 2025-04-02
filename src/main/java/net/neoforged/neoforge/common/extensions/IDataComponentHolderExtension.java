@@ -23,7 +23,7 @@ public interface IDataComponentHolderExtension {
         var value = self().get(type);
 
         if (value != null)
-            value.addToTooltip(context, adder, flag, self());
+            value.addToTooltip(context, adder, flag, null, null); // TODO: that itemstack is tricky. we need to rework this class into the upstream addToTooltip function -C
     }
 
     default <T extends TooltipProvider> void addToTooltip(Supplier<? extends DataComponentType<T>> type, Item.TooltipContext context, Consumer<Component> adder, TooltipFlag flag) {

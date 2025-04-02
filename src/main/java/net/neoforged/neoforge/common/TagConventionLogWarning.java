@@ -503,7 +503,7 @@ public final class TagConventionLogWarning {
 
                 if (!FMLLoader.isProduction() == isConfigSetToDev) {
                     List<TagKey<?>> legacyTags = new ObjectArrayList<>();
-                    RegistryAccess.Frozen registryAccess = serverStartingEvent.getServer().registryAccess();
+                    RegistryAccess.Frozen registryAccess = serverStartingEvent.getTheGame().registryAccess();
 
                     // We only care about vanilla registries
                     registryAccess.registries().forEach(registryEntry -> {

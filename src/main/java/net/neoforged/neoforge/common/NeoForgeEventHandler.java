@@ -61,7 +61,7 @@ public class NeoForgeEventHandler {
                 if (newEntity != null) {
                     entity.discard();
                     event.setCanceled(true);
-                    BlockableEventLoop<? super TickTask> executor = event.getLevel() instanceof ServerLevel serverLevel ? serverLevel.getServer() : NeoForgeProxy.INSTANCE.getClientExecutor();
+                    BlockableEventLoop<? super TickTask> executor = event.getLevel() instanceof ServerLevel serverLevel ? serverLevel.theGame().server() : NeoForgeProxy.INSTANCE.getClientExecutor();
                     executor.schedule(new TickTask(0, () -> event.getLevel().addFreshEntity(newEntity)));
                 }
             }
@@ -114,7 +114,7 @@ public class NeoForgeEventHandler {
     @SubscribeEvent
     public void onDpSync(final OnDatapackSyncEvent event) {
         RegistryManager.getDataMaps().forEach((registry, values) -> {
-            final var regOpt = event.getPlayerList().getServer().overworld().registryAccess()
+            final var regOpt = event.getPlayer().theGame().overworld().registryAccess()
                     .lookup(registry);
             if (regOpt.isEmpty()) return;
             event.getRelevantPlayers().forEach(player -> {

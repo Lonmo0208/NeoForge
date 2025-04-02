@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "#": "#c:cobblestones/normal",
+    "#": "#minecraft:stone_tool_materials",
     "X": "#c:rods/wooden"
   },
   "pattern": [

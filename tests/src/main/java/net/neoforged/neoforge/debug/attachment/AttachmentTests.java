@@ -9,6 +9,7 @@ import static net.minecraft.commands.Commands.literal;
 
 import com.mojang.brigadier.Command;
 import com.mojang.serialization.Codec;
+import java.util.Optional;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -94,11 +95,11 @@ public class AttachmentTests {
 
             helper.getLevel().getChunk(pos).removeData(attachmentType); // remove data to ensure that the test can run multiple times
 
-            helper.getLevel().getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack(), test.id() + " print_and_increment");
+            helper.getLevel().theGame().getCommands().performPrefixedCommand(player.createCommandSourceStack(), test.id() + " print_and_increment");
             helper.assertTrue(((LevelChunk) helper.getLevel().getChunk(pos)).getData(attachmentType).getValue() == 1,
                     "Chunk attachment value should have been 1");
 
-            helper.getLevel().getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack(), test.id() + " print_and_increment");
+            helper.getLevel().theGame().getCommands().performPrefixedCommand(player.createCommandSourceStack(), test.id() + " print_and_increment");
             helper.assertTrue(((LevelChunk) helper.getLevel().getChunk(pos)).getData(attachmentType).getValue() == 2,
                     "Chunk attachment value should have been 2");
 
@@ -120,12 +121,12 @@ public class AttachmentTests {
             player.setData(lostOnDeathBoolean, true);
             player.setData(keptOnDeathBoolean, true);
 
-            var returningPlayer = player.getServer().getPlayerList().respawn(player, true, Entity.RemovalReason.CHANGED_DIMENSION);
+            var returningPlayer = player.theGame().playerList().respawn(player, true, Entity.RemovalReason.CHANGED_DIMENSION, Optional.empty());
 
             helper.assertTrue(returningPlayer.getData(lostOnDeathBoolean), "Lost-on-death attachment should have remained after end portal respawning.");
             helper.assertTrue(returningPlayer.getData(keptOnDeathBoolean), "Kept-on-death attachment should have remained after end portal respawning.");
 
-            var respawnedPlayer = player.getServer().getPlayerList().respawn(returningPlayer, false, Entity.RemovalReason.KILLED);
+            var respawnedPlayer = player.theGame().playerList().respawn(returningPlayer, false, Entity.RemovalReason.KILLED, Optional.empty());
 
             helper.assertFalse(respawnedPlayer.getData(lostOnDeathBoolean), "Lost-on-death attachment should not have remained after respawning.");
             helper.assertTrue(respawnedPlayer.getData(keptOnDeathBoolean), "Kept-on-death attachment should have remained after respawning.");

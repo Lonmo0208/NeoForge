@@ -6,6 +6,7 @@
 package net.neoforged.neoforge.event.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TheGame;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /**
@@ -17,7 +18,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
  * @author cpw
  */
 public class ServerStartingEvent extends ServerLifecycleEvent {
-    public ServerStartingEvent(final MinecraftServer server) {
-        super(server);
+    public ServerStartingEvent(final TheGame game) {
+        super(game);
     }
 }

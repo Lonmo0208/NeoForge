@@ -27,7 +27,7 @@
          }
  
          return super.playerWillDestroy(p_57445_, p_57446_, p_57447_, p_57448_);
-@@ -79,10 +_,14 @@
+@@ -79,14 +_,18 @@
          }
      }
  
@@ -36,13 +36,19 @@
      public static boolean prime(Level p_57437_, BlockPos p_57438_) {
          return prime(p_57437_, p_57438_, null);
      }
- 
+-
 +    /** @deprecated Neo: use {@link net.neoforged.neoforge.common.extensions.IBlockStateExtension#onCaughtFire(Level,BlockPos,net.minecraft.core.Direction,LivingEntity)} instead */
 +    @Deprecated
      private static boolean prime(Level p_394104_, BlockPos p_393490_, @Nullable LivingEntity p_411047_) {
-         if (p_394104_ instanceof ServerLevel serverlevel && serverlevel.getGameRules().getBoolean(GameRules.RULE_TNT_EXPLODES)) {
-             PrimedTnt primedtnt = new PrimedTnt(p_394104_, p_393490_.getX() + 0.5, p_393490_.getY(), p_393490_.getZ() + 0.5, p_411047_);
-@@ -102,7 +_,7 @@
+         return prime(p_394104_, p_393490_, p_411047_, 80);
+     }
+-
++    /** @deprecated Neo: use {@link net.neoforged.neoforge.common.extensions.IBlockStateExtension#onCaughtFire(Level,BlockPos,net.minecraft.core.Direction,LivingEntity)} instead */
++    @Deprecated
+     public static boolean prime(Level p_420615_, BlockPos p_419682_, @Nullable LivingEntity p_421408_, int p_420465_) {
+         if (p_420615_ instanceof ServerLevel serverlevel && serverlevel.getGameRules().getBoolean(GameRules.RULE_TNT_EXPLODES)) {
+             PrimedTnt primedtnt = new PrimedTnt(p_420615_, p_419682_.getX() + 0.5, p_419682_.getY(), p_419682_.getZ() + 0.5, p_421408_, p_420465_);
+@@ -106,7 +_,7 @@
          if (!p_316149_.is(Items.FLINT_AND_STEEL) && !p_316149_.is(Items.FIRE_CHARGE)) {
              return super.useItemOn(p_316149_, p_316217_, p_316520_, p_316601_, p_316770_, p_316393_, p_316532_);
          } else {
@@ -51,7 +57,7 @@
                  p_316520_.setBlock(p_316601_, Blocks.AIR.defaultBlockState(), 11);
                  Item item = p_316149_.getItem();
                  if (p_316149_.is(Items.FLINT_AND_STEEL)) {
-@@ -128,7 +_,7 @@
+@@ -132,7 +_,7 @@
              Entity entity = p_57432_.getOwner();
              if (p_57432_.isOnFire()
                  && p_57432_.mayInteract(serverlevel, blockpos)
@@ -60,7 +66,7 @@
                  p_57429_.removeBlock(blockpos, false);
              }
          }
-@@ -142,5 +_,10 @@
+@@ -146,5 +_,10 @@
      @Override
      protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_57464_) {
          p_57464_.add(UNSTABLE);

@@ -6,6 +6,7 @@
 package net.neoforged.neoforge.debug.entity.player;
 
 import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -205,10 +206,10 @@ public class PlayerEventTests {
         test.onGameTest(helper -> helper.startSequence(() -> helper.makeTickingMockServerPlayerInLevel(GameType.CREATIVE).moveToCorner())
                 .thenExecute(player -> player.setCustomName(Component.literal("permschangedevent")))
                 // Make sure the player isn't OP by default
-                .thenExecute(player -> player.getServer().getPlayerList().getOps().add(new ServerOpListEntry(
+                .thenExecute(player -> player.theGame().playerList().getOps().add(new ServerOpListEntry(
                         player.getGameProfile(), Commands.LEVEL_ADMINS, true)))
-                .thenExecute(player -> player.getServer().getPlayerList().deop(player.getGameProfile()))
-                .thenExecute(player -> helper.assertTrue(player.getServer().getProfilePermissions(player.getGameProfile()) == Commands.LEVEL_ADMINS, "Player was de-op'd"))
+                .thenExecute(player -> player.theGame().playerList().deop(player.getGameProfile()))
+                .thenExecute(player -> helper.assertTrue(player.theGame().server().getProfilePermissions(player.getGameProfile()) == Commands.LEVEL_ADMINS, "Player was de-op'd"))
                 .thenSucceed());
     }
 
@@ -233,7 +234,7 @@ public class PlayerEventTests {
             player.awardStat(Stats.CUSTOM.get(Stats.DAMAGE_TAKEN), 100);
             //Award an animal breed stat, which we are listining for in order to multiply the value
             player.awardStat(Stats.CUSTOM.get(Stats.ANIMALS_BRED), 1);
-            ServerStatsCounter stats = player.level().getServer().getPlayerList().getPlayerStats(player);
+            ServerStatsCounter stats = player.level().theGame().playerList().getPlayerStats(player);
             //if our damage stat is changed to bell ring and our animal breed stat is multiplied by ten, the test passes
             if (stats.getValue(Stats.CUSTOM.get(Stats.BELL_RING)) == 100 && stats.getValue(Stats.CUSTOM.get(Stats.ANIMALS_BRED)) == 10)
                 helper.succeed();
@@ -292,7 +293,7 @@ public class PlayerEventTests {
                     ResourceKey<Level> dimension = oldConfig != null ? oldConfig.dimension() : Level.OVERWORLD;
                     player.setRespawnPosition(new ServerPlayer.RespawnConfig(dimension, helper.absolutePos(new BlockPos(0, 1, 0)), 0, false), true);
                 })
-                .thenExecute(player -> Objects.requireNonNull(player.getServer()).getPlayerList().respawn(player, false, Entity.RemovalReason.KILLED))
+                .thenExecute(player -> Objects.requireNonNull(player.theGame()).playerList().respawn(player, false, Entity.RemovalReason.KILLED, Optional.empty()))
                 .thenExecute(() -> helper.assertEntityPresent(EntityType.PLAYER, new BlockPos(0, 1, 1)))
                 .thenSucceed());
     }
@@ -311,7 +312,7 @@ public class PlayerEventTests {
                     ResourceKey<Level> dimension = oldConfig != null ? oldConfig.dimension() : Level.OVERWORLD;
                     player.setRespawnPosition(new ServerPlayer.RespawnConfig(dimension, helper.absolutePos(new BlockPos(0, 1, 1)), 0, true), true);
                 })
-                .thenExecute(player -> Objects.requireNonNull(player.getServer()).getPlayerList().respawn(player, false, Entity.RemovalReason.KILLED))
+                .thenExecute(player -> Objects.requireNonNull(player.theGame()).playerList().respawn(player, false, Entity.RemovalReason.KILLED, Optional.empty()))
                 .thenExecute(() -> helper.assertEntityIsHolding(new BlockPos(0, 1, 1), EntityType.PLAYER, Items.APPLE))
                 .thenSucceed());
     }

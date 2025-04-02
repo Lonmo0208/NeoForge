@@ -9,5 +9,6 @@ project.gradleutils.version {
     }
     branches {
         suffixBranch = true
+        suffixExemptedBranches.addAll("0." + project.rootProject.minecraft_version) // Replace mcVersion to appropriate variable
     }
 }

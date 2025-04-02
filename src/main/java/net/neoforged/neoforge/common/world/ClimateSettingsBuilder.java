@@ -5,7 +5,7 @@
 
 package net.neoforged.neoforge.common.world;
 
-import net.minecraft.world.level.biome.Biome.ClimateSettings;
+import net.minecraft.world.level.biome.ClimateSettings;
 import net.minecraft.world.level.biome.Biome.TemperatureModifier;
 
 /**

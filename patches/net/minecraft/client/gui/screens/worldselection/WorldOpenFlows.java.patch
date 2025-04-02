@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/worldselection/WorldOpenFlows.java
 +++ b/net/minecraft/client/gui/screens/worldselection/WorldOpenFlows.java
-@@ -66,7 +_,7 @@
+@@ -69,7 +_,7 @@
  import org.slf4j.Logger;
  
  @OnlyIn(Dist.CLIENT)
@@ -9,7 +9,7 @@
      private static final Logger LOGGER = LogUtils.getLogger();
      private static final UUID WORLD_PACK_ID = UUID.fromString("640a6a92-b6cb-48a0-b391-831586500359");
      private final Minecraft minecraft;
-@@ -215,7 +_,10 @@
+@@ -228,7 +_,10 @@
              component1 = Component.translatable("selectWorld.backupWarning.customized");
          } else {
              component = Component.translatable("selectWorld.backupQuestion.experimental");
@@ -21,19 +21,17 @@
          }
  
          this.minecraft.setScreen(new BackupConfirmScreen(p_307323_, (p_307085_, p_307086_) -> {
-@@ -381,10 +_,19 @@
+@@ -392,9 +_,17 @@
+         LevelStorageSource.LevelStorageAccess p_331469_, WorldStem p_330774_, PackRepository p_330989_, Runnable p_332128_
+     ) {
          WorldData worlddata = p_330774_.worldData();
-         boolean flag = worlddata.worldGenOptions().isOldCustomizedWorld();
-         boolean flag1 = worlddata.worldGenSettingsLifecycle() != Lifecycle.stable();
--        if (!flag && !flag1) {
 +        boolean skipConfirmation = worlddata instanceof PrimaryLevelData pld && pld.hasConfirmedExperimentalWarning();
-+        if (skipConfirmation || (!flag && !flag1)) {
-             this.openWorldLoadBundledResourcePack(p_331469_, p_330774_, p_330989_, p_332128_);
-         } else {
+         boolean flag = worlddata.worldGenOptions().isOldCustomizedWorld();
+-        if (flag) {
 -            this.askForBackup(p_331469_, flag, () -> this.openWorldLoadBundledResourcePack(p_331469_, p_330774_, p_330989_, p_332128_), () -> {
-+            this.askForBackup(p_331469_, flag, () -> {
++        if (flag && !skipConfirmation) {
++            this.askForBackup(p_331469_, flag, () ->  {
 +                if (!flag) {
-+                    // Neo: Prevent the message from showing again
 +                    if (p_330774_.worldData() instanceof PrimaryLevelData pld) {
 +                        pld.withConfirmedWarning(true);
 +                    }

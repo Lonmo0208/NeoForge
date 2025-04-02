@@ -63,7 +63,7 @@ public class LootPoolTest {
                 event.getLookupProvider()));
 
         test.onGameTest(helper -> {
-            var testTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(TEST_LOOT_TABLE_1);
+            var testTable = helper.getLevel().theGame().reloadableRegistries().getLootTable(TEST_LOOT_TABLE_1);
 
             helper.assertTrue(testTable.getPool("custom_name") != null, "Expected custom_name pool");
             helper.assertTrue(testTable.getPool("pool1") != null, "Expected unnamed pool pool1");
@@ -99,7 +99,7 @@ public class LootPoolTest {
 
         test.onGameTest(helper -> helper.startSequence()
                 .thenExecute(() -> {
-                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
+                    LootTable lootTable = helper.getLevel().theGame().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
                     LootParams.Builder lootParamsBuilder = new LootParams.Builder(helper.getLevel())
                             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(BlockPos.ZERO)))
                             .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
@@ -140,7 +140,7 @@ public class LootPoolTest {
 
         test.onGameTest(helper -> helper.startSequence()
                 .thenExecute(() -> {
-                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
+                    LootTable lootTable = helper.getLevel().theGame().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
                     LootParams.Builder lootParamsBuilder = new LootParams.Builder(helper.getLevel())
                             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(BlockPos.ZERO)))
                             .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
@@ -181,7 +181,7 @@ public class LootPoolTest {
 
         test.onGameTest(helper -> helper.startSequence()
                 .thenExecute(() -> {
-                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
+                    LootTable lootTable = helper.getLevel().theGame().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
                     LootParams.Builder lootParamsBuilder = new LootParams.Builder(helper.getLevel())
                             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(BlockPos.ZERO)))
                             .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)

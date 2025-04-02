@@ -85,7 +85,7 @@ public class CreativeTabOrderTest {
 
     @BeforeAll
     static void testSetupTabs(MinecraftServer server) {
-        CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, server.registryAccess());
+        CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, server.theGame().registryAccess());
     }
 
     /**
@@ -95,7 +95,7 @@ public class CreativeTabOrderTest {
      */
     @Test
     void testIngredientsEnchantmentExistence(MinecraftServer server) {
-        final Set<ItemStack> tabEnchantments = server.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements()
+        final Set<ItemStack> tabEnchantments = server.theGame().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements()
                 .map(enchantment -> EnchantmentHelper.createBook(new EnchantmentInstance(enchantment, enchantment.value().getMaxLevel())))
                 .collect(() -> new ObjectOpenCustomHashSet<>(ItemStackLinkedSet.TYPE_AND_TAG), ObjectOpenCustomHashSet::add, ObjectOpenCustomHashSet::addAll);
         for (ItemStack entry : ingredientsTab) {
@@ -114,7 +114,7 @@ public class CreativeTabOrderTest {
      */
     @Test
     void testSearchEnchantmentOrder(MinecraftServer server) {
-        final var tabEnchantments = server.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements()
+        final var tabEnchantments = server.theGame().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements()
                 .flatMap(
                         enchantment -> IntStream.rangeClosed(enchantment.value().getMinLevel(), enchantment.value().getMaxLevel())
                                 .mapToObj(p_270006_ -> EnchantmentHelper.createBook(new EnchantmentInstance(enchantment, p_270006_))))

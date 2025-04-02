@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.client.event.RegisterDimensionTransitionScreenEvent;
@@ -53,6 +55,6 @@ public class DimensionTransitionScreenManager {
     }
 
     public interface ReceivingLevelScreenFactory {
-        ReceivingLevelScreen create(BooleanSupplier supplier, ReceivingLevelScreen.Reason reason);
+        ReceivingLevelScreen create(BooleanSupplier supplier, ReceivingLevelScreen.Reason reason, RandomSource random, @Nullable Connection conn);
     }
 }

@@ -85,7 +85,7 @@ public class CustomFeatureFlagsTests {
                 .registerSimpleItem("ext_range_disabled_test", new Item.Properties().requiredFeatures(extRangeDisabledTestFlag));
 
         test.eventListeners().forge().addListener((ServerStartedEvent event) -> {
-            FeatureFlagSet flagSet = event.getServer().getLevel(Level.OVERWORLD).enabledFeatures();
+            FeatureFlagSet flagSet = event.getTheGame().getLevel(Level.OVERWORLD).enabledFeatures();
             if (!baseRangeEnabledTestItem.get().isEnabled(flagSet)) {
                 test.fail("Item with enabled custom flag in base mask range was unexpectedly disabled");
             } else if (baseRangeDisabledTestItem.get().isEnabled(flagSet)) {
@@ -133,8 +133,8 @@ public class CustomFeatureFlagsTests {
 
         test.eventListeners().forge().addListener((ServerStartedEvent event) -> {
             var server = event.getServer();
-            var isFlagEnabled = server.getWorldData().enabledFeatures().contains(flag);
-            var recipeMap = server.getRecipeManager().recipeMap();
+            var isFlagEnabled = server.theGame().getWorldData().enabledFeatures().contains(flag);
+            var recipeMap = server.theGame().getRecipeManager().recipeMap();
             var hasEnabledRecipe = recipeMap.byKey(enabledRecipeName) != null;
 
             if (isFlagEnabled) {

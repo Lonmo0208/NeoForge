@@ -157,7 +157,7 @@ public class BlockTests {
                 .thenExecute(() -> helper.setBlock(1, 2, 2, Blocks.IRON_BLOCK))
 
                 .thenExecute(player -> helper.useBlock(new BlockPos(1, 2, 1), player))
-                .thenExecute(player -> player.getServer().getPlayerList().respawn(player, false, Entity.RemovalReason.CHANGED_DIMENSION))
+                .thenExecute(player -> player.theGame().playerList().respawn(player, false, Entity.RemovalReason.CHANGED_DIMENSION, Optional.empty()))
                 .thenExecute(() -> helper.assertEntityPresent(
                         EntityType.PLAYER,
                         1, 3, 2))

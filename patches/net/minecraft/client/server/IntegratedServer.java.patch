@@ -1,23 +1,18 @@
 --- a/net/minecraft/client/server/IntegratedServer.java
 +++ b/net/minecraft/client/server/IntegratedServer.java
-@@ -71,10 +_,12 @@
-         this.setPvpAllowed(true);
-         this.setFlightAllowed(true);
-         this.initializeKeyPair();
-+        net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerAboutToStart(this);
-         this.loadLevel();
-         GameProfile gameprofile = this.getSingleplayerProfile();
-         String s = this.getWorldData().getLevelName();
+@@ -76,6 +_,7 @@
+         String s = thegame.getWorldData().getLevelName();
          this.setMotd(gameprofile != null ? gameprofile.getName() + " - " + s : s);
-+        net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerStarting(this);
-         return true;
+         this.previousSimulationDistance = 0;
++        net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerStarting(thegame);
+         return thegame;
      }
  
-@@ -218,6 +_,7 @@
+@@ -216,6 +_,7 @@
  
      @Override
      public void halt(boolean p_120053_) {
 +        if (isRunning())
          this.executeBlocking(() -> {
-             for (ServerPlayer serverplayer : Lists.newArrayList(this.getPlayerList().getPlayers())) {
-                 if (!serverplayer.getUUID().equals(this.uuid)) {
+             TheGame thegame = this.theGame();
+             if (thegame != null) {

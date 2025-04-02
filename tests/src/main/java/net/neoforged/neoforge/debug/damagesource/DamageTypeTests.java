@@ -115,12 +115,12 @@ public class DamageTypeTests {
             helper.assertTrue(dTypeReg.getResourceKey(target.getLastDamageSource().type()).get() == TEST_DMG_TYPE, "Incorrect damage type used");
 
             // Test that the scaling function works correctly.
-            helper.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
+            helper.getLevel().theGame().setDifficulty(Difficulty.NORMAL, true);
             attacker.setHealth(20F);
             attacker.hurt(helper.getLevel().damageSources().source(TEST_DMG_TYPE), 2);
             helper.assertTrue(attacker.getHealth() == 18F, "Incorrecty damage scaling for normal difficulty");
 
-            helper.getLevel().getServer().setDifficulty(Difficulty.HARD, true);
+            helper.getLevel().theGame().setDifficulty(Difficulty.HARD, true);
             attacker.invulnerableTime = 0; // Need to reset this so full damage is taken.
             attacker.setHealth(20F);
             attacker.hurt(helper.getLevel().damageSources().source(TEST_DMG_TYPE), 2);

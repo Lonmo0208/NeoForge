@@ -1,15 +1,28 @@
 --- a/net/minecraft/util/random/WeightedList.java
 +++ b/net/minecraft/util/random/WeightedList.java
+@@ -4,10 +_,8 @@
+ import com.google.common.collect.Lists;
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.MapCodec;
+-import java.util.Arrays;
+-import java.util.List;
+-import java.util.Objects;
+-import java.util.Optional;
++
++import java.util.*;
+ import java.util.function.Function;
+ import javax.annotation.Nullable;
+ import net.minecraft.util.ExtraCodecs;
 @@ -127,7 +_,7 @@
      }
  
      public static class Builder<E> {
--        private final ImmutableList.Builder<Weighted<E>> result = ImmutableList.builder();
+-        private ImmutableList.Builder<Weighted<E>> result = ImmutableList.builder();
 +        private final List<Weighted<E>> result = new java.util.ArrayList<>();
  
          public WeightedList.Builder<E> add(E p_394625_) {
              return this.add(p_394625_, 1);
-@@ -138,8 +_,41 @@
+@@ -138,12 +_,45 @@
              return this;
          }
  
@@ -50,5 +63,10 @@
 -            return new WeightedList<>(this.result.build());
 +            return new WeightedList<>(this.result);
          }
-     }
  
+         public WeightedList.Builder<E> clear() {
+-            this.result = ImmutableList.builder();
++            this.result.clear();
+             return this;
+         }
+     }
