@@ -6,7 +6,8 @@ name: Release
 on:
   push:
     branches:
-      - '1.*'
+      - '1.*'       # Mainline release versions
+      - '\d\dw14.+' # April Fools snapshot versions
 
 permissions:
   contents: read
