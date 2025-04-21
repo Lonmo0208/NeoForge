@@ -14,6 +14,8 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+
+import java.lang.reflect.Field;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -29,6 +31,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TheGame;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -50,10 +53,7 @@ public class ClientCommandHandler {
         final ClientPacketListener connection = event.getPlayer().connection;
         // Some custom server implementations do not send ClientboundCommandsPacket, so we provide a fallback:
         // Must set this, so that suggestions for client-only commands work, if server never sends commands packet
-        connection.commands = mergeServerCommands(
-                new CommandDispatcher<>(),
-                CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures())
-        );
+        connection.commands = mergeServerCommands(new CommandDispatcher<>(), CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures()));// TODO: -C
     }
 
     private static void registerClientCommands(RegisterClientCommandsEvent event) {
@@ -73,29 +73,21 @@ public class ClientCommandHandler {
      * with server commands in suggestions
      */
     @ApiStatus.Internal
-    public static CommandDispatcher<SharedSuggestionProvider> mergeServerCommands(
-            CommandDispatcher<SharedSuggestionProvider> serverCommands,
-            CommandBuildContext buildContext
-    ) {
-        // 创建临时调度器注册客户端命令
+    public static CommandDispatcher<SharedSuggestionProvider> mergeServerCommands(CommandDispatcher<SharedSuggestionProvider> serverCommands, CommandBuildContext buildContext) {
         CommandDispatcher<CommandSourceStack> commandsTemp = new CommandDispatcher<>();
         NeoForge.EVENT_BUS.post(new RegisterClientCommandsEvent(commandsTemp, buildContext));
 
-
-        // 初始化静态的 commands 调度器
+        // Copies the client commands into another RootCommandNode so that redirects can't be used with server commands
         commands = new CommandDispatcher<>();
         copy(commandsTemp.getRoot(), commands.getRoot());
 
-        // 合并服务器命令
+        // Copies the server commands into another RootCommandNode so that redirects can't be used with client commands
         RootCommandNode<SharedSuggestionProvider> serverCommandsRoot = serverCommands.getRoot();
         CommandDispatcher<SharedSuggestionProvider> newServerCommands = new CommandDispatcher<>();
         copy(serverCommandsRoot, newServerCommands.getRoot());
 
-        CommandHelper.mergeCommandNode(
-                commands.getRoot(),
-                newServerCommands.getRoot(),
-                new IdentityHashMap<>(),
-                getSource(),
+        // Copies the client side commands into the server side commands to be used for suggestions
+        CommandHelper.mergeCommandNode(commands.getRoot(), newServerCommands.getRoot(), new IdentityHashMap<>(), getSource(),
                 context -> 0,
                 suggestions -> {
                     SuggestionProvider<SharedSuggestionProvider> provider = SuggestionProviders.safelySwap(
@@ -138,9 +130,22 @@ public class ClientCommandHandler {
         if (connection == null) return null;
 
         MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
-        if (server == null) return null; // 如果是联机模式则无法处理
+        if (server == null) return null;
 
+        TheGame theGame = null;
+        try {
+            Field theGameField = MinecraftServer.class.getDeclaredField("theGame");
+            theGameField.setAccessible(true);
+            theGame = (TheGame) theGameField.get(server);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            LOGGER.error("Failed to access theGame field via reflection", e);
+            return null;
+        }
 
+        if (theGame == null) {
+            LOGGER.warn("theGame is null in MinecraftServer");
+            return null;
+        }
 
         CommandSource commandSource = new CommandSource() {
             @Override
@@ -171,7 +176,7 @@ public class ClientCommandHandler {
                 player.getPermissionLevel(),
                 player.getName().getString(),
                 player.getDisplayName(),
-                server.theGame,
+                theGame,
                 player
         );
     }
