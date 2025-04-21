@@ -14,19 +14,17 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-
 import java.lang.reflect.Field;
 import java.util.IdentityHashMap;
 import java.util.Map;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.network.chat.ClickEvent;
@@ -66,8 +64,7 @@ public class ClientCommandHandler {
                         .executes(ctx -> {
                             ctx.getSource().sendSuccess(() -> Component.literal("Client command executed!"), false);
                             return 1;
-                        })
-        );
+                        }));
     }
 
     /*
@@ -91,12 +88,15 @@ public class ClientCommandHandler {
         copy(serverCommandsRoot, newServerCommands.getRoot());
 
         // Copies the client side commands into the server side commands to be used for suggestions
-        CommandHelper.mergeCommandNode(commands.getRoot(), newServerCommands.getRoot(), new IdentityHashMap<>(), getSource(),
+        CommandHelper.mergeCommandNode(
+                commands.getRoot(),
+                newServerCommands.getRoot(),
+                new IdentityHashMap<>(),
+                getSource(),
                 context -> 0,
                 suggestions -> {
                     SuggestionProvider<SharedSuggestionProvider> provider = SuggestionProviders.safelySwap(
-                            (SuggestionProvider<SharedSuggestionProvider>) (SuggestionProvider<?>) suggestions
-                    );
+                            (SuggestionProvider<SharedSuggestionProvider>) (SuggestionProvider<?>) suggestions);
                     if (provider == SuggestionProviders.ASK_SERVER) {
                         provider = (context, builder) -> {
                             ClientCommandSourceStack source = getSource();
@@ -110,9 +110,7 @@ public class ClientCommandHandler {
                         };
                     }
                     return provider;
-                }
-        );
-
+                });
         return newServerCommands;
     }
 
@@ -172,17 +170,8 @@ public class ClientCommandHandler {
                 Minecraft.getInstance().gui.getChat().addMessage(message);
             }
         };
-
-        return new ClientCommandSourceStack(
-                commandSource,
-                player.position(),
-                player.getRotationVector(),
-                player.getPermissionLevel(),
-                player.getName().getString(),
-                player.getDisplayName(),
-                theGame,
-                player
-        );
+        return new ClientCommandSourceStack(commandSource, player.position(), player.getRotationVector(), player.getPermissionLevel(),
+                player.getName().getString(), player.getDisplayName(), theGame, player);
     }
 
     /**
