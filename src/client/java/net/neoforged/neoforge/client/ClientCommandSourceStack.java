@@ -43,7 +43,6 @@ public class ClientCommandSourceStack extends CommandSourceStack {
         super(source, position, rotation, null, permission, plainTextName, displayName, game, executing);
     }
 
-
     /**
      * {@return the current connection, used to shorten method calls and hide the nullability warnings}
      */
