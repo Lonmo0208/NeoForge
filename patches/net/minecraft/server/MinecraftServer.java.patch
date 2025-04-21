@@ -1,5 +1,10 @@
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
+@@ -202,1 +_,1 @@
+
+-    protected TheGame theGame;
++    public TheGame theGame;
+
 @@ -215,7 +_,7 @@
          Function<Thread, S> p_129873_
      ) {

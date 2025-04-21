@@ -11,24 +11,24 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import java.util.IdentityHashMap;
 import java.util.Map;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSource;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.*;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -39,17 +39,31 @@ import org.jetbrains.annotations.ApiStatus;
 
 public class ClientCommandHandler {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static CommandDispatcher<CommandSourceStack> commands = null;
+    private static CommandDispatcher<CommandSourceStack> commands = new CommandDispatcher<>();
 
     public static void init() {
         NeoForge.EVENT_BUS.addListener(ClientCommandHandler::handleClientPlayerLogin);
+        NeoForge.EVENT_BUS.addListener(ClientCommandHandler::registerClientCommands);
     }
 
     private static void handleClientPlayerLogin(ClientPlayerNetworkEvent.LoggingIn event) {
         final ClientPacketListener connection = event.getPlayer().connection;
         // Some custom server implementations do not send ClientboundCommandsPacket, so we provide a fallback:
         // Must set this, so that suggestions for client-only commands work, if server never sends commands packet
-        // connection.commands = mergeServerCommands(new CommandDispatcher<>(), CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures())); TODO: -C
+        connection.commands = mergeServerCommands(
+                new CommandDispatcher<>(),
+                CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures())
+        );
+    }
+
+    private static void registerClientCommands(RegisterClientCommandsEvent event) {
+        event.getDispatcher().register(
+                Commands.literal("example")
+                        .executes(ctx -> {
+                            ctx.getSource().sendSuccess(() -> Component.literal("Client command executed!"), false);
+                            return 1;
+                        })
+        );
     }
 
     /*
@@ -59,37 +73,49 @@ public class ClientCommandHandler {
      * with server commands in suggestions
      */
     @ApiStatus.Internal
-    public static CommandDispatcher<SharedSuggestionProvider> mergeServerCommands(CommandDispatcher<SharedSuggestionProvider> serverCommands, CommandBuildContext buildContext) {
+    public static CommandDispatcher<SharedSuggestionProvider> mergeServerCommands(
+            CommandDispatcher<SharedSuggestionProvider> serverCommands,
+            CommandBuildContext buildContext
+    ) {
+        // 创建临时调度器注册客户端命令
         CommandDispatcher<CommandSourceStack> commandsTemp = new CommandDispatcher<>();
         NeoForge.EVENT_BUS.post(new RegisterClientCommandsEvent(commandsTemp, buildContext));
 
-        // Copies the client commands into another RootCommandNode so that redirects can't be used with server commands
+
+        // 初始化静态的 commands 调度器
         commands = new CommandDispatcher<>();
         copy(commandsTemp.getRoot(), commands.getRoot());
 
-        // Copies the server commands into another RootCommandNode so that redirects can't be used with client commands
+        // 合并服务器命令
         RootCommandNode<SharedSuggestionProvider> serverCommandsRoot = serverCommands.getRoot();
         CommandDispatcher<SharedSuggestionProvider> newServerCommands = new CommandDispatcher<>();
         copy(serverCommandsRoot, newServerCommands.getRoot());
 
-        // Copies the client side commands into the server side commands to be used for suggestions
-        CommandHelper.mergeCommandNode(commands.getRoot(), newServerCommands.getRoot(), new IdentityHashMap<>(), getSource(), (context) -> 0, (suggestions) -> {
-            SuggestionProvider<SharedSuggestionProvider> suggestionProvider = SuggestionProviders
-                    .safelySwap((SuggestionProvider<SharedSuggestionProvider>) (SuggestionProvider<?>) suggestions);
-            if (suggestionProvider == SuggestionProviders.ASK_SERVER) {
-                suggestionProvider = (context, builder) -> {
-                    ClientCommandSourceStack source = getSource();
-                    StringReader reader = new StringReader(context.getInput());
-                    if (reader.canRead() && reader.peek() == '/') {
-                        reader.skip();
-                    }
+        CommandHelper.mergeCommandNode(
+                commands.getRoot(),
+                newServerCommands.getRoot(),
+                new IdentityHashMap<>(),
+                getSource(),
+                context -> 0,
+                suggestions -> {
+                    SuggestionProvider<SharedSuggestionProvider> provider = SuggestionProviders.safelySwap(
+                            (SuggestionProvider<SharedSuggestionProvider>) (SuggestionProvider<?>) suggestions
+                    );
+                    if (provider == SuggestionProviders.ASK_SERVER) {
+                        provider = (context, builder) -> {
+                            ClientCommandSourceStack source = getSource();
+                            if (source == null) return Suggestions.empty();
 
-                    ParseResults<CommandSourceStack> parse = commands.parse(reader, source);
-                    return commands.getCompletionSuggestions(parse);
-                };
-            }
-            return suggestionProvider;
-        });
+                            StringReader reader = new StringReader(context.getInput());
+                            if (reader.canRead() && reader.peek() == '/') reader.skip();
+
+                            ParseResults<CommandSourceStack> parse = commands.parse(reader, source);
+                            return commands.getCompletionSuggestions(parse);
+                        };
+                    }
+                    return provider;
+                }
+        );
 
         return newServerCommands;
     }
@@ -106,6 +132,16 @@ public class ClientCommandHandler {
      */
     public static ClientCommandSourceStack getSource() {
         LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return null;
+
+        ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        if (connection == null) return null;
+
+        MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
+        if (server == null) return null; // 如果是联机模式则无法处理
+
+
+
         CommandSource commandSource = new CommandSource() {
             @Override
             public boolean acceptsSuccess() {
@@ -127,8 +163,17 @@ public class ClientCommandHandler {
                 Minecraft.getInstance().gui.getChat().addMessage(message);
             }
         };
-        return new ClientCommandSourceStack(commandSource, player.position(), player.getRotationVector(), player.getPermissionLevel(),
-                player.getName().getString(), player.getDisplayName(), player.theGame(), player);
+
+        return new ClientCommandSourceStack(
+                commandSource,
+                player.position(),
+                player.getRotationVector(),
+                player.getPermissionLevel(),
+                player.getName().getString(),
+                player.getDisplayName(),
+                server.theGame,
+                player
+        );
     }
 
     /**
@@ -157,24 +202,30 @@ public class ClientCommandHandler {
     /**
      * Always try to execute the cached parsing of a typed command as a clientside command. Requires that the execute field of the commands to be set to send to server so that they aren't
      * treated as client command's that do nothing.
-     *
+     * <p>
      * {@link net.minecraft.commands.Commands#performCommand(ParseResults, String)} for reference
      *
      * @param command the full command to execute, no preceding slash
      * @return {@code false} leaves the message to be sent to the server, while {@code true} means it should be caught before LocalPlayer#sendCommand
      */
     public static boolean runCommand(String command) {
-        StringReader reader = new StringReader(command);
+        if (commands == null) {
+            LOGGER.error("Command dispatcher is not initialized!");
+            return false;
+        }
+
+        if (command == null || command.isEmpty()) return false;
 
         ClientCommandSourceStack source = getSource();
+        if (source == null) {
+            LOGGER.error("Failed to get command source");
+            return false;
+        }
 
+        StringReader reader = new StringReader(command);
         try {
             commands.execute(reader, source);
-            //} catch (CommandRuntimeException execution)// Probably thrown by the command
-            //{
-            //    Minecraft.getInstance().player.sendSystemMessage(Component.literal("").append(execution.getComponent()).withStyle(ChatFormatting.RED));
-        } catch (CommandSyntaxException syntax)// Usually thrown by the CommandDispatcher
-        {
+        } catch (CommandSyntaxException syntax) {
             if (syntax.getType() == CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand() || syntax.getType() == CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument()) {
                 // in case of unknown command, let the server try and handle it
                 return false;

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -42,6 +43,7 @@ public class ClientCommandSourceStack extends CommandSourceStack {
     public ClientCommandSourceStack(CommandSource source, Vec3 position, Vec2 rotation, int permission, String plainTextName, Component displayName, TheGame game, Entity executing) {
         super(source, position, rotation, null, permission, plainTextName, displayName, game, executing);
     }
+
 
     /**
      * {@return the current connection, used to shorten method calls and hide the nullability warnings}
