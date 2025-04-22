@@ -16,9 +16,12 @@ import java.util.stream.Collectors;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.commands.CommandResultCallback;
+import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -27,6 +30,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.TheGame;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
@@ -39,8 +44,12 @@ import org.jetbrains.annotations.Nullable;
  * overrides for {@link CommandSourceStack} so that the methods will run successfully client side
  */
 public class ClientCommandSourceStack extends CommandSourceStack {
-    public ClientCommandSourceStack(CommandSource source, Vec3 position, Vec2 rotation, int permission, String plainTextName, Component displayName, TheGame game, Entity executing) {
-        super(source, position, rotation, null, permission, plainTextName, displayName, game, executing);
+    public ClientCommandSourceStack(CommandSource source, Vec3 position, Vec2 rotation, int permission, String plainTextName, Component displayName, Entity executing) {
+        super(source, position, rotation, null, permission, plainTextName, displayName, null, executing, false,
+                CommandResultCallback.EMPTY,
+                EntityAnchorArgument.Anchor.FEET,
+                CommandSigningContext.ANONYMOUS,
+                TaskChainer.immediate(Minecraft.getInstance()));
     }
 
     /**
@@ -140,9 +149,22 @@ public class ClientCommandSourceStack extends CommandSourceStack {
         return connection().getLevel();
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *                                       because the game isn't available on the client side
+     */
     @Override
     public TheGame theGame() {
-        return connection().getLevel().theGame();
+        throw new UnsupportedOperationException("Attempted to get the game in client command");
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     *                                       because the player list isn't available on the client side
+     */
+    @Override
+    public PlayerList playerList() {
+        throw new UnsupportedOperationException("Attempted to get player list in client command");
     }
 
     /**

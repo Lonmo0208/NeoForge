@@ -11,10 +11,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import java.lang.reflect.Field;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import net.minecraft.ChatFormatting;
@@ -24,7 +22,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.network.chat.ClickEvent;
@@ -32,8 +29,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.TheGame;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -44,27 +39,17 @@ import org.jetbrains.annotations.ApiStatus;
 
 public class ClientCommandHandler {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static CommandDispatcher<CommandSourceStack> commands = new CommandDispatcher<>();
+    private static CommandDispatcher<CommandSourceStack> commands = null;
 
     public static void init() {
         NeoForge.EVENT_BUS.addListener(ClientCommandHandler::handleClientPlayerLogin);
-        NeoForge.EVENT_BUS.addListener(ClientCommandHandler::registerClientCommands);
     }
 
     private static void handleClientPlayerLogin(ClientPlayerNetworkEvent.LoggingIn event) {
         final ClientPacketListener connection = event.getPlayer().connection;
         // Some custom server implementations do not send ClientboundCommandsPacket, so we provide a fallback:
         // Must set this, so that suggestions for client-only commands work, if server never sends commands packet
-        connection.commands = mergeServerCommands(new CommandDispatcher<>(), CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures()));// TODO: -C
-    }
-
-    private static void registerClientCommands(RegisterClientCommandsEvent event) {
-        event.getDispatcher().register(
-                Commands.literal("example")
-                        .executes(ctx -> {
-                            ctx.getSource().sendSuccess(() -> Component.literal("Client command executed!"), false);
-                            return 1;
-                        }));
+        connection.commands = mergeServerCommands(new CommandDispatcher<>(), CommandBuildContext.simple(connection.registryAccess(), connection.enabledFeatures()));
     }
 
     /*
@@ -88,29 +73,24 @@ public class ClientCommandHandler {
         copy(serverCommandsRoot, newServerCommands.getRoot());
 
         // Copies the client side commands into the server side commands to be used for suggestions
-        CommandHelper.mergeCommandNode(
-                commands.getRoot(),
-                newServerCommands.getRoot(),
-                new IdentityHashMap<>(),
-                getSource(),
-                context -> 0,
-                suggestions -> {
-                    SuggestionProvider<SharedSuggestionProvider> provider = SuggestionProviders.safelySwap(
-                            (SuggestionProvider<SharedSuggestionProvider>) (SuggestionProvider<?>) suggestions);
-                    if (provider == SuggestionProviders.ASK_SERVER) {
-                        provider = (context, builder) -> {
-                            ClientCommandSourceStack source = getSource();
-                            if (source == null) return Suggestions.empty();
-
-                            StringReader reader = new StringReader(context.getInput());
-                            if (reader.canRead() && reader.peek() == '/') reader.skip();
-
-                            ParseResults<CommandSourceStack> parse = commands.parse(reader, source);
-                            return commands.getCompletionSuggestions(parse);
-                        };
+        CommandHelper.mergeCommandNode(commands.getRoot(), newServerCommands.getRoot(), new IdentityHashMap<>(), getSource(), (context) -> 0, (suggestions) -> {
+            SuggestionProvider<SharedSuggestionProvider> suggestionProvider = SuggestionProviders
+                    .safelySwap((SuggestionProvider<SharedSuggestionProvider>) (SuggestionProvider<?>) suggestions);
+            if (suggestionProvider == SuggestionProviders.ASK_SERVER) {
+                suggestionProvider = (context, builder) -> {
+                    ClientCommandSourceStack source = getSource();
+                    StringReader reader = new StringReader(context.getInput());
+                    if (reader.canRead() && reader.peek() == '/') {
+                        reader.skip();
                     }
-                    return provider;
-                });
+
+                    ParseResults<CommandSourceStack> parse = commands.parse(reader, source);
+                    return commands.getCompletionSuggestions(parse);
+                };
+            }
+            return suggestionProvider;
+        });
+
         return newServerCommands;
     }
 
@@ -126,29 +106,6 @@ public class ClientCommandHandler {
      */
     public static ClientCommandSourceStack getSource() {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return null;
-
-        ClientPacketListener connection = Minecraft.getInstance().getConnection();
-        if (connection == null) return null;
-
-        MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
-        if (server == null) return null;
-
-        TheGame theGame = null;
-        try {
-            Field theGameField = MinecraftServer.class.getDeclaredField("theGame");
-            theGameField.setAccessible(true);
-            theGame = (TheGame) theGameField.get(server);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            LOGGER.error("Failed to access theGame field via reflection", e);
-            return null;
-        }
-
-        if (theGame == null) {
-            LOGGER.warn("theGame is null in MinecraftServer");
-            return null;
-        }
-
         CommandSource commandSource = new CommandSource() {
             @Override
             public boolean acceptsSuccess() {
@@ -171,7 +128,7 @@ public class ClientCommandHandler {
             }
         };
         return new ClientCommandSourceStack(commandSource, player.position(), player.getRotationVector(), player.getPermissionLevel(),
-                player.getName().getString(), player.getDisplayName(), theGame, player);
+                player.getName().getString(), player.getDisplayName(), player);
     }
 
     /**
@@ -200,30 +157,24 @@ public class ClientCommandHandler {
     /**
      * Always try to execute the cached parsing of a typed command as a clientside command. Requires that the execute field of the commands to be set to send to server so that they aren't
      * treated as client command's that do nothing.
-     * <p>
+     *
      * {@link net.minecraft.commands.Commands#performCommand(ParseResults, String)} for reference
      *
      * @param command the full command to execute, no preceding slash
      * @return {@code false} leaves the message to be sent to the server, while {@code true} means it should be caught before LocalPlayer#sendCommand
      */
     public static boolean runCommand(String command) {
-        if (commands == null) {
-            LOGGER.error("Command dispatcher is not initialized!");
-            return false;
-        }
-
-        if (command == null || command.isEmpty()) return false;
+        StringReader reader = new StringReader(command);
 
         ClientCommandSourceStack source = getSource();
-        if (source == null) {
-            LOGGER.error("Failed to get command source");
-            return false;
-        }
 
-        StringReader reader = new StringReader(command);
         try {
             commands.execute(reader, source);
-        } catch (CommandSyntaxException syntax) {
+            //} catch (CommandRuntimeException execution)// Probably thrown by the command
+            //{
+            //    Minecraft.getInstance().player.sendSystemMessage(Component.literal("").append(execution.getComponent()).withStyle(ChatFormatting.RED));
+        } catch (CommandSyntaxException syntax)// Usually thrown by the CommandDispatcher
+        {
             if (syntax.getType() == CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand() || syntax.getType() == CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument()) {
                 // in case of unknown command, let the server try and handle it
                 return false;

@@ -84,14 +84,13 @@
          this.levelLoadStatusManager = new LevelLoadStatusManager(p_304688_, p_304528_, this.minecraft.levelRenderer, p_421417_);
          if (this.minecraft.screen instanceof ReceivingLevelScreen receivinglevelscreen) {
              receivinglevelscreen.updateScreen(this.levelLoadStatusManager::levelReady, p_341690_);
-@@ -1632,7 +_,9 @@
+@@ -1632,7 +_,8 @@
      @Override
      public void handleCommands(ClientboundCommandsPacket p_104990_) {
          PacketUtils.ensureRunningOnSameThread(p_104990_, this, this.minecraft);
 -        this.commands = new CommandDispatcher<>(p_104990_.getRoot(CommandBuildContext.simple(this.registryAccess, this.enabledFeatures)));
 +        var context = CommandBuildContext.simple(this.registryAccess, this.enabledFeatures);
-+        this.commands = new CommandDispatcher<>(p_104990_.getRoot(context));
-+        //this.commands = net.neoforged.neoforge.client.ClientCommandHandler.mergeServerCommands(this.commands, context); TODO: -C
++        this.commands = net.neoforged.neoforge.client.ClientCommandHandler.mergeServerCommands(new CommandDispatcher<>(p_104990_.getRoot(context)), context);
      }
  
      @Override
