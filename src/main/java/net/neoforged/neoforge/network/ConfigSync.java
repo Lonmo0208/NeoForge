@@ -43,8 +43,13 @@ public final class ConfigSync {
     private ConfigSync() {}
 
     public static void syncAllConfigs(ServerConfigurationPacketListener listener) {
+        var connection = listener.getConnection();
+        if (connection.isMemoryConnection()) {
+            return; // Do not sync server configs with ourselves
+        }
+
         synchronized (lock) {
-            configsToSync.put(listener.getConnection(), new LinkedHashMap<>());
+            configsToSync.put(connection, new LinkedHashMap<>());
         }
 
         final Map<String, byte[]> configData = ModConfigs.getConfigSet(ModConfig.Type.SERVER).stream().collect(Collectors.toMap(ModConfig::getFileName, mc -> {
@@ -78,9 +83,13 @@ public final class ConfigSync {
                         return;
                     }
 
+                    var configFormat = loadedConfig.config().configFormat();
+                    if (configFormat.isInMemory()) {
+                        return; // An in-memory format indicates that we received this config from a server and shouldn't try to sync it
+                    }
+
                     // Write config bytes and queue for syncing to all connected players.
-                    // This is harmless client-side, as the configsToSync map is either empty or full of stale connections.
-                    var bytes = loadedConfig.config().configFormat().createWriter().writeToString(loadedConfig.config()).getBytes(StandardCharsets.UTF_8);
+                    var bytes = configFormat.createWriter().writeToString(loadedConfig.config()).getBytes(StandardCharsets.UTF_8);
                     synchronized (lock) {
                         for (var toSync : configsToSync.values()) {
                             toSync.put(config.getFileName(), bytes);
@@ -94,6 +103,14 @@ public final class ConfigSync {
     public static void syncPendingConfigs(MinecraftServer server) {
         synchronized (lock) {
             for (var player : server.getPlayerList().getPlayers()) {
+                if (!player.connection.hasChannel(ConfigFilePayload.TYPE)) {
+                    continue; // Only sync configs to NeoForge clients supporting config sync
+                }
+
+                if (player.connection.getConnection().isMemoryConnection()) {
+                    continue; // Do not sync server configs with ourselves
+                }
+
                 var toSync = configsToSync.get(player.connection.getConnection());
                 if (toSync == null) {
                     // null for GameTestPlayer. Should not happen for normal players though.
