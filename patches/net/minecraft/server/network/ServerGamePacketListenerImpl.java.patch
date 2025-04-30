@@ -136,16 +136,15 @@
          if (this.player.isModelPartShown(PlayerModelPart.HAT) != flag) {
              this.theGame.playerList().broadcastAll(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_HAT, this.player));
          }
-@@ -2055,8 +_,7 @@
+@@ -2055,7 +_,7 @@
              this.connection
                  .setupInboundProtocol(
                      ConfigurationProtocols.SERVERBOUND,
 -                    new ServerHibernateConfigPacketListenerImpl(this.connection, this.createCookie(this.player.clientInformation()), this.theGame.eventLoop())
--                );
-+                        new ServerConfigurationPacketListenerImpl(this.theGame, this.connection, this.createCookie(this.player.clientInformation(), this.connectionType)));
++                    new ServerConfigurationPacketListenerImpl(this.theGame, this.connection, this.createCookie(this.player.clientInformation(), this.connectionType))
+                 );
          }
      }
- 
 @@ -2090,6 +_,7 @@
  
      @Override

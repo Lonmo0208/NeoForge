@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
  * <h3>Querying a block capability</h3>
  * <p>To get an object of type {@code T}, use {@link Level#getCapability(BlockCapability, BlockPos, Object)}.
  * For example, to query an item handler in the world, from a specific side:
- * 
+ *
  * <pre>{@code
  * Level level = ...;
  * BlockPos pos = ...;
@@ -37,12 +37,12 @@ import org.jetbrains.annotations.Nullable;
  *     // Use maybeHandler
  * }
  * }</pre>
- * 
+ *
  * <p>For repeated queries at a specific position, use {@link BlockCapabilityCache} to improve performance.
  *
  * <h3>Providing a capability for a block entity</h3>
  * <p>To provide objects of type {@code T}, register providers to {@link RegisterCapabilitiesEvent}. For example:
- * 
+ *
  * <pre>{@code
  * modBus.addListener(RegisterCapabilitiesEvent.class, event -> {
  *     event.registerBlockEntity(
@@ -51,7 +51,7 @@ import org.jetbrains.annotations.Nullable;
  *         (myBlockEntity, side) -> <return the IItemHandler for myBlockEntity and side>);
  * });
  * }</pre>
- * 
+ *
  * <p><b>If a previously returned capability is not valid anymore, or if a new capability is available,
  * {@link Level#invalidateCapabilities(BlockPos)} MUST be called to notify the caches (see below).</b>
  *
@@ -142,25 +142,25 @@ public final class BlockCapability<T, C extends @Nullable Object> extends BaseCa
         return registry.getAll().stream().filter(BlockCapability::isProxyable).toList();
     }
 
-/**
- * Returns whether this capability is proxyable.
- * This information is metadata: it does not change how the capability works internally,
- * but it tells mods whether they should or should not register proxying capability providers.
- *
- * <p>If the capability is proxyable, requests for this capability are safe to forward unilaterally to other blocks.
- *
- * <p>If the capability is not proxyable, requests for this capability should not be forwarded to other blocks without further information.
- * In that case, refer to documentation of the capability to understand under which circumstances it is safe to forward, if at all.
- * For this reason, mods that forward "all" capabilities should not forward non-proxyable capabilities.
- *
- * <p>Block capabilities are not proxyable by default.
- * Any call to {@link RegisterCapabilitiesEvent#setProxyable(BlockCapability)} will mark the capability as proxyable.
- * Any call to {@link RegisterCapabilitiesEvent#setNonProxyable(BlockCapability)} will mark the capability as non-proxyable,
- * and prevent it from being marked as proxyable.
- */
-public boolean isProxyable() {
-    return proxyable.isTrue();
-}
+    /**
+     * Returns whether this capability is proxyable.
+     * This information is metadata: it does not change how the capability works internally,
+     * but it tells mods whether they should or should not register proxying capability providers.
+     *
+     * <p>If the capability is proxyable, requests for this capability are safe to forward unilaterally to other blocks.
+     *
+     * <p>If the capability is not proxyable, requests for this capability should not be forwarded to other blocks without further information.
+     * In that case, refer to documentation of the capability to understand under which circumstances it is safe to forward, if at all.
+     * For this reason, mods that forward "all" capabilities should not forward non-proxyable capabilities.
+     *
+     * <p>Block capabilities are not proxyable by default.
+     * Any call to {@link RegisterCapabilitiesEvent#setProxyable(BlockCapability)} will mark the capability as proxyable.
+     * Any call to {@link RegisterCapabilitiesEvent#setNonProxyable(BlockCapability)} will mark the capability as non-proxyable,
+     * and prevent it from being marked as proxyable.
+     */
+    public boolean isProxyable() {
+        return proxyable.isTrue();
+    }
     // INTERNAL
 
     // Requires explicitly-typed constructor due to ECJ inference failure.

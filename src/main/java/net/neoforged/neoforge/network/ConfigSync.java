@@ -15,8 +15,6 @@ import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ConfigTracker;
 import net.neoforged.fml.config.ModConfig;
@@ -99,7 +97,6 @@ public final class ConfigSync {
             }
         }
     }
-
 
     public static void receiveSyncedConfig(final byte[] contents, final String fileName) {
         Optional.ofNullable(ModConfigs.getFileMap().get(fileName)).ifPresent(mc -> ConfigTracker.acceptSyncedConfig(mc, contents));
