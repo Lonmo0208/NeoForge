@@ -7,7 +7,7 @@
 +
 +    @Override
 +    public Connection getConnection() {
-+        return null;
++        return this.connection;
 +    }
 +
 +    @Override
