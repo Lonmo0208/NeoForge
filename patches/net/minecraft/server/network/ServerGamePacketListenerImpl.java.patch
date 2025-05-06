@@ -141,7 +141,7 @@
                  .setupInboundProtocol(
                      ConfigurationProtocols.SERVERBOUND,
 -                    new ServerHibernateConfigPacketListenerImpl(this.connection, this.createCookie(this.player.clientInformation()), this.theGame.eventLoop())
-+                    new ServerConfigurationPacketListenerImpl(this.theGame, this.connection, this.createCookie(this.player.clientInformation(), this.connectionType))
++                    new ServerHibernateConfigPacketListenerImpl(this.connection, this.createCookie(this.player.clientInformation(),this.getConnectionType()), this.theGame.eventLoop())
                  );
          }
      }

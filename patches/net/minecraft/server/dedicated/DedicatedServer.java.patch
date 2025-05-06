@@ -37,7 +37,7 @@
          if (dedicatedserverproperties.announcePlayerAchievements != null) {
              thegame.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(dedicatedserverproperties.announcePlayerAchievements, thegame);
          }
-@@ -281,6 +_,13 @@
+@@ -281,6 +_,10 @@
          if (this.queryThreadGs4 != null) {
              this.queryThreadGs4.stop();
          }
@@ -45,9 +45,6 @@
 +            this.dediLanPinger.interrupt();
 +            this.dediLanPinger = null;
 +        }
-+
-+        // Neo: Forcibly stop the FileWatcher default instance, to prevent it from blocking normal JVM exit; see #1626
-+        com.electronwill.nightconfig.core.file.FileWatcher.defaultInstance().stop();
      }
  
      @Override

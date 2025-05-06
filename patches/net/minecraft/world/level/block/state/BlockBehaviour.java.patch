@@ -55,6 +55,28 @@
      public abstract static class BlockStateBase extends StateHolder<Block, BlockState> {
          private static final Direction[] DIRECTIONS = Direction.values();
          private static final VoxelShape[] EMPTY_OCCLUSION_SHAPES = Util.make(
+@@ -500,6 +_,7 @@
+             this.legacySolid = this.calculateSolid();
+             this.occlusionShape = this.canOcclude ? this.owner.getOcclusionShape(this.asState()) : Shapes.empty();
+             this.solidRender = Block.isShapeFullBlock(this.occlusionShape);
++
+             if (this.occlusionShape.isEmpty()) {
+                 this.occlusionShapesByFace = EMPTY_OCCLUSION_SHAPES;
+             } else if (this.solidRender) {
+@@ -508,7 +_,12 @@
+                 this.occlusionShapesByFace = new VoxelShape[DIRECTIONS.length];
+ 
+                 for (Direction direction : DIRECTIONS) {
+-                    this.occlusionShapesByFace[direction.ordinal()] = this.occlusionShape.getFaceShape(direction);
++                    // Neo: properly intern full-cube face shapes generated from shapes with multiple boxes
++                    VoxelShape faceOcclusionShape = this.occlusionShape.getFaceShape(direction);
++                    if (faceOcclusionShape != Shapes.block() && Block.isShapeFullBlock(faceOcclusionShape)) {
++                        faceOcclusionShape = Shapes.block();
++                    }
++                    this.occlusionShapesByFace[direction.ordinal()] = faceOcclusionShape;
+                 }
+             }
+ 
 @@ -563,12 +_,14 @@
              return this.useShapeForLightOcclusion;
          }
