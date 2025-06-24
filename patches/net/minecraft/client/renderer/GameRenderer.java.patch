@@ -5,14 +5,20 @@
              this.guiRenderState,
              multibuffersource$buffersource,
 -            List.of(
-+            net.neoforged.neoforge.client.ClientHooks.gatherPictureInPictureRenderers(multibuffersource$buffersource, List.of(
-                 new GuiEntityRenderer(multibuffersource$buffersource, p_234219_.getEntityRenderDispatcher()),
-                 new GuiSkinRenderer(multibuffersource$buffersource),
-                 new GuiBookModelRenderer(multibuffersource$buffersource),
-                 new GuiBannerResultRenderer(multibuffersource$buffersource),
-                 new GuiSignRenderer(multibuffersource$buffersource),
-                 new GuiProfilerChartRenderer(multibuffersource$buffersource)
+-                new GuiEntityRenderer(multibuffersource$buffersource, p_234219_.getEntityRenderDispatcher()),
+-                new GuiSkinRenderer(multibuffersource$buffersource),
+-                new GuiBookModelRenderer(multibuffersource$buffersource),
+-                new GuiBannerResultRenderer(multibuffersource$buffersource),
+-                new GuiSignRenderer(multibuffersource$buffersource),
+-                new GuiProfilerChartRenderer(multibuffersource$buffersource)
 -            )
++            net.neoforged.neoforge.client.ClientHooks.gatherPictureInPictureRenderers(List.of(
++                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiEntityRenderState.class, buffers -> new GuiEntityRenderer(buffers, p_234219_.getEntityRenderDispatcher())),
++                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiSkinRenderState.class, GuiSkinRenderer::new),
++                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiBookModelRenderState.class, GuiBookModelRenderer::new),
++                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiBannerResultRenderState.class, GuiBannerResultRenderer::new),
++                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiSignRenderState.class, GuiSignRenderer::new),
++                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiProfilerChartRenderState.class, GuiProfilerChartRenderer::new)
 +            ))
          );
          this.screenEffectRenderer = new ScreenEffectRenderer(p_234219_, multibuffersource$buffersource);
