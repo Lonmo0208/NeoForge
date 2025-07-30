@@ -1,11 +1,39 @@
 --- a/net/minecraft/world/entity/ai/village/poi/PoiType.java
 +++ b/net/minecraft/world/entity/ai/village/poi/PoiType.java
-@@ -9,7 +_,7 @@
+@@ -7,12 +_,35 @@
+ 
+ public record PoiType(Set<BlockState> matchingStates, int maxTickets, int validRange) {
      public static final Predicate<Holder<PoiType>> NONE = p_218041_ -> false;
++    private static final boolean USE_NEOFORGE = checkNeoForge();
++
++    private static boolean checkNeoForge() {
++        try {
++            Class.forName("net.neoforged.neoforge.common.world.poi.PoiStateSet");
++            return true;
++        } catch (ClassNotFoundException e) {
++            return false;
++        }
++    }
  
      public PoiType(Set<BlockState> matchingStates, int maxTickets, int validRange) {
 -        matchingStates = Set.copyOf(matchingStates);
-+        matchingStates = new net.neoforged.neoforge.common.world.poi.PoiStateSet(matchingStates);
++        if (USE_NEOFORGE) {
++            matchingStates = initNeoForgeStateSet(matchingStates);
++        } else {
++            matchingStates = Set.copyOf(matchingStates);
++        }
          this.matchingStates = matchingStates;
          this.maxTickets = maxTickets;
          this.validRange = validRange;
++    }
++
++    private static Set<BlockState> initNeoForgeStateSet(Set<BlockState> states) {
++        try {
++            Class<?> clazz = Class.forName("net.neoforged.neoforge.common.world.poi.PoiStateSet");
++            return (Set<BlockState>) clazz.getConstructor(Set.class).newInstance(states);
++        } catch (ReflectiveOperationException e) {
++            throw new RuntimeException("Failed to initialize NeoForge PoiStateSet", e);
++        }
+     }
+ 
+     public boolean is(BlockState p_148693_) {
