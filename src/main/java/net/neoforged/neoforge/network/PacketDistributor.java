@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -76,7 +77,7 @@ public final class PacketDistributor {
         if (entity.level().isClientSide()) {
             throw new IllegalStateException("Cannot send clientbound payloads on the client");
         } else if (entity.level().getChunkSource() instanceof ServerChunkCache chunkCache) {
-            chunkCache.broadcast(entity, makeClientboundPacket(payload, payloads));
+            chunkCache.sendToTrackingPlayers(entity, makeClientboundPacket(payload, payloads));
         }
         // Silently ignore custom Level implementations which may not return ServerChunkCache.
     }
@@ -88,7 +89,7 @@ public final class PacketDistributor {
         if (entity.level().isClientSide()) {
             throw new IllegalStateException("Cannot send clientbound payloads on the client");
         } else if (entity.level().getChunkSource() instanceof ServerChunkCache chunkCache) {
-            chunkCache.broadcastAndSend(entity, makeClientboundPacket(payload, payloads));
+            chunkCache.sendToTrackingPlayersAndSelf(entity, makeClientboundPacket(payload, payloads));
         }
         // Silently ignore custom Level implementations which may not return ServerChunkCache.
     }
@@ -103,7 +104,7 @@ public final class PacketDistributor {
         }
     }
 
-    private static Packet<?> makeClientboundPacket(CustomPacketPayload payload, CustomPacketPayload... payloads) {
+    private static Packet<? super ClientGamePacketListener> makeClientboundPacket(CustomPacketPayload payload, CustomPacketPayload... payloads) {
         Objects.requireNonNull(payload, "Cannot send null payload");
         if (payloads.length > 0) {
             final List<Packet<? super ClientGamePacketListener>> packets = new ArrayList<>();

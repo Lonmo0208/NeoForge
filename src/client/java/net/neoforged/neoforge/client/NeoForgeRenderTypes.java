@@ -29,8 +29,7 @@ public enum NeoForgeRenderTypes {
     ITEM_LAYERED_TRANSLUCENT(() -> getItemLayeredTranslucent(TextureAtlas.LOCATION_BLOCKS)),
     ITEM_UNSORTED_TRANSLUCENT(() -> getUnsortedTranslucent(TextureAtlas.LOCATION_BLOCKS)),
     ITEM_UNLIT_TRANSLUCENT(() -> getUnlitTranslucent(TextureAtlas.LOCATION_BLOCKS)),
-    ITEM_UNSORTED_UNLIT_TRANSLUCENT(() -> getUnlitTranslucent(TextureAtlas.LOCATION_BLOCKS, false)),
-    TRANSLUCENT_ON_PARTICLES_TARGET(() -> getTranslucentParticlesTarget(TextureAtlas.LOCATION_BLOCKS));
+    ITEM_UNSORTED_UNLIT_TRANSLUCENT(() -> getUnlitTranslucent(TextureAtlas.LOCATION_BLOCKS, false));
 
     /**
      * @return A RenderType fit for multi-layer solid item rendering.
@@ -131,13 +130,6 @@ public enum NeoForgeRenderTypes {
      */
     public static RenderType getTextIntensitySeeThroughFiltered(ResourceLocation locationIn) {
         return Internal.TEXT_INTENSITY_SEETHROUGH_FILTERED.apply(locationIn);
-    }
-
-    /**
-     * @return A variation of {@link RenderType#translucent()} that uses {@link OutputStateShard#PARTICLES_TARGET} to allow fabulous transparency sorting when using {@link RenderLevelStageEvent}
-     */
-    public static RenderType getTranslucentParticlesTarget(ResourceLocation locationIn) {
-        return Internal.TRANSLUCENT_PARTICLES_TARGET.apply(locationIn);
     }
 
     // ----------------------------------------
@@ -288,17 +280,6 @@ public enum NeoForgeRenderTypes {
                     .setLightmapState(RenderType.LIGHTMAP)
                     .createCompositeState(false);
             return RenderType.create("neoforge_text_intensity_see_through", 256, false, false, RenderPipelines.TEXT_INTENSITY_SEE_THROUGH, rendertype$state);
-        }
-
-        public static Function<ResourceLocation, RenderType> TRANSLUCENT_PARTICLES_TARGET = Util.memoize(Internal::getTranslucentParticlesTarget);
-
-        private static RenderType getTranslucentParticlesTarget(ResourceLocation locationIn) {
-            var rendertype$state = RenderType.CompositeState.builder()
-                    .setTextureState(new RenderStateShard.TextureStateShard(locationIn, true))
-                    .setLightmapState(RenderType.LIGHTMAP)
-                    .setOutputState(RenderType.PARTICLES_TARGET)
-                    .createCompositeState(true);
-            return RenderType.create("neoforge_translucent_particles_target", 2097152, true, true, RenderPipelines.TRANSLUCENT, rendertype$state);
         }
 
         private static final class LinearFilteredTexturing extends RenderStateShard.TexturingStateShard {

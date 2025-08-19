@@ -104,7 +104,7 @@ public class NeoForgeEventHandler {
 
     @SubscribeEvent
     public void playerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        UsernameCache.setUsername(event.getEntity().getUUID(), event.getEntity().getGameProfile().getName());
+        UsernameCache.setUsername(event.getEntity().getUUID(), event.getEntity().getGameProfile().name());
     }
 
     @SubscribeEvent

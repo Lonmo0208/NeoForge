@@ -5,7 +5,6 @@
 
 package net.neoforged.neoforge.client;
 
-import java.util.Optional;
 import net.minecraft.DetectedVersion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BiomeColors;
@@ -123,10 +122,9 @@ public class ClientNeoForgeMod {
         // having to juggle two generated resources folders and two runs for no additional benefit.
 
         event.createProvider(output -> new PackMetadataGenerator(output)
-                .add(PackMetadataSection.TYPE, new PackMetadataSection(
+                .add(PackMetadataSection.SERVER_TYPE, new PackMetadataSection(
                         Component.translatable("pack.neoforge.description"),
-                        DetectedVersion.BUILT_IN.packVersion(PackType.SERVER_DATA),
-                        Optional.of(new InclusiveRange<>(0, Integer.MAX_VALUE)))));
+                        new InclusiveRange<>(DetectedVersion.BUILT_IN.packVersion(PackType.SERVER_DATA)))));
 
         event.createProvider(NeoForgeAdvancementProvider::new);
         event.createBlockAndItemTags(NeoForgeBlockTagsProvider::new, NeoForgeItemTagsProvider::new);

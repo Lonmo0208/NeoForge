@@ -30,8 +30,8 @@
                  }
 @@ -443,7 +_,7 @@
      @Override
-     public boolean killedEntity(ServerLevel p_219160_, LivingEntity p_219161_) {
-         boolean flag = super.killedEntity(p_219160_, p_219161_);
+     public boolean killedEntity(ServerLevel p_219160_, LivingEntity p_219161_, DamageSource p_432761_) {
+         boolean flag = super.killedEntity(p_219160_, p_219161_, p_432761_);
 -        if ((p_219160_.getDifficulty() == Difficulty.NORMAL || p_219160_.getDifficulty() == Difficulty.HARD) && p_219161_ instanceof Villager villager) {
 +        if ((p_219160_.getDifficulty() == Difficulty.NORMAL || p_219160_.getDifficulty() == Difficulty.HARD) && p_219161_ instanceof Villager villager && net.neoforged.neoforge.event.EventHooks.canLivingConvert(p_219161_, EntityType.ZOMBIE_VILLAGER, (timer) -> {})) {
              if (p_219160_.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {

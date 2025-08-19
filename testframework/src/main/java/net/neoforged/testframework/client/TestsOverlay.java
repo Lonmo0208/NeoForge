@@ -190,7 +190,7 @@ public final class TestsOverlay implements GuiLayer {
         rendering.add(withXY(x, y, (x$, y$) -> graphics.drawString(font, title, x$, y$, colour)));
 
         final List<Component> extras = new ArrayList<>();
-        if (Screen.hasShiftDown()) extras.addAll(test.visuals().description());
+        if (Minecraft.getInstance().hasShiftDown()) extras.addAll(test.visuals().description());
         if (status.result() != Test.Result.PASSED && !status.message().isBlank()) {
             extras.add(Component.literal("!!! " + status.message()).withStyle(ChatFormatting.RED));
         }

@@ -531,7 +531,7 @@ public class FluidUtil {
      * @param pos   the location that the fluid will be placed
      */
     public static void destroyBlockOnFluidPlacement(Level level, BlockPos pos) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             BlockState destBlockState = level.getBlockState(pos);
             boolean isDestNonSolid = !destBlockState.isSolid();
             boolean isDestReplaceable = false; //TODO: Needs BlockItemUseContext destBlockState.canBeReplaced(context);

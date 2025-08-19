@@ -74,7 +74,7 @@ public class ClientModLoader extends CommonModLoader {
      * <p>
      * It is used as the entrypoint for client mod loading, which starts when {@link Minecraft} triggers the first resource reload.
      */
-    public static CompletableFuture<Void> onResourceReload(final PreparableReloadListener.PreparationBarrier stage, final ResourceManager resourceManager, final Executor asyncExecutor, final Executor syncExecutor) {
+    public static CompletableFuture<Void> onResourceReload(PreparableReloadListener.SharedState sharedState, Executor asyncExecutor, PreparableReloadListener.PreparationBarrier stage, Executor syncExecutor) {
         return CompletableFuture.runAsync(() -> startModLoading(syncExecutor, asyncExecutor), ModWorkManager.parallelExecutor())
                 .thenCompose(stage::wait)
                 .thenRunAsync(() -> finishModLoading(syncExecutor, asyncExecutor), ModWorkManager.parallelExecutor());

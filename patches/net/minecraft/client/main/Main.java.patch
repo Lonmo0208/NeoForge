@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/main/Main.java
 +++ b/net/minecraft/client/main/Main.java
-@@ -123,10 +_,12 @@
+@@ -116,10 +_,12 @@
              CrashReport.preload();
              logger = LogUtils.getLogger();
              s1 = "Bootstrap";
@@ -13,5 +13,5 @@
 +            net.neoforged.neoforge.client.loading.ClientModLoader.begin(); // Mirroring server mod-loading, we construct immediately after Bootstrap.validate()
 +
              s1 = "Argument parsing";
-             List<String> list = optionset.valuesOf(optionspec30);
+             List<String> list = optionset.valuesOf(optionspec28);
              if (!list.isEmpty()) {

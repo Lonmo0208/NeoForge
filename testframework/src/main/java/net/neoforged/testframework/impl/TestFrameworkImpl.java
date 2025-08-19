@@ -319,7 +319,7 @@ public class TestFrameworkImpl implements MutableTestFramework {
 
         BiConsumer<String, Object[]> logger = newStatus.result() == Test.Result.FAILED ? this.logger::error : this.logger::info;
 
-        logger.accept("Test '{}' has had status changed to {}{}.", new Object[] { test.id(), newStatus, changer instanceof Player player ? " by " + player.getGameProfile().getName() : "" });
+        logger.accept("Test '{}' has had status changed to {}{}.", new Object[] { test.id(), newStatus, changer instanceof Player player ? " by " + player.getGameProfile().name() : "" });
 
         if (server == null && !inClientWorld) return;
 
@@ -340,7 +340,7 @@ public class TestFrameworkImpl implements MutableTestFramework {
             tests.disable(test.id());
         }
 
-        logger.info("Test '{}' has been {}{}.", test.id(), enabled ? "enabled" : "disabled", changer instanceof Player player ? " by " + player.getGameProfile().getName() : "");
+        logger.info("Test '{}' has been {}{}.", test.id(), enabled ? "enabled" : "disabled", changer instanceof Player player ? " by " + player.getGameProfile().name() : "");
 
         if (enabled) {
             changeStatus(test, Test.Status.DEFAULT, changer);

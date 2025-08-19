@@ -31,7 +31,7 @@ import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -145,14 +145,14 @@ public class DynamicFluidContainerModel implements ItemModel {
     }
 
     @Override
-    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver modelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable LivingEntity entity, int p_387820_) {
+    public void update(ItemStackRenderState renderState, ItemStack stack, ItemModelResolver modelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel level, @Nullable ItemOwner owner, int seed) {
         var fluid = FluidUtil.getFluidContained(stack)
                 .map(FluidStack::getFluid)
                 // not a fluid item apparently
                 .orElse(unbakedModel.fluid);
 
         cache.computeIfAbsent(fluid, this::bakeModelForFluid)
-                .update(renderState, stack, modelResolver, displayContext, level, entity, p_387820_);
+                .update(renderState, stack, modelResolver, displayContext, level, owner, seed);
     }
 
     public record Textures(

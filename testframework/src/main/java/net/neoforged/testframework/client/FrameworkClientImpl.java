@@ -34,11 +34,12 @@ public class FrameworkClientImpl implements FrameworkClient {
 
     @Override
     public void init(IEventBus modBus, ModContainer container) {
-        final String keyCategory = "key.categories." + impl.id().getNamespace() + "." + impl.id().getPath();
+        // TODO Porting: make KeyMapping.Category extensible or get mojang to make it not an enum
+        final KeyMapping.Category keyCategory = KeyMapping.Category.MISC;//"key.categories." + impl.id().getNamespace() + "." + impl.id().getPath();
 
         final BooleanSupplier overlayEnabled;
         if (configuration.toggleOverlayKey() != 0) {
-            final ToggleKeyMapping overlayKey = new ToggleKeyMapping("key.testframework.toggleoverlay", configuration.toggleOverlayKey(), keyCategory, () -> true);
+            final ToggleKeyMapping overlayKey = new ToggleKeyMapping("key.testframework.toggleoverlay", configuration.toggleOverlayKey(), keyCategory, () -> true, true);
             modBus.addListener((final RegisterKeyMappingsEvent event) -> event.register(overlayKey));
             overlayEnabled = () -> !overlayKey.isDown();
         } else {

@@ -64,8 +64,8 @@ public class ClientTests {
         // these are two separate keys to stand in for keys added by different
         // mods that each do something similar with a held item from the
         // respective mod, so the user wants them on the same physical key.
-        final KeyMapping stickKey = new KeyMapping("stick_key", InputConstants.KEY_BACKSLASH, KeyMapping.CATEGORY_MISC);
-        final KeyMapping rockKey = new KeyMapping("rock_key", InputConstants.KEY_BACKSLASH, KeyMapping.CATEGORY_MISC);
+        final KeyMapping stickKey = new KeyMapping("stick_key", InputConstants.KEY_BACKSLASH, KeyMapping.Category.MISC);
+        final KeyMapping rockKey = new KeyMapping("rock_key", InputConstants.KEY_BACKSLASH, KeyMapping.Category.MISC);
 
         test.registrationHelper().clientProvider(LanguageProvider.class, lang -> {
             lang.add(stickKey.getName(), "Stick key");

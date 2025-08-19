@@ -74,11 +74,11 @@ public class NewFluidTest {
     public static DeferredHolder<Fluid, FlowingFluid> test_fluid = FLUIDS.register("test_fluid", () -> new BaseFlowingFluid.Source(makeProperties()));
     public static DeferredHolder<Fluid, FlowingFluid> test_fluid_flowing = FLUIDS.register("test_fluid_flowing", () -> new BaseFlowingFluid.Flowing(makeProperties()));
 
-    public static DeferredBlock<LiquidBlock> test_fluid_block = BLOCKS.register("test_fluid_block", () -> new LiquidBlock(test_fluid.value(), Properties.of().noCollission().strength(100.0F).noLootTable()));
+    public static DeferredBlock<LiquidBlock> test_fluid_block = BLOCKS.register("test_fluid_block", () -> new LiquidBlock(test_fluid.value(), Properties.of().noCollision().strength(100.0F).noLootTable()));
     public static DeferredItem<Item> TEST_FLUID_BUCKET = ITEMS.register("test_fluid_bucket", () -> new BucketItem(test_fluid.value(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
 
     // WARNING: this doesn't allow "any fluid", only the fluid from this test mod!
-    public static DeferredBlock<Block> fluidloggable_block = BLOCKS.register("fluidloggable_block", () -> new FluidloggableBlock(Properties.of().mapColor(MapColor.WOOD).noCollission().strength(100.0F).noLootTable()));
+    public static DeferredBlock<Block> fluidloggable_block = BLOCKS.register("fluidloggable_block", () -> new FluidloggableBlock(Properties.of().mapColor(MapColor.WOOD).noCollision().strength(100.0F).noLootTable()));
     public static DeferredItem<Item> FLUID_LOGGABLE_BLOCK_ITEM = ITEMS.register("fluidloggable_block", () -> new BlockItem(fluidloggable_block.get(), new Item.Properties()));
 
     public NewFluidTest(IEventBus modEventBus) {

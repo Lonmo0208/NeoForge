@@ -8,10 +8,8 @@ package net.neoforged.neoforge.client.event;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import net.minecraft.client.gui.GuiSpriteManager;
 import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.TextureAtlasHolder;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
@@ -29,7 +27,7 @@ import org.jetbrains.annotations.ApiStatus.Internal;
  * It is important to note that this event only affects texture atlases using {@link SpriteLoader#DEFAULT_METADATA_SECTIONS}, which includes:
  * <ul>
  * <li>all vanilla atlases in {@link ModelManager#VANILLA_ATLASES};</li>
- * <li>modded atlases using {@link RegisterMaterialAtlasesEvent};</li>
+ * <li>modded atlases using {@link RegisterTextureAtlasesEvent};</li>
  * <li>vanilla and modded atlases using {@link TextureAtlasHolder#TextureAtlasHolder(TextureManager, ResourceLocation, ResourceLocation)}; and</li>
  * <li>those using {@link SpriteLoader#loadAndStitch(ResourceManager, ResourceLocation, int, Executor)} directly.</li>
  * </ul>
@@ -43,6 +41,7 @@ import org.jetbrains.annotations.ApiStatus.Internal;
  *
  * <p>This event is fired on the mod-specific event bus, only on the {@linkplain LogicalSide#CLIENT logical client}.</p>
  */
+// FIXME - porting: the concept of global default metadata types no longer exists
 public class RegisterSpriteDefaultMetadataSectionTypesEvent extends Event implements IModBusEvent {
     private final Set<MetadataSectionType<?>> defaultTypes;
 

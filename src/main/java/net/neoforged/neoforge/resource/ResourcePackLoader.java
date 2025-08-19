@@ -8,6 +8,8 @@ package net.neoforged.neoforge.resource;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
+import net.minecraft.server.packs.metadata.pack.PackFormat;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.KnownPack;
 import net.minecraft.server.packs.repository.Pack;
@@ -144,12 +147,39 @@ public class ResourcePackLoader {
         packAcceptor.accept(makePack(packType, hiddenPacks));
     }
 
-    public static final MetadataSectionType<PackMetadataSection> OPTIONAL_FORMAT = new MetadataSectionType<>("pack", RecordCodecBuilder.create(
-            in -> in.group(
-                    ComponentSerialization.CODEC.optionalFieldOf("description", Component.empty()).forGetter(PackMetadataSection::description),
-                    Codec.INT.optionalFieldOf("pack_format", -1).forGetter(PackMetadataSection::packFormat),
-                    InclusiveRange.codec(Codec.INT).optionalFieldOf("supported_formats").forGetter(PackMetadataSection::supportedFormats))
-                    .apply(in, PackMetadataSection::new)));
+    private static final InclusiveRange<PackFormat> UNLIMITED_SUPPORT = new InclusiveRange<>(new PackFormat(0, 0), new PackFormat(Integer.MAX_VALUE, Integer.MAX_VALUE));
+    private static final MetadataSectionType<PackMetadataSection> OPTIONAL_CLIENT_FORMAT = new MetadataSectionType<>("pack", metadataCodecForPackType(PackType.CLIENT_RESOURCES));
+    private static final MetadataSectionType<PackMetadataSection> OPTIONAL_SERVER_FORMAT = new MetadataSectionType<>("pack", metadataCodecForPackType(PackType.SERVER_DATA));
+
+    private static Codec<PackMetadataSection> metadataCodecForPackType(PackType type) {
+        int lastPreMinor = PackFormat.lastPreMinorVersion(type);
+        MapCodec<InclusiveRange<PackFormat>> formatCodec = PackFormat.IntermediaryFormat.PACK_CODEC.flatXmap(
+                intermediary -> {
+                    if (intermediary.min().isEmpty() && intermediary.max().isEmpty() && intermediary.format().isEmpty() && intermediary.supported().isEmpty()) {
+                        return DataResult.success(UNLIMITED_SUPPORT);
+                    }
+                    return intermediary.validate(lastPreMinor, true, false, "Pack", "supported_formats");
+                },
+                range -> {
+                    if (range.equals(UNLIMITED_SUPPORT)) {
+                        return DataResult.success(new PackFormat.IntermediaryFormat(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+                    }
+                    return DataResult.success(PackFormat.IntermediaryFormat.fromRange(range, lastPreMinor));
+                }
+        );
+        return RecordCodecBuilder.create(
+                in -> in.group(
+                                ComponentSerialization.CODEC.optionalFieldOf("description", Component.empty()).forGetter(PackMetadataSection::description),
+                                formatCodec.forGetter(PackMetadataSection::supportedFormats))
+                        .apply(in, PackMetadataSection::new));
+    }
+
+    private static MetadataSectionType<PackMetadataSection> metadataTypeForPackType(PackType type) {
+        return switch (type) {
+            case CLIENT_RESOURCES -> OPTIONAL_CLIENT_FORMAT;
+            case SERVER_DATA -> OPTIONAL_SERVER_FORMAT;
+        };
+    }
 
     public static Pack readWithOptionalMeta(
             PackLocationInfo location,
@@ -161,19 +191,21 @@ public class ResourcePackLoader {
     }
 
     private static Pack.Metadata readMeta(PackType type, PackLocationInfo location, Pack.ResourcesSupplier resources) throws IOException {
-        final int currentVersion = SharedConstants.getCurrentVersion().packVersion(type);
+        final PackFormat currentVersion = SharedConstants.getCurrentVersion().packVersion(type);
         try (final PackResources primaryResources = resources.openPrimary(location)) {
-            final PackMetadataSection metadata = primaryResources.getMetadataSection(OPTIONAL_FORMAT);
+            final PackMetadataSection metadata = primaryResources.getMetadataSection(metadataTypeForPackType(type));
 
             final FeatureFlagSet flags = Optional.ofNullable(primaryResources.getMetadataSection(FeatureFlagsMetadataSection.TYPE))
                     .map(FeatureFlagsMetadataSection::flags)
                     .orElse(FeatureFlagSet.of());
 
-            final List<String> vanillaOverlays = Optional.ofNullable(primaryResources.getMetadataSection(OverlayMetadataSection.TYPE))
+            MetadataSectionType<OverlayMetadataSection> vanillaOverlayType = OverlayMetadataSection.forPackType(type);
+            final List<String> vanillaOverlays = Optional.ofNullable(primaryResources.getMetadataSection(vanillaOverlayType))
                     .map(section -> section.overlaysForVersion(currentVersion))
                     .orElse(List.of());
 
-            final List<String> neoOverlays = Optional.ofNullable(primaryResources.getMetadataSection(OverlayMetadataSection.NEOFORGE_TYPE))
+            MetadataSectionType<OverlayMetadataSection> neoOverlayType = OverlayMetadataSection.forPackTypeNeoForge(type);
+            final List<String> neoOverlays = Optional.ofNullable(primaryResources.getMetadataSection(neoOverlayType))
                     .map(section -> section.overlaysForVersion(currentVersion))
                     .orElse(List.of());
 
@@ -186,10 +218,10 @@ public class ResourcePackLoader {
             }
 
             final PackCompatibility compatibility;
-            if (metadata.packFormat() == -1 && metadata.supportedFormats().isEmpty()) {
+            if (metadata.supportedFormats().equals(UNLIMITED_SUPPORT)) {
                 compatibility = PackCompatibility.COMPATIBLE;
             } else {
-                compatibility = PackCompatibility.forVersion(Pack.getDeclaredPackVersions(location.id(), metadata), currentVersion);
+                compatibility = PackCompatibility.forVersion(metadata.supportedFormats(), currentVersion);
             }
             return new Pack.Metadata(metadata.description(), compatibility, flags, overlays, primaryResources.isHidden());
         }
@@ -202,7 +234,7 @@ public class ResourcePackLoader {
         return Pack.readMetaAndCreate(
                 new PackLocationInfo(id, Component.literal(name), PackSource.DEFAULT, Optional.empty()),
                 new EmptyPackResources.EmptyResourcesSupplier(new PackMetadataSection(Component.translatable(descriptionKey, hiddenPacks.size()),
-                        SharedConstants.getCurrentVersion().packVersion(packType))),
+                        new InclusiveRange<>(SharedConstants.getCurrentVersion().packVersion(packType)))),
                 packType,
                 new PackSelectionConfig(true, Pack.Position.TOP, false)).withChildren(hiddenPacks);
     }
