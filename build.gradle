@@ -11,12 +11,7 @@ plugins {
 
 ext.isPreReleaseVersion = project.minecraft_version.contains('w') || project.minecraft_version.contains('-')
 
-if (isPreReleaseVersion) {
-    project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.${project.minecraft_version}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
-} else {
-    project.version = gradleutils.version.toString()
-}
-
+project.version = project.neoforge_version
 // Print version, generally useful to know - also appears on CI
 System.out.println("NeoForge version ${project.version}")
 
