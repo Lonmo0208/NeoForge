@@ -165,12 +165,11 @@ public class ResourcePackLoader {
                         return DataResult.success(new PackFormat.IntermediaryFormat(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
                     }
                     return DataResult.success(PackFormat.IntermediaryFormat.fromRange(range, lastPreMinor));
-                }
-        );
+                });
         return RecordCodecBuilder.create(
                 in -> in.group(
-                                ComponentSerialization.CODEC.optionalFieldOf("description", Component.empty()).forGetter(PackMetadataSection::description),
-                                formatCodec.forGetter(PackMetadataSection::supportedFormats))
+                        ComponentSerialization.CODEC.optionalFieldOf("description", Component.empty()).forGetter(PackMetadataSection::description),
+                        formatCodec.forGetter(PackMetadataSection::supportedFormats))
                         .apply(in, PackMetadataSection::new));
     }
 

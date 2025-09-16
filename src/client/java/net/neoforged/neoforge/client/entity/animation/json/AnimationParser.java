@@ -184,15 +184,13 @@ public final class AnimationParser {
                         Codec.mapEither(
                                 Codec.mapPair(
                                         targetCodec(target).fieldOf("preTarget"),
-                                        targetCodec(target).fieldOf("postTarget")
-                                ),
-                                targetCodec(target).fieldOf("target")
-                        ).forGetter(keyframe -> {
-                            if (keyframe.preTarget().equals(keyframe.postTarget())) {
-                                return Either.right(keyframe.preTarget());
-                            }
-                            return Either.left(Pair.of(keyframe.preTarget(), keyframe.postTarget()));
-                        }),
+                                        targetCodec(target).fieldOf("postTarget")),
+                                targetCodec(target).fieldOf("target")).forGetter(keyframe -> {
+                                    if (keyframe.preTarget().equals(keyframe.postTarget())) {
+                                        return Either.right(keyframe.preTarget());
+                                    }
+                                    return Either.left(Pair.of(keyframe.preTarget(), keyframe.postTarget()));
+                                }),
                         INTERPOLATION_CODEC.fieldOf("interpolation").forGetter(Keyframe::interpolation)).apply(instance, AnimationParser::constructKeyframe));
     }
 

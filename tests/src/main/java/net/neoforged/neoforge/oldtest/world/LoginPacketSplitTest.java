@@ -161,8 +161,8 @@ public class LoginPacketSplitTest {
                     .codec()
                     .encodeStart(JsonOps.INSTANCE, new PackMetadataSection(
                             Component.literal("A virtual resource pack."),
-                            new InclusiveRange<>(SharedConstants.getCurrentVersion().packVersion(PackType.SERVER_DATA))
-                    )).getOrThrow());
+                            new InclusiveRange<>(SharedConstants.getCurrentVersion().packVersion(PackType.SERVER_DATA))))
+                    .getOrThrow());
 
             putRoot("pack.mcmeta", mcmeta);
         }

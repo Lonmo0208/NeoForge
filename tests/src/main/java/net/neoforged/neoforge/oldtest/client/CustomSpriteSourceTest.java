@@ -10,7 +10,6 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.client.renderer.texture.SpriteContents;

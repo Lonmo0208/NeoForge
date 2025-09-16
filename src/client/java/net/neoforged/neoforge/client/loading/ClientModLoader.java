@@ -14,7 +14,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.DataPackConfig;
 import net.neoforged.fml.Logging;
 import net.neoforged.fml.ModList;
