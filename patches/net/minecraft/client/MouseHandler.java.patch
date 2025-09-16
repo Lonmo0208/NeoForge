@@ -59,53 +59,6 @@
          }
      }
  
-@@ -169,27 +_,27 @@
- 
-     public void fillMousePositionDetails(CrashReportCategory p_412950_, Window p_412953_) {
-         p_412950_.setDetail(
--            "Mouse location",
--            () -> String.format(
--                Locale.ROOT,
--                "Scaled: (%f, %f). Absolute: (%f, %f)",
--                getScaledXPos(p_412953_, this.xpos),
--                getScaledYPos(p_412953_, this.ypos),
--                this.xpos,
--                this.ypos
--            )
-+                "Mouse location",
-+                () -> String.format(
-+                        Locale.ROOT,
-+                        "Scaled: (%f, %f). Absolute: (%f, %f)",
-+                        getScaledXPos(p_412953_, this.xpos),
-+                        getScaledYPos(p_412953_, this.ypos),
-+                        this.xpos,
-+                        this.ypos
-+                )
-         );
-         p_412950_.setDetail(
--            "Screen size",
--            () -> String.format(
--                Locale.ROOT,
--                "Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %f",
--                p_412953_.getGuiScaledWidth(),
--                p_412953_.getGuiScaledHeight(),
--                p_412953_.getWidth(),
--                p_412953_.getHeight(),
--                p_412953_.getGuiScale()
--            )
-+                "Screen size",
-+                () -> String.format(
-+                        Locale.ROOT,
-+                        "Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %f",
-+                        p_412953_.getGuiScaledWidth(),
-+                        p_412953_.getGuiScaledHeight(),
-+                        p_412953_.getWidth(),
-+                        p_412953_.getHeight(),
-+                        p_412953_.getGuiScale()
-+                )
-         );
-     }
- 
 @@ -204,7 +_,11 @@
                  if (this.minecraft.screen != null) {
                      double d3 = this.getScaledXPos(this.minecraft.getWindow());
@@ -127,67 +80,6 @@
                      if (this.minecraft.player.isSpectator()) {
                          if (this.minecraft.gui.getSpectatorGui().isMenuActive()) {
                              this.minecraft.gui.getSpectatorGui().onMouseScrolled(-i);
-@@ -242,33 +_,33 @@
- 
-     public void setup(Window p_445436_) {
-         InputConstants.setupMouseCallbacks(
--            p_445436_,
--            (p_91591_, p_91592_, p_91593_) -> this.minecraft.execute(() -> this.onMove(p_91591_, p_91592_, p_91593_)),
--            (p_445145_, p_445146_, p_445147_, p_445148_) -> {
--                MouseButtonInfo mousebuttoninfo = new MouseButtonInfo(p_445146_, p_445148_);
--                this.minecraft.execute(() -> this.onButton(p_445145_, mousebuttoninfo, p_445147_));
--            },
--            (p_91576_, p_91577_, p_91578_) -> this.minecraft.execute(() -> this.onScroll(p_91576_, p_91577_, p_91578_)),
--            (p_349790_, p_349791_, p_349792_) -> {
--                List<Path> list = new ArrayList<>(p_349791_);
--                int i = 0;
--
--                for (int j = 0; j < p_349791_; j++) {
--                    String s = GLFWDropCallback.getName(p_349792_, j);
--
--                    try {
--                        list.add(Paths.get(s));
--                    } catch (InvalidPathException invalidpathexception) {
--                        i++;
--                        LOGGER.error("Failed to parse path '{}'", s, invalidpathexception);
--                    }
--                }
--
--                if (!list.isEmpty()) {
--                    int k = i;
--                    this.minecraft.execute(() -> this.onDrop(p_349790_, list, k));
--                }
--            }
-+                p_445436_,
-+                (p_91591_, p_91592_, p_91593_) -> this.minecraft.execute(() -> this.onMove(p_91591_, p_91592_, p_91593_)),
-+                (p_445145_, p_445146_, p_445147_, p_445148_) -> {
-+                    MouseButtonInfo mousebuttoninfo = new MouseButtonInfo(p_445146_, p_445148_);
-+                    this.minecraft.execute(() -> this.onButton(p_445145_, mousebuttoninfo, p_445147_));
-+                },
-+                (p_91576_, p_91577_, p_91578_) -> this.minecraft.execute(() -> this.onScroll(p_91576_, p_91577_, p_91578_)),
-+                (p_349790_, p_349791_, p_349792_) -> {
-+                    List<Path> list = new ArrayList<>(p_349791_);
-+                    int i = 0;
-+
-+                    for (int j = 0; j < p_349791_; j++) {
-+                        String s = GLFWDropCallback.getName(p_349792_, j);
-+
-+                        try {
-+                            list.add(Paths.get(s));
-+                        } catch (InvalidPathException invalidpathexception) {
-+                            i++;
-+                            LOGGER.error("Failed to parse path '{}'", s, invalidpathexception);
-+                        }
-+                    }
-+
-+                    if (!list.isEmpty()) {
-+                        int k = i;
-+                        this.minecraft.execute(() -> this.onDrop(p_349790_, list, k));
-+                    }
-+                }
-         );
-     }
- 
 @@ -321,7 +_,12 @@
                      double d5 = getScaledYPos(window, this.accumulatedDY);
  

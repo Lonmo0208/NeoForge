@@ -23,7 +23,7 @@
              this.window.handle(),
              this.options.glDebugVerbosity,
 -            SharedConstants.DEBUG_SYNCHRONOUS_GL_LOGS,
-+            enableGlDebug,
++            SharedConstants.DEBUG_SYNCHRONOUS_GL_LOGS || enableGlDebug,
              (p_408948_, p_408949_) -> this.getShaderManager().getShader(p_408948_, p_408949_),
 -            p_91084_.game.renderDebugLabels
 +            p_91084_.game.renderDebugLabels || enableGlDebug

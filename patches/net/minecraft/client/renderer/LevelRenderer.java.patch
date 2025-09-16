@@ -58,12 +58,12 @@
                  float f1 = this.ticks + f;
                  int k = this.level.getCloudColor(f);
 -                this.addCloudsPass(framegraphbuilder, cloudstatus, this.levelRenderState.cameraRenderState.pos, f1, k, optional.get().intValue() + 0.33F);
-+                this.addCloudsPass(framegraphbuilder, cloudstatus, p_109604_.getPosition(), f1, k, optional.get().intValue() + 0.33F, p_254120_);
++                this.addCloudsPass(framegraphbuilder, cloudstatus, this.levelRenderState.cameraRenderState.pos, f1, k, optional.get().intValue() + 0.33F, p_254120_);
              }
          }
  
 -        this.addWeatherPass(framegraphbuilder, this.levelRenderState.cameraRenderState.pos, p_425977_);
-+        this.addWeatherPass(framegraphbuilder, p_109604_.getPosition(), p_425977_, p_254120_, p_109604_);
++        this.addWeatherPass(framegraphbuilder, this.levelRenderState.cameraRenderState.pos, p_425977_, p_254120_, p_109604_);
          if (postchain != null) {
              postchain.addToFrame(framegraphbuilder, i, j, this.targets);
          }

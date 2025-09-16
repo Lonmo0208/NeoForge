@@ -44,11 +44,10 @@
                  this.itemModelResolver.updateForLiving(p_446472_.heldOnHead, itemstack, ItemDisplayContext.HEAD, p_445469_);
              }
          }
-@@ -251,12 +_,28 @@
-         float f2 = clientavatarstate.getInterpolatedWalkDistance(p_445869_);
+@@ -252,11 +_,29 @@
          p_446374_.capeFlap = p_446374_.capeFlap + Mth.sin(f2 * 6.0F) * 32.0F * f1;
      }
--
+ 
 +    /**
 +     * @deprecated Neo: use {@link #renderRightHand(PoseStack, SubmitNodeCollector, int, ResourceLocation, boolean, net.minecraft.client.player.AbstractClientPlayer)} instead
 +     */
@@ -61,7 +60,7 @@
 +        if(!net.neoforged.neoforge.client.ClientHooks.renderSpecificFirstPersonArm(p_446962_, p_445938_, p_445470_, player, HumanoidArm.RIGHT))
          this.renderHand(p_446962_, p_445938_, p_445470_, p_445487_, this.model.rightArm, p_446672_);
      }
--
+ 
 +    /**
 +     * @deprecated Neo: use {@link #renderLeftHand(PoseStack, SubmitNodeCollector, int, ResourceLocation, boolean, net.minecraft.client.player.AbstractClientPlayer)} instead
 +     */
