@@ -219,6 +219,11 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         }
 
         @Override
+        protected void updateEffectiveRespawnData() {
+            // The server doesn't have any levels
+        }
+
+        @Override
         public boolean saveEverything(boolean p_195515_, boolean p_195516_, boolean p_195517_) {
             // The server is ephemeral
             return false;
