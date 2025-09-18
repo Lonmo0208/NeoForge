@@ -596,7 +596,7 @@ public final class ConfigurationScreen extends OptionsSubScreen {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         protected ConfigurationSectionScreen rebuild() {
             if (list != null) { // this may be called early, skip and wait for init() then
-                list.children().clear();
+                list.clearEntries();
                 boolean hasUndoableElements = false;
 
                 final List<@Nullable Element> elements = new ArrayList<>();
