@@ -9,7 +9,7 @@
              p_434265_.submitNameTag(
                  p_433473_,
                  p_436016_.nameTagAttachment,
-@@ -163,6 +_,7 @@
+@@ -164,6 +_,7 @@
          S s = this.createRenderState();
          this.extractRenderState(p_361382_, s, p_360885_);
          this.finalizeRenderState(p_361382_, s);

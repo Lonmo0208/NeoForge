@@ -25,8 +25,8 @@
 +
      protected void submitNameTag(AvatarRenderState p_447013_, PoseStack p_446358_, SubmitNodeCollector p_446248_, CameraRenderState p_451056_) {
          p_446358_.pushPose();
-         if (p_447013_.scoreText != null) {
-@@ -157,6 +_,8 @@
+         int i = p_447013_.showExtraEars ? -10 : 0;
+@@ -159,6 +_,8 @@
          }
  
          if (p_447013_.nameTag != null) {
@@ -35,7 +35,7 @@
              p_446248_.submitNameTag(
                  p_446358_,
                  p_447013_.nameTagAttachment,
-@@ -206,7 +_,7 @@
+@@ -209,7 +_,7 @@
          p_446472_.heldOnHead.clear();
          if (p_446472_.isUsingItem) {
              ItemStack itemstack = p_445469_.getItemInHand(p_446472_.useItemHand);
@@ -44,7 +44,7 @@
                  this.itemModelResolver.updateForLiving(p_446472_.heldOnHead, itemstack, ItemDisplayContext.HEAD, p_445469_);
              }
          }
-@@ -252,11 +_,29 @@
+@@ -255,11 +_,29 @@
          p_446374_.capeFlap = p_446374_.capeFlap + Mth.sin(f2 * 6.0F) * 32.0F * f1;
      }
  
