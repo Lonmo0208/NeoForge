@@ -356,7 +356,7 @@
          this.level = p_91157_;
          this.updateLevelInEngines(p_91157_);
      }
-@@ -2115,15 +_,18 @@
+@@ -2115,13 +_,16 @@
          IntegratedServer integratedserver = this.singleplayerServer;
          this.singleplayerServer = null;
          this.gameRenderer.resetData();
@@ -369,12 +369,10 @@
          try {
              if (this.level != null) {
                  this.gui.onDisconnected();
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Unload(this.level));
              }
  
-+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Unload(this.level));
              if (integratedserver != null) {
-                 this.setScreen(new GenericMessageScreen(SAVING_LEVEL));
-                 ProfilerFiller profilerfiller = Profiler.get();
 @@ -2144,6 +_,7 @@
          } finally {
              this.clientLevelTeardownInProgress = false;
