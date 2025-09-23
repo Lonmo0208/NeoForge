@@ -710,8 +710,11 @@ public class ClientHooks {
         ModLoader.postEvent(new RegisterParticleProvidersEvent(particleResources));
     }
 
-    public static void onRegisterKeyMappings(Options options) {
-        ModLoader.postEvent(new RegisterKeyMappingsEvent(options));
+    @ApiStatus.Internal
+    public static void onRegisterKeyMappings(Options options, List<KeyMapping.Category> categories) {
+        RegisterKeyMappingsEvent event = new RegisterKeyMappingsEvent(options);
+        ModLoader.postEvent(event);
+        event.sortAndStoreCategories(categories);
     }
 
     @Nullable
