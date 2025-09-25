@@ -26,10 +26,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.SequencedMap;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
@@ -169,7 +171,6 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterSpriteDefaultMetadataSectionTypesEvent;
 import net.neoforged.neoforge.client.event.RegisterTextureAtlasesEvent;
 import net.neoforged.neoforge.client.event.RenderArmEvent;
 import net.neoforged.neoforge.client.event.RenderBlockScreenEffectEvent;
@@ -977,7 +978,6 @@ public class ClientHooks {
         ModLoader.postEvent(new EntityRenderersEvent.CreateSkullModels(skullModelsByType));
         ModLoader.postEvent(new EntityRenderersEvent.RegisterRenderers());
         ModLoader.postEvent(new RegisterRenderStateModifiersEvent());
-        ModLoader.postEvent(new RegisterSpriteDefaultMetadataSectionTypesEvent(DEFAULT_METADATA_SECTION_TYPES));
         ClientTooltipComponentManager.init();
         EntitySpectatorShaderManager.init();
         RecipeBookManager.init();
@@ -1089,9 +1089,10 @@ public class ClientHooks {
     }
 
     public static List<AtlasManager.AtlasConfig> gatherTextureAtlases(List<AtlasManager.AtlasConfig> vanillaAtlases) {
-        vanillaAtlases = new ArrayList<>(vanillaAtlases);
-        ModLoader.postEvent(new RegisterTextureAtlasesEvent(vanillaAtlases));
-        return List.copyOf(vanillaAtlases);
+        SequencedMap<ResourceLocation, AtlasManager.AtlasConfig> atlasMap = new LinkedHashMap<>(vanillaAtlases.size());
+        vanillaAtlases.forEach(atlas -> atlasMap.put(atlas.definitionLocation(), atlas));
+        ModLoader.postEvent(new RegisterTextureAtlasesEvent(atlasMap));
+        return List.copyOf(atlasMap.values());
     }
 
     @ApiStatus.Internal
