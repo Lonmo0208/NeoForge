@@ -91,7 +91,7 @@ public class NewFluidTest {
             FLUIDS.register(modEventBus);
             modEventBus.addListener(this::addCreative);
 
-            if (FMLEnvironment.dist.isClient()) {
+            if (FMLEnvironment.getDist().isClient()) {
                 modEventBus.addListener(ClientEvents::onRegisterClientExtensions);
             }
         }

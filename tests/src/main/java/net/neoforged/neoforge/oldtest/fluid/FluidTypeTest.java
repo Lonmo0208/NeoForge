@@ -109,7 +109,7 @@ public class FluidTypeTest {
             modEventBus.addListener(this::commonSetup);
             modEventBus.addListener(this::addCreative);
 
-            if (FMLEnvironment.dist.isClient()) {
+            if (FMLEnvironment.getDist().isClient()) {
                 new FluidTypeTestClient(modEventBus);
             }
         }
