@@ -13,26 +13,31 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 
 /**
  * Abstract scroll panel class.
  */
-public abstract class ScrollPanel extends AbstractContainerEventHandler implements Renderable, NarratableEntry {
+public abstract class ScrollPanel extends AbstractContainerEventHandler implements Renderable, NarratableEntry, LayoutElement {
     private final Minecraft client;
-    protected final int width;
-    protected final int height;
-    protected final int top;
-    protected final int bottom;
-    protected final int right;
-    protected final int left;
+    protected int width;
+    protected int height;
+    protected int top;
+    protected int bottom;
+    protected int right;
+    protected int left;
     private boolean scrolling;
     protected float scrollDistance;
     protected boolean captureMouse = true;
@@ -174,6 +179,11 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     @Override
+    public ScreenRectangle getRectangle() {
+        return super.getRectangle();
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button))
             return true;
@@ -295,4 +305,47 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
+
+    @Override
+    public void setX(int p_265236_) {
+        this.left = p_265236_;
+        this.right = p_265236_ + width;
+    }
+
+    @Override
+    public void setY(int p_265404_) {
+        this.top = p_265404_;
+        this.bottom = p_265404_ + height;
+    }
+
+    @Override
+    public int getX() {
+        return this.left;
+    }
+
+    @Override
+    public int getY() {
+        return this.top;
+    }
+
+    @Override
+    public int getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
+    }
+
+    @Override
+    public void visitWidgets(Consumer<AbstractWidget> p_265082_) {}
+
+    @Override
+    public NarrationPriority narrationPriority() {
+        return null;
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput p_169152_) {}
 }
