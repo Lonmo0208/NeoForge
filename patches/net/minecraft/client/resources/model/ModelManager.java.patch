@@ -58,6 +58,17 @@
              )
              .thenComposeAsync(
                  p_465791_ -> {
+@@ -144,7 +_,10 @@
+                         completablefuture4.join().contents(),
+                         modelmanager$resolvedmodels.models(),
+                         modelmanager$resolvedmodels.missing()
++                        , standaloneModelsFuture.join(),
++                        pendingAnimations
+                     );
++                    this.modelBakery.set(modelbakery);
+                     return loadModels(
+                         spriteloader$preparations,
+                         spriteloader$preparations1,
 @@ -165,7 +_,7 @@
          return CompletableFuture.<Map<Identifier, Resource>>supplyAsync(() -> MODEL_LISTER.listMatchingResources(p_251361_), p_252189_)
              .thenCompose(

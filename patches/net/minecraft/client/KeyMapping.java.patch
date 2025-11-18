@@ -159,6 +159,15 @@
      }
  
      public String saveString() {
+@@ -191,7 +_,7 @@
+     }
+ 
+     private void registerMapping(InputConstants.Key p_446356_) {
+-        MAP.computeIfAbsent(p_446356_, p_445127_ -> new ArrayList<>()).add(this);
++        MAP.put(p_446356_, this);
+     }
+ 
+     public static @Nullable KeyMapping get(String p_389468_) {
 @@ -214,6 +_,10 @@
              return register(Identifier.withDefaultNamespace(p_449101_));
          }

@@ -132,6 +132,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.sounds.Music;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -416,7 +417,7 @@ public class ClientHooks {
     }
 
     @Nullable
-    public static MusicInfo selectMusic(MusicInfo situational, @Nullable SoundInstance playing) {
+    public static Music selectMusic(Music situational, @Nullable SoundInstance playing) {
         SelectMusicEvent e = new SelectMusicEvent(situational, playing);
         NeoForge.EVENT_BUS.post(e);
         return e.getMusic();

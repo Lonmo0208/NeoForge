@@ -9,6 +9,23 @@
              if (this.minecraft.getOverlay() == null) {
                  if (this.minecraft.screen == null) {
                      if (!this.mouseGrabbed && flag) {
+@@ -105,10 +_,14 @@
+                                 && i - this.lastClick.time() < 250L
+                                 && this.lastClick.screen() == screen
+                                 && this.lastClickButton == mousebuttonevent.button();
+-                            if (screen.mouseClicked(mousebuttonevent, flag1)) {
++                            screenHandled = net.neoforged.neoforge.client.ClientHooks.onScreenMouseClickedPre(screen, mousebuttonevent, flag1);
++                            if (!screenHandled) {
++                                screenHandled = screen.mouseClicked(mousebuttonevent, flag1);
++                                screenHandled = net.neoforged.neoforge.client.ClientHooks.onScreenMouseClickedPost(screen, mousebuttonevent, flag1, screenHandled);
++                            }
++                            if (screenHandled) {
+                                 this.lastClick = new MouseHandler.LastClick(i, screen);
+                                 this.lastClickButton = mousebuttoninfo.button();
+-                                return;
+                             }
+                         } catch (Throwable throwable1) {
+                             CrashReport crashreport = CrashReport.forThrowable(throwable1, "mouseClicked event handler");
 @@ -120,8 +_,10 @@
                          }
                      } else {

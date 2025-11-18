@@ -184,6 +184,16 @@
          } finally {
              Util.timeSource = System::nanoTime;
              if (this.delayedCrash == null) {
+@@ -1304,7 +_,9 @@
+             RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(rendertarget.getColorTexture(), 0, rendertarget.getDepthTexture(), 1.0);
+             profilerfiller.push("gameRenderer");
+             if (!this.noRender) {
++                net.neoforged.neoforge.client.ClientHooks.fireRenderFramePre(this.deltaTracker);
+                 this.gameRenderer.render(this.deltaTracker, p_91384_);
++                net.neoforged.neoforge.client.ClientHooks.fireRenderFramePost(this.deltaTracker);
+             }
+ 
+             profilerfiller.popPush("blit");
 @@ -1338,9 +_,13 @@
          this.window.setErrorSection("Post render");
          this.frames++;
@@ -221,6 +231,46 @@
          this.running = false;
      }
  
+@@ -1590,8 +_,16 @@
+                     BlockPos blockpos = blockhitresult.getBlockPos();
+                     if (!this.level.getBlockState(blockpos).isAir()) {
+                         Direction direction = blockhitresult.getDirection();
+-                        if (this.gameMode.continueDestroyBlock(blockpos, direction)) {
+-                            this.level.addBreakingBlockEffect(blockpos, direction);
++                    var inputEvent = net.neoforged.neoforge.client.ClientHooks.onClickInput(0, this.options.keyAttack, InteractionHand.MAIN_HAND);
++                    if (inputEvent.isCanceled()) {
++                        if (inputEvent.shouldSwingHand()) {
++                            this.level.addBreakingBlockEffect(blockpos, direction, blockhitresult);
++                            this.player.swing(InteractionHand.MAIN_HAND);
++                        }
++                        return;
++                    }
++                    if (this.gameMode.continueDestroyBlock(blockpos, direction) && inputEvent.shouldSwingHand()) {
++                        this.level.addBreakingBlockEffect(blockpos, direction, blockhitresult);
+                             this.player.swing(InteractionHand.MAIN_HAND);
+                         }
+                     }
+@@ -1622,7 +_,9 @@
+                 return false;
+             } else {
+                 boolean flag = false;
++                var inputEvent = net.neoforged.neoforge.client.ClientHooks.onClickInput(0, this.options.keyAttack, InteractionHand.MAIN_HAND);
+                 PiercingWeapon piercingweapon = itemstack.get(DataComponents.PIERCING_WEAPON);
++                if (!inputEvent.isCanceled())
+                 if (piercingweapon != null && !this.gameMode.isSpectator()) {
+                     this.gameMode.piercingAttack(piercingweapon);
+                     this.player.swing(InteractionHand.MAIN_HAND);
+@@ -1648,8 +_,10 @@
+                             }
+ 
+                             this.player.resetAttackStrengthTicker();
++                            net.neoforged.neoforge.common.CommonHooks.onEmptyLeftClick(this.player);
+                     }
+ 
++                    if (inputEvent.shouldSwingHand())
+                     this.player.swing(InteractionHand.MAIN_HAND);
+                     return flag;
+                 }
 @@ -1666,6 +_,11 @@
                  }
  

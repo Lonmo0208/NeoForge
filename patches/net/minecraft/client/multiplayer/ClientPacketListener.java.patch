@@ -1,5 +1,13 @@
 --- a/net/minecraft/client/multiplayer/ClientPacketListener.java
 +++ b/net/minecraft/client/multiplayer/ClientPacketListener.java
+@@ -414,6 +_,7 @@
+     private final ChunkBatchSizeCalculator chunkBatchSizeCalculator = new ChunkBatchSizeCalculator();
+     private final PingDebugMonitor pingDebugMonitor;
+     private final ClientDebugSubscriber debugSubscriber;
++    private net.neoforged.neoforge.network.connection.ConnectionType connectionType;
+     private @Nullable LevelLoadTracker levelLoadTracker;
+     private boolean serverEnforcesSecureChat;
+     private volatile boolean closed;
 @@ -444,7 +_,8 @@
              p_253924_.gui.getChat().restoreState(p_295121_.chatState());
          }

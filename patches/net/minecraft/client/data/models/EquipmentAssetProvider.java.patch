@@ -11,7 +11,25 @@
      private static void bootstrap(BiConsumer<ResourceKey<EquipmentAsset>, EquipmentClientInfo> p_387865_) {
          p_387865_.accept(
              EquipmentAssets.LEATHER,
-@@ -131,7 +_,7 @@
+@@ -117,21 +_,21 @@
+     }
+ 
+     public static EquipmentClientInfo onlyHumanoid(String p_388505_) {
+-        return EquipmentClientInfo.builder().addHumanoidLayers(Identifier.withDefaultNamespace(p_388505_)).build();
++        return EquipmentClientInfo.builder().addHumanoidLayers(Identifier.parse(p_388505_)).build();
+     }
+ 
+     private static EquipmentClientInfo humanoidAndMountArmor(String p_456144_) {
+         return EquipmentClientInfo.builder()
+-            .addHumanoidLayers(Identifier.withDefaultNamespace(p_456144_))
+-            .addLayers(EquipmentClientInfo.LayerType.HORSE_BODY, EquipmentClientInfo.Layer.leatherDyeable(Identifier.withDefaultNamespace(p_456144_), false))
+-            .addLayers(EquipmentClientInfo.LayerType.NAUTILUS_BODY, EquipmentClientInfo.Layer.leatherDyeable(Identifier.withDefaultNamespace(p_456144_), false))
++            .addHumanoidLayers(Identifier.parse(p_456144_))
++            .addLayers(EquipmentClientInfo.LayerType.HORSE_BODY, EquipmentClientInfo.Layer.leatherDyeable(Identifier.parse(p_456144_), false))
++            .addLayers(EquipmentClientInfo.LayerType.NAUTILUS_BODY, EquipmentClientInfo.Layer.leatherDyeable(Identifier.parse(p_456144_), false))
+             .build();
+     }
+ 
      @Override
      public CompletableFuture<?> run(CachedOutput p_387304_) {
          Map<ResourceKey<EquipmentAsset>, EquipmentClientInfo> map = new HashMap<>();

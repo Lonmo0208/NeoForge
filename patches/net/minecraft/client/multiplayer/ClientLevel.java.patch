@@ -1,5 +1,14 @@
 --- a/net/minecraft/client/multiplayer/ClientLevel.java
 +++ b/net/minecraft/client/multiplayer/ClientLevel.java
+@@ -135,7 +_,7 @@
+     private final @Nullable EndFlashState endFlashState;
+     private final Minecraft minecraft = Minecraft.getInstance();
+     final List<AbstractClientPlayer> players = Lists.newArrayList();
+-    final List<EnderDragonPart> dragonParts = Lists.newArrayList();
++    final List<net.neoforged.neoforge.entity.PartEntity<?>> dragonParts = Lists.newArrayList();
+     private final Map<MapId, MapItemSavedData> mapData = Maps.newHashMap();
+     private int skyFlashTime;
+     private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(
 @@ -154,6 +_,7 @@
              p_406186_.put(
                  BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(p_194168_ -> this.calculateBlockTint(p_194168_, BiomeColors.WATER_COLOR_RESOLVER))
@@ -32,6 +41,14 @@
              }
  
              return flag;
+@@ -250,6 +_,7 @@
+         this.environmentAttributes = this.addEnvironmentAttributeLayers(EnvironmentAttributeSystem.builder()).build();
+         this.updateSkyBrightness();
+         this.prepareWeather();
++        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Load(this));
+     }
+ 
+     private EnvironmentAttributeSystem.Builder addEnvironmentAttributeLayers(EnvironmentAttributeSystem.Builder p_468725_) {
 @@ -327,7 +_,7 @@
      private void tickTime() {
          this.clientLevelData.setGameTime(this.clientLevelData.getGameTime() + 1L);

@@ -373,6 +373,15 @@
          this.experienceLevel = IntMath.saturatedAdd(this.experienceLevel, p_36276_);
          if (this.experienceLevel < 0) {
              this.experienceLevel = 0;
+@@ -1576,7 +_,7 @@
+     }
+ 
+     protected boolean hasEnoughFoodToDoExhaustiveManoeuvres() {
+-        return this.getFoodData().hasEnoughFood() || this.getAbilities().mayfly;
++        return this.getFoodData().hasEnoughFood() || this.mayFly();
+     }
+ 
+     public Optional<WardenSpawnTracker> getWardenSpawnTracker() {
 @@ -1683,7 +_,11 @@
  
      @Override

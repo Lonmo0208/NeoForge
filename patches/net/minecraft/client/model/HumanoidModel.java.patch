@@ -1,37 +1,34 @@
-++++ REJECTED HUNK: 1
-@@ -288,6 +288,8 @@
-             case BRUSH:
-                 this.rightArm.xRot = this.rightArm.xRot * 0.5F - (float) (Math.PI / 5);
-                 this.rightArm.yRot = 0.0F;
+--- a/net/minecraft/client/model/HumanoidModel.java
++++ b/net/minecraft/client/model/HumanoidModel.java
+@@ -297,6 +_,9 @@
+                 break;
+             case SPEAR:
+                 SpearAnimations.thirdPersonHandUse(this.rightArm, this.head, true, p_364666_.getUseItemStackForArm(HumanoidArm.RIGHT), p_364666_);
++                break;
 +            default:
-+                p_362238_.applyTransform(this, p_364666_, net.minecraft.world.entity.HumanoidArm.RIGHT);
++                p_364666_.rightArmPose.applyTransform(this, p_364666_, net.minecraft.world.entity.HumanoidArm.RIGHT);
          }
      }
  
-++++ END HUNK
-
-++++ REJECTED HUNK: 2
-@@ -330,6 +332,8 @@
-             case BRUSH:
-                 this.leftArm.xRot = this.leftArm.xRot * 0.5F - (float) (Math.PI / 5);
-                 this.leftArm.yRot = 0.0F;
+@@ -342,6 +_,9 @@
+                 break;
+             case SPEAR:
+                 SpearAnimations.thirdPersonHandUse(this.leftArm, this.head, false, p_361741_.getUseItemStackForArm(HumanoidArm.LEFT), p_361741_);
++                break;
 +            default:
-+                p_361463_.applyTransform(this, p_361741_, net.minecraft.world.entity.HumanoidArm.LEFT);
++                p_361741_.leftArmPose.applyTransform(this, p_361741_, net.minecraft.world.entity.HumanoidArm.LEFT);
          }
      }
  
-++++ END HUNK
-
-++++ REJECTED HUNK: 3
-@@ -410,13 +414,31 @@
-         BRUSH(false);
+@@ -435,12 +_,31 @@
  
          private final boolean twoHanded;
+ 
 +        @org.jetbrains.annotations.Nullable
 +        private final net.neoforged.neoforge.client.IArmPoseTransformer forgeArmPose;
- 
++
 +        @net.neoforged.fml.common.asm.enumextension.ReservedConstructor
-         private ArmPose(boolean p_102896_) {
+         ArmPose(boolean p_102896_) {
              this.twoHanded = p_102896_;
 +            this.forgeArmPose = null;
 +        }
@@ -53,6 +50,5 @@
 +        public static net.neoforged.fml.common.asm.enumextension.ExtensionInfo getExtensionInfo() {
 +            return net.neoforged.fml.common.asm.enumextension.ExtensionInfo.nonExtended(HumanoidModel.ArmPose.class);
          }
-     }
- }
-++++ END HUNK
+ 
+         public <S extends ArmedEntityRenderState> void animateUseItem(

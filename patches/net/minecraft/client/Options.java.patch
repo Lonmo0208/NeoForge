@@ -29,6 +29,14 @@
          this.minecraft = p_92138_;
          this.optionsFile = new File(p_92139_, "options.txt");
          boolean flag = Runtime.getRuntime().maxMemory() >= 1000000000L;
+@@ -1394,6 +_,7 @@
+             p_461224_ -> this.setGraphicsPresetToCustom()
+         );
+         this.syncWrites = Util.getPlatform() == Util.OS.WINDOWS;
++        net.neoforged.neoforge.client.ClientHooks.onRegisterKeyMappings(this, KeyMapping.Category.SORT_ORDER);
+         this.load();
+     }
+ 
 @@ -1524,10 +_,14 @@
          p_168428_.process("musicFrequency", this.musicFrequency);
  
