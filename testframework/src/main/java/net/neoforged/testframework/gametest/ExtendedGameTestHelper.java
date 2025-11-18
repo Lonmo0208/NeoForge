@@ -36,6 +36,7 @@ import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -63,7 +64,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ExtendedGameTestHelper extends GameTestHelper {
     public ExtendedGameTestHelper(GameTestInfo info) {
@@ -148,11 +149,11 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         serverplayer.setYRot(180);
         serverplayer.connection.chunkSender.sendNextChunks(serverplayer);
         serverplayer.connection.chunkSender.onChunkBatchReceivedByClient(64f);
-        serverplayer.setClientLoaded(true);
+        serverplayer.connection.markClientLoaded();
         return serverplayer;
     }
 
-    public ServerPlayer makeOpMockPlayer(int commandLevel) {
+    public ServerPlayer makeOpMockPlayer(PermissionSet permissions) {
         return new FakePlayer(this.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-player")) {
             @Override
             public boolean isSpectator() {
@@ -170,8 +171,8 @@ public class ExtendedGameTestHelper extends GameTestHelper {
             }
 
             @Override
-            public int getPermissionLevel() {
-                return commandLevel;
+            public PermissionSet permissions() {
+                return permissions;
             }
         };
     }
