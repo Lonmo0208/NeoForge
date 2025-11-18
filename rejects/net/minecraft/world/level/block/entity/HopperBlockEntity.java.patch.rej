@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 6
+@@ -356,6 +397,8 @@
+         return p_155590_.getEntitiesOfClass(ItemEntity.class, aabb, EntitySelector.ENTITY_STILL_ALIVE);
+     }
+ 
++    /** @deprecated Use IItemHandler capability instead. To preserve Container-specific interactions, use {@link #getContainerOrHandlerAt} and handle both cases. */
++    @Deprecated
+     @Nullable
+     public static Container getContainerAt(Level p_59391_, BlockPos p_59392_) {
+         return getContainerAt(p_59391_, p_59392_, p_59391_.getBlockState(p_59392_), p_59392_.getX() + 0.5, p_59392_.getY() + 0.5, p_59392_.getZ() + 0.5);
+++++ END HUNK

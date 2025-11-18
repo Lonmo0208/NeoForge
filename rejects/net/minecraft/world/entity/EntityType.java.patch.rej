@@ -1,0 +1,13 @@
+++++ REJECTED HUNK: 3
+@@ -1253,6 +1282,10 @@
+         this.lootTable = p_368696_;
+         this.requiredFeatures = p_273518_;
+         this.allowedInPeaceful = p_434970_;
++        this.trackDeltasSupplier = trackDeltasSupplier;
++        this.trackingRangeSupplier = trackingRangeSupplier;
++        this.updateIntervalSupplier = updateIntervalSupplier;
++        this.onlyOpCanSetNbt = onlyOpCanSetNbt;
+     }
+ 
+     @Nullable
+++++ END HUNK

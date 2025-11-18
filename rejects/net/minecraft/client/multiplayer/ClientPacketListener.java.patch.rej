@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 1
+@@ -410,6 +410,7 @@
+     private final ChunkBatchSizeCalculator chunkBatchSizeCalculator = new ChunkBatchSizeCalculator();
+     private final PingDebugMonitor pingDebugMonitor;
+     private final ClientDebugSubscriber debugSubscriber;
++    private net.neoforged.neoforge.network.connection.ConnectionType connectionType;
+     @Nullable
+     private LevelLoadTracker levelLoadTracker;
+     private boolean serverEnforcesSecureChat;
+++++ END HUNK

@@ -1,0 +1,12 @@
+++++ REJECTED HUNK: 12
+@@ -852,7 +884,8 @@
+         this.addToTooltip(DataComponents.DYED_COLOR, p_400057_, p_400252_, p_399603_, p_400174_);
+         this.addToTooltip(DataComponents.PROFILE, p_400057_, p_400252_, p_399603_, p_400174_);
+         this.addToTooltip(DataComponents.LORE, p_400057_, p_400252_, p_399603_, p_400174_);
+-        this.addAttributeTooltips(p_399603_, p_400252_, p_399628_);
++        // Neo: Replace attribute tooltips with custom handling
++        net.neoforged.neoforge.common.util.AttributeUtil.addAttributeTooltips(this, p_399603_, p_400252_, net.neoforged.neoforge.common.util.AttributeTooltipContext.of(p_399628_, p_400057_, p_400252_, p_400174_));
+         if (this.has(DataComponents.UNBREAKABLE) && p_400252_.shows(DataComponents.UNBREAKABLE)) {
+             p_399603_.accept(UNBREAKABLE_TOOLTIP);
+         }
+++++ END HUNK

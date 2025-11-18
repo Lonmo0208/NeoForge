@@ -1,7 +1,7 @@
 --- a/net/minecraft/client/renderer/block/model/SimpleModelWrapper.java
 +++ b/net/minecraft/client/renderer/block/model/SimpleModelWrapper.java
 @@ -13,18 +_,35 @@
- import net.neoforged.api.distmarker.OnlyIn;
+ import org.jspecify.annotations.Nullable;
  
  @OnlyIn(Dist.CLIENT)
 -public record SimpleModelWrapper(QuadCollection quads, boolean useAmbientOcclusion, TextureAtlasSprite particleIcon) implements BlockModelPart {
@@ -11,8 +11,8 @@
 +        this(quads, useAmbientOcclusion, particleIcon, null);
 +    }
 +
-     public static SimpleModelWrapper bake(ModelBaker p_405335_, ResourceLocation p_405098_, ModelState p_405869_) {
-         ResolvedModel resolvedmodel = p_405335_.getModel(p_405098_);
+     public static SimpleModelWrapper bake(ModelBaker p_405335_, Identifier p_468685_, ModelState p_405869_) {
+         ResolvedModel resolvedmodel = p_405335_.getModel(p_468685_);
 +        return bake(p_405335_, resolvedmodel, p_405869_);
 +    }
 +

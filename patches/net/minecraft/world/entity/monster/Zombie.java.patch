@@ -1,18 +1,10 @@
 --- a/net/minecraft/world/entity/monster/Zombie.java
 +++ b/net/minecraft/world/entity/monster/Zombie.java
-@@ -259,6 +_,7 @@
-     }
- 
-     protected void doUnderWaterConversion() {
-+        if (!net.neoforged.neoforge.event.EventHooks.canLivingConvert(this, EntityType.DROWNED, (timer) -> this.conversionTime = timer)) return;
-         this.convertToZombieType(EntityType.DROWNED);
-         if (!this.isSilent()) {
-             this.level().levelEvent(null, 1040, this.blockPosition(), 0);
-@@ -269,7 +_,10 @@
+@@ -241,7 +_,10 @@
          this.convertTo(
              p_34311_,
              ConversionParams.single(this, true, true),
--            p_427112_ -> p_427112_.handleAttributes(p_427112_.level().getCurrentDifficultyAt(p_427112_.blockPosition()).getSpecialMultiplier())
+-            p_454580_ -> p_454580_.handleAttributes(p_455742_.getCurrentDifficultyAt(p_454580_.blockPosition()).getSpecialMultiplier())
 +            p_381517_ -> {
 +                p_381517_.handleAttributes(p_381517_.level().getCurrentDifficultyAt(p_381517_.blockPosition()).getSpecialMultiplier());
 +                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_381517_);
@@ -20,7 +12,7 @@
          );
      }
  
-@@ -289,6 +_,7 @@
+@@ -261,6 +_,7 @@
                  p_370686_.setGossips(p_371444_.getGossips().copy());
                  p_370686_.setTradeOffers(p_371444_.getOffers().copy());
                  p_370686_.setVillagerXp(p_371444_.getVillagerXp());
@@ -28,7 +20,7 @@
                  if (!this.isSilent()) {
                      p_371466_.levelEvent(null, 1026, this.blockPosition(), 0);
                  }
-@@ -442,7 +_,7 @@
+@@ -416,7 +_,7 @@
      @Override
      public boolean killedEntity(ServerLevel p_219160_, LivingEntity p_219161_, DamageSource p_432761_) {
          boolean flag = super.killedEntity(p_219160_, p_219161_, p_432761_);
@@ -37,7 +29,7 @@
              if (p_219160_.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
                  return flag;
              }
-@@ -564,10 +_,14 @@
+@@ -532,10 +_,14 @@
                  .addOrReplacePermanentModifier(
                      new AttributeModifier(LEADER_ZOMBIE_BONUS_ID, this.random.nextDouble() * 0.25 + 0.5, AttributeModifier.Operation.ADD_VALUE)
                  );

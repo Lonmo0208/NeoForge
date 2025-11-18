@@ -1,16 +1,6 @@
 --- a/net/minecraft/client/gui/render/GuiRenderer.java
 +++ b/net/minecraft/client/gui/render/GuiRenderer.java
-@@ -109,7 +_,8 @@
-     private final MultiBufferSource.BufferSource bufferSource;
-     private final SubmitNodeCollector submitNodeCollector;
-     private final FeatureRenderDispatcher featureRenderDispatcher;
--    private final Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> pictureInPictureRenderers;
-+    private final Map<Class<? extends PictureInPictureRenderState>, net.neoforged.neoforge.client.gui.PictureInPictureRendererPool<?>> pictureInPictureRendererPools;
-+    private final Set<PictureInPictureRenderState> pictureInPictureRenderStatesScratch = new it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<>();
-     @Nullable
-     private GpuTexture itemsAtlas;
-     @Nullable
-@@ -136,19 +_,13 @@
+@@ -128,19 +_,13 @@
          MultiBufferSource.BufferSource p_415673_,
          SubmitNodeCollector p_440036_,
          FeatureRenderDispatcher p_439972_,
@@ -32,7 +22,7 @@
      }
  
      public void incrementFrameNumber() {
-@@ -168,6 +_,7 @@
+@@ -160,6 +_,7 @@
          this.renderState.reset();
          this.firstDrawIndexAfterBlur = Integer.MAX_VALUE;
          this.clearUnusedOversizedItemRenderers();
@@ -40,7 +30,7 @@
          if (SharedConstants.DEBUG_SHUFFLE_UI_RENDERING_ORDER) {
              RenderPipeline.updateSortKeySeed();
              TextureSetup.updateSortKeySeed();
-@@ -429,14 +_,31 @@
+@@ -419,14 +_,31 @@
  
      private void preparePictureInPicture() {
          int i = Minecraft.getInstance().getWindow().getGuiScale();
@@ -75,7 +65,7 @@
      }
  
      private void renderItemToAtlas(TrackingItemStackRenderState p_428843_, PoseStack p_416703_, int p_416443_, int p_416400_, int p_416052_) {
-@@ -710,7 +_,7 @@
+@@ -699,7 +_,7 @@
              this.itemsAtlasDepthView.close();
          }
  

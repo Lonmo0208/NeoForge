@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 4
+@@ -110,7 +120,7 @@
+             Objects.requireNonNullElse(this.group, ""),
+             RecipeBuilder.determineBookCategory(this.category),
+             shapedrecipepattern,
+-            new ItemStack(this.result, this.count),
++            this.resultStack,
+             this.showNotification
+         );
+         p_301098_.accept(p_380072_, shapedrecipe, advancement$builder.build(p_380072_.location().withPrefix("recipes/" + this.category.getFolderName() + "/")));
+++++ END HUNK

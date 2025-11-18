@@ -1,0 +1,22 @@
+++++ REJECTED HUNK: 1
+@@ -136,7 +136,7 @@
+     private final EndFlashState endFlashState;
+     private final Minecraft minecraft = Minecraft.getInstance();
+     final List<AbstractClientPlayer> players = Lists.newArrayList();
+-    final List<EnderDragonPart> dragonParts = Lists.newArrayList();
++    final List<net.neoforged.neoforge.entity.PartEntity<?>> dragonParts = Lists.newArrayList();
+     private final Map<MapId, MapItemSavedData> mapData = Maps.newHashMap();
+     private static final int CLOUD_COLOR = -1;
+     private int skyFlashTime;
+++++ END HUNK
+
+++++ REJECTED HUNK: 5
+@@ -251,6 +258,7 @@
+         this.serverSimulationDistance = p_363776_;
+         this.updateSkyBrightness();
+         this.prepareWeather();
++        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Load(this));
+     }
+ 
+     public void queueLightUpdate(Runnable p_194172_) {
+++++ END HUNK

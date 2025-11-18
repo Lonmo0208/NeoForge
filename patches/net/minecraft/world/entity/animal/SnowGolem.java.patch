@@ -4,7 +4,7 @@
                  this.hurtServer(serverlevel, this.damageSources().onFire(), 1.0F);
              }
  
--            if (!serverlevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+-            if (!serverlevel.getGameRules().get(GameRules.MOB_GRIEFING)) {
 +            if (!net.neoforged.neoforge.event.EventHooks.canEntityGrief(serverlevel, this)) {
                  return;
              }

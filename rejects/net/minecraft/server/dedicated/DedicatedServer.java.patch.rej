@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 1
+@@ -97,6 +97,8 @@
+     @Nullable
+     private ManagementServer jsonRpcServer;
+     private long lastHeartbeat;
++    @Nullable
++    private net.neoforged.neoforge.server.dedicated.DedicatedLanServerPinger dediLanPinger;
+ 
+     public DedicatedServer(
+         Thread p_214789_,
+++++ END HUNK

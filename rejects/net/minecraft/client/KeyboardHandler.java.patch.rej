@@ -1,0 +1,25 @@
+++++ REJECTED HUNK: 1
+@@ -503,12 +503,20 @@
+             if (screen != null) {
+                 try {
+                     if (p_90895_ != 1 && p_90895_ != 2) {
+-                        if (p_90895_ == 0 && screen.keyReleased(p_446050_)) {
++                        if (p_90895_ == 0 && (
++                            net.neoforged.neoforge.client.ClientHooks.onScreenKeyReleasedPre(screen, p_446050_) ||
++                            screen.keyReleased(p_446050_) ||
++                            net.neoforged.neoforge.client.ClientHooks.onScreenKeyReleasedPost(screen, p_446050_))
++                        ) {
+                             return;
+                         }
+                     } else {
+                         screen.afterKeyboardAction();
+-                        if (screen.keyPressed(p_446050_)) {
++                        if (
++                            net.neoforged.neoforge.client.ClientHooks.onScreenKeyPressedPre(screen, p_446050_) ||
++                            screen.keyPressed(p_446050_) ||
++                            net.neoforged.neoforge.client.ClientHooks.onScreenKeyPressedPost(screen, p_446050_)
++                        ) {
+                             if (this.minecraft.screen == null) {
+                                 InputConstants.Key inputconstants$key = InputConstants.getKey(p_446050_);
+                                 KeyMapping.set(inputconstants$key, false);
+++++ END HUNK

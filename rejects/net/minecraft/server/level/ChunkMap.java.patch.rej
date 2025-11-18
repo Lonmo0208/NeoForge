@@ -1,0 +1,21 @@
+++++ REJECTED HUNK: 7
+@@ -963,6 +971,18 @@
+         return tristate == TriState.DEFAULT ? this.anyPlayerCloseEnoughForSpawningInternal(p_183880_) : tristate.toBoolean(true);
+     }
+ 
++    void collectForceTickingChunks(List<LevelChunk> list) {
++        for (long l : distanceManager.ticketStorage.getForceLoadedChunks()) {
++            ChunkHolder holder = this.visibleChunkMap.get(l);
++            if (holder != null) {
++                var chunk = holder.getTickingChunk();
++                if (chunk != null) {
++                    list.add(chunk);
++                }
++            }
++        }
++    }
++
+     private boolean anyPlayerCloseEnoughForSpawningInternal(ChunkPos p_363995_) {
+         for (ServerPlayer serverplayer : this.playerMap.getAllPlayers()) {
+             if (this.playerIsCloseEnoughForSpawning(serverplayer, p_363995_)) {
+++++ END HUNK

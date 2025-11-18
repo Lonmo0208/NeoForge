@@ -13,11 +13,11 @@
  
      abstract void blitFrameBuffers(
          int p_412546_,
-@@ -113,9 +_,14 @@
+@@ -112,9 +_,14 @@
          }
  
          @Override
--        public void bindFrameBufferTextures(int p_412474_, int p_412101_, int p_412181_, int p_412742_, int p_412591_) {
+-        public void bindFrameBufferTextures(int p_412474_, int p_412101_, int p_412181_, int p_412742_, @GpuBuffer.Usage int p_412591_) {
 +        public void bindFrameBufferTextures(int p_412474_, int p_412101_, int p_412181_, int p_412742_, int p_412591_, boolean useStencil) {
              ARBDirectStateAccess.glNamedFramebufferTexture(p_412474_, 36064, p_412101_, p_412742_);
              ARBDirectStateAccess.glNamedFramebufferTexture(p_412474_, 36096, p_412181_, p_412742_);
@@ -29,7 +29,7 @@
              if (p_412591_ != 0) {
                  GlStateManager._glBindFramebuffer(p_412591_, p_412474_);
              }
-@@ -250,12 +_,17 @@
+@@ -248,12 +_,17 @@
          }
  
          @Override

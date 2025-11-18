@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/phys/shapes/MinecartCollisionContext.java
 +++ b/net/minecraft/world/phys/shapes/MinecartCollisionContext.java
-@@ -25,7 +_,7 @@
+@@ -23,7 +_,7 @@
          boolean flag = BaseRailBlock.isRail(blockstate);
          if (flag) {
              this.ingoreBelow = blockpos.below();

@@ -28,7 +28,7 @@
 -                            public void accept(ResourceKey<Recipe<?>> p_380360_, Recipe<?> p_362882_, @Nullable AdvancementHolder p_364507_) {
 +                            public void accept(ResourceKey<Recipe<?>> p_380360_, Recipe<?> p_362882_, @Nullable AdvancementHolder p_364507_, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
                                  if (!set.add(p_380360_)) {
-                                     throw new IllegalStateException("Duplicate recipe " + p_380360_.location());
+                                     throw new IllegalStateException("Duplicate recipe " + p_380360_.identifier());
                                  } else {
 -                                    this.saveRecipe(p_380360_, p_362882_);
 +                                    this.saveRecipe(p_380360_, p_362882_, conditions);
@@ -46,7 +46,7 @@
 +                            }
 +                            private void saveRecipe(ResourceKey<Recipe<?>> p_380099_, Recipe<?> p_364792_, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
                                  list.add(
--                                    DataProvider.saveStable(p_364823_, p_364211_, Recipe.CODEC, p_364792_, packoutput$pathprovider.json(p_380099_.location()))
+-                                    DataProvider.saveStable(p_364823_, p_364211_, Recipe.CODEC, p_364792_, packoutput$pathprovider.json(p_380099_.identifier()))
 +                                    DataProvider.saveStable(p_364823_, p_364211_, Recipe.CONDITIONAL_CODEC, Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(p_364792_, conditions)), packoutput$pathprovider.json(p_380099_.location()))
                                  );
                              }

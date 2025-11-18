@@ -22,10 +22,12 @@
                  Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b0), s, p_302338_, p_302362_);
                  if (map.put(s, tag) == null) {
                      p_302362_.accountBytes(36L);
-@@ -173,6 +_,17 @@
-         this(new HashMap<>());
-     }
+@@ -171,6 +_,17 @@
  
+     public CompoundTag() {
+         this(new HashMap<>());
++    }
++
 +    /**
 +     * Neo: create a compound tag that is generally suitable to hold the given amount of entries
 +     * without needing to resize the internal map.
@@ -35,16 +37,6 @@
 +     */
 +    public CompoundTag(int expectedEntries) {
 +        this(HashMap.newHashMap(expectedEntries));
-+    }
-+
-     @Override
-     public void write(DataOutput p_128341_) throws IOException {
-         for (String s : this.tags.keySet()) {
-@@ -228,6 +_,7 @@
- 
-     @Nullable
-     public Tag put(String p_128366_, Tag p_128367_) {
-+        if (p_128367_ == null) throw new IllegalArgumentException("Invalid null NBT value with key " + p_128366_);
-         return this.tags.put(p_128366_, p_128367_);
      }
  
+     @Override

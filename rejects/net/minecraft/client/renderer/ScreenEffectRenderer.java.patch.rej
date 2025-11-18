@@ -1,0 +1,14 @@
+++++ REJECTED HUNK: 2
+@@ -123,6 +126,11 @@
+ 
+     @Nullable
+     private static BlockState getViewBlockingState(Player p_110717_) {
++        return getOverlayBlock(p_110717_).getLeft();
++    }
++
++    @Nullable
++    private static org.apache.commons.lang3.tuple.Pair<BlockState, BlockPos> getOverlayBlock(Player p_110717_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+         for (int i = 0; i < 8; i++) {
+++++ END HUNK

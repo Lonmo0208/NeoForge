@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/SpawnEggItem.java
 +++ b/net/minecraft/world/item/SpawnEggItem.java
-@@ -197,4 +_,45 @@
+@@ -196,4 +_,45 @@
  
          return false;
      }

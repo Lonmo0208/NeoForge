@@ -1,15 +1,6 @@
 --- a/net/minecraft/world/entity/vehicle/OldMinecartBehavior.java
 +++ b/net/minecraft/world/entity/vehicle/OldMinecartBehavior.java
-@@ -62,7 +_,7 @@
-             this.minecart.setOnRails($$4);
-             if ($$4) {
-                 this.moveAlongTrack(serverlevel);
--                if (blockstate.is(Blocks.ACTIVATOR_RAIL)) {
-+                if (blockstate.getBlock() instanceof PoweredRailBlock poweredRail && poweredRail.isActivatorRail()) {
-                     this.minecart.activateMinecart(blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockstate.getValue(PoweredRailBlock.POWERED));
-                 }
-             } else {
-@@ -112,7 +_,7 @@
+@@ -113,7 +_,7 @@
          d1 = blockpos.getY();
          boolean flag = false;
          boolean flag1 = false;
@@ -18,7 +9,7 @@
              flag = blockstate.getValue(PoweredRailBlock.POWERED);
              flag1 = !flag;
          }
-@@ -123,7 +_,7 @@
+@@ -124,7 +_,7 @@
          }
  
          Vec3 vec31 = this.getDeltaMovement();
@@ -40,7 +31,7 @@
              p_363435_ = j;
              if (railshape.isSlope()) {
                  p_363435_ = j + 1;
-@@ -320,9 +_,10 @@
+@@ -319,9 +_,10 @@
              j--;
          }
  

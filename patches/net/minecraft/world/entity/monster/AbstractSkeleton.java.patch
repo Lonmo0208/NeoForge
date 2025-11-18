@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/monster/AbstractSkeleton.java
 +++ b/net/minecraft/world/entity/monster/AbstractSkeleton.java
-@@ -163,8 +_,8 @@
+@@ -132,8 +_,8 @@
          if (this.level() != null && !this.level().isClientSide()) {
              this.goalSelector.removeGoal(this.meleeGoal);
              this.goalSelector.removeGoal(this.bowGoal);
@@ -11,7 +11,7 @@
                  int i = this.getHardAttackInterval();
                  if (this.level().getDifficulty() != Difficulty.HARD) {
                      i = this.getAttackInterval();
-@@ -188,9 +_,11 @@
+@@ -157,9 +_,11 @@
  
      @Override
      public void performRangedAttack(LivingEntity p_32141_, float p_32142_) {
@@ -26,7 +26,7 @@
          double d0 = p_32141_.getX() - this.getX();
          double d1 = p_32141_.getY(0.3333333333333333) - abstractarrow.getY();
          double d2 = p_32141_.getZ() - this.getZ();
-@@ -210,7 +_,7 @@
+@@ -179,7 +_,7 @@
  
      @Override
      public boolean canFireProjectileWeapon(ProjectileWeaponItem p_32144_) {

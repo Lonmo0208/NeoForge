@@ -1,0 +1,13 @@
+++++ REJECTED HUNK: 4
+@@ -377,6 +378,10 @@
+     @Nullable
+     public BlockEntity getBlockEntity(BlockPos p_62868_, LevelChunk.EntityCreationType p_62869_) {
+         BlockEntity blockentity = this.blockEntities.get(p_62868_);
++        if (blockentity != null && blockentity.isRemoved()) {
++            blockEntities.remove(p_62868_);
++            blockentity = null;
++        }
+         if (blockentity == null) {
+             CompoundTag compoundtag = this.pendingBlockEntities.remove(p_62868_);
+             if (compoundtag != null) {
+++++ END HUNK

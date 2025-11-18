@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 7
+@@ -1091,7 +1104,7 @@
+     }
+ 
+     private boolean hasEnoughFoodToSprint() {
+-        return this.isPassenger() || this.getFoodData().getFoodLevel() > 6.0F || this.getAbilities().mayfly;
++        return this.isPassenger() || this.getFoodData().getFoodLevel() > 6.0F || this.mayFly();
+     }
+ 
+     public float getWaterVision() {
+++++ END HUNK

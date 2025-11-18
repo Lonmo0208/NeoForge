@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 1
+@@ -44,7 +44,7 @@
+     private static final Logger LOGGER = LogUtils.getLogger();
+     private static final FileToIdConverter PARTICLE_LISTER = FileToIdConverter.json("particles");
+     private final Map<Identifier, ParticleResources.MutableSpriteSet> spriteSets = Maps.newHashMap();
+-    private final Int2ObjectMap<ParticleProvider<?>> providers = new Int2ObjectOpenHashMap<>();
++    private final Map<Identifier, ParticleProvider<?>> providers = new java.util.HashMap<>();
+     @Nullable
+     private Runnable onReload;
+ 
+++++ END HUNK

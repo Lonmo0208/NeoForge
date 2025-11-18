@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 1
+@@ -98,7 +98,7 @@
+                     p_82948_.accept(t);
+                 }
+             } else if (matchesSubStr(p_82946_, Identifier.getNamespace())
+-                || Identifier.getNamespace().equals("minecraft") && matchesSubStr(p_82946_, Identifier.getPath())) {
++                || matchesSubStr(p_82946_, Identifier.getPath())) { // Neo: Removed "minecraft" namespace requirement for path searching to allow modded path suggestions to show up
+                 p_82948_.accept(t);
+             }
+         }
+++++ END HUNK

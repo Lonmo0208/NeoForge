@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 5
+@@ -183,7 +281,7 @@
+     }
+ 
+     private void registerMapping(InputConstants.Key p_446356_) {
+-        MAP.computeIfAbsent(p_446356_, p_445127_ -> new ArrayList<>()).add(this);
++        MAP.put(p_446356_, this);
+     }
+ 
+     @Nullable
+++++ END HUNK

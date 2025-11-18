@@ -1,0 +1,17 @@
+++++ REJECTED HUNK: 1
+@@ -543,6 +543,14 @@
+         }
+     }
+ 
++    public void addPlayer(ServerPlayer player) {
++        this.dragonEvent.addPlayer(player);
++    }
++
++    public void removePlayer(ServerPlayer player) {
++        this.dragonEvent.removePlayer(player);
++    }
++
+     @Nullable
+     public UUID getDragonUUID() {
+         return this.dragonUUID;
+++++ END HUNK

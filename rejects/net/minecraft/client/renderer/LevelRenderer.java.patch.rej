@@ -1,0 +1,160 @@
+++++ REJECTED HUNK: 2
+@@ -477,6 +477,11 @@
+         profilerfiller.popPush("border");
+         this.worldBorderRenderer
+             .extract(this.level.getWorldBorder(), vec3, this.minecraft.options.getEffectiveRenderDistance() * 16, this.levelRenderState.worldBorderRenderState);
++        profilerfiller.popPush("neoforge_custom");
++        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent(
++                this, this.levelRenderState, this.level, p_109604_, frustum, p_348530_, this.ticks
++        ));
++        this.levelRenderState.dimensionSpecialEffects = this.level.effects();
+         profilerfiller.pop();
+         profilerfiller.popPush("setupFrameGraph");
+         Matrix4fStack matrix4fstack = RenderSystem.getModelViewStack();
+++++ END HUNK
+
+++++ REJECTED HUNK: 6
+@@ -523,18 +531,18 @@
+         }
+ 
+         this.minecraft.particleEngine.extract(this.particlesRenderState, new Frustum(frustum).offset(-3.0F), p_109604_, f);
+-        this.addParticlesPass(framegraphbuilder, p_425977_);
++        this.addParticlesPass(framegraphbuilder, p_425977_, p_254120_);
+         CloudStatus cloudstatus = this.minecraft.options.getCloudsType();
+         if (cloudstatus != CloudStatus.OFF) {
+             Optional<Integer> optional = this.level.dimensionType().cloudHeight();
+             if (optional.isPresent()) {
+                 float f1 = this.ticks + f;
+                 int k = this.level.getCloudColor(f);
+-                this.addCloudsPass(framegraphbuilder, cloudstatus, this.levelRenderState.cameraRenderState.pos, f1, k, optional.get().intValue() + 0.33F);
++                this.addCloudsPass(framegraphbuilder, cloudstatus, this.levelRenderState.cameraRenderState.pos, f1, k, optional.get().intValue() + 0.33F, p_254120_);
+             }
+         }
+ 
+-        this.addWeatherPass(framegraphbuilder, this.levelRenderState.cameraRenderState.pos, p_425977_);
++        this.addWeatherPass(framegraphbuilder, this.levelRenderState.cameraRenderState.pos, p_425977_, p_254120_);
+         if (postchain != null) {
+             postchain.addToFrame(framegraphbuilder, i, j, this.targets);
+         }
+++++ END HUNK
+
+++++ REJECTED HUNK: 7
+@@ -599,6 +607,9 @@
+                 p_362234_.push("terrain");
+                 ChunkSectionsToRender chunksectionstorender = this.prepareChunkRenders(p_362420_, d0, d1, d2);
+                 chunksectionstorender.renderGroup(ChunkSectionLayerGroup.OPAQUE);
++                p_362234_.push("neoforge_render_after_opaque_blocks");
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterOpaqueBlocks(this, this.levelRenderState, null, p_362420_, this.getRenderableSections()));
++                p_362234_.pop();
+                 this.minecraft.gameRenderer.getLighting().setupFor(Lighting.Entry.LEVEL);
+                 if (resourcehandle2 != null) {
+                     resourcehandle2.get().copyDepthFrom(this.minecraft.getMainRenderTarget());
+++++ END HUNK
+
+++++ REJECTED HUNK: 9
+@@ -664,8 +677,12 @@
+ 
+                 p_362234_.push("translucent");
+                 chunksectionstorender.renderGroup(ChunkSectionLayerGroup.TRANSLUCENT);
++                p_362234_.popPush("neoforge_render_after_translucent_blocks");
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterTranslucentBlocks(this, this.levelRenderState, null, p_362420_, this.getRenderableSections()));
+                 p_362234_.popPush("string");
+                 chunksectionstorender.renderGroup(ChunkSectionLayerGroup.TRIPWIRE);
++                p_362234_.popPush("neoforge_render_after_tripwire_blocks");
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterTripwireBlocks(this, this.levelRenderState, null, p_362420_, this.getRenderableSections()));
+                 if (p_363964_) {
+                     this.renderBlockOutline(multibuffersource$buffersource, posestack, true, p_451509_);
+                 }
+++++ END HUNK
+
+++++ REJECTED HUNK: 11
+@@ -696,10 +721,22 @@
+             this.particlesRenderState.submit(this.submitNodeStorage, this.levelRenderState.cameraRenderState);
+             this.featureRenderDispatcher.renderAllFeatures();
+             this.particlesRenderState.reset();
++
++            Profiler.get().push("neoforge_render_after_particles");
++            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterParticles(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
++            Profiler.get().pop();
+         });
+     }
+ 
++    /**
++     * @deprecated Neo: use {@link #addCloudsPass(FrameGraphBuilder, CloudStatus, Vec3, float, int, float, Matrix4f)} instead
++     */
++    @Deprecated
+     private void addCloudsPass(FrameGraphBuilder p_361907_, CloudStatus p_364196_, Vec3 p_362985_, float p_365209_, int p_362342_, float p_362337_) {
++        addCloudsPass(p_361907_, p_364196_, p_362985_, p_365209_, p_362342_, p_362337_, RenderSystem.getModelViewMatrix());
++    }
++
++    private void addCloudsPass(FrameGraphBuilder p_361907_, CloudStatus p_364196_, Vec3 p_362985_, float p_365209_, int p_362342_, float p_362337_, Matrix4f modelViewMatrix) {
+         FramePass framepass = p_361907_.addPass("clouds");
+         if (this.targets.clouds != null) {
+             this.targets.clouds = framepass.readsAndWrites(this.targets.clouds);
+++++ END HUNK
+
+++++ REJECTED HUNK: 13
+@@ -723,7 +772,10 @@
+         framepass.executes(() -> {
+             RenderSystem.setShaderFog(p_418104_);
+             MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
+-            this.weatherEffectRenderer.render(multibuffersource$buffersource, p_360771_, this.levelRenderState.weatherRenderState);
++            this.weatherEffectRenderer.render(multibuffersource$buffersource, p_360771_, this.levelRenderState.weatherRenderState, this.levelRenderState);
++            Profiler.get().push("neoforge_render_after_weather");
++            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterWeather(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
++            Profiler.get().pop();
+             this.worldBorderRenderer.render(this.levelRenderState.worldBorderRenderState, p_360771_, i, f);
+             multibuffersource$buffersource.endBatch();
+         });
+++++ END HUNK
+
+++++ REJECTED HUNK: 22
+@@ -1121,6 +1211,7 @@
+                 this.targets.main = framepass.readsAndWrites(this.targets.main);
+                 framepass.executes(
+                     () -> {
++                        if (!this.levelRenderState.dimensionSpecialEffects.renderSky(levelRenderState, skyrenderstate, modelViewMatrix, () -> RenderSystem.setShaderFog(p_418294_))) {
+                         RenderSystem.setShaderFog(p_418294_);
+                         if (skyrenderstate.skyType == DimensionSpecialEffects.SkyType.END) {
+                             this.skyRenderer.renderEndSky();
+++++ END HUNK
+
+++++ REJECTED HUNK: 23
+@@ -1147,6 +1238,10 @@
+                                 this.skyRenderer.renderDarkDisc();
+                             }
+                         }
++                        }
++                        Profiler.get().push("neoforge_render_after_sky");
++                        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterSky(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
++                        Profiler.get().pop();
+                     }
+                 );
+             }
+++++ END HUNK
+
+++++ REJECTED HUNK: 25
+@@ -1433,6 +1528,22 @@
+ 
+     public CloudRenderer getCloudRenderer() {
+         return this.cloudRenderer;
++    }
++
++    public int getTicks() {
++        return this.ticks;
++    }
++
++    public void iterateVisibleBlockEntities(java.util.function.Consumer<BlockEntity> blockEntityConsumer) {
++        for (var chunkInfo : this.visibleSections) {
++            chunkInfo.getSectionMesh().getRenderableBlockEntities().forEach(blockEntityConsumer);
++        }
++        this.level.getGloballyRenderedBlockEntities().forEach(blockEntityConsumer);
++    }
++
++    @org.jetbrains.annotations.ApiStatus.Internal
++    public Iterable<? extends net.neoforged.neoforge.client.IRenderableSection> getRenderableSections() {
++        return this.visibleSections;
+     }
+ 
+     @FunctionalInterface
+++++ END HUNK

@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 1
+@@ -80,7 +80,7 @@
+ 
+     @Nullable
+     public Identifier getNoItemIcon() {
+-        return null;
++        return backgroundSprite;
+     }
+ 
+     public ItemStack remove(int p_40227_) {
+++++ END HUNK

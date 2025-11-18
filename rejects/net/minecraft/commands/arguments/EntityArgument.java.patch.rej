@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 1
+@@ -127,7 +127,7 @@
+         if (p_91482_.getSource() instanceof SharedSuggestionProvider sharedsuggestionprovider) {
+             StringReader stringreader = new StringReader(p_91483_.getInput());
+             stringreader.setCursor(p_91483_.getStart());
+-            EntitySelectorParser entityselectorparser = new EntitySelectorParser(stringreader, EntitySelectorParser.allowSelectors(sharedsuggestionprovider));
++            EntitySelectorParser entityselectorparser = new EntitySelectorParser(stringreader, net.neoforged.neoforge.common.CommonHooks.canUseEntitySelectors(sharedsuggestionprovider));
+ 
+             try {
+                 entityselectorparser.parse();
+++++ END HUNK

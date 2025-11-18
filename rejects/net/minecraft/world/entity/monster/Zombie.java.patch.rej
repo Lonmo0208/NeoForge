@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 1
+@@ -259,6 +259,7 @@
+     }
+ 
+     protected void doUnderWaterConversion() {
++        if (!net.neoforged.neoforge.event.EventHooks.canLivingConvert(this, EntityType.DROWNED, (timer) -> this.conversionTime = timer)) return;
+         this.convertToZombieType(EntityType.DROWNED);
+         if (!this.isSilent()) {
+             this.level().levelEvent(null, 1040, this.blockPosition(), 0);
+++++ END HUNK

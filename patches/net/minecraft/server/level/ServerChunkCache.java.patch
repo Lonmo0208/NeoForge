@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/level/ServerChunkCache.java
 +++ b/net/minecraft/server/level/ServerChunkCache.java
-@@ -165,6 +_,10 @@
+@@ -161,6 +_,10 @@
                  }
              }
  
@@ -11,7 +11,7 @@
              profilerfiller.incrementCounter("getChunkCacheMiss");
              CompletableFuture<ChunkResult<ChunkAccess>> completablefuture = this.getChunkFutureMainThread(p_8360_, p_8361_, p_330876_, p_8363_);
              this.mainThreadProcessor.managedBlock(completablefuture::isDone);
-@@ -199,6 +_,7 @@
+@@ -194,6 +_,7 @@
              if (chunkholder == null) {
                  return null;
              } else {

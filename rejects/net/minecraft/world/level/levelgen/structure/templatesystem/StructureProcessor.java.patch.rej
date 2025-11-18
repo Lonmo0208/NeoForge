@@ -1,0 +1,13 @@
+++++ REJECTED HUNK: 1
+@@ -7,6 +7,10 @@
+ import net.minecraft.world.level.ServerLevelAccessor;
+ 
+ public abstract class StructureProcessor {
++    /**
++     * @deprecated Forge: Use {@link #process(LevelReader, BlockPos, BlockPos, StructureTemplate.StructureBlockInfo, StructureTemplate.StructureBlockInfo, StructurePlaceSettings, StructureTemplate)} instead.
++     */
++    @Deprecated
+     @Nullable
+     public StructureTemplate.StructureBlockInfo processBlock(
+         LevelReader p_74416_,
+++++ END HUNK

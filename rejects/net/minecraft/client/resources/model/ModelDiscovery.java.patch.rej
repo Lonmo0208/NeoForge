@@ -1,0 +1,25 @@
+++++ REJECTED HUNK: 3
+@@ -143,17 +151,19 @@
+         private static final ModelDiscovery.Slot<TextureSlots> KEY_TEXTURE_SLOTS = slot(4);
+         private static final ModelDiscovery.Slot<TextureAtlasSprite> KEY_PARTICLE_SPRITE = slot(5);
+         private static final ModelDiscovery.Slot<QuadCollection> KEY_DEFAULT_GEOMETRY = slot(6);
+-        private static final int SLOT_COUNT = 7;
++        // Neo: Cache additional properties too
++        private static final ModelDiscovery.Slot<net.minecraft.util.context.ContextMap> KEY_ADDITIONAL_PROPERTIES = slot(7);
++        private static final int SLOT_COUNT = 8;
+         private final Identifier id;
+         boolean valid;
+         @Nullable
+         ModelDiscovery.ModelWrapper parent;
+         final UnbakedModel wrapped;
+-        private final AtomicReferenceArray<Object> fixedSlots = new AtomicReferenceArray<>(7);
++        private final AtomicReferenceArray<Object> fixedSlots = new AtomicReferenceArray<>(SLOT_COUNT);
+         private final Map<ModelState, QuadCollection> modelBakeCache = new ConcurrentHashMap<>();
+ 
+         private static <T> ModelDiscovery.Slot<T> slot(int p_405746_) {
+-            Objects.checkIndex(p_405746_, 7);
++            Objects.checkIndex(p_405746_, SLOT_COUNT);
+             return new ModelDiscovery.Slot<>(p_405746_);
+         }
+ 
+++++ END HUNK

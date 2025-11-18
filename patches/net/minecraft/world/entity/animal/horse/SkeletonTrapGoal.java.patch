@@ -11,11 +11,3 @@
          DifficultyInstance difficultyinstance = serverlevel.getCurrentDifficultyAt(this.horse.blockPosition());
          this.horse.setTrap(false);
          this.horse.setTamed(true);
-@@ -58,6 +_,7 @@
-                 }
-             }
-         }
-+        }));
-     }
- 
-     @Nullable

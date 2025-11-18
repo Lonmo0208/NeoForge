@@ -28,9 +28,9 @@
  
              for (String s2 : p_265765_.getNamespaces()) {
                  try {
-                     ResourceLocation resourcelocation = ResourceLocation.fromNamespaceAndPath(s2, s1);
--                    appendFrom(s, p_265765_.getResourceStack(resourcelocation), map);
-+                    appendFrom(s, p_265765_.getResourceStack(resourcelocation), map, componentMap);
+                     Identifier identifier = Identifier.fromNamespaceAndPath(s2, s1);
+-                    appendFrom(s, p_265765_.getResourceStack(identifier), map);
++                    appendFrom(s, p_265765_.getResourceStack(Identifier), map, componentMap);
                  } catch (Exception exception) {
                      LOGGER.warn("Skipped language file: {}:{} ({})", s2, s1, exception.toString());
                  }

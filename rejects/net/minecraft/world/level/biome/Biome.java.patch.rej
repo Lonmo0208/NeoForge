@@ -1,0 +1,51 @@
+++++ REJECTED HUNK: 1
+@@ -37,8 +37,8 @@
+ public final class Biome {
+     public static final Codec<Biome> DIRECT_CODEC = RecordCodecBuilder.create(
+         p_220544_ -> p_220544_.group(
+-                Biome.ClimateSettings.CODEC.forGetter(p_151717_ -> p_151717_.climateSettings),
+-                BiomeSpecialEffects.CODEC.fieldOf("effects").forGetter(p_220550_ -> p_220550_.specialEffects),
++                Biome.ClimateSettings.CODEC.forGetter(p_151717_ -> p_151717_.modifiableBiomeInfo().getOriginalBiomeInfo().climateSettings()), // FORGE: Patch codec to ignore field redirect coremods.
++                BiomeSpecialEffects.CODEC.fieldOf("effects").forGetter(p_220550_ -> p_220550_.modifiableBiomeInfo().getOriginalBiomeInfo().effects()), // FORGE: Patch codec to ignore field redirect coremods.
+                 BiomeGenerationSettings.CODEC.forGetter(p_220548_ -> p_220548_.generationSettings),
+                 MobSpawnSettings.CODEC.forGetter(p_220546_ -> p_220546_.mobSettings)
+             )
+++++ END HUNK
+
+++++ REJECTED HUNK: 2
+@@ -62,9 +62,11 @@
+     )
+     public static final PerlinSimplexNoise BIOME_INFO_NOISE = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(2345L)), ImmutableList.of(0));
+     private static final int TEMPERATURE_CACHE_SIZE = 1024;
++    /** Neo: Field accesses are redirected to {@link #getModifiedClimateSettings()} with a coremod. */
+     private final Biome.ClimateSettings climateSettings;
+     private final BiomeGenerationSettings generationSettings;
+     private final MobSpawnSettings mobSettings;
++    /** Neo: Field accesses are redirected to {@link #getModifiedSpecialEffects()} with a coremod. */
+     private final BiomeSpecialEffects specialEffects;
+     private final ThreadLocal<Long2FloatLinkedOpenHashMap> temperatureCache = ThreadLocal.withInitial(() -> Util.make(() -> {
+         Long2FloatLinkedOpenHashMap long2floatlinkedopenhashmap = new Long2FloatLinkedOpenHashMap(1024, 0.25F) {
+++++ END HUNK
+
+++++ REJECTED HUNK: 3
+@@ -81,6 +83,7 @@
+         this.generationSettings = p_220532_;
+         this.mobSettings = p_220533_;
+         this.specialEffects = p_220531_;
++        this.modifiableBiomeInfo = new net.neoforged.neoforge.common.world.ModifiableBiomeInfo(new net.neoforged.neoforge.common.world.ModifiableBiomeInfo.BiomeInfo(p_220530_, p_220531_, p_220532_, p_220533_)); // FORGE: cache original biome info on construction so we can bypass our field read coremods where necessary
+     }
+ 
+     public int getSkyColor() {
+++++ END HUNK
+
+++++ REJECTED HUNK: 5
+@@ -190,7 +193,7 @@
+     }
+ 
+     public BiomeGenerationSettings getGenerationSettings() {
+-        return this.generationSettings;
++        return this.modifiableBiomeInfo().get().generationSettings();
+     }
+ 
+     public int getFogColor() {
+++++ END HUNK

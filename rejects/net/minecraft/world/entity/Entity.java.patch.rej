@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 26
+@@ -2925,6 +2960,7 @@
+ 
+     @Nullable
+     public Entity teleport(TeleportTransition p_379899_) {
++        if (!net.neoforged.neoforge.common.CommonHooks.onTravelToDimension(this, p_379899_.newLevel().dimension())) return null;
+         if (this.level() instanceof ServerLevel serverlevel && !this.isRemoved()) {
+             ServerLevel serverlevel1 = p_379899_.newLevel();
+             boolean flag = serverlevel1.dimension() != serverlevel.dimension();
+++++ END HUNK

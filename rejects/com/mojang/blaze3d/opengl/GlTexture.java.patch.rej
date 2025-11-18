@@ -1,0 +1,25 @@
+++++ REJECTED HUNK: 1
+@@ -17,15 +17,21 @@
+     protected boolean closed;
+     protected boolean modesDirty = true;
+     private int views;
++    protected final boolean external; // If true, the raw OpenGL texture is not managed by this GpuTexture
+ 
+     protected GlTexture(int p_409690_, String p_410238_, TextureFormat p_410416_, int p_409866_, int p_410468_, int p_409791_, int p_419794_, int p_423590_) {
++        this(p_409690_, p_410238_, p_410416_, p_409866_, p_410468_, p_409791_, p_419794_, p_423590_, false);
++    }
++
++    protected GlTexture(int p_409690_, String p_410238_, TextureFormat p_410416_, int p_409866_, int p_410468_, int p_409791_, int p_419794_, int p_423590_, boolean external) {
+         super(p_409690_, p_410238_, p_410416_, p_409866_, p_410468_, p_409791_, p_419794_);
+         this.id = p_423590_;
++        this.external = external;
+     }
+ 
+     @Override
+     public void close() {
+-        if (!this.closed) {
++        if (!this.closed && !this.external) {
+             this.closed = true;
+             if (this.views == 0) {
+                 this.destroyImmediately();
+++++ END HUNK

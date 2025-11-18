@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 3
+@@ -30,5 +31,7 @@
+         this.weatherRenderState.reset();
+         this.worldBorderRenderState.reset();
+         this.skyRenderState.reset();
++        this.dimensionSpecialEffects = net.neoforged.neoforge.client.DimensionSpecialEffectsManager.getDefaultEffects();
++        this.resetRenderData();
+     }
+ }
+++++ END HUNK

@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 1
+@@ -53,6 +53,7 @@
+     @Nullable
+     private AdvancementTab selectedTab;
+     private boolean isScrolling;
++    private static int tabPage, maxPages;
+ 
+     public AdvancementsScreen(ClientAdvancements p_97340_) {
+         this(p_97340_, null);
+++++ END HUNK

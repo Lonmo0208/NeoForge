@@ -10,10 +10,10 @@
      };
 +    /** @deprecated Neo: use the {@link net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps#PARROT_IMITATIONS data map} instead */
 +    @Deprecated
-     static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), p_415269_ -> {
-         p_415269_.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
-         p_415269_.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
-@@ -266,7 +_,7 @@
+     static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), p_460537_ -> {
+         p_460537_.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
+         p_460537_.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
+@@ -268,7 +_,7 @@
              }
  
              if (!this.level().isClientSide()) {

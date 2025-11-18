@@ -1,0 +1,15 @@
+++++ REJECTED HUNK: 8
+@@ -369,6 +407,12 @@
+         private ResourceKey<Item> id;
+         private DependantName<Item, String> descriptionId = ITEM_DESCRIPTION_ID;
+         private DependantName<Item, Identifier> model = ResourceKey::location;
++        private boolean canCombineRepair = true;
++
++        public Item.Properties setNoCombineRepair() {
++            canCombineRepair = false;
++            return this;
++        }
+ 
+         public Item.Properties food(FoodProperties p_41490_) {
+             return this.food(p_41490_, Consumables.DEFAULT_FOOD);
+++++ END HUNK

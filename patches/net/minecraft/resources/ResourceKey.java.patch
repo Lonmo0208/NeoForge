@@ -11,6 +11,6 @@
 +        return ret;
 +    }
 +
-     record InternKey(ResourceLocation registry, ResourceLocation location) {
+     record InternKey(Identifier registry, Identifier identifier) {
      }
  }

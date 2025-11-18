@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/npc/VillagerTrades.java
 +++ b/net/minecraft/world/entity/npc/VillagerTrades.java
-@@ -1390,6 +_,7 @@
+@@ -1389,6 +_,7 @@
          private final int villagerXp;
  
          public EmeraldsForVillagerTypeItem(int p_35669_, int p_35670_, int p_35671_, Map<ResourceKey<VillagerType>, Item> p_35672_) {
@@ -8,7 +8,7 @@
              BuiltInRegistries.VILLAGER_TYPE.registryKeySet().stream().filter(p_397212_ -> !p_35672_.containsKey(p_397212_)).findAny().ifPresent(p_396860_ -> {
                  throw new IllegalStateException("Missing trade for villager type: " + p_396860_);
              });
-@@ -1407,7 +_,9 @@
+@@ -1405,7 +_,9 @@
                  if (resourcekey == null) {
                      return null;
                  } else {

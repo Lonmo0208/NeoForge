@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 1
+@@ -62,7 +62,7 @@
+             this.minecart.setOnRails($$4);
+             if ($$4) {
+                 this.moveAlongTrack(serverlevel);
+-                if (blockstate.is(Blocks.ACTIVATOR_RAIL)) {
++                if (blockstate.getBlock() instanceof PoweredRailBlock poweredRail && poweredRail.isActivatorRail()) {
+                     this.minecart.activateMinecart(blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockstate.getValue(PoweredRailBlock.POWERED));
+                 }
+             } else {
+++++ END HUNK

@@ -20,7 +20,7 @@
      }
  
      public void addPairing(ServerPlayer p_8542_) {
-@@ -263,15 +_,17 @@
+@@ -263,16 +_,18 @@
          this.sendPairingData(p_8542_, list::add);
          p_8542_.connection.send(new ClientboundBundlePacket(list));
          this.entity.startSeenByPlayer(p_8542_);
@@ -28,6 +28,7 @@
      }
  
 -    public void sendPairingData(ServerPlayer p_289562_, Consumer<Packet<ClientGamePacketListener>> p_289563_) {
+         this.entity.updateDataBeforeSync();
 +    public void sendPairingData(ServerPlayer p_289562_, Consumer<Packet<? super ClientGamePacketListener>> p_289563_) {
          if (this.entity.isRemoved()) {
              LOGGER.warn("Fetching packet for removed entity {}", this.entity);
@@ -39,7 +40,7 @@
          if (this.trackedDataValues != null) {
              p_289563_.accept(new ClientboundSetEntityDataPacket(this.entity.getId(), this.trackedDataValues));
          }
-@@ -309,6 +_,8 @@
+@@ -310,6 +_,8 @@
          if (this.entity instanceof Leashable leashable && leashable.isLeashed()) {
              p_289563_.accept(new ClientboundSetEntityLinkPacket(this.entity, leashable.getLeashHolder()));
          }

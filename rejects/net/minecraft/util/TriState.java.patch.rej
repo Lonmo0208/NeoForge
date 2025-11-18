@@ -1,0 +1,21 @@
+++++ REJECTED HUNK: 1
+@@ -12,4 +12,18 @@
+             default -> p_361506_;
+         };
+     }
++
++    // Neo: Helper methods for use in patches
++
++    public boolean isTrue() {
++        return this == TRUE;
++    }
++
++    public boolean isDefault() {
++        return this == DEFAULT;
++    }
++
++    public boolean isFalse() {
++        return this == FALSE;
++    }
+ }
+++++ END HUNK

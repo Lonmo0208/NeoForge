@@ -1,0 +1,20 @@
+++++ REJECTED HUNK: 2
+@@ -858,6 +863,17 @@
+         protected void breed() {
+             ServerLevel serverlevel = this.level;
+             Fox fox = (Fox)this.animal.getBreedOffspring(serverlevel, this.partner);
++            final net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent event = new net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent(animal, partner, fox);
++            final boolean cancelled = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event).isCanceled();
++            fox = (Fox) event.getChild();
++            if (cancelled) {
++                //Reset the "inLove" state for the animals
++                this.animal.setAge(6000);
++                this.partner.setAge(6000);
++                this.animal.resetLove();
++                this.partner.resetLove();
++                return;
++            }
+             if (fox != null) {
+                 ServerPlayer serverplayer = this.animal.getLoveCause();
+                 ServerPlayer serverplayer1 = this.partner.getLoveCause();
+++++ END HUNK

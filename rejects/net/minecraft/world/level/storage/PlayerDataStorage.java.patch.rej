@@ -1,0 +1,12 @@
+++++ REJECTED HUNK: 2
+@@ -85,5 +86,9 @@
+             int i = NbtUtils.getDataVersion(p_432736_, -1);
+             return DataFixTypes.PLAYER.updateToCurrentVersion(this.fixerUpper, p_432736_, i);
+         });
++    }
++
++    public File getPlayerDir() {
++        return playerDir;
+     }
+ }
+++++ END HUNK

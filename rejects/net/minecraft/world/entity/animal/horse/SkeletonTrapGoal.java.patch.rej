@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 2
+@@ -58,6 +62,7 @@
+                 }
+             }
+         }
++        }));
+     }
+ 
+     @Nullable
+++++ END HUNK

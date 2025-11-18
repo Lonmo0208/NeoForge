@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/block/model/FaceBakery.java
 +++ b/net/minecraft/client/renderer/block/model/FaceBakery.java
-@@ -69,10 +_,19 @@
+@@ -67,10 +_,19 @@
          );
          Direction direction = calculateFacing(aint);
          if (p_111607_ == null) {
