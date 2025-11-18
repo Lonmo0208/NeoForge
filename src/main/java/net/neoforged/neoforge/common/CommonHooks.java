@@ -1392,6 +1392,7 @@ public class CommonHooks {
         if (EntitySelectorParser.allowSelectors(provider)) {
             return true;
         } else if (provider instanceof CommandSourceStack source && source.source instanceof ServerPlayer player) {
+            // TODO 1.21.11: Minecraft now has a permission system too and has permissions for this
             return PermissionAPI.getPermission(player, NeoForgeMod.USE_SELECTORS_PERMISSION);
         }
         return false;

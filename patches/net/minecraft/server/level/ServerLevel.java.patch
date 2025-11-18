@@ -1,5 +1,14 @@
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
+@@ -214,7 +_,7 @@
+     private boolean handlingTick;
+     private final List<CustomSpawner> customSpawners;
+     private @Nullable EndDragonFight dragonFight;
+-    final Int2ObjectMap<EnderDragonPart> dragonParts = new Int2ObjectOpenHashMap<>();
++    final Int2ObjectMap<net.neoforged.neoforge.entity.PartEntity<?>> dragonParts = new Int2ObjectOpenHashMap<>();
+     private final StructureManager structureManager;
+     private final StructureCheck structureCheck;
+     private final boolean tickTime;
 @@ -237,7 +_,6 @@
          super(p_215002_, p_215003_, p_214999_.registryAccess(), p_215004_.type(), false, p_215006_, p_215007_, p_214999_.getMaxChainedNeighborUpdates());
          this.tickTime = p_215009_;
@@ -8,6 +17,18 @@
          this.serverLevelData = p_215002_;
          ChunkGenerator chunkgenerator = p_215004_.generator();
          boolean flag = p_214999_.forceSynchronousWrites();
+@@ -301,6 +_,11 @@
+         this.waypointManager = new ServerWaypointManager();
+         this.environmentAttributes = EnvironmentAttributeSystem.builder().addDefaultLayers(this).build();
+         this.updateSkyBrightness();
++
++        net.neoforged.neoforge.attachment.LevelAttachmentsSavedData.init(this);
++        // Neo: Move the initialization of customSpawners to the end of costructor
++        // Providing a fully initialized ServerLevel instance for the ServerLevelEvent.CustomSpawners
++        this.customSpawners = net.neoforged.neoforge.event.EventHooks.getCustomSpawners(this, p_215008_);
+     }
+ 
+     @Deprecated
 @@ -351,7 +_,7 @@
          if (this.sleepStatus.areEnoughSleeping(i) && this.sleepStatus.areEnoughDeepSleeping(i, this.players)) {
              if (this.getGameRules().get(GameRules.ADVANCE_TIME)) {
@@ -184,6 +205,15 @@
          this.neighborUpdater.updateNeighborsAtExceptFromFacing(p_215052_, p_215053_, p_215054_, p_365231_);
      }
  
+@@ -1209,7 +_,7 @@
+         Explosion.BlockInteraction explosion$blockinteraction = switch (p_255827_) {
+             case NONE -> Explosion.BlockInteraction.KEEP;
+             case BLOCK -> this.getDestroyType(GameRules.BLOCK_EXPLOSION_DROP_DECAY);
+-            case MOB -> this.getGameRules().get(GameRules.MOB_GRIEFING)
++            case MOB -> net.neoforged.neoforge.event.EventHooks.canEntityGrief(this, p_256039_)
+                 ? this.getDestroyType(GameRules.MOB_EXPLOSION_DROP_DECAY)
+                 : Explosion.BlockInteraction.KEEP;
+             case TNT -> this.getDestroyType(GameRules.TNT_EXPLOSION_DROP_DECAY);
 @@ -1217,6 +_,7 @@
          };
          Vec3 vec3 = new Vec3(p_256067_, p_256370_, p_256153_);

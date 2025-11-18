@@ -61,6 +61,25 @@
                      p_401784_.add(levelchunk);
                  }
              }
+@@ -968,6 +_,18 @@
+         return tristate == TriState.DEFAULT ? this.anyPlayerCloseEnoughForSpawningInternal(p_183880_) : tristate.toBoolean(true);
+     }
+ 
++    void collectForceTickingChunks(List<LevelChunk> list) {
++        for (long l : distanceManager.ticketStorage.getForceLoadedChunks()) {
++            ChunkHolder holder = this.visibleChunkMap.get(l);
++            if (holder != null) {
++                var chunk = holder.getTickingChunk();
++                if (chunk != null) {
++                    list.add(chunk);
++                }
++            }
++        }
++    }
++
+     boolean anyPlayerCloseEnoughTo(BlockPos p_461043_, int p_460915_) {
+         Vec3 vec3 = new Vec3(p_461043_);
+ 
 @@ -1097,6 +_,7 @@
                  this.playerMap.unIgnorePlayer(p_140185_);
              }

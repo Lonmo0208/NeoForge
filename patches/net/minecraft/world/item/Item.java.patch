@@ -104,6 +104,19 @@
      public boolean canFitInsideContainerItems() {
          return true;
      }
+@@ -378,6 +_,12 @@
+         private @Nullable ResourceKey<Item> id;
+         private DependantName<Item, String> descriptionId = ITEM_DESCRIPTION_ID;
+         private final DependantName<Item, Identifier> model = ResourceKey::identifier;
++        private boolean canCombineRepair = true;
++
++        public Item.Properties setNoCombineRepair() {
++            canCombineRepair = false;
++            return this;
++        }
+ 
+         public Item.Properties food(FoodProperties p_41490_) {
+             return this.food(p_41490_, Consumables.DEFAULT_FOOD);
 @@ -639,6 +_,7 @@
          }
  

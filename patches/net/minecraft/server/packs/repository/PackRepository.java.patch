@@ -58,3 +58,13 @@
      }
  
      public FeatureFlagSet getRequestedFeatureFlags() {
+@@ -127,5 +_,9 @@
+ 
+     public List<PackResources> openAllSelected() {
+         return this.selected.stream().map(Pack::open).collect(ImmutableList.toImmutableList());
++    }
++
++    public synchronized void addPackFinder(RepositorySource packFinder) {
++        this.sources.add(packFinder);
+     }
+ }

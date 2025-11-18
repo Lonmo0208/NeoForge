@@ -133,6 +133,15 @@
          playeradvancements.setPlayer(p_11297_);
          return playeradvancements;
      }
+@@ -820,7 +_,7 @@
+     }
+ 
+     public List<ServerPlayer> getPlayers() {
+-        return this.players;
++        return this.playersView; // Neo: Return an unmodifiable view, we don't want people removing things without us knowing.
+     }
+ 
+     public @Nullable ServerPlayer getPlayer(UUID p_11260_) {
 @@ -846,6 +_,7 @@
              playeradvancements.reload(this.server.getAdvancements());
          }

@@ -70,6 +70,14 @@
          } else {
              boolean flag1 = block.isPossibleToRespawnInThis(blockstate);
              BlockState blockstate1 = p_348505_.getBlockState(blockpos.above());
+@@ -1091,6 +_,7 @@
+     }
+ 
+     public @Nullable ServerPlayer teleport(TeleportTransition p_379854_) {
++        if (!net.neoforged.neoforge.common.CommonHooks.onTravelToDimension(this, p_379854_.newLevel().dimension())) return null;
+         if (this.isRemoved()) {
+             return null;
+         } else {
 @@ -1118,7 +_,7 @@
                  PlayerList playerlist = this.server.getPlayerList();
                  playerlist.sendPlayerPermissionLevel(this);
@@ -95,6 +103,60 @@
                  return this;
              }
          }
+@@ -1184,8 +_,19 @@
+ 
+     @Override
+     public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos p_9115_) {
++        // Neo: Encapsulate the vanilla check logic to supply to the CanPlayerSleepEvent
++        var vanillaResult = ((java.util.function.Supplier<Either<BedSleepingProblem, Unit>>) () -> {
++        // Guard against modded beds that may not have the FACING property.
++        // We just return success (Unit) here. Modders will need to implement conditions in the CanPlayerSleepEvent
++        if (!this.level().getBlockState(p_9115_).hasProperty(HorizontalDirectionalBlock.FACING)) {
++            return Either.right(Unit.INSTANCE);
++        }
++
++        // Start vanilla code
+         Direction direction = this.level().getBlockState(p_9115_).getValue(HorizontalDirectionalBlock.FACING);
+-        if (!this.isSleeping() && this.isAlive()) {
++        if (this.isSleeping() || !this.isAlive()) {
++            return Either.left(Player.BedSleepingProblem.OTHER_PROBLEM);
++        } else {
+             BedRule bedrule = this.level().environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, p_9115_);
+             boolean flag = bedrule.canSleep(this.level());
+             boolean flag1 = bedrule.canSetSpawn(this.level());
+@@ -1221,6 +_,23 @@
+                         }
+                     }
+ 
++        // End vanilla code
++                }
++            }
++        }
++
++        return Either.right(Unit.INSTANCE);
++        }).get();
++
++        // Fire the event. Return the error if one exists after the event, otherwise use the vanilla logic to start sleeping.
++        vanillaResult = net.neoforged.neoforge.event.EventHooks.canPlayerStartSleeping(this, p_9115_, vanillaResult);
++        if (vanillaResult.left().isPresent()) {
++            return vanillaResult;
++        }
++
++        {
++            {{
++                // Start vanilla code
+                     Either<Player.BedSleepingProblem, Unit> either = super.startSleepInBed(p_9115_).ifRight(p_466339_ -> {
+                         this.awardStat(Stats.SLEEP_IN_BED);
+                         CriteriaTriggers.SLEPT_IN_BED.trigger(this);
+@@ -1233,8 +_,6 @@
+                     return either;
+                 }
+             }
+-        } else {
+-            return Either.left(Player.BedSleepingProblem.OTHER_PROBLEM);
+         }
+     }
+ 
 @@ -1245,6 +_,7 @@
      }
  
@@ -205,6 +267,19 @@
          if (entity != this.camera) {
              if (this.camera.level() instanceof ServerLevel serverlevel) {
                  this.teleportTo(serverlevel, this.camera.getX(), this.camera.getY(), this.camera.getZ(), Set.of(), this.getYRot(), this.getXRot(), false);
+@@ -1932,7 +_,11 @@
+     }
+ 
+     public @Nullable Component getTabListDisplayName() {
+-        return null;
++        if (!this.hasTabListName) {
++            this.tabListDisplayName = net.neoforged.neoforge.event.EventHooks.getPlayerTabListDisplayName(this);
++            this.hasTabListName = true;
++        }
++        return this.tabListDisplayName;
+     }
+ 
+     public int getTabListOrder() {
 @@ -1966,6 +_,7 @@
      }
  
@@ -297,3 +372,21 @@
          GameType gametype = this.server.getForcedGameType();
          if (gametype != null) {
              return gametype;
+@@ -2070,6 +_,9 @@
+ 
+     public void drop(boolean p_182295_) {
+         Inventory inventory = this.getInventory();
++        ItemStack selected = inventory.getSelectedItem();
++        if (selected.isEmpty() || !selected.onDroppedByPlayer(this)) return;
++        if (isUsingItem() && getUsedItemHand() == InteractionHand.MAIN_HAND && (p_182295_ || selected.getCount() == 1)) stopUsingItem(); // Forge: fix MC-231097 on the serverside
+         ItemStack itemstack = inventory.removeFromSelected(p_182295_);
+         this.containerMenu
+             .findSlot(inventory, inventory.getSelectedSlot())
+@@ -2079,6 +_,7 @@
+         }
+ 
+         this.drop(itemstack, false, true);
++        net.neoforged.neoforge.common.CommonHooks.onPlayerTossEvent(this, itemstack, false, true);
+     }
+ 
+     @Override

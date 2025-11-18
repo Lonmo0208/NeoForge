@@ -1,6 +1,7 @@
-++++ REJECTED HUNK: 1
-@@ -9,6 +9,28 @@
- import javax.annotation.Nullable;
+--- a/net/minecraft/core/NonNullList.java
++++ b/net/minecraft/core/NonNullList.java
+@@ -8,6 +_,28 @@
+ import org.jspecify.annotations.Nullable;
  
  public class NonNullList<E> extends AbstractList<E> {
 +
@@ -26,6 +27,5 @@
 +    }
 +
      private final List<E> list;
-     @Nullable
-     private final E defaultValue;
-++++ END HUNK
+     private final @Nullable E defaultValue;
+ 

@@ -16,3 +16,23 @@
      public static TagEntry element(Identifier p_468706_) {
          return new TagEntry(p_468706_, false, true);
      }
+@@ -109,6 +_,19 @@
+         }
+ 
+         return stringbuilder.toString();
++    }
++
++    // Neo: Used in datagen
++    public Identifier getId() {
++        return id;
++    }
++
++    public boolean isRequired() {
++        return required;
++    }
++
++    public boolean isTag() {
++        return tag;
+     }
+ 
+     public interface Lookup<T> {

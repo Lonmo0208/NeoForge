@@ -14,15 +14,3 @@
              serverstatscounter = new ServerStatsCounter(this.server, file2);
              this.stats.put(uuid, serverstatscounter);
 ++++ END HUNK
-
-++++ REJECTED HUNK: 15
-@@ -814,7 +833,7 @@
-     }
- 
-     public List<ServerPlayer> getPlayers() {
--        return this.players;
-+        return this.playersView; //Unmodifiable view, we don't want people removing things without us knowing.
-     }
- 
-     @Nullable
-++++ END HUNK

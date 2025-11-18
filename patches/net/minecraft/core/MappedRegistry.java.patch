@@ -1,5 +1,14 @@
 --- a/net/minecraft/core/MappedRegistry.java
 +++ b/net/minecraft/core/MappedRegistry.java
+@@ -29,7 +_,7 @@
+ import net.minecraft.util.Util;
+ import org.jspecify.annotations.Nullable;
+ 
+-public class MappedRegistry<T> implements WritableRegistry<T> {
++public class MappedRegistry<T> extends net.neoforged.neoforge.registries.BaseMappedRegistry<T> implements WritableRegistry<T> {
+     private final ResourceKey<? extends Registry<T>> key;
+     private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<>(256);
+     private final Reference2IntMap<T> toId = Util.make(new Reference2IntOpenHashMap<>(), p_304142_ -> p_304142_.defaultReturnValue(-1));
 @@ -84,9 +_,17 @@
  
      @Override
@@ -38,6 +47,15 @@
              return reference;
          }
      }
+@@ -134,7 +_,7 @@
+ 
+     @Override
+     public @Nullable T getValue(@Nullable ResourceKey<T> p_122714_) {
+-        return getValueFromNullable(this.byKey.get(p_122714_));
++        return getValueFromNullable(this.byKey.get(resolve(p_122714_)));
+     }
+ 
+     @Override
 @@ -149,12 +_,12 @@
  
      @Override
@@ -69,6 +87,15 @@
              }
          });
      }
+@@ -201,7 +_,7 @@
+ 
+     @Override
+     public @Nullable T getValue(@Nullable Identifier p_467986_) {
+-        Holder.Reference<T> reference = this.byLocation.get(p_467986_);
++        Holder.Reference<T> reference = this.byLocation.get(p_467986_ != null ? resolve(p_467986_) : null);
+         return getValueFromNullable(reference);
+     }
+ 
 @@ -262,13 +_,23 @@
          return this.byKey.containsKey(p_175392_);
      }

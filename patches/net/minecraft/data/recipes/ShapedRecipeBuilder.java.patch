@@ -26,14 +26,23 @@
      }
  
      public static ShapedRecipeBuilder shaped(HolderGetter<Item> p_364036_, RecipeCategory p_250853_, ItemLike p_249747_) {
-@@ -47,6 +_,10 @@
- 
-     public static ShapedRecipeBuilder shaped(HolderGetter<Item> p_365019_, RecipeCategory p_251325_, ItemLike p_250636_, int p_249081_) {
+@@ -49,6 +_,10 @@
          return new ShapedRecipeBuilder(p_365019_, p_251325_, p_250636_, p_249081_);
-+    }
-+
-+    public static ShapedRecipeBuilder shaped(HolderGetter<Item> p_365019_, RecipeCategory p_251325_, ItemStack result) {
-+        return new ShapedRecipeBuilder(p_365019_, p_251325_, result);
      }
  
++    public static ShapedRecipeBuilder shaped(HolderGetter<Item> p_365019_, RecipeCategory p_251325_, ItemStack result) {
++        return new ShapedRecipeBuilder(p_365019_, p_251325_, result);
++    }
++
      public ShapedRecipeBuilder define(Character p_206417_, TagKey<Item> p_206418_) {
+         return this.define(p_206417_, Ingredient.of(this.items.getOrThrow(p_206418_)));
+     }
+@@ -109,7 +_,7 @@
+             Objects.requireNonNullElse(this.group, ""),
+             RecipeBuilder.determineBookCategory(this.category),
+             shapedrecipepattern,
+-            new ItemStack(this.result, this.count),
++            this.resultStack,
+             this.showNotification
+         );
+         p_301098_.accept(

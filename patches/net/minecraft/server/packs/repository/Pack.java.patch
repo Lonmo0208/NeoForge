@@ -1,5 +1,22 @@
 --- a/net/minecraft/server/packs/repository/Pack.java
 +++ b/net/minecraft/server/packs/repository/Pack.java
+@@ -23,6 +_,16 @@
+     private final Pack.ResourcesSupplier resources;
+     private final Pack.Metadata metadata;
+     private final PackSelectionConfig selectionConfig;
++    private final boolean hidden; // Neo: Allow packs to be hidden from the UI entirely
++    private final List<Pack> children; // Neo: Allows packs to specify packs which will always be placed beneath them; must be hidden
++    private static final PackSource CHILD_SOURCE = PackSource.create(
++            name -> Component.translatable(
++                    "pack.nameAndSource",
++                    name,
++                    Component.translatable("pack.neoforge.source.child")
++            ).withStyle(net.minecraft.ChatFormatting.GRAY),
++            false
++    ); // Neo: Pack source for child packs; should not be otherwise used
+ 
+     public static @Nullable Pack readMetaAndCreate(
+         PackLocationInfo p_326065_, Pack.ResourcesSupplier p_252210_, PackType p_250595_, PackSelectionConfig p_326429_
 @@ -33,6 +_,34 @@
      }
  
