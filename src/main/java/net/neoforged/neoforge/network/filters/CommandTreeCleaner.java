@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.commands.PermissionCheck;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +40,7 @@ class CommandTreeCleaner {
         }
 
         @Override
-        public ArgumentBuilder<SharedSuggestionProvider, ?> createArgument(String name, ArgumentType<?> type, @Nullable ResourceLocation suggests) {
+        public ArgumentBuilder<SharedSuggestionProvider, ?> createArgument(String name, ArgumentType<?> type, @Nullable Identifier suggests) {
             RequiredArgumentBuilder<SharedSuggestionProvider, ?> builder = RequiredArgumentBuilder.argument(name, type);
             if (suggests != null) {
                 builder.suggests(SuggestionProviders.getProvider(suggests));
@@ -66,7 +66,7 @@ class CommandTreeCleaner {
     public static final ClientboundCommandsPacket.NodeInspector<SharedSuggestionProvider> COMMAND_NODE_INSPECTOR = new ClientboundCommandsPacket.NodeInspector<>() {
         @Nullable
         @Override
-        public ResourceLocation suggestionId(ArgumentCommandNode<SharedSuggestionProvider, ?> node) {
+        public Identifier suggestionId(ArgumentCommandNode<SharedSuggestionProvider, ?> node) {
             var suggestions = node.getCustomSuggestions();
             return suggestions != null ? SuggestionProviders.getName(suggestions) : null;
         }

@@ -29,7 +29,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.ReloadableServerResources;
@@ -680,11 +680,11 @@ public class EventHooks {
     /**
      * Fires the {@link LootTableLoadEvent} for non-empty loot tables and returns the table if the event was not
      * canceled and the table was not set to {@link LootTable#EMPTY} in the event. Otherwise returns {@code null}
-     * which maps to an empty {@link Optional} in {@link LootDataType#deserialize(ResourceLocation, DynamicOps, Object)}
+     * which maps to an empty {@link Optional} in {@link LootDataType#deserialize(Identifier, DynamicOps, Object)}
      */
     @Nullable
     @ApiStatus.Internal
-    public static LootTable loadLootTable(HolderLookup.Provider registries, ResourceLocation name, LootTable table) {
+    public static LootTable loadLootTable(HolderLookup.Provider registries, Identifier name, LootTable table) {
         if (table == LootTable.EMPTY) // Empty table has a null name, and shouldn't be modified anyway.
             return null;
         LootTableLoadEvent event = new LootTableLoadEvent(registries, name, table);

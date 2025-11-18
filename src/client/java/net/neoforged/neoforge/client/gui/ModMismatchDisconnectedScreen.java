@@ -32,7 +32,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.fml.ModList;
@@ -53,10 +53,10 @@ public class ModMismatchDisconnectedScreen extends Screen {
     private final Path modsDir;
     private final Path logFile;
     private final int listHeight = 140;
-    private final Map<ResourceLocation, Component> mismatchedChannelData;
+    private final Map<Identifier, Component> mismatchedChannelData;
     // TODO 1.21: DisconnectionDetails
 
-    public ModMismatchDisconnectedScreen(Screen parentScreen, Component reason, Map<ResourceLocation, Component> mismatchedChannelData) {
+    public ModMismatchDisconnectedScreen(Screen parentScreen, Component reason, Map<Identifier, Component> mismatchedChannelData) {
         super(Component.translatable("disconnect.lost"));
         this.reason = reason;
         this.parent = parentScreen;
@@ -118,7 +118,7 @@ public class ModMismatchDisconnectedScreen extends Screen {
         }
 
         private void updateListContent() {
-            Map<List<ResourceLocation>, Component> mergedChannelData = sortAndMergeChannelData(mismatchedChannelData);
+            Map<List<Identifier>, Component> mergedChannelData = sortAndMergeChannelData(mismatchedChannelData);
             record Row(MutableComponent name, MutableComponent reason) {}
             //The raw list of the strings in a table row, the components may still be too long for the final table and will be split up later. The first row element may have a style assigned to it that will be used for the whole content row.
             List<Row> rows = new ArrayList<>();
@@ -126,7 +126,7 @@ public class ModMismatchDisconnectedScreen extends Screen {
                 //Each table row contains the channel id(s) and the reason for the corresponding channel mismatch.
                 rows.add(new Row(Component.translatable("fml.modmismatchscreen.table.channelname"), Component.translatable("fml.modmismatchscreen.table.reason")));
                 int i = 0;
-                for (Map.Entry<List<ResourceLocation>, Component> channelData : mergedChannelData.entrySet()) {
+                for (Map.Entry<List<Identifier>, Component> channelData : mergedChannelData.entrySet()) {
                     rows.add(new Row(toChannelComponent(channelData.getKey(), i % 2 == 0 ? ChatFormatting.GOLD : ChatFormatting.YELLOW), channelData.getValue().copy()));
                     if (++i == 30 && mergedChannelData.size() > 30) {
                         //If too many mismatched channel entries are present, append a line referencing how to see the full list and stop rendering any more entries
@@ -151,10 +151,10 @@ public class ModMismatchDisconnectedScreen extends Screen {
          * @return A map containing channel mismatch entries with unique reasons. Each channel mismatch entry contains the list of all channels that share the same reason component,
          *         mapped to that reason component.
          */
-        private Map<List<ResourceLocation>, Component> sortAndMergeChannelData(Map<ResourceLocation, Component> mismatchedChannelData) {
-            Map<Component, List<ResourceLocation>> channelsByReason = new LinkedHashMap<>();
-            List<ResourceLocation> sortedChannels = mismatchedChannelData.keySet().stream().sorted(Comparator.comparing(ResourceLocation::toString)).toList();
-            for (ResourceLocation channel : sortedChannels) {
+        private Map<List<Identifier>, Component> sortAndMergeChannelData(Map<Identifier, Component> mismatchedChannelData) {
+            Map<Component, List<Identifier>> channelsByReason = new LinkedHashMap<>();
+            List<Identifier> sortedChannels = mismatchedChannelData.keySet().stream().sorted(Comparator.comparing(Identifier::toString)).toList();
+            for (Identifier channel : sortedChannels) {
                 Component channelMismatchReason = mismatchedChannelData.get(channel);
                 if (channelsByReason.containsKey(channelMismatchReason))
                     channelsByReason.get(channelMismatchReason).add(channel);
@@ -162,7 +162,7 @@ public class ModMismatchDisconnectedScreen extends Screen {
                     channelsByReason.put(channelMismatchReason, Lists.newArrayList(channel));
             }
 
-            Map<List<ResourceLocation>, Component> channelMismatchEntries = new LinkedHashMap<>();
+            Map<List<Identifier>, Component> channelMismatchEntries = new LinkedHashMap<>();
             List<Component> sortedChannelEntries = channelsByReason.entrySet().stream().sorted(Comparator.comparing(entry -> entry.getValue().get(0).toString())).map(Map.Entry::getKey).toList();
             for (Component mismatchReason : sortedChannelEntries) {
                 channelMismatchEntries.put(channelsByReason.get(mismatchReason), mismatchReason);
@@ -201,7 +201,7 @@ public class ModMismatchDisconnectedScreen extends Screen {
          * @param color Defines the color of the returned component.
          * @return A component with one or all entries of the channel id list as the main text component, and an assigned color which will be used for the whole content row.
          */
-        private MutableComponent toChannelComponent(List<ResourceLocation> ids, ChatFormatting color) {
+        private MutableComponent toChannelComponent(List<Identifier> ids, ChatFormatting color) {
             MutableComponent namespaceComponent;
             if (oneChannelPerEntry) {
                 namespaceComponent = Component.literal(ids.get(0).toString()).withStyle(color);

@@ -15,7 +15,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attribute.Sentiment;
@@ -106,7 +106,7 @@ public interface IAttributeExtension {
      * @apiNote Base modifiers always operate as if they were using {@link Operation#ADD_VALUE}.
      */
     @Nullable
-    default ResourceLocation getBaseId() {
+    default Identifier getBaseId() {
         if (this == Attributes.ATTACK_DAMAGE.value()) return AttributeUtil.BASE_ATTACK_DAMAGE_ID;
         else if (this == Attributes.ATTACK_SPEED.value()) return AttributeUtil.BASE_ATTACK_SPEED_ID;
         else if (this == Attributes.ENTITY_INTERACTION_RANGE.value()) return AttributeUtil.BASE_ENTITY_REACH_ID;

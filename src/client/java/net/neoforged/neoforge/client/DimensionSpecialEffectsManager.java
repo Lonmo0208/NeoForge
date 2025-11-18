@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
@@ -21,19 +21,19 @@ import org.jetbrains.annotations.ApiStatus;
  * Provides a lookup by dimension type.
  */
 public final class DimensionSpecialEffectsManager {
-    private static ImmutableMap<ResourceLocation, DimensionSpecialEffects> EFFECTS;
+    private static ImmutableMap<Identifier, DimensionSpecialEffects> EFFECTS;
     private static DimensionSpecialEffects DEFAULT_EFFECTS;
 
     /**
      * Finds the {@link DimensionSpecialEffects} for a given dimension type, or the default if none is registered.
      */
-    public static DimensionSpecialEffects getForType(ResourceLocation type) {
+    public static DimensionSpecialEffects getForType(Identifier type) {
         return EFFECTS.getOrDefault(type, DEFAULT_EFFECTS);
     }
 
     @ApiStatus.Internal
     public static void init() {
-        var effects = new HashMap<ResourceLocation, DimensionSpecialEffects>();
+        var effects = new HashMap<Identifier, DimensionSpecialEffects>();
         DEFAULT_EFFECTS = preRegisterVanillaEffects(effects);
         var event = new RegisterDimensionSpecialEffectsEvent(effects);
         ModLoader.postEventWrapContainerInModOrder(event);
@@ -45,7 +45,7 @@ public final class DimensionSpecialEffectsManager {
      * <p>
      * Borrowed from {@link DimensionSpecialEffects#EFFECTS}.
      */
-    private static DimensionSpecialEffects preRegisterVanillaEffects(Map<ResourceLocation, DimensionSpecialEffects> effects) {
+    private static DimensionSpecialEffects preRegisterVanillaEffects(Map<Identifier, DimensionSpecialEffects> effects) {
         var overworldEffects = new DimensionSpecialEffects.OverworldEffects();
         effects.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, overworldEffects);
         effects.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());

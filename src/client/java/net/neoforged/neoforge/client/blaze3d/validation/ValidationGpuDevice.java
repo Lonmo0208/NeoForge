@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.blaze3d.GpuDeviceFeatures;
 import net.neoforged.neoforge.client.blaze3d.GpuDeviceProperties;
 import org.jetbrains.annotations.ApiStatus;
@@ -153,7 +153,7 @@ public class ValidationGpuDevice implements GpuDevice {
     }
 
     @Override
-    public CompiledRenderPipeline precompilePipeline(RenderPipeline pipeline, @Nullable BiFunction<ResourceLocation, ShaderType, String> shaderSourceProvider) {
+    public CompiledRenderPipeline precompilePipeline(RenderPipeline pipeline, @Nullable BiFunction<Identifier, ShaderType, String> shaderSourceProvider) {
         validator.validatePipeline(pipeline);
         return realDevice.precompilePipeline(pipeline, shaderSourceProvider);
     }

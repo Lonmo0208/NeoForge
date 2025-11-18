@@ -8,7 +8,7 @@ package net.neoforged.neoforge.common.world.chunk;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.TicketStorage;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,9 +19,9 @@ public class TicketHelper {
     private final Map<BlockPos, TicketSet> blockTickets;
     private final Map<UUID, TicketSet> entityTickets;
     private final TicketStorage saveData;
-    private final ResourceLocation controllerId;
+    private final Identifier controllerId;
 
-    TicketHelper(TicketStorage saveData, ResourceLocation controllerId, Map<BlockPos, TicketSet> blockTickets, Map<UUID, TicketSet> entityTickets) {
+    TicketHelper(TicketStorage saveData, Identifier controllerId, Map<BlockPos, TicketSet> blockTickets, Map<UUID, TicketSet> entityTickets) {
         this.saveData = saveData;
         this.controllerId = controllerId;
         this.blockTickets = blockTickets;

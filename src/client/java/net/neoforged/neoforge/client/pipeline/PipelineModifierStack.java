@@ -13,7 +13,7 @@ import java.util.Deque;
 import java.util.Locale;
 import java.util.Map;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -54,7 +54,7 @@ public final class PipelineModifierStack {
             Map<RenderPipeline, RenderPipeline> xformCache = this.modifierTransformCache.computeIfAbsent(modifier, $ -> new Reference2ReferenceOpenHashMap<>());
             RenderPipeline newPipeline = xformCache.get(pipeline);
             if (newPipeline == null) {
-                ResourceLocation name = pipeline.getLocation().withSuffix("/transform/" + modifier.location().toString().replace(":", "/"));
+                Identifier name = pipeline.getLocation().withSuffix("/transform/" + modifier.location().toString().replace(":", "/"));
                 newPipeline = PipelineModifiers.MODIFIERS.get(modifier).apply(pipeline, name);
                 if (newPipeline != pipeline && newPipeline.getLocation().equals(pipeline.getLocation())) {
                     throw new IllegalStateException(String.format(

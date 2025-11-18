@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.TextureSlots;
 import net.minecraft.client.resources.model.UnbakedGeometry;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextMap;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +51,7 @@ public abstract class DelegateUnbakedModel implements UnbakedModel {
 
     @Nullable
     @Override
-    public ResourceLocation parent() {
+    public Identifier parent() {
         return this.delegate.parent();
     }
 

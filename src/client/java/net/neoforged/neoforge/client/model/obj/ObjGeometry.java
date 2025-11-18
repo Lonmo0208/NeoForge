@@ -25,7 +25,7 @@ import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.QuadCollection;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.phys.Vec2;
@@ -60,7 +60,7 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
     @Nullable
     public final String mtlOverride;
 
-    public final ResourceLocation modelLocation;
+    public final Identifier modelLocation;
 
     private ObjGeometry(Settings settings) {
         this.modelLocation = settings.modelLocation();
@@ -97,9 +97,9 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
         if (materialLibraryOverrideLocation != null) {
             String lib = materialLibraryOverrideLocation;
             if (lib.contains(":"))
-                mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(ResourceLocation.parse(lib));
+                mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(Identifier.parse(lib));
             else
-                mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(ResourceLocation.fromNamespaceAndPath(modelDomain, modelPath + lib));
+                mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(Identifier.fromNamespaceAndPath(modelDomain, modelPath + lib));
         }
 
         String[] line;
@@ -112,9 +112,9 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
 
                     String lib = line[1];
                     if (lib.contains(":"))
-                        mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(ResourceLocation.parse(lib));
+                        mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(Identifier.parse(lib));
                     else
-                        mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(ResourceLocation.fromNamespaceAndPath(modelDomain, modelPath + lib));
+                        mtllib = ObjLoader.INSTANCE.loadMaterialLibrary(Identifier.fromNamespaceAndPath(modelDomain, modelPath + lib));
                     break;
                 }
 
@@ -484,7 +484,7 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
         }
     }
 
-    public record Settings(ResourceLocation modelLocation,
+    public record Settings(Identifier modelLocation,
             boolean automaticCulling, boolean shadeQuads, boolean flipV,
             boolean emissiveAmbient, @Nullable String mtlOverride) {}
 }

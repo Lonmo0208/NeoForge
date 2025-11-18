@@ -7,7 +7,7 @@ package net.neoforged.neoforge.common.extensions;
 
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Scoreboard;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,7 @@ public interface ICommandSourceStackExtension {
      * @return the advancement from the id
      */
     @Nullable
-    default AdvancementHolder getAdvancement(ResourceLocation id) {
+    default AdvancementHolder getAdvancement(Identifier id) {
         return self().getServer().getAdvancements().get(id);
     }
 

@@ -16,7 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -35,7 +35,7 @@ import net.neoforged.neoforge.client.blaze3d.validation.ValidationGpuDevice;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class NeoForgeLoadingOverlay extends LoadingOverlay {
-    public static final ResourceLocation LOADING_OVERLAY_TEXTURE_ID = ResourceLocation.parse("neoforge:loading_overlay");
+    public static final Identifier LOADING_OVERLAY_TEXTURE_ID = Identifier.parse("neoforge:loading_overlay");
     private final Minecraft minecraft;
     private final ReloadInstance reload;
     private final DisplayWindow displayWindow;

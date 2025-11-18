@@ -7,7 +7,7 @@ package net.neoforged.neoforge.common.data.internal;
 
 import java.util.Locale;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
@@ -529,7 +529,7 @@ public final class NeoForgeLanguageProvider extends LanguageProvider {
         for (DyeColor color : DyeColor.values()) {
             TagKey<T> coloredTag = TagKey.create(
                     baseTagKey.registry(),
-                    ResourceLocation.fromNamespaceAndPath(baseTagKey.location().getNamespace(), baseTagKey.location().getPath() + "/" + color.name().toLowerCase(Locale.ROOT)));
+                    Identifier.fromNamespaceAndPath(baseTagKey.location().getNamespace(), baseTagKey.location().getPath() + "/" + color.name().toLowerCase(Locale.ROOT)));
 
             add(coloredTag, pattern.replace("{color}", StringUtils.capitalize(color.getName())));
         }

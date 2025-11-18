@@ -13,7 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -849,7 +849,7 @@ public class FluidType {
     @Override
     public String toString() {
         @Nullable
-        ResourceLocation name = NeoForgeRegistries.FLUID_TYPES.getKey(this);
+        Identifier name = NeoForgeRegistries.FLUID_TYPES.getKey(this);
         return name != null ? name.toString() : "Unregistered FluidType";
     }
 

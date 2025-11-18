@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
@@ -34,7 +34,7 @@ import net.neoforged.neoforge.common.NeoForgeMod;
 @EventBusSubscriber(value = Dist.CLIENT, modid = NeoForgeMod.MOD_ID)
 public final class BlockEntityRenderBoundsDebugRenderer {
     private static final ContextKey<List<BlockEntityRenderBoundsRenderState>> DATA_KEY = new ContextKey<>(
-            ResourceLocation.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "block_entity_render_bounds"));
+            Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "block_entity_render_bounds"));
     private static boolean enabled = false;
 
     @SubscribeEvent

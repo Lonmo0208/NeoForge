@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.model.ExtraFaceData;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,7 @@ public final class ExtendedModelTemplate extends ModelTemplate {
     final CustomLoaderBuilder customLoader;
     final RootTransformsBuilder rootTransforms;
     @Nullable
-    final ResourceLocation renderType;
+    final Identifier renderType;
     @Nullable
     final Boolean ambientOcclusion;
     @Nullable
@@ -49,7 +49,7 @@ public final class ExtendedModelTemplate extends ModelTemplate {
     }
 
     @Override
-    public JsonObject createBaseTemplate(ResourceLocation modelPath, Map<TextureSlot, ResourceLocation> textureMap) {
+    public JsonObject createBaseTemplate(Identifier modelPath, Map<TextureSlot, Identifier> textureMap) {
         var root = super.createBaseTemplate(modelPath, textureMap);
 
         if (this.ambientOcclusion != null) {
@@ -172,7 +172,7 @@ public final class ExtendedModelTemplate extends ModelTemplate {
         if (tex.charAt(0) == '#') {
             return tex;
         }
-        return ResourceLocation.parse(tex).toString();
+        return Identifier.parse(tex).toString();
     }
 
     private static JsonArray serializeVector3f(Vector3fc vec) {

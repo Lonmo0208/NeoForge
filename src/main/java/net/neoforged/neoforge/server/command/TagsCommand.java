@@ -29,7 +29,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 
@@ -56,7 +56,7 @@ class TagsCommand {
     // ample room for the explanatory text (see #createMessage() below).
     private static final long CLIPBOARD_TEXT_LIMIT = 32600;
     private static final long PAGE_SIZE = 8;
-    private static final ResourceKey<Registry<Registry<?>>> ROOT_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("root"));
+    private static final ResourceKey<Registry<Registry<?>>> ROOT_REGISTRY_KEY = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("root"));
 
     private static final DynamicCommandExceptionType UNKNOWN_REGISTRY = new DynamicCommandExceptionType(key -> CommandUtils.makeTranslatableWithFallback("commands.neoforge.tags.error.unknown_registry", key.toString()));
     private static final Dynamic2CommandExceptionType UNKNOWN_TAG = new Dynamic2CommandExceptionType((tag, registry) -> CommandUtils.makeTranslatableWithFallback("commands.neoforge.tags.error.unknown_tag", tag.toString(), registry.toString()));
@@ -118,7 +118,7 @@ class TagsCommand {
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
                 .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.location()));
 
-        final ResourceLocation tagLocation = ResourceLocationArgument.getId(ctx, "tag");
+        final Identifier tagLocation = ResourceLocationArgument.getId(ctx, "tag");
         final TagKey<?> tagKey = TagKey.create(cast(registryKey), tagLocation);
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -145,7 +145,7 @@ class TagsCommand {
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
                 .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.location()));
 
-        final ResourceLocation elementLocation = ResourceLocationArgument.getId(ctx, "element");
+        final Identifier elementLocation = ResourceLocationArgument.getId(ctx, "element");
         final ResourceKey<?> elementKey = ResourceKey.create(cast(registryKey), elementLocation);
 
         @SuppressWarnings({ "unchecked", "rawtypes" })

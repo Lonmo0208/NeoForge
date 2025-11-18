@@ -11,7 +11,7 @@ import java.util.Optional;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +33,7 @@ public interface SpriteContentsConstructor {
      */
     @Nullable
     SpriteContents create(
-            ResourceLocation id,
+            Identifier id,
             FrameSize frameSize,
             NativeImage nativeImage,
             Optional<AnimationMetadataSection> animationMetadata,

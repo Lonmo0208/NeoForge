@@ -21,7 +21,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.payload.KnownRegistryDataMapsPayload;
@@ -54,7 +54,7 @@ public class ClientRegistryManager {
     }
 
     public static void handleKnownDataMaps(final KnownRegistryDataMapsPayload payload, final IPayloadContext context) {
-        record MandatoryEntry(ResourceKey<? extends Registry<?>> registry, ResourceLocation id) {}
+        record MandatoryEntry(ResourceKey<? extends Registry<?>> registry, Identifier id) {}
         final Set<MandatoryEntry> ourMandatory = new HashSet<>();
         RegistryManager.getDataMaps().forEach((reg, values) -> values.values().forEach(attach -> {
             if (attach.mandatorySync()) {
@@ -98,7 +98,7 @@ public class ClientRegistryManager {
             return;
         }
 
-        final var known = new HashMap<ResourceKey<? extends Registry<?>>, Collection<ResourceLocation>>();
+        final var known = new HashMap<ResourceKey<? extends Registry<?>>, Collection<Identifier>>();
         RegistryManager.getDataMaps().forEach((key, vals) -> known.put(key, vals.keySet()));
         context.reply(new KnownRegistryDataMapsReplyPayload(known));
     }

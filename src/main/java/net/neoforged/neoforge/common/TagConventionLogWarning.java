@@ -15,7 +15,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.neoforged.bus.api.IEventBus;
@@ -565,6 +565,6 @@ public final class TagConventionLogWarning {
     }
 
     private static <T> TagKey<T> createTagKey(ResourceKey<Registry<T>> registryKey, String namespace, String tagId) {
-        return TagKey.create(registryKey, ResourceLocation.fromNamespaceAndPath(namespace, tagId));
+        return TagKey.create(registryKey, Identifier.fromNamespaceAndPath(namespace, tagId));
     }
 }

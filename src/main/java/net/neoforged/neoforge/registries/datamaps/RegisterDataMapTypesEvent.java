@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.neoforge.registries.DataPackRegistriesHooks;
@@ -19,10 +19,10 @@ import org.jetbrains.annotations.ApiStatus;
  * Event fired on the mod event bus, in order to register {@link DataMapType data map types}.
  */
 public class RegisterDataMapTypesEvent extends Event implements IModBusEvent {
-    private final Map<ResourceKey<Registry<?>>, Map<ResourceLocation, DataMapType<?, ?>>> attachments;
+    private final Map<ResourceKey<Registry<?>>, Map<Identifier, DataMapType<?, ?>>> attachments;
 
     @ApiStatus.Internal
-    public RegisterDataMapTypesEvent(Map<ResourceKey<Registry<?>>, Map<ResourceLocation, DataMapType<?, ?>>> attachments) {
+    public RegisterDataMapTypesEvent(Map<ResourceKey<Registry<?>>, Map<Identifier, DataMapType<?, ?>>> attachments) {
         this.attachments = attachments;
     }
 

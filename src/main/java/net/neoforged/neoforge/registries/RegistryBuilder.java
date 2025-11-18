@@ -13,7 +13,7 @@ import net.minecraft.core.DefaultedMappedRegistry;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.callback.AddCallback;
 import net.neoforged.neoforge.registries.callback.BakeCallback;
 import net.neoforged.neoforge.registries.callback.ClearCallback;
@@ -24,7 +24,7 @@ public class RegistryBuilder<T> {
     private final ResourceKey<? extends Registry<T>> registryKey;
     private final List<RegistryCallback<T>> callbacks = new ArrayList<>();
     @Nullable
-    private ResourceLocation defaultKey;
+    private Identifier defaultKey;
     private boolean intrusiveHolders = false;
     private int maxId = -1;
     private boolean sync = false;
@@ -34,7 +34,7 @@ public class RegistryBuilder<T> {
         this.registryKey = registryKey;
     }
 
-    public RegistryBuilder<T> defaultKey(ResourceLocation key) {
+    public RegistryBuilder<T> defaultKey(Identifier key) {
         this.defaultKey = key;
         return this;
     }

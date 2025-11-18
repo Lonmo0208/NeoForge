@@ -24,7 +24,7 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.QuadCollection;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.ClientHooks;
 import org.jetbrains.annotations.Nullable;
@@ -157,7 +157,7 @@ public final class UnbakedElementsHelper {
     public static void bakeElements(QuadCollection.Builder builder, List<BlockElement> elements, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState) {
         for (BlockElement element : elements) {
             element.faces().forEach((side, face) -> {
-                var sprite = spriteGetter.apply(new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.parse(face.texture())));
+                var sprite = spriteGetter.apply(new Material(TextureAtlas.LOCATION_BLOCKS, Identifier.parse(face.texture())));
                 BakedQuad quad = SimpleUnbakedGeometry.bakeFace(element, face, sprite, side, modelState);
                 if (face.cullForDirection() == null)
                     builder.addUnculledFace(quad);

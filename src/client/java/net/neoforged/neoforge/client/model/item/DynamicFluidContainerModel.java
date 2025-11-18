@@ -30,7 +30,7 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -74,7 +74,7 @@ public class DynamicFluidContainerModel implements ItemModel {
         this.unbakedModel = unbakedModel;
         this.bakingContext = bakingContext;
         // Source ItemTransforms from the base item model
-        var baseItemModel = bakingContext.blockModelBaker().getModel(ResourceLocation.withDefaultNamespace("item/generated"));
+        var baseItemModel = bakingContext.blockModelBaker().getModel(Identifier.withDefaultNamespace("item/generated"));
         if (baseItemModel == null) {
             throw new IllegalStateException("Failed to access item/generated model");
         }
@@ -153,17 +153,17 @@ public class DynamicFluidContainerModel implements ItemModel {
     }
 
     public record Textures(
-            Optional<ResourceLocation> particle,
-            Optional<ResourceLocation> base,
-            Optional<ResourceLocation> fluid,
-            Optional<ResourceLocation> cover) {
+            Optional<Identifier> particle,
+            Optional<Identifier> base,
+            Optional<Identifier> fluid,
+            Optional<Identifier> cover) {
         public static final Codec<Textures> CODEC = RecordCodecBuilder.<Textures>create(
                 instance -> instance
                         .group(
-                                ResourceLocation.CODEC.optionalFieldOf("particle").forGetter(Textures::particle),
-                                ResourceLocation.CODEC.optionalFieldOf("base").forGetter(Textures::base),
-                                ResourceLocation.CODEC.optionalFieldOf("fluid").forGetter(Textures::fluid),
-                                ResourceLocation.CODEC.optionalFieldOf("cover").forGetter(Textures::cover))
+                                Identifier.CODEC.optionalFieldOf("particle").forGetter(Textures::particle),
+                                Identifier.CODEC.optionalFieldOf("base").forGetter(Textures::base),
+                                Identifier.CODEC.optionalFieldOf("fluid").forGetter(Textures::fluid),
+                                Identifier.CODEC.optionalFieldOf("cover").forGetter(Textures::cover))
                         .apply(instance, Textures::new))
                 .validate(textures -> {
                     if (textures.particle.isPresent() || textures.base.isPresent() || textures.fluid.isPresent() || textures.cover.isPresent()) {

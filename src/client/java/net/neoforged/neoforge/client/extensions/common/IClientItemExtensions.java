@@ -16,7 +16,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -230,7 +230,7 @@ public interface IClientItemExtensions {
      * @return Path of texture to bind, or null to use default
      */
     @Nullable
-    default ResourceLocation getArmorTexture(ItemStack stack, EquipmentClientInfo.LayerType type, EquipmentClientInfo.Layer layer, ResourceLocation _default) {
+    default Identifier getArmorTexture(ItemStack stack, EquipmentClientInfo.LayerType type, EquipmentClientInfo.Layer layer, Identifier _default) {
         return null;
     }
 
@@ -240,7 +240,7 @@ public interface IClientItemExtensions {
      * @param stack The scoping item stack
      * @return The texture to use for scoping
      */
-    default ResourceLocation getScopeOverlayTexture(ItemStack stack) {
+    default Identifier getScopeOverlayTexture(ItemStack stack) {
         return Gui.SPYGLASS_SCOPE_LOCATION;
     }
 

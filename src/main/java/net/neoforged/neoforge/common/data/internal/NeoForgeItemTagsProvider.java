@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagAppender;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
@@ -429,24 +429,24 @@ public final class NeoForgeItemTagsProvider extends BlockTagCopyingItemTagProvid
         tag(Tags.Items.TOOLS_FISHING_ROD).addOptionalTag(forge("tools/fishing_rods"));
         tag(Tags.Items.TOOLS_SHEAR).addOptionalTag(forge("tools/shears"));
         tag(Tags.Items.TOOLS_SPEAR).addOptionalTag(forge("tools/tridents"));
-        tag(Tags.Items.TOOLS_SHIELD).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/shields")));
-        tag(Tags.Items.TOOLS_BOW).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/bows")));
-        tag(Tags.Items.TOOLS_BRUSH).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/brushes")));
-        tag(Tags.Items.TOOLS_CROSSBOW).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/crossbows")));
-        tag(Tags.Items.TOOLS_FISHING_ROD).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/fishing_rods")));
-        tag(Tags.Items.TOOLS_SHEAR).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/shears")));
-        tag(Tags.Items.TOOLS_SPEAR).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/tridents")));
-        tag(Tags.Items.FOODS_FRUIT).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/fruits")));
-        tag(Tags.Items.FOODS_VEGETABLE).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/vegetables")));
-        tag(Tags.Items.FOODS_BERRY).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/berries")));
-        tag(Tags.Items.FOODS_BREAD).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/breads")));
-        tag(Tags.Items.FOODS_COOKIE).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/cookies")));
-        tag(Tags.Items.FOODS_RAW_MEAT).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/raw_meats")));
-        tag(Tags.Items.FOODS_COOKED_MEAT).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/cooked_meats")));
-        tag(Tags.Items.FOODS_RAW_FISH).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/raw_fishes")));
-        tag(Tags.Items.FOODS_COOKED_FISH).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/cooked_fishes")));
-        tag(Tags.Items.FOODS_SOUP).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/soups")));
-        tag(Tags.Items.FOODS_CANDY).addOptionalTag(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "foods/candies")));
+        tag(Tags.Items.TOOLS_SHIELD).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/shields")));
+        tag(Tags.Items.TOOLS_BOW).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/bows")));
+        tag(Tags.Items.TOOLS_BRUSH).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/brushes")));
+        tag(Tags.Items.TOOLS_CROSSBOW).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/crossbows")));
+        tag(Tags.Items.TOOLS_FISHING_ROD).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/fishing_rods")));
+        tag(Tags.Items.TOOLS_SHEAR).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/shears")));
+        tag(Tags.Items.TOOLS_SPEAR).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/tridents")));
+        tag(Tags.Items.FOODS_FRUIT).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/fruits")));
+        tag(Tags.Items.FOODS_VEGETABLE).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/vegetables")));
+        tag(Tags.Items.FOODS_BERRY).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/berries")));
+        tag(Tags.Items.FOODS_BREAD).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/breads")));
+        tag(Tags.Items.FOODS_COOKIE).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/cookies")));
+        tag(Tags.Items.FOODS_RAW_MEAT).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/raw_meats")));
+        tag(Tags.Items.FOODS_COOKED_MEAT).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/cooked_meats")));
+        tag(Tags.Items.FOODS_RAW_FISH).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/raw_fishes")));
+        tag(Tags.Items.FOODS_COOKED_FISH).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/cooked_fishes")));
+        tag(Tags.Items.FOODS_SOUP).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/soups")));
+        tag(Tags.Items.FOODS_CANDY).addOptionalTag(ItemTags.create(Identifier.fromNamespaceAndPath("c", "foods/candies")));
     }
 
     private TagAppender<Item, Item> tagWithOptionalLegacy(TagKey<Item> tag) {
@@ -466,7 +466,7 @@ public final class NeoForgeItemTagsProvider extends BlockTagCopyingItemTagProvid
     private void addColored(TagKey<Item> group, String pattern) {
         String prefix = group.location().getPath().toUpperCase(Locale.ENGLISH) + '_';
         for (DyeColor color : DyeColor.values()) {
-            ResourceLocation key = ResourceLocation.fromNamespaceAndPath("minecraft", pattern.replace("{color}", color.getName()));
+            Identifier key = Identifier.fromNamespaceAndPath("minecraft", pattern.replace("{color}", color.getName()));
             TagKey<Item> tag = getForgeItemTag(prefix + color.getName());
             Item item = BuiltInRegistries.ITEM.getValue(key);
             if (item == null || item == Items.AIR)
@@ -504,7 +504,7 @@ public final class NeoForgeItemTagsProvider extends BlockTagCopyingItemTagProvid
     }
 
     private static TagKey<Item> forge(String name) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("forge", name));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("forge", name));
     }
 
     @Override

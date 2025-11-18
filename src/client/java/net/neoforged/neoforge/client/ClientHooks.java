@@ -128,7 +128,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -238,7 +238,7 @@ public class ClientHooks {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker CLIENTHOOKS = MarkerManager.getMarker("CLIENTHOOKS");
 
-    //private static final ResourceLocation ITEM_GLINT = ResourceLocation.withDefaultNamespace("textures/misc/enchanted_item_glint.png");
+    //private static final Identifier ITEM_GLINT = Identifier.withDefaultNamespace("textures/misc/enchanted_item_glint.png");
 
     /**
      * Contains the *extra* GUI layers.
@@ -292,8 +292,8 @@ public class ClientHooks {
         return NeoForge.EVENT_BUS.post(new PlayerHeartTypeEvent(player, heartType)).getType();
     }
 
-    public static ResourceLocation getArmorTexture(ItemStack armor, EquipmentClientInfo.LayerType type, EquipmentClientInfo.Layer layer, ResourceLocation _default) {
-        ResourceLocation result = IClientItemExtensions.of(armor).getArmorTexture(armor, type, layer, _default);
+    public static Identifier getArmorTexture(ItemStack armor, EquipmentClientInfo.LayerType type, EquipmentClientInfo.Layer layer, Identifier _default) {
+        Identifier result = IClientItemExtensions.of(armor).getArmorTexture(armor, type, layer, _default);
         return result != null ? result : _default;
     }
 
@@ -462,7 +462,7 @@ public class ClientHooks {
     }
 
     public static void onModifyBakingResult(ModelBakery.BakingResult bakingResult, SpriteLoader.Preparations spriteLoaderPreparations, ModelBakery modelBakery) {
-        Function<ResourceLocation, TextureAtlasSprite> textureGetter = location -> {
+        Function<Identifier, TextureAtlasSprite> textureGetter = location -> {
             TextureAtlasSprite sprite = spriteLoaderPreparations.getSprite(location);
             if (sprite != null) {
                 return sprite;
@@ -478,7 +478,7 @@ public class ClientHooks {
     }
 
     @SuppressWarnings("deprecation")
-    public static Material getBlockMaterial(ResourceLocation loc) {
+    public static Material getBlockMaterial(Identifier loc) {
         return new Material(TextureAtlas.LOCATION_BLOCKS, loc);
     }
 
@@ -538,7 +538,7 @@ public class ClientHooks {
 
     public static boolean loadEntityShader(@Nullable Entity entity, GameRenderer gameRenderer) {
         if (entity != null) {
-            ResourceLocation shader = EntitySpectatorShaderManager.get(entity.getType());
+            Identifier shader = EntitySpectatorShaderManager.get(entity.getType());
             if (shader != null) {
                 gameRenderer.setPostEffect(shader);
                 return true;
@@ -715,7 +715,7 @@ public class ClientHooks {
         return skullModelsByType.getOrDefault(type, set -> null).apply(modelSet);
     }
 
-    private static final ResourceLocation ICON_SHEET = ResourceLocation.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "textures/gui/icons.png");
+    private static final Identifier ICON_SHEET = Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "textures/gui/icons.png");
 
     public static void firePlayerLogin(MultiPlayerGameMode pc, LocalPlayer player, Connection networkManager) {
         NeoForge.EVENT_BUS.post(new ClientPlayerNetworkEvent.LoggingIn(pc, player, networkManager));
@@ -786,7 +786,7 @@ public class ClientHooks {
         return preEvent;
     }
 
-    public static RenderTooltipEvent.Texture onRenderTooltipTexture(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, List<ClientTooltipComponent> components, @Nullable ResourceLocation texture) {
+    public static RenderTooltipEvent.Texture onRenderTooltipTexture(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, List<ClientTooltipComponent> components, @Nullable Identifier texture) {
         return NeoForge.EVENT_BUS.post(new RenderTooltipEvent.Texture(stack, graphics, x, y, font, components, texture));
     }
 
@@ -1095,7 +1095,7 @@ public class ClientHooks {
     }
 
     public static List<AtlasManager.AtlasConfig> gatherTextureAtlases(List<AtlasManager.AtlasConfig> vanillaAtlases) {
-        SequencedMap<ResourceLocation, AtlasManager.AtlasConfig> atlasMap = new LinkedHashMap<>(vanillaAtlases.size());
+        SequencedMap<Identifier, AtlasManager.AtlasConfig> atlasMap = new LinkedHashMap<>(vanillaAtlases.size());
         vanillaAtlases.forEach(atlas -> atlasMap.put(atlas.definitionLocation(), atlas));
         ModLoader.postEvent(new RegisterTextureAtlasesEvent(atlasMap));
         return List.copyOf(atlasMap.values());
@@ -1198,8 +1198,8 @@ public class ClientHooks {
     }
 
     @ApiStatus.Internal
-    public static void updateDebugScreenEntriesForSearch(String searchText, Consumer<DebugEntryCategory> addCategory, Consumer<ResourceLocation> addEntry) {
-        var byCategory = MultimapBuilder.hashKeys().arrayListValues().<DebugEntryCategory, ResourceLocation>build();
+    public static void updateDebugScreenEntriesForSearch(String searchText, Consumer<DebugEntryCategory> addCategory, Consumer<Identifier> addEntry) {
+        var byCategory = MultimapBuilder.hashKeys().arrayListValues().<DebugEntryCategory, Identifier>build();
 
         // filter out to match search text
         // - blank/empty string, accept everything
@@ -1226,11 +1226,11 @@ public class ClientHooks {
         });
     }
 
-    private static boolean isValidDebugEntryForSearch(String searchText, ResourceLocation id) {
+    private static boolean isValidDebugEntryForSearch(String searchText, Identifier id) {
         if (searchText.isBlank()) {
             // no search provided, accept everything
             return true;
-        } else if (StringUtils.contains(searchText, ResourceLocation.NAMESPACE_SEPARATOR)) {
+        } else if (StringUtils.contains(searchText, Identifier.NAMESPACE_SEPARATOR)) {
             // search text contains ':' separator, accept all whose full id match
             return SharedSuggestionProvider.matchesSubStr(searchText, id.toString());
         } else {

@@ -6,7 +6,7 @@
 package net.neoforged.neoforge.capabilities;
 
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
@@ -51,8 +51,8 @@ public final class Capabilities {
         private Item() {}
     }
 
-    private static ResourceLocation create(String path) {
-        return ResourceLocation.fromNamespaceAndPath("neoforge", path);
+    private static Identifier create(String path) {
+        return Identifier.fromNamespaceAndPath("neoforge", path);
     }
 
     private Capabilities() {}

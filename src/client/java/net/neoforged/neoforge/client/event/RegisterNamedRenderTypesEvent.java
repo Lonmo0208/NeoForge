@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import java.util.Map;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.fml.LogicalSide;
@@ -26,10 +26,10 @@ import org.jetbrains.annotations.ApiStatus;
  * <p>This event is fired on the mod-specific event bus, only on the {@linkplain LogicalSide#CLIENT logical client}.</p>
  */
 public class RegisterNamedRenderTypesEvent extends Event implements IModBusEvent {
-    private final Map<ResourceLocation, RenderTypeGroup> renderTypes;
+    private final Map<Identifier, RenderTypeGroup> renderTypes;
 
     @ApiStatus.Internal
-    public RegisterNamedRenderTypesEvent(Map<ResourceLocation, RenderTypeGroup> renderTypes) {
+    public RegisterNamedRenderTypesEvent(Map<Identifier, RenderTypeGroup> renderTypes) {
         this.renderTypes = renderTypes;
     }
 
@@ -40,7 +40,7 @@ public class RegisterNamedRenderTypesEvent extends Event implements IModBusEvent
      * @param chunkLayer       The {@link ChunkSectionLayer} to render blocks with as part of the terrain
      * @param entityRenderType A {@link RenderType} using {@link DefaultVertexFormat#NEW_ENTITY}
      */
-    public void register(ResourceLocation key, ChunkSectionLayer chunkLayer, RenderType entityRenderType) {
+    public void register(Identifier key, ChunkSectionLayer chunkLayer, RenderType entityRenderType) {
         Preconditions.checkArgument(!renderTypes.containsKey(key), "Render type already registered: " + key);
         Preconditions.checkArgument(entityRenderType.format() == DefaultVertexFormat.NEW_ENTITY, "The entity render type must use the NEW_ENTITY vertex format.");
         renderTypes.put(key, new RenderTypeGroup(chunkLayer, entityRenderType));

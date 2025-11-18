@@ -9,7 +9,7 @@ import java.util.Objects;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
@@ -32,14 +32,14 @@ import org.jetbrains.annotations.Nullable;
  */
 public class LootTableLoadEvent extends Event implements ICancellableEvent {
     private final HolderLookup.Provider registries;
-    private final ResourceLocation name;
+    private final Identifier name;
     private LootTable table;
 
     @Nullable
     private ResourceKey<LootTable> key;
 
     @ApiStatus.Internal
-    public LootTableLoadEvent(HolderLookup.Provider registries, ResourceLocation name, LootTable table) {
+    public LootTableLoadEvent(HolderLookup.Provider registries, Identifier name, LootTable table) {
         this.registries = registries;
         this.name = name;
         this.table = table;
@@ -52,7 +52,7 @@ public class LootTableLoadEvent extends Event implements ICancellableEvent {
         return this.registries;
     }
 
-    public ResourceLocation getName() {
+    public Identifier getName() {
         return this.name;
     }
 

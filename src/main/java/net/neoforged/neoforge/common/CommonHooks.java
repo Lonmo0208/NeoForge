@@ -78,7 +78,7 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.SyncedDataHolder;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -238,9 +238,9 @@ import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
  * Class for various common (i.e. client and server-side) hooks.
  */
 public class CommonHooks {
-    public static final Comparator<ResourceLocation> CMP_BY_NAMESPACE_VANILLA_FIRST = Comparator
-            .<ResourceLocation, Boolean>comparing(location -> !location.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE))
-            .thenComparing(ResourceLocation::compareNamespaced);
+    public static final Comparator<Identifier> CMP_BY_NAMESPACE_VANILLA_FIRST = Comparator
+            .<Identifier, Boolean>comparing(location -> !location.getNamespace().equals(Identifier.DEFAULT_NAMESPACE))
+            .thenComparing(Identifier::compareNamespaced);
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Marker WORLDPERSISTENCE = MarkerManager.getMarker("WP");
@@ -1019,7 +1019,7 @@ public class CommonHooks {
     @Nullable
     public static String getDefaultCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
         Item item = itemStack.getItem();
-        ResourceLocation registryName = BuiltInRegistries.ITEM.getKey(item);
+        Identifier registryName = BuiltInRegistries.ITEM.getKey(item);
         String modId = registryName == null ? null : registryName.getNamespace();
         if ("minecraft".equals(modId)) {
             if (itemStack.has(DataComponents.STORED_ENCHANTMENTS)) {
@@ -1100,7 +1100,7 @@ public class CommonHooks {
      * @param context The loot context that generated that loot
      * @return The modified list
      *
-     * @deprecated Use {@link #modifyLoot(ResourceLocation, ObjectArrayList, LootContext)} instead.
+     * @deprecated Use {@link #modifyLoot(Identifier, ObjectArrayList, LootContext)} instead.
      *
      * @implNote This method will use the {@linkplain LootTableIdCondition#UNKNOWN_LOOT_TABLE unknown loot table marker} when redirecting.
      */
@@ -1123,7 +1123,7 @@ public class CommonHooks {
      *
      * @apiNote The given context will be modified by this method to also store the ID of the loot table being queried.
      */
-    public static ObjectArrayList<ItemStack> modifyLoot(ResourceLocation lootTableId, ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
+    public static ObjectArrayList<ItemStack> modifyLoot(Identifier lootTableId, ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
         context.setQueriedLootTableId(lootTableId); // In case the ID was set via copy constructor, this will be ignored: intended
         LootModifierManager man = NeoForgeEventHandler.getLootModifierManager();
         for (IGlobalLootModifier mod : man.getAllLootMods()) {
@@ -1333,7 +1333,7 @@ public class CommonHooks {
             return fallback;
         }
         try {
-            return BuiltInRegistries.MOB_EFFECT.getValue(ResourceLocation.parse(registryName));
+            return BuiltInRegistries.MOB_EFFECT.getValue(Identifier.parse(registryName));
         } catch (ResourceLocationException e) {
             return fallback;
         }
@@ -1363,8 +1363,8 @@ public class CommonHooks {
      */
     public static boolean checkStructureNamespace(String biome) {
         @Nullable
-        ResourceLocation biomeLocation = ResourceLocation.tryParse(biome);
-        return biomeLocation != null && !biomeLocation.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE);
+        Identifier biomeLocation = Identifier.tryParse(biome);
+        return biomeLocation != null && !biomeLocation.getNamespace().equals(Identifier.DEFAULT_NAMESPACE);
     }
 
     /**
@@ -1384,7 +1384,7 @@ public class CommonHooks {
      * @param registryKey key of the registry
      * @return path of the registry key. Prefixed with the namespace if it is not "minecraft"
      */
-    public static String prefixNamespace(ResourceLocation registryKey) {
+    public static String prefixNamespace(Identifier registryKey) {
         return registryKey.getNamespace().equals("minecraft") ? registryKey.getPath() : registryKey.getNamespace() + "/" + registryKey.getPath();
     }
 

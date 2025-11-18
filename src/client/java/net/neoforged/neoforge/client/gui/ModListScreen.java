@@ -35,7 +35,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
@@ -131,7 +131,7 @@ public class ModListScreen extends Screen {
 
     class InfoPanel extends ScrollPanel {
         @Nullable
-        private ResourceLocation logoPath;
+        private Identifier logoPath;
         private Size2i logoDims = new Size2i(0, 0);
         private List<FormattedCharSequence> lines = Collections.emptyList();
 
@@ -139,7 +139,7 @@ public class ModListScreen extends Screen {
             super(mcIn, widthIn, heightIn, topIn, modList.getRight() + PADDING);
         }
 
-        void setInfo(List<String> lines, ResourceLocation logoPath, Size2i logoDims) {
+        void setInfo(List<String> lines, Identifier logoPath, Size2i logoDims) {
             this.logoPath = logoPath;
             this.logoDims = logoDims;
             this.lines = resizeContent(lines);
@@ -377,9 +377,9 @@ public class ModListScreen extends Screen {
         VersionChecker.CheckResult vercheck = VersionChecker.getResult(selectedMod);
 
         @SuppressWarnings("resource")
-        Pair<ResourceLocation, Size2i> logoData;
+        Pair<Identifier, Size2i> logoData;
 
-        if (selectedMod.getModId().equals(ResourceLocation.DEFAULT_NAMESPACE)) {
+        if (selectedMod.getModId().equals(Identifier.DEFAULT_NAMESPACE)) {
             logoData = Pair.of(LogoRenderer.MINECRAFT_LOGO, new Size2i(LogoRenderer.LOGO_TEXTURE_WIDTH, LogoRenderer.LOGO_TEXTURE_HEIGHT));
         } else {
             logoData = selectedMod.getLogoFile().map(logoFile -> {
@@ -392,7 +392,7 @@ public class ModListScreen extends Screen {
                     if (logoResource != null)
                         logo = NativeImage.read(logoResource.get());
                     if (logo != null) {
-                        var textureId = ResourceLocation.fromNamespaceAndPath("neoforge", "modlogo");
+                        var textureId = Identifier.fromNamespaceAndPath("neoforge", "modlogo");
                         tm.register(textureId, new DynamicTexture(textureId::toString, logo) {
                             @Override
                             public void upload() {
@@ -405,7 +405,7 @@ public class ModListScreen extends Screen {
                         return Pair.of(textureId, new Size2i(logo.getWidth(), logo.getHeight()));
                     }
                 } catch (IOException | IllegalArgumentException e) {}
-                return Pair.<ResourceLocation, Size2i>of(null, new Size2i(0, 0));
+                return Pair.<Identifier, Size2i>of(null, new Size2i(0, 0));
             }).orElse(Pair.of(null, new Size2i(0, 0)));
         }
 

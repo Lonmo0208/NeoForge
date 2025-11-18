@@ -8,7 +8,7 @@ package net.neoforged.neoforge.client.gui.widget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.VersionChecker;
 import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.neoforge.client.loading.ClientModLoader;
@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @ApiStatus.Internal
 public class ModsButton extends Button {
-    private static final ResourceLocation VERSION_CHECK_ICONS = ResourceLocation.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "textures/gui/version_check_icons.png");
+    private static final Identifier VERSION_CHECK_ICONS = Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "textures/gui/version_check_icons.png");
 
     @Nullable
     private VersionChecker.Status showNotification;

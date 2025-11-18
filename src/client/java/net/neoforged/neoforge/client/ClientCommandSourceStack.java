@@ -24,7 +24,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -129,7 +129,7 @@ public class ClientCommandSourceStack extends CommandSourceStack {
      */
     @Override
     @Nullable
-    public AdvancementHolder getAdvancement(ResourceLocation id) {
+    public AdvancementHolder getAdvancement(Identifier id) {
         return connection().getAdvancements().get(id);
     }
 

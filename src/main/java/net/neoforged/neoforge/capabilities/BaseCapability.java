@@ -5,7 +5,7 @@
 
 package net.neoforged.neoforge.capabilities;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -20,11 +20,11 @@ import org.jetbrains.annotations.Nullable;
  * @param <C> Type of the additional context.
  */
 public abstract class BaseCapability<T, C extends @Nullable Object> {
-    private final ResourceLocation name;
+    private final Identifier name;
     private final Class<T> typeClass;
     private final Class<C> contextClass;
 
-    protected BaseCapability(ResourceLocation name, Class<T> typeClass, Class<C> contextClass) {
+    protected BaseCapability(Identifier name, Class<T> typeClass, Class<C> contextClass) {
         this.name = name;
         this.typeClass = typeClass;
         this.contextClass = contextClass;
@@ -33,7 +33,7 @@ public abstract class BaseCapability<T, C extends @Nullable Object> {
     /**
      * {@return the name of this capability}
      */
-    public final ResourceLocation name() {
+    public final Identifier name() {
         return name;
     }
 

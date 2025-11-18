@@ -16,7 +16,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -51,7 +51,7 @@ public final class AttachmentSync {
      */
     public static final Registry<AttachmentType<?>> SYNCED_ATTACHMENT_TYPES = new RegistryBuilder<>(
             ResourceKey.<AttachmentType<?>>createRegistryKey(
-                    ResourceLocation.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "synced_attachment_types")))
+                    Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "synced_attachment_types")))
                             .sync(true)
                             .callback((AddCallback<AttachmentType<?>>) (registry, id, key, value) -> {
                                 // Sanity check to ensure that no entries are added to this registry by accident

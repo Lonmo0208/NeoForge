@@ -27,7 +27,7 @@ import net.minecraft.core.component.predicates.DataComponentPredicate;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
@@ -485,11 +485,11 @@ public class NeoForgeMod {
     private static boolean enableMilkFluid = false;
     private static boolean enableMergedAttributeTooltips = false;
 
-    public static final DeferredHolder<SoundEvent, SoundEvent> BUCKET_EMPTY_MILK = DeferredHolder.create(Registries.SOUND_EVENT, ResourceLocation.withDefaultNamespace("item.bucket.empty_milk"));
-    public static final DeferredHolder<SoundEvent, SoundEvent> BUCKET_FILL_MILK = DeferredHolder.create(Registries.SOUND_EVENT, ResourceLocation.withDefaultNamespace("item.bucket.fill_milk"));
-    public static final DeferredHolder<FluidType, FluidType> MILK_TYPE = DeferredHolder.create(NeoForgeRegistries.Keys.FLUID_TYPES, ResourceLocation.withDefaultNamespace("milk"));
-    public static final DeferredHolder<Fluid, Fluid> MILK = DeferredHolder.create(Registries.FLUID, ResourceLocation.withDefaultNamespace("milk"));
-    public static final DeferredHolder<Fluid, Fluid> FLOWING_MILK = DeferredHolder.create(Registries.FLUID, ResourceLocation.withDefaultNamespace("flowing_milk"));
+    public static final DeferredHolder<SoundEvent, SoundEvent> BUCKET_EMPTY_MILK = DeferredHolder.create(Registries.SOUND_EVENT, Identifier.withDefaultNamespace("item.bucket.empty_milk"));
+    public static final DeferredHolder<SoundEvent, SoundEvent> BUCKET_FILL_MILK = DeferredHolder.create(Registries.SOUND_EVENT, Identifier.withDefaultNamespace("item.bucket.fill_milk"));
+    public static final DeferredHolder<FluidType, FluidType> MILK_TYPE = DeferredHolder.create(NeoForgeRegistries.Keys.FLUID_TYPES, Identifier.withDefaultNamespace("milk"));
+    public static final DeferredHolder<Fluid, Fluid> MILK = DeferredHolder.create(Registries.FLUID, Identifier.withDefaultNamespace("milk"));
+    public static final DeferredHolder<Fluid, Fluid> FLOWING_MILK = DeferredHolder.create(Registries.FLUID, Identifier.withDefaultNamespace("flowing_milk"));
 
     /**
      * Used in place of {@link DamageSources#magic()} for damage dealt by {@link MobEffects#POISON}.
@@ -498,7 +498,7 @@ public class NeoForgeMod {
      *
      * @see Tags.DamageTypes#IS_POISON
      */
-    public static final ResourceKey<DamageType> POISON_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "poison"));
+    public static final ResourceKey<DamageType> POISON_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, "poison"));
 
     /**
      * Run this method during mod constructor to enable milk and add it to the Minecraft milk bucket
@@ -649,8 +649,8 @@ public class NeoForgeMod {
         if (!event.getRegistryKey().equals(Registries.LOOT_CONDITION_TYPE))
             return;
 
-        event.register(Registries.LOOT_CONDITION_TYPE, ResourceLocation.fromNamespaceAndPath("neoforge", "loot_table_id"), () -> LootTableIdCondition.LOOT_TABLE_ID);
-        event.register(Registries.LOOT_CONDITION_TYPE, ResourceLocation.fromNamespaceAndPath("neoforge", "can_item_perform_ability"), () -> CanItemPerformAbility.LOOT_CONDITION_TYPE);
+        event.register(Registries.LOOT_CONDITION_TYPE, Identifier.fromNamespaceAndPath("neoforge", "loot_table_id"), () -> LootTableIdCondition.LOOT_TABLE_ID);
+        event.register(Registries.LOOT_CONDITION_TYPE, Identifier.fromNamespaceAndPath("neoforge", "can_item_perform_ability"), () -> CanItemPerformAbility.LOOT_CONDITION_TYPE);
     }
 
     private static void onConfigLoad(final ModConfigEvent.Loading configEvent) {
