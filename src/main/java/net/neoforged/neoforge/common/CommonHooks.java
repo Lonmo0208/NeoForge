@@ -44,7 +44,6 @@ import java.util.stream.Stream;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
@@ -76,9 +75,9 @@ import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.SyncedDataHolder;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -87,6 +86,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.util.datafix.fixes.StructuresBecomeConfiguredFix;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
@@ -1028,7 +1028,7 @@ public class CommonHooks {
                     Holder<Enchantment> enchantmentHolder = enchantments.iterator().next();
                     Optional<ResourceKey<Enchantment>> key = enchantmentHolder.unwrapKey();
                     if (key.isPresent()) {
-                        return key.get().location().getNamespace();
+                        return key.get().identifier().getNamespace();
                     }
                 }
             } else if (item instanceof PotionItem || item instanceof TippedArrowItem) {
@@ -1036,12 +1036,12 @@ public class CommonHooks {
                 Optional<Holder<Potion>> potionType = potionContents.potion();
                 Optional<ResourceKey<Potion>> key = potionType.flatMap(Holder::unwrapKey);
                 if (key.isPresent()) {
-                    return key.get().location().getNamespace();
+                    return key.get().identifier().getNamespace();
                 }
             } else if (item instanceof SpawnEggItem spawnEggItem) {
                 Optional<ResourceKey<EntityType<?>>> key = BuiltInRegistries.ENTITY_TYPE.getResourceKey(spawnEggItem.getType(itemStack));
                 if (key.isPresent()) {
-                    return key.get().location().getNamespace();
+                    return key.get().identifier().getNamespace();
                 }
             }
         }

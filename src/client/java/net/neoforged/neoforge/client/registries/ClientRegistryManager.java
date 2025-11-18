@@ -20,8 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.payload.KnownRegistryDataMapsPayload;
@@ -48,7 +48,7 @@ public class ClientRegistryManager {
                 NeoForge.EVENT_BUS.post(new DataMapsUpdatedEvent(regAccess, registry, DataMapsUpdatedEvent.UpdateCause.CLIENT_SYNC));
             } catch (Throwable t) {
                 LOGGER.error("Failed to handle registry data map sync: ", t);
-                context.disconnect(Component.translatable("neoforge.network.data_maps.failed", payload.registryKey().location().toString(), t.toString()));
+                context.disconnect(Component.translatable("neoforge.network.data_maps.failed", payload.registryKey().identifier().toString(), t.toString()));
             }
         });
     }
@@ -73,14 +73,14 @@ public class ClientRegistryManager {
         final var missingOur = Sets.difference(ourMandatory, theirMandatory);
         if (!missingOur.isEmpty()) {
             messages.add(Component.translatable("neoforge.network.data_maps.missing_our", Component.literal(missingOur.stream()
-                    .map(e -> e.id() + " (" + e.registry().location() + ")")
+                    .map(e -> e.id() + " (" + e.registry().identifier() + ")")
                     .collect(Collectors.joining(", "))).withStyle(ChatFormatting.GOLD)));
         }
 
         final var missingTheir = Sets.difference(theirMandatory, ourMandatory);
         if (!missingTheir.isEmpty()) {
             messages.add(Component.translatable("neoforge.network.data_maps.missing_their", Component.literal(missingTheir.stream()
-                    .map(e -> e.id() + " (" + e.registry().location() + ")")
+                    .map(e -> e.id() + " (" + e.registry().identifier() + ")")
                     .collect(Collectors.joining(", "))).withStyle(ChatFormatting.GOLD)));
         }
 

@@ -12,8 +12,8 @@ import java.util.function.Consumer;
 import net.minecraft.core.DefaultedMappedRegistry;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.registries.callback.AddCallback;
 import net.neoforged.neoforge.registries.callback.BakeCallback;
 import net.neoforged.neoforge.registries.callback.ClearCallback;
@@ -40,7 +40,7 @@ public class RegistryBuilder<T> {
     }
 
     public RegistryBuilder<T> defaultKey(ResourceKey<T> key) {
-        this.defaultKey = key.location();
+        this.defaultKey = key.identifier();
         return this;
     }
 
@@ -122,7 +122,7 @@ public class RegistryBuilder<T> {
         registry.setSync(this.sync);
 
         if (this.registrationCheck) {
-            RegistryManager.trackModdedRegistry(registry.key().location());
+            RegistryManager.trackModdedRegistry(registry.key().identifier());
         }
 
         return registry;

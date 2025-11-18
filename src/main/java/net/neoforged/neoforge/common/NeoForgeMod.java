@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.SharedConstants;
-import net.minecraft.advancements.critereon.EntitySubPredicate;
+import net.minecraft.advancements.criterion.EntitySubPredicate;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
@@ -26,8 +26,8 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.component.predicates.DataComponentPredicate;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
@@ -515,7 +515,7 @@ public class NeoForgeMod {
     }
 
     /**
-     * Run this method during mod constructor to enable {@link net.minecraft.FileUtil#RESERVED_WINDOWS_FILENAMES_NEOFORGE} regex being used for filepath validation.
+     * Run this method during mod constructor to enable {@link net.minecraft.util.FileUtil#RESERVED_WINDOWS_FILENAMES_NEOFORGE} regex being used for filepath validation.
      * Fixes MC-268617 at cost of vanilla incompat edge cases with files generated with this activated and them migrated to vanilla instance - See PR #767
      */
     public static void enableProperFilenameValidation() {

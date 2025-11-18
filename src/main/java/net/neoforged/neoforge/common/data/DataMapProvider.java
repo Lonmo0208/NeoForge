@@ -25,8 +25,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -66,7 +66,7 @@ public abstract class DataMapProvider implements DataProvider {
 
             return CompletableFuture.allOf(this.builders.entrySet().stream().map(entry -> {
                 DataMapType<?, ?> type = entry.getKey();
-                final Path path = this.pathProvider.json(type.id().withPrefix(DataMapLoader.getFolderLocation(type.registryKey().location()) + "/"));
+                final Path path = this.pathProvider.json(type.id().withPrefix(DataMapLoader.getFolderLocation(type.registryKey().identifier()) + "/"));
                 return generate(path, cache, entry.getValue(), dynamicOps);
             }).toArray(CompletableFuture[]::new));
         });

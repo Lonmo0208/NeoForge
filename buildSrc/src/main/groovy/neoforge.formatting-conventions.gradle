@@ -17,14 +17,10 @@ abstract class GeneratePackageInfos extends DefaultTask {
                 pkgName = pkgName.replaceAll('/', '.')
 
                 def pkgInfoText = """
-                    |@FieldsAreNonnullByDefault
-                    |@MethodsReturnNonnullByDefault
-                    |@ParametersAreNonnullByDefault
+                    |@NullMarked
                     |package $pkgName;
                     |
-                    |import javax.annotation.ParametersAreNonnullByDefault;
-                    |import net.minecraft.FieldsAreNonnullByDefault;
-                    |import net.minecraft.MethodsReturnNonnullByDefault;
+                    |import org.jspecify.annotations.NullMarked;
                 """.stripMargin().trim()
 
                 packageInfoFile.text = pkgInfoText

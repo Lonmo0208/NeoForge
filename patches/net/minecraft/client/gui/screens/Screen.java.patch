@@ -1,5 +1,15 @@
 --- a/net/minecraft/client/gui/screens/Screen.java
 +++ b/net/minecraft/client/gui/screens/Screen.java
+@@ -50,7 +_,8 @@
+ import org.slf4j.Logger;
+ 
+ @OnlyIn(Dist.CLIENT)
+-public abstract class Screen extends AbstractContainerEventHandler implements Renderable {
++public abstract class
++Screen extends AbstractContainerEventHandler implements Renderable {
+     private static final Logger LOGGER = LogUtils.getLogger();
+     private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
+     public static final Identifier MENU_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/menu_background.png");
 @@ -107,6 +_,7 @@
      public final void renderWithTooltipAndSubtitles(GuiGraphics p_434220_, int p_435721_, int p_435145_, float p_435742_) {
          p_434220_.nextStratum();
@@ -50,14 +60,29 @@
      }
  
      protected void fadeWidgets(float p_421625_) {
-@@ -469,6 +_,10 @@
+@@ -471,6 +_,10 @@
+     public void onFilesDrop(List<Path> p_96591_) {
      }
  
-     public void onFilesDrop(List<Path> p_96591_) {
-+    }
-+
 +    public Minecraft getMinecraft() {
 +        return this.minecraft;
++    }
++
+     private void scheduleNarration(long p_169381_, boolean p_169382_) {
+         this.nextNarrationTime = Util.getMillis() + p_169381_;
+         if (p_169382_) {
+@@ -623,6 +_,14 @@
+ 
+     public @Nullable Music getBackgroundMusic() {
+         return null;
++    }
++
++    private void addEventWidget(GuiEventListener b) {
++        if (b instanceof Renderable r)
++            this.renderables.add(r);
++        if (b instanceof NarratableEntry ne)
++            this.narratables.add(ne);
++        children.add(b);
      }
  
-     private void scheduleNarration(long p_169381_, boolean p_169382_) {
+     @OnlyIn(Dist.CLIENT)

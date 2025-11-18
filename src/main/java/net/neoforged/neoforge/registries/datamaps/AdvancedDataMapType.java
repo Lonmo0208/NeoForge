@@ -9,8 +9,8 @@ import com.mojang.serialization.Codec;
 import java.util.Map;
 import java.util.Objects;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.Nullable;
 
 /**

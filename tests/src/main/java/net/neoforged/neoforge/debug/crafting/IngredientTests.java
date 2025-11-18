@@ -363,12 +363,12 @@ public class IngredientTests {
             ShapelessRecipe shapelessrecipe = new CompressedShapelessRecipe(
                     Objects.requireNonNullElse(this.group, ""), RecipeBuilder.determineBookCategory(this.category), this.result, CompressedShapelessRecipe.compressIngredients(this.ingredients));
             p_301215_.accept(
-                    p_379987_, shapelessrecipe, advancement$builder.build(p_379987_.location().withPrefix("recipes/" + this.category.getFolderName() + "/")));
+                    p_379987_, shapelessrecipe, advancement$builder.build(p_379987_.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
         }
 
         private void ensureValid(ResourceKey<Recipe<?>> p_379745_) {
             if (this.criteria.isEmpty()) {
-                throw new IllegalStateException("No way of obtaining recipe " + p_379745_.location());
+                throw new IllegalStateException("No way of obtaining recipe " + p_379745_.identifier());
             }
         }
     }

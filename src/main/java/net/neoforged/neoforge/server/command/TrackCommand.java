@@ -120,7 +120,7 @@ class TrackCommand {
                 double averageTimings = data.getAverageTimings();
                 String tickTime = (averageTimings > 1000 ? TIME_FORMAT.format(averageTimings / 1000) : TIME_FORMAT.format(averageTimings)) + (averageTimings < 1000 ? "\u03bcs" : "ms");
 
-                return CommandUtils.makeTranslatableWithFallback("commands.neoforge.tracking.timing_entry", BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString(), entity.level().dimension().location().toString(), pos.getX(), pos.getY(), pos.getZ(), tickTime);
+                return CommandUtils.makeTranslatableWithFallback("commands.neoforge.tracking.timing_entry", BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString(), entity.level().dimension().identifier().toString(), pos.getX(), pos.getY(), pos.getZ(), tickTime);
             }));
         }
     }
@@ -136,7 +136,7 @@ class TrackCommand {
 
                 double averageTimings = data.getAverageTimings();
                 String tickTime = (averageTimings > 1000 ? TIME_FORMAT.format(averageTimings / 1000) : TIME_FORMAT.format(averageTimings)) + (averageTimings < 1000 ? "\u03bcs" : "ms");
-                return CommandUtils.makeTranslatableWithFallback("commands.neoforge.tracking.timing_entry", BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(be.getType()).toString(), be.getLevel().dimension().location().toString(), pos.getX(), pos.getY(), pos.getZ(), tickTime);
+                return CommandUtils.makeTranslatableWithFallback("commands.neoforge.tracking.timing_entry", BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(be.getType()).toString(), be.getLevel().dimension().identifier().toString(), pos.getX(), pos.getY(), pos.getZ(), tickTime);
             }));
         }
     }

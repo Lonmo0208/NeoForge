@@ -7,16 +7,16 @@ package net.neoforged.neoforge.client;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderStateShard.TextureStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.neoforged.neoforge.common.util.Lazy;
 
 @SuppressWarnings("deprecation")

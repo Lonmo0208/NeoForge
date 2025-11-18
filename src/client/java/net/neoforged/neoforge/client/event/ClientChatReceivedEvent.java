@@ -6,10 +6,10 @@
 package net.neoforged.neoforge.client.event;
 
 import java.util.UUID;
-import net.minecraft.Util;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.util.Util;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.fml.LogicalSide;

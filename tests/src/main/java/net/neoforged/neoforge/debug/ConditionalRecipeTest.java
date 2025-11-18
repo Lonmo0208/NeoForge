@@ -55,7 +55,7 @@ public interface ConditionalRecipeTest {
             if (recipe == null)
                 test.pass();
             else
-                test.fail("Found recipe: '" + recipeName.location() + "', This should always be disabled due to 'FALSE' condition!");
+                test.fail("Found recipe: '" + recipeName.identifier() + "', This should always be disabled due to 'FALSE' condition!");
         });
     }
 }

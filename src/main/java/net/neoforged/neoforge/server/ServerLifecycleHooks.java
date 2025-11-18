@@ -188,11 +188,11 @@ public class ServerLifecycleHooks {
                         boolean isVanillaBug = spawnerData.value().type() == EntityType.OCELOT && (biomeHolder.is(Biomes.JUNGLE) || biomeHolder.is(Biomes.BAMBOO_JUNGLE));
                         if (!isVanillaBug) {
                             LOGGER.warn("Detected {} that was registered with {} mob category but was added under {} mob category for {} biome! " +
-                                    "Mobs should be added to biomes under the same mob category that the mob was registered as to prevent mob cap spawning issues.",
+                                            "Mobs should be added to biomes under the same mob category that the mob was registered as to prevent mob cap spawning issues.",
                                     BuiltInRegistries.ENTITY_TYPE.getKey(spawnerData.value().type()),
                                     spawnerData.value().type().getCategory(),
                                     mobCategory,
-                                    biomeHolder.getKey().location());
+                                    biomeHolder.getKey().identifier());
                         }
                     }
                 }

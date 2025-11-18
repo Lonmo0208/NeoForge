@@ -186,24 +186,24 @@ public final class CreativeModeTabRegistry {
         {
             final Holder<CreativeModeTab> value = indexed.get(i);
             final CreativeModeTab tab = value.value();
-            final Identifier name = value.unwrapKey().orElseThrow().location();
+            final Identifier name = value.unwrapKey().orElseThrow().identifier();
 
             if (!tab.tabsBefore.isEmpty() || !tab.tabsAfter.isEmpty())
                 addTabOrder(tab, name);
             else {
                 // If there is no order specified ensure vanilla ordering by specifying the previous and next indexed tab as edges
                 if (i != 0)
-                    edges.put(indexed.get(i - 1).unwrapKey().orElseThrow().location(), name);
+                    edges.put(indexed.get(i - 1).unwrapKey().orElseThrow().identifier(), name);
                 if (i + 1 < indexed.size())
-                    edges.put(name, indexed.get(i + 1).unwrapKey().orElseThrow().location());
+                    edges.put(name, indexed.get(i + 1).unwrapKey().orElseThrow().identifier());
             }
         }
 
-        Identifier lastVanilla = indexed.get(vanillaTabs - 1).unwrapKey().orElseThrow().location();
+        Identifier lastVanilla = indexed.get(vanillaTabs - 1).unwrapKey().orElseThrow().identifier();
         for (int i = vanillaTabs; i < indexed.size(); i++) {
             final Holder<CreativeModeTab> value = indexed.get(i);
             final CreativeModeTab tab = value.value();
-            final Identifier name = value.unwrapKey().orElseThrow().location();
+            final Identifier name = value.unwrapKey().orElseThrow().identifier();
 
             if (!tab.tabsBefore.isEmpty() || !tab.tabsAfter.isEmpty())
                 addTabOrder(tab, name);

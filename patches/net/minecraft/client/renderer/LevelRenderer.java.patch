@@ -9,6 +9,17 @@
          profilerfiller.popPush("blockOutline");
          this.extractBlockOutline(p_109604_, this.levelRenderState);
          profilerfiller.popPush("blockBreaking");
+@@ -499,6 +_,10 @@
+             .extract(
+                 this.level.getWorldBorder(), f, vec3, this.minecraft.options.getEffectiveRenderDistance() * 16, this.levelRenderState.worldBorderRenderState
+             );
++        profilerfiller.popPush("neoforge_custom");
++        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent(
++                this, this.levelRenderState, this.level, p_109604_, frustum, p_348530_, this.ticks
++        ));
+         profilerfiller.pop();
+         profilerfiller.popPush("debug");
+         this.debugRenderer.emitGizmos(frustum, vec3.x, vec3.y, vec3.z, p_348530_.getGameTimeDeltaPartialTick(false));
 @@ -511,7 +_,7 @@
          this.targets.main = framegraphbuilder.importExternal("main", this.minecraft.getMainRenderTarget());
          int i = this.minecraft.getMainRenderTarget().width;
@@ -37,6 +48,37 @@
          }
  
          this.addMainPass(framegraphbuilder, frustum, p_254120_, p_425977_, p_109603_, this.levelRenderState, p_348530_, profilerfiller);
+@@ -548,17 +_,17 @@
+         }
+ 
+         this.minecraft.particleEngine.extract(this.particlesRenderState, new Frustum(frustum).offset(-3.0F), p_109604_, f);
+-        this.addParticlesPass(framegraphbuilder, p_425977_);
++        this.addParticlesPass(framegraphbuilder, p_425977_, p_254120_);
+         CloudStatus cloudstatus = this.minecraft.options.getCloudsType();
+         if (cloudstatus != CloudStatus.OFF) {
+             int k = p_109604_.attributeProbe().getValue(EnvironmentAttributes.CLOUD_COLOR, f);
+             if (ARGB.alpha(k) > 0) {
+                 float f1 = p_109604_.attributeProbe().getValue(EnvironmentAttributes.CLOUD_HEIGHT, f);
+-                this.addCloudsPass(framegraphbuilder, cloudstatus, this.levelRenderState.cameraRenderState.pos, this.levelRenderState.gameTime, f, k, f1);
++                this.addCloudsPass(framegraphbuilder, cloudstatus, this.levelRenderState.cameraRenderState.pos, this.levelRenderState.gameTime, f, k, f1, p_254120_);
+             }
+         }
+ 
+-        this.addWeatherPass(framegraphbuilder, p_425977_);
++        this.addWeatherPass(framegraphbuilder, p_425977_, p_254120_);
+         if (postchain != null) {
+             postchain.addToFrame(framegraphbuilder, i, j, this.targets);
+         }
+@@ -636,6 +_,9 @@
+ 
+                 ChunkSectionsToRender chunksectionstorender = this.prepareChunkRenders(p_362420_, d0, d1, d2);
+                 chunksectionstorender.renderGroup(ChunkSectionLayerGroup.OPAQUE, this.chunkLayerSampler);
++                p_362234_.push("neoforge_render_after_opaque_blocks");
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterOpaqueBlocks(this, this.levelRenderState, null, p_362420_, this.getRenderableSections()));
++                p_362234_.pop();
+                 this.minecraft.gameRenderer.getLighting().setupFor(Lighting.Entry.LEVEL);
+                 if (resourcehandle2 != null) {
+                     resourcehandle2.get().copyDepthFrom(this.minecraft.getMainRenderTarget());
 @@ -670,6 +_,8 @@
                  multibuffersource$buffersource.endBatch(Sheets.hangingSignSheet());
                  multibuffersource$buffersource.endBatch(Sheets.chestSheet());
@@ -45,6 +87,19 @@
 +                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterEntities(this, this.levelRenderState, posestack, p_362420_, this.getRenderableSections()));
                  if (p_363964_) {
                      this.renderBlockOutline(multibuffersource$buffersource, posestack, false, p_451509_);
+                 }
+@@ -696,8 +_,12 @@
+ 
+                 p_362234_.push("translucent");
+                 chunksectionstorender.renderGroup(ChunkSectionLayerGroup.TRANSLUCENT, this.chunkLayerSampler);
++                p_362234_.popPush("neoforge_render_after_translucent_blocks");
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterTranslucentBlocks(this, this.levelRenderState, null, p_362420_, this.getRenderableSections()));
+                 p_362234_.popPush("string");
+                 chunksectionstorender.renderGroup(ChunkSectionLayerGroup.TRIPWIRE, this.chunkLayerSampler);
++                p_362234_.popPush("neoforge_render_after_tripwire_blocks");
++                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterTripwireBlocks(this, this.levelRenderState, null, p_362420_, this.getRenderableSections()));
+                 if (p_363964_) {
+                     this.renderBlockOutline(multibuffersource$buffersource, posestack, true, p_451509_);
                  }
 @@ -708,7 +_,15 @@
          );
@@ -62,6 +117,31 @@
          FramePass framepass = p_363357_.addPass("particles");
          if (this.targets.particles != null) {
              this.targets.particles = framepass.readsAndWrites(this.targets.particles);
+@@ -728,12 +_,24 @@
+             this.particlesRenderState.submit(this.submitNodeStorage, this.levelRenderState.cameraRenderState);
+             this.featureRenderDispatcher.renderAllFeatures();
+             this.particlesRenderState.reset();
++
++            Profiler.get().push("neoforge_render_after_particles");
++            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterParticles(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
++            Profiler.get().pop();
+         });
+     }
+ 
++    /**
++     * @deprecated Neo: use {@link #addCloudsPass(FrameGraphBuilder, CloudStatus, Vec3, float, int, float, Matrix4f)} instead
++     */
++    @Deprecated
+     private void addCloudsPass(
+         FrameGraphBuilder p_361907_, CloudStatus p_364196_, Vec3 p_362985_, long p_469097_, float p_365209_, int p_362342_, float p_362337_
+     ) {
++        addCloudsPass(p_361907_, p_364196_, p_362985_, p_365209_, p_362342_, p_362337_, RenderSystem.getModelViewMatrix());
++    }
++
++    private void addCloudsPass(FrameGraphBuilder p_361907_, CloudStatus p_364196_, Vec3 p_362985_, float p_365209_, int p_362342_, float p_362337_, Matrix4f modelViewMatrix) {
+         FramePass framepass = p_361907_.addPass("clouds");
+         if (this.targets.clouds != null) {
+             this.targets.clouds = framepass.readsAndWrites(this.targets.clouds);
 @@ -741,10 +_,22 @@
              this.targets.main = framepass.readsAndWrites(this.targets.main);
          }
@@ -86,6 +166,17 @@
          int i = this.minecraft.options.getEffectiveRenderDistance() * 16;
          float f = this.minecraft.gameRenderer.getDepthFar();
          FramePass framepass = p_364025_.addPass("weather");
+@@ -759,6 +_,10 @@
+             MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
+             CameraRenderState camerarenderstate = this.levelRenderState.cameraRenderState;
+             this.weatherEffectRenderer.render(multibuffersource$buffersource, camerarenderstate.pos, this.levelRenderState.weatherRenderState);
++            this.weatherEffectRenderer.render(multibuffersource$buffersource, p_360771_, this.levelRenderState.weatherRenderState, this.levelRenderState);
++            Profiler.get().push("neoforge_render_after_weather");
++            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterWeather(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
++            Profiler.get().pop();
+             this.worldBorderRenderer.render(this.levelRenderState.worldBorderRenderState, camerarenderstate.pos, i, f);
+             multibuffersource$buffersource.endBatch();
+         });
 @@ -834,7 +_,7 @@
                              || p_435924_.isDetached()
                              || p_435924_.entity() instanceof LivingEntity && ((LivingEntity)p_435924_.entity()).isSleeping()
@@ -213,6 +304,25 @@
          FogType fogtype = p_362177_.getFluidInCamera();
          if (fogtype != FogType.POWDER_SNOW && fogtype != FogType.LAVA && !this.doesMobEffectBlockSky(p_362177_)) {
              SkyRenderState skyrenderstate = this.levelRenderState.skyRenderState;
+@@ -1198,6 +_,7 @@
+                     this.targets.main = framepass.readsAndWrites(this.targets.main);
+                     framepass.executes(
+                         () -> {
++                            // TODO 1.21.11: if (!this.levelRenderState.dimensionSpecialEffects.renderSky(levelRenderState, skyrenderstate, modelViewMatrix, () -> RenderSystem.setShaderFog(p_418294_))) {
+                             RenderSystem.setShaderFog(p_418294_);
+                             if (skyrenderstate.skybox == DimensionType.Skybox.END) {
+                                 skyrenderer.renderEndSky();
+@@ -1224,6 +_,10 @@
+                                     skyrenderer.renderDarkDisc();
+                                 }
+                             }
++                            // TODO 1.21.11: }
++                            Profiler.get().push("neoforge_render_after_sky");
++                            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterSky(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
++                            Profiler.get().pop();
+                         }
+                     );
+                 }
 @@ -1478,7 +_,7 @@
          } else {
              int i = p_412967_.packedBrightness(p_109538_, p_109540_);
@@ -222,3 +332,26 @@
              if (j < k) {
                  int l = LightTexture.sky(i);
                  return LightTexture.pack(k, l);
+@@ -1535,6 +_,22 @@
+ 
+     public CloudRenderer getCloudRenderer() {
+         return this.cloudRenderer;
++    }
++
++    public int getTicks() {
++        return this.ticks;
++    }
++
++    public void iterateVisibleBlockEntities(java.util.function.Consumer<BlockEntity> blockEntityConsumer) {
++        for (var chunkInfo : this.visibleSections) {
++            chunkInfo.getSectionMesh().getRenderableBlockEntities().forEach(blockEntityConsumer);
++        }
++        this.level.getGloballyRenderedBlockEntities().forEach(blockEntityConsumer);
++    }
++
++    @org.jetbrains.annotations.ApiStatus.Internal
++    public Iterable<? extends net.neoforged.neoforge.client.IRenderableSection> getRenderableSections() {
++        return this.visibleSections;
+     }
+ 
+     public Gizmos.TemporaryCollection collectPerFrameGizmos() {

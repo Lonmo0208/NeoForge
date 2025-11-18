@@ -1,19 +1,13 @@
 --- a/net/minecraft/client/renderer/item/BlockModelWrapper.java
 +++ b/net/minecraft/client/renderer/item/BlockModelWrapper.java
-@@ -73,6 +_,7 @@
+@@ -175,7 +_,9 @@
+             TextureSlots textureslots = resolvedmodel.getTopTextureSlots();
+             List<BakedQuad> list = resolvedmodel.bakeTopGeometry(textureslots, modelbaker, BlockModelRotation.IDENTITY).getAll();
+             ModelRenderProperties modelrenderproperties = ModelRenderProperties.fromResolvedModel(modelbaker, resolvedmodel, textureslots);
+-            Function<ItemStack, RenderType> function = BlockModelWrapper.detectRenderType(list);
++            var renderTypeGroup = resolvedmodel.getTopAdditionalProperties().getOptional(
++                    net.neoforged.neoforge.client.model.NeoForgeModelProperties.RENDER_TYPE);
++            Function<ItemStack, RenderType> function = renderTypeGroup == null ? BlockModelWrapper.detectRenderType(list) : ignored -> renderTypeGroup.entity();
+             return new BlockModelWrapper(this.tints, list, modelrenderproperties, function);
          }
  
-         this.animated = flag;
-+        this.renderType = renderType;
-     }
- 
-     public static Vector3f[] computeExtents(List<BakedQuad> p_404655_) {
-@@ -116,7 +_,7 @@
-         }
- 
-         itemstackrenderstate$layerrenderstate.setExtents(this.extents);
--        itemstackrenderstate$layerrenderstate.setRenderType(this.renderType.apply(p_386443_));
-+        itemstackrenderstate$layerrenderstate.setRenderType(this.renderType != null ? this.renderType : ItemBlockRenderTypes.getRenderType(p_386443_));
-         this.properties.applyToLayer(itemstackrenderstate$layerrenderstate, p_388231_);
-         itemstackrenderstate$layerrenderstate.prepareQuadList().addAll(this.quads);
-         if (this.animated) {

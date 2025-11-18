@@ -17,3 +17,11 @@
                      int j = nativeimage1.getWidth();
                      int k = nativeimage1.getHeight();
  
+@@ -64,6 +_,7 @@
+ 
+                             nativeimage1.setPixel(l, i1, j1);
+                         }
++                    }
+                     }
+ 
+                     anativeimage[i] = nativeimage1;

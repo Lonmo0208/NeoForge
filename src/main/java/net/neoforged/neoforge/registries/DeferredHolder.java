@@ -16,8 +16,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
 import org.jetbrains.annotations.Nullable;
@@ -160,7 +160,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
      * @return The ID of the object pointed to by this DeferredHolder.
      */
     public Identifier getId() {
-        return this.key.location();
+        return this.key.identifier();
     }
 
     /**
@@ -204,7 +204,7 @@ public class DeferredHolder<R, T extends R> implements Holder<R>, Supplier<T> {
      */
     @Override
     public boolean is(Identifier id) {
-        return id.equals(this.key.location());
+        return id.equals(this.key.identifier());
     }
 
     /**

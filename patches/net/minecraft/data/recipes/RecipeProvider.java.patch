@@ -47,7 +47,7 @@
 +                            private void saveRecipe(ResourceKey<Recipe<?>> p_380099_, Recipe<?> p_364792_, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
                                  list.add(
 -                                    DataProvider.saveStable(p_364823_, p_364211_, Recipe.CODEC, p_364792_, packoutput$pathprovider.json(p_380099_.identifier()))
-+                                    DataProvider.saveStable(p_364823_, p_364211_, Recipe.CONDITIONAL_CODEC, Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(p_364792_, conditions)), packoutput$pathprovider.json(p_380099_.location()))
++                                    DataProvider.saveStable(p_364823_, p_364211_, Recipe.CONDITIONAL_CODEC, Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(p_364792_, conditions)), packoutput$pathprovider.json(p_380099_.identifier()))
                                  );
                              }
  

@@ -9,8 +9,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.event.IModBusEvent;
 import org.jetbrains.annotations.Nullable;
@@ -97,7 +97,7 @@ public class RegisterEvent extends Event implements IModBusEvent {
          * @param value the object value
          */
         default void register(ResourceKey<T> key, T value) {
-            register(key.location(), value);
+            register(key.identifier(), value);
         }
 
         /**

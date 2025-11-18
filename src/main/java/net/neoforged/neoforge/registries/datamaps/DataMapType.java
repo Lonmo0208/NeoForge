@@ -9,8 +9,8 @@ import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import java.util.Objects;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import org.jetbrains.annotations.Nullable;
 

@@ -7,8 +7,8 @@ package net.neoforged.neoforge.registries;
 
 import java.util.Map;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.registries.callback.AddCallback;
 import net.neoforged.neoforge.registries.callback.BakeCallback;
 import net.neoforged.neoforge.registries.callback.ClearCallback;

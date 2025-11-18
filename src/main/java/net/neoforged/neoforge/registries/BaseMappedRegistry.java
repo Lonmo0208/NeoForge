@@ -11,8 +11,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.registries.callback.AddCallback;
 import net.neoforged.neoforge.registries.callback.BakeCallback;
 import net.neoforged.neoforge.registries.callback.ClearCallback;
@@ -88,9 +88,9 @@ public abstract class BaseMappedRegistry<T> implements Registry<T> {
 
     @Override
     public ResourceKey<T> resolve(ResourceKey<T> key) {
-        Identifier resolvedName = resolve(key.location());
+        Identifier resolvedName = resolve(key.identifier());
         // Try to reuse the key if possible
-        return resolvedName == key.location() ? key : ResourceKey.create(this.key(), resolvedName);
+        return resolvedName == key.identifier() ? key : ResourceKey.create(this.key(), resolvedName);
     }
 
     @Override

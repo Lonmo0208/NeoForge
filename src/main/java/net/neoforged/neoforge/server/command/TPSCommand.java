@@ -80,7 +80,7 @@ class TPSCommand {
                     .withColor(ChatFormatting.GREEN)
                     .withHoverEvent(new HoverEvent.ShowText(CommandUtils.makeTranslatableWithFallback(
                             "commands.neoforge.tps.dimension.tooltip",
-                            dimension.dimension().location().toString(),
+                            dimension.dimension().identifier().toString(),
                             dimensionType.getRegisteredName()))));
 
             component = CommandUtils.makeTranslatableWithFallback("commands.neoforge.tps.dimension", dimensionName, tpsComponent, tickTimeComponent);

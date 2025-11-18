@@ -9,13 +9,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 
 public record RegisteredCondition<T>(ResourceKey<T> registryKey) implements ICondition {
     public static final MapCodec<RegisteredCondition<?>> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
-            .group(Identifier.CODEC.optionalFieldOf("registry", Registries.ITEM.location()).forGetter(condition -> condition.registryKey().registry()),
-                    Identifier.CODEC.fieldOf("value").forGetter(condition -> condition.registryKey().location()))
+            .group(Identifier.CODEC.optionalFieldOf("registry", Registries.ITEM.identifier()).forGetter(condition -> condition.registryKey().registry()),
+                    Identifier.CODEC.fieldOf("value").forGetter(condition -> condition.registryKey().identifier()))
             .apply(instance, RegisteredCondition::new));
 
     private RegisteredCondition(Identifier registryType, Identifier registryName) {

@@ -142,11 +142,11 @@ public class CustomFeatureFlagsTests {
 
             if (isFlagEnabled) {
                 if (!hasEnabledRecipe) {
-                    test.fail("Missing recipe '" + enabledRecipeName.location() + "', This should be enabled due to our flag '" + flagName + "' being enabled");
+                    test.fail("Missing recipe '" + enabledRecipeName.identifier() + "', This should be enabled due to our flag '" + flagName + "' being enabled");
                 }
             } else {
                 if (hasEnabledRecipe) {
-                    test.fail("Found recipe '" + enabledRecipeName.location() + "', This should be disabled due to our flag '" + flagName + "' being enabled");
+                    test.fail("Found recipe '" + enabledRecipeName.identifier() + "', This should be disabled due to our flag '" + flagName + "' being enabled");
                 }
             }
 

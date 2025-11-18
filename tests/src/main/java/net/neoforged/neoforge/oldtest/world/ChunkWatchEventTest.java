@@ -60,6 +60,6 @@ public class ChunkWatchEventTest {
 
     @Nullable
     private static ResourceLocation getDimensionName(Level w) {
-        return w.dimension().location();
+        return w.dimension().identifier();
     }
 }

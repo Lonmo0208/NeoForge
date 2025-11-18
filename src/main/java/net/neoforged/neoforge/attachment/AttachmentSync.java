@@ -15,8 +15,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -55,9 +55,9 @@ public final class AttachmentSync {
                             .sync(true)
                             .callback((AddCallback<AttachmentType<?>>) (registry, id, key, value) -> {
                                 // Sanity check to ensure that no entries are added to this registry by accident
-                                if (!NeoForgeRegistries.ATTACHMENT_TYPES.containsKey(key.location())
+                                if (!NeoForgeRegistries.ATTACHMENT_TYPES.containsKey(key.identifier())
                                         || !NeoForgeRegistries.ATTACHMENT_TYPES.containsValue(value)
-                                        || NeoForgeRegistries.ATTACHMENT_TYPES.getValue(key.location()) != value) {
+                                        || NeoForgeRegistries.ATTACHMENT_TYPES.getValue(key.identifier()) != value) {
                                     throw new IllegalStateException("Cannot add entries to the SYNCED_ATTACHMENT_TYPES registry directly.");
                                 }
                             })
@@ -65,7 +65,7 @@ public final class AttachmentSync {
 
     public static final AddCallback<AttachmentType<?>> ATTACHMENT_TYPE_ADD_CALLBACK = (registry, id, key, value) -> {
         if (value.syncHandler != null) {
-            Registry.register(SYNCED_ATTACHMENT_TYPES, key.location(), value);
+            Registry.register(SYNCED_ATTACHMENT_TYPES, key.identifier(), value);
         }
     };
 

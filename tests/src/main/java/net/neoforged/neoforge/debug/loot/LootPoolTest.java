@@ -104,7 +104,7 @@ public class LootPoolTest {
 
         test.onGameTest(helper -> helper.startSequence()
                 .thenExecute(() -> {
-                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
+                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.identifier()));
                     LootParams.Builder lootParamsBuilder = new LootParams.Builder(helper.getLevel())
                             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(BlockPos.ZERO)))
                             .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
@@ -145,7 +145,7 @@ public class LootPoolTest {
 
         test.onGameTest(helper -> helper.startSequence()
                 .thenExecute(() -> {
-                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
+                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.identifier()));
                     LootParams.Builder lootParamsBuilder = new LootParams.Builder(helper.getLevel())
                             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(BlockPos.ZERO)))
                             .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
@@ -186,7 +186,7 @@ public class LootPoolTest {
 
         test.onGameTest(helper -> helper.startSequence()
                 .thenExecute(() -> {
-                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.location()));
+                    LootTable lootTable = helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableToUse.identifier()));
                     LootParams.Builder lootParamsBuilder = new LootParams.Builder(helper.getLevel())
                             .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(BlockPos.ZERO)))
                             .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
@@ -202,8 +202,8 @@ public class LootPoolTest {
     static void conditionalLootTable(final DynamicTest test, final RegistrationHelper reg) {
         ResourceKey<LootTable> tableOne = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(test.createModId(), "table_1"));
         ResourceKey<LootTable> tableTwo = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(test.createModId(), "table_2"));
-        ResourceLocation tableOneLoc = tableOne.location().withPrefix("loot_table/").withSuffix(".json");
-        ResourceLocation tableTwoLoc = tableTwo.location().withPrefix("loot_table/").withSuffix(".json");
+        ResourceLocation tableOneLoc = tableOne.identifier().withPrefix("loot_table/").withSuffix(".json");
+        ResourceLocation tableTwoLoc = tableTwo.identifier().withPrefix("loot_table/").withSuffix(".json");
 
         reg.addClientProvider(event -> new LootTableProvider(
                 event.getGenerator().getPackOutput(),

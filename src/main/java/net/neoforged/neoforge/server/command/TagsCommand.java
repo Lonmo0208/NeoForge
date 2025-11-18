@@ -28,8 +28,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 
@@ -94,12 +94,12 @@ class TagsCommand {
         final ResourceKey<? extends Registry<?>> registryKey = CommandUtils.getResourceKey(ctx, "registry", ROOT_REGISTRY_KEY)
                 .orElseThrow(); // Expect to always retrieve a resource key for the root registry (registry key)
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
-                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.location()));
+                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.identifier()));
 
         final long tagCount = registry.getTags().count();
 
         ctx.getSource().sendSuccess(() -> createMessage(
-                CommandUtils.makeTranslatableWithFallback("commands.neoforge.tags.registry_key", Component.literal(registryKey.location().toString()).withStyle(ChatFormatting.GOLD)),
+                CommandUtils.makeTranslatableWithFallback("commands.neoforge.tags.registry_key", Component.literal(registryKey.identifier().toString()).withStyle(ChatFormatting.GOLD)),
                 "commands.neoforge.tags.tag_count",
                 "commands.neoforge.tags.copy_tag_names",
                 tagCount,
@@ -116,25 +116,25 @@ class TagsCommand {
         final ResourceKey<? extends Registry<?>> registryKey = CommandUtils.getResourceKey(ctx, "registry", ROOT_REGISTRY_KEY)
                 .orElseThrow(); // Expect to always retrieve a resource key for the root registry (registry key)
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
-                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.location()));
+                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.identifier()));
 
         final Identifier tagLocation = ResourceLocationArgument.getId(ctx, "tag");
         final TagKey<?> tagKey = TagKey.create(cast(registryKey), tagLocation);
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         Optional<HolderSet.Named<?>> optional = registry.get(TagsCommand.<TagKey>cast(tagKey));
-        final HolderSet.Named<?> tag = optional.orElseThrow(() -> UNKNOWN_TAG.create(tagKey.location(), registryKey.location()));
+        final HolderSet.Named<?> tag = optional.orElseThrow(() -> UNKNOWN_TAG.create(tagKey.location(), registryKey.identifier()));
 
         ctx.getSource().sendSuccess(() -> createMessage(
                 CommandUtils.makeTranslatableWithFallback("commands.neoforge.tags.tag_key",
-                        Component.literal(tagKey.registry().location().toString()).withStyle(ChatFormatting.GOLD),
+                        Component.literal(tagKey.registry().identifier().toString()).withStyle(ChatFormatting.GOLD),
                         Component.literal(tagKey.location().toString()).withStyle(ChatFormatting.DARK_GREEN)),
                 "commands.neoforge.tags.element_count",
                 "commands.neoforge.tags.copy_element_names",
                 tag.size(),
                 page,
                 ChatFormatting.YELLOW,
-                () -> tag.stream().map(s -> s.unwrap().map(k -> k.location().toString(), Object::toString))), false);
+                () -> tag.stream().map(s -> s.unwrap().map(k -> k.identifier().toString(), Object::toString))), false);
 
         return tag.size();
     }
@@ -143,20 +143,20 @@ class TagsCommand {
         final ResourceKey<? extends Registry<?>> registryKey = CommandUtils.getResourceKey(ctx, "registry", ROOT_REGISTRY_KEY)
                 .orElseThrow(); // Expect to always retrieve a resource key for the root registry (registry key)
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
-                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.location()));
+                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.identifier()));
 
         final Identifier elementLocation = ResourceLocationArgument.getId(ctx, "element");
         final ResourceKey<?> elementKey = ResourceKey.create(cast(registryKey), elementLocation);
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Optional<Holder<?>> elementHolderOpt = registry.get(TagsCommand.<ResourceKey>cast(elementKey));
-        final Holder<?> elementHolder = elementHolderOpt.orElseThrow(() -> UNKNOWN_ELEMENT.create(elementLocation, registryKey.location()));
+        final Holder<?> elementHolder = elementHolderOpt.orElseThrow(() -> UNKNOWN_ELEMENT.create(elementLocation, registryKey.identifier()));
 
         final long containingTagsCount = elementHolder.tags().count();
 
         ctx.getSource().sendSuccess(() -> createMessage(
                 CommandUtils.makeTranslatableWithFallback("commands.neoforge.tags.element",
-                        Component.literal(registryKey.location().toString()).withStyle(ChatFormatting.GOLD),
+                        Component.literal(registryKey.identifier().toString()).withStyle(ChatFormatting.GOLD),
                         Component.literal(elementLocation.toString()).withStyle(ChatFormatting.YELLOW)),
                 "commands.neoforge.tags.containing_tag_count",
                 "commands.neoforge.tags.copy_tag_names",

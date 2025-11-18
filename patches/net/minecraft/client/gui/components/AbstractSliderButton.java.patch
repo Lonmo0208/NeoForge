@@ -1,0 +1,16 @@
+--- a/net/minecraft/client/gui/components/AbstractSliderButton.java
++++ b/net/minecraft/client/gui/components/AbstractSliderButton.java
+@@ -37,11 +_,11 @@
+         this.value = p_93584_;
+     }
+ 
+-    protected Identifier getSprite() {
++    private Identifier getSprite() {
+         return this.isActive() && this.isFocused() && !this.canChangeValue ? HIGHLIGHTED_SPRITE : SLIDER_SPRITE;
+     }
+ 
+-    protected Identifier getHandleSprite() {
++    private Identifier getHandleSprite() {
+         return !this.isActive() || !this.isHovered && !this.canChangeValue ? SLIDER_HANDLE_SPRITE : SLIDER_HANDLE_HIGHLIGHTED_SPRITE;
+     }
+ 

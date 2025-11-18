@@ -52,7 +52,7 @@
 -            .map(ClientTooltipComponent::create)
 -            .collect(Util.toMutableList());
 -        p_468924_.ifPresent(p_337410_ -> list.add(list.isEmpty() ? 0 : 1, ClientTooltipComponent.create(p_337410_)));
-+        List<ClientTooltipComponent> list = net.neoforged.neoforge.client.ClientHooks.gatherTooltipComponents(this.tooltipStack, p_419494_, p_419637_, p_419571_, guiWidth(), guiHeight(), p_420034_);
++        List<ClientTooltipComponent> list = net.neoforged.neoforge.client.ClientHooks.gatherTooltipComponents(this.tooltipStack, p_468746_, p_468924_, p_420073_, guiWidth(), guiHeight(), p_420056_);
          this.setTooltipForNextFrameInternal(p_420056_, list, p_420073_, p_419473_, DefaultTooltipPositioner.INSTANCE, p_469674_, false);
      }
  
@@ -108,7 +108,7 @@
              if (this.deferredTooltip == null || p_419788_) {
 -                this.deferredTooltip = () -> this.renderTooltip(p_419941_, p_419687_, p_419453_, p_419611_, p_419886_, p_468840_);
 +                ItemStack capturedTooltipStack = this.tooltipStack;
-+                this.deferredTooltip = () -> this.renderTooltip(p_419941_, p_419687_, p_419453_, p_419611_, p_419886_, p_419692_, capturedTooltipStack);
++                this.deferredTooltip = () -> this.renderTooltip(p_419941_, p_419687_, p_419453_, p_419611_, p_419886_, p_468840_, capturedTooltipStack);
              }
          }
      }

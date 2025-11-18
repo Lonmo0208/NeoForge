@@ -22,8 +22,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -257,7 +257,7 @@ public class DeferredRegister<T> {
      * @return The {@link Registry} linked to {@link #getRegistryKey()}.
      */
     public Registry<T> makeRegistry(final Consumer<RegistryBuilder<T>> consumer) {
-        return makeRegistry(this.registryKey.location(), consumer);
+        return makeRegistry(this.registryKey.identifier(), consumer);
     }
 
     /**
@@ -338,7 +338,7 @@ public class DeferredRegister<T> {
      * @return The registry name stored in this deferred register. Useful for creating new deferred registers based on an existing one.
      */
     public Identifier getRegistryName() {
-        return this.registryKey.location();
+        return this.registryKey.identifier();
     }
 
     /**
@@ -694,7 +694,7 @@ public class DeferredRegister<T> {
          * @see #registerSimpleBlockItem(Holder)
          */
         public DeferredItem<BlockItem> registerSimpleBlockItem(Holder<Block> block, Supplier<Item.Properties> properties) {
-            return this.registerSimpleBlockItem(block.unwrapKey().orElseThrow().location().getPath(), block::value, properties);
+            return this.registerSimpleBlockItem(block.unwrapKey().orElseThrow().identifier().getPath(), block::value, properties);
         }
 
         /**

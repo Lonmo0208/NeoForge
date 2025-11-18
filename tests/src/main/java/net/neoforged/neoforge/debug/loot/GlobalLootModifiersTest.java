@@ -245,7 +245,7 @@ public class GlobalLootModifiersTest {
         var registrySetBuilder = new RegistrySetBuilder()
                 .add(Registries.ENCHANTMENT, boot -> boot
                         .register(SMELT, new Enchantment.Builder(Enchantment.definition(boot.registryLookup(Registries.ITEM).orElseThrow().getOrThrow(ItemTags.MINING_ENCHANTABLE), 10, 1, Enchantment.dynamicCost(1, 10), Enchantment.dynamicCost(5, 10), 1, EquipmentSlotGroup.HAND))
-                                .build(SMELT.location())));
+                                .build(SMELT.identifier())));
 
         var subpack = HELPER.registerSubpack("smelt_glms");
         HELPER.addClientProvider(event -> new GlobalLootModifierProvider(event.getGenerator().getPackOutput(subpack), CompletableFuture.supplyAsync(() -> registrySetBuilder.build(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)), Util.backgroundExecutor()), HELPER.modId()) {

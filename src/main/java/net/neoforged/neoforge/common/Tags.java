@@ -1522,7 +1522,7 @@ public class Tags {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("tag.");
 
-        Identifier registryIdentifier = tagKey.registry().location();
+        Identifier registryIdentifier = tagKey.registry().identifier();
         Identifier tagIdentifier = tagKey.location();
 
         stringBuilder.append(registryIdentifier.toShortLanguageKey().replace("/", "."))

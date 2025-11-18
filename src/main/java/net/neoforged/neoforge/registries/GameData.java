@@ -16,8 +16,8 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.item.Item;
@@ -84,7 +84,7 @@ public class GameData {
                 Registry<?> registry = Objects.requireNonNull(BuiltInRegistries.REGISTRY.getValue(rootRegistryName));
                 RegisterEvent registerEvent = new RegisterEvent(registryKey, registry);
 
-                StartupNotificationManager.modLoaderMessage("REGISTERING " + registryKey.location());
+                StartupNotificationManager.modLoaderMessage("REGISTERING " + registryKey.identifier());
 
                 ModLoader.postEventWrapContainerInModOrder(registerEvent);
             } catch (Throwable t) {
@@ -115,9 +115,9 @@ public class GameData {
      */
     public static Set<Identifier> getRegistrationOrder() {
         Set<Identifier> ordered = new LinkedHashSet<>();
-        ordered.add(Registries.ATTRIBUTE.location()); // Vanilla order is incorrect, both Item and MobEffect depend on Attribute at construction time.
-        ordered.add(Registries.DATA_COMPONENT_TYPE.location()); // Vanilla order is incorrect, Item depends on data components at construction time.
-        ordered.add(Registries.PARTICLE_TYPE.location()); // Vanilla order is incorrect, both Block and MobEffect depend on ParticleType at construction time.
+        ordered.add(Registries.ATTRIBUTE.identifier()); // Vanilla order is incorrect, both Item and MobEffect depend on Attribute at construction time.
+        ordered.add(Registries.DATA_COMPONENT_TYPE.identifier()); // Vanilla order is incorrect, Item depends on data components at construction time.
+        ordered.add(Registries.PARTICLE_TYPE.identifier()); // Vanilla order is incorrect, both Block and MobEffect depend on ParticleType at construction time.
         ordered.addAll(BuiltInRegistries.getVanillaRegistrationOrder());
         ordered.addAll(BuiltInRegistries.REGISTRY.keySet().stream().sorted(Identifier::compareNamespaced).toList());
         return ordered;

@@ -13,3 +13,12 @@
      public String toDebugFileName() {
          return this.toString().replace('/', '_').replace(':', '_');
      }
+@@ -256,7 +_,7 @@
+             || p_467163_ == '.';
+     }
+ 
+-    public static boolean validNamespaceChar(char p_467176_) {
++    private static boolean validNamespaceChar(char p_467176_) {
+         return p_467176_ == '_' || p_467176_ == '-' || p_467176_ >= 'a' && p_467176_ <= 'z' || p_467176_ >= '0' && p_467176_ <= '9' || p_467176_ == '.';
+     }
+ 

@@ -15,8 +15,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.DamageTypeTagsProvider;
 import net.minecraft.data.tags.TagAppender;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagKey;
@@ -123,7 +123,7 @@ public final class NeoForgeDamageTypeTagsProvider extends DamageTypeTagsProvider
     private TagAppender<ResourceKey<DamageType>, DamageType> addAsVanilla(ResourceKey<DamageType> entry) {
         final List<TagBuilder> builders = new ArrayList<>();
         vanillaBuilders.forEach((location, tagBuilder) -> {
-            if (tagBuilder.build().stream().anyMatch(tagEntry -> tagEntry.verifyIfPresent(element -> element.equals(entry.location()), tag -> false))) {
+            if (tagBuilder.build().stream().anyMatch(tagEntry -> tagEntry.verifyIfPresent(element -> element.equals(entry.identifier()), tag -> false))) {
                 builders.add(getOrCreateRawBuilder(TagKey.create(registryKey, location)));
             }
         });

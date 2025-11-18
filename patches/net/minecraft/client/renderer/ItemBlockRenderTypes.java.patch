@@ -26,3 +26,50 @@
      public static RenderType getMovingBlockRenderType(BlockState p_109294_) {
          Block block = p_109294_.getBlock();
          if (block instanceof LeavesBlock) {
+@@ -391,11 +_,15 @@
+         }
+     }
+ 
++    /** @deprecated Neo: Use {@link net.neoforged.neoforge.client.RenderTypeHelper#getEntityRenderType(ChunkSectionLayer)} with the result of {@link net.minecraft.client.renderer.block.model.BlockModelPart#getRenderType(BlockState)}. */
++    @Deprecated // Note: this method does NOT support model-based render types
+     public static RenderType getRenderType(BlockState p_366653_) {
+         ChunkSectionLayer chunksectionlayer = getChunkRenderType(p_366653_);
+         return chunksectionlayer == ChunkSectionLayer.TRANSLUCENT ? Sheets.translucentBlockItemSheet() : Sheets.cutoutBlockSheet();
+     }
+ 
++    /** @deprecated Neo: See {@link net.minecraft.client.renderer.item.BlockModelWrapper#renderType}. */
++    @Deprecated // Note: this method does NOT support model-based render types
+     public static ChunkSectionLayer getRenderLayer(FluidState p_109288_) {
+         ChunkSectionLayer chunksectionlayer = LAYER_BY_FLUID.get(p_109288_.getType());
+         return chunksectionlayer != null ? chunksectionlayer : ChunkSectionLayer.SOLID;
+@@ -403,5 +_,30 @@
+ 
+     public static void setCutoutLeaves(boolean p_455116_) {
+         cutoutLeaves = p_455116_;
++    }
++
++    // Neo: RenderType for block setters injected
++    /**
++     * Helper to set the RenderType for Blocks
++     * @deprecated Set your render type in your block model's JSON (e.g. {@code "render_type": "cutout"}) or override {@link net.minecraft.client.renderer.block.model.BlockModelPart#getRenderType(BlockState)}
++     * */
++    @Deprecated(since = "1.19")
++    public static synchronized void setRenderLayer(Block block, ChunkSectionLayer layer) {
++        checkClientLoading();
++        TYPE_BY_BLOCK.put(block, layer);
++    }
++
++    /**
++     * Helper to set the RenderType for Fluids
++     */
++    public static synchronized void setRenderLayer(Fluid fluid, ChunkSectionLayer layer) {
++        checkClientLoading();
++        LAYER_BY_FLUID.put(fluid, layer);
++    }
++
++    private static void checkClientLoading() {
++        com.google.common.base.Preconditions.checkState(net.neoforged.neoforge.client.loading.ClientModLoader.isLoading(),
++                  "Render layers can only be set during client loading! This should ideally be done from `FMLClientSetupEvent`."
++        );
+     }
+ }

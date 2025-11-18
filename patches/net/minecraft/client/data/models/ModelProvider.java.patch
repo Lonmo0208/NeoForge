@@ -34,7 +34,7 @@
 +     * @see #getKnownItems()
 +     */
 +    protected Stream<? extends Holder<Block>> getKnownBlocks() {
-+        return BuiltInRegistries.BLOCK.listElements().filter(holder -> holder.getKey().location().getNamespace().equals(modId));
++        return BuiltInRegistries.BLOCK.listElements().filter(holder -> holder.getKey().identifier().getNamespace().equals(modId));
 +    }
 +
 +    /**
@@ -47,7 +47,7 @@
 +     * @see #getKnownBlocks()
 +     */
 +    protected Stream<? extends Holder<Item>> getKnownItems() {
-+        return BuiltInRegistries.ITEM.listElements().filter(holder -> holder.getKey().location().getNamespace().equals(modId));
++        return BuiltInRegistries.ITEM.listElements().filter(holder -> holder.getKey().identifier().getNamespace().equals(modId));
      }
  
      @Override
@@ -95,7 +95,7 @@
 +            Stream<? extends Holder<Block>> stream = knownBlocks.get();
              List<Identifier> list = stream.filter(p_386843_ -> !this.generators.containsKey(p_386843_.value()))
 -                .map(p_465437_ -> p_465437_.key().identifier())
-+                .map(p_386823_ -> p_386823_.unwrapKey().orElseThrow().location())
++                .map(p_386823_ -> p_386823_.unwrapKey().orElseThrow().identifier())
                  .toList();
              if (!list.isEmpty()) {
                  throw new IllegalStateException("Missing blockstate definitions for: " + list);
@@ -116,15 +116,19 @@
  
          @Override
          public void accept(Item p_387063_, ItemModel.Unbaked p_388578_, ClientItem.Properties p_455547_) {
-@@ -116,7 +_,7 @@
+@@ -116,9 +_,9 @@
          }
  
          public void finalizeAndValidate() {
 -            BuiltInRegistries.ITEM.forEach(p_465440_ -> {
+-                if (!this.copies.containsKey(p_465440_)) {
+-                    if (p_465440_ instanceof BlockItem blockitem && !this.itemInfos.containsKey(blockitem)) {
 +            knownItems.get().map(Holder::value).forEach(p_388426_ -> {
-                 if (!this.copies.containsKey(p_465440_)) {
-                     if (p_465440_ instanceof BlockItem blockitem && !this.itemInfos.containsKey(blockitem)) {
++                if (!this.copies.containsKey(p_388426_)) {
++                    if (p_388426_ instanceof BlockItem blockitem && !this.itemInfos.containsKey(blockitem)) {
                          Identifier identifier = ModelLocationUtils.getModelLocation(blockitem.getBlock());
+                         this.accept(blockitem, ItemModelUtils.plainModel(identifier));
+                     }
 @@ -132,10 +_,9 @@
                      this.register(p_386494_, clientitem);
                  }
@@ -134,7 +138,7 @@
 +            List<Identifier> list = knownItems.get()
                  .filter(p_388636_ -> !this.itemInfos.containsKey(p_388636_.value()))
 -                .map(p_465441_ -> p_465441_.key().identifier())
-+                .map(p_388278_ -> p_388278_.unwrapKey().orElseThrow().location())
++                .map(p_388278_ -> p_388278_.unwrapKey().orElseThrow().identifier())
                  .toList();
              if (!list.isEmpty()) {
                  throw new IllegalStateException("Missing item model definitions for: " + list);

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import net.minecraft.FileUtil;
+import net.minecraft.util.FileUtil;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.CompositePackResources;

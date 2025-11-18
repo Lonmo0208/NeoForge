@@ -8,6 +8,7 @@ package net.neoforged.neoforge.client.textures;
 import com.mojang.blaze3d.platform.NativeImage;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.client.renderer.texture.MipmapStrategy;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
@@ -37,5 +38,6 @@ public interface SpriteContentsConstructor {
             FrameSize frameSize,
             NativeImage nativeImage,
             Optional<AnimationMetadataSection> animationMetadata,
-            List<MetadataSectionType.WithValue<?>> additionalMetadata);
+            List<MetadataSectionType.WithValue<?>> additionalMetadata,
+            MipmapStrategy mipmapstrategy);
 }

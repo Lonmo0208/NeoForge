@@ -25,8 +25,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLLoader;
 import org.slf4j.Logger;
@@ -64,15 +64,15 @@ class DumpCommand {
                 .orElseThrow(); // Expect to always retrieve a resource key for the root registry (registry key)
 
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
-                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.location()));
+                .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.identifier()));
 
         String fileLocationForErrorReporting = "";
         try {
             Path registryDumpDirectory = FMLLoader.getCurrent().getGameDir().resolve("dumps").resolve("registry");
-            Path registryNamespaceDirectory = registryDumpDirectory.resolve(registryKey.location().getNamespace().replaceAll("[/:.]", "_"));
+            Path registryNamespaceDirectory = registryDumpDirectory.resolve(registryKey.identifier().getNamespace().replaceAll("[/:.]", "_"));
             Files.createDirectories(registryNamespaceDirectory);
 
-            String fileName = registryKey.location().getPath().replaceAll("[/:.]", "_") + ".txt";
+            String fileName = registryKey.identifier().getPath().replaceAll("[/:.]", "_") + ".txt";
             Path registryDumpFile = registryNamespaceDirectory.resolve(fileName);
             fileLocationForErrorReporting = registryDumpFile.toString();
 
@@ -99,7 +99,7 @@ class DumpCommand {
 
             ctx.getSource().sendSuccess(() -> CommandUtils.makeTranslatableWithFallback(
                     "commands.neoforge.dump.success",
-                    Component.literal(registryKey.location().toString()).withStyle(ChatFormatting.YELLOW),
+                    Component.literal(registryKey.identifier().toString()).withStyle(ChatFormatting.YELLOW),
                     filePathComponent),
                     false);
 
@@ -109,7 +109,7 @@ class DumpCommand {
             ctx.getSource().sendFailure(
                     CommandUtils.makeTranslatableWithFallback(
                             "commands.neoforge.dump.failure",
-                            Component.literal(registryKey.location().toString()).withStyle(ChatFormatting.YELLOW),
+                            Component.literal(registryKey.identifier().toString()).withStyle(ChatFormatting.YELLOW),
                             Component.literal(fileLocationForErrorReporting).withStyle(ChatFormatting.GOLD)));
 
             LOGGER.error("Failed to create new file with " + registryKey + " registry's contents at " + fileLocationForErrorReporting, e);

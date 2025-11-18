@@ -25,8 +25,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagNetworkSerialization;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import net.neoforged.neoforge.registries.RegistryManager;
@@ -96,7 +96,7 @@ public class VanillaConnectionNetworkFilter extends VanillaPacketFilter {
      */
     private static ClientboundUpdateTagsPacket filterCustomTagTypes(ClientboundUpdateTagsPacket packet) {
         Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> tags = packet.getTags()
-                .entrySet().stream().filter(e -> isVanillaRegistry(e.getKey().location()))
+                .entrySet().stream().filter(e -> isVanillaRegistry(e.getKey().identifier()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new ClientboundUpdateTagsPacket(tags);
     }

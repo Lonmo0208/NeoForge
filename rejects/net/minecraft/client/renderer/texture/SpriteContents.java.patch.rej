@@ -1,16 +1,3 @@
-++++ REJECTED HUNK: 1
-@@ -66,6 +66,10 @@
-         this.byMipLevel = new NativeImage[]{this.originalImage};
-     }
- 
-+    public NativeImage getOriginalImage() {
-+        return this.originalImage;
-+    }
-+
-     public void increaseMipLevel(int p_248864_) {
-         try {
-             this.byMipLevel = MipmapGenerator.generateMipLevels(this.byMipLevel, p_248864_);
-++++ END HUNK
 
 ++++ REJECTED HUNK: 2
 @@ -144,6 +148,8 @@

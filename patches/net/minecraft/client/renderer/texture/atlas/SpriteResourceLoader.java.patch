@@ -5,7 +5,24 @@
  
      static SpriteResourceLoader create(Set<MetadataSectionType<?>> p_434463_) {
 -        return (p_465738_, p_465739_) -> {
-+        return (p_432311_, p_432312_, constructor) -> {
++        return (p_465738_, p_465739_, constructor) -> {
              Optional<AnimationMetadataSection> optional;
              Optional<TextureMetadataSection> optional1;
              List<MetadataSectionType.WithValue<?>> list;
+@@ -70,9 +_,14 @@
+             }
+ 
+             MipmapStrategy mipmapstrategy = optional1.map(TextureMetadataSection::mipmapStrategy).orElse(MipmapStrategy.AUTO);
+-            return new SpriteContents(p_465738_, framesize, nativeimage, optional, list, mipmapstrategy);
++            return constructor.create(p_465738_, framesize, nativeimage, optional, list, mipmapstrategy);
+         };
+     }
+ 
+-    @Nullable SpriteContents loadSprite(Identifier p_469874_, Resource p_294329_);
++    default SpriteContents loadSprite(Identifier p_295581_, Resource p_294329_) {
++        return loadSprite(p_295581_, p_294329_, SpriteContents::new);
++    }
++
++    @Nullable
++    SpriteContents loadSprite(Identifier id, Resource resource, net.neoforged.neoforge.client.textures.SpriteContentsConstructor constructor);
+ }

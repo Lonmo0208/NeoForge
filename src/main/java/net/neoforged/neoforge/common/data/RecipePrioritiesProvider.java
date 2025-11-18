@@ -14,8 +14,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.crafting.Recipe;
 
 /**
@@ -78,7 +78,7 @@ public abstract class RecipePrioritiesProvider implements DataProvider {
     }
 
     public void add(ResourceKey<Recipe> recipe, int priority) {
-        this.add(recipe.location(), priority);
+        this.add(recipe.identifier(), priority);
     }
 
     public void add(String recipe, int priority) {

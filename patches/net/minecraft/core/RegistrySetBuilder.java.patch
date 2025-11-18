@@ -1,5 +1,13 @@
 --- a/net/minecraft/core/RegistrySetBuilder.java
 +++ b/net/minecraft/core/RegistrySetBuilder.java
+@@ -19,6 +_,7 @@
+ import net.minecraft.resources.RegistryOps;
+ import net.minecraft.resources.ResourceKey;
+ import net.minecraft.tags.TagKey;
++import net.neoforged.neoforge.common.CommonHooks;
+ import org.apache.commons.lang3.mutable.MutableObject;
+ import org.jspecify.annotations.Nullable;
+ 
 @@ -72,6 +_,10 @@
          return this.add(p_256261_, Lifecycle.stable(), p_256010_);
      }
@@ -48,7 +56,7 @@
              RegistrySetBuilder.UniversalLookup registrysetbuilder$universallookup = new RegistrySetBuilder.UniversalLookup(registrysetbuilder$universalowner);
              Builder<Identifier, HolderGetter<?>> builder = ImmutableMap.builder();
 -            p_255995_.registries().forEach(p_465908_ -> builder.put(p_465908_.key().identifier(), RegistrySetBuilder.wrapContextLookup(p_465908_.value())));
-+            p_255995_.registries().forEach(p_367807_ -> builder.put(p_367807_.key().location(), net.neoforged.neoforge.common.CommonHooks.wrapRegistryLookup(p_367807_.value())));
++            p_255995_.registries().forEach(p_367807_ -> builder.put(p_367807_.key().identifier(), CommonHooks.wrapRegistryLookup(p_367807_.value())));
              p_256495_.forEach(p_465906_ -> builder.put(p_465906_.identifier(), registrysetbuilder$universallookup));
              return new RegistrySetBuilder.BuildState(
                  registrysetbuilder$universalowner, registrysetbuilder$universallookup, builder.build(), new HashMap<>(), list
@@ -59,7 +67,7 @@
 +
 +                @Override
 +                public <S> Optional<HolderLookup.RegistryLookup<S>> registryLookup(ResourceKey<? extends Registry<? extends S>> registry) {
-+                    return Optional.ofNullable((HolderLookup.RegistryLookup<S>) BuildState.this.registries.get(registry.location()));
++                    return Optional.ofNullable((HolderLookup.RegistryLookup<S>) BuildState.this.registries.get(registry.identifier()));
 +                }
              };
          }

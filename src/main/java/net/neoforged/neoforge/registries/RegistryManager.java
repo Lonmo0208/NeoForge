@@ -22,8 +22,8 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.network.configuration.RegistryDataMapNegotiation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -211,7 +211,7 @@ public class RegistryManager {
                 if (!registry.doesSync())
                     continue;
             }
-            map.put(registry.key().location(), new RegistrySnapshot(registry, full));
+            map.put(registry.key().identifier(), new RegistrySnapshot(registry, full));
         }
 
         return map;
@@ -231,7 +231,7 @@ public class RegistryManager {
 
         BuiltInRegistries.REGISTRY.entrySet().forEach(e -> {
             if (e.getValue().doesSync())
-                list.add(e.getKey().location());
+                list.add(e.getKey().identifier());
         });
 
         return list;

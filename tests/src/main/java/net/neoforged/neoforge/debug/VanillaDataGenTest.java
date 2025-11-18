@@ -59,7 +59,7 @@ public interface VanillaDataGenTest {
             protected void registerModels(BiConsumer<ResourceKey<EquipmentAsset>, EquipmentClientInfo> output) {
                 // generate model which switches out the texture when worn
                 output.accept(headModelName, EquipmentClientInfo.builder()
-                        .addLayers(EquipmentClientInfo.LayerType.HUMANOID, new EquipmentClientInfo.Layer(headModelName.location()))
+                        .addLayers(EquipmentClientInfo.LayerType.HUMANOID, new EquipmentClientInfo.Layer(headModelName.identifier()))
                         .build());
             }
         });

@@ -48,7 +48,7 @@
      @Override
      public String getName() {
 -        return "Tags for " + this.registryKey.identifier();
-+        return "Tags for " + this.registryKey.location() + " mod id " + this.modId;
++        return "Tags for " + this.registryKey.identifier() + " mod id " + this.modId;
      }
  
      protected abstract void addTags(HolderLookup.Provider p_256380_);

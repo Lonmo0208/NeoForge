@@ -144,7 +144,7 @@ public interface ILevelExtension {
      * @see #TRANSLATION_PREFIX
      */
     default String getDescriptionKey() {
-        return self().dimension().location().toLanguageKey(TRANSLATION_PREFIX);
+        return self().dimension().identifier().toLanguageKey(TRANSLATION_PREFIX);
     }
 
     /**
@@ -155,6 +155,6 @@ public interface ILevelExtension {
      * @see #getDescriptionKey()
      */
     default Component getDescription() {
-        return Component.translatableWithFallback(getDescriptionKey(), self().dimension().location().toString());
+        return Component.translatableWithFallback(getDescriptionKey(), self().dimension().identifier().toString());
     }
 }

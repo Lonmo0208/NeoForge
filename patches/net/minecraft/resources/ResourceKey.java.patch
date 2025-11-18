@@ -7,7 +7,7 @@
 +    @Override
 +    public int compareTo(ResourceKey<?> o) {
 +        int ret = this.registry().compareTo(o.registry());
-+        if (ret == 0) ret = this.location().compareTo(o.location());
++        if (ret == 0) ret = this.identifier().compareTo(o.identifier());
 +        return ret;
 +    }
 +

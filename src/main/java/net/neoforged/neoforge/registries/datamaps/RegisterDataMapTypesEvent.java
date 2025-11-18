@@ -8,8 +8,8 @@ package net.neoforged.neoforge.registries.datamaps;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.neoforge.registries.DataPackRegistriesHooks;
@@ -39,13 +39,13 @@ public class RegisterDataMapTypesEvent extends Event implements IModBusEvent {
         final var registry = type.registryKey();
         if (DataPackRegistriesHooks.getDataPackRegistries().stream().anyMatch(data -> data.key().equals(registry))) {
             if (type.networkCodec() != null && DataPackRegistriesHooks.getSyncedRegistry(registry) == null) {
-                throw new UnsupportedOperationException("Cannot register synced data map " + type.id() + " for datapack registry " + registry.location() + " that is not synced!");
+                throw new UnsupportedOperationException("Cannot register synced data map " + type.id() + " for datapack registry " + registry.identifier() + " that is not synced!");
             }
         }
 
         final var map = attachments.computeIfAbsent((ResourceKey) registry, k -> new HashMap<>());
         if (map.containsKey(type.id())) {
-            throw new IllegalArgumentException("Tried to register data map type with ID " + type.id() + " to registry " + registry.location() + " twice");
+            throw new IllegalArgumentException("Tried to register data map type with ID " + type.id() + " to registry " + registry.identifier() + " twice");
         }
         map.put(type.id(), type);
     }

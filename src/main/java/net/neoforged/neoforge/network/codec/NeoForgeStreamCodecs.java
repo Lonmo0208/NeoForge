@@ -85,7 +85,7 @@ public final class NeoForgeStreamCodecs {
 
             @Override
             public void encode(B buf, ResourceKey<? extends Registry<?>> value) {
-                buf.writeResourceLocation(value.location());
+                buf.writeResourceLocation(value.identifier());
             }
         };
     }

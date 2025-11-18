@@ -89,7 +89,7 @@ public class DataPackRegistriesTest {
         final Path outputFolder = generator.getPackOutput().getOutputFolder();
         final CompletableFuture<HolderLookup.Provider> providerCompletableFuture = event.getLookupProvider();
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        final ResourceLocation registryId = Unsyncable.REGISTRY_KEY.location();
+        final ResourceLocation registryId = Unsyncable.REGISTRY_KEY.identifier();
         final ResourceLocation id = this.datagenTestObject.getId();
         final Unsyncable element = new Unsyncable("Datagen Success");
         final String pathString = String.join("/", PackType.SERVER_DATA.getDirectory(), id.getNamespace(), registryId.getNamespace(), registryId.getPath(), id.getPath() + ".json");

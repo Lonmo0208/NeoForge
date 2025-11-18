@@ -26,6 +26,18 @@
                      renderFire(posestack, this.bufferSource, textureatlassprite);
                  }
              }
+@@ -122,6 +_,11 @@
+     }
+ 
+     private static @Nullable BlockState getViewBlockingState(Player p_110717_) {
++        return getOverlayBlock(p_110717_).getLeft();
++    }
++
++    @Nullable
++    private static org.apache.commons.lang3.tuple.Pair<BlockState, BlockPos> getOverlayBlock(Player p_110717_) {
+         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+ 
+         for (int i = 0; i < 8; i++) {
 @@ -131,7 +_,7 @@
              blockpos$mutableblockpos.set(d0, d1, d2);
              BlockState blockstate = p_110717_.level().getBlockState(blockpos$mutableblockpos);
