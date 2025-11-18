@@ -1,6 +1,17 @@
 --- a/net/minecraft/world/level/block/entity/BlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/BlockEntity.java
-@@ -45,6 +_,8 @@
+@@ -36,15 +_,18 @@
+ import org.jspecify.annotations.Nullable;
+ import org.slf4j.Logger;
+ 
+-public abstract class BlockEntity implements DebugValueSource, net.neoforged.neoforge.common.extensions.IBlockEntityExtension {
++public abstract class BlockEntity extends net.neoforged.neoforge.attachment.AttachmentHolder implements DebugValueSource, net.neoforged.neoforge.common.extensions.IBlockEntityExtension {
+     private static final Codec<BlockEntityType<?>> TYPE_CODEC = BuiltInRegistries.BLOCK_ENTITY_TYPE.byNameCodec();
+     private static final Logger LOGGER = LogUtils.getLogger();
++    @Deprecated // Neo: always use getType()
+     private final BlockEntityType<?> type;
+     protected @Nullable Level level;
+     protected final BlockPos worldPosition;
      protected boolean remove;
      private BlockState blockState;
      private DataComponentMap components = DataComponentMap.EMPTY;

@@ -1,9 +1,20 @@
 --- a/net/minecraft/world/inventory/Slot.java
 +++ b/net/minecraft/world/inventory/Slot.java
-@@ -94,6 +_,37 @@
-         return true;
+@@ -79,7 +_,7 @@
      }
  
+     public @Nullable Identifier getNoItemIcon() {
+-        return null;
++        return backgroundSprite;
+     }
+ 
+     public ItemStack remove(int p_40227_) {
+@@ -92,6 +_,37 @@
+ 
+     public boolean isActive() {
+         return true;
++    }
++
 +    /**
 +     * Retrieves the index in the inventory for this slot, this value should typically not
 +     * be used, but can be useful for some occasions.
@@ -33,8 +44,6 @@
 +    public Slot setBackground(Identifier sprite) {
 +         this.backgroundSprite = sprite;
 +         return this;
-+    }
-+
+     }
+ 
      public Optional<ItemStack> tryRemove(int p_150642_, int p_150643_, Player p_150644_) {
-         if (!this.mayPickup(p_150644_)) {
-             return Optional.empty();

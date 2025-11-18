@@ -10,3 +10,14 @@
  public enum ItemUseAnimation implements StringRepresentable, net.neoforged.fml.common.asm.enumextension.IExtensibleEnum {
      NONE(0, "none"),
      EAT(1, "eat", true),
+@@ -46,6 +_,10 @@
+     @Override
+     public String getSerializedName() {
+         return this.name;
++    }
++
++    public static net.neoforged.fml.common.asm.enumextension.ExtensionInfo getExtensionInfo() {
++        return net.neoforged.fml.common.asm.enumextension.ExtensionInfo.nonExtended(ItemUseAnimation.class);
+     }
+ 
+     public boolean hasCustomArmTransform() {

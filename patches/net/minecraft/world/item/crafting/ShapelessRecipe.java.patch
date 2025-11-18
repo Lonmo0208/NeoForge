@@ -1,5 +1,20 @@
 --- a/net/minecraft/world/item/crafting/ShapelessRecipe.java
 +++ b/net/minecraft/world/item/crafting/ShapelessRecipe.java
+@@ -23,12 +_,14 @@
+     final ItemStack result;
+     final List<Ingredient> ingredients;
+     private @Nullable PlacementInfo placementInfo;
++    private final boolean isSimple;
+ 
+     public ShapelessRecipe(String p_249640_, CraftingBookCategory p_249390_, ItemStack p_252071_, List<Ingredient> p_361103_) {
+         this.group = p_249640_;
+         this.category = p_249390_;
+         this.result = p_252071_;
+         this.ingredients = p_361103_;
++        this.isSimple = p_361103_.stream().allMatch(Ingredient::isSimple);
+     }
+ 
+     @Override
 @@ -58,6 +_,12 @@
      public boolean matches(CraftingInput p_346123_, Level p_44263_) {
          if (p_346123_.ingredientCount() != this.ingredients.size()) {

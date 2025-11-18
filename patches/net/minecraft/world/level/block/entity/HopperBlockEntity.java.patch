@@ -87,6 +87,15 @@
          } else {
              boolean flag = p_155554_.isGridAligned()
                  && blockstate.isCollisionShapeFullBlock(p_155553_, blockpos)
+@@ -354,6 +_,8 @@
+         return p_155590_.getEntitiesOfClass(ItemEntity.class, aabb, EntitySelector.ENTITY_STILL_ALIVE);
+     }
+ 
++    /** @deprecated Use IItemHandler capability instead. To preserve Container-specific interactions, use {@link #getContainerOrHandlerAt} and handle both cases. */
++    @Deprecated
+     public static @Nullable Container getContainerAt(Level p_59391_, BlockPos p_59392_) {
+         return getContainerAt(p_59391_, p_59392_, p_59391_.getBlockState(p_59392_), p_59392_.getX() + 0.5, p_59392_.getY() + 0.5, p_59392_.getZ() + 0.5);
+     }
 @@ -393,6 +_,28 @@
          return !list.isEmpty() ? (Container)list.get(p_326325_.random.nextInt(list.size())) : null;
      }

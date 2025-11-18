@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/level/saveddata/SavedDataType.java
++++ b/net/minecraft/world/level/saveddata/SavedDataType.java
+@@ -4,7 +_,12 @@
+ import java.util.function.Supplier;
+ import net.minecraft.util.datafix.DataFixTypes;
+ 
+-public record SavedDataType<T extends SavedData>(String id, Supplier<T> constructor, Codec<T> codec, DataFixTypes dataFixType) {
++// Neo: We do not have update logic compatible with DFU, several downstream patches from this record are made to support a nullable dataFixType.
++public record SavedDataType<T extends SavedData>(String id, Supplier<T> constructor, Codec<T> codec, @org.jspecify.annotations.Nullable DataFixTypes dataFixType) {
++    public SavedDataType(String id, Supplier<T> constructor, Codec<T> codec) {
++        this(id, constructor, codec, null);
++    }
++
+     @Override
+     public boolean equals(Object p_401293_) {
+         return p_401293_ instanceof SavedDataType<?> saveddatatype && this.id.equals(saveddatatype.id);

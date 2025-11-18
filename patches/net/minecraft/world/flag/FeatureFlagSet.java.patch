@@ -1,5 +1,26 @@
 --- a/net/minecraft/world/flag/FeatureFlagSet.java
 +++ b/net/minecraft/world/flag/FeatureFlagSet.java
+@@ -7,13 +_,20 @@
+ 
+ public final class FeatureFlagSet {
+     private static final FeatureFlagSet EMPTY = new FeatureFlagSet(null, 0L);
++    private static final long[] EMPTY_EXT_MASK = new long[0];
+     public static final int MAX_CONTAINER_SIZE = 64;
+     private final @Nullable FeatureFlagUniverse universe;
+     private final long mask;
++    private final long[] extendedMask;
+ 
+     private FeatureFlagSet(@Nullable FeatureFlagUniverse p_250433_, long p_251523_) {
++        this(p_250433_, p_251523_, EMPTY_EXT_MASK);
++    }
++
++    private FeatureFlagSet(@Nullable FeatureFlagUniverse p_250433_, long p_251523_, long[] extendedMask) {
+         this.universe = p_250433_;
+         this.mask = p_251523_;
++        this.extendedMask = extendedMask;
+     }
+ 
+     static FeatureFlagSet create(FeatureFlagUniverse p_251573_, Collection<FeatureFlag> p_251037_) {
 @@ -21,7 +_,8 @@
              return EMPTY;
          } else {

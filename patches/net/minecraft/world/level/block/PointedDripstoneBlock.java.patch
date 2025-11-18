@@ -35,3 +35,14 @@
      }
  
      private static boolean canGrow(BlockState p_154141_, BlockState p_154142_) {
+@@ -555,7 +_,9 @@
+         if (p_457734_.isSame(Fluids.EMPTY)) {
+             return p_457548_.environmentAttributes().getValue(EnvironmentAttributes.DEFAULT_DRIPSTONE_PARTICLE, p_458141_);
+         } else {
+-            return p_457734_.is(FluidTags.LAVA) ? ParticleTypes.DRIPPING_DRIPSTONE_LAVA : ParticleTypes.DRIPPING_DRIPSTONE_WATER;
++            ParticleOptions options = p_457734_.getFluidType().getDripInfo() != null ? p_457734_.getFluidType().getDripInfo().dripParticle() : ParticleTypes.DRIPPING_DRIPSTONE_WATER;
++            if (options == null) options = p_457548_.environmentAttributes().getValue(EnvironmentAttributes.DEFAULT_DRIPSTONE_PARTICLE, p_458141_);
++            return options;
+         }
+     }
+ 

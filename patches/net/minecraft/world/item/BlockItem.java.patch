@@ -14,3 +14,18 @@
                          SoundSource.BLOCKS,
                          (soundtype.getVolume() + 1.0F) / 2.0F,
                          soundtype.getPitch() * 0.8F
+@@ -94,8 +_,14 @@
+         }
+     }
+ 
++    @Deprecated //Forge: Use more sensitive version {@link BlockItem#getPlaceSound(BlockState, IBlockReader, BlockPos, Entity) }
+     protected SoundEvent getPlaceSound(BlockState p_40588_) {
+         return p_40588_.getSoundType().getPlaceSound();
++    }
++
++    //Forge: Sensitive version of BlockItem#getPlaceSound
++    protected SoundEvent getPlaceSound(BlockState state, Level world, BlockPos pos, Player entity) {
++        return state.getSoundType(world, pos, entity).getPlaceSound();
+     }
+ 
+     public @Nullable BlockPlaceContext updatePlacementContext(BlockPlaceContext p_40609_) {

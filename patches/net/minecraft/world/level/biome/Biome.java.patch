@@ -1,6 +1,37 @@
 --- a/net/minecraft/world/level/biome/Biome.java
 +++ b/net/minecraft/world/level/biome/Biome.java
-@@ -96,7 +_,7 @@
+@@ -36,11 +_,11 @@
+ public final class Biome {
+     public static final Codec<Biome> DIRECT_CODEC = RecordCodecBuilder.create(
+         p_457475_ -> p_457475_.group(
+-                Biome.ClimateSettings.CODEC.forGetter(p_151717_ -> p_151717_.climateSettings),
++                Biome.ClimateSettings.CODEC.forGetter(p_151717_ -> p_151717_.modifiableBiomeInfo().getOriginalBiomeInfo().climateSettings()), // FORGE: Patch codec to ignore field redirect coremods.
+                 EnvironmentAttributeMap.CODEC_ONLY_POSITIONAL
+                     .optionalFieldOf("attributes", EnvironmentAttributeMap.EMPTY)
+                     .forGetter(p_457469_ -> p_457469_.attributes),
+-                BiomeSpecialEffects.CODEC.fieldOf("effects").forGetter(p_220550_ -> p_220550_.specialEffects),
++                BiomeSpecialEffects.CODEC.fieldOf("effects").forGetter(p_220550_ -> p_220550_.modifiableBiomeInfo().getOriginalBiomeInfo().effects()), // FORGE: Patch codec to ignore field redirect coremods.
+                 BiomeGenerationSettings.CODEC.forGetter(p_220548_ -> p_220548_.generationSettings),
+                 MobSpawnSettings.CODEC.forGetter(p_220546_ -> p_220546_.mobSettings)
+             )
+@@ -66,10 +_,12 @@
+     @Deprecated(forRemoval = true)
+     public static final PerlinSimplexNoise BIOME_INFO_NOISE = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(2345L)), ImmutableList.of(0));
+     private static final int TEMPERATURE_CACHE_SIZE = 1024;
++    /** Neo: Field accesses are redirected to {@link #getModifiedClimateSettings()} with a coremod. */
+     private final Biome.ClimateSettings climateSettings;
+     private final BiomeGenerationSettings generationSettings;
+     private final MobSpawnSettings mobSettings;
+     private final EnvironmentAttributeMap attributes;
++    /** Neo: Field accesses are redirected to {@link #getModifiedSpecialEffects()} with a coremod. */
+     private final BiomeSpecialEffects specialEffects;
+     private final ThreadLocal<Long2FloatLinkedOpenHashMap> temperatureCache = ThreadLocal.withInitial(() -> {
+         Long2FloatLinkedOpenHashMap long2floatlinkedopenhashmap = new Long2FloatLinkedOpenHashMap(1024, 0.25F) {
+@@ -93,10 +_,11 @@
+         this.mobSettings = p_220533_;
+         this.attributes = p_457781_;
+         this.specialEffects = p_220531_;
++        this.modifiableBiomeInfo = new net.neoforged.neoforge.common.world.ModifiableBiomeInfo(new net.neoforged.neoforge.common.world.ModifiableBiomeInfo.BiomeInfo(p_220530_, p_220531_, p_220532_, p_220533_)); // FORGE: cache original biome info on construction so we can bypass our field read coremods where necessary
      }
  
      public MobSpawnSettings getMobSettings() {
@@ -9,6 +40,15 @@
      }
  
      public boolean hasPrecipitation() {
+@@ -198,7 +_,7 @@
+     }
+ 
+     public BiomeGenerationSettings getGenerationSettings() {
+-        return this.generationSettings;
++        return this.modifiableBiomeInfo().get().generationSettings();
+     }
+ 
+     public int getGrassColor(double p_47465_, double p_47466_) {
 @@ -430,5 +_,32 @@
          public String getSerializedName() {
              return this.name;

@@ -1,5 +1,6 @@
-++++ REJECTED HUNK: 1
-@@ -543,6 +543,14 @@
+--- a/net/minecraft/world/level/dimension/end/EndDragonFight.java
++++ b/net/minecraft/world/level/dimension/end/EndDragonFight.java
+@@ -537,6 +_,14 @@
          }
      }
  
@@ -11,7 +12,6 @@
 +        this.dragonEvent.removePlayer(player);
 +    }
 +
-     @Nullable
-     public UUID getDragonUUID() {
+     public @Nullable UUID getDragonUUID() {
          return this.dragonUUID;
-++++ END HUNK
+     }

@@ -1,5 +1,16 @@
 --- a/net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate.java
 +++ b/net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate.java
+@@ -259,6 +_,10 @@
+         return transform(p_74565_, p_74564_.getMirror(), p_74564_.getRotation(), p_74564_.getRotationPivot());
+     }
+ 
++    public static Vec3 transformedVec3d(StructurePlaceSettings placementIn, Vec3 pos) {
++        return transform(pos, placementIn.getMirror(), placementIn.getRotation(), placementIn.getRotationPivot());
++    }
++
+     public boolean placeInWorld(
+         ServerLevelAccessor p_230329_,
+         BlockPos p_230330_,
 @@ -285,7 +_,7 @@
                  int l = Integer.MIN_VALUE;
                  int i1 = Integer.MIN_VALUE;
@@ -119,3 +130,12 @@
                          mob.finalizeSpawn(p_74524_, p_74524_.getCurrentDifficultyAt(BlockPos.containing(vec31)), EntitySpawnReason.STRUCTURE, null);
                      }
  
+@@ -875,7 +_,7 @@
+ 
+     public static final class Palette {
+         private final List<StructureTemplate.StructureBlockInfo> blocks;
+-        private final Map<Block, List<StructureTemplate.StructureBlockInfo>> cache = Maps.newHashMap();
++        private final Map<Block, List<StructureTemplate.StructureBlockInfo>> cache = Maps.newConcurrentMap(); // Neo: Fixes MC-271899 - Make the global StructureTemplate's palette caches now thread safe for worldgen
+         private @Nullable List<StructureTemplate.JigsawBlockInfo> cachedJigsaws;
+ 
+         Palette(List<StructureTemplate.StructureBlockInfo> p_74648_) {
