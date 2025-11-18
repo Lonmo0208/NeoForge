@@ -1,5 +1,24 @@
 --- a/com/mojang/blaze3d/opengl/GlDevice.java
 +++ b/com/mojang/blaze3d/opengl/GlDevice.java
+@@ -63,6 +_,8 @@
+     private final Set<String> enabledExtensions = new HashSet<>();
+     private final int uniformOffsetAlignment;
+     private final int maxSupportedAnisotropy;
++    private final net.neoforged.neoforge.client.blaze3d.GpuDeviceProperties deviceProperties;
++    private final net.neoforged.neoforge.client.blaze3d.GpuDeviceFeatures enabledFeatures;
+ 
+     public GlDevice(long p_410629_, int p_410525_, boolean p_409747_, ShaderSource p_460964_, boolean p_410647_) {
+         GLFW.glfwMakeContextCurrent(p_410629_);
+@@ -87,6 +_,9 @@
+         } else {
+             this.maxSupportedAnisotropy = 1;
+         }
++        deviceProperties = new net.neoforged.neoforge.client.blaze3d.opengl.ImmutableGlDeviceProperties(new net.neoforged.neoforge.client.blaze3d.opengl.DefaultGlDeviceProperties());
++        final var event = net.neoforged.fml.ModLoader.postEventWithReturn(new net.neoforged.neoforge.client.event.ConfigureGpuDeviceEvent(deviceProperties(), new net.neoforged.neoforge.client.blaze3d.opengl.DefaultGlDeviceFeatures()));
++        enabledFeatures = new net.neoforged.neoforge.client.blaze3d.opengl.ImmutableGlDeviceFeatures(event);
+     }
+ 
+     public GlDebugLabel debugLabels() {
 @@ -222,6 +_,67 @@
          }
      }

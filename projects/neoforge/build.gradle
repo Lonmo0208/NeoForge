@@ -146,6 +146,7 @@ dependencies {
     }
 
     compileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
+    compileOnly "org.jspecify:jspecify:1.0.0"
 
     userdevCompileOnly jarJar("io.github.llamalad7:mixinextras-neoforge:${project.mixin_extras_version}")
 

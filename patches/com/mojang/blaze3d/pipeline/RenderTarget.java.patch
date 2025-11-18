@@ -1,17 +1,14 @@
-++++ REJECTED HUNK: 1
-@@ -21,6 +21,7 @@
+--- a/com/mojang/blaze3d/pipeline/RenderTarget.java
++++ b/com/mojang/blaze3d/pipeline/RenderTarget.java
+@@ -20,14 +_,23 @@
      public int height;
      protected final String label;
      public final boolean useDepth;
 +    public final boolean useStencil;
-     @Nullable
-     protected GpuTexture colorTexture;
-     @Nullable
-++++ END HUNK
-
-++++ REJECTED HUNK: 2
-@@ -32,8 +33,16 @@
-     public FilterMode filterMode;
+     protected @Nullable GpuTexture colorTexture;
+     protected @Nullable GpuTextureView colorTextureView;
+     protected @Nullable GpuTexture depthTexture;
+     protected @Nullable GpuTextureView depthTextureView;
  
      public RenderTarget(@Nullable String p_405387_, boolean p_166199_) {
 +        this(p_405387_, p_166199_, false);
@@ -27,10 +24,7 @@
      }
  
      public void resize(int p_83942_, int p_83943_) {
-++++ END HUNK
-
-++++ REJECTED HUNK: 3
-@@ -86,7 +95,8 @@
+@@ -80,7 +_,8 @@
              this.width = p_83951_;
              this.height = p_83952_;
              if (this.useDepth) {
@@ -38,6 +32,5 @@
 +                var format = this.useStencil ? net.neoforged.neoforge.client.ClientHooks.getStencilFormat() : TextureFormat.DEPTH32;
 +                this.depthTexture = gpudevice.createTexture(() -> this.label + " / Depth", 15, format, p_83951_, p_83952_, 1, 1);
                  this.depthTextureView = gpudevice.createTextureView(this.depthTexture);
-                 this.depthTexture.setTextureFilter(FilterMode.NEAREST, false);
-                 this.depthTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
-++++ END HUNK
+             }
+ 

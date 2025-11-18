@@ -1,10 +1,11 @@
-++++ REJECTED HUNK: 1
-@@ -164,6 +164,19 @@
+--- a/com/mojang/math/Transformation.java
++++ b/com/mojang/math/Transformation.java
+@@ -161,6 +_,19 @@
          return Objects.hash(this.matrix);
      }
  
 +    private Matrix3f normalTransform = null;
-+    public Matrix3f getNormalMatrix() {
++    public org.joml.Matrix3fc getNormalMatrix() {
 +        checkNormalTransform();
 +        return normalTransform;
 +    }
@@ -17,6 +18,5 @@
 +    }
 +
      public Transformation slerp(Transformation p_175938_, float p_175939_) {
-         Vector3f vector3f = this.getTranslation();
-         Quaternionf quaternionf = this.getLeftRotation();
-++++ END HUNK
+         return new Transformation(
+             this.getTranslation().lerp(p_175938_.getTranslation(), p_175939_, new Vector3f()),

@@ -14,6 +14,7 @@ import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
+import com.mojang.blaze3d.shaders.ShaderSource;
 import com.mojang.blaze3d.shaders.ShaderType;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -1141,7 +1142,7 @@ public class ClientHooks {
         return List.copyOf(vanillaRenderers);
     }
 
-    public static GpuDevice createGpuDevice(long window, int debugLevel, boolean syncDebug, BiFunction<ResourceLocation, ShaderType, String> defaultShaderSource, boolean enableDebugLabels) {
+    public static GpuDevice createGpuDevice(long window, int debugLevel, boolean syncDebug, ShaderSource defaultShaderSource, boolean enableDebugLabels) {
         final var glDevice = new GlDevice(window, debugLevel, syncDebug, defaultShaderSource, enableDebugLabels);
         boolean enableValidation;
         try {
