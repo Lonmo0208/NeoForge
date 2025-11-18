@@ -43,6 +43,17 @@
          this.factory = p_273268_;
          this.category = p_272918_;
          this.canSpawnFarFromPlayer = p_272654_;
+@@ -1278,6 +_,10 @@
+         this.lootTable = p_368696_;
+         this.requiredFeatures = p_273518_;
+         this.allowedInPeaceful = p_434970_;
++        this.trackDeltasSupplier = trackDeltasSupplier;
++        this.trackingRangeSupplier = trackingRangeSupplier;
++        this.updateIntervalSupplier = updateIntervalSupplier;
++        this.onlyOpCanSetNbt = onlyOpCanSetNbt;
+     }
+ 
+     public @Nullable T spawn(
 @@ -1358,6 +_,13 @@
                  mob.yHeadRot = mob.getYRot();
                  mob.yBodyRot = mob.getYRot();

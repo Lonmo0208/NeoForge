@@ -16,6 +16,15 @@
      }
  
      @Override
+@@ -207,7 +_,7 @@
+     }
+ 
+     boolean isBeingStaredBy(Player p_380267_) {
+-        return !LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(p_380267_) ? false : this.isLookingAtMe(p_380267_, 0.025, true, false, this.getEyeY());
++        return !LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM_FOR_TARGET.test(p_380267_, this) ? false : this.isLookingAtMe(p_380267_, 0.025, true, false, this.getEyeY()) && !net.neoforged.neoforge.common.CommonHooks.shouldSuppressEnderManAnger(this, p_380267_);
+     }
+ 
+     @Override
 @@ -285,8 +_,10 @@
          boolean flag = blockstate.blocksMotion();
          boolean flag1 = blockstate.getFluidState().is(FluidTags.WATER);

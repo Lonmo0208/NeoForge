@@ -356,10 +356,12 @@
          p_147241_ *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
          if (!(p_147241_ <= 0.0)) {
              this.needsSync = true;
-@@ -1683,15 +_,9 @@
+@@ -1681,17 +_,11 @@
+         } else {
+             BlockPos blockpos = this.blockPosition();
              BlockState blockstate = this.getInBlockState();
-             if (this.isFallFlying() && blockstate.is(BlockTags.CAN_GLIDE_THROUGH)) {
-                 return false;
+-            if (this.isFallFlying() && blockstate.is(BlockTags.CAN_GLIDE_THROUGH)) {
+-                return false;
 -            } else if (blockstate.is(BlockTags.CLIMBABLE)) {
 -                this.lastClimbablePos = Optional.of(blockpos);
 -                return true;
@@ -369,6 +371,8 @@
 -            } else {
 -                return false;
 -            }
++            if (this.isFallFlying() && blockstate.is(BlockTags.CAN_GLIDE_THROUGH))
++                return false;
 +            Optional<BlockPos> ladderPos = net.neoforged.neoforge.common.CommonHooks.isLivingOnLadder(blockstate, level(), blockpos, this);
 +            if (ladderPos.isPresent()) this.lastClimbablePos = ladderPos;
 +            return ladderPos.isPresent();
@@ -525,6 +529,36 @@
          float f1 = f * 0.91F;
          Vec3 vec3 = this.handleRelativeFrictionAndCalculateMovement(p_362457_, f);
          double d0 = vec3.y;
+@@ -2352,11 +_,20 @@
+         }
+     }
+ 
++    /**
++     * @deprecated Neo: use {@link #travelInFluid(Vec3, FluidState)} instead
++     */
++    @Deprecated
+     private void travelInFluid(Vec3 p_365480_) {
++        travelInFluid(p_365480_, net.minecraft.world.level.material.Fluids.EMPTY.defaultFluidState());
++    }
++
++    private void travelInFluid(Vec3 p_365480_, FluidState fluidState) {
+         boolean flag = this.getDeltaMovement().y <= 0.0;
+         double d0 = this.getY();
+         double d1 = this.getEffectiveGravity();
+-        if (this.isInWater()) {
++        // Neo: patched in to use the fluid the eye is in because fluidState is always EMPTY fluid.
++        if (this.isInWater() || (this.isInFluidType(this.getEyeInFluidType()) && !this.moveInFluid(this.level().getFluidState(BlockPos.containing(this.getEyePosition())), p_365480_, d1))) {
+             this.travelInWater(p_365480_, d1, flag, d0);
+             this.floatInWaterWhileRidden();
+         } else {
+@@ -2381,6 +_,7 @@
+             f = 0.96F;
+         }
+ 
++        f1 *= (float)this.getAttributeValue(net.neoforged.neoforge.common.NeoForgeMod.SWIM_SPEED);
+         this.moveRelative(f1, p_460666_);
+         this.move(MoverType.SELF, this.getDeltaMovement());
+         Vec3 vec3 = this.getDeltaMovement();
 @@ -2552,7 +_,7 @@
              double d0 = Mth.clamp(p_21298_.x, -0.15F, 0.15F);
              double d1 = Mth.clamp(p_21298_.z, -0.15F, 0.15F);
@@ -673,6 +707,17 @@
                  Vec3 vec31 = BedBlock.findStandUpPosition(this.getType(), this.level(), p_261435_, direction, this.getYRot()).orElseGet(() -> {
                      BlockPos blockpos = p_261435_.above();
                      return new Vec3(blockpos.getX() + 0.5, blockpos.getY() + 0.1, blockpos.getZ() + 0.5);
+@@ -3655,7 +_,9 @@
+ 
+     public @Nullable Direction getBedOrientation() {
+         BlockPos blockpos = this.getSleepingPos().orElse(null);
+-        return blockpos != null ? BedBlock.getBedOrientation(this.level(), blockpos) : null;
++        if (blockpos == null) return null;
++        BlockState state = this.level().getBlockState(blockpos);
++        return !state.isBed(level(), blockpos, this) ? null : state.getBedDirection(level(), blockpos);
+     }
+ 
+     @Override
 @@ -3664,7 +_,7 @@
      }
  

@@ -35,6 +35,14 @@
              }
          }
  
+@@ -323,6 +_,7 @@
+         Vec3 vec3 = this.getDeltaMovement();
+         this.setDeltaMovement(vec3.x, this.getJumpPower(), vec3.z);
+         this.needsSync = true;
++        net.neoforged.neoforge.common.CommonHooks.onLivingJump(this);
+     }
+ 
+     @Override
 @@ -353,6 +_,12 @@
      public EntityDimensions getDefaultDimensions(Pose p_316359_) {
          return super.getDefaultDimensions(p_316359_).scale(this.getSize());

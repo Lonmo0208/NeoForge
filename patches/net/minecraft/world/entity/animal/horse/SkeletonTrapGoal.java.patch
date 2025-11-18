@@ -11,3 +11,11 @@
          DifficultyInstance difficultyinstance = serverlevel.getCurrentDifficultyAt(this.horse.blockPosition());
          this.horse.setTrap(false);
          this.horse.setTamed(true);
+@@ -58,6 +_,7 @@
+                 }
+             }
+         }
++        }));
+     }
+ 
+     private @Nullable AbstractHorse createHorse(DifficultyInstance p_30930_) {

@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/monster/Zombie.java
 +++ b/net/minecraft/world/entity/monster/Zombie.java
+@@ -231,6 +_,7 @@
+     }
+ 
+     protected void doUnderWaterConversion(ServerLevel p_455171_) {
++        if (!net.neoforged.neoforge.event.EventHooks.canLivingConvert(this, EntityType.DROWNED, (timer) -> this.conversionTime = timer)) return;
+         this.convertToZombieType(p_455171_, EntityType.DROWNED);
+         if (!this.isSilent()) {
+             p_455171_.levelEvent(null, 1040, this.blockPosition(), 0);
 @@ -241,7 +_,10 @@
          this.convertTo(
              p_34311_,

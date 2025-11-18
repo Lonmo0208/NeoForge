@@ -37,6 +37,15 @@
          this.noPhysics = this.isSpectator();
          if (this.isSpectator() || this.isPassenger()) {
              this.setOnGround(false);
+@@ -250,7 +_,7 @@
+             }
+ 
+             if (!this.level().isClientSide()
+-                && !this.level().environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, this.position()).canSleep(this.level())) {
++                && !net.neoforged.neoforge.event.EventHooks.canEntityContinueSleeping(this, !this.level().environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, this.position()).canSleep(this.level()) ? BedSleepingProblem.OTHER_PROBLEM : null)) {
+                 this.stopSleepInBed(false, true);
+             }
+         } else if (this.sleepCounter > 0) {
 @@ -289,6 +_,7 @@
          if (this.currentImpulseContextResetGraceTime > 0) {
              this.currentImpulseContextResetGraceTime--;
@@ -73,6 +82,26 @@
          super.die(p_36152_);
          this.reapplyPosition();
          if (!this.isSpectator() && this.level() instanceof ServerLevel serverlevel) {
+@@ -591,10 +_,18 @@
+     }
+ 
+     public @Nullable ItemEntity drop(ItemStack p_36177_, boolean p_36178_) {
+-        return this.drop(p_36177_, false, p_36178_);
++        return net.neoforged.neoforge.common.CommonHooks.onPlayerTossEvent(this, p_36177_, false, p_36178_);
+     }
+ 
++    /**
++     * @deprecated Neo: {@link #getDestroySpeed(BlockState, BlockPos)} instead
++     */
++    @Deprecated
+     public float getDestroySpeed(BlockState p_36282_) {
++        return getDestroySpeed(p_36282_, null);
++    }
++
++    public float getDestroySpeed(BlockState p_36282_, @Nullable BlockPos pos) {
+         float f = this.inventory.getSelectedItem().getDestroySpeed(p_36282_);
+         if (f > 1.0F) {
+             f += (float)this.getAttributeValue(Attributes.MINING_EFFICIENCY);
 @@ -623,13 +_,19 @@
              f /= 5.0F;
          }
@@ -176,6 +205,109 @@
      private boolean isAboveGround(float p_341626_) {
          return this.onGround() || this.fallDistance < p_341626_ && !this.canFallAtLeast(0.0, 0.0, p_341626_ - this.fallDistance);
      }
+@@ -951,6 +_,7 @@
+     }
+ 
+     public void attack(Entity p_36347_) {
++        if (!net.neoforged.neoforge.common.CommonHooks.onPlayerAttackTarget(this, p_36347_)) return;
+         if (!this.cannotAttack(p_36347_)) {
+             float f = this.isAutoSpinAttack() ? this.autoSpinAttackDmg : (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+             ItemStack itemstack = this.getWeaponItem();
+@@ -972,12 +_,22 @@
+ 
+                     f += itemstack.getItem().getAttackDamageBonus(p_36347_, f, damagesource);
+                     boolean flag2 = flag && this.canCriticalAttack(p_36347_);
++                    // Neo: Fire the critical hit event and override the critical hit status and damage multiplier based on the event.
++                    // The boolean local above (flag2) is the vanilla critical hit result.
++                    var critEvent = net.neoforged.neoforge.common.CommonHooks.fireCriticalHit(this, p_36347_, flag2, flag2 ? 1.5F : 1.0F);
++                    flag2 = critEvent.isCriticalHit();
+                     if (flag2) {
+-                        f *= 1.5F;
++                        f *= critEvent.getDamageMultiplier();
+                     }
+ 
+                     float f3 = f + f2;
+-                    boolean flag3 = this.isSweepAttack(flag, flag2, flag1);
++                    // Neo: Replace !flag2 (!isCriticalHit) with the logic from the CriticalHitEvent.
++                    boolean flag3 = this.isSweepAttack(flag, critEvent.isCriticalHit() && critEvent.disableSweep(), flag1);
++
++                    // Neo: Fire the SweepAttackEvent and overwrite the value of flag3 (the local controlling if a sweep will occur).
++                    var sweepEvent = net.neoforged.neoforge.common.CommonHooks.fireSweepAttack(this, p_36347_, flag3);
++                    flag3 = sweepEvent.isSweeping();
++
+                     float f4 = 0.0F;
+                     if (p_36347_ instanceof LivingEntity livingentity) {
+                         f4 = livingentity.getHealth();
+@@ -988,7 +_,8 @@
+                     if (flag4) {
+                         this.causeExtraKnockback(p_36347_, this.getKnockback(p_36347_, damagesource) + (flag1 ? 0.5F : 0.0F), vec3);
+                         if (flag3) {
+-                            this.doSweepAttack(p_36347_, f, damagesource, f1);
++                            var sweepHitBox = itemstack.getSweepHitBox(this, p_36347_);
++                            this.doSweepAttack(p_36347_, f, damagesource, f1, sweepHitBox);
+                         }
+ 
+                         this.attackVisualEffects(p_36347_, flag2, flag3, flag, f2);
+@@ -1045,7 +_,8 @@
+             double d0 = this.getKnownMovement().horizontalDistanceSqr();
+             double d1 = this.getSpeed() * 2.5;
+             if (d0 < Mth.square(d1)) {
+-                return this.getItemInHand(InteractionHand.MAIN_HAND).is(ItemTags.SWORDS);
++                // Neo: Make sweep attacks check SWORD_SWEEP instead of ItemTags.SWORDS.
++                return this.getItemInHand(InteractionHand.MAIN_HAND).canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SWORD_SWEEP);
+             }
+         }
+ 
+@@ -1081,11 +_,12 @@
+ 
+     private void itemAttackInteraction(Entity p_455471_, ItemStack p_456074_, DamageSource p_455954_, boolean p_458145_) {
+         Entity entity = p_455471_;
+-        if (p_455471_ instanceof EnderDragonPart) {
+-            entity = ((EnderDragonPart)p_455471_).parentMob;
++        if (p_455471_ instanceof net.neoforged.neoforge.entity.PartEntity) {
++            entity = ((net.neoforged.neoforge.entity.PartEntity<?>) p_455471_).getParent();
+         }
+ 
+         boolean flag = false;
++        ItemStack copy = p_456074_.copy();
+         if (this.level() instanceof ServerLevel serverlevel) {
+             if (entity instanceof LivingEntity livingentity) {
+                 flag = p_456074_.hurtEnemy(livingentity, this);
+@@ -1102,6 +_,7 @@
+             }
+ 
+             if (p_456074_.isEmpty()) {
++                net.neoforged.neoforge.event.EventHooks.onPlayerDestroyItem(this, copy, p_456074_ == this.getMainHandItem() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+                 if (p_456074_ == this.getMainHandItem()) {
+                     this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                 } else {
+@@ -1138,17 +_,24 @@
+         return 1.0F;
+     }
+ 
++    // Neo: Use version that allows the sweep hitbox to be specified
++    @Deprecated
+     private void doSweepAttack(Entity p_455758_, float p_455168_, DamageSource p_455188_, float p_455105_) {
++        doSweepAttack(p_455758_, p_455168_, p_455188_, p_455105_, p_455758_.getBoundingBox().inflate(1.0, 0.25, 1.0));
++    }
++
++    private void doSweepAttack(Entity p_455758_, float p_455168_, DamageSource p_455188_, float p_455105_, AABB sweepHitBox) {
+         this.playServerSideSound(SoundEvents.PLAYER_ATTACK_SWEEP);
+         if (this.level() instanceof ServerLevel serverlevel) {
+             float f = 1.0F + (float)this.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * p_455168_;
+ 
+-            for (LivingEntity livingentity : this.level().getEntitiesOfClass(LivingEntity.class, p_455758_.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
++            double entityReachSq = Mth.square(this.entityInteractionRange()); // Use entity reach instead of constant 9.0. Vanilla uses bottom center-to-center checks here, so don't update this to use canReach, since it uses closest-corner checks.
++            for (LivingEntity livingentity : this.level().getEntitiesOfClass(LivingEntity.class, sweepHitBox)) {
+                 if (livingentity != this
+                     && livingentity != p_455758_
+                     && !this.isAlliedTo(livingentity)
+                     && !(livingentity instanceof ArmorStand armorstand && armorstand.isMarker())
+-                    && this.distanceToSqr(livingentity) < 9.0) {
++                    && this.distanceToSqr(livingentity) < entityReachSq) {
+                     float f1 = this.getEnchantedDamage(livingentity, f, p_455188_) * p_455105_;
+                     if (livingentity.hurtServer(serverlevel, p_455188_, f1)) {
+                         livingentity.knockback(0.4F, Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), -Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)));
 @@ -1303,6 +_,7 @@
      }
  
@@ -290,3 +422,45 @@
      }
  
      @Override
+@@ -2060,5 +_,41 @@
+         public static final Player.BedSleepingProblem OBSTRUCTED = new Player.BedSleepingProblem(Component.translatable("block.minecraft.bed.obstructed"));
+         public static final Player.BedSleepingProblem OTHER_PROBLEM = new Player.BedSleepingProblem(null);
+         public static final Player.BedSleepingProblem NOT_SAFE = new Player.BedSleepingProblem(Component.translatable("block.minecraft.bed.not_safe"));
++    }
++
++    // Neo: Getters for the Player's name prefixes and suffixes
++    public Collection<MutableComponent> getPrefixes() {
++         return this.prefixes;
++    }
++
++    public Collection<MutableComponent> getSuffixes() {
++         return this.suffixes;
++    }
++
++    private Component displayname = null;
++
++    /**
++     * Neo: Force the displayed name to refresh, by firing {@link net.neoforged.neoforge.event.entity.player.PlayerEvent.NameFormat}, using the real player name as event parameter.
++     */
++    public void refreshDisplayName() {
++        this.displayname = net.neoforged.neoforge.event.EventHooks.getPlayerDisplayName(this, this.getName());
++    }
++
++    /**
++     * Neo: Force a pose for the player. If set, the vanilla pose determination and clearance check is skipped. Make sure the pose is clear yourself (e.g. in PlayerTick).
++     * This has to be set just once, do not set it every tick.
++     * Make sure to clear (null) the pose if not required anymore and only use if necessary.
++     */
++    public void setForcedPose(@Nullable Pose pose) {
++        this.forcedPose = pose;
++    }
++
++    /**
++     * Neo:
++     * @return The forced pose if set, null otherwise
++     */
++    @Nullable
++    public Pose getForcedPose() {
++        return this.forcedPose;
+     }
+ }

@@ -20,6 +20,24 @@
      }
  
      public static boolean isPathClear(Fox p_28472_, LivingEntity p_28473_) {
+@@ -849,6 +_,17 @@
+         @Override
+         protected void breed() {
+             Fox fox = (Fox)this.animal.getBreedOffspring(this.level, this.partner);
++            final net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent event = new net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent(animal, partner, fox);
++            final boolean cancelled = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event).isCanceled();
++            fox = (Fox) event.getChild();
++            if (cancelled) {
++                //Reset the "inLove" state for the animals
++                this.animal.setAge(6000);
++                this.partner.setAge(6000);
++                this.animal.resetLove();
++                this.partner.resetLove();
++                return;
++            }
+             if (fox != null) {
+                 ServerPlayer serverplayer = this.animal.getLoveCause();
+                 ServerPlayer serverplayer1 = this.partner.getLoveCause();
 @@ -926,7 +_,7 @@
          }
  
