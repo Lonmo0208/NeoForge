@@ -1,13 +1,5 @@
 --- a/net/minecraft/server/players/PlayerList.java
 +++ b/net/minecraft/server/players/PlayerList.java
-@@ -72,6 +_,7 @@
- import net.minecraft.server.network.ServerGamePacketListenerImpl;
- import net.minecraft.server.notifications.NotificationService;
- import net.minecraft.server.permissions.LevelBasedPermissionSet;
-+import net.minecraft.server.permissions.PermissionSet;
- import net.minecraft.sounds.SoundEvents;
- import net.minecraft.sounds.SoundSource;
- import net.minecraft.stats.ServerStatsCounter;
 @@ -127,6 +_,7 @@
      private int simulationDistance;
      private boolean allowCommandsForAllPlayers;
