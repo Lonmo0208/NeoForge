@@ -1,11 +1,10 @@
 --- a/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -93,6 +_,8 @@
+@@ -93,6 +_,7 @@
      private final Map<String, String> codeOfConductTexts;
      private @Nullable ManagementServer jsonRpcServer;
      private long lastHeartbeat;
-+    @Nullable
-+    private net.neoforged.neoforge.server.dedicated.DedicatedLanServerPinger dediLanPinger;
++    private net.neoforged.neoforge.server.dedicated.@Nullable DedicatedLanServerPinger dediLanPinger;
  
      public DedicatedServer(
          Thread p_214789_,

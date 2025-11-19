@@ -6,12 +6,12 @@
 package net.neoforged.neoforge.client.event;
 
 import java.util.Map;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.IModBusEvent;
+import net.neoforged.neoforge.client.extensions.IDimensionSpecialEffectsExtension;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -22,17 +22,17 @@ import org.jetbrains.annotations.ApiStatus;
  * <p>This event is fired on the mod-specific event bus, only on the {@linkplain LogicalSide#CLIENT logical client}.</p>
  */
 public class RegisterDimensionSpecialEffectsEvent extends Event implements IModBusEvent {
-    private final Map<Identifier, DimensionSpecialEffects> effects;
+    private final Map<Identifier, IDimensionSpecialEffectsExtension> effects;
 
     @ApiStatus.Internal
-    public RegisterDimensionSpecialEffectsEvent(Map<Identifier, DimensionSpecialEffects> effects) {
+    public RegisterDimensionSpecialEffectsEvent(Map<Identifier, IDimensionSpecialEffectsExtension> effects) {
         this.effects = effects;
     }
 
     /**
      * Registers the effects for a given dimension type.
      */
-    public void register(Identifier dimensionType, DimensionSpecialEffects effects) {
+    public void register(Identifier dimensionType, IDimensionSpecialEffectsExtension effects) {
         this.effects.put(dimensionType, effects);
     }
 }

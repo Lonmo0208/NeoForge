@@ -8,7 +8,6 @@ package net.neoforged.neoforge.client.extensions;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.client.renderer.state.SkyRenderState;
@@ -24,10 +23,6 @@ import org.joml.Matrix4f;
  * and stored in the provided {@link LevelRenderState}.
  */
 public interface IDimensionSpecialEffectsExtension {
-    private DimensionSpecialEffects self() {
-        return (DimensionSpecialEffects) this;
-    }
-
     /**
      * Renders the clouds of this dimension.
      *

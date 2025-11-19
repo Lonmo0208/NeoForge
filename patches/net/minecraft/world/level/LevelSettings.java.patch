@@ -9,9 +9,9 @@
      public LevelSettings(
          String p_250485_, GameType p_250207_, boolean p_251631_, Difficulty p_252122_, boolean p_248961_, GameRules p_460896_, WorldDataConfiguration p_249797_
      ) {
-+        this(p_250485_, p_250207_, p_251631_, p_252122_, p_248961_, p_248536_, p_249797_, com.mojang.serialization.Lifecycle.stable());
++        this(p_250485_, p_250207_, p_251631_, p_252122_, p_248961_, p_460896_, p_249797_, com.mojang.serialization.Lifecycle.stable());
 +    }
-+    public LevelSettings(String p_250485_, GameType p_250207_, boolean p_251631_, Difficulty p_252122_, boolean p_248961_, GameRules p_248536_, WorldDataConfiguration p_249797_, com.mojang.serialization.Lifecycle lifecycle) {
++    public LevelSettings(String p_250485_, GameType p_250207_, boolean p_251631_, Difficulty p_252122_, boolean p_248961_, GameRules p_460896_, WorldDataConfiguration p_249797_, com.mojang.serialization.Lifecycle lifecycle) {
          this.levelName = p_250485_;
          this.gameType = p_250207_;
          this.hardcore = p_251631_;

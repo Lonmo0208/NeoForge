@@ -14,7 +14,7 @@
              ConversionParams.single(this, true, true),
 -            p_454580_ -> p_454580_.handleAttributes(p_455742_.getCurrentDifficultyAt(p_454580_.blockPosition()).getSpecialMultiplier())
 +            p_381517_ -> {
-+                p_381517_.handleAttributes(p_381517_.level().getCurrentDifficultyAt(p_381517_.blockPosition()).getSpecialMultiplier());
++                p_381517_.handleAttributes(p_455742_.getCurrentDifficultyAt(p_381517_.blockPosition()).getSpecialMultiplier());
 +                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_381517_);
 +            }
          );

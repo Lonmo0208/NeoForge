@@ -61,7 +61,7 @@
      @Override
      public Optional<Holder.Reference<T>> get(Identifier p_468929_) {
 -        return Optional.ofNullable(this.byLocation.get(p_468929_));
-+        return Optional.ofNullable(this.byLocation.get(resolve(p_316743_)));
++        return Optional.ofNullable(this.byLocation.get(resolve(p_468929_)));
      }
  
      @Override

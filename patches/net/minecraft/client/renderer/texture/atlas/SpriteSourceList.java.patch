@@ -12,7 +12,7 @@
 +        return this.list(p_294111_, java.util.Set.of());
 +    }
 +
-+    public List<Function<SpriteResourceLoader, SpriteContents>> list(ResourceManager p_294111_, java.util.Set<net.minecraft.server.packs.metadata.MetadataSectionType<?>> additionalMetadata) {
++    public List<SpriteSource.Loader> list(ResourceManager p_294111_, java.util.Set<net.minecraft.server.packs.metadata.MetadataSectionType<?>> additionalMetadata) {
          final Map<Identifier, SpriteSource.DiscardableLoader> map = new HashMap<>();
          SpriteSource.Output spritesource$output = new SpriteSource.Output() {
              @Override

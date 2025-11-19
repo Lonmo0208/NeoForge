@@ -19,7 +19,7 @@
                      for (BlockPos blockpos : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
                          if (EnchantingTableBlock.isValidBookShelf(p_460548_, p_460549_, blockpos)) {
 -                            j++;
-+                            j += p_344366_.getBlockState(p_344367_.offset(blockpos)).getEnchantPowerBonus(p_344366_, p_344367_.offset(blockpos));
++                            j += p_460548_.getBlockState(p_460549_.offset(blockpos)).getEnchantPowerBonus(p_460548_, p_460549_.offset(blockpos));
                          }
                      }
  
@@ -33,7 +33,7 @@
                          if (this.costs[k] < k + 1) {
                              this.costs[k] = 0;
                          }
-+                        this.costs[k] = net.neoforged.neoforge.event.EventHooks.onEnchantmentLevelSet(p_344366_, p_344367_, k, (int)j, itemstack, costs[k]);
++                        this.costs[k] = net.neoforged.neoforge.event.EventHooks.onEnchantmentLevelSet(p_460548_, p_460549_, k, (int)j, itemstack, costs[k]);
                      }
  
                      for (int l = 0; l < 3; l++) {

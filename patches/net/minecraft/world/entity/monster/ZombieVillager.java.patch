@@ -14,7 +14,7 @@
                      p_34399_.levelEvent(null, 1027, this.blockPosition(), 0);
                  }
 +
-+                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_438851_);
++                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_466610_);
              }
          );
      }

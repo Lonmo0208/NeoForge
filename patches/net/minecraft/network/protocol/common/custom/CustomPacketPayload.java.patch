@@ -12,7 +12,7 @@
          return new StreamCodec<B, CustomPacketPayload>() {
              private StreamCodec<? super B, ? extends CustomPacketPayload> findCodec(Identifier p_467071_) {
                  StreamCodec<? super B, ? extends CustomPacketPayload> streamcodec = map.get(p_467071_);
-+                if (streamcodec == null) streamcodec = net.neoforged.neoforge.network.registration.NetworkRegistry.getCodec(p_320938_, protocol, packetFlow);
++                if (streamcodec == null) streamcodec = net.neoforged.neoforge.network.registration.NetworkRegistry.getCodec(p_467071_, protocol, packetFlow);
                  return streamcodec != null ? streamcodec : p_319839_.create(p_467071_);
              }
  
@@ -33,9 +33,9 @@
                  Identifier identifier = p_320227_.readIdentifier();
 -                return (CustomPacketPayload)this.findCodec(identifier).decode(p_320227_);
 +                try {
-+                    return (CustomPacketPayload)this.findCodec(Identifier).decode(p_320227_);
++                    return (CustomPacketPayload)this.findCodec(identifier).decode(p_320227_);
 +                } catch (RuntimeException e) {
-+                    throw new RuntimeException("Failed decoding custom payload " + Identifier + ": " + e, e); // Make it easier to debug which mod payload failed to be decoded
++                    throw new RuntimeException("Failed decoding custom payload " + identifier + ": " + e, e); // Make it easier to debug which mod payload failed to be decoded
 +                }
              }
          };

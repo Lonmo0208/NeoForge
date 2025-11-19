@@ -9,12 +9,11 @@
      static final Identifier DEFAULT_BACKGROUND = createTextureLocation("items");
      private final Component displayName;
      Identifier backgroundTexture = DEFAULT_BACKGROUND;
-@@ -27,6 +_,15 @@
+@@ -27,6 +_,14 @@
      private Set<ItemStack> displayItemsSearchTab = ItemStackLinkedSet.createTypeAndComponentsSet();
      private final Supplier<ItemStack> iconGenerator;
      private final CreativeModeTab.DisplayItemsGenerator displayItemsGenerator;
-+    @Nullable
-+    private final net.minecraft.resources.Identifier scrollerSpriteLocation;
++    private final net.minecraft.resources.@Nullable Identifier scrollerSpriteLocation;
 +    private final boolean hasSearchBar;
 +    private final int searchBarWidth;
 +    private final net.minecraft.resources.Identifier tabsImage;

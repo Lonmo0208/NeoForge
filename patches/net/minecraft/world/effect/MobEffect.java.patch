@@ -41,7 +41,7 @@
      }
  
 -    public record AttributeTemplate(Identifier id, double amount, AttributeModifier.Operation operation) {
-+    public record AttributeTemplate(Identifier id, double amount, AttributeModifier.Operation operation, @Nullable it.unimi.dsi.fastutil.ints.Int2DoubleFunction curve) {
++    public record AttributeTemplate(Identifier id, double amount, AttributeModifier.Operation operation, it.unimi.dsi.fastutil.ints.@Nullable Int2DoubleFunction curve) {
 +
 +        public AttributeTemplate(Identifier id, double amount, AttributeModifier.Operation operation) {
 +            this(id, amount, operation, null);

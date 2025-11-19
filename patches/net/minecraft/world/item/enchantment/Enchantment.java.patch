@@ -93,7 +93,7 @@
              return new Enchantment(
 -                Component.translatable(Util.makeDescriptionId("enchantment", p_469761_)), this.definition, this.exclusiveSet, this.effectMapBuilder.build()
 +                // Neo: permit custom name components instead of a single hardcoded translatable component.
-+                this.nameFactory.apply(Component.translatable(Util.makeDescriptionId("enchantment", p_344988_))),
++                this.nameFactory.apply(Component.translatable(Util.makeDescriptionId("enchantment", p_469761_))),
 +                this.definition, this.exclusiveSet, this.effectMapBuilder.build()
              );
          }

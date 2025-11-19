@@ -8,12 +8,17 @@ package net.neoforged.neoforge.client;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
+
+import net.minecraft.client.CloudStatus;
+import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.neoforged.neoforge.client.extensions.IDimensionSpecialEffectsExtension;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 
 /**
  * Manager for {@link DimensionSpecialEffects} instances.
@@ -21,39 +26,26 @@ import org.jetbrains.annotations.ApiStatus;
  * Provides a lookup by dimension type.
  */
 public final class DimensionSpecialEffectsManager {
-    private static ImmutableMap<Identifier, DimensionSpecialEffects> EFFECTS;
-    private static DimensionSpecialEffects DEFAULT_EFFECTS;
+    private static ImmutableMap<Identifier, IDimensionSpecialEffectsExtension> EFFECTS;
+    private static IDimensionSpecialEffectsExtension DEFAULT_EFFECTS = new IDimensionSpecialEffectsExtension() {
+    };
 
     /**
      * Finds the {@link DimensionSpecialEffects} for a given dimension type, or the default if none is registered.
      */
-    public static DimensionSpecialEffects getForType(Identifier type) {
+    public static IDimensionSpecialEffectsExtension getForType(Identifier type) {
         return EFFECTS.getOrDefault(type, DEFAULT_EFFECTS);
     }
 
     @ApiStatus.Internal
     public static void init() {
-        var effects = new HashMap<Identifier, DimensionSpecialEffects>();
-        DEFAULT_EFFECTS = preRegisterVanillaEffects(effects);
+        var effects = new HashMap<Identifier, IDimensionSpecialEffectsExtension>();
         var event = new RegisterDimensionSpecialEffectsEvent(effects);
         ModLoader.postEventWrapContainerInModOrder(event);
         EFFECTS = ImmutableMap.copyOf(effects);
     }
 
-    /**
-     * Pre-registers vanilla dimension effects and returns the default fallback effects instance.
-     * <p>
-     * Borrowed from {@link DimensionSpecialEffects#EFFECTS}.
-     */
-    private static DimensionSpecialEffects preRegisterVanillaEffects(Map<Identifier, DimensionSpecialEffects> effects) {
-        var overworldEffects = new DimensionSpecialEffects.OverworldEffects();
-        effects.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, overworldEffects);
-        effects.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());
-        effects.put(BuiltinDimensionTypes.END_EFFECTS, new DimensionSpecialEffects.EndEffects());
-        return overworldEffects;
-    }
-
-    public static DimensionSpecialEffects getDefaultEffects() {
+    public static IDimensionSpecialEffectsExtension getDefaultEffects() {
         return DEFAULT_EFFECTS;
     }
 

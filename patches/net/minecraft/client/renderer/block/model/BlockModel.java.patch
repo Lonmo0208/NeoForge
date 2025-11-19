@@ -6,7 +6,7 @@
      TextureSlots.Data textureSlots,
 -    @Nullable Identifier parent
 +    @Nullable Identifier parent,
-+    @Nullable com.mojang.math.Transformation rootTransform,
++    com.mojang.math.@Nullable Transformation rootTransform,
 +    net.neoforged.neoforge.client.RenderTypeGroup renderTypeGroup,
 +    java.util.Map<String, Boolean> partVisibility
  ) implements UnbakedModel {
@@ -31,7 +31,7 @@
  
 +    public BlockModel(
 +            @Nullable UnbakedGeometry geometry,
-+            @Nullable UnbakedModel.GuiLight guiLight,
++            UnbakedModel.@Nullable GuiLight guiLight,
 +            @Nullable Boolean ambientOcclusion,
 +            @Nullable ItemTransforms transforms,
 +            TextureSlots.Data textureSlots,
@@ -60,7 +60,7 @@
 +            var renderTypeGroup = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRenderType(jsonobject);
 +            var partVisibility = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializePartVisibility(jsonobject);
 +
-+            return new BlockModel(unbakedgeometry, unbakedmodel$guilight, obool, itemtransforms, textureslots$data, Identifier, rootTransform, renderTypeGroup, partVisibility);
++            return new BlockModel(unbakedgeometry, unbakedmodel$guilight, obool, itemtransforms, textureslots$data, identifier, rootTransform, renderTypeGroup, partVisibility);
          }
  
          private TextureSlots.Data getTextureMap(JsonObject p_111510_) {

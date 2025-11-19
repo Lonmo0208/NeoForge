@@ -9,12 +9,11 @@
      public static final Identifier BASE_ATTACK_DAMAGE_ID = Identifier.withDefaultNamespace("base_attack_damage");
      public static final Identifier BASE_ATTACK_SPEED_ID = Identifier.withDefaultNamespace("base_attack_speed");
      public static final int DEFAULT_MAX_STACK_SIZE = 64;
-@@ -116,6 +_,8 @@
+@@ -116,6 +_,7 @@
      private final @Nullable Item craftingRemainingItem;
      protected final String descriptionId;
      private final FeatureFlagSet requiredFeatures;
-+    @Nullable
-+    private net.neoforged.neoforge.transfer.item.ItemResource defaultResource;
++    private net.neoforged.neoforge.transfer.item.@Nullable ItemResource defaultResource;
  
      public static int getId(Item p_41394_) {
          return p_41394_ == null ? 0 : BuiltInRegistries.ITEM.getId(p_41394_);

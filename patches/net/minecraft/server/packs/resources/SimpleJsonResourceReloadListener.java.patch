@@ -37,8 +37,8 @@
 -                    if (p_279404_.putIfAbsent(identifier1, (T)p_371454_) != null) {
 +                conditionalCodec.parse(p_371830_, com.google.gson.JsonParser.parseReader(reader)).ifSuccess(p_371454_ -> {
 +                    if (p_371454_.isEmpty()) {
-+                        LOGGER.debug("Skipping loading data file '{}' from '{}' as its conditions were not met", Identifier1, Identifier);
-+                    } else if (p_279404_.putIfAbsent(Identifier1, p_371454_.get()) != null) {
++                        LOGGER.debug("Skipping loading data file '{}' from '{}' as its conditions were not met", identifier1, identifier);
++                    } else if (p_279404_.putIfAbsent(identifier1, p_371454_.get()) != null) {
                          throw new IllegalStateException("Duplicate data file ignored with ID " + identifier1);
                      }
                  }).ifError(p_371566_ -> LOGGER.error("Couldn't parse data file '{}' from '{}': {}", identifier1, identifier, p_371566_));

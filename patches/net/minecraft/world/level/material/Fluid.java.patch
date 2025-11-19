@@ -1,11 +1,10 @@
 --- a/net/minecraft/world/level/material/Fluid.java
 +++ b/net/minecraft/world/level/material/Fluid.java
-@@ -29,6 +_,8 @@
+@@ -29,6 +_,7 @@
      protected final StateDefinition<Fluid, FluidState> stateDefinition;
      private FluidState defaultFluidState;
      private final Holder.Reference<Fluid> builtInRegistryHolder = BuiltInRegistries.FLUID.createIntrusiveHolder(this);
-+    @Nullable
-+    private net.neoforged.neoforge.transfer.fluid.FluidResource defaultResource;
++    private net.neoforged.neoforge.transfer.fluid.@Nullable FluidResource defaultResource;
  
      protected Fluid() {
          StateDefinition.Builder<Fluid, FluidState> builder = new StateDefinition.Builder<>(this);

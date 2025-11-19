@@ -120,13 +120,13 @@
                  createEntityIgnoreException(p_421857_, p_74524_, compoundtag).ifPresent(p_454648_ -> {
 -                    float f = p_454648_.rotate(p_74527_);
 -                    f += p_454648_.mirror(p_74526_) - p_454648_.getYRot();
-+                    float f = p_432733_.rotate(placementIn.getRotation());
-+                    f += p_432733_.mirror(placementIn.getMirror()) - p_432733_.getYRot();
++                    float f = p_454648_.rotate(placementIn.getRotation());
++                    f += p_454648_.mirror(placementIn.getMirror()) - p_454648_.getYRot();
                      p_454648_.snapTo(vec31.x, vec31.y, vec31.z, f, p_454648_.getXRot());
                      p_454648_.setYBodyRot(f);
                      p_454648_.setYHeadRot(f);
 -                    if (p_74530_ && p_454648_ instanceof Mob mob) {
-+                    if (placementIn.shouldFinalizeEntities() && p_432733_ instanceof Mob mob) {
++                    if (placementIn.shouldFinalizeEntities() && p_454648_ instanceof Mob mob) {
                          mob.finalizeSpawn(p_74524_, p_74524_.getCurrentDifficultyAt(BlockPos.containing(vec31)), EntitySpawnReason.STRUCTURE, null);
                      }
  

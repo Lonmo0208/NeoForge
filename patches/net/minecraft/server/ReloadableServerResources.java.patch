@@ -42,7 +42,7 @@
                      );
 +
 +                    // Neo: Fire the AddServerReloadListenersEvent and use the resulting listeners instead of the vanilla listener list.
-+                    List<PreparableReloadListener> listeners = net.neoforged.neoforge.event.EventHooks.onResourceReload(reloadableserverresources, p_359514_.layers().compositeAccess());
++                    List<PreparableReloadListener> listeners = net.neoforged.neoforge.event.EventHooks.onResourceReload(reloadableserverresources, p_454398_.layers().compositeAccess());
 +
 +                    // Neo: Inject the ConditionContext and RegistryLookup to any resource listener that requests it.
 +                    for (PreparableReloadListener rl : listeners) {

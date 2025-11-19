@@ -596,3 +596,8 @@ publishing {
         maven gradleutils.getPublishingMaven()
     }
 }
+
+
+tasks.withType(JavaCompile.class).configureEach(task -> {
+    Collections.addAll(task.getOptions().getCompilerArgs(), "-Xmaxerrs", "9999");
+});

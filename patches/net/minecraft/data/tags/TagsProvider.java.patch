@@ -70,7 +70,7 @@
                                      } else {
 -                                        Path path = this.pathProvider.json(identifier);
 -                                        return DataProvider.saveStable(p_253684_, p_323140_.contents, TagFile.CODEC, new TagFile(list, false), path);
-+                                        Path path = this.getPath(Identifier);
++                                        Path path = this.getPath(identifier);
 +                                        if (path == null) return CompletableFuture.completedFuture(null); // Neo: Allow running this data provider without writing it. Recipe provider needs valid tags.
 +                                        var removed = tagbuilder.getRemoveEntries().toList();
 +                                        return DataProvider.saveStable(p_253684_, p_323140_.contents, TagFile.CODEC, new TagFile(list, tagbuilder.isReplace(), removed), path);

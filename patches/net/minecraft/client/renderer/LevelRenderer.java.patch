@@ -129,16 +129,16 @@
      }
  
 +    /**
-+     * @deprecated Neo: use {@link #addCloudsPass(FrameGraphBuilder, CloudStatus, Vec3, float, int, float, Matrix4f)} instead
++     * @deprecated Neo: use {@link #addCloudsPass(FrameGraphBuilder, CloudStatus, Vec3, long, float, int, float, Matrix4f)} instead
 +     */
 +    @Deprecated
      private void addCloudsPass(
          FrameGraphBuilder p_361907_, CloudStatus p_364196_, Vec3 p_362985_, long p_469097_, float p_365209_, int p_362342_, float p_362337_
      ) {
-+        addCloudsPass(p_361907_, p_364196_, p_362985_, p_365209_, p_362342_, p_362337_, RenderSystem.getModelViewMatrix());
++        addCloudsPass(p_361907_, p_364196_, p_362985_, p_469097_, p_365209_, p_362342_, p_362337_, RenderSystem.getModelViewMatrix());
 +    }
 +
-+    private void addCloudsPass(FrameGraphBuilder p_361907_, CloudStatus p_364196_, Vec3 p_362985_, float p_365209_, int p_362342_, float p_362337_, Matrix4f modelViewMatrix) {
++    private void addCloudsPass(FrameGraphBuilder p_361907_, CloudStatus p_364196_, Vec3 p_362985_, long p_469097_, float p_365209_, int p_362342_, float p_362337_, Matrix4f modelViewMatrix) {
          FramePass framepass = p_361907_.addPass("clouds");
          if (this.targets.clouds != null) {
              this.targets.clouds = framepass.readsAndWrites(this.targets.clouds);
@@ -149,28 +149,27 @@
 -        framepass.executes(() -> this.cloudRenderer.render(p_362342_, p_364196_, p_362337_, p_362985_, p_469097_, p_365209_));
 +        framepass.executes(() -> {
 +            if (!this.levelRenderState.dimensionSpecialEffects.renderClouds(this.levelRenderState, p_362985_, p_364196_, p_362342_, p_362337_, modelViewMatrix)) {
-+                this.cloudRenderer.render(p_362342_, p_364196_, p_362337_, p_362985_, p_365209_);
++                this.cloudRenderer.render(p_362342_, p_364196_, p_362337_, p_362985_, p_469097_, p_365209_);
 +            }
 +        });
      }
  
 +    /**
-+     * @deprecated Neo: use {@link #addWeatherPass(FrameGraphBuilder, Vec3, GpuBufferSlice, Matrix4f)} instead
++     * @deprecated Neo: use {@link #addWeatherPass(FrameGraphBuilder, GpuBufferSlice, Matrix4f)} instead
 +     */
 +    @Deprecated
      private void addWeatherPass(FrameGraphBuilder p_364025_, GpuBufferSlice p_418104_) {
-+        addWeatherPass(p_364025_, p_360771_, p_418104_, RenderSystem.getModelViewMatrix());
++        addWeatherPass(p_364025_, p_418104_, RenderSystem.getModelViewMatrix());
 +    }
 +
-+    private void addWeatherPass(FrameGraphBuilder p_364025_, Vec3 p_360771_, GpuBufferSlice p_418104_, Matrix4f modelViewMatrix) {
++    private void addWeatherPass(FrameGraphBuilder p_364025_, GpuBufferSlice p_418104_, Matrix4f modelViewMatrix) {
          int i = this.minecraft.options.getEffectiveRenderDistance() * 16;
          float f = this.minecraft.gameRenderer.getDepthFar();
          FramePass framepass = p_364025_.addPass("weather");
-@@ -759,6 +_,10 @@
+@@ -759,6 +_,9 @@
              MultiBufferSource.BufferSource multibuffersource$buffersource = this.renderBuffers.bufferSource();
              CameraRenderState camerarenderstate = this.levelRenderState.cameraRenderState;
              this.weatherEffectRenderer.render(multibuffersource$buffersource, camerarenderstate.pos, this.levelRenderState.weatherRenderState);
-+            this.weatherEffectRenderer.render(multibuffersource$buffersource, p_360771_, this.levelRenderState.weatherRenderState, this.levelRenderState);
 +            Profiler.get().push("neoforge_render_after_weather");
 +            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterWeather(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
 +            Profiler.get().pop();
@@ -182,7 +181,7 @@
                              || p_435924_.entity() instanceof LivingEntity && ((LivingEntity)p_435924_.entity()).isSleeping()
                      )
 -                    && (!(entity instanceof LocalPlayer) || p_435924_.entity() == entity)) {
-+                    && (!(entity instanceof LocalPlayer) || p_435924_.getEntity() == entity || (entity == minecraft.player && !minecraft.player.isSpectator()))) { // Neo: render local player entity when it is not the camera entity
++                    && (!(entity instanceof LocalPlayer) || p_435924_.entity() == entity || (entity == minecraft.player && !minecraft.player.isSpectator()))) { // Neo: render local player entity when it is not the camera entity
                      if (entity.tickCount == 0) {
                          entity.xOld = entity.getX();
                          entity.yOld = entity.getY();
@@ -308,7 +307,7 @@
                      this.targets.main = framepass.readsAndWrites(this.targets.main);
                      framepass.executes(
                          () -> {
-+                            // TODO 1.21.11: if (!this.levelRenderState.dimensionSpecialEffects.renderSky(levelRenderState, skyrenderstate, modelViewMatrix, () -> RenderSystem.setShaderFog(p_418294_))) {
++                            if (!this.levelRenderState.dimensionSpecialEffects.renderSky(levelRenderState, skyrenderstate, modelViewMatrix, () -> RenderSystem.setShaderFog(p_418294_))) {
                              RenderSystem.setShaderFog(p_418294_);
                              if (skyrenderstate.skybox == DimensionType.Skybox.END) {
                                  skyrenderer.renderEndSky();
@@ -316,7 +315,7 @@
                                      skyrenderer.renderDarkDisc();
                                  }
                              }
-+                            // TODO 1.21.11: }
++                            } // Neo: End of skip if custom sky is in effect
 +                            Profiler.get().push("neoforge_render_after_sky");
 +                            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderLevelStageEvent.AfterSky(this, this.levelRenderState, null, modelViewMatrix, this.getRenderableSections()));
 +                            Profiler.get().pop();

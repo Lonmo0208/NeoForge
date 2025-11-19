@@ -147,7 +147,7 @@
 +        this.addBreakingBlockEffect(p_446936_, p_446144_, null);
 +    }
 +
-+    public void addBreakingBlockEffect(BlockPos p_446936_, Direction p_446144_, @Nullable net.minecraft.world.phys.HitResult hitResult) {
++    public void addBreakingBlockEffect(BlockPos p_446936_, Direction p_446144_, net.minecraft.world.phys.@Nullable HitResult hitResult) {
          BlockState blockstate = this.getBlockState(p_446936_);
 -        if (blockstate.getRenderShape() != RenderShape.INVISIBLE && blockstate.shouldSpawnTerrainParticles()) {
 +        if (blockstate.getRenderShape() != RenderShape.INVISIBLE && !net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions.of(blockstate).addHitEffects(blockstate, this, hitResult, this.minecraft.particleEngine)) {
@@ -181,7 +181,7 @@
              }
          }
  
-@@ -1242,10 +_,59 @@
+@@ -1242,10 +_,62 @@
                      ClientLevel.this.dragonParts.removeAll(Arrays.asList(enderdragon.getSubEntities()));
                      break;
                  default:
@@ -210,7 +210,10 @@
 +
 +    @Override
 +    public float getShade(float normalX, float normalY, float normalZ, boolean shade) {
-+        boolean constantAmbientLight = this.effects().constantAmbientLight();
++        // TODO 1.21.11: Make this extensible / use our dimension special effects replacement.
++        var cardinalLightType = this.dimensionType().cardinalLightType();
++        boolean constantAmbientLight = cardinalLightType == DimensionType.CardinalLightType.NETHER;
++
 +        if (!shade)
 +            return constantAmbientLight ? 0.9F : 1.0F;
 +        float yFactor = constantAmbientLight ? 0.9F : normalY < 0 ? 0.5F : 1.0F;

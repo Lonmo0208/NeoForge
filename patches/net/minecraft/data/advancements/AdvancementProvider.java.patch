@@ -5,7 +5,7 @@
                  } else {
                      Path path = this.pathProvider.json(p_465962_.id());
 -                    list.add(DataProvider.saveStable(p_254268_, p_323115_, Advancement.CODEC, p_465962_.value(), path));
-+                    list.add(DataProvider.saveStable(p_254268_, p_323115_, Advancement.CODEC, p_339356_.value(), path));// TODO: make conditional
++                    list.add(DataProvider.saveStable(p_254268_, p_323115_, Advancement.CODEC, p_465962_.value(), path));// TODO: make conditional
                  }
              };
  

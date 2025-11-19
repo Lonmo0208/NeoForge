@@ -15,10 +15,10 @@
  
      public ItemModel getItemModel(Identifier p_468547_) {
 -        return this.bakedItemStackModels.getOrDefault(p_468547_, this.missingModels.item());
-+        ItemModel model = this.bakedItemStackModels.get(p_387691_);
++        ItemModel model = this.bakedItemStackModels.get(p_468547_);
 +        if (model == null) {
-+            if (this.reportedMissingItemModels.add(p_387691_)) {
-+                LOGGER.warn("Missing item model for location {}", p_387691_);
++            if (this.reportedMissingItemModels.add(p_468547_)) {
++                LOGGER.warn("Missing item model for location {}", p_468547_);
 +            }
 +            return this.missingModels.item();
 +        }
@@ -74,7 +74,7 @@
              .thenCompose(
                  p_465794_ -> {
 -                    List<CompletableFuture<Pair<Identifier, BlockModel>>> list = new ArrayList<>(p_465794_.size());
-+                    List<CompletableFuture<Pair<Identifier, UnbakedModel>>> list = new ArrayList<>(p_250597_.size());
++                    List<CompletableFuture<Pair<Identifier, UnbakedModel>>> list = new ArrayList<>(p_465794_.size());
  
                      for (Entry<Identifier, Resource> entry : p_465794_.entrySet()) {
                          list.add(CompletableFuture.supplyAsync(() -> {
@@ -83,7 +83,7 @@
                                  Pair pair;
                                  try (Reader reader = entry.getValue().openAsReader()) {
 -                                    pair = Pair.of(identifier, BlockModel.fromStream(reader));
-+                                    pair = Pair.of(Identifier, net.neoforged.neoforge.client.model.UnbakedModelParser.parse(reader));
++                                    pair = Pair.of(identifier, net.neoforged.neoforge.client.model.UnbakedModelParser.parse(reader));
                                  }
  
                                  return pair;

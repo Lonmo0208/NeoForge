@@ -15,7 +15,7 @@
 +
 +    @Nullable
 +    public <E extends BlockEntity, S extends BlockEntityRenderState> S tryExtractRenderState(
-+            E p_445799_, float p_446989_, @Nullable ModelFeatureRenderer.CrumblingOverlay p_447358_, @Nullable net.minecraft.client.renderer.culling.Frustum frustum
++            E p_445799_, float p_446989_, ModelFeatureRenderer.@Nullable CrumblingOverlay p_447358_, net.minecraft.client.renderer.culling.@Nullable Frustum frustum
 +    ) {
          BlockEntityRenderer<E, S> blockentityrenderer = this.getRenderer(p_445799_);
          if (blockentityrenderer == null) {

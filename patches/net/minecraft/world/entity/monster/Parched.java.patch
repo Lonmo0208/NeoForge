@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/monster/Parched.java
++++ b/net/minecraft/world/entity/monster/Parched.java
+@@ -49,7 +_,7 @@
+     }
+ 
+     @Override
+-    SoundEvent getStepSound() {
++    protected SoundEvent getStepSound() {
+         return SoundEvents.PARCHED_STEP;
+     }
+ 
