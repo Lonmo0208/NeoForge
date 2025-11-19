@@ -14,6 +14,7 @@ import java.util.Map;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Util;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.textures.UnitTextureAtlasSprite;
@@ -70,6 +71,11 @@ public class QuadBakingVertexConsumer implements VertexConsumer {
     }
 
     @Override
+    public VertexConsumer setColor(int packedColor) {
+        return setColor(ARGB.red(packedColor), ARGB.green(packedColor), ARGB.blue(packedColor), ARGB.alpha(packedColor));
+    }
+
+    @Override
     public VertexConsumer setColor(int r, int g, int b, int a) {
         int offset = vertexIndex * IQuadTransformer.STRIDE + IQuadTransformer.COLOR;
         quadData[offset] = ((a & 0xFF) << 24) |
@@ -110,6 +116,11 @@ public class QuadBakingVertexConsumer implements VertexConsumer {
             int offset = vertexIndex * IQuadTransformer.STRIDE + baseOffset;
             System.arraycopy(rawData, 0, quadData, offset, rawData.length);
         }
+        return this;
+    }
+
+    @Override
+    public VertexConsumer setLineWidth(float lineWidth) {
         return this;
     }
 

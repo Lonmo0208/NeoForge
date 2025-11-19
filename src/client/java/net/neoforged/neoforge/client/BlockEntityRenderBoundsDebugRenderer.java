@@ -15,7 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
@@ -23,6 +23,7 @@ import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -74,14 +75,15 @@ public final class BlockEntityRenderBoundsDebugRenderer {
 
         PoseStack poseStack = event.getPoseStack();
         Vec3 camera = event.getLevelRenderState().cameraRenderState.pos;
-        VertexConsumer consumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.lines());
+        VertexConsumer consumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypes.lines());
 
         for (BlockEntityRenderBoundsRenderState be : renderStates) {
             Vec3 offset = Vec3.atLowerCornerOf(be.pos).subtract(camera);
 
             poseStack.pushPose();
             poseStack.translate(offset.x, offset.y, offset.z);
-            ShapeRenderer.renderLineBox(poseStack.last(), consumer, be.bounds, 1F, 0F, 0F, 1F);
+            // TODO 1.21.11: check that the line width is sufficient
+            ShapeRenderer.renderShape(poseStack, consumer, Shapes.create(be.bounds), 0, 0, 0, 0xFFFF0000, 1F);
             poseStack.popPose();
         }
     }

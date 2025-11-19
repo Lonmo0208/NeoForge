@@ -61,7 +61,7 @@ public final class SimpleUnbakedStandaloneModel<T> implements UnbakedStandaloneM
      */
     public static SimpleUnbakedStandaloneModel<SimpleModelWrapper> simpleModelWrapper(Identifier modelId) {
         return new SimpleUnbakedStandaloneModel<>(
-                modelId, (model, baker) -> SimpleModelWrapper.bake(baker, model, BlockModelRotation.X0_Y0));
+                modelId, (model, baker) -> SimpleModelWrapper.bake(baker, model, BlockModelRotation.IDENTITY));
     }
 
     /**
@@ -77,7 +77,7 @@ public final class SimpleUnbakedStandaloneModel<T> implements UnbakedStandaloneM
      */
     public static SimpleUnbakedStandaloneModel<BlockStateModel> blockStateModel(Identifier modelId) {
         return new SimpleUnbakedStandaloneModel<>(
-                modelId, (model, baker) -> new SingleVariant(SimpleModelWrapper.bake(baker, model, BlockModelRotation.X0_Y0)));
+                modelId, (model, baker) -> new SingleVariant(SimpleModelWrapper.bake(baker, model, BlockModelRotation.IDENTITY)));
     }
 
     /**
@@ -93,7 +93,7 @@ public final class SimpleUnbakedStandaloneModel<T> implements UnbakedStandaloneM
      */
     public static SimpleUnbakedStandaloneModel<QuadCollection> quadCollection(Identifier modelId) {
         return new SimpleUnbakedStandaloneModel<>(
-                modelId, (model, baker) -> model.bakeTopGeometry(model.getTopTextureSlots(), baker, BlockModelRotation.X0_Y0));
+                modelId, (model, baker) -> model.bakeTopGeometry(model.getTopTextureSlots(), baker, BlockModelRotation.IDENTITY));
     }
 
     /**

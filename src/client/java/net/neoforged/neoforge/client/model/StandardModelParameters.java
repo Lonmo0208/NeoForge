@@ -11,7 +11,6 @@ import com.mojang.math.Transformation;
 import java.util.Map;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.TextureSlots;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
@@ -40,7 +39,7 @@ public record StandardModelParameters(
         TextureSlots.Data textures = TextureSlots.Data.EMPTY;
         if (jsonObject.has("textures")) {
             JsonObject jsonobject = GsonHelper.getAsJsonObject(jsonObject, "textures");
-            textures = TextureSlots.parseTextureMap(jsonobject, TextureAtlas.LOCATION_BLOCKS);
+            textures = TextureSlots.parseTextureMap(jsonobject);
         }
 
         ItemTransforms itemTransforms = null;

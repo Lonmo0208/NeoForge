@@ -25,8 +25,6 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.QuadCollection;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.ClientHooks;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -73,7 +71,6 @@ public final class UnbakedElementsHelper {
         List<BlockElement> elements = createUnbakedItemElements(layerIndex, sprite, faceData);
         elements.removeFirst(); // Remove north and south faces
 
-        float expand = -sprite.uvShrinkRatio();
         SpriteContents spriteContents = sprite.contents();
         int width = spriteContents.width();
         int height = spriteContents.height();
@@ -114,17 +111,9 @@ public final class UnbakedElementsHelper {
 
                     Vector3f from = new Vector3f(16 * xStart / (float) width, 16 - 16 * yEnd / (float) height, 7.5F);
                     Vector3f to = new Vector3f(16 * x / (float) width, 16 - 16 * y / (float) height, 8.5F);
-                    // Create initial default UVs
+                    // Create UVs
                     BlockElementFace.UVs northUvs = FaceBakery.defaultFaceUV(from, to, Direction.NORTH);
                     BlockElementFace.UVs southUvs = FaceBakery.defaultFaceUV(from, to, Direction.SOUTH);
-                    // Expand coordinates to match the shrunk UVs of the front/back face on a standard generated model
-                    from.x = Mth.clamp(Mth.lerp(expand, from.x, 8F), 0F, 16F);
-                    from.y = Mth.clamp(Mth.lerp(expand, from.y, 8F), 0F, 16F);
-                    to.x = Mth.clamp(Mth.lerp(expand, to.x, 8F), 0F, 16F);
-                    to.y = Mth.clamp(Mth.lerp(expand, to.y, 8F), 0F, 16F);
-                    // Counteract sprite expansion to ensure pixel alignment
-                    northUvs = expandUVs(northUvs, expand);
-                    southUvs = expandUVs(southUvs, expand);
                     // Create faces
                     Map<Direction, BlockElementFace> faces = Map.of(
                             Direction.NORTH, new BlockElementFace(null, layerIndex, "layer" + layerIndex, northUvs, Quadrant.R0),
@@ -138,16 +127,6 @@ public final class UnbakedElementsHelper {
             }
         }
         return elements;
-    }
-
-    private static BlockElementFace.UVs expandUVs(BlockElementFace.UVs uvs, float expand) {
-        float centerU = (uvs.minU() + uvs.minU() + uvs.maxU() + uvs.maxU()) / 4.0F;
-        float centerV = (uvs.minV() + uvs.minV() + uvs.maxV() + uvs.maxV()) / 4.0F;
-        return new BlockElementFace.UVs(
-                Mth.clamp(Mth.lerp(expand, uvs.minU(), centerU), 0F, 16F),
-                Mth.clamp(Mth.lerp(expand, uvs.minV(), centerV), 0F, 16F),
-                Mth.clamp(Mth.lerp(expand, uvs.maxU(), centerU), 0F, 16F),
-                Mth.clamp(Mth.lerp(expand, uvs.maxV(), centerV), 0F, 16F));
     }
 
     /**

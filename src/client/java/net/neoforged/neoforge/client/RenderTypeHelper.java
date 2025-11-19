@@ -38,11 +38,10 @@ public final class RenderTypeHelper {
      */
     public static RenderType getMovingBlockRenderType(ChunkSectionLayer chunkSectionLayer) {
         return switch (chunkSectionLayer) {
-            case SOLID -> RenderTypes.solid();
-            case CUTOUT_MIPPED -> RenderTypes.cutoutMipped();
-            case CUTOUT -> RenderTypes.cutout();
+            case SOLID -> RenderTypes.solidMovingBlock();
+            case CUTOUT -> RenderTypes.cutoutMovingBlock();
             case TRANSLUCENT -> RenderTypes.translucentMovingBlock();
-            case TRIPWIRE -> RenderTypes.tripwire();
+            case TRIPWIRE -> RenderTypes.tripwireMovingBlock();
         };
     }
 

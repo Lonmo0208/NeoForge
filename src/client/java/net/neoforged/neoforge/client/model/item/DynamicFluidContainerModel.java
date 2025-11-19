@@ -100,7 +100,7 @@ public class DynamicFluidContainerModel implements ItemModel {
         if (particleSprite == null && !unbakedModel.coverIsMask) particleSprite = coverSprite;
 
         // If the fluid is lighter than air, rotate 180deg to turn it upside down
-        ModelState state = BlockModelRotation.X0_Y0;
+        ModelState state = BlockModelRotation.IDENTITY;
         if (unbakedModel.flipGas && fluid != Fluids.EMPTY && fluid.getFluidType().isLighterThanAir()) {
             state = new ComposedModelState(state, new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null));
         }
