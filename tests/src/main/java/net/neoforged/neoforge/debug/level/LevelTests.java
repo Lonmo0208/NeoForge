@@ -5,14 +5,18 @@
 
 package net.neoforged.neoforge.debug.level;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRuleCategory;
 import net.minecraft.world.level.gamerules.GameRules;
-import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.testframework.DynamicTest;
+import net.neoforged.testframework.TestFramework;
 import net.neoforged.testframework.annotation.ForEachTest;
+import net.neoforged.testframework.annotation.OnInit;
 import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.gametest.EmptyTemplate;
 import net.neoforged.testframework.gametest.GameTest;
@@ -20,6 +24,19 @@ import net.neoforged.testframework.gametest.GameTest;
 @ForEachTest(groups = LevelTests.GROUP)
 public class LevelTests {
     public static final String GROUP = "level";
+
+    private static GameRule<Boolean> booleanGameRule;
+    private static GameRule<Integer> integerGameRule;
+
+    @OnInit
+    static void init(final TestFramework framework) {
+        framework.modEventBus().addListener((RegisterEvent event) -> {
+            if (event.getRegistryKey() == Registries.GAME_RULE) {
+                booleanGameRule = GameRules.registerBoolean("neotests_custom_game_rule:custom_boolean_game_rule", GameRuleCategory.MISC, true);
+                integerGameRule = GameRules.registerInteger("neotests_custom_game_rule:custom_integer_game_rule", GameRuleCategory.MISC, 1337, 1337);
+            }
+        });
+    }
 
     /**
      * Simple test to ensure custom game rules can be registered correctly and used in game.
@@ -48,8 +65,6 @@ public class LevelTests {
     @EmptyTemplate
     @TestHolder(description = "Tests if custom game rules work")
     static void customGameRule(final DynamicTest test) {
-        final GameRule<Boolean> booleanGameRule = GameRules.registerBoolean("%s:custom_boolean_game_rule".formatted(test.createModId()), GameRuleCategory.MISC, true);
-        final GameRule<Integer> integerGameRule = GameRules.registerInteger("%s:custom_integer_game_rule".formatted(test.createModId()), GameRuleCategory.MISC, 1337, 1337);
 
         test.eventListeners().forge().addListener((EntityTickEvent.Pre event) -> {
             if (event.getEntity() instanceof ServerPlayer player && player.getGameProfile().name().equals("test-mock-player")) {
