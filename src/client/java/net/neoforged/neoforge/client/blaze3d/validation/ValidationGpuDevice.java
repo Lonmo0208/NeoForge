@@ -9,17 +9,18 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.CompiledRenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.ShaderSource;
-import com.mojang.blaze3d.shaders.ShaderType;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.OptionalDouble;
 import java.util.function.Supplier;
-import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.blaze3d.GpuDeviceFeatures;
 import net.neoforged.neoforge.client.blaze3d.GpuDeviceProperties;
 import org.jetbrains.annotations.ApiStatus;
@@ -58,6 +59,11 @@ public class ValidationGpuDevice implements GpuDevice {
     @Override
     public CommandEncoder createCommandEncoder() {
         return validationCommandEncoder;
+    }
+
+    @Override
+    public GpuSampler createSampler(AddressMode addressModeU, AddressMode addressModeV, FilterMode minFilter, FilterMode magFilter, int maxAnisotropy, OptionalDouble maxLod) {
+        return realDevice.createSampler(addressModeU, addressModeV, minFilter, magFilter, maxAnisotropy, maxLod);
     }
 
     protected ValidationGpuTexture wrapGpuTexture(GpuTexture texture, GpuDeviceUsageValidator validator) {
@@ -151,6 +157,11 @@ public class ValidationGpuDevice implements GpuDevice {
     @Override
     public int getUniformOffsetAlignment() {
         return realDevice.getUniformOffsetAlignment();
+    }
+
+    @Override
+    public int getMaxSupportedAnisotropy() {
+        return realDevice.getMaxSupportedAnisotropy();
     }
 
     @Override

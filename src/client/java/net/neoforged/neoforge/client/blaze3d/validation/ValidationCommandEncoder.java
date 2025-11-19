@@ -10,6 +10,7 @@ import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.GpuFence;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.CommandEncoder;
+import com.mojang.blaze3d.systems.GpuQuery;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -189,5 +190,15 @@ public class ValidationCommandEncoder implements CommandEncoder {
     @Override
     public GpuFence createFence() {
         return realCommandEncoder.createFence();
+    }
+
+    @Override
+    public GpuQuery timerQueryBegin() {
+        return realCommandEncoder.timerQueryBegin();
+    }
+
+    @Override
+    public void timerQueryEnd(GpuQuery query) {
+        realCommandEncoder.timerQueryEnd(query);
     }
 }
