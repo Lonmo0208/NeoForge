@@ -19,7 +19,7 @@
 +        return EquipmentClientInfo.builder().addHumanoidLayers(Identifier.parse(p_388505_)).build();
      }
  
-     private static EquipmentClientInfo humanoidAndMountArmor(String p_456144_) {
+     public static EquipmentClientInfo humanoidAndMountArmor(String p_456144_) {
          return EquipmentClientInfo.builder()
 -            .addHumanoidLayers(Identifier.withDefaultNamespace(p_456144_))
 -            .addLayers(EquipmentClientInfo.LayerType.HORSE_BODY, EquipmentClientInfo.Layer.leatherDyeable(Identifier.withDefaultNamespace(p_456144_), false))
