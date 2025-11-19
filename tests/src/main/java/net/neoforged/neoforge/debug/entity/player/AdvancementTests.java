@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Objects;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.critereon.DataComponentMatchers;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.DataComponentMatchers;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.predicates.DataComponentPredicate;
@@ -87,7 +87,7 @@ public class AdvancementTests {
     @SuppressWarnings("removal")
     @TestHolder(description = "Tests if custom advancement predicates work")
     static void customPredicateTest(final DynamicTest test, final RegistrationHelper reg) {
-        DataComponentPredicate.Type<CustomNamePredicate> type = new DataComponentPredicate.Type<>(RecordCodecBuilder.create(g -> g.group(
+        DataComponentPredicate.Type<CustomNamePredicate> type = new DataComponentPredicate.ConcreteType<>(RecordCodecBuilder.create(g -> g.group(
                 Codec.INT.fieldOf("data1").forGetter(CustomNamePredicate::data1),
                 Codec.INT.fieldOf("data2").forGetter(CustomNamePredicate::data2))
                 .apply(g, CustomNamePredicate::new)));

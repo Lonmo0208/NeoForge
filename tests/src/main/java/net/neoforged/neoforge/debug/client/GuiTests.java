@@ -233,14 +233,14 @@ public class GuiTests {
         Lazy<ArmorStand> entityOne = Lazy.of(() -> makeTestArmorStand(140F));
         Lazy<ArmorStand> entityTwo = Lazy.of(() -> makeTestArmorStand(210F));
         Vector3f armorStandTranslation = new Vector3f(0.0F, 1.0F, 0.0F);
-        Quaternionf armorStandAngle = new Quaternionf().rotationXYZ(0.43633232F, 0.0F, (float) Math.PI);
+        var armorStandAngleX = 0.43633232F;
         test.framework().modEventBus().addListener((RegisterGuiLayersEvent event) -> {
             event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "inv_entities"), (graphics, deltaTracker) -> {
                 if (!test.framework().tests().isEnabled(test.id())) return;
 
                 int maxX = graphics.guiWidth();
-                InventoryScreen.renderEntityInInventory(graphics, maxX - 100, 20, maxX - 60, 80, 25.0F, armorStandTranslation, armorStandAngle, null, entityOne.get());
-                InventoryScreen.renderEntityInInventory(graphics, maxX - 50, 20, maxX - 10, 80, 25.0F, armorStandTranslation, armorStandAngle, null, entityTwo.get());
+                InventoryScreen.renderEntityInInventoryFollowsAngle(graphics, maxX - 100, 20, maxX - 60, 80, 25.0F, armorStandTranslation, 0, armorStandAngleX, entityOne.get());
+                InventoryScreen.renderEntityInInventoryFollowsAngle(graphics, maxX - 50, 20, maxX - 10, 80, 25.0F, armorStandTranslation, 0, armorStandAngleX, entityTwo.get());
             });
         });
         test.eventListeners().forge().addListener((ClientPlayerNetworkEvent.LoggingOut event) -> {

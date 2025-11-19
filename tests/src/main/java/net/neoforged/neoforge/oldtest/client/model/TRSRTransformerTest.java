@@ -9,7 +9,7 @@ import com.mojang.math.Transformation;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;

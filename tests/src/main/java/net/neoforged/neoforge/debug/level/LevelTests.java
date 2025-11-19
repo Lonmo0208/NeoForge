@@ -6,7 +6,9 @@
 package net.neoforged.neoforge.debug.level;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRuleCategory;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.testframework.DynamicTest;
@@ -46,13 +48,13 @@ public class LevelTests {
     @EmptyTemplate
     @TestHolder(description = "Tests if custom game rules work")
     static void customGameRule(final DynamicTest test) {
-        final GameRules.Key<GameRules.BooleanValue> booleanGameRule = GameRules.register("%s:custom_boolean_game_rule".formatted(test.createModId()), GameRules.Category.MISC, GameRules.BooleanValue.create(true));
-        final GameRules.Key<GameRules.IntegerValue> integerGameRule = GameRules.register("%s:custom_integer_game_rule".formatted(test.createModId()), GameRules.Category.MISC, GameRules.IntegerValue.create(1337));
+        final GameRule<Boolean> booleanGameRule = GameRules.registerBoolean("%s:custom_boolean_game_rule".formatted(test.createModId()), GameRuleCategory.MISC, true);
+        final GameRule<Integer> integerGameRule = GameRules.registerInteger("%s:custom_integer_game_rule".formatted(test.createModId()), GameRuleCategory.MISC, 1337, 1337);
 
         test.eventListeners().forge().addListener((EntityTickEvent.Pre event) -> {
             if (event.getEntity() instanceof ServerPlayer player && player.getGameProfile().name().equals("test-mock-player")) {
-                if (player.level().getServer().getGameRules().get(booleanGameRule)) {
-                    player.setHealth(player.getHealth() - player.level().getServer().getGameRules().getInt(integerGameRule));
+                if (player.level().getGameRules().get(booleanGameRule)) {
+                    player.setHealth(player.getHealth() - player.level().getGameRules().get(integerGameRule));
                 }
             }
         });
@@ -60,21 +62,19 @@ public class LevelTests {
         test.onGameTest(helper -> {
             final ServerPlayer player = helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL);
 
-            final var boolRule = player.level().getServer().getGameRules().getRule(booleanGameRule);
-            final var intRule = player.level().getServer().getGameRules().getRule(integerGameRule);
-
-            final var oldBool = boolRule.get();
-            final var oldInt = intRule.get();
+            var gameRules = player.level().getGameRules();
+            final var oldBool = gameRules.get(booleanGameRule);
+            final var oldInt = gameRules.get(integerGameRule);
 
             helper.startSequence()
-                    .thenExecute(() -> boolRule.set(true, player.level().getServer()))
-                    .thenExecute(() -> intRule.set(12, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(booleanGameRule, true, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(integerGameRule, 12, player.level().getServer()))
 
                     .thenIdle(1)
                     .thenExecute(() -> helper.assertEntityProperty(player, ServerPlayer::getHealth, "player health", 8f))
 
-                    .thenExecute(() -> boolRule.set(oldBool, player.level().getServer()))
-                    .thenExecute(() -> intRule.set(oldInt, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(booleanGameRule, oldBool, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(integerGameRule, oldInt, player.level().getServer()))
                     .thenSucceed();
         });
     }

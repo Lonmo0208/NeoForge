@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.entity.state.HoglinRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -71,7 +72,7 @@ public class ClientEventTests {
     @TestHolder(description = { "Tests if the RegisterRenderBuffersEvent event is fired and whether the registered render buffer is represented within a fixed render buffer map" }, enabledByDefault = true)
     static void registerRenderBuffersEvent(final DynamicTest test) {
         test.framework().modEventBus().addListener((final RegisterRenderBuffersEvent event) -> {
-            event.registerRenderBuffer(RenderType.lightning());
+            event.registerRenderBuffer(RenderTypes.lightning());
         });
         test.framework().modEventBus().addListener((final AddClientReloadListenersEvent event) -> {
             try {
@@ -82,7 +83,7 @@ public class ClientEventTests {
 
                 var fixedBuffers = (Map<RenderType, BufferBuilder>) field.get(bufferSource);
 
-                if (fixedBuffers != null && fixedBuffers.containsKey(RenderType.lightning())) {
+                if (fixedBuffers != null && fixedBuffers.containsKey(RenderTypes.lightning())) {
                     test.pass();
                 } else {
                     test.fail("The render buffer for the specified render type was not registered");

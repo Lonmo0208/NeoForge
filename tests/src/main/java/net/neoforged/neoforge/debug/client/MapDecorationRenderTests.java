@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -138,7 +139,7 @@ public class MapDecorationRenderTests {
             }
 
             final int finalColor = color;
-            submitNodeCollector.submitCustomGeometry(poseStack, RenderType.text(sprite.atlasLocation()), (pose, consumer) -> {
+            submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.text(sprite.atlasLocation()), (pose, consumer) -> {
                 consumer.addVertex(pose, -1.0F, 1.0F, index * -0.001F).setColor(finalColor).setUv(u0, v0).setLight(packedLight);
                 consumer.addVertex(pose, 1.0F, 1.0F, index * -0.001F).setColor(finalColor).setUv(u1, v0).setLight(packedLight);
                 consumer.addVertex(pose, 1.0F, -1.0F, index * -0.001F).setColor(finalColor).setUv(u1, v1).setLight(packedLight);

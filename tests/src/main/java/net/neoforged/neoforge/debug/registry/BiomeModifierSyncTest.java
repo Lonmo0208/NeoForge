@@ -98,7 +98,7 @@ public class BiomeModifierSyncTest {
                     framework.changeStatus(test, Test.Status.failed("Taiga biome not found"), changer);
                     return;
                 }
-                if (taiga.getSpecialEffects().getWaterColor() == MODIFIED_WATER_COLOR) {
+                if (taiga.getSpecialEffects().waterColor() == MODIFIED_WATER_COLOR) {
                     framework.changeStatus(test, Test.Status.passed(), changer);
                 } else {
                     framework.changeStatus(test, Test.Status.failed("Taiga biome water color not modified"), changer);

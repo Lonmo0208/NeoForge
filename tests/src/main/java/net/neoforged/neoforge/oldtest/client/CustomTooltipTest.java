@@ -190,10 +190,10 @@ public class CustomTooltipTest {
             int y = 50;
             for (var test : tooltipTests) {
                 addRenderableWidget(new Button.Builder(Component.literal(test.getKey()), button -> {})
-                        .bounds(x, y, 100, 20).build(b -> new Button(b) {
+                        .bounds(x, y, 100, 20).build(b -> new Button.Plain(b) {
                             @Override
-                            public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-                                super.renderWidget(graphics, mouseX, mouseY, partialTick);
+                            public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+                                super.renderContents(graphics, mouseX, mouseY, partialTick);
 
                                 boolean showTooltip = this.isHovered || this.isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard();
                                 if (showTooltip)
