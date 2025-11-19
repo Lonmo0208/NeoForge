@@ -36,6 +36,7 @@ import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -152,7 +153,7 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         return serverplayer;
     }
 
-    public ServerPlayer makeOpMockPlayer(int commandLevel) {
+    public ServerPlayer makeOpMockPlayer(PermissionSet permissions) {
         return new FakePlayer(this.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-player")) {
             @Override
             public boolean isSpectator() {
@@ -170,8 +171,8 @@ public class ExtendedGameTestHelper extends GameTestHelper {
             }
 
             @Override
-            public int getPermissionLevel() {
-                return commandLevel;
+            public PermissionSet permissions() {
+                return permissions;
             }
         };
     }

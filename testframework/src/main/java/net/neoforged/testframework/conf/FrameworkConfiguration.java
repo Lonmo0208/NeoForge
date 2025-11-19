@@ -11,8 +11,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.Permissions;
 import org.jspecify.annotations.NullMarked;
-import net.minecraft.commands.Commands;
 import net.minecraft.resources.Identifier;
 import net.neoforged.testframework.impl.DefaultMarkdownFileSummaryDumper;
 import net.neoforged.testframework.impl.MutableTestFramework;
@@ -26,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 public record FrameworkConfiguration(
         Identifier id,
         Collection<Feature> enabledFeatures,
-        int commandRequiredPermission,
+        Permission commandRequiredPermission,
         List<String> enabledTests,
         @Nullable Supplier<ClientConfiguration> clientConfiguration,
         List<SummaryDumper> dumpers,
@@ -47,7 +49,7 @@ public record FrameworkConfiguration(
         private final Identifier id;
         private final Collection<Feature> features = EnumSet.noneOf(Feature.class);
 
-        private int commandRequiredPermission = Commands.LEVEL_GAMEMASTERS;
+        private Permission commandRequiredPermission = Permissions.COMMANDS_GAMEMASTER;
         private final List<String> enabledTests = new ArrayList<>();
         private MissingDescriptionAction onMissingDescription = MissingDescriptionAction.WARNING;
         private final List<SummaryDumper> dumpers = new ArrayList<>();
@@ -74,7 +76,7 @@ public record FrameworkConfiguration(
             return this;
         }
 
-        public Builder commandRequiredPermission(int commandRequiredPermission) {
+        public Builder commandRequiredPermission(Permission commandRequiredPermission) {
             this.commandRequiredPermission = commandRequiredPermission;
             return this;
         }

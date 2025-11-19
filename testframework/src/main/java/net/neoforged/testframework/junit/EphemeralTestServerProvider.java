@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import net.minecraft.SystemReport;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.util.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.MappedRegistry;
@@ -155,7 +156,7 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
             LevelSettings levelsettings = new LevelSettings(
                     "Test Level", GameType.CREATIVE, false, Difficulty.NORMAL, true, TEST_GAME_RULES, config);
             WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(resources, config, false, true);
-            WorldLoader.InitConfig worldloader$initconfig = new WorldLoader.InitConfig(worldloader$packconfig, Commands.CommandSelection.DEDICATED, 4);
+            WorldLoader.InitConfig worldloader$initconfig = new WorldLoader.InitConfig(worldloader$packconfig, Commands.CommandSelection.DEDICATED, LevelBasedPermissionSet.OWNER);
 
             try {
                 LOGGER.debug("Starting resource loading");
@@ -288,8 +289,8 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         }
 
         @Override
-        public boolean isCommandBlockEnabled() {
-            return true;
+        public boolean useNativeTransport() {
+            return false;
         }
 
         @Override
