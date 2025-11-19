@@ -5,8 +5,6 @@
 
 package net.neoforged.neoforge.debug.client;
 
-import java.util.Objects;
-import java.util.Random;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,8 +17,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.ClientChatEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -38,8 +40,9 @@ import net.neoforged.testframework.TestListener;
 import net.neoforged.testframework.annotation.ForEachTest;
 import net.neoforged.testframework.annotation.TestHolder;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+
+import java.util.Objects;
+import java.util.Random;
 
 @ForEachTest(groups = "client.gui", side = Dist.CLIENT)
 public class GuiTests {
@@ -210,7 +213,8 @@ public class GuiTests {
         test.framework().modEventBus().addListener((RegisterGuiLayersEvent event) -> {
             // Register some placeholder layers
             for (int i = 0; i < 50; i++) {
-                event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "fake_" + i), (guiGraphics, deltaTracker) -> {});
+                event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "fake_" + i), (guiGraphics, deltaTracker) -> {
+                });
             }
             // Register the real layer
             event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "high_depth_test"), (guiGraphics, deltaTracker) -> {
@@ -230,17 +234,16 @@ public class GuiTests {
 
     @TestHolder(description = "Checks that InventoryScreen.renderEntityInInventory() can render multiple entities of the same type within a single frame")
     static void testInventoryEntityRenderMulti(DynamicTest test) {
-        Lazy<ArmorStand> entityOne = Lazy.of(() -> makeTestArmorStand(140F));
-        Lazy<ArmorStand> entityTwo = Lazy.of(() -> makeTestArmorStand(210F));
-        Vector3f armorStandTranslation = new Vector3f(0.0F, 1.0F, 0.0F);
-        var armorStandAngleX = 0.43633232F;
+        Lazy<ArmorStand> entityOne = Lazy.of(() -> makeTestArmorStand(Items.DIAMOND_CHESTPLATE));
+        Lazy<ArmorStand> entityTwo = Lazy.of(() -> makeTestArmorStand(Items.LEATHER_CHESTPLATE));
         test.framework().modEventBus().addListener((RegisterGuiLayersEvent event) -> {
             event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "inv_entities"), (graphics, deltaTracker) -> {
                 if (!test.framework().tests().isEnabled(test.id())) return;
 
+                var armorStandAngleX = 0.43633232F;
                 int maxX = graphics.guiWidth();
-                InventoryScreen.renderEntityInInventoryFollowsAngle(graphics, maxX - 100, 20, maxX - 60, 80, 25.0F, armorStandTranslation, 0, armorStandAngleX, entityOne.get());
-                InventoryScreen.renderEntityInInventoryFollowsAngle(graphics, maxX - 50, 20, maxX - 10, 80, 25.0F, armorStandTranslation, 0, armorStandAngleX, entityTwo.get());
+                InventoryScreen.renderEntityInInventoryFollowsAngle(graphics, maxX - 100, 20, maxX - 60, 80, 25, 1, 0, armorStandAngleX, entityOne.get());
+                InventoryScreen.renderEntityInInventoryFollowsAngle(graphics, maxX - 50, 20, maxX - 10, 80, 25, 1, 0, armorStandAngleX, entityTwo.get());
             });
         });
         test.eventListeners().forge().addListener((ClientPlayerNetworkEvent.LoggingOut event) -> {
@@ -249,14 +252,14 @@ public class GuiTests {
         });
     }
 
-    private static ArmorStand makeTestArmorStand(float yRot) {
+    private static ArmorStand makeTestArmorStand(Item armor) {
         ArmorStand armorStand = new ArmorStand(Minecraft.getInstance().level, 0.0, 0.0, 0.0);
         armorStand.setNoBasePlate(true);
         armorStand.setShowArms(true);
-        armorStand.yBodyRot = yRot;
         armorStand.setXRot(25.0F);
         armorStand.yHeadRot = armorStand.getYRot();
         armorStand.yHeadRotO = armorStand.getYRot();
+        armorStand.setItemSlot(EquipmentSlot.CHEST, new ItemStack(armor));
         return armorStand;
     }
 }

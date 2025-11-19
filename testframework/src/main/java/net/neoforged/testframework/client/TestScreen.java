@@ -81,14 +81,12 @@ public class TestScreen extends AbstractTestScreen {
             @Override
             public void renderContents(GuiGraphics pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
                 this.active = groupableList != null && groupableList.getSelected() != null && groupableList.getSelected().canDisable();
-                super.renderWidget(pPoseStack, pMouseX, pMouseY, pPartialTick);
             }
         }));
         addRenderableWidget(Button.builder(Component.literal("Enable"), pButton -> groupableList.getSelected().enable(true)).bounds(searchTextField.getX() + searchTextField.getWidth() + 3, searchTextField.getY(), 40, 20).build(builder -> new Button(builder) {
             @Override
             public void renderContents(GuiGraphics pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
                 this.active = groupableList != null && groupableList.getSelected() != null && groupableList.getSelected().canEnable();
-                super.renderWidget(pPoseStack, pMouseX, pMouseY, pPartialTick);
             }
         }));
     }
