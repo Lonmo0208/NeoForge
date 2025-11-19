@@ -226,7 +226,7 @@
          int i = k + 112;
          if (selectedTab.canScroll()) {
 -            Identifier identifier = this.canScroll() ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
-+            Identifier Identifier = selectedTab.getScrollerSprite(); // this.canScroll() ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
++            Identifier identifier = selectedTab.getScrollerSprite(); // this.canScroll() ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
              p_282663_.blitSprite(RenderPipelines.GUI_TEXTURED, identifier, j, k + (int)((i - k - 17) * this.scrollOffs), 12, 15);
          }
  

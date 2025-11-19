@@ -4,9 +4,9 @@
      public Identifier create(Identifier p_467879_, TextureMapping p_387099_, BiConsumer<Identifier, ModelInstance> p_387748_) {
          Map<TextureSlot, Identifier> map = this.createMap(p_387099_);
          p_387748_.accept(p_467879_, () -> {
-+            return createBaseTemplate(p_388380_, map);
++            return createBaseTemplate(p_467879_, map);
 +        });
-+        return p_388380_;
++        return p_467879_;
 +    }
 +
 +    // Neo: Reintroduced to allow subclasses to customize the serialization logic, many implementations just delegating

@@ -4,7 +4,7 @@
                      file2 = new File(file1, p_92297_);
                  }
  
-+                net.neoforged.neoforge.client.event.ScreenshotEvent event = net.neoforged.neoforge.client.ClientHooks.onScreenshot(p_406180_, file2);
++                net.neoforged.neoforge.client.event.ScreenshotEvent event = net.neoforged.neoforge.client.ClientHooks.onScreenshot(p_465362_, file2);
 +                if (event.isCanceled()) {
 +                    p_92301_.accept(event.getCancelMessage());
 +                    return;
@@ -20,7 +20,7 @@
                                  try {
 -                                    p_465362_.writeToFile(file2);
 -                                    Component component = Component.literal(file2.getName())
-+                                    p_406180_.writeToFile(target);
++                                    $$4x.writeToFile(target);
 +                                    if (event.getResultMessage() != null) {
 +                                        p_92301_.accept(event.getResultMessage());
 +                                    } else {

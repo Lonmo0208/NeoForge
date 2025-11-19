@@ -5,8 +5,8 @@
              this.isAllowed = debugscreenentry != null && debugscreenentry.isAllowed(DebugOptionsScreen.this.minecraft.showOnlyReducedInfo());
              String s = p_468830_.getPath();
 +            // Neo: Display the full RL for modded entries
-+            if(!p_434775_.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
-+                s = p_434775_.toString();
++            if(!p_468830_.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
++                s = p_468830_.toString();
 +            }
              if (this.isAllowed) {
                  this.name = s;

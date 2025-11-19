@@ -243,8 +243,8 @@ public class ClientHooks {
      */
     private static final Stack<Screen> guiLayers = new Stack<>();
 
-    public static void resizeGuiLayers(Minecraft minecraft, int width, int height) {
-        guiLayers.forEach(screen -> screen.resize(minecraft, width, height));
+    public static void resizeGuiLayers(int width, int height) {
+        guiLayers.forEach(screen -> screen.resize(width, height));
     }
 
     public static void clearGuiLayers(Minecraft minecraft) {
@@ -262,7 +262,7 @@ public class ClientHooks {
         if (minecraft.screen != null)
             guiLayers.push(minecraft.screen);
         minecraft.screen = Objects.requireNonNull(screen);
-        screen.init(minecraft, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
+        screen.init(minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
         minecraft.getNarrator().saySystemNow(screen.getNarrationMessage());
     }
 
@@ -437,9 +437,9 @@ public class ClientHooks {
 
     public static Vector4f getFogColor(Camera camera, float partialTick, ClientLevel level, int renderDistance, float darkenWorldAmount, float fogRed, float fogGreen, float fogBlue) {
         // Modify fog color depending on the fluid
-        FluidState state = level.getFluidState(camera.getBlockPosition());
+        FluidState state = level.getFluidState(camera.blockPosition());
         Vector4f fluidFogColor = new Vector4f(fogRed, fogGreen, fogBlue, 1F);
-        if (camera.getPosition().y < (double) ((float) camera.getBlockPosition().getY() + state.getHeight(level, camera.getBlockPosition())))
+        if (camera.position().y < (double) ((float) camera.blockPosition().getY() + state.getHeight(level, camera.blockPosition())))
             fluidFogColor = IClientFluidTypeExtensions.of(state).modifyFogColor(camera, partialTick, level, renderDistance, darkenWorldAmount, fluidFogColor);
 
         ViewportEvent.ComputeFogColor event = new ViewportEvent.ComputeFogColor(camera, partialTick, fluidFogColor.x(), fluidFogColor.y(), fluidFogColor.z());
@@ -451,8 +451,8 @@ public class ClientHooks {
 
     public static void onSetupFog(@Nullable FogEnvironment environment, FogType type, Camera camera, float partialTick, float renderDistance, FogData fogData) {
         // Modify fog rendering depending on the fluid
-        FluidState state = camera.getEntity().level().getFluidState(camera.getBlockPosition());
-        if (camera.getPosition().y < (double) ((float) camera.getBlockPosition().getY() + state.getHeight(camera.getEntity().level(), camera.getBlockPosition())))
+        FluidState state = camera.entity().level().getFluidState(camera.blockPosition());
+        if (camera.position().y < (double) ((float) camera.blockPosition().getY() + state.getHeight(camera.entity().level(), camera.blockPosition())))
             IClientFluidTypeExtensions.of(state).modifyFogRender(camera, environment, renderDistance, partialTick, fogData);
 
         NeoForge.EVENT_BUS.post(new ViewportEvent.RenderFog(environment, type, camera, partialTick, fogData));
@@ -880,60 +880,6 @@ public class ClientHooks {
         return Math.min(
                 Mth.log2(Math.max(1, width)),
                 Mth.log2(Math.max(1, height)));
-    }
-
-    /**
-     * Modify the position and UVs of the edge quads of generated item models to account for sprite expansion of the
-     * front and back quad. Fixes <a href="https://bugs.mojang.com/browse/MC-73186">MC-73186</a> on generated item models.
-     *
-     * @param elements The generated elements, may include the front and back face
-     * @param sprite   The texture from which the elements were generated
-     * @return the original elements list
-     */
-    public static List<BlockElement> fixItemModelSeams(List<BlockElement> elements, TextureAtlasSprite sprite) {
-        float expand = -sprite.uvShrinkRatio();
-        elements.replaceAll(element -> {
-            // Edge elements are guaranteed to have exactly one face, anything else is either invalid or the front/back
-            if (element.faces().size() != 1) return element;
-
-            var faceEntry = element.faces().entrySet().iterator().next();
-            if (faceEntry.getKey().getAxis() == Direction.Axis.Z) return element;
-
-            // Move edge quads to account for sprite expansion of the front and back quads
-            Vector3f from = new Vector3f(
-                    Mth.clamp(Mth.lerp(expand, element.from().x(), 8F), 0F, 16F),
-                    Mth.clamp(Mth.lerp(expand, element.from().y(), 8F), 0F, 16F),
-                    element.from().z());
-            Vector3f to = new Vector3f(
-                    Mth.clamp(Mth.lerp(expand, element.to().x(), 8F), 0F, 16F),
-                    Mth.clamp(Mth.lerp(expand, element.to().y(), 8F), 0F, 16F),
-                    element.to().z());
-
-            BlockElementFace face = faceEntry.getValue();
-            BlockElementFace.UVs uvs = face.uvs();
-            if (uvs == null) {
-                uvs = FaceBakery.defaultFaceUV(element.from(), element.to(), faceEntry.getKey());
-            }
-            float minU = uvs.minU();
-            float minV = uvs.minV();
-            float maxU = uvs.maxU();
-            float maxV = uvs.maxV();
-            // Counteract sprite expansion on edge quads to ensure alignment with pixels on the front and back quads
-            if (faceEntry.getKey().getAxis() == Direction.Axis.Y) {
-                float centerU = (minU + minU + maxU + maxU) / 4.0F;
-                minU = Mth.clamp(Mth.lerp(expand, minU, centerU), 0F, 16F);
-                maxU = Mth.clamp(Mth.lerp(expand, maxU, centerU), 0F, 16F);
-            } else {
-                float centerV = (minV + minV + maxV + maxV) / 4.0F;
-                minV = Mth.clamp(Mth.lerp(expand, minV, centerV), 0F, 16F);
-                maxV = Mth.clamp(Mth.lerp(expand, maxV, centerV), 0F, 16F);
-            }
-            uvs = new BlockElementFace.UVs(minU, minV, maxU, maxV);
-            face = new BlockElementFace(face.cullForDirection(), face.tintIndex(), face.texture(), uvs, face.rotation(), face.faceData(), new MutableObject<>());
-
-            return new BlockElement(from, to, Map.of(faceEntry.getKey(), face), element.rotation(), element.shade(), element.lightEmission(), element.faceData());
-        });
-        return elements;
     }
 
     public static List<AddSectionGeometryEvent.AdditionalSectionRenderer> gatherAdditionalRenderers(

@@ -27,12 +27,12 @@ public interface IPoseStackExtension {
         final PoseStack self = self();
         self.pushPose();
 
-        Vector3f trans = transformation.getTranslation();
+        var trans = transformation.getTranslation();
         self.translate(trans.x(), trans.y(), trans.z());
 
         self.mulPose(transformation.getLeftRotation());
 
-        Vector3f scale = transformation.getScale();
+        var scale = transformation.getScale();
         self.scale(scale.x(), scale.y(), scale.z());
 
         self.mulPose(transformation.getRightRotation());

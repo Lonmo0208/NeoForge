@@ -50,7 +50,6 @@ public final class UnbakedElementsHelper {
      */
     public static List<BlockElement> createUnbakedItemElements(int layerIndex, TextureAtlasSprite sprite, @Nullable ExtraFaceData faceData) {
         var elements = ItemModelGenerator.processFrames(layerIndex, "layer" + layerIndex, sprite.contents());
-        ClientHooks.fixItemModelSeams(elements, sprite);
         if (faceData != null) {
             elements.replaceAll(elem -> new BlockElement(elem.from(), elem.to(), elem.faces(), elem.rotation(), elem.shade(), elem.lightEmission(), faceData));
         }

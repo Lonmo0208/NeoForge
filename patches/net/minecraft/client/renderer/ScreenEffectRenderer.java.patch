@@ -26,15 +26,14 @@
                      renderFire(posestack, this.bufferSource, textureatlassprite);
                  }
              }
-@@ -122,6 +_,11 @@
+@@ -122,6 +_,10 @@
      }
  
      private static @Nullable BlockState getViewBlockingState(Player p_110717_) {
 +        return getOverlayBlock(p_110717_).getLeft();
 +    }
 +
-+    @Nullable
-+    private static org.apache.commons.lang3.tuple.Pair<BlockState, BlockPos> getOverlayBlock(Player p_110717_) {
++    private static org.apache.commons.lang3.tuple.@Nullable Pair<BlockState, BlockPos> getOverlayBlock(Player p_110717_) {
          BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
  
          for (int i = 0; i < 8; i++) {
@@ -63,7 +62,7 @@
          float f8 = p_110726_.player.getXRot() / 64.0F;
          Matrix4f matrix4f = p_110727_.last().pose();
 -        VertexConsumer vertexconsumer = p_383128_.getBuffer(RenderTypes.blockScreenEffect(UNDERWATER_LOCATION));
-+        VertexConsumer vertexconsumer = p_383128_.getBuffer(RenderType.blockScreenEffect(texture));
++        VertexConsumer vertexconsumer = p_383128_.getBuffer(RenderTypes.blockScreenEffect(texture));
          vertexconsumer.addVertex(matrix4f, -1.0F, -1.0F, -0.5F).setUv(4.0F + f7, 4.0F + f8).setColor(i);
          vertexconsumer.addVertex(matrix4f, 1.0F, -1.0F, -0.5F).setUv(0.0F + f7, 4.0F + f8).setColor(i);
          vertexconsumer.addVertex(matrix4f, 1.0F, 1.0F, -0.5F).setUv(0.0F + f7, 0.0F + f8).setColor(i);

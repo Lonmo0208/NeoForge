@@ -23,19 +23,13 @@
          );
          this.screenEffectRenderer = new ScreenEffectRenderer(p_234219_, atlasmanager, multibuffersource$buffersource);
      }
-@@ -250,11 +_,12 @@
+@@ -250,6 +_,7 @@
                  break;
              case null:
              default:
 +                if (!net.neoforged.neoforge.client.ClientHooks.loadEntityShader(p_109107_, this))
                  this.clearPostEffect();
          }
-     }
- 
--    public void setPostEffect(Identifier p_467780_) {
-+    private void setPostEffect(Identifier p_467780_) {
-         this.postEffectId = p_467780_;
-         this.effectActive = true;
      }
 @@ -421,7 +_,7 @@
                  f *= Mth.lerp(f2, 1.0F, 0.85714287F);

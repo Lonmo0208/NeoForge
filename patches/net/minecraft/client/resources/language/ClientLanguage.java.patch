@@ -30,7 +30,7 @@
                  try {
                      Identifier identifier = Identifier.fromNamespaceAndPath(s2, s1);
 -                    appendFrom(s, p_265765_.getResourceStack(identifier), map);
-+                    appendFrom(s, p_265765_.getResourceStack(Identifier), map, componentMap);
++                    appendFrom(s, p_265765_.getResourceStack(identifier), map, componentMap);
                  } catch (Exception exception) {
                      LOGGER.warn("Skipped language file: {}:{} ({})", s2, s1, exception.toString());
                  }

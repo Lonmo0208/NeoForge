@@ -11,11 +11,14 @@
      protected RenderPipeline(
          Identifier p_467434_,
          Identifier p_467154_,
-@@ -64,6 +_,31 @@
+@@ -64,9 +_,34 @@
          float p_409999_,
          int p_415862_
      ) {
-+        this(p_405403_, p_405389_, p_404945_, p_405426_, p_405334_, p_404693_, p_404667_, p_410224_, p_409822_, p_404907_, p_405688_, p_405411_, p_405477_, p_410051_, p_405109_, p_404708_, p_410755_, p_409999_, p_415862_, Optional.empty());
+-        this.location = p_467434_;
+-        this.vertexShader = p_467154_;
+-        this.fragmentShader = p_467193_;
++        this(p_467434_, p_467154_, p_467193_, p_405426_, p_405334_, p_404693_, p_404667_, p_410224_, p_409822_, p_404907_, p_405688_, p_405411_, p_405477_, p_410051_, p_405109_, p_404708_, p_410755_, p_409999_, p_415862_, Optional.empty());
 +    }
 +
 +    protected RenderPipeline(
@@ -40,9 +43,12 @@
 +            int p_415862_,
 +            Optional<net.neoforged.neoforge.client.stencil.StencilTest> stencilTest
 +            ) {
-         this.location = p_467434_;
-         this.vertexShader = p_467154_;
-         this.fragmentShader = p_467193_;
++        this.location = p_405403_;
++        this.vertexShader = p_405389_;
++        this.fragmentShader = p_404945_;
+         this.shaderDefines = p_405426_;
+         this.samplers = p_405334_;
+         this.uniforms = p_404693_;
 @@ -83,6 +_,7 @@
          this.depthBiasScaleFactor = p_410755_;
          this.depthBiasConstant = p_409999_;

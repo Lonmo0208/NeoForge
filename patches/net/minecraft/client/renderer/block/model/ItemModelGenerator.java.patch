@@ -7,7 +7,7 @@
 -            SpriteContents spritecontents = p_405238_.get(material, p_404999_).contents();
 -            list.addAll(processFrames(i, s, spritecontents));
 +            net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = p_405238_.get(material, p_404999_);
-+            list.addAll(net.neoforged.neoforge.client.ClientHooks.fixItemModelSeams(processFrames(i, s, sprite.contents()), sprite));
++            list.addAll(processFrames(i, s, sprite.contents()));
          }
  
          return SimpleUnbakedGeometry.bake(list, p_386773_, p_405238_, p_386536_, p_404999_);

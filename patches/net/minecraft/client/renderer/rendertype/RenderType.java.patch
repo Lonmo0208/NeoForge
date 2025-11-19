@@ -18,3 +18,12 @@
  
      private RenderType(String p_459041_, RenderSetup p_459042_) {
          this.name = p_459041_;
+@@ -40,7 +_,7 @@
+             : Optional.empty();
+     }
+ 
+-    static RenderType create(String p_459033_, RenderSetup p_458928_) {
++    public static RenderType create(String p_459033_, RenderSetup p_458928_) {
+         return new RenderType(p_459033_, p_458928_);
+     }
+ 
