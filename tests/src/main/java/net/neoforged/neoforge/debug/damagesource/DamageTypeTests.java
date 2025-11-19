@@ -13,7 +13,7 @@ import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
@@ -75,7 +75,7 @@ public class DamageTypeTests {
     @EmptyTemplate
     @TestHolder(description = "Tests if custom damage types function as expected")
     static void dmgTypeTests(final DynamicTest test, final RegistrationHelper reg) {
-        ResourceKey<DamageType> TEST_DMG_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(reg.modId(), "test"));
+        ResourceKey<DamageType> TEST_DMG_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(reg.modId(), "test"));
 
         DamageEffects effects = EFFECTS_ENUM_PARAMS.getValue();
         DamageScaling scaling = SCALING_ENUM_PARAMS.getValue();

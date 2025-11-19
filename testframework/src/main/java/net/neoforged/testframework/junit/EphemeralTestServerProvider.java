@@ -20,7 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import net.minecraft.SystemReport;
-import net.minecraft.Util;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.util.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -42,7 +43,7 @@ import net.minecraft.util.debugchart.SampleLogger;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.DataPackConfig;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
@@ -141,8 +142,8 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         private static final Logger LOGGER = LogUtils.getLogger();
         private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null, null);
         private static final GameRules TEST_GAME_RULES = Util.make(new GameRules(FeatureFlags.REGISTRY.allFlags()), rules -> {
-            rules.getRule(GameRules.SPAWN_MOBS).set(false, null);
-            rules.getRule(GameRules.ADVANCE_WEATHER).set(false, null);
+            rules.set(GameRules.SPAWN_MOBS, false, null);
+            rules.set(GameRules.ADVANCE_WEATHER, false, null);
         });
         private static final WorldOptions WORLD_OPTIONS = new WorldOptions(0L, false, false);
 
@@ -262,13 +263,13 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         }
 
         @Override
-        public int operatorUserPermissionLevel() {
-            return 0;
+        public LevelBasedPermissionSet operatorUserPermissions() {
+            return LevelBasedPermissionSet.ALL;
         }
 
         @Override
-        public int getFunctionCompilationLevel() {
-            return 4;
+        public LevelBasedPermissionSet getFunctionCompilationPermissions() {
+            return LevelBasedPermissionSet.OWNER;
         }
 
         @Override
@@ -284,11 +285,6 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         @Override
         public int getRateLimitPacketsPerSecond() {
             return 0;
-        }
-
-        @Override
-        public boolean isEpollEnabled() {
-            return false;
         }
 
         @Override

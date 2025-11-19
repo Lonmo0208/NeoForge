@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.AtlasManager;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.data.AtlasIds;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.neoforged.api.distmarker.Dist;
@@ -26,13 +26,13 @@ import net.neoforged.testframework.annotation.TestHolder;
 
 @ForEachTest(side = Dist.CLIENT, groups = { "client.texture_atlas", "texture_atlas" })
 public class TextureAtlasTests {
-    public static final ResourceLocation LISTENER_NAME = ResourceLocation.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "atlas_test");
+    public static final Identifier LISTENER_NAME = Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "atlas_test");
 
     @TestHolder(description = { "Tests that texture atlases intended for use with Material are correctly registered and loaded" }, enabledByDefault = true)
     static void testMaterialAtlas(final DynamicTest test) {
         String modId = test.createModId();
-        ResourceLocation atlasLoc = ResourceLocation.fromNamespaceAndPath(modId, "textures/atlas/material_test.png");
-        ResourceLocation infoLoc = ResourceLocation.fromNamespaceAndPath(modId, "material_test");
+        Identifier atlasLoc = Identifier.fromNamespaceAndPath(modId, "textures/atlas/material_test.png");
+        Identifier infoLoc = Identifier.fromNamespaceAndPath(modId, "material_test");
 
         test.framework().modEventBus().addListener(RegisterTextureAtlasesEvent.class, event -> {
             event.register(new AtlasManager.AtlasConfig(atlasLoc, infoLoc, false));
@@ -51,7 +51,7 @@ public class TextureAtlasTests {
                 }
 
                 try {
-                    Material material = new Material(atlasLoc, ResourceLocation.withDefaultNamespace("block/stone"));
+                    Material material = new Material(atlasLoc, Identifier.withDefaultNamespace("block/stone"));
                     TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(material);
                     if (sprite.contents().name().equals(MissingTextureAtlasSprite.getLocation())) {
                         test.fail("Expected sprite was not stitched");
@@ -70,7 +70,7 @@ public class TextureAtlasTests {
     static void defaultSpriteMetadataSections(final DynamicTest test) {
         String modId = test.createModId();
 
-        var testResource = ResourceLocation.fromNamespaceAndPath(modId, "block/resource");
+        var testResource = Identifier.fromNamespaceAndPath(modId, "block/resource");
         var sectionType = new MetadataSectionType<>("default_metadata_test", Codec.BOOL);
 
         test.framework().modEventBus().addListener(RegisterTextureAtlasesEvent.class, event -> {

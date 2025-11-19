@@ -28,12 +28,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.ChatFormatting;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.gametest.framework.GameTestServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
 
 @ApiStatus.Internal
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 public class TestFrameworkImpl implements MutableTestFramework {
     static final Set<TestFrameworkImpl> FRAMEWORKS = Collections.synchronizedSet(new HashSet<>());
 
@@ -81,7 +81,7 @@ public class TestFrameworkImpl implements MutableTestFramework {
     private final @Nullable FrameworkClient client;
 
     private final Logger logger;
-    private final ResourceLocation id;
+    private final Identifier id;
     private final TestsImpl tests = new TestsImpl();
 
     private @Nullable MinecraftServer server;
@@ -292,7 +292,7 @@ public class TestFrameworkImpl implements MutableTestFramework {
     }
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return id;
     }
 
@@ -369,7 +369,7 @@ public class TestFrameworkImpl implements MutableTestFramework {
     }
 
     @ParametersAreNonnullByDefault
-    @MethodsReturnNonnullByDefault
+    @NullMarked
     public final class TestsImpl implements MutableTests {
         private final Map<String, Test> tests = Collections.synchronizedMap(new LinkedHashMap<>());
         private final Map<String, Group> groups = Collections.synchronizedMap(new LinkedHashMap<>());

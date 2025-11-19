@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.testframework.Test;
@@ -29,9 +29,9 @@ import net.neoforged.testframework.group.Group;
  * @see TestFrameworkImpl
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 public interface MutableTestFramework extends TestFramework {
-    Codec<TestFramework> REFERENCE_CODEC = ResourceLocation.CODEC.xmap(
+    Codec<TestFramework> REFERENCE_CODEC = Identifier.CODEC.xmap(
             rl -> TestFrameworkImpl.FRAMEWORKS.stream()
                     .filter(testFramework -> testFramework.id().equals(rl))
                     .findFirst()

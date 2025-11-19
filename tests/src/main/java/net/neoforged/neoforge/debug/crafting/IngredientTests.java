@@ -31,7 +31,7 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -80,7 +80,7 @@ public class IngredientTests {
                                 .requires(new TestEnabledIngredient(new BlockTagIngredient(BlockTags.CONVERTABLE_TO_MUD).toVanilla(), test.framework(), test.id()).toVanilla())
                                 .requires(Items.WATER_BUCKET)
                                 .unlockedBy("has_item", has(Items.WATER_BUCKET))
-                                .save(output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(reg.modId(), "block_tag")));
+                                .save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(reg.modId(), "block_tag")));
                     }
                 };
             }
@@ -125,7 +125,7 @@ public class IngredientTests {
                                 .define('D', Items.DIAMOND)
                                 .define('E', Items.EMERALD)
                                 .unlockedBy("has_axe", has(Items.IRON_AXE))
-                                .save(output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(reg.modId(), "partial_nbt")));
+                                .save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(reg.modId(), "partial_nbt")));
                     }
                 };
             }
@@ -179,7 +179,7 @@ public class IngredientTests {
                                         test.framework(), test.id()).toVanilla())
                                 .requires(Items.ACACIA_PLANKS)
                                 .unlockedBy("has_pick", has(Items.DIAMOND_PICKAXE))
-                                .save(output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(reg.modId(), "strict_nbt")));
+                                .save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(reg.modId(), "strict_nbt")));
                     }
                 };
             }
@@ -389,7 +389,7 @@ public class IngredientTests {
                                         test.framework(), test.id()).toVanilla(), 2)
                                 .requires(Ingredient.of(Items.COAL, Items.CHARCOAL), 2)
                                 .unlockedBy("has_pick", has(Items.DIAMOND_PICKAXE))
-                                .save(output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(reg.modId(), "sized_ingredient_1")));
+                                .save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(reg.modId(), "sized_ingredient_1")));
                     }
                 };
             }

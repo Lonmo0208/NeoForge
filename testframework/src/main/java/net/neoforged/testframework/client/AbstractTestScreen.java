@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.ChatFormatting;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -33,14 +33,14 @@ import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.testframework.Test;
 import net.neoforged.testframework.group.Group;
 import net.neoforged.testframework.impl.MutableTestFramework;
 import org.lwjgl.glfw.GLFW;
 
-@MethodsReturnNonnullByDefault
+@NullMarked
 @ParametersAreNonnullByDefault
 public abstract class AbstractTestScreen extends Screen {
     protected final MutableTestFramework framework;
@@ -183,7 +183,7 @@ public abstract class AbstractTestScreen extends Screen {
                 final int alpha = 0x73000000;
                 final boolean renderTransparent = !isEnabled();
 
-                ResourceLocation icon = TestsOverlay.ICON_BY_RESULT.get(status.result());
+                Identifier icon = TestsOverlay.ICON_BY_RESULT.get(status.result());
                 graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, getContentX(), getContentY(), 9, 9, renderTransparent ? (alpha | 0x00FFFFFF) : 0xFFFFFFFF);
 
                 final Component title = TestsOverlay.statusColoured(test.visuals().title(), status);

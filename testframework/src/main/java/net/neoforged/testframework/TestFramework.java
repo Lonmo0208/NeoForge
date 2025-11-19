@@ -8,8 +8,8 @@ package net.neoforged.testframework;
 import java.util.Collection;
 import java.util.Optional;
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.resources.ResourceLocation;
+import org.jspecify.annotations.NullMarked;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -28,12 +28,12 @@ import org.slf4j.Logger;
  * @see MutableTestFramework
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 public interface TestFramework {
     /**
      * {@return the ID of this framework instance}
      */
-    ResourceLocation id();
+    Identifier id();
 
     /**
      * {@return this framework's logger}
@@ -88,7 +88,7 @@ public interface TestFramework {
      * Interface used for accessing a framework's tests.
      */
     @ParametersAreNonnullByDefault
-    @MethodsReturnNonnullByDefault
+    @NullMarked
     interface Tests {
         /**
          * Queries a test by its {@linkplain Test#id() ID}.

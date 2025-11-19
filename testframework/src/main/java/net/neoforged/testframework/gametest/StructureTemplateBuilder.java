@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +31,7 @@ import net.neoforged.testframework.impl.ReflectionUtils;
 import org.jetbrains.annotations.Nullable;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 public class StructureTemplateBuilder implements TemplateBuilderHelper<StructureTemplateBuilder> {
     private static final FieldHandle<StructureTemplate, List<StructureTemplate.Palette>> PALETTES = FieldHandle.getFor(StructureTemplate.class, "palettes");
     private static final FieldHandle<StructureTemplate, List<StructureTemplate.StructureEntityInfo>> ENTITY_INFO_LIST = FieldHandle.getFor(StructureTemplate.class, "entityInfoList");

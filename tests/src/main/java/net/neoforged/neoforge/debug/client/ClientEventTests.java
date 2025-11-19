@@ -23,7 +23,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -149,8 +149,8 @@ public class ClientEventTests {
 
     @TestHolder(description = { "Test render state modifier system and registration event" })
     static void updateRenderState(final DynamicTest test) {
-        var rotationKey = new ContextKey<Float>(ResourceLocation.fromNamespaceAndPath(test.createModId(), "rotation"));
-        var numRenderAttachmentKey = new ContextKey<Integer>(ResourceLocation.fromNamespaceAndPath(test.createModId(), "times_to_render"));
+        var rotationKey = new ContextKey<Float>(Identifier.fromNamespaceAndPath(test.createModId(), "rotation"));
+        var numRenderAttachmentKey = new ContextKey<Integer>(Identifier.fromNamespaceAndPath(test.createModId(), "times_to_render"));
         var testAttachment = test.registrationHelper().attachments().registerSimpleAttachment("test", () -> 3);
         test.framework().modEventBus().addListener((RegisterRenderStateModifiersEvent event) -> {
             event.registerEntityModifier(PigRenderer.class, (entity, renderState) -> {

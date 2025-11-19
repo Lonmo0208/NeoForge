@@ -20,7 +20,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -119,7 +119,7 @@ public class CustomTooltipTest {
     }
 
     private static class ClientEventHandler {
-        private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(ID, "test");
+        private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(ID, "test");
 
         @SubscribeEvent
         public static void gatherTooltips(RenderTooltipEvent.GatherComponents event) {

@@ -14,7 +14,7 @@ import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
@@ -31,7 +31,7 @@ import net.neoforged.testframework.registration.RegistrationHelper;
 public interface VanillaDataGenTest {
     @TestHolder(description = "Tests the patched vanilla model generators work for modded usages")
     static void testModelGenerators(DynamicTest test, RegistrationHelper reg) {
-        var headModelName = ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocation.fromNamespaceAndPath(reg.modId(), "vanilla_model_gen_item_head"));
+        var headModelName = ResourceKey.create(EquipmentAssets.ROOT_ID, Identifier.fromNamespaceAndPath(reg.modId(), "vanilla_model_gen_item_head"));
         // item should appear as red/blue chessboard
         // when worn on head should be cyan/yellow chessboard
         var item = reg.items().registerSimpleItem("vanilla_model_gen_item", props -> props

@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -50,18 +50,18 @@ public class CustomSpriteSourceTest {
     }
 
     private void registerTextureAtlasSpriteLoaders(RegisterSpriteSourcesEvent event) {
-        event.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "custom_sprite_source"), CustomSpriteSource.CODEC);
+        event.register(Identifier.fromNamespaceAndPath(MOD_ID, "custom_sprite_source"), CustomSpriteSource.CODEC);
     }
 
-    private record CustomSpriteSource(ResourceLocation id) implements SpriteSource {
+    private record CustomSpriteSource(Identifier id) implements SpriteSource {
         private static final Logger LOGGER = LogUtils.getLogger();
         private static final MapCodec<CustomSpriteSource> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-                ResourceLocation.CODEC.fieldOf("id").forGetter(CustomSpriteSource::id)).apply(inst, CustomSpriteSource::new));
+                Identifier.CODEC.fieldOf("id").forGetter(CustomSpriteSource::id)).apply(inst, CustomSpriteSource::new));
 
         @Override
         public void run(ResourceManager manager, Output output) {
-            ResourceLocation id = this.id();
-            ResourceLocation resourcelocation = TEXTURE_ID_CONVERTER.idToFile(id);
+            Identifier id = this.id();
+            Identifier resourcelocation = TEXTURE_ID_CONVERTER.idToFile(id);
             Optional<Resource> optional = manager.getResource(resourcelocation);
             if (optional.isPresent()) {
                 output.add(id, spriteResourceLoader -> spriteResourceLoader.loadSprite(id, optional.get(), CustomSpriteContents::new));
@@ -76,7 +76,7 @@ public class CustomSpriteSourceTest {
         }
 
         static final class CustomSpriteContents extends SpriteContents {
-            public CustomSpriteContents(ResourceLocation name, FrameSize size, NativeImage image, Optional<AnimationMetadataSection> animationMetadata, List<MetadataSectionType.WithValue<?>> additionalMetadata) {
+            public CustomSpriteContents(Identifier name, FrameSize size, NativeImage image, Optional<AnimationMetadataSection> animationMetadata, List<MetadataSectionType.WithValue<?>> additionalMetadata) {
                 super(name, size, image, animationMetadata, additionalMetadata);
             }
 

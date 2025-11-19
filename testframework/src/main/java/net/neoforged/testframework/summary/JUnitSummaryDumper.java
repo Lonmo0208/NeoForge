@@ -22,7 +22,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
@@ -36,7 +36,7 @@ public class JUnitSummaryDumper implements FileSummaryDumper {
     }
 
     @Override
-    public Path outputPath(ResourceLocation frameworkId) {
+    public Path outputPath(Identifier frameworkId) {
         return outputDir.resolve("testframework-" + frameworkId.toString().replace(':', '-') + "-" + Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[:TZ-]", "") + ".junit.xml");
     }
 

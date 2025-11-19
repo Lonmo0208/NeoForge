@@ -23,7 +23,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -106,7 +106,7 @@ public class DeferredBlockBuilder<T extends Block> extends DeferredBlock<T> {
                     template = ModelTemplates.CUBE_ALL;
                 }
 
-                var modelPath = template.create(value(), TextureMapping.cube(ResourceLocation.fromNamespaceAndPath("testframework", "block/white")), blockModels.modelOutput);
+                var modelPath = template.create(value(), TextureMapping.cube(Identifier.fromNamespaceAndPath("testframework", "block/white")), blockModels.modelOutput);
                 blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(value(), BlockModelGenerators.plainVariant(modelPath)));
             }
 

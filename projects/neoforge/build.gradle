@@ -295,7 +295,7 @@ generateAccessTransformers {
     fieldGroup(
             'DebugScreenEntry groups', PUBLIC,
             classesWithSuperclass('net/minecraft/client/gui/components/debug/DebugScreenEntry'),
-            fieldsOfType(named('net/minecraft/resources/ResourceLocation'))
+            fieldsOfType(named('net/minecraft/resources/Identifier'))
     )
 }
 

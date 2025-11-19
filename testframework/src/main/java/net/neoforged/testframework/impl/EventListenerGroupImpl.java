@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 public class EventListenerGroupImpl implements Test.EventListenerGroup {
     private final EventListenerCollectorImpl mod = new EventListenerCollectorImpl(),
             game = new EventListenerCollectorImpl();

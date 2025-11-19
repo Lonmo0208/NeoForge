@@ -13,13 +13,13 @@ import java.lang.reflect.Method;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestListener;
 
 @SuppressWarnings("unchecked")
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 public final class ReflectionUtils {
     public static <T> T getInstanceField(Object instance, String name) {
         try {

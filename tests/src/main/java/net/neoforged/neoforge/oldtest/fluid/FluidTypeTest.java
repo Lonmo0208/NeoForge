@@ -18,7 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -151,28 +151,28 @@ public class FluidTypeTest {
 
         private void registerClientExtensions(RegisterClientExtensionsEvent event) {
             event.registerFluidType(new IClientFluidTypeExtensions() {
-                private static final ResourceLocation STILL = ResourceLocation.withDefaultNamespace("block/water_still"),
-                        FLOW = ResourceLocation.withDefaultNamespace("block/water_flow"),
-                        OVERLAY = ResourceLocation.withDefaultNamespace("block/obsidian"),
-                        VIEW_OVERLAY = ResourceLocation.withDefaultNamespace("textures/block/obsidian.png");
+                private static final Identifier STILL = Identifier.withDefaultNamespace("block/water_still"),
+                        FLOW = Identifier.withDefaultNamespace("block/water_flow"),
+                        OVERLAY = Identifier.withDefaultNamespace("block/obsidian"),
+                        VIEW_OVERLAY = Identifier.withDefaultNamespace("textures/block/obsidian.png");
 
                 @Override
-                public ResourceLocation getStillTexture() {
+                public Identifier getStillTexture() {
                     return STILL;
                 }
 
                 @Override
-                public ResourceLocation getFlowingTexture() {
+                public Identifier getFlowingTexture() {
                     return FLOW;
                 }
 
                 @Override
-                public ResourceLocation getOverlayTexture() {
+                public Identifier getOverlayTexture() {
                     return OVERLAY;
                 }
 
                 @Override
-                public ResourceLocation getRenderOverlayTexture(Minecraft mc) {
+                public Identifier getRenderOverlayTexture(Minecraft mc) {
                     return VIEW_OVERLAY;
                 }
 

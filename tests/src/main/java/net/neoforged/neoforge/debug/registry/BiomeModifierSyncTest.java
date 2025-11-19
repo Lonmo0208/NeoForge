@@ -15,7 +15,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.biome.Biome;
@@ -72,7 +72,7 @@ public class BiomeModifierSyncTest {
     @TestHolder(description = "Tests if biome modifications are properly synced", side = Dist.CLIENT)
     @WithListener(Listener.class)
     static void biomeModifierSync(final DynamicTest test) {
-        ResourceKey<BiomeModifier> modifyTaigaModifier = ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS, ResourceLocation.fromNamespaceAndPath(HELPER.modId(), "modify_taiga"));
+        ResourceKey<BiomeModifier> modifyTaigaModifier = ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS, Identifier.fromNamespaceAndPath(HELPER.modId(), "modify_taiga"));
         HELPER.addClientProvider(event -> new DatapackBuiltinEntriesProvider(
                 event.getGenerator().getPackOutput(),
                 event.getLookupProvider(),

@@ -30,7 +30,7 @@ import net.minecraft.core.component.predicates.EnchantmentsPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionHand;
@@ -84,7 +84,7 @@ public class GlobalLootModifiersTest {
     private static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<SilkTouchTestModifier>> SILKTOUCH = GLM.register("silk_touch_bamboo", SilkTouchTestModifier.CODEC);
 //    private static final DeferredHolder<Enchantment, Enchantment> SMELT = ENCHANTS.register("smelt", () -> new Enchantment(
 //            Enchantment.definition(ItemTags.MINING_ENCHANTABLE, 10, 1, Enchantment.dynamicCost(1, 10), Enchantment.dynamicCost(5, 10), 1, EquipmentSlot.MAINHAND)));
-    private static final ResourceKey<Enchantment> SMELT = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(HELPER.modId(), "smelt"));
+    private static final ResourceKey<Enchantment> SMELT = ResourceKey.create(Registries.ENCHANTMENT, Identifier.fromNamespaceAndPath(HELPER.modId(), "smelt"));
 
     @OnInit
     static void init(final TestFramework framework) {
@@ -338,7 +338,7 @@ public class GlobalLootModifiersTest {
     static void dungeonLootTest(final DynamicTest test) {
         HELPER.clientProvider(GlobalLootModifierProvider.class, prov -> prov.add("dungeon_loot", new DungeonLootEnhancerModifier(
                 new LootItemCondition[] {
-                        LootTableIdCondition.builder(ResourceLocation.withDefaultNamespace("chests/simple_dungeon")).build(),
+                        LootTableIdCondition.builder(Identifier.withDefaultNamespace("chests/simple_dungeon")).build(),
                         new TestEnabledLootCondition(test)
                 },
                 2)));
@@ -346,7 +346,7 @@ public class GlobalLootModifiersTest {
         test.onGameTest(helper -> helper.startSequence()
                 .thenExecute(() -> helper.setBlock(1, 2, 1, Blocks.CHEST.defaultBlockState()))
                 .thenMap(() -> helper.getBlockEntity(1, 2, 1, ChestBlockEntity.class))
-                .thenExecute(chest -> chest.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace("chests/simple_dungeon")), 124424))
+                .thenExecute(chest -> chest.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, Identifier.withDefaultNamespace("chests/simple_dungeon")), 124424))
 
                 .thenExecute(chest -> chest.unpackLootTable(helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL)))
 
@@ -356,7 +356,7 @@ public class GlobalLootModifiersTest {
                         .collect(Collectors.toMap(ItemStack::getItem, ItemStack::getCount, Integer::sum)))
 
                 .thenMapToSequence(stacks -> helper
-                        .startSequence(() -> helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace("chests/simple_dungeon")))
+                        .startSequence(() -> helper.getLevel().getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, Identifier.withDefaultNamespace("chests/simple_dungeon")))
                                 .getRandomItems(new LootParams.Builder(helper.getLevel())
                                         .withParameter(LootContextParams.ORIGIN, helper.absoluteVec(new Vec3(1, 3, 1)))
                                         .create(LootContextParamSets.CHEST), 124424))

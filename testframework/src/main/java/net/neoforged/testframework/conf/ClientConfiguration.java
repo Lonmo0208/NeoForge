@@ -6,10 +6,10 @@
 package net.neoforged.testframework.conf;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 public record ClientConfiguration(int toggleOverlayKey, int openManagerKey) {
     public static Builder builder() {
         return new Builder();

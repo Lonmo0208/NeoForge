@@ -15,7 +15,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -47,7 +47,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class CreativeTabOrderTest {
     public static final String MOD_ID = "creative_tab_order_test";
-    private static final ResourceKey<CreativeModeTab> STONE_ORDERING = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(MOD_ID, "stone_ordering"));
+    private static final ResourceKey<CreativeModeTab> STONE_ORDERING = ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath(MOD_ID, "stone_ordering"));
     private static final Set<TagKey<Item>> ENCHANTABLES = Set.of(
             ItemTags.FOOT_ARMOR_ENCHANTABLE,
             ItemTags.LEG_ARMOR_ENCHANTABLE,
