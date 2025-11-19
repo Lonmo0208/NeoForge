@@ -1,11 +1,11 @@
 --- a/net/minecraft/client/resources/SplashManager.java
 +++ b/net/minecraft/client/resources/SplashManager.java
-@@ -35,14 +_,18 @@
+@@ -35,14 +_,19 @@
          this.user = p_118866_;
      }
  
--    public static Component literalSplash(String p_457628_) {
-+    private static Component literalSplash(String p_457628_) {
++    // TODO 1.21.11: replace with AT
+     public static Component literalSplash(String p_457628_) {
          return Component.literal(p_457628_).setStyle(DEFAULT_STYLE);
      }
  

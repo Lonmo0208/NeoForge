@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
  * Custom button subclass to draw an indicator overlay on the button when updates are available.
  */
 @ApiStatus.Internal
-public class ModsButton extends Button {
+public class ModsButton extends Button.Plain {
     private static final Identifier VERSION_CHECK_ICONS = Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "textures/gui/version_check_icons.png");
 
     @Nullable
@@ -32,8 +32,8 @@ public class ModsButton extends Button {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+    protected void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderContents(guiGraphics, mouseX, mouseY, partialTick);
 
         if (!hasCheckedForUpdates) {
             showNotification = ClientModLoader.checkForUpdates();
