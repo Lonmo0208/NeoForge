@@ -12,8 +12,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
+
+import net.minecraft.client.renderer.texture.MipmapStrategy;
 import net.minecraft.client.renderer.texture.SpriteContents;
-import net.minecraft.client.renderer.texture.SpriteTicker;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
@@ -76,25 +77,26 @@ public class CustomSpriteSourceTest {
         }
 
         static final class CustomSpriteContents extends SpriteContents {
-            public CustomSpriteContents(Identifier name, FrameSize size, NativeImage image, Optional<AnimationMetadataSection> animationMetadata, List<MetadataSectionType.WithValue<?>> additionalMetadata) {
-                super(name, size, image, animationMetadata, additionalMetadata);
+            public CustomSpriteContents(Identifier name, FrameSize size, NativeImage image, Optional<AnimationMetadataSection> animationMetadata, List<MetadataSectionType.WithValue<?>> additionalMetadata, MipmapStrategy mipmapStrategy) {
+                super(name, size, image, animationMetadata, additionalMetadata, mipmapStrategy);
             }
 
-            @Override
-            public SpriteTicker createTicker() {
-                return new Ticker();
-            }
+            // TODO 1.21.11 It's unclear how this test can be resurrected since Vanilla now much more strictly manages the frames of the animated sprite in GPU memory
+            // @Override
+            // public SpriteTicker createTicker() {
+            //     return new Ticker();
+            // }
 
-            class Ticker implements SpriteTicker {
+            class Ticker /* TODO 1.21.11 implements SpriteTicker */ {
                 final RandomSource random = RandomSource.create();
 
-                @Override
+                // TODO 1.21.11 @Override
                 public void tickAndUpload(int x, int y, GpuTexture texture) {
                     CustomSpriteContents.this.byMipLevel[0].fillRect(0, 0, 16, 16, 0xFF000000 | random.nextInt(0xFFFFFF));
-                    CustomSpriteContents.this.uploadFirstFrame(x, y, texture);
+                    CustomSpriteContents.this.uploadFirstFrame(texture, 0 /* mip level */);
                 }
 
-                @Override
+                // TODO 1.21.11 @Override
                 public void close() {}
             }
         }
