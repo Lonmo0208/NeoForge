@@ -7,6 +7,8 @@ package net.neoforged.neoforge.client.loading;
 
 import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -95,7 +97,8 @@ public class NeoForgeLoadingOverlay extends LoadingOverlay {
     static class ExternalTexture extends AbstractTexture {
         public ExternalTexture(GpuTexture texture) {
             this.texture = texture;
-            this.setFilter(false, false);
+            this.sampler = RenderSystem.getSamplerCache()
+                    .getSampler(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.LINEAR, FilterMode.LINEAR, false);
             var gpuDevice = RenderSystem.getDevice();
             // ValidationGpuDevice.createTextureView is expecting a ValidationGpuTexture instance, but the previous reach around created a GlTexture instance instead so validation must be reached around again
             if (gpuDevice instanceof ValidationGpuDevice validationGpuDevice) {

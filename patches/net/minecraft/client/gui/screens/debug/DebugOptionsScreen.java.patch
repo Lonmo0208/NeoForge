@@ -11,7 +11,7 @@
              if (this.isAllowed) {
                  this.name = s;
              } else {
-@@ -244,8 +_,10 @@
+@@ -244,8 +_,11 @@
          public void renderContent(GuiGraphics p_439423_, int p_439217_, int p_439543_, boolean p_439889_, float p_439319_) {
              int i = this.getContentX();
              int j = this.getContentY();
@@ -19,7 +19,8 @@
 +            // Neo: Moved 'k' up for 'maxX' calculation for scrolling string render
              int k = i + this.getContentWidth() - this.never.getWidth() - this.overlay.getWidth() - this.always.getWidth();
 +            // Neo: Scroll entry names that go out of bounds
-+            p_439423_.drawScrollingString(DebugOptionsScreen.this.minecraft.font, Component.literal(this.name), i, k, j + 5, this.isAllowed ? -1 : -8355712);
++
++            p_439423_.drawScrollingString(p_439423_.textRenderer(), DebugOptionsScreen.this.minecraft.font, Component.literal(this.name).withColor(this.isAllowed ? -1 : -8355712), i, k, j + 5);
              if (!this.isAllowed && p_439889_ && p_439217_ < k) {
                  p_439423_.setTooltipForNextFrame(DebugOptionsScreen.NOT_ALLOWED_TOOLTIP, p_439217_, p_439543_);
              }
