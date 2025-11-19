@@ -8,7 +8,6 @@ package net.neoforged.testframework.client;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.jspecify.annotations.NullMarked;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ToggleKeyMapping;
@@ -20,6 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.testframework.conf.ClientConfiguration;
 import net.neoforged.testframework.impl.FrameworkClient;
 import net.neoforged.testframework.impl.MutableTestFramework;
+import org.jspecify.annotations.NullMarked;
 
 @ParametersAreNonnullByDefault
 @NullMarked

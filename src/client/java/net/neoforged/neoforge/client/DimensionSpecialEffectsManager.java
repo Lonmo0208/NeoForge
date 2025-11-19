@@ -7,18 +7,11 @@ package net.neoforged.neoforge.client;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import java.util.Map;
-
-import net.minecraft.client.CloudStatus;
-import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.extensions.IDimensionSpecialEffectsExtension;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
 
 /**
  * Manager for {@link DimensionSpecialEffects} instances.
@@ -27,8 +20,7 @@ import org.joml.Matrix4f;
  */
 public final class DimensionSpecialEffectsManager {
     private static ImmutableMap<Identifier, IDimensionSpecialEffectsExtension> EFFECTS;
-    private static IDimensionSpecialEffectsExtension DEFAULT_EFFECTS = new IDimensionSpecialEffectsExtension() {
-    };
+    private static IDimensionSpecialEffectsExtension DEFAULT_EFFECTS = new IDimensionSpecialEffectsExtension() {};
 
     /**
      * Finds the {@link DimensionSpecialEffects} for a given dimension type, or the default if none is registered.

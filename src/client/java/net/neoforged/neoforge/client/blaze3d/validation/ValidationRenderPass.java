@@ -12,10 +12,9 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Collection;
 import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Validation wrapper around RenderPass

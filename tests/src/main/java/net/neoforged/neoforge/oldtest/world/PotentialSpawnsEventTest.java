@@ -5,7 +5,6 @@
 
 package net.neoforged.neoforge.oldtest.world;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.LevelAccessor;

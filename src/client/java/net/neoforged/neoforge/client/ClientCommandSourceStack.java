@@ -28,7 +28,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.PermissionSet;
-import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
@@ -42,7 +41,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ClientCommandSourceStack extends CommandSourceStack {
     public ClientCommandSourceStack(CommandSource source, Vec3 position, Vec2 rotation, PermissionSet permissions, String plainTextName, Component displayName,
-                                    Entity executing) {
+            Entity executing) {
         super(source, position, rotation, null, permissions, plainTextName, displayName, null, executing);
     }
 

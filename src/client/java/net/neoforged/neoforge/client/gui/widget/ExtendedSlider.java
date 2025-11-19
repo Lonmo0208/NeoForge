@@ -7,7 +7,6 @@ package net.neoforged.neoforge.client.gui.widget;
 
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import java.text.DecimalFormat;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.input.KeyEvent;

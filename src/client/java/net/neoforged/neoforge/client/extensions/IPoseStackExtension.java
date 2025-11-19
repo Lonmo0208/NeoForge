@@ -7,7 +7,6 @@ package net.neoforged.neoforge.client.extensions;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Transformation;
-import org.joml.Vector3f;
 
 /**
  * Extension interface for {@link com.mojang.blaze3d.vertex.PoseStack}.

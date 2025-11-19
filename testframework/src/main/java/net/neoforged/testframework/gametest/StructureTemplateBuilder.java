@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.jspecify.annotations.NullMarked;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -29,6 +28,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.testframework.impl.ReflectionUtils;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
 @ParametersAreNonnullByDefault
 @NullMarked

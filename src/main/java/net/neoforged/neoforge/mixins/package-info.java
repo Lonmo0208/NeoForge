@@ -7,5 +7,5 @@
 @ApiStatus.Internal
 package net.neoforged.neoforge.mixins;
 
-import org.jspecify.annotations.NullMarked;
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.NullMarked;

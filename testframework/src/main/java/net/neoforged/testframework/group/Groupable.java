@@ -7,8 +7,8 @@ package net.neoforged.testframework.group;
 
 import java.util.List;
 import java.util.stream.Stream;
-import org.jspecify.annotations.NullMarked;
 import net.neoforged.testframework.Test;
+import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public interface Groupable {

@@ -6,13 +6,13 @@
 package net.neoforged.testframework.gametest;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.jspecify.annotations.NullMarked;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
 @SuppressWarnings("unchecked")
 @ParametersAreNonnullByDefault

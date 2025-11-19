@@ -13,9 +13,9 @@ import java.lang.reflect.Method;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.jspecify.annotations.NullMarked;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestListener;
+import org.jspecify.annotations.NullMarked;
 
 @SuppressWarnings("unchecked")
 @ParametersAreNonnullByDefault

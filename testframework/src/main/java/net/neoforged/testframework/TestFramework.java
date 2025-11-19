@@ -8,7 +8,6 @@ package net.neoforged.testframework;
 import java.util.Collection;
 import java.util.Optional;
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.jspecify.annotations.NullMarked;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.IEventBus;
@@ -19,6 +18,7 @@ import net.neoforged.testframework.group.Group;
 import net.neoforged.testframework.impl.MutableTestFramework;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 
 /**

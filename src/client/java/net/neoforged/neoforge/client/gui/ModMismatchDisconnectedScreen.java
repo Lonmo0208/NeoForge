@@ -31,10 +31,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Util;
 import net.neoforged.fml.ModList;
@@ -277,7 +275,7 @@ public class ModMismatchDisconnectedScreen extends Screen {
                 if (slotIndex < contentSize) {
                     //The relative x needs to take the potentially missing indent of the row into account. It does that by checking if the line has a version associated to it
                     double relativeX = x - left - border - (lineTable.get(slotIndex).getRight() == null ? 0 : nameIndent);
-                    var slotRelativeY = (int)(relativeY - slotIndex * ROW_HEIGHT);
+                    var slotRelativeY = (int) (relativeY - slotIndex * ROW_HEIGHT);
                     if (relativeX >= 0) {
                         var collector = new ActiveTextCollector.ClickableStyleFinder(font, (int) relativeX, slotRelativeY);
                         collector.accept(TextAlignment.LEFT, 0, 0, lineTable.get(slotIndex).getLeft());

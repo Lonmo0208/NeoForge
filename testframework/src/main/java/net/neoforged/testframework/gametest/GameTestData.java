@@ -7,10 +7,10 @@ package net.neoforged.testframework.gametest;
 
 import java.util.function.Consumer;
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.jspecify.annotations.NullMarked;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Rotation;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
 @ParametersAreNonnullByDefault
 @NullMarked

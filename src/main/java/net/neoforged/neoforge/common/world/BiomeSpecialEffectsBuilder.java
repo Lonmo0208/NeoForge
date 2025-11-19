@@ -5,9 +5,8 @@
 
 package net.neoforged.neoforge.common.world;
 
-import net.minecraft.world.level.biome.BiomeSpecialEffects;
-
 import java.util.Optional;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 
 /**
  * Extension of the vanilla builder but also provides read access and a copy-from-existing-data helper.

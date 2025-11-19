@@ -6,6 +6,9 @@
 package net.neoforged.neoforge.client.gui;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,10 +21,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.AddressMode;
-import com.mojang.blaze3d.textures.FilterMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -37,7 +36,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
@@ -230,8 +228,7 @@ public class ModListScreen extends Screen {
             if (line != null) {
                 var styleFinder = new ActiveTextCollector.ClickableStyleFinder(
                         // TODO 1.21.11: The calculatin of Y needs to be validated, it should be relative to the vertical line origin
-                        font, mouseX - left - border - 1, (int)(offset - (lineIdx * font.lineHeight))
-                );
+                        font, mouseX - left - border - 1, (int) (offset - (lineIdx * font.lineHeight)));
                 styleFinder.accept(TextAlignment.LEFT, 0, 0, line);
                 return styleFinder.result();
             }
@@ -409,7 +406,7 @@ public class ModListScreen extends Screen {
                             public void upload() {
                                 // Use custom "blur" value which controls texture filtering (nearest-neighbor vs linear)
                                 // TODO 1.21.11: Unclear if this is the best way of setting linear/nearest filtering
-                                var filter = selectedMod.getLogoBlur() ?  FilterMode.LINEAR : FilterMode.NEAREST;
+                                var filter = selectedMod.getLogoBlur() ? FilterMode.LINEAR : FilterMode.NEAREST;
                                 sampler = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, filter, filter, false);
                                 super.upload();
                             }

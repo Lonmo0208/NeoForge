@@ -5,6 +5,8 @@
 
 package net.neoforged.neoforge.debug.client;
 
+import java.util.Objects;
+import java.util.Random;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -40,9 +42,6 @@ import net.neoforged.testframework.TestListener;
 import net.neoforged.testframework.annotation.ForEachTest;
 import net.neoforged.testframework.annotation.TestHolder;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
-import java.util.Random;
 
 @ForEachTest(groups = "client.gui", side = Dist.CLIENT)
 public class GuiTests {
@@ -213,8 +212,7 @@ public class GuiTests {
         test.framework().modEventBus().addListener((RegisterGuiLayersEvent event) -> {
             // Register some placeholder layers
             for (int i = 0; i < 50; i++) {
-                event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "fake_" + i), (guiGraphics, deltaTracker) -> {
-                });
+                event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "fake_" + i), (guiGraphics, deltaTracker) -> {});
             }
             // Register the real layer
             event.registerAboveAll(Identifier.fromNamespaceAndPath(test.createModId(), "high_depth_test"), (guiGraphics, deltaTracker) -> {
