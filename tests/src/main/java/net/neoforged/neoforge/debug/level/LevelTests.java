@@ -52,7 +52,7 @@ public class LevelTests {
     @TestHolder(description = "Tests if custom game rules work")
     static void customGameRule(final DynamicTest test, final RegistrationHelper reg) {
         final DeferredHolder<GameRule<?>, GameRule<Boolean>> booleanGameRule = reg.register(Registries.GAME_RULE, "custom_boolean_game_rule", (r, n) -> GameRules.registerBoolean(n.toString(), GameRuleCategory.MISC, true));
-        final DeferredHolder<GameRule<?>, GameRule<Integer>> integerGameRule = reg.register(Registries.GAME_RULE, "custom_integer_game_rule", (r, n) -> GameRules.registerInteger(n.toString(), GameRuleCategory.MISC, true, 1337, 1337));
+        final DeferredHolder<GameRule<?>, GameRule<Integer>> integerGameRule = reg.register(Registries.GAME_RULE, "custom_integer_game_rule", (r, n) -> GameRules.registerInteger(n.toString(), GameRuleCategory.MISC, 1337, 1337));
 
         test.eventListeners().forge().addListener((EntityTickEvent.Pre event) -> {
             if (event.getEntity() instanceof ServerPlayer player && player.getGameProfile().name().equals("test-mock-player")) {
