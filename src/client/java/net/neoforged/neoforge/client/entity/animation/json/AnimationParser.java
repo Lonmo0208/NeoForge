@@ -84,8 +84,7 @@ public final class AnimationParser {
      * }
      */
     public static final MapCodec<AnimationChannel> CHANNEL_CODEC = new KeyDispatchCodec<>(
-            "target",
-            TARGET_CODEC,
+            TARGET_CODEC.fieldOf("target"),
             channel -> Optional.ofNullable(AnimationTypeManager.getTargetFromChannelTarget(channel.target()))
                     .map(DataResult::success)
                     .orElseGet(() -> DataResult.error(() -> String.format(
