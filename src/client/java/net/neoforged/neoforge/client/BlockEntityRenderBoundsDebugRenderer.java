@@ -91,7 +91,7 @@ public final class BlockEntityRenderBoundsDebugRenderer {
         event.getDispatcher().register(
                 Commands.literal("neoforge")
                         .then(Commands.literal("debug_blockentity_renderbounds")
-                                .requires(src -> src.hasPermission(Commands.LEVEL_ADMINS))
+                                .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
                                 .then(Commands.argument("enable", BoolArgumentType.bool())
                                         .executes(ctx -> {
                                             enabled = BoolArgumentType.getBool(ctx, "enable");

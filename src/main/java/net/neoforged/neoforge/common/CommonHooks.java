@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.ChatFormatting;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -1334,7 +1334,7 @@ public class CommonHooks {
         }
         try {
             return BuiltInRegistries.MOB_EFFECT.getValue(Identifier.parse(registryName));
-        } catch (ResourceLocationException e) {
+        } catch (IdentifierException e) {
             return fallback;
         }
     }

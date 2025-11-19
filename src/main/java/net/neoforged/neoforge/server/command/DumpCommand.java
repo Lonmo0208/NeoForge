@@ -48,7 +48,7 @@ class DumpCommand {
          * /neoforge dump registry <registry> <alphabetical_sort> <print_numeric_ids>
          */
         return Commands.literal("dump")
-                .requires(cs -> cs.hasPermission(Commands.LEVEL_OWNERS))
+                .requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
                 .then(Commands.literal("registry")
                         .then(Commands.argument("registry", ResourceKeyArgument.key(ROOT_REGISTRY_KEY))
                                 .suggests(CommandUtils::suggestRegistries)

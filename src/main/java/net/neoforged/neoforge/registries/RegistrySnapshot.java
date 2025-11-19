@@ -28,8 +28,8 @@ public class RegistrySnapshot {
         @Override
         public RegistrySnapshot decode(FriendlyByteBuf buf) {
             RegistrySnapshot snapshot = new RegistrySnapshot();
-            buf.readMap(size -> snapshot.ids, FriendlyByteBuf::readVarInt, FriendlyByteBuf::readResourceLocation);
-            buf.readMap(size -> snapshot.aliases, FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readResourceLocation);
+            buf.readMap(size -> snapshot.ids, FriendlyByteBuf::readVarInt, FriendlyByteBuf::readIdentifier);
+            buf.readMap(size -> snapshot.aliases, FriendlyByteBuf::readIdentifier, FriendlyByteBuf::readIdentifier);
             return snapshot;
         }
 
@@ -38,8 +38,8 @@ public class RegistrySnapshot {
             if (snapshot.binary == null) {
                 FriendlyByteBuf pkt = new FriendlyByteBuf(Unpooled.buffer());
                 try {
-                    pkt.writeMap(snapshot.ids, FriendlyByteBuf::writeVarInt, FriendlyByteBuf::writeResourceLocation);
-                    pkt.writeMap(snapshot.aliases, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeResourceLocation);
+                    pkt.writeMap(snapshot.ids, FriendlyByteBuf::writeVarInt, FriendlyByteBuf::writeIdentifier);
+                    pkt.writeMap(snapshot.aliases, FriendlyByteBuf::writeIdentifier, FriendlyByteBuf::writeIdentifier);
                     snapshot.binary = new byte[pkt.readableBytes()];
                     pkt.readBytes(snapshot.binary);
                 } finally {

@@ -68,7 +68,7 @@ public class VanillaConnectionNetworkFilter extends VanillaPacketFilter {
         ClientboundUpdateAttributesPacket newPacket = new ClientboundUpdateAttributesPacket(msg.getEntityId(), Collections.emptyList());
         msg.getValues().stream()
                 .filter(snapshot -> {
-                    Identifier key = snapshot.attribute().unwrapKey().map(ResourceKey::location).orElse(null);
+                    Identifier key = snapshot.attribute().unwrapKey().map(ResourceKey::identifier).orElse(null);
                     return key != null && key.getNamespace().equals("minecraft");
                 })
                 .forEach(snapshot -> newPacket.getValues().add(snapshot));
@@ -104,6 +104,6 @@ public class VanillaConnectionNetworkFilter extends VanillaPacketFilter {
     private static boolean isVanillaRegistry(Identifier location) {
         // Checks if the registry name is contained within the static view of both BuiltInRegistries and VanillaRegistries
         return RegistryManager.getVanillaRegistryKeys().contains(location)
-                || VanillaRegistries.DATAPACK_REGISTRY_KEYS.stream().anyMatch(k -> k.location().equals(location));
+                || VanillaRegistries.DATAPACK_REGISTRY_KEYS.stream().anyMatch(k -> k.identifier().equals(location));
     }
 }

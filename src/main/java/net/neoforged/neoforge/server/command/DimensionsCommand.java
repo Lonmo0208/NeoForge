@@ -22,7 +22,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 class DimensionsCommand {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("dimensions")
-                .requires(cs -> cs.hasPermission(0)) //permission
+                .requires(Commands.hasPermission(Commands.LEVEL_ALL)) //permission
                 .executes(ctx -> {
                     ctx.getSource().sendSuccess(() -> CommandUtils.makeTranslatableWithFallback("commands.neoforge.dimensions.list"), true);
                     final Registry<DimensionType> reg = ctx.getSource().registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);

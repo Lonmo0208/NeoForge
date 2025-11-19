@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Util;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -821,7 +822,7 @@ public class FluidType {
      * @see BucketItem#emptyContents(LivingEntity, Level, BlockPos, BlockHitResult)
      */
     public boolean isVaporizedOnPlacement(Level level, BlockPos pos, FluidStack stack) {
-        if (level.dimensionType().ultraWarm()) {
+        if (level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos)) {
             return this == NeoForgeMod.WATER_TYPE.value() || this.getStateForPlacement(level, pos, stack).is(FluidTags.WATER);
         }
         return false;

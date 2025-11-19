@@ -141,8 +141,8 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         private static final Logger LOGGER = LogUtils.getLogger();
         private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null, null);
         private static final GameRules TEST_GAME_RULES = Util.make(new GameRules(FeatureFlags.REGISTRY.allFlags()), rules -> {
-            rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
-            rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
+            rules.getRule(GameRules.SPAWN_MOBS).set(false, null);
+            rules.getRule(GameRules.ADVANCE_WEATHER).set(false, null);
         });
         private static final WorldOptions WORLD_OPTIONS = new WorldOptions(0L, false, false);
 

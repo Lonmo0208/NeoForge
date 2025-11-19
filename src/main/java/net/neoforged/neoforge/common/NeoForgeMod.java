@@ -34,6 +34,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.util.random.WeightedList;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffects;
@@ -49,7 +50,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -430,7 +431,7 @@ public class NeoForgeMod {
         @Override
         public boolean canConvertToSource(FluidState state, LevelReader reader, BlockPos pos) {
             if (reader instanceof ServerLevel level) {
-                return level.getGameRules().getBoolean(GameRules.RULE_WATER_SOURCE_CONVERSION);
+                return level.getGameRules().get(GameRules.WATER_SOURCE_CONVERSION);
             }
             //Best guess fallback to default (true)
             return super.canConvertToSource(state, reader, pos);
@@ -457,7 +458,7 @@ public class NeoForgeMod {
         @Override
         public boolean canConvertToSource(FluidState state, LevelReader reader, BlockPos pos) {
             if (reader instanceof ServerLevel level) {
-                return level.getGameRules().getBoolean(GameRules.RULE_LAVA_SOURCE_CONVERSION);
+                return level.getGameRules().get(GameRules.LAVA_SOURCE_CONVERSION);
             }
             //Best guess fallback to default (false)
             return super.canConvertToSource(state, reader, pos);
@@ -465,7 +466,7 @@ public class NeoForgeMod {
 
         @Override
         public double motionScale(Entity entity) {
-            return entity.level().dimensionType().ultraWarm() ? 0.007D : 0.0023333333333333335D;
+            return entity.level().environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, entity.blockPosition()) ? 0.007D : 0.0023333333333333335D;
         }
 
         @Override
@@ -662,7 +663,7 @@ public class NeoForgeMod {
     }
 
     public static final PermissionNode<Boolean> USE_SELECTORS_PERMISSION = new PermissionNode<>(MOD_ID, "use_entity_selectors",
-            PermissionTypes.BOOLEAN, (player, uuid, contexts) -> player != null && player.hasPermissions(Commands.LEVEL_GAMEMASTERS));
+            PermissionTypes.BOOLEAN, (player, uuid, contexts) -> player != null && Commands.LEVEL_GAMEMASTERS.check(player.permissions()));
 
     public void registerPermissionNodes(PermissionGatherEvent.Nodes event) {
         event.addNodes(USE_SELECTORS_PERMISSION);

@@ -15,6 +15,9 @@ import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 @ApiStatus.Internal
 public class LevelAttachmentsSavedData extends SavedData {
@@ -29,9 +32,9 @@ public class LevelAttachmentsSavedData extends SavedData {
         level.getDataStorage().computeIfAbsent(TYPE);
     }
 
-    private static Codec<LevelAttachmentsSavedData> makeCodec(SavedData.Context context) {
+    private static Codec<LevelAttachmentsSavedData> makeCodec(@Nullable ServerLevel level) {
         return CompoundTag.CODEC.flatXmap(tag -> {
-            var data = new LevelAttachmentsSavedData(context);
+            var data = new LevelAttachmentsSavedData(level);
             ProblemReporter.Collector reporter = new ProblemReporter.Collector();
             // Note: Side effect here, keep an eye on this
             data.level.deserializeAttachments(TagValueInput.create(reporter, data.level.registryAccess(), tag));
@@ -50,8 +53,8 @@ public class LevelAttachmentsSavedData extends SavedData {
 
     private final ServerLevel level;
 
-    public LevelAttachmentsSavedData(SavedData.Context context) {
-        this.level = context.levelOrThrow();
+    public LevelAttachmentsSavedData(@Nullable ServerLevel level) {
+        this.level = Objects.requireNonNull(level, "level");
     }
 
     @Override

@@ -36,7 +36,7 @@ public record RegistryDataMapSyncPayload<T>(ResourceKey<? extends Registry<T>> r
     public static <T> RegistryDataMapSyncPayload<T> decode(RegistryFriendlyByteBuf buf) {
         //noinspection RedundantCast javac complains about this cast
         final ResourceKey<Registry<T>> registryKey = (ResourceKey<Registry<T>>) (Object) buf.readRegistryKey();
-        final Map<Identifier, Map<ResourceKey<T>, ?>> attach = buf.readMap(FriendlyByteBuf::readResourceLocation, (b1, key) -> {
+        final Map<Identifier, Map<ResourceKey<T>, ?>> attach = buf.readMap(FriendlyByteBuf::readIdentifier, (b1, key) -> {
             final DataMapType<T, ?> dataMap = RegistryManager.getDataMap(registryKey, key);
             return b1.readMap(bf -> bf.readResourceKey(registryKey), bf -> readJsonWithRegistryCodec((RegistryFriendlyByteBuf) bf, dataMap.networkCodec()));
         });
@@ -45,7 +45,7 @@ public record RegistryDataMapSyncPayload<T>(ResourceKey<? extends Registry<T>> r
 
     public void write(RegistryFriendlyByteBuf buf) {
         buf.writeResourceKey(registryKey);
-        buf.writeMap(dataMaps, FriendlyByteBuf::writeResourceLocation, (b1, key, attach) -> {
+        buf.writeMap(dataMaps, FriendlyByteBuf::writeIdentifier, (b1, key, attach) -> {
             final DataMapType<T, ?> dataMap = RegistryManager.getDataMap(registryKey, key);
             // TODO - make datamaps use stream codecs once datapack registries use them too
             b1.writeMap(attach, FriendlyByteBuf::writeResourceKey, (bf, value) -> writeJsonWithRegistryCodec((RegistryFriendlyByteBuf) bf, (Codec) dataMap.networkCodec(), value));

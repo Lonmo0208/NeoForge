@@ -220,14 +220,14 @@
 +        /** Define tabs that should come <i>before</i> this tab. This tab will be placed <strong>after</strong> the {@code tabs}. **/
 +        @SafeVarargs
 +        public final CreativeModeTab.Builder withTabsBefore(net.minecraft.resources.ResourceKey<CreativeModeTab>... tabs) {
-+            java.util.stream.Stream.of(tabs).map(net.minecraft.resources.ResourceKey::location).forEach(this.tabsBefore::add);
++            java.util.stream.Stream.of(tabs).map(net.minecraft.resources.ResourceKey::identifier).forEach(this.tabsBefore::add);
 +            return this;
 +        }
 +
 +        /** Define tabs that should come <i>after</i> this tab. This tab will be placed <strong>before</strong> the {@code tabs}.**/
 +        @SafeVarargs
 +        public final CreativeModeTab.Builder withTabsAfter(net.minecraft.resources.ResourceKey<CreativeModeTab>... tabs) {
-+            java.util.stream.Stream.of(tabs).map(net.minecraft.resources.ResourceKey::location).forEach(this.tabsAfter::add);
++            java.util.stream.Stream.of(tabs).map(net.minecraft.resources.ResourceKey::identifier).forEach(this.tabsAfter::add);
 +            return this;
 +        }
 +

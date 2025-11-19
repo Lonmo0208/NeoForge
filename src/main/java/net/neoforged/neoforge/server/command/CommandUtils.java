@@ -32,7 +32,7 @@ public final class CommandUtils {
     public static CompletableFuture<Suggestions> suggestRegistries(
             final CommandContext<CommandSourceStack> ctx,
             final SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggestResource(ctx.getSource().registryAccess().listRegistryKeys().map(ResourceKey::location), builder);
+        return SharedSuggestionProvider.suggestResource(ctx.getSource().registryAccess().listRegistryKeys().map(ResourceKey::identifier), builder);
     }
 
     public static <T extends Registry<?>> SuggestionProvider<CommandSourceStack> suggestFromRegistry(

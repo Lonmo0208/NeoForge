@@ -51,7 +51,7 @@ public class LevelTests {
 
         test.eventListeners().forge().addListener((EntityTickEvent.Pre event) -> {
             if (event.getEntity() instanceof ServerPlayer player && player.getGameProfile().name().equals("test-mock-player")) {
-                if (player.level().getServer().getGameRules().getBoolean(booleanGameRule)) {
+                if (player.level().getServer().getGameRules().get(booleanGameRule)) {
                     player.setHealth(player.getHealth() - player.level().getServer().getGameRules().getInt(integerGameRule));
                 }
             }

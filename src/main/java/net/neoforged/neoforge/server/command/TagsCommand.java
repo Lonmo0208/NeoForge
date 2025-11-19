@@ -19,7 +19,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceKeyArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -69,7 +69,7 @@ class TagsCommand {
          * /neoforge tags <registry> query <element> [page]
          */
         return Commands.literal("tags")
-                .requires(cs -> cs.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("registry", ResourceKeyArgument.key(ROOT_REGISTRY_KEY))
                         .suggests(CommandUtils::suggestRegistries)
                         .then(Commands.literal("list")
@@ -77,13 +77,13 @@ class TagsCommand {
                                 .then(Commands.argument("page", IntegerArgumentType.integer(1))
                                         .executes(ctx -> listTags(ctx, IntegerArgumentType.getInteger(ctx, "page")))))
                         .then(Commands.literal("get")
-                                .then(Commands.argument("tag", ResourceLocationArgument.id())
+                                .then(Commands.argument("tag", IdentifierArgument.id())
                                         .suggests(CommandUtils.suggestFromRegistry(r -> r.getTags().map(HolderSet.Named::key).map(TagKey::location)::iterator, "registry", ROOT_REGISTRY_KEY))
                                         .executes(ctx -> listTagElements(ctx, 1))
                                         .then(Commands.argument("page", IntegerArgumentType.integer(1))
                                                 .executes(ctx -> listTagElements(ctx, IntegerArgumentType.getInteger(ctx, "page"))))))
                         .then(Commands.literal("query")
-                                .then(Commands.argument("element", ResourceLocationArgument.id())
+                                .then(Commands.argument("element", IdentifierArgument.id())
                                         .suggests(CommandUtils.suggestFromRegistry(Registry::keySet, "registry", ROOT_REGISTRY_KEY))
                                         .executes(ctx -> queryElementTags(ctx, 1))
                                         .then(Commands.argument("page", IntegerArgumentType.integer(1))
@@ -118,7 +118,7 @@ class TagsCommand {
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
                 .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.identifier()));
 
-        final Identifier tagLocation = ResourceLocationArgument.getId(ctx, "tag");
+        final Identifier tagLocation = IdentifierArgument.getId(ctx, "tag");
         final TagKey<?> tagKey = TagKey.create(cast(registryKey), tagLocation);
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -145,7 +145,7 @@ class TagsCommand {
         final Registry<?> registry = ctx.getSource().getServer().registryAccess().lookup(registryKey)
                 .orElseThrow(() -> UNKNOWN_REGISTRY.create(registryKey.identifier()));
 
-        final Identifier elementLocation = ResourceLocationArgument.getId(ctx, "element");
+        final Identifier elementLocation = IdentifierArgument.getId(ctx, "element");
         final ResourceKey<?> elementKey = ResourceKey.create(cast(registryKey), elementLocation);
 
         @SuppressWarnings({ "unchecked", "rawtypes" })

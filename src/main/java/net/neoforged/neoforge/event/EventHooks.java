@@ -27,6 +27,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.RegistryLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -37,6 +38,9 @@ import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
@@ -82,7 +86,7 @@ import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NaturalSpawner;
@@ -720,7 +724,7 @@ public class EventHooks {
      * Checks if an entity can perform a griefing action.
      * <p>
      * If an entity is provided, this method fires {@link EntityMobGriefingEvent}.
-     * If an entity is not provided, this method returns the value of {@link GameRules#RULE_MOBGRIEFING}.
+     * If an entity is not provided, this method returns the value of {@link GameRules#MOB_GRIEFING}.
      * 
      * @param level  The level of the action
      * @param entity The entity performing the action, or null if unknown.
@@ -728,7 +732,7 @@ public class EventHooks {
      */
     public static boolean canEntityGrief(ServerLevel level, @Nullable Entity entity) {
         if (entity == null)
-            return level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+            return level.getGameRules().get(GameRules.MOB_GRIEFING);
 
         return NeoForge.EVENT_BUS.post(new EntityMobGriefingEvent(level, entity)).canGrief();
     }
@@ -863,11 +867,11 @@ public class EventHooks {
         return event;
     }
 
-    public static boolean onPermissionChanged(NameAndId nameAndId, int newLevel, PlayerList playerList) {
-        int oldLevel = playerList.getServer().getProfilePermissions(nameAndId);
+    public static boolean onPermissionChanged(NameAndId nameAndId, LevelBasedPermissionSet newPermissions, PlayerList playerList) {
+        var oldPermissions = playerList.getServer().getProfilePermissions(nameAndId);
         ServerPlayer player = playerList.getPlayer(nameAndId.id());
-        if (newLevel != oldLevel && player != null) {
-            return NeoForge.EVENT_BUS.post(new PermissionsChangedEvent(player, newLevel, oldLevel)).isCanceled();
+        if (newPermissions.level() != oldPermissions.level() && player != null) {
+            return NeoForge.EVENT_BUS.post(new PermissionsChangedEvent(player, newPermissions, oldPermissions)).isCanceled();
         }
         return false;
     }

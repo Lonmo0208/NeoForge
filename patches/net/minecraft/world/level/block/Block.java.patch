@@ -81,7 +81,7 @@
  
      private static void popResource(Level p_152441_, Supplier<ItemEntity> p_152442_, ItemStack p_152443_) {
 -        if (p_152441_ instanceof ServerLevel serverlevel && !p_152443_.isEmpty() && serverlevel.getGameRules().get(GameRules.BLOCK_DROPS)) {
-+        if (p_152441_ instanceof ServerLevel serverLevel && !p_152443_.isEmpty() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && !p_152441_.restoringBlockSnapshots) {
++        if (p_152441_ instanceof ServerLevel serverLevel && !p_152443_.isEmpty() && serverLevel.getGameRules().get(GameRules.BLOCK_DROPS) && !p_152441_.restoringBlockSnapshots) {
              ItemEntity itementity = p_152442_.get();
              itementity.setDefaultPickUpDelay();
 -            p_152441_.addFreshEntity(itementity);
@@ -97,7 +97,7 @@
  
      public void popExperience(ServerLevel p_49806_, BlockPos p_49807_, int p_49808_) {
 -        if (p_49806_.getGameRules().get(GameRules.BLOCK_DROPS)) {
-+        if (p_49806_.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && !p_49806_.restoringBlockSnapshots) {
++        if (p_49806_.getGameRules().get(GameRules.BLOCK_DROPS) && !p_49806_.restoringBlockSnapshots) {
              ExperienceOrb.award(p_49806_, Vec3.atCenterOf(p_49807_), p_49808_);
          }
      }

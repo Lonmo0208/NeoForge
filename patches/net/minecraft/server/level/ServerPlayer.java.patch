@@ -25,7 +25,7 @@
                  if (!this.isSleeping()) {
 -                    this.awardStat(Stats.TIME_SINCE_REST);
 +                    // Neo: Advance TIME_SINCE_REST if (a) vanilla daytime handling in effect, or (b) days are shorter, or (c) dayTime has ticked, or (d) dayTime advances are off and we need to ignore day length
-+                    if (level().getDayTimeFraction() < 0 || level().getDayTimeFraction() >= 1 || lastDayTimeTick != level().getDayTime() || !level().getGameRules().getRule(GameRules.RULE_DAYLIGHT).get()) {
++                    if (level().getDayTimeFraction() < 0 || level().getDayTimeFraction() >= 1 || lastDayTimeTick != level().getDayTime() || !level().getGameRules().get(GameRules.ADVANCE_TIME)) {
 +                        lastDayTimeTick = level().getDayTime();
 +                        this.awardStat(Stats.TIME_SINCE_REST);
 +                    }
@@ -173,7 +173,7 @@
 +    }
 +
 +    @Override
-+    public OptionalInt openMenu(@Nullable MenuProvider p_9033_, @Nullable java.util.function.Consumer<net.minecraft.network.RegistryFriendlyByteBuf> extraDataWriter) {
++    public OptionalInt openMenu(@Nullable MenuProvider p_9033_, java.util.function.@Nullable Consumer<net.minecraft.network.RegistryFriendlyByteBuf> extraDataWriter) {
          if (p_9033_ == null) {
              return OptionalInt.empty();
          } else {

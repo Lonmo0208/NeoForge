@@ -19,7 +19,8 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.commands.PermissionCheck;
+import net.minecraft.server.permissions.PermissionCheck;
+import net.minecraft.server.permissions.PermissionProviderCheck;
 import org.jetbrains.annotations.Nullable;
 
 // TODO 1.21.6: Investigate whether the NodeBuilder/NodeInspector are actually correctly implemented and whether the filtering can be done directly in the NodeBuilder
@@ -78,7 +79,7 @@ class CommandTreeCleaner {
 
         @Override
         public boolean isRestricted(CommandNode<SharedSuggestionProvider> node) {
-            return node.getRequirement() instanceof PermissionCheck<?> permissioncheck && permissioncheck.requiredLevel() > 0;
+            return node.getRequirement() instanceof PermissionProviderCheck<?>(PermissionCheck test) && test instanceof PermissionCheck.Require;
         }
     };
 
