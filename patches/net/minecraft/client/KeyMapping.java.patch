@@ -39,7 +39,7 @@
          if (list != null && !list.isEmpty()) {
              for (KeyMapping keymapping : list) {
                  p_446545_.accept(keymapping);
-@@ -105,8 +_,82 @@
+@@ -105,8 +_,83 @@
          this.registerMapping(this.key);
      }
  
@@ -73,6 +73,7 @@
 +        this.key = keyCode;
 +        this.defaultKey = keyCode;
 +        this.category = category;
++        this.order = 0; // TODO 1.21.11: should we add additional constructor overloads to specify this?
 +        this.keyConflictContext = keyConflictContext;
 +        this.keyModifier = keyModifier;
 +        this.keyModifierDefault = keyModifier;
