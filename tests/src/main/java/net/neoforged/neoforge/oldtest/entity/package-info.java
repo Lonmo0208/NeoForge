@@ -1,11 +1,4 @@
-/*
- * Copyright (c) Forge Development LLC and contributors
- * SPDX-License-Identifier: LGPL-2.1-only
- */
-
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
+@NullMarked
 package net.neoforged.neoforge.oldtest.entity;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

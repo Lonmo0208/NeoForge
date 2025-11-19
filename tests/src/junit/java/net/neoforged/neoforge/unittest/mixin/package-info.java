@@ -1,4 +1,4 @@
 @NullMarked
-package net.neoforged.neoforge.oldtest.entity.player;
+package net.neoforged.neoforge.unittest.mixin;
 
 import org.jspecify.annotations.NullMarked;

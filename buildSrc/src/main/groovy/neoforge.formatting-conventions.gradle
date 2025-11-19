@@ -33,6 +33,9 @@ final generatePackageInfos = tasks.register('generatePackageInfos', GeneratePack
     if (file("src/client/java").exists()) {
         it.files.from fileTree("src/client/java")
     }
+    if (file("src/junit/java").exists()) {
+        it.files.from fileTree("src/junit/java")
+    }
 }
 
 immaculate {
