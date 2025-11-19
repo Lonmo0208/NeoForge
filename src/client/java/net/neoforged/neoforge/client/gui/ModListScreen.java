@@ -18,9 +18,15 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.LogoRenderer;
@@ -222,7 +228,12 @@ public class ModListScreen extends Screen {
 
             FormattedCharSequence line = lines.get(lineIdx);
             if (line != null) {
-                return font.getSplitter().componentStyleAtWidth(line, mouseX - left - border - 1);
+                var styleFinder = new ActiveTextCollector.ClickableStyleFinder(
+                        // TODO 1.21.11: The calculatin of Y needs to be validated, it should be relative to the vertical line origin
+                        font, mouseX - left - border - 1, (int)(offset - (lineIdx * font.lineHeight))
+                );
+                styleFinder.accept(TextAlignment.LEFT, 0, 0, line);
+                return styleFinder.result();
             }
             return null;
         }
@@ -230,8 +241,8 @@ public class ModListScreen extends Screen {
         @Override
         public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             final Style component = findTextLine((int) event.x(), (int) event.y());
-            if (component != null) {
-                ModListScreen.this.handleComponentClicked(component);
+            if (component != null && component.getClickEvent() != null) {
+                defaultHandleGameClickEvent(component.getClickEvent(), minecraft, ModListScreen.this);
                 return true;
             }
             return super.mouseClicked(event, doubleClick);
@@ -397,7 +408,9 @@ public class ModListScreen extends Screen {
                             @Override
                             public void upload() {
                                 // Use custom "blur" value which controls texture filtering (nearest-neighbor vs linear)
-                                this.setFilter(selectedMod.getLogoBlur(), false);
+                                // TODO 1.21.11: Unclear if this is the best way of setting linear/nearest filtering
+                                var filter = selectedMod.getLogoBlur() ?  FilterMode.LINEAR : FilterMode.NEAREST;
+                                sampler = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, filter, filter, false);
                                 super.upload();
                             }
                         });
@@ -452,11 +465,11 @@ public class ModListScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft mc, int width, int height) {
+    public void resize(int width, int height) {
         String s = this.search.getValue();
         SortType sort = this.sortType;
         ModListWidget.ModEntry selected = this.selected;
-        this.init(mc, width, height);
+        this.init(width, height);
         this.search.setValue(s);
         this.selected = selected;
         if (!this.search.getValue().isEmpty())
@@ -469,10 +482,5 @@ public class ModListScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.parentScreen);
-    }
-
-    @Override
-    protected void handleClickEvent(Minecraft minecraft, ClickEvent clickEvent) {
-        defaultHandleClickEvent(clickEvent, minecraft, this);
     }
 }

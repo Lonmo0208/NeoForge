@@ -46,8 +46,8 @@ public final class NamedRenderTypeManager {
         blockRenderTypes.put(Identifier.withDefaultNamespace("solid"), new RenderTypeGroup(ChunkSectionLayer.SOLID, NeoForgeRenderTypes.ITEM_LAYERED_SOLID.get()));
         blockRenderTypes.put(Identifier.withDefaultNamespace("cutout"), new RenderTypeGroup(ChunkSectionLayer.CUTOUT, NeoForgeRenderTypes.ITEM_LAYERED_CUTOUT.get()));
         // Generally entity/item rendering shouldn't use mipmaps, so cutout_mipped has them off by default. To enforce them, use cutout_mipped_all.
-        blockRenderTypes.put(Identifier.withDefaultNamespace("cutout_mipped"), new RenderTypeGroup(ChunkSectionLayer.CUTOUT_MIPPED, NeoForgeRenderTypes.ITEM_LAYERED_CUTOUT.get()));
-        blockRenderTypes.put(Identifier.withDefaultNamespace("cutout_mipped_all"), new RenderTypeGroup(ChunkSectionLayer.CUTOUT_MIPPED, NeoForgeRenderTypes.ITEM_LAYERED_CUTOUT_MIPPED.get()));
+        // TODO 1.21.11: Investigate how to deal with block atlas/item atlas split -> blockRenderTypes.put(Identifier.withDefaultNamespace("cutout_mipped"), new RenderTypeGroup(ChunkSectionLayer.CUTOUT_MIPPED, NeoForgeRenderTypes.ITEM_LAYERED_CUTOUT.get()));
+        // TODO 1.21.11: Investigate how to deal with block atlas/item atlas split -> blockRenderTypes.put(Identifier.withDefaultNamespace("cutout_mipped_all"), new RenderTypeGroup(ChunkSectionLayer.CUTOUT_MIPPED, NeoForgeRenderTypes.ITEM_LAYERED_CUTOUT_MIPPED.get()));
         blockRenderTypes.put(Identifier.withDefaultNamespace("translucent"), new RenderTypeGroup(ChunkSectionLayer.TRANSLUCENT, NeoForgeRenderTypes.ITEM_LAYERED_TRANSLUCENT.get()));
         blockRenderTypes.put(Identifier.withDefaultNamespace("tripwire"), new RenderTypeGroup(ChunkSectionLayer.TRIPWIRE, NeoForgeRenderTypes.ITEM_LAYERED_TRANSLUCENT.get()));
     }
