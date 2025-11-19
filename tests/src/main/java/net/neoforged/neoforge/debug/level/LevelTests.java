@@ -12,31 +12,17 @@ import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRuleCategory;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
-import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.testframework.DynamicTest;
-import net.neoforged.testframework.TestFramework;
 import net.neoforged.testframework.annotation.ForEachTest;
-import net.neoforged.testframework.annotation.OnInit;
 import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.gametest.EmptyTemplate;
 import net.neoforged.testframework.gametest.GameTest;
+import net.neoforged.testframework.registration.RegistrationHelper;
 
 @ForEachTest(groups = LevelTests.GROUP)
 public class LevelTests {
     public static final String GROUP = "level";
-
-    private static GameRule<Boolean> booleanGameRule;
-    private static GameRule<Integer> integerGameRule;
-
-    @OnInit
-    static void init(final TestFramework framework) {
-        framework.modEventBus().addListener((RegisterEvent event) -> {
-            if (event.getRegistryKey() == Registries.GAME_RULE) {
-                booleanGameRule = GameRules.registerBoolean("neotests_custom_game_rule:custom_boolean_game_rule", GameRuleCategory.MISC, true);
-                integerGameRule = GameRules.registerInteger("neotests_custom_game_rule:custom_integer_game_rule", GameRuleCategory.MISC, 1337, 1337);
-            }
-        });
-    }
 
     /**
      * Simple test to ensure custom game rules can be registered correctly and used in game.
@@ -64,12 +50,14 @@ public class LevelTests {
     @GameTest
     @EmptyTemplate
     @TestHolder(description = "Tests if custom game rules work")
-    static void customGameRule(final DynamicTest test) {
+    static void customGameRule(final DynamicTest test, final RegistrationHelper reg) {
+        final DeferredHolder<GameRule<?>, GameRule<Boolean>> booleanGameRule = reg.register(Registries.GAME_RULE, "custom_boolean_game_rule", (r, n) -> GameRules.registerBoolean(n.toString(), GameRuleCategory.MISC, true));
+        final DeferredHolder<GameRule<?>, GameRule<Integer>> integerGameRule = reg.register(Registries.GAME_RULE, "custom_integer_game_rule", (r, n) -> GameRules.registerInteger(n.toString(), GameRuleCategory.MISC, true, 1337, 1337));
 
         test.eventListeners().forge().addListener((EntityTickEvent.Pre event) -> {
             if (event.getEntity() instanceof ServerPlayer player && player.getGameProfile().name().equals("test-mock-player")) {
-                if (player.level().getGameRules().get(booleanGameRule)) {
-                    player.setHealth(player.getHealth() - player.level().getGameRules().get(integerGameRule));
+                if (player.level().getGameRules().get(booleanGameRule.get())) {
+                    player.setHealth(player.getHealth() - player.level().getGameRules().get(integerGameRule.get()));
                 }
             }
         });
@@ -78,18 +66,18 @@ public class LevelTests {
             final ServerPlayer player = helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL);
 
             var gameRules = player.level().getGameRules();
-            final var oldBool = gameRules.get(booleanGameRule);
-            final var oldInt = gameRules.get(integerGameRule);
+            final var oldBool = gameRules.get(booleanGameRule.get());
+            final var oldInt = gameRules.get(integerGameRule.get());
 
             helper.startSequence()
-                    .thenExecute(() -> gameRules.set(booleanGameRule, true, player.level().getServer()))
-                    .thenExecute(() -> gameRules.set(integerGameRule, 12, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(booleanGameRule.get(), true, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(integerGameRule.get(), 12, player.level().getServer()))
 
                     .thenIdle(1)
                     .thenExecute(() -> helper.assertEntityProperty(player, ServerPlayer::getHealth, "player health", 8f))
 
-                    .thenExecute(() -> gameRules.set(booleanGameRule, oldBool, player.level().getServer()))
-                    .thenExecute(() -> gameRules.set(integerGameRule, oldInt, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(booleanGameRule.get(), oldBool, player.level().getServer()))
+                    .thenExecute(() -> gameRules.set(integerGameRule.get(), oldInt, player.level().getServer()))
                     .thenSucceed();
         });
     }
