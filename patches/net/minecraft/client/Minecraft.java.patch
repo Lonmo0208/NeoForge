@@ -250,16 +250,23 @@
                              this.player.swing(InteractionHand.MAIN_HAND);
                          }
                      }
-@@ -1622,7 +_,9 @@
+@@ -1622,9 +_,16 @@
                  return false;
              } else {
                  boolean flag = false;
 +                var inputEvent = net.neoforged.neoforge.client.ClientHooks.onClickInput(0, this.options.keyAttack, InteractionHand.MAIN_HAND);
                  PiercingWeapon piercingweapon = itemstack.get(DataComponents.PIERCING_WEAPON);
-+                if (!inputEvent.isCanceled())
++                if (inputEvent.isCanceled()) {
++                    if (inputEvent.shouldSwingHand())
++                        this.player.swing(InteractionHand.MAIN_HAND);
++                    return flag;
++                }
                  if (piercingweapon != null && !this.gameMode.isSpectator()) {
                      this.gameMode.piercingAttack(piercingweapon);
++                    if (inputEvent.shouldSwingHand())
                      this.player.swing(InteractionHand.MAIN_HAND);
+                     return true;
+                 } else {
 @@ -1648,8 +_,10 @@
                              }
  

@@ -132,7 +132,7 @@ public class ClientCommandHandler {
                 Minecraft.getInstance().gui.getChat().addMessage(message);
             }
         };
-        return new ClientCommandSourceStack(commandSource, player.position(), player.getRotationVector(), player.getPermissionLevel(),
+        return new ClientCommandSourceStack(commandSource, player.position(), player.getRotationVector(), player.permissions(),
                 player.getName().getString(), player.getDisplayName(), player);
     }
 

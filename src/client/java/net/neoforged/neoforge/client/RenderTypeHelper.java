@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -37,11 +38,11 @@ public final class RenderTypeHelper {
      */
     public static RenderType getMovingBlockRenderType(ChunkSectionLayer chunkSectionLayer) {
         return switch (chunkSectionLayer) {
-            case SOLID -> RenderType.solid();
-            case CUTOUT_MIPPED -> RenderType.cutoutMipped();
-            case CUTOUT -> RenderType.cutout();
-            case TRANSLUCENT -> RenderType.translucentMovingBlock();
-            case TRIPWIRE -> RenderType.tripwire();
+            case SOLID -> RenderTypes.solid();
+            case CUTOUT_MIPPED -> RenderTypes.cutoutMipped();
+            case CUTOUT -> RenderTypes.cutout();
+            case TRANSLUCENT -> RenderTypes.translucentMovingBlock();
+            case TRIPWIRE -> RenderTypes.tripwire();
         };
     }
 

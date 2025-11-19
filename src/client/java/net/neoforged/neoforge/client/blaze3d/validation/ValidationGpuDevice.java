@@ -8,6 +8,7 @@ package net.neoforged.neoforge.client.blaze3d.validation;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.CompiledRenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.shaders.ShaderSource;
 import com.mojang.blaze3d.shaders.ShaderType;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.GpuDevice;
@@ -153,7 +154,7 @@ public class ValidationGpuDevice implements GpuDevice {
     }
 
     @Override
-    public CompiledRenderPipeline precompilePipeline(RenderPipeline pipeline, @Nullable BiFunction<Identifier, ShaderType, String> shaderSourceProvider) {
+    public CompiledRenderPipeline precompilePipeline(RenderPipeline pipeline, @Nullable ShaderSource shaderSourceProvider) {
         validator.validatePipeline(pipeline);
         return realDevice.precompilePipeline(pipeline, shaderSourceProvider);
     }

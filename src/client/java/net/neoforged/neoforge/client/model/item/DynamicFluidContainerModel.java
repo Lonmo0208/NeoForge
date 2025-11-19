@@ -114,7 +114,7 @@ public class DynamicFluidContainerModel implements ItemModel {
             // Base texture
             var unbaked = UnbakedElementsHelper.createUnbakedItemElements(0, baseSprite);
             var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> baseSprite, state);
-            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, normalRenderTypes.entity()));
+            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, stack -> normalRenderTypes.entity()));
         }
 
         if (fluidMaskLocation != null && fluidSprite != null) {
@@ -128,7 +128,7 @@ public class DynamicFluidContainerModel implements ItemModel {
             var renderTypes = getLayerRenderTypes(emissive);
             if (emissive) QuadTransformers.settingMaxEmissivity().processInPlace(quads);
 
-            subModels.add(new BlockModelWrapper(List.of(FluidContentsTint.INSTANCE), quads, renderProperties, renderTypes.entity()));
+            subModels.add(new BlockModelWrapper(List.of(FluidContentsTint.INSTANCE), quads, renderProperties, stack -> renderTypes.entity()));
         }
 
         if (coverSprite != null) {
@@ -137,7 +137,7 @@ public class DynamicFluidContainerModel implements ItemModel {
             var transformedState = new ComposedModelState(state, COVER_TRANSFORM);
             var unbaked = UnbakedElementsHelper.createUnbakedItemMaskElements(0, coverSprite); // Use cover as mask
             var quads = UnbakedElementsHelper.bakeElements(unbaked, $ -> sprite, transformedState); // Bake with selected texture
-            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, normalRenderTypes.entity()));
+            subModels.add(new BlockModelWrapper(List.of(), quads, renderProperties, stack -> normalRenderTypes.entity()));
         }
 
         return new CompositeModel(subModels);
