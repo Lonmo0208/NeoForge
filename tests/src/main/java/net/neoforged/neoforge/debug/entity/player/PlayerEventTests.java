@@ -6,7 +6,7 @@
 package net.neoforged.neoforge.debug.entity.player;
 
 import java.util.Objects;
-import net.minecraft.commands.Commands;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -16,7 +16,6 @@ import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
-import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -206,12 +205,15 @@ public class PlayerEventTests {
         });
 
         test.onGameTest(helper -> helper.startSequence(() -> helper.makeTickingMockServerPlayerInLevel(GameType.CREATIVE).moveToCorner())
-                .thenExecute(player -> player.setCustomName(Component.literal("permschangedevent")))
-                // Make sure the player isn't OP by default
-                .thenExecute(player -> player.level().getServer().getPlayerList().getOps().add(new ServerOpListEntry(
-                        player.nameAndId(), LevelBasedPermissionSet.ADMIN, true)))
-                .thenExecute(player -> player.level().getServer().getPlayerList().deop(player.nameAndId()))
-                .thenExecute(player -> helper.assertTrue(player.level().getServer().getProfilePermissions(player.nameAndId()) == Commands.LEVEL_ADMINS, "Player was de-op'd"))
+                .thenExecute(player -> {
+                    player.setCustomName(Component.literal("permschangedevent"));
+                    // Make sure the player isn't OP by default
+                    var server = player.level().getServer();
+                    var playerList = server.getPlayerList();
+                    playerList.op(player.nameAndId(), Optional.of(LevelBasedPermissionSet.ADMIN), Optional.empty());
+                    playerList.deop(player.nameAndId());
+                    helper.assertTrue(server.getProfilePermissions(player.nameAndId()) == LevelBasedPermissionSet.ADMIN, "Player was de-op'd");
+                })
                 .thenSucceed());
     }
 
