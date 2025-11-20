@@ -38,6 +38,7 @@ public interface IVertexConsumerExtension {
         self().putBulkData(pose, bakedQuad, new float[] { 1.0F, 1.0F, 1.0F, 1.0F }, red, green, blue, alpha, new int[] { packedLight, packedLight, packedLight, packedLight }, packedOverlay, readExistingColor);
     }
 
+    // TODO 1.21.11: This doesn't work anymore since BakedQuad no longer has full vertexdata.
     default int applyBakedLighting(int packedLight, ByteBuffer data) {
         int bl = packedLight & 0xFFFF;
         int sl = (packedLight >> 16) & 0xFFFF;
@@ -49,6 +50,7 @@ public interface IVertexConsumerExtension {
         return bl | (sl << 16);
     }
 
+    // TODO 1.21.11: This doesn't work anymore since BakedQuad no longer has full vertexdata.
     default void applyBakedNormals(Vector3f generated, ByteBuffer data, Matrix3f normalTransform) {
         byte nx = data.get(28);
         byte ny = data.get(29);

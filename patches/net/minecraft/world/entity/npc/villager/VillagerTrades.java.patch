@@ -3,10 +3,10 @@
 @@ -1389,6 +_,7 @@
          private final int villagerXp;
  
-         public EmeraldsForVillagerTypeItem(int p_35669_, int p_35670_, int p_35671_, Map<ResourceKey<VillagerType>, Item> p_35672_) {
+         public EmeraldsForVillagerTypeItem(int p_480321_, int p_480095_, int p_478325_, Map<ResourceKey<VillagerType>, Item> p_481157_) {
 +            if (false) // Neo: disable this check so that mods can add custom villager types
-             BuiltInRegistries.VILLAGER_TYPE.registryKeySet().stream().filter(p_397212_ -> !p_35672_.containsKey(p_397212_)).findAny().ifPresent(p_396860_ -> {
-                 throw new IllegalStateException("Missing trade for villager type: " + p_396860_);
+             BuiltInRegistries.VILLAGER_TYPE.registryKeySet().stream().filter(p_480286_ -> !p_481157_.containsKey(p_480286_)).findAny().ifPresent(p_478321_ -> {
+                 throw new IllegalStateException("Missing trade for villager type: " + p_478321_);
              });
 @@ -1405,7 +_,9 @@
                  if (resourcekey == null) {

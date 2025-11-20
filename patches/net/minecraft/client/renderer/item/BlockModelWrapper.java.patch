@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/item/BlockModelWrapper.java
 +++ b/net/minecraft/client/renderer/item/BlockModelWrapper.java
-@@ -57,7 +_,7 @@
+@@ -56,7 +_,7 @@
      private final boolean animated;
      private final Function<ItemStack, RenderType> renderType;
  
@@ -9,7 +9,7 @@
          this.tints = p_388185_;
          this.quads = p_405671_;
          this.properties = p_404871_;
-@@ -175,7 +_,9 @@
+@@ -176,7 +_,9 @@
              TextureSlots textureslots = resolvedmodel.getTopTextureSlots();
              List<BakedQuad> list = resolvedmodel.bakeTopGeometry(textureslots, modelbaker, BlockModelRotation.IDENTITY).getAll();
              ModelRenderProperties modelrenderproperties = ModelRenderProperties.fromResolvedModel(modelbaker, resolvedmodel, textureslots);

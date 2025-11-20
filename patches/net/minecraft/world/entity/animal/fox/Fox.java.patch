@@ -1,26 +1,26 @@
 --- a/net/minecraft/world/entity/animal/fox/Fox.java
 +++ b/net/minecraft/world/entity/animal/fox/Fox.java
-@@ -687,13 +_,18 @@
+@@ -698,13 +_,18 @@
  
      @Override
-     protected void dropAllDeathLoot(ServerLevel p_348640_, DamageSource p_28536_) {
-+        super.dropAllDeathLoot(p_348640_, p_28536_);
+     protected void dropAllDeathLoot(ServerLevel p_479911_, DamageSource p_479438_) {
++        super.dropAllDeathLoot(p_479911_, p_479438_);
 +    }
 +
 +    @Override
-+    protected void dropEquipment(ServerLevel p_348640_) { // Forge: move extra drops to dropEquipment to allow them to be captured by LivingDropsEvent
-+        super.dropEquipment(p_348640_);
++    protected void dropEquipment(ServerLevel p_479911_) { // Forge: move extra drops to dropEquipment to allow them to be captured by LivingDropsEvent
++        super.dropEquipment(p_479911_);
          ItemStack itemstack = this.getItemBySlot(EquipmentSlot.MAINHAND);
          if (!itemstack.isEmpty()) {
-             this.spawnAtLocation(p_348640_, itemstack);
+             this.spawnAtLocation(p_479911_, itemstack);
              this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
          }
  
--        super.dropAllDeathLoot(p_348640_, p_28536_);
+-        super.dropAllDeathLoot(p_479911_, p_479438_);
      }
  
-     public static boolean isPathClear(Fox p_28472_, LivingEntity p_28473_) {
-@@ -849,6 +_,17 @@
+     public static boolean isPathClear(Fox p_480404_, LivingEntity p_479734_) {
+@@ -860,6 +_,17 @@
          @Override
          protected void breed() {
              Fox fox = (Fox)this.animal.getBreedOffspring(this.level, this.partner);
@@ -38,7 +38,7 @@
              if (fox != null) {
                  ServerPlayer serverplayer = this.animal.getLoveCause();
                  ServerPlayer serverplayer1 = this.partner.getLoveCause();
-@@ -926,7 +_,7 @@
+@@ -937,7 +_,7 @@
          }
  
          protected void onReachedTarget() {
@@ -47,7 +47,7 @@
                  BlockState blockstate = Fox.this.level().getBlockState(this.blockPos);
                  if (blockstate.is(Blocks.SWEET_BERRY_BUSH)) {
                      this.pickSweetBerries(blockstate);
-@@ -985,7 +_,7 @@
+@@ -996,7 +_,7 @@
  
          @Override
          public boolean canUse() {

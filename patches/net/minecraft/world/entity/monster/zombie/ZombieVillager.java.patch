@@ -11,10 +11,10 @@
          }
 @@ -232,6 +_,8 @@
                  if (!this.isSilent()) {
-                     p_34399_.levelEvent(null, 1027, this.blockPosition(), 0);
+                     p_479576_.levelEvent(null, 1027, this.blockPosition(), 0);
                  }
 +
-+                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_466610_);
++                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_480457_);
              }
          );
      }

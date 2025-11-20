@@ -37,9 +37,9 @@
          if (BaseRailBlock.isRail(blockstate)) {
 -            RailShape railshape = blockstate.getValue(((BaseRailBlock)blockstate.getBlock()).getShapeProperty());
 +            RailShape railshape = ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, this.level(), railPos, this.minecart);
-             p_363435_ = j;
+             p_479361_ = j;
              if (railshape.isSlope()) {
-                 p_363435_ = j + 1;
+                 p_479361_ = j + 1;
 @@ -319,9 +_,10 @@
              j--;
          }

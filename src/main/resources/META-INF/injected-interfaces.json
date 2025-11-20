@@ -164,7 +164,7 @@
   "net/minecraft/world/entity/player/Player": [
     "net/neoforged/neoforge/common/extensions/IPlayerExtension"
   ],
-  "net/minecraft/world/entity/vehicle/AbstractBoat": [
+  "net/minecraft/world/entity/vehicle/boat/AbstractBoat": [
     "net/neoforged/neoforge/common/extensions/IAbstractBoatExtension"
   ],
   "net/minecraft/world/inventory/MenuType": [

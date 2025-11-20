@@ -51,7 +51,7 @@
          if (this.tabs.size() > 1) {
              for (AdvancementTab advancementtab : this.tabs.values()) {
 +                if (advancementtab.getPage() == tabPage)
-                 advancementtab.drawTab(p_283395_, p_281890_, p_282532_, advancementtab == this.selectedTab);
+                 advancementtab.drawTab(p_283395_, p_281890_, p_282532_, p_470848_, p_470691_, advancementtab == this.selectedTab);
              }
  
              for (AdvancementTab advancementtab1 : this.tabs.values()) {

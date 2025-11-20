@@ -1,7 +1,7 @@
 --- a/net/minecraft/client/renderer/texture/SpriteContents.java
 +++ b/net/minecraft/client/renderer/texture/SpriteContents.java
-@@ -75,6 +_,10 @@
-         this.mipmapStrategy = p_458977_;
+@@ -78,6 +_,10 @@
+         this.alphaCutoffBias = p_479037_.map(TextureMetadataSection::alphaCutoffBias).orElse(0.0F);
      }
  
 +    public NativeImage getOriginalImage() {
@@ -10,4 +10,4 @@
 +
      public void increaseMipLevel(int p_248864_) {
          try {
-             this.byMipLevel = MipmapGenerator.generateMipLevels(this.name, this.byMipLevel, p_248864_, this.mipmapStrategy);
+             this.byMipLevel = MipmapGenerator.generateMipLevels(this.name, this.byMipLevel, p_248864_, this.mipmapStrategy, this.alphaCutoffBias);

@@ -154,7 +154,7 @@
  
 +
 +            if (false)
-             if (p_261454_ instanceof EnderDragon enderdragon) {
+             if (p_477907_ instanceof EnderDragon enderdragon) {
                  for (EnderDragonPart enderdragonpart : enderdragon.getSubEntities()) {
                      T t = p_261885_.tryCast(enderdragonpart);
 @@ -788,6 +_,15 @@
@@ -178,7 +178,7 @@
                  return AbortableIterationConsumer.Continuation.ABORT;
              } else {
 +                if (false)
-                 if (p_445349_ instanceof EnderDragon enderdragon) {
+                 if (p_477911_ instanceof EnderDragon enderdragon) {
                      for (EnderDragonPart enderdragonpart : enderdragon.getSubEntities()) {
                          T t = p_446763_.tryCast(enderdragonpart);
 @@ -811,6 +_,13 @@

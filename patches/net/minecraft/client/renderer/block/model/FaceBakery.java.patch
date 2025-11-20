@@ -1,23 +1,26 @@
 --- a/net/minecraft/client/renderer/block/model/FaceBakery.java
 +++ b/net/minecraft/client/renderer/block/model/FaceBakery.java
-@@ -67,10 +_,19 @@
-         );
-         Direction direction = calculateFacing(aint);
-         if (p_111607_ == null) {
+@@ -77,6 +_,8 @@
+ 
+         Direction direction = calculateFacing(avector3fc);
+         if (p_111607_ == null && direction != null) {
 +            // Neo: Suppress winding re-calculation when the quads may not be axis-aligned due to root transforms
 +            if (!p_111606_.mayApplyArbitraryRotation())
-             recalculateWinding(aint, direction);
+             recalculateWinding(avector3fc, along, direction);
          }
  
--        return new BakedQuad(aint, p_111603_.tintIndex(), direction, p_111604_, p_111608_, p_364857_);
-+        net.neoforged.neoforge.client.ClientHooks.fillNormal(aint);
-+        var data = p_111603_.faceData();
-+        var quad = new BakedQuad(aint, p_111603_.tintIndex(), direction, p_111604_, p_111608_, p_364857_, data.ambientOcclusion());
-+        if (!net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT.equals(data)) {
-+            net.neoforged.neoforge.client.model.QuadTransformers.applyingLightmap(data.blockLight(), data.skyLight()).processInPlace(quad);
-+            net.neoforged.neoforge.client.model.QuadTransformers.applyingColor(data.color()).processInPlace(quad);
-+        }
-+        return quad;
+@@ -95,6 +_,14 @@
+             p_111608_,
+             p_364857_
+         );
++        // TODO 1.21.11: net.neoforged.neoforge.client.ClientHooks.fillNormal(aint);
++        // TODO 1.21.11:var data = p_111603_.faceData();
++        // TODO 1.21.11:var quad = new BakedQuad(aint, p_111603_.tintIndex(), direction, p_111604_, p_111608_, p_364857_, data.ambientOcclusion());
++        // TODO 1.21.11:if (!net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT.equals(data)) {
++        // TODO 1.21.11:    net.neoforged.neoforge.client.model.QuadTransformers.applyingLightmap(data.blockLight(), data.skyLight()).processInPlace(quad);
++        // TODO 1.21.11:    net.neoforged.neoforge.client.model.QuadTransformers.applyingColor(data.color()).processInPlace(quad);
++        // TODO 1.21.11:}
++        // TODO 1.21.11:return quad;
      }
  
-     private static BlockElementFace.UVs shrinkUVs(TextureAtlasSprite p_404992_, BlockElementFace.UVs p_405227_) {
+     private static void bakeVertex(

@@ -19,7 +19,7 @@
 +        if (event.isCanceled()) {
 +            return;
 +        }
-         if (!this.player.canInteractWithBlock(p_215120_, 1.0)) {
+         if (!this.player.isWithinBlockInteractionRange(p_215120_, 1.0)) {
              this.debugLogging(p_215120_, false, p_215124_, "too far");
          } else if (p_215120_.getY() > p_215123_) {
 @@ -187,6 +_,7 @@

@@ -41,15 +41,15 @@
              }
  
              return flag;
-@@ -250,6 +_,7 @@
-         this.environmentAttributes = this.addEnvironmentAttributeLayers(EnvironmentAttributeSystem.builder()).build();
-         this.updateSkyBrightness();
-         this.prepareWeather();
+@@ -252,6 +_,7 @@
+         if (this.canHaveWeather()) {
+             this.prepareWeather();
+         }
 +        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Load(this));
      }
  
      private EnvironmentAttributeSystem.Builder addEnvironmentAttributeLayers(EnvironmentAttributeSystem.Builder p_468725_) {
-@@ -327,7 +_,7 @@
+@@ -329,7 +_,7 @@
      private void tickTime() {
          this.clientLevelData.setGameTime(this.clientLevelData.getGameTime() + 1L);
          if (this.tickDayTime) {
@@ -58,7 +58,7 @@
          }
      }
  
-@@ -362,7 +_,11 @@
+@@ -364,7 +_,11 @@
          p_104640_.setOldPosAndRot();
          p_104640_.tickCount++;
          Profiler.get().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(p_104640_.getType()).toString());
@@ -71,7 +71,7 @@
          Profiler.get().pop();
  
          for (Entity entity : p_104640_.getPassengers()) {
-@@ -413,8 +_,10 @@
+@@ -415,8 +_,10 @@
      }
  
      public void addEntity(Entity p_104741_) {
@@ -82,7 +82,7 @@
      }
  
      public void removeEntity(int p_171643_, Entity.RemovalReason p_171644_) {
-@@ -583,6 +_,13 @@
+@@ -585,6 +_,13 @@
          float p_263349_,
          long p_263408_
      ) {
@@ -96,7 +96,7 @@
          if (p_393665_ == this.minecraft.player) {
              this.playSound(p_263372_, p_263404_, p_263365_, p_263335_.value(), p_263417_, p_263416_, p_263349_, false, p_263408_);
          }
-@@ -592,6 +_,12 @@
+@@ -594,6 +_,12 @@
      public void playSeededSound(
          @Nullable Entity p_263536_, Entity p_394209_, Holder<SoundEvent> p_263518_, SoundSource p_263487_, float p_263538_, float p_263524_, long p_263509_
      ) {
@@ -109,7 +109,7 @@
          if (p_263536_ == this.minecraft.player) {
              this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(p_263518_.value(), p_263487_, p_263538_, p_263524_, p_394209_, p_263509_));
          }
-@@ -856,7 +_,7 @@
+@@ -858,7 +_,7 @@
          return this.players;
      }
  
@@ -118,7 +118,7 @@
          return this.dragonParts;
      }
  
-@@ -964,7 +_,7 @@
+@@ -966,7 +_,7 @@
  
      @Override
      public void addDestroyBlockEffect(BlockPos p_171667_, BlockState p_171668_) {
@@ -127,7 +127,7 @@
              VoxelShape voxelshape = p_171668_.getShape(this, p_171667_);
              double d0 = 0.25;
              voxelshape.forAllBoxes(
-@@ -998,7 +_,7 @@
+@@ -1000,7 +_,7 @@
                                              d6 - 0.5,
                                              p_171668_,
                                              p_171667_
@@ -136,7 +136,7 @@
                                      );
                              }
                          }
-@@ -1008,9 +_,16 @@
+@@ -1010,9 +_,16 @@
          }
      }
  
@@ -154,7 +154,7 @@
              int i = p_446936_.getX();
              int j = p_446936_.getY();
              int k = p_446936_.getZ();
-@@ -1043,7 +_,7 @@
+@@ -1045,7 +_,7 @@
                  d0 = i + aabb.maxX + 0.1F;
              }
  
@@ -163,7 +163,7 @@
          }
      }
  
-@@ -1188,6 +_,7 @@
+@@ -1190,6 +_,7 @@
          }
  
          public void setDifficulty(Difficulty p_104852_) {
@@ -171,7 +171,7 @@
              this.difficulty = p_104852_;
          }
  
-@@ -1229,6 +_,9 @@
+@@ -1231,6 +_,9 @@
                      ClientLevel.this.dragonParts.addAll(Arrays.asList(enderdragon.getSubEntities()));
                      break;
                  default:
@@ -181,7 +181,7 @@
              }
          }
  
-@@ -1242,10 +_,62 @@
+@@ -1244,10 +_,62 @@
                      ClientLevel.this.dragonParts.removeAll(Arrays.asList(enderdragon.getSubEntities()));
                      break;
                  default:

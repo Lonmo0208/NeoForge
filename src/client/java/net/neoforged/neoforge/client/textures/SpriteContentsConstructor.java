@@ -8,10 +8,10 @@ package net.neoforged.neoforge.client.textures;
 import com.mojang.blaze3d.platform.NativeImage;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.client.renderer.texture.MipmapStrategy;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +30,7 @@ public interface SpriteContentsConstructor {
      * @param nativeImage        the image of the sprite
      * @param animationMetadata  the sprite's animation metadata
      * @param additionalMetadata additional metadata loaded from the resource
+     * @param textureMetadata    texture metadata (i.e. mip map strategy)
      * @return an instance of SpriteContents or return null to not load the sprite
      */
     @Nullable
@@ -39,5 +40,5 @@ public interface SpriteContentsConstructor {
             NativeImage nativeImage,
             Optional<AnimationMetadataSection> animationMetadata,
             List<MetadataSectionType.WithValue<?>> additionalMetadata,
-            MipmapStrategy mipmapstrategy);
+            Optional<TextureMetadataSection> textureMetadata);
 }

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/model/HumanoidModel.java
 +++ b/net/minecraft/client/model/HumanoidModel.java
-@@ -297,6 +_,9 @@
+@@ -306,6 +_,9 @@
                  break;
              case SPEAR:
                  SpearAnimations.thirdPersonHandUse(this.rightArm, this.head, true, p_364666_.getUseItemStackForArm(HumanoidArm.RIGHT), p_364666_);
@@ -10,7 +10,7 @@
          }
      }
  
-@@ -342,6 +_,9 @@
+@@ -351,6 +_,9 @@
                  break;
              case SPEAR:
                  SpearAnimations.thirdPersonHandUse(this.leftArm, this.head, false, p_361741_.getUseItemStackForArm(HumanoidArm.LEFT), p_361741_);
@@ -20,27 +20,32 @@
          }
      }
  
-@@ -435,12 +_,31 @@
- 
+@@ -445,9 +_,21 @@
          private final boolean twoHanded;
+         private final boolean affectsOffhandPose;
  
 +        @org.jetbrains.annotations.Nullable
 +        private final net.neoforged.neoforge.client.IArmPoseTransformer forgeArmPose;
 +
 +        @net.neoforged.fml.common.asm.enumextension.ReservedConstructor
-         ArmPose(boolean p_102896_) {
+         ArmPose(boolean p_102896_, boolean p_470634_) {
              this.twoHanded = p_102896_;
+             this.affectsOffhandPose = p_470634_;
 +            this.forgeArmPose = null;
 +        }
 +
-+        private ArmPose(boolean twoHanded, net.neoforged.neoforge.client.IArmPoseTransformer forgeArmPose) {
++        private ArmPose(boolean twoHanded, boolean affectsOffhandPose, net.neoforged.neoforge.client.IArmPoseTransformer forgeArmPose) {
 +            this.twoHanded = twoHanded;
++            this.affectsOffhandPose = affectsOffhandPose;
 +            com.google.common.base.Preconditions.checkNotNull(forgeArmPose, "Cannot create new ArmPose with null transformer!");
 +            this.forgeArmPose = forgeArmPose;
          }
  
          public boolean isTwoHanded() {
-             return this.twoHanded;
+@@ -456,6 +_,14 @@
+ 
+         public boolean affectsOffhandPose() {
+             return this.affectsOffhandPose;
 +        }
 +
 +        public <T extends HumanoidRenderState> void applyTransform(HumanoidModel<T> model, T entity, net.minecraft.world.entity.HumanoidArm arm) {

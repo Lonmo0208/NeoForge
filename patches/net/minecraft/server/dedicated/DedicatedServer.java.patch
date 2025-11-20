@@ -55,7 +55,7 @@
          if (this.jsonRpcServer != null) {
              try {
                  this.jsonRpcServer.stop(true);
-@@ -725,7 +_,12 @@
+@@ -720,7 +_,12 @@
      @Override
      public void stopServer() {
          this.notificationManager().serverShuttingDown();

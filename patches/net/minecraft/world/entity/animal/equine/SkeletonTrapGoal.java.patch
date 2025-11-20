@@ -18,4 +18,4 @@
 +        }));
      }
  
-     private @Nullable AbstractHorse createHorse(DifficultyInstance p_30930_) {
+     private @Nullable AbstractHorse createHorse(DifficultyInstance p_481531_) {

@@ -3,9 +3,9 @@
 @@ -23,6 +_,8 @@
  
      @Override
-     public InteractionResult interact(Player p_38483_, InteractionHand p_38484_) {
-+        InteractionResult ret = super.interact(p_38483_, p_38484_);
+     public InteractionResult interact(Player p_479928_, InteractionHand p_482146_) {
++        InteractionResult ret = super.interact(p_479928_, p_482146_);
 +        if (ret.consumesAction()) return ret;
-         if (!p_38483_.isSecondaryUseActive() && !this.isVehicle() && (this.level().isClientSide() || p_38483_.startRiding(this))) {
+         if (!p_479928_.isSecondaryUseActive() && !this.isVehicle() && (this.level().isClientSide() || p_479928_.startRiding(this))) {
              this.playerRotationOffset = this.rotationOffset;
              if (!this.level().isClientSide()) {

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/components/AbstractButton.java
 +++ b/net/minecraft/client/gui/components/AbstractButton.java
-@@ -37,7 +_,13 @@
+@@ -40,7 +_,13 @@
      protected abstract void renderContents(GuiGraphics p_458060_, int p_457746_, int p_458121_, float p_457981_);
  
      protected void renderDefaultLabel(ActiveTextCollector p_457933_) {

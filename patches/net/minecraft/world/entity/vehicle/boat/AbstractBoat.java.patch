@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/vehicle/boat/AbstractBoat.java
 +++ b/net/minecraft/world/entity/vehicle/boat/AbstractBoat.java
-@@ -416,7 +_,7 @@
+@@ -418,7 +_,7 @@
                  for (int i2 = i1; i2 < j1; i2++) {
                      blockpos$mutableblockpos.set(l1, k1, i2);
                      FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
@@ -9,7 +9,7 @@
                          f = Math.max(f, fluidstate.getHeight(this.level(), blockpos$mutableblockpos));
                      }
  
-@@ -462,7 +_,7 @@
+@@ -464,7 +_,7 @@
                                      voxelshape,
                                      BooleanOp.AND
                                  )) {
@@ -18,7 +18,7 @@
                                  k1++;
                              }
                          }
-@@ -491,7 +_,7 @@
+@@ -493,7 +_,7 @@
                  for (int i2 = i1; i2 < j1; i2++) {
                      blockpos$mutableblockpos.set(k1, l1, i2);
                      FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
@@ -27,7 +27,7 @@
                          float f = l1 + fluidstate.getHeight(this.level(), blockpos$mutableblockpos);
                          this.waterLevel = Math.max((double)f, this.waterLevel);
                          flag |= aabb.minY < f;
-@@ -520,7 +_,7 @@
+@@ -522,7 +_,7 @@
                  for (int i2 = i1; i2 < j1; i2++) {
                      blockpos$mutableblockpos.set(k1, l1, i2);
                      FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
@@ -36,19 +36,19 @@
                          if (!fluidstate.isSource()) {
                              return AbstractBoat.Status.UNDER_FLOWING_WATER;
                          }
-@@ -722,7 +_,7 @@
+@@ -724,7 +_,7 @@
          if (!this.isPassenger()) {
-             if (p_376924_) {
+             if (p_478464_) {
                  this.resetFallDistance();
--            } else if (!this.level().getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && p_376661_ < 0.0) {
-+            } else if (!this.canBoatInFluid(this.level().getFluidState(this.blockPosition().below())) && p_376661_ < 0.0) {
-                 this.fallDistance -= (float)p_376661_;
+-            } else if (!this.level().getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && p_478149_ < 0.0) {
++            } else if (!this.canBoatInFluid(this.level().getFluidState(this.blockPosition().below())) && p_478149_ < 0.0) {
+                 this.fallDistance -= (float)p_478149_;
              }
          }
-@@ -746,7 +_,7 @@
+@@ -748,7 +_,7 @@
  
      @Override
-     protected boolean canAddPassenger(Entity p_376443_) {
+     protected boolean canAddPassenger(Entity p_478625_) {
 -        return this.getPassengers().size() < this.getMaxPassengers() && !this.isEyeInFluid(FluidTags.WATER);
 +        return this.getPassengers().size() < this.getMaxPassengers() && !this.canBoatInFluid(this.getEyeInFluidType());
      }

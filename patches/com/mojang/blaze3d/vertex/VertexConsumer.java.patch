@@ -1,19 +1,22 @@
 --- a/com/mojang/blaze3d/vertex/VertexConsumer.java
 +++ b/com/mojang/blaze3d/vertex/VertexConsumer.java
-@@ -130,11 +_,14 @@
-                     f5 = p_331397_[i1] * p_85992_ * 255.0F;
-                 }
- 
--                int j1 = ARGB.color(k, (int)f3, (int)f4, (int)f5);
--                int k1 = LightTexture.lightCoordsWithEmission(p_331378_[i1], l);
-+                // Neo: also apply alpha that's coming from the baked quad
-+                int vertexAlpha = p_331268_ ? (int)((p_331416_ * (float) (bytebuffer.get(15) & 255) / 255.0F) * 255) : k;
-+                int j1 = ARGB.color(vertexAlpha, (int)f3, (int)f4, (int)f5);
-+                int k1 = applyBakedLighting(LightTexture.lightCoordsWithEmission(p_331378_[i1], l), bytebuffer);
-                 float f10 = bytebuffer.getFloat(16);
-                 float f9 = bytebuffer.getFloat(20);
-                 Vector3f vector3f1 = matrix4f.transformPosition(f, f1, f2, new Vector3f());
-+                applyBakedNormals(vector3f, bytebuffer, p_85988_.normal());
-                 this.addVertex(vector3f1.x(), vector3f1.y(), vector3f1.z(), j1, f10, f9, p_85993_, k1, vector3f.x(), vector3f.y(), vector3f.z());
-             }
-         }
+@@ -67,6 +_,11 @@
+     default void putBulkData(
+         PoseStack.Pose p_85996_, BakedQuad p_85997_, float p_85999_, float p_86000_, float p_86001_, float p_331520_, int p_86003_, int p_331548_
+     ) {
++        // Neo: also apply alpha that's coming from the baked quad
++        // TODO 1.21.11: Restore per-quad or per-vertex color -> int vertexAlpha = p_331268_ ? (int)((p_331416_ * (float) (bytebuffer.get(15) & 255) / 255.0F) * 255) : k;
++        // TODO 1.21.11: Restore per-quad or per-vertex color -> int j1 = ARGB.color(vertexAlpha, (int)f3, (int)f4, (int)f5);
++        // TODO 1.21.11: Restore pre-baked per-quad lighting? -> int k1 = applyBakedLighting(LightTexture.lightCoordsWithEmission(p_331378_[i1], l), bytebuffer);
++
+         this.putBulkData(
+             p_85996_,
+             p_85997_,
+@@ -91,6 +_,7 @@
+         int[] p_331378_,
+         int p_85993_
+     ) {
++        // TODO 1.21.11: Restore per-quad or per-vertex normals: applyBakedNormals(vector3f, bytebuffer, p_85988_.normal());
+         Vector3fc vector3fc = p_85989_.direction().getUnitVec3f();
+         Matrix4f matrix4f = p_85988_.pose();
+         Vector3f vector3f = p_85988_.transformNormal(vector3fc, new Vector3f());

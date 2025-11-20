@@ -239,7 +239,7 @@ generateAccessTransformers {
     // getStepSound is package-private and abstract, so mods couldn't otherwise extend from AbstractSkeleton
     methodGroup(
             'skeleton step sound', PROTECTED,
-            classesWithSuperclass('net/minecraft/world/entity/monster/AbstractSkeleton'),
+            classesWithSuperclass('net/minecraft/world/entity/monster/skeleton/AbstractSkeleton'),
             named('getStepSound')
     )
 
@@ -266,11 +266,11 @@ generateAccessTransformers {
     // Make all villager item listings classes and constructors public for use in custom trades
     classGroup(
             'villager item listings', PUBLIC,
-            classesWithSuperclass('net/minecraft/world/entity/npc/VillagerTrades$ItemListing')
+            classesWithSuperclass('net/minecraft/world/entity/npc/villager/VillagerTrades$ItemListing')
     )
     methodGroup(
             'villager item listing constructors', PUBLIC,
-            classesWithSuperclass('net/minecraft/world/entity/npc/VillagerTrades$ItemListing'),
+            classesWithSuperclass('net/minecraft/world/entity/npc/villager/VillagerTrades$ItemListing'),
             named('<init>')
     )
 

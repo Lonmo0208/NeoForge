@@ -1,7 +1,7 @@
 --- a/com/mojang/blaze3d/opengl/GlTexture.java
 +++ b/com/mojang/blaze3d/opengl/GlTexture.java
-@@ -14,17 +_,25 @@
-     private final Int2IntMap fboCache = new Int2IntOpenHashMap();
+@@ -17,17 +_,25 @@
+     private @Nullable Int2IntMap fboCache;
      protected boolean closed;
      private int views;
 +    protected final boolean external; // If true, the raw OpenGL texture is not managed by this GpuTexture
@@ -27,15 +27,39 @@
              this.closed = true;
              if (this.views == 0) {
                  this.destroyImmediately();
-@@ -47,9 +_,10 @@
+@@ -55,10 +_,11 @@
  
      public int getFbo(DirectStateAccess p_412345_, @Nullable GpuTexture p_410364_) {
          int i = p_410364_ == null ? 0 : ((GlTexture)p_410364_).id;
 +        var useStencil = p_410364_ != null && p_410364_.getFormat().hasStencilAspect();
-         return this.fboCache.computeIfAbsent(i, p_411998_ -> {
-             int j = p_412345_.createFrameBufferObject();
--            p_412345_.bindFrameBufferTextures(j, this.id, i, 0, 0);
-+            p_412345_.bindFrameBufferTextures(j, this.id, i, 0, 0, useStencil);
-             return j;
-         });
+         if (this.firstFboDepthId == i) {
+             return this.firstFboId;
+         } else if (this.firstFboId == -1) {
+-            this.firstFboId = this.createFbo(p_412345_, i);
++            this.firstFboId = this.createFbo(p_412345_, i, useStencil);
+             this.firstFboDepthId = i;
+             return this.firstFboId;
+         } else {
+@@ -66,13 +_,20 @@
+                 this.fboCache = new Int2IntArrayMap();
+             }
+ 
+-            return this.fboCache.computeIfAbsent(i, p_470461_ -> this.createFbo(p_412345_, p_470461_));
++            return this.fboCache.computeIfAbsent(i, p_470461_ -> this.createFbo(p_412345_, p_470461_, useStencil));
+         }
      }
+ 
++    /** @deprecated use overload that takes useStencil */
++    @Deprecated
+     private int createFbo(DirectStateAccess p_470782_, int p_470657_) {
++        return createFbo(p_470782_, p_470657_, false);
++    }
++
++    // Neo: Allow for stencil use
++    private int createFbo(DirectStateAccess p_470782_, int p_470657_, boolean useStencil) {
+         int i = p_470782_.createFrameBufferObject();
+-        p_470782_.bindFrameBufferTextures(i, this.id, p_470657_, 0, 0);
++        p_470782_.bindFrameBufferTextures(i, this.id, p_470657_, 0, 0, useStencil);
+         return i;
+     }
+ 

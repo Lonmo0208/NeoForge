@@ -3,9 +3,9 @@
 @@ -107,6 +_,8 @@
  
      @Override
-     public InteractionResult interact(Player p_38562_, InteractionHand p_38563_) {
-+        InteractionResult ret = super.interact(p_38562_, p_38563_);
+     public InteractionResult interact(Player p_478294_, InteractionHand p_479681_) {
++        InteractionResult ret = super.interact(p_478294_, p_479681_);
 +        if (ret.consumesAction()) return ret;
-         ItemStack itemstack = p_38562_.getItemInHand(p_38563_);
-         if (this.addFuel(p_38562_.position(), itemstack)) {
-             itemstack.consume(1, p_38562_);
+         ItemStack itemstack = p_478294_.getItemInHand(p_479681_);
+         if (this.addFuel(p_478294_.position(), itemstack)) {
+             itemstack.consume(1, p_478294_);

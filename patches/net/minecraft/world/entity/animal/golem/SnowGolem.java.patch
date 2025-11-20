@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/animal/golem/SnowGolem.java
 +++ b/net/minecraft/world/entity/animal/golem/SnowGolem.java
-@@ -95,7 +_,7 @@
+@@ -96,7 +_,7 @@
                  this.hurtServer(serverlevel, this.damageSources().onFire(), 1.0F);
              }
  
@@ -9,12 +9,12 @@
                  return;
              }
  
-@@ -136,7 +_,7 @@
+@@ -137,7 +_,7 @@
      @Override
-     protected InteractionResult mobInteract(Player p_29920_, InteractionHand p_29921_) {
-         ItemStack itemstack = p_29920_.getItemInHand(p_29921_);
+     protected InteractionResult mobInteract(Player p_478090_, InteractionHand p_480474_) {
+         ItemStack itemstack = p_478090_.getItemInHand(p_480474_);
 -        if (itemstack.is(Items.SHEARS) && this.readyForShearing()) {
 +        if (false && itemstack.is(Items.SHEARS) && this.readyForShearing()) { // Neo: Shear logic is handled by IShearable
              if (this.level() instanceof ServerLevel serverlevel) {
                  this.shear(serverlevel, SoundSource.PLAYERS, itemstack);
-                 this.gameEvent(GameEvent.SHEAR, p_29920_);
+                 this.gameEvent(GameEvent.SHEAR, p_478090_);

@@ -5,9 +5,9 @@
  @OnlyIn(Dist.CLIENT)
  public class ItemBlockRenderTypes {
 +    @Deprecated
-     private static final Map<Block, ChunkSectionLayer> TYPE_BY_BLOCK = Util.make(Maps.newHashMap(), p_458800_ -> {
+     private static final Map<Block, ChunkSectionLayer> TYPE_BY_BLOCK = Util.make(Maps.newHashMap(), p_470488_ -> {
          ChunkSectionLayer chunksectionlayer = ChunkSectionLayer.TRIPWIRE;
-         p_458800_.put(Blocks.TRIPWIRE, chunksectionlayer);
+         p_470488_.put(Blocks.TRIPWIRE, chunksectionlayer);
 @@ -362,6 +_,8 @@
      });
      private static boolean cutoutLeaves;
