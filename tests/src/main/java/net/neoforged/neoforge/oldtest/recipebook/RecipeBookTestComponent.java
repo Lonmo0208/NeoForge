@@ -37,8 +37,8 @@ public class RecipeBookTestComponent extends RecipeBookComponent<RecipeBookTestM
     }
 
     @Override
-    protected void initFilterButtonTextures() {
-        this.filterButton.initTextureValues(FILTER_BUTTON_SPRITES);
+    protected WidgetSprites getFilterButtonTextures() {
+        return FILTER_BUTTON_SPRITES;
     }
 
     @Override

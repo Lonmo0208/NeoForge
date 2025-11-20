@@ -149,7 +149,7 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         serverplayer.setYRot(180);
         serverplayer.connection.chunkSender.sendNextChunks(serverplayer);
         serverplayer.connection.chunkSender.onChunkBatchReceivedByClient(64f);
-        serverplayer.setClientLoaded(true);
+        serverplayer.connection.markClientLoaded();
         return serverplayer;
     }
 

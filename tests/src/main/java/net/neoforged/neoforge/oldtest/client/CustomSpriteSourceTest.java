@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
@@ -76,8 +77,8 @@ public class CustomSpriteSourceTest {
         }
 
         static final class CustomSpriteContents extends SpriteContents {
-            public CustomSpriteContents(Identifier name, FrameSize size, NativeImage image, Optional<AnimationMetadataSection> animationMetadata, List<MetadataSectionType.WithValue<?>> additionalMetadata, MipmapStrategy mipmapStrategy) {
-                super(name, size, image, animationMetadata, additionalMetadata, mipmapStrategy);
+            public CustomSpriteContents(Identifier name, FrameSize size, NativeImage image, Optional<AnimationMetadataSection> animationMetadata, List<MetadataSectionType.WithValue<?>> additionalMetadata, Optional<TextureMetadataSection> textureMetadata) {
+                super(name, size, image, animationMetadata, additionalMetadata, textureMetadata);
             }
 
             // TODO 1.21.11 It's unclear how this test can be resurrected since Vanilla now much more strictly manages the frames of the animated sprite in GPU memory

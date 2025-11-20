@@ -31,7 +31,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.DispensibleContainerItem;
@@ -108,7 +108,7 @@ public class ItemTests {
                 .thenIdle(5)
                 .thenExecute(() -> helper.assertBlockPresent(net.minecraft.world.level.block.Blocks.WATER, new net.minecraft.core.BlockPos(1, 2, 1)))
                 .thenExecute(() -> helper.assertEntityPresent(net.minecraft.world.entity.EntityType.COW, 1, 3, 1))
-                .thenExecute(() -> helper.killAllEntitiesOfClass(net.minecraft.world.entity.animal.Cow.class))
+                .thenExecute(() -> helper.killAllEntitiesOfClass(net.minecraft.world.entity.animal.cow.Cow.class))
                 .thenSucceed());
     }
 
