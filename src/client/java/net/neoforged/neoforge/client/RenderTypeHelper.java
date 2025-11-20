@@ -27,7 +27,7 @@ public final class RenderTypeHelper {
     public static RenderType getEntityRenderType(ChunkSectionLayer chunkSectionLayer) {
         if (chunkSectionLayer != ChunkSectionLayer.TRANSLUCENT)
             return Sheets.cutoutBlockSheet();
-        return Sheets.translucentItemSheet();
+        return Sheets.translucentBlockItemSheet();
     }
 
     /**
