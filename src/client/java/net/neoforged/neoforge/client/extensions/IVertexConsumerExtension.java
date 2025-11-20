@@ -45,8 +45,8 @@ public interface IVertexConsumerExtension {
                 alpha,
                 new int[] { packedLight, packedLight, packedLight, packedLight },
                 packedOverlay
-                // TODO 1.21.11: quads no longer store baked color
-                /*, readExistingColor*/
+        // TODO 1.21.11: quads no longer store baked color
+        /*, readExistingColor*/
         );
     }
 

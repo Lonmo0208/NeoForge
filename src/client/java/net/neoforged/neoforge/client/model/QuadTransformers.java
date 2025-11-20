@@ -11,8 +11,6 @@ import java.util.Arrays;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.Util;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 /**
  * A collection of {@link IQuadTransformer} implementations.
@@ -46,16 +44,16 @@ public final class QuadTransformers {
                 float x = Float.intBitsToFloat(vertices[offset]);
                 float y = Float.intBitsToFloat(vertices[offset + 1]);
                 float z = Float.intBitsToFloat(vertices[offset + 2]);
-
+            
                 Vector4f pos = new Vector4f(x, y, z, 1);
                 transform.transformPosition(pos);
                 pos.div(pos.w);
-
+            
                 vertices[offset] = Float.floatToRawIntBits(pos.x());
                 vertices[offset + 1] = Float.floatToRawIntBits(pos.y());
                 vertices[offset + 2] = Float.floatToRawIntBits(pos.z());
             }
-
+            
             for (int i = 0; i < 4; i++) {
                 int offset = i * IQuadTransformer.STRIDE + IQuadTransformer.NORMAL;
                 int normalIn = vertices[offset];
@@ -64,10 +62,10 @@ public final class QuadTransformers {
                     float x = ((byte) (normalIn & 0xFF)) / 127.0f;
                     float y = ((byte) ((normalIn >> 8) & 0xFF)) / 127.0f;
                     float z = ((byte) ((normalIn >> 16) & 0xFF)) / 127.0f;
-
+            
                     Vector3f pos = new Vector3f(x, y, z);
                     transform.transformNormal(pos);
-
+            
                     vertices[offset] = (((byte) (pos.x() * 127.0f)) & 0xFF) |
                             ((((byte) (pos.y() * 127.0f)) & 0xFF) << 8) |
                             ((((byte) (pos.z() * 127.0f)) & 0xFF) << 16) |
