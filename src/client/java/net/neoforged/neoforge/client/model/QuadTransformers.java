@@ -39,7 +39,8 @@ public final class QuadTransformers {
         if (transform.isIdentity())
             return empty();
         return quad -> {
-            var vertices = quad.vertices();
+            // TODO 1.21.11: quad vertex data can no longer be modified in-place
+            /*var vertices = quad.vertices();
             for (int i = 0; i < 4; i++) {
                 int offset = i * IQuadTransformer.STRIDE + IQuadTransformer.POSITION;
                 float x = Float.intBitsToFloat(vertices[offset]);
@@ -72,7 +73,7 @@ public final class QuadTransformers {
                             ((((byte) (pos.z() * 127.0f)) & 0xFF) << 16) |
                             (normalIn & 0xFF000000); // Restore padding, just in case
                 }
-            }
+            }*/
         };
     }
 
@@ -81,9 +82,10 @@ public final class QuadTransformers {
      */
     public static IQuadTransformer applyingLightmap(int packedLight) {
         return quad -> {
-            var vertices = quad.vertices();
-            for (int i = 0; i < 4; i++)
-                vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.UV2] = packedLight;
+            // TODO 1.21.11: quad vertex data can no longer be modified in-place
+            //var vertices = quad.vertices();
+            //for (int i = 0; i < 4; i++)
+            //    vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.UV2] = packedLight;
         };
     }
 
@@ -116,9 +118,10 @@ public final class QuadTransformers {
     public static IQuadTransformer applyingColor(int color) {
         final int fixedColor = toABGR(color);
         return quad -> {
-            var vertices = quad.vertices();
-            for (int i = 0; i < 4; i++)
-                vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.COLOR] = fixedColor;
+            // TODO 1.21.11: quad vertex data can no longer be modified in-place
+            //var vertices = quad.vertices();
+            //for (int i = 0; i < 4; i++)
+            //    vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.COLOR] = fixedColor;
         };
     }
 

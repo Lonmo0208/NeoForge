@@ -35,7 +35,19 @@ public interface IVertexConsumerExtension {
      * Variant with no per-vertex shading.
      */
     default void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay, boolean readExistingColor) {
-        self().putBulkData(pose, bakedQuad, new float[] { 1.0F, 1.0F, 1.0F, 1.0F }, red, green, blue, alpha, new int[] { packedLight, packedLight, packedLight, packedLight }, packedOverlay, readExistingColor);
+        self().putBulkData(
+                pose,
+                bakedQuad,
+                new float[] { 1.0F, 1.0F, 1.0F, 1.0F },
+                red,
+                green,
+                blue,
+                alpha,
+                new int[] { packedLight, packedLight, packedLight, packedLight },
+                packedOverlay
+                // TODO 1.21.11: quads no longer store baked color
+                /*, readExistingColor*/
+        );
     }
 
     // TODO 1.21.11: This doesn't work anymore since BakedQuad no longer has full vertexdata.

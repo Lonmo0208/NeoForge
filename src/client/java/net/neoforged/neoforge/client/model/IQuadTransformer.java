@@ -7,7 +7,6 @@ package net.neoforged.neoforge.client.model;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import java.util.Arrays;
 import java.util.List;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 
@@ -50,8 +49,8 @@ public interface IQuadTransformer {
     }
 
     private static BakedQuad copy(BakedQuad quad) {
-        var vertices = quad.vertices();
-        return new BakedQuad(Arrays.copyOf(vertices, vertices.length), quad.tintIndex(), quad.direction(), quad.sprite(), quad.shade(), quad.lightEmission(), quad.hasAmbientOcclusion());
+        // TODO 1.21.11: this is pretty much useless now
+        return new BakedQuad(quad.position0(), quad.position1(), quad.position2(), quad.position3(), quad.packedUV0(), quad.packedUV1(), quad.packedUV2(), quad.packedUV3(), quad.tintIndex(), quad.direction(), quad.sprite(), quad.shade(), quad.lightEmission(), quad.hasAmbientOcclusion());
     }
 
     private static int findOffset(VertexFormatElement element) {
