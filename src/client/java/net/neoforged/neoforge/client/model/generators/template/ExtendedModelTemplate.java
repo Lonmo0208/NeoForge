@@ -14,6 +14,7 @@ import java.util.Map;
 import net.minecraft.client.data.models.model.ModelTemplate;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
+import net.minecraft.client.renderer.block.model.BlockElementRotation;
 import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.resources.model.UnbakedModel;
@@ -98,8 +99,18 @@ public final class ExtendedModelTemplate extends ModelTemplate {
                 if (part.rotation() != null) {
                     JsonObject rotation = new JsonObject();
                     rotation.add("origin", serializeVector3f(part.rotation().origin()));
-                    rotation.addProperty("axis", part.rotation().axis().getSerializedName());
-                    rotation.addProperty("angle", part.rotation().angle());
+                    switch (part.rotation().value()) {
+                        case BlockElementRotation.SingleAxisRotation(Direction.Axis axis, float angle) -> {
+                            rotation.addProperty("axis", axis.getSerializedName());
+                            rotation.addProperty("angle", angle);
+                        }
+                        case BlockElementRotation.EulerXYZRotation(float x, float y, float z) -> {
+                            rotation.addProperty("x", x);
+                            rotation.addProperty("y", y);
+                            rotation.addProperty("z", z);
+                        }
+                        default -> throw new IllegalArgumentException("Unrecognized BlockElementRotation.RotationValue: " + part.rotation().value());
+                    }
                     if (part.rotation().rescale()) {
                         rotation.addProperty("rescale", true);
                     }
