@@ -10,13 +10,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.client.entity.ClientMannequin;
-import net.minecraft.client.model.SkullModel;
-import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.object.skull.SkullModel;
+import net.minecraft.client.model.object.skull.SkullModelBase;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -220,7 +220,7 @@ public abstract class EntityRenderersEvent extends Event implements IModBusEvent
     }
 
     /**
-     * Fired for registering additional {@linkplain net.minecraft.client.model.SkullModelBase skull models}.
+     * Fired for registering additional {@linkplain net.minecraft.client.model.object.skull.SkullModelBase skull models}.
      *
      * <p>This event is not {@linkplain ICancellableEvent cancellable}, and does not have a result.</p>
      *

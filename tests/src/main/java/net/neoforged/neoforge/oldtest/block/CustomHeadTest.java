@@ -6,8 +6,8 @@
 package net.neoforged.neoforge.oldtest.block;
 
 import java.util.Locale;
-import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.object.skull.SkullModel;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.special.SkullSpecialRenderer;
 import net.minecraft.core.BlockPos;
