@@ -6,6 +6,7 @@
 package net.neoforged.neoforge.client.model.standalone;
 
 import java.util.function.BiFunction;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
 import net.minecraft.client.renderer.block.model.SingleVariant;
@@ -57,17 +58,17 @@ public final class SimpleUnbakedStandaloneModel<T> implements UnbakedStandaloneM
     }
 
     /**
-     * {@return an unbaked standalone model for a {@link SimpleModelWrapper}, baked without additional transformations}
+     * {@return an unbaked standalone model for a {@link BlockModelPart}, baked without additional transformations}
      */
-    public static SimpleUnbakedStandaloneModel<SimpleModelWrapper> simpleModelWrapper(Identifier modelId) {
+    public static SimpleUnbakedStandaloneModel<BlockModelPart> simpleModelWrapper(Identifier modelId) {
         return new SimpleUnbakedStandaloneModel<>(
                 modelId, (model, baker) -> SimpleModelWrapper.bake(baker, model, BlockModelRotation.IDENTITY));
     }
 
     /**
-     * {@return an unbaked standalone model for a {@link SimpleModelWrapper}, baked with the provided {@link ModelState} transformations}
+     * {@return an unbaked standalone model for a {@link BlockModelPart}, baked with the provided {@link ModelState} transformations}
      */
-    public static SimpleUnbakedStandaloneModel<SimpleModelWrapper> simpleModelWrapper(Identifier modelId, ModelState modelState) {
+    public static SimpleUnbakedStandaloneModel<BlockModelPart> simpleModelWrapper(Identifier modelId, ModelState modelState) {
         return new SimpleUnbakedStandaloneModel<>(
                 modelId, (model, baker) -> SimpleModelWrapper.bake(baker, model, modelState));
     }

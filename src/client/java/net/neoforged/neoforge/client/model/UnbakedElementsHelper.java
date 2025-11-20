@@ -16,11 +16,11 @@ import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemModelGenerator;
-import net.minecraft.client.renderer.block.model.SimpleUnbakedGeometry;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.QuadCollection;
 import net.minecraft.core.Direction;
@@ -31,7 +31,7 @@ import org.joml.Vector3f;
 public final class UnbakedElementsHelper {
     private UnbakedElementsHelper() {}
 
-    private static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
+    private static final ModelBaker.PartCache DUMMY_PART_CACHE = vector -> vector;
 
     /**
      * @see #createUnbakedItemElements(int, TextureAtlasSprite, ExtraFaceData)
@@ -136,7 +136,17 @@ public final class UnbakedElementsHelper {
         for (BlockElement element : elements) {
             element.faces().forEach((side, face) -> {
                 var sprite = spriteGetter.apply(new Material(TextureAtlas.LOCATION_BLOCKS, Identifier.parse(face.texture())));
-                BakedQuad quad = SimpleUnbakedGeometry.bakeFace(element, face, sprite, side, modelState);
+                BakedQuad quad = FaceBakery.bakeQuad(
+                        DUMMY_PART_CACHE,
+                        element.from(),
+                        element.to(),
+                        face,
+                        sprite,
+                        side,
+                        modelState,
+                        element.rotation(),
+                        element.shade(),
+                        element.lightEmission());
                 if (face.cullForDirection() == null)
                     builder.addUnculledFace(quad);
                 else
