@@ -74,7 +74,7 @@
          if (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SWIMMING)) {
              Pose pose = this.getDesiredPose();
              Pose pose1;
-@@ -533,6 +_,7 @@
+@@ -530,6 +_,7 @@
  
      @Override
      public void die(DamageSource p_36152_) {
@@ -82,7 +82,7 @@
          super.die(p_36152_);
          this.reapplyPosition();
          if (!this.isSpectator() && this.level() instanceof ServerLevel serverlevel) {
-@@ -589,10 +_,18 @@
+@@ -586,10 +_,18 @@
      }
  
      public @Nullable ItemEntity drop(ItemStack p_36177_, boolean p_36178_) {
@@ -102,7 +102,7 @@
          float f = this.inventory.getSelectedItem().getDestroySpeed(p_36282_);
          if (f > 1.0F) {
              f += (float)this.getAttributeValue(Attributes.MINING_EFFICIENCY);
-@@ -621,13 +_,19 @@
+@@ -618,13 +_,19 @@
              f /= 5.0F;
          }
  
@@ -122,7 +122,7 @@
      @Override
      protected void readAdditionalSaveData(ValueInput p_422427_) {
          super.readAdditionalSaveData(p_422427_);
-@@ -702,7 +_,8 @@
+@@ -699,7 +_,8 @@
                  return false;
              } else {
                  this.removeEntitiesOnShoulder();
@@ -132,7 +132,7 @@
                      if (p_376451_.getDifficulty() == Difficulty.PEACEFUL) {
                          p_376389_ = 0.0F;
                      }
-@@ -760,11 +_,14 @@
+@@ -757,11 +_,14 @@
      @Override
      protected void actuallyHurt(ServerLevel p_376500_, DamageSource p_36312_, float p_36313_) {
          if (!this.isInvulnerableTo(p_376500_, p_36312_)) {
@@ -152,7 +152,7 @@
              if (f > 0.0F && f < 3.4028235E37F) {
                  this.awardStat(Stats.DAMAGE_ABSORBED, Math.round(f * 10.0F));
              }
-@@ -778,7 +_,9 @@
+@@ -775,7 +_,9 @@
                  }
  
                  this.gameEvent(GameEvent.ENTITY_DAMAGE);
@@ -162,7 +162,7 @@
          }
      }
  
-@@ -834,6 +_,8 @@
+@@ -831,6 +_,8 @@
  
              return InteractionResult.PASS;
          } else {
@@ -171,7 +171,7 @@
              ItemStack itemstack = this.getItemInHand(p_36159_);
              ItemStack itemstack1 = itemstack.copy();
              InteractionResult interactionresult = p_36158_.interact(this, p_36159_);
-@@ -842,6 +_,9 @@
+@@ -839,6 +_,9 @@
                      itemstack.setCount(itemstack1.getCount());
                  }
  
@@ -181,7 +181,7 @@
                  return interactionresult;
              } else {
                  if (!itemstack.isEmpty() && p_36158_ instanceof LivingEntity) {
-@@ -853,6 +_,7 @@
+@@ -850,6 +_,7 @@
                      if (interactionresult1.consumesAction()) {
                          this.level().gameEvent(GameEvent.ENTITY_INTERACT, p_36158_.position(), GameEvent.Context.of(this));
                          if (itemstack.isEmpty() && !this.hasInfiniteMaterials()) {
@@ -189,7 +189,7 @@
                              this.setItemInHand(p_36159_, ItemStack.EMPTY);
                          }
  
-@@ -882,6 +_,7 @@
+@@ -879,6 +_,7 @@
      }
  
      @Override
@@ -197,7 +197,7 @@
      protected Vec3 maybeBackOffFromEdge(Vec3 p_36201_, MoverType p_36202_) {
          float f = this.maxUpStep();
          if (!this.abilities.flying
-@@ -931,6 +_,7 @@
+@@ -928,6 +_,7 @@
          }
      }
  
@@ -205,7 +205,7 @@
      private boolean isAboveGround(float p_341626_) {
          return this.onGround() || this.fallDistance < p_341626_ && !this.canFallAtLeast(0.0, 0.0, p_341626_ - this.fallDistance);
      }
-@@ -952,6 +_,7 @@
+@@ -949,6 +_,7 @@
      }
  
      public void attack(Entity p_36347_) {
@@ -213,7 +213,7 @@
          if (!this.cannotAttack(p_36347_)) {
              float f = this.isAutoSpinAttack() ? this.autoSpinAttackDmg : (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
              ItemStack itemstack = this.getWeaponItem();
-@@ -973,12 +_,22 @@
+@@ -970,12 +_,22 @@
  
                      f += itemstack.getItem().getAttackDamageBonus(p_36347_, f, damagesource);
                      boolean flag2 = flag && this.canCriticalAttack(p_36347_);
@@ -238,7 +238,7 @@
                      float f4 = 0.0F;
                      if (p_36347_ instanceof LivingEntity livingentity) {
                          f4 = livingentity.getHealth();
-@@ -989,7 +_,8 @@
+@@ -986,7 +_,8 @@
                      if (flag4) {
                          this.causeExtraKnockback(p_36347_, this.getKnockback(p_36347_, damagesource) + (flag1 ? 0.5F : 0.0F), vec3);
                          if (flag3) {
@@ -248,7 +248,7 @@
                          }
  
                          this.attackVisualEffects(p_36347_, flag2, flag3, flag, f2);
-@@ -1046,7 +_,8 @@
+@@ -1043,7 +_,8 @@
              double d0 = this.getKnownMovement().horizontalDistanceSqr();
              double d1 = this.getSpeed() * 2.5;
              if (d0 < Mth.square(d1)) {
@@ -258,7 +258,7 @@
              }
          }
  
-@@ -1082,11 +_,12 @@
+@@ -1079,11 +_,12 @@
  
      private void itemAttackInteraction(Entity p_455471_, ItemStack p_456074_, DamageSource p_455954_, boolean p_458145_) {
          Entity entity = p_455471_;
@@ -273,7 +273,7 @@
          if (this.level() instanceof ServerLevel serverlevel) {
              if (entity instanceof LivingEntity livingentity) {
                  flag = p_456074_.hurtEnemy(livingentity, this);
-@@ -1103,6 +_,7 @@
+@@ -1100,6 +_,7 @@
              }
  
              if (p_456074_.isEmpty()) {
@@ -281,7 +281,7 @@
                  if (p_456074_ == this.getMainHandItem()) {
                      this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                  } else {
-@@ -1139,17 +_,24 @@
+@@ -1136,17 +_,24 @@
          return 1.0F;
      }
  
@@ -308,7 +308,7 @@
                      float f1 = this.getEnchantedDamage(livingentity, f, p_455188_) * p_455105_;
                      if (livingentity.hurtServer(serverlevel, p_455188_, f1)) {
                          livingentity.knockback(0.4F, Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), -Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)));
-@@ -1308,6 +_,7 @@
+@@ -1305,6 +_,7 @@
      }
  
      public void stopSleepInBed(boolean p_36226_, boolean p_36227_) {
@@ -316,7 +316,7 @@
          super.stopSleeping();
          if (this.level() instanceof ServerLevel && p_36227_) {
              ((ServerLevel)this.level()).updateSleepingPlayerList();
-@@ -1413,7 +_,8 @@
+@@ -1410,7 +_,8 @@
  
      @Override
      public boolean causeFallDamage(double p_397701_, float p_150093_, DamageSource p_150095_) {
@@ -326,7 +326,7 @@
              return false;
          } else {
              if (p_397701_ >= 2.0) {
-@@ -1468,13 +_,13 @@
+@@ -1465,13 +_,13 @@
      protected void playStepSound(BlockPos p_282121_, BlockState p_282194_) {
          if (this.isInWater()) {
              this.waterSwimSound();
@@ -342,7 +342,7 @@
                  } else {
                      super.playStepSound(blockpos, blockstate);
                  }
-@@ -1505,6 +_,10 @@
+@@ -1502,6 +_,10 @@
      }
  
      public void giveExperiencePoints(int p_36291_) {
@@ -353,7 +353,7 @@
          this.increaseScore(p_36291_);
          this.experienceProgress = this.experienceProgress + (float)p_36291_ / this.getXpNeededForNextLevel();
          this.totalExperience = Mth.clamp(this.totalExperience + p_36291_, 0, Integer.MAX_VALUE);
-@@ -1532,7 +_,7 @@
+@@ -1529,7 +_,7 @@
      }
  
      public void onEnchantmentPerformed(ItemStack p_36172_, int p_36173_) {
@@ -362,7 +362,7 @@
          if (this.experienceLevel < 0) {
              this.experienceLevel = 0;
              this.experienceProgress = 0.0F;
-@@ -1543,6 +_,10 @@
+@@ -1540,6 +_,10 @@
      }
  
      public void giveExperienceLevels(int p_36276_) {
@@ -373,7 +373,7 @@
          this.experienceLevel = IntMath.saturatedAdd(this.experienceLevel, p_36276_);
          if (this.experienceLevel < 0) {
              this.experienceLevel = 0;
-@@ -1581,7 +_,7 @@
+@@ -1578,7 +_,7 @@
      }
  
      protected boolean hasEnoughFoodToDoExhaustiveManoeuvres() {
@@ -382,7 +382,7 @@
      }
  
      public Optional<WardenSpawnTracker> getWardenSpawnTracker() {
-@@ -1688,7 +_,11 @@
+@@ -1685,7 +_,11 @@
  
      @Override
      public Component getDisplayName() {
@@ -395,7 +395,7 @@
          return this.decorateDisplayNameComponent(mutablecomponent);
      }
  
-@@ -1867,21 +_,21 @@
+@@ -1864,21 +_,21 @@
          if (!(p_36349_.getItem() instanceof ProjectileWeaponItem)) {
              return ItemStack.EMPTY;
          } else {
@@ -422,7 +422,7 @@
              }
          }
      }
-@@ -1921,7 +_,7 @@
+@@ -1918,7 +_,7 @@
      }
  
      public boolean isScoping() {
@@ -431,7 +431,7 @@
      }
  
      @Override
-@@ -2061,5 +_,41 @@
+@@ -2058,5 +_,41 @@
          public static final Player.BedSleepingProblem OBSTRUCTED = new Player.BedSleepingProblem(Component.translatable("block.minecraft.bed.obstructed"));
          public static final Player.BedSleepingProblem OTHER_PROBLEM = new Player.BedSleepingProblem(null);
          public static final Player.BedSleepingProblem NOT_SAFE = new Player.BedSleepingProblem(Component.translatable("block.minecraft.bed.not_safe"));
