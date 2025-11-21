@@ -1,48 +1,5 @@
 --- a/net/minecraft/client/Options.java
 +++ b/net/minecraft/client/Options.java
-@@ -201,6 +_,7 @@
-     private static final Component GRAPHICS_TOOLTIP_CUTOUT_LEAVES = Component.translatable("options.cutoutLeaves.tooltip");
-     private final OptionInstance<Boolean> cutoutLeaves = OptionInstance.createBoolean(
-         "options.cutoutLeaves", OptionInstance.cachedConstantTooltip(GRAPHICS_TOOLTIP_CUTOUT_LEAVES), true, p_454154_ -> {
-+            if (Minecraft.getInstance().levelRenderer != null) // TODO 1.21.11: Fixes MC-304369, remove when upstream fixes it.
-             Minecraft.getInstance().levelRenderer.allChanged();
-             this.setGraphicsPresetToCustom();
-         }
-@@ -217,12 +_,14 @@
-             if (p_454138_ && gpuwarnlistmanager.willShowWarning()) {
-                 gpuwarnlistmanager.showWarning();
-             } else {
-+                if (Minecraft.getInstance().levelRenderer != null) // TODO 1.21.11: Fixes MC-304369, remove when upstream fixes it.
-                 minecraft.levelRenderer.allChanged();
-                 this.setGraphicsPresetToCustom();
-             }
-         }
-     );
-     private final OptionInstance<Boolean> ambientOcclusion = OptionInstance.createBoolean("options.ao", true, p_454143_ -> {
-+        if (Minecraft.getInstance().levelRenderer != null) // TODO 1.21.11: Fixes MC-304369, remove when upstream fixes it.
-         Minecraft.getInstance().levelRenderer.allChanged();
-         this.setGraphicsPresetToCustom();
-     });
-@@ -461,6 +_,7 @@
-             int i = p_232017_ * 2 + 1;
-             return genericValueLabel(p_232016_, Component.translatable("options.biomeBlendRadius." + i));
-         }, new OptionInstance.IntRange(0, 7, false), 2, p_454145_ -> {
-+            if (Minecraft.getInstance().levelRenderer != null) // TODO 1.21.11: Fixes MC-304369, remove when upstream fixes it.
-             Minecraft.getInstance().levelRenderer.allChanged();
-             this.setGraphicsPresetToCustom();
-         }
-@@ -776,7 +_,10 @@
-         new OptionInstance.IntRange(30, 110),
-         Codec.DOUBLE.xmap(p_232007_ -> (int)(p_232007_ * 40.0 + 70.0), p_232009_ -> (p_232009_.intValue() - 70.0) / 40.0),
-         70,
--        p_231992_ -> Minecraft.getInstance().levelRenderer.needsUpdate()
-+        p_231992_ -> {
-+            if (Minecraft.getInstance().levelRenderer != null) // TODO 1.21.11: Fixes MC-304369, remove when upstream fixes it.
-+            Minecraft.getInstance().levelRenderer.needsUpdate();
-+        }
-     );
-     private static final Component TELEMETRY_TOOLTIP = Component.translatable(
-         "options.telemetry.button.tooltip", Component.translatable("options.telemetry.state.minimal"), Component.translatable("options.telemetry.state.all")
 @@ -907,9 +_,10 @@
              }
          },
