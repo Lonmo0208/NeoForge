@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
@@ -34,6 +35,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.ClientHooks;
@@ -43,7 +45,6 @@ import net.neoforged.neoforge.client.RenderTypeHelper;
 import net.neoforged.neoforge.client.color.item.FluidContentsTint;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.ComposedModelState;
-import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
 import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 import org.jetbrains.annotations.Nullable;
@@ -130,7 +131,10 @@ public class DynamicFluidContainerModel implements ItemModel {
 
             var emissive = unbakedModel.applyFluidLuminosity && fluid.getFluidType().getLightLevel() > 0;
             var renderType = RenderTypeHelper.detectItemModelRenderType(quads, getLayerRenderTypes(emissive));
-            if (emissive) QuadTransformers.settingMaxEmissivity().processInPlace(quads);
+            if (emissive) {
+                quads = new ArrayList<>(quads);
+                quads.replaceAll(DynamicFluidContainerModel::setMaxEmissivity);
+            }
 
             subModels.add(new BlockModelWrapper(List.of(FluidContentsTint.INSTANCE), quads, renderProperties, renderType));
         }
@@ -146,6 +150,26 @@ public class DynamicFluidContainerModel implements ItemModel {
         }
 
         return new CompositeModel(subModels);
+    }
+
+    private static BakedQuad setMaxEmissivity(BakedQuad quad) {
+        return new BakedQuad(
+                quad.position0(),
+                quad.position1(),
+                quad.position2(),
+                quad.position3(),
+                quad.packedUV0(),
+                quad.packedUV1(),
+                quad.packedUV2(),
+                quad.packedUV3(),
+                quad.tintIndex(),
+                quad.direction(),
+                quad.sprite(),
+                quad.shade(),
+                Level.MAX_BRIGHTNESS,
+                quad.bakedNormals(),
+                quad.bakedColors(),
+                quad.hasAmbientOcclusion());
     }
 
     @Override
