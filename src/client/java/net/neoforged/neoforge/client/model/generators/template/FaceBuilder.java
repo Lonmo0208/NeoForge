@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.core.Direction;
 import net.neoforged.neoforge.client.model.ExtraFaceData;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class FaceBuilder {
     @Nullable
@@ -20,8 +20,7 @@ public final class FaceBuilder {
     private int tintindex = -1;
     @Nullable
     private TextureSlot texture = null;
-    @Nullable
-    private BlockElementFace.UVs uvs;
+    private BlockElementFace.@Nullable UVs uvs;
     private Quadrant rotation = Quadrant.R0;
     private int color = 0xFFFFFFFF;
     private int lightEmission = 0;

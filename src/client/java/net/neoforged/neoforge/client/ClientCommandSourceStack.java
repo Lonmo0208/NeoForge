@@ -34,7 +34,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * overrides for {@link CommandSourceStack} so that the methods will run successfully client side

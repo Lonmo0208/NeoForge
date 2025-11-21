@@ -16,8 +16,8 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.testframework.gametest.ExtendedGameTestHelper;
 import net.neoforged.testframework.gametest.StructureTemplateBuilder;
 import net.neoforged.testframework.registration.RegistrationHelper;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A special type of {@linkplain Test test} which may only be linked to one {@linkplain TestFramework framework} at a time. <br>

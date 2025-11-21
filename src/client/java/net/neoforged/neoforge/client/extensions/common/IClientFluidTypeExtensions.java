@@ -25,8 +25,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@linkplain LogicalSide#CLIENT Client-only} extensions to {@link FluidType}.

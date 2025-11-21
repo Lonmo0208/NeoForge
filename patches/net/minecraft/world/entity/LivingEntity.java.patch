@@ -6,7 +6,7 @@
      private static final float WATER_FLOAT_IMPULSE = 0.04F;
 -    public static final Predicate<LivingEntity> PLAYER_NOT_WEARING_DISGUISE_ITEM = p_401735_ -> {
 +    // Neo: Support IItemExtension#isGazeDisguise
-+    public static final java.util.function.BiPredicate<LivingEntity, @org.jetbrains.annotations.Nullable LivingEntity> PLAYER_NOT_WEARING_DISGUISE_ITEM_FOR_TARGET = (p_401735_, target) -> {
++    public static final java.util.function.BiPredicate<LivingEntity, @org.jspecify.annotations.Nullable LivingEntity> PLAYER_NOT_WEARING_DISGUISE_ITEM_FOR_TARGET = (p_401735_, target) -> {
          if (p_401735_ instanceof Player player) {
              ItemStack itemstack = player.getItemBySlot(EquipmentSlot.HEAD);
 -            return !itemstack.is(ItemTags.GAZE_DISGUISE_EQUIPMENT);

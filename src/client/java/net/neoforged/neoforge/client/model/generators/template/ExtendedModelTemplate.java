@@ -22,8 +22,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.model.ExtraFaceData;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
 public final class ExtendedModelTemplate extends ModelTemplate {
     final Map<ItemDisplayContext, TransformVecBuilder> transforms;
@@ -35,8 +35,7 @@ public final class ExtendedModelTemplate extends ModelTemplate {
     final Identifier renderType;
     @Nullable
     final Boolean ambientOcclusion;
-    @Nullable
-    final UnbakedModel.GuiLight guiLight;
+    final UnbakedModel.@Nullable GuiLight guiLight;
 
     ExtendedModelTemplate(ExtendedModelTemplateBuilder builder) {
         super(builder.parent, builder.suffix, builder.requiredSlots.toArray(TextureSlot[]::new));

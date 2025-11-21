@@ -19,8 +19,8 @@ import net.neoforged.testframework.impl.MutableTestFramework;
 import net.neoforged.testframework.impl.TestFrameworkImpl;
 import net.neoforged.testframework.summary.DefaultLogSummaryDumper;
 import net.neoforged.testframework.summary.SummaryDumper;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @ParametersAreNonnullByDefault
 @NullMarked

@@ -47,9 +47,9 @@ import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtension
 import net.neoforged.neoforge.client.model.ComposedModelState;
 import net.neoforged.neoforge.client.model.UnbakedElementsHelper;
 import net.neoforged.neoforge.transfer.fluid.FluidUtil;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A dynamic fluid container model, capable of re-texturing itself at runtime to match the contained fluid.

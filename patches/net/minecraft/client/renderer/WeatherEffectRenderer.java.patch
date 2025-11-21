@@ -12,7 +12,7 @@
 +        this.render(p_382792_, p_360652_, p_451561_, null);
 +    }
 +
-+    public void render(MultiBufferSource p_382792_, Vec3 p_360652_, WeatherRenderState p_451561_, @org.jetbrains.annotations.Nullable net.minecraft.client.renderer.state.LevelRenderState levelRenderState) {
++    public void render(MultiBufferSource p_382792_, Vec3 p_360652_, WeatherRenderState p_451561_, net.minecraft.client.renderer.state.@org.jspecify.annotations.Nullable LevelRenderState levelRenderState) {
 +        if (levelRenderState != null && levelRenderState.dimensionSpecialEffects.renderSnowAndRain(levelRenderState, p_451561_, p_382792_, p_360652_)) {
 +            return;
 +        }

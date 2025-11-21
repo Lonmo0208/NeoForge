@@ -20,8 +20,8 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.testframework.gametest.GameTestData;
 import net.neoforged.testframework.group.Groupable;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The base interface for tests in the TestFramework.

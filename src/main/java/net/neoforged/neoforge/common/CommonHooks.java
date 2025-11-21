@@ -231,7 +231,7 @@ import org.apache.logging.log4j.MarkerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 /**
@@ -1353,8 +1353,7 @@ public class CommonHooks {
     /**
      * @hidden For internal use only.
      */
-    @Nullable
-    public static StructuresBecomeConfiguredFix.Conversion getStructureConversion(String originalBiome) {
+    public static StructuresBecomeConfiguredFix.@Nullable Conversion getStructureConversion(String originalBiome) {
         return FORGE_CONVERSION_MAP.get().get(originalBiome);
     }
 

@@ -35,7 +35,7 @@
 //import net.neoforged.neoforge.registries.DeferredHolder;
 //import net.neoforged.neoforge.registries.DeferredItem;
 //import net.neoforged.neoforge.registries.DeferredRegister;
-//import org.jetbrains.annotations.Nullable;
+//import org.jspecify.annotations.Nullable;
 //
 //@Mod(GameTestTest.MODID)
 //public class GameTestTest {

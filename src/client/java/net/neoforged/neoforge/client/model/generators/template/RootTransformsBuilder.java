@@ -10,11 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.math.Transformation;
 import net.neoforged.neoforge.common.util.TransformationHelper;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
 public class RootTransformsBuilder {
     private static final Vector3f ONE = new Vector3f(1, 1, 1);
@@ -23,8 +23,7 @@ public class RootTransformsBuilder {
     private Quaternionfc leftRotation = new Quaternionf();
     private Quaternionfc rightRotation = new Quaternionf();
     private Vector3fc scale = ONE;
-    @Nullable
-    private TransformationHelper.TransformOrigin origin;
+    private TransformationHelper.@Nullable TransformOrigin origin;
     @Nullable
     private Vector3fc originVec;
 

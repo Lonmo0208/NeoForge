@@ -219,10 +219,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3fc;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Class for various client-side-only hooks.

@@ -40,7 +40,7 @@ import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.neoforge.client.ClientHooks;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Fired for on different events/actions relating to {@linkplain EntityRenderer entity renderers}.

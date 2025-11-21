@@ -67,7 +67,7 @@
 +    }
 +
 +    @Override
-+    public @org.jetbrains.annotations.Nullable net.minecraft.network.chat.Component getComponent(String key) {
++    public net.minecraft.network.chat.@org.jspecify.annotations.Nullable Component getComponent(String key) {
 +        return componentStorage.get(key);
      }
  }

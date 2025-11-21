@@ -27,8 +27,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.testframework.impl.ReflectionUtils;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @ParametersAreNonnullByDefault
 @NullMarked

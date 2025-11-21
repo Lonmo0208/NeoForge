@@ -24,8 +24,8 @@ import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.world.TickRateManager;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Math;
+import org.jspecify.annotations.Nullable;
 
 class TPSCommand {
     private static final DecimalFormat TIME_FORMATTER = new DecimalFormat("########0.000");

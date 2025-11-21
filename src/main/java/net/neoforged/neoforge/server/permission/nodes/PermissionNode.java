@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.server.permission.PermissionAPI;
 import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
 import net.neoforged.neoforge.server.permission.handler.IPermissionHandler;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents the basic unit at the heart of the permission system.

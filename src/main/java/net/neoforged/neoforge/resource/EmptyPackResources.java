@@ -17,7 +17,7 @@ import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.IoSupplier;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EmptyPackResources extends AbstractPackResources {
     private final PackMetadataSection packMeta;

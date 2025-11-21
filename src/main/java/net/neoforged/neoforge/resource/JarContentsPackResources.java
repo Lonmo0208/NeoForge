@@ -23,7 +23,7 @@ import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.util.FileUtil;
 import net.neoforged.fml.jarcontents.JarContents;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 /**

@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.neoforge.mixins.BlockEntityTypeAccessor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Allows injecting new blocks into a block entity's {@link BlockEntityType#validBlocks} field in a safe manner.

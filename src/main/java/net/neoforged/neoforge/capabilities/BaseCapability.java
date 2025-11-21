@@ -6,7 +6,7 @@
 package net.neoforged.neoforge.capabilities;
 
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class to reuse code common between most/all {@code *Capability} implementation.

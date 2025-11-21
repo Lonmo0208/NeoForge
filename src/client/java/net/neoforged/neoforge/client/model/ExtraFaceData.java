@@ -14,7 +14,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Function;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Holds extra data that may be injected into a face.<p>

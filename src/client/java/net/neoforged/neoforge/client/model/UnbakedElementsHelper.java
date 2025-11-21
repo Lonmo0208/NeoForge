@@ -25,8 +25,8 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.QuadCollection;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 public final class UnbakedElementsHelper {
     private UnbakedElementsHelper() {}

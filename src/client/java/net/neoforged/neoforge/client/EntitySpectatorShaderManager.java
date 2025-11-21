@@ -13,7 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.client.event.RegisterEntitySpectatorShadersEvent;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Manager for entity spectator mode shaders.

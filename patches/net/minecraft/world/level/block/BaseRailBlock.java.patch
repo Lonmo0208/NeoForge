@@ -60,7 +60,7 @@
 +    }
 +
 +    @Override
-+    public RailShape getRailDirection(BlockState state, BlockGetter world, BlockPos pos, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.vehicle.minecart.AbstractMinecart cart) {
++    public RailShape getRailDirection(BlockState state, BlockGetter world, BlockPos pos, net.minecraft.world.entity.vehicle.minecart.@Nullable AbstractMinecart cart) {
 +         return state.getValue(getShapeProperty());
      }
  }

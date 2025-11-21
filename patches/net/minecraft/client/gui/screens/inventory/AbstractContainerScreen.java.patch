@@ -172,7 +172,7 @@
          return this.menu;
 +    }
 +
-+    @org.jetbrains.annotations.Nullable
++    @org.jspecify.annotations.Nullable
 +    public Slot getSlotUnderMouse() { return this.hoveredSlot; }
 +    public int getGuiLeft() { return leftPos; }
 +    public int getGuiTop() { return topPos; }

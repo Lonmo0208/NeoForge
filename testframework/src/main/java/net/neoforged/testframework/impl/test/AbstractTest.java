@@ -47,8 +47,8 @@ import net.neoforged.testframework.impl.ReflectionUtils;
 import net.neoforged.testframework.impl.TestFrameworkImpl;
 import net.neoforged.testframework.impl.reg.RegistrationHelperImpl;
 import net.neoforged.testframework.registration.RegistrationHelper;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 @ParametersAreNonnullByDefault

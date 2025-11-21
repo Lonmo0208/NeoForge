@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Validation wrapper around CommandEncoder

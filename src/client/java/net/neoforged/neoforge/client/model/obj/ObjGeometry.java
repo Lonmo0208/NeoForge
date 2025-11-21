@@ -32,9 +32,9 @@ import net.neoforged.neoforge.client.model.ExtendedUnbakedGeometry;
 import net.neoforged.neoforge.client.model.NeoForgeModelProperties;
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
 public class ObjGeometry implements ExtendedUnbakedGeometry {
     private static final Vector4f COLOR_WHITE = new Vector4f(1, 1, 1, 1);
@@ -451,13 +451,12 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
     }
 
     private class ModelMesh {
-        @Nullable
-        public ObjMaterialLibrary.Material mat;
+        public ObjMaterialLibrary.@Nullable Material mat;
         @Nullable
         public String smoothingGroup;
         public final List<int[][]> faces = Lists.newArrayList();
 
-        public ModelMesh(@Nullable ObjMaterialLibrary.Material currentMat, @Nullable String currentSmoothingGroup) {
+        public ModelMesh(ObjMaterialLibrary.@Nullable Material currentMat, @Nullable String currentSmoothingGroup) {
             this.mat = currentMat;
             this.smoothingGroup = currentSmoothingGroup;
         }

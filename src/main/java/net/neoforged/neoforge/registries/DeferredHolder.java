@@ -20,7 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A Deferred Holder is a {@link Holder} that is constructed with only a ResourceKey.

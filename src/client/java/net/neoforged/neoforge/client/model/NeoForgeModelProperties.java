@@ -19,7 +19,7 @@ import net.minecraft.util.context.ContextKey;
 import net.minecraft.util.context.ContextMap;
 import net.neoforged.neoforge.client.NamedRenderTypeManager;
 import net.neoforged.neoforge.client.RenderTypeGroup;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Properties that NeoForge adds for {@link BlockModel}s and {@link UnbakedModel}s.

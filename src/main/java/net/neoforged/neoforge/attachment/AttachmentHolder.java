@@ -16,7 +16,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 /**

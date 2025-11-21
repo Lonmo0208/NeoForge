@@ -34,7 +34,7 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.registries.DeferredBlock;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class DeferredBlockBuilder<T extends Block> extends DeferredBlock<T> {
     private final RegistrationHelper helper;

@@ -15,12 +15,11 @@
      }
  
      public void setDragonFight(EndDragonFight p_287736_) {
-@@ -148,8 +_,20 @@
+@@ -148,8 +_,19 @@
          p_326491_.define(DATA_PHASE, EnderDragonPhase.HOVERING.getId());
      }
  
-+    @org.jetbrains.annotations.Nullable
-+    private net.minecraft.world.entity.EntityReference<Player> unlimitedLastHurtByPlayer = null;
++    private net.minecraft.world.entity.@Nullable EntityReference<Player> unlimitedLastHurtByPlayer = null;
 +
      @Override
      public void aiStep() {

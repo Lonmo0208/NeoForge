@@ -22,7 +22,7 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.event.RegisterNamedRenderTypesEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ExtendedModelTemplateBuilder {
     Optional<Identifier> parent = Optional.empty();
@@ -37,8 +37,7 @@ public class ExtendedModelTemplateBuilder {
     Identifier renderType = null;
     @Nullable
     Boolean ambientOcclusion = null; // UnbakedModel.DEFAULT_AMBIENT_OCCLUSION
-    @Nullable
-    UnbakedModel.GuiLight guiLight = null;
+    UnbakedModel.@Nullable GuiLight guiLight = null;
 
     public static ExtendedModelTemplateBuilder of(ModelTemplate template) {
         ExtendedModelTemplateBuilder builder = new ExtendedModelTemplateBuilder();

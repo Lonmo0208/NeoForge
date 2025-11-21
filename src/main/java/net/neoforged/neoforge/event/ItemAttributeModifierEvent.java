@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.bus.api.Event;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This event is fired when the attributes for an item stack are queried (for any reason) through {@link ItemStack#getAttributeModifiers()}.
@@ -211,8 +211,7 @@ public class ItemAttributeModifierEvent extends Event {
          * 
          * @return the previous modifier, or null if there was no previous modifier with the same id
          */
-        @Nullable
-        ItemAttributeModifiers.Entry replaceModifier(Holder<Attribute> attribute, AttributeModifier modifier, EquipmentSlotGroup slot) {
+        ItemAttributeModifiers.@Nullable Entry replaceModifier(Holder<Attribute> attribute, AttributeModifier modifier, EquipmentSlotGroup slot) {
             Key key = new Key(attribute, modifier.id());
             ItemAttributeModifiers.Entry entry = new ItemAttributeModifiers.Entry(attribute, modifier, slot);
             if (entriesByKey.containsKey(key)) {

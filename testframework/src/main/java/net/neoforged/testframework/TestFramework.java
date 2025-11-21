@@ -16,9 +16,9 @@ import net.neoforged.testframework.conf.FrameworkConfiguration;
 import net.neoforged.testframework.gametest.DynamicStructureTemplates;
 import net.neoforged.testframework.group.Group;
 import net.neoforged.testframework.impl.MutableTestFramework;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 /**

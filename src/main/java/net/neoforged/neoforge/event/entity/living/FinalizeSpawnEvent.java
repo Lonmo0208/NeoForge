@@ -22,7 +22,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.NeoForgeEventHandler;
 import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This event is fired before {@link Mob#finalizeSpawn} is called.<br>

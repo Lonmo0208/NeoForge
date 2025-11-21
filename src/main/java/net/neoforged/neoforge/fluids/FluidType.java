@@ -46,7 +46,7 @@ import net.neoforged.neoforge.common.SoundAction;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A definition of common attributes, properties, and methods that is applied

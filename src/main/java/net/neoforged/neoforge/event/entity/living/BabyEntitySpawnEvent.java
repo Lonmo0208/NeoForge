@@ -13,7 +13,7 @@ import net.minecraft.world.entity.animal.fox.Fox;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * BabyEntitySpawnEvent is fired just before a baby entity is about to be spawned. <br>

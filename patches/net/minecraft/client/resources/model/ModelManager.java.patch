@@ -151,7 +151,7 @@
 +        return this.modelBakery.get();
 +    }
 +
-+    @org.jetbrains.annotations.Nullable
++    @org.jspecify.annotations.Nullable
 +    public <T> T getStandaloneModel(net.neoforged.neoforge.client.model.standalone.StandaloneModelKey<T> modelKey) {
 +        return this.bakedStandaloneModels.get(modelKey);
      }

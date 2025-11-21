@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.InputQuirks;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 public enum KeyModifier {

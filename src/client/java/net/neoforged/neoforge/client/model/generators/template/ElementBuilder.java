@@ -18,8 +18,8 @@ import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.core.Direction;
 import net.neoforged.neoforge.client.model.ExtraFaceData;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 public final class ElementBuilder {
     private Vector3f from = new Vector3f();

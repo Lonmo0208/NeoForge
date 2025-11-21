@@ -12,7 +12,7 @@ import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TrialSpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawner;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface IOwnedSpawner {
     /**

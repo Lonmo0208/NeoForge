@@ -15,7 +15,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.common.util.VanillaClassToKey;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Keys for vanilla {@link PreparableReloadListener reload listeners}, used to specify dependency ordering in the {@link AddServerReloadListenersEvent}.

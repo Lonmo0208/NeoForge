@@ -11,7 +11,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.testframework.impl.ReflectionUtils;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A listener which listens for changes in tests.

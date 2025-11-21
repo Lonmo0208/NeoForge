@@ -20,7 +20,7 @@ import net.neoforged.neoforge.network.payload.MinecraftRegisterPayload;
 import net.neoforged.neoforge.network.payload.ModdedNetworkPayload;
 import net.neoforged.neoforge.network.payload.ModdedNetworkQueryPayload;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utilities for manipulation of Netty {@link Channel} attributes

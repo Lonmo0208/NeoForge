@@ -5,7 +5,7 @@
      }
  
 +    // Neo: Keep track of the original loot table ID through modifications
-+    @org.jetbrains.annotations.Nullable
++    @org.jspecify.annotations.Nullable
 +    private Identifier queriedLootTableId;
 +
 +    private LootContext(LootParams p_287722_, RandomSource p_287702_, HolderGetter.Provider p_287619_, Identifier queriedLootTableId) {
@@ -13,7 +13,7 @@
 +        this.queriedLootTableId = queriedLootTableId;
 +    }
 +
-+    public void setQueriedLootTableId(@org.jetbrains.annotations.Nullable Identifier queriedLootTableId) {
++    public void setQueriedLootTableId(@org.jspecify.annotations.Nullable Identifier queriedLootTableId) {
 +        if (this.queriedLootTableId == null && queriedLootTableId != null) this.queriedLootTableId = queriedLootTableId;
 +    }
 +

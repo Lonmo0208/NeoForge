@@ -29,7 +29,7 @@
 +     *
 +     * @param emptyPot The empty pot for this pot, or null for self.
 +     */
-+    public FlowerPotBlock(@org.jetbrains.annotations.Nullable java.util.function.Supplier<FlowerPotBlock> emptyPot, java.util.function.Supplier<? extends Block> p_53528_, BlockBehaviour.Properties properties) {
++    public FlowerPotBlock(java.util.function.@org.jspecify.annotations.Nullable Supplier<FlowerPotBlock> emptyPot, java.util.function.Supplier<? extends Block> p_53528_, BlockBehaviour.Properties properties) {
 +        super(properties);
 +        this.potted = null; // Unused, redirected by coremod
 +        this.flowerDelegate = p_53528_;
@@ -61,7 +61,7 @@
              p_316655_.gameEvent(p_316338_, GameEvent.BLOCK_CHANGE, p_316654_);
              return InteractionResult.SUCCESS;
          }
-@@ -118,12 +_,45 @@
+@@ -118,12 +_,44 @@
      }
  
      public Block getPotted() {
@@ -77,8 +77,7 @@
 +    // Neo: Maps flower blocks to the filled flower pot equivalent
 +    private final Map<net.minecraft.resources.Identifier, java.util.function.Supplier<? extends Block>> fullPots;
 +
-+    @org.jetbrains.annotations.Nullable
-+    private final java.util.function.Supplier<FlowerPotBlock> emptyPot;
++    private final java.util.function.@org.jspecify.annotations.Nullable Supplier<FlowerPotBlock> emptyPot;
 +
 +    private final java.util.function.Supplier<? extends Block> flowerDelegate;
 +

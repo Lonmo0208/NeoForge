@@ -35,7 +35,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 import net.neoforged.neoforge.registries.callback.AddCallback;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @ApiStatus.Internal
 @EventBusSubscriber(modid = NeoForgeMod.MOD_ID)

@@ -18,7 +18,7 @@ import net.neoforged.neoforge.registries.callback.AddCallback;
 import net.neoforged.neoforge.registries.callback.BakeCallback;
 import net.neoforged.neoforge.registries.callback.ClearCallback;
 import net.neoforged.neoforge.registries.callback.RegistryCallback;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class RegistryBuilder<T> {
     private final ResourceKey<? extends Registry<T>> registryKey;

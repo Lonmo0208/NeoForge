@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TridentEntityPredicate implements EntitySubPredicate {
     public static final TridentEntityPredicate INSTANCE = new TridentEntityPredicate();

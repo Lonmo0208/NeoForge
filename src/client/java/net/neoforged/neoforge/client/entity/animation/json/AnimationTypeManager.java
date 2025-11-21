@@ -17,7 +17,7 @@ import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.client.entity.animation.AnimationTarget;
 import net.neoforged.neoforge.client.event.RegisterJsonAnimationTypesEvent;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Manager for custom {@link AnimationTarget}s and {@link AnimationChannel.Interpolation interpolation function}s.
@@ -85,8 +85,7 @@ public final class AnimationTypeManager {
     /**
      * Gets the {@link AnimationChannel.Interpolation interpolation function} associated with the given {@code name}.
      */
-    @Nullable
-    public static AnimationChannel.Interpolation getInterpolation(Identifier name) {
+    public static AnimationChannel.@Nullable Interpolation getInterpolation(Identifier name) {
         return INTERPOLATIONS.get(name);
     }
 
