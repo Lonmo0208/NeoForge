@@ -26,8 +26,6 @@ import org.jspecify.annotations.Nullable;
 /**
  * The base interface for tests in the TestFramework.
  */
-@NullMarked
-@ParametersAreNonnullByDefault
 public interface Test extends Groupable {
     /**
      * {@return the ID of this test}

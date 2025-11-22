@@ -27,8 +27,6 @@ import org.slf4j.Logger;
  * @see FrameworkConfiguration#create()
  * @see MutableTestFramework
  */
-@ParametersAreNonnullByDefault
-@NullMarked
 public interface TestFramework {
     /**
      * {@return the ID of this framework instance}

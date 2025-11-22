@@ -72,8 +72,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ApiStatus.Internal
-@ParametersAreNonnullByDefault
-@NullMarked
 public class TestFrameworkImpl implements MutableTestFramework {
     static final Set<TestFrameworkImpl> FRAMEWORKS = Collections.synchronizedSet(new HashSet<>());
 
