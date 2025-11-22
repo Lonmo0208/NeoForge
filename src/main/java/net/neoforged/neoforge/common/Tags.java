@@ -1002,7 +1002,7 @@ public class Tags {
         /**
          * A tag containing armor that can fit on a Wolf.
          */
-        public static final TagKey<Item>ARMORS_WOLF = tag("armors/wolf");
+        public static final TagKey<Item> ARMORS_WOLF = tag("armors/wolf");
         /**
          * Collects the many enchantable tags into one parent collection for ease.
          */
