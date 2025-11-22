@@ -16,7 +16,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.ChatFormatting;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestInfo;
@@ -211,7 +210,6 @@ public abstract class AbstractTest implements Test {
         }
     }
 
-    @ParametersAreNonnullByDefault
     public static abstract class Dynamic extends AbstractTest implements DynamicTest {
         @Override
         public TestFramework framework() {
