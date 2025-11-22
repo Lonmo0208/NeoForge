@@ -386,6 +386,10 @@ public final class NeoForgeLanguageProvider extends LanguageProvider {
         add(Tags.Items.MINING_TOOL_TOOLS, "Mining Tools");
         add(Tags.Items.TOOLS, "Tools");
         add(Tags.Items.ARMORS, "Armors");
+        add(Tags.Items.ARMORS_HUMANOID, "Humanoid Armors");
+        add(Tags.Items.ARMORS_HORSE, "Horse Armors");
+        add(Tags.Items.ARMORS_NAUTILUS, "Nautilus Armors");
+        add(Tags.Items.ARMORS_WOLF, "Wolf Armors");
         add(Tags.Items.ENCHANTABLES, "Enchantables");
 
         // Fluids

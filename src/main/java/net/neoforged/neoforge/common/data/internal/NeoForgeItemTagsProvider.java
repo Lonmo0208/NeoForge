@@ -314,7 +314,33 @@ public final class NeoForgeItemTagsProvider extends BlockTagCopyingItemTagProvid
                         Tags.Items.TOOLS_IGNITER, Tags.Items.TOOLS_SHEAR, Tags.Items.TOOLS_SHIELD, Tags.Items.TOOLS_SPEAR,
                         Tags.Items.TOOLS_MACE, Tags.Items.TOOLS_WRENCH,
                         Tags.Items.MINING_TOOL_TOOLS, Tags.Items.MELEE_WEAPON_TOOLS, Tags.Items.RANGED_WEAPON_TOOLS);
-        tag(Tags.Items.ARMORS).addTags(ItemTags.HEAD_ARMOR, ItemTags.CHEST_ARMOR, ItemTags.LEG_ARMOR, ItemTags.FOOT_ARMOR);
+        tag(Tags.Items.ARMORS)
+                .addOptionalTag(Tags.Items.ARMORS_HUMANOID)
+                .addOptionalTag(Tags.Items.ARMORS_HORSE)
+                .addOptionalTag(Tags.Items.ARMORS_NAUTILUS)
+                .addOptionalTag(Tags.Items.ARMORS_WOLF);
+
+        tag(Tags.Items.ARMORS_HORSE)
+                .add(Items.LEATHER_HORSE_ARMOR)
+                .add(Items.COPPER_HORSE_ARMOR)
+                .add(Items.IRON_HORSE_ARMOR)
+                .add(Items.GOLDEN_HORSE_ARMOR)
+                .add(Items.DIAMOND_HORSE_ARMOR)
+                .add(Items.NETHERITE_HORSE_ARMOR);
+
+        tag(Tags.Items.ARMORS_NAUTILUS)
+                .add(Items.COPPER_NAUTILUS_ARMOR)
+                .add(Items.IRON_NAUTILUS_ARMOR)
+                .add(Items.GOLDEN_NAUTILUS_ARMOR)
+                .add(Items.DIAMOND_NAUTILUS_ARMOR)
+                .add(Items.NETHERITE_NAUTILUS_ARMOR);
+
+        tag(Tags.Items.ARMORS_WOLF)
+                .add(Items.WOLF_ARMOR);
+
+        tag(Tags.Items.ARMORS_HUMANOID)
+                .addTags(ItemTags.HEAD_ARMOR, ItemTags.CHEST_ARMOR, ItemTags.LEG_ARMOR, ItemTags.FOOT_ARMOR);
+
         tag(Tags.Items.ENCHANTABLES).addTags(ItemTags.ARMOR_ENCHANTABLE, ItemTags.EQUIPPABLE_ENCHANTABLE, ItemTags.WEAPON_ENCHANTABLE, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.SHARP_WEAPON_ENCHANTABLE, ItemTags.SWEEPING_ENCHANTABLE, ItemTags.MINING_ENCHANTABLE, ItemTags.MINING_LOOT_ENCHANTABLE, ItemTags.FISHING_ENCHANTABLE, ItemTags.TRIDENT_ENCHANTABLE, ItemTags.BOW_ENCHANTABLE, ItemTags.CROSSBOW_ENCHANTABLE, ItemTags.MACE_ENCHANTABLE, ItemTags.FIRE_ASPECT_ENCHANTABLE, ItemTags.DURABILITY_ENCHANTABLE, ItemTags.VANISHING_ENCHANTABLE);
 
         // Backwards compat with pre-1.21 tags. Done after so optional tag is last for better readability.
