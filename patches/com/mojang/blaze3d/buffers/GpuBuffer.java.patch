@@ -10,4 +10,4 @@
 +    public static final int RESERVED_USAGE_BITS = 0xFF << 24;
      @GpuBuffer.Usage
      private final int usage;
-     private final int size;
+     private final long size;

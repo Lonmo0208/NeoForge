@@ -32,5 +32,5 @@
 -        p_360515_.isInWater = p_362733_.isInWater();
 +        p_360515_.isInWater = p_362733_.isInWater() || p_362733_.isInFluidType((fluidType, height) -> p_362733_.canSwimInFluidType(fluidType));
          p_360515_.isAutoSpinAttack = p_362733_.isAutoSpinAttack();
-         p_360515_.ticksSinceEnemyHit = p_362733_.getTicksSinceEnemyHit(p_361157_);
+         p_360515_.ticksSinceKineticHitFeedback = p_362733_.getTicksSinceLastKineticHitFeedback(p_361157_);
          p_360515_.hasRedOverlay = p_362733_.hurtTime > 0 || p_362733_.deathTime > 0;

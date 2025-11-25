@@ -291,16 +291,16 @@
                      ItemStack itemstack = this.player.getItemInHand(interactionhand);
                      if (!itemstack.isItemEnabled(this.level.enabledFeatures())) {
                          return;
-@@ -1697,7 +_,7 @@
-                                 }
- 
-                                 if (interactionresult instanceof InteractionResult.Success interactionresult$success2) {
--                                    if (interactionresult$success2.swingSource() == InteractionResult.SwingSource.CLIENT) {
-+                                    if (interactionresult$success2.swingSource() == InteractionResult.SwingSource.CLIENT && inputEvent.shouldSwingHand()) {
-                                         this.player.swing(interactionhand);
+@@ -1694,7 +_,7 @@
                                      }
  
-@@ -1709,7 +_,7 @@
+                                     if (interactionresult instanceof InteractionResult.Success interactionresult$success2) {
+-                                        if (interactionresult$success2.swingSource() == InteractionResult.SwingSource.CLIENT) {
++                                        if (interactionresult$success2.swingSource() == InteractionResult.SwingSource.CLIENT && inputEvent.shouldSwingHand()) {
+                                             this.player.swing(interactionhand);
+                                         }
+ 
+@@ -1707,7 +_,7 @@
                                  int i = itemstack.getCount();
                                  InteractionResult interactionresult1 = this.gameMode.useItemOn(this.player, interactionhand, blockhitresult);
                                  if (interactionresult1 instanceof InteractionResult.Success interactionresult$success) {
@@ -309,7 +309,7 @@
                                          this.player.swing(interactionhand);
                                          if (!itemstack.isEmpty() && (itemstack.getCount() != i || this.player.hasInfiniteMaterials())) {
                                              this.gameRenderer.itemInHandRenderer.itemUsed(interactionhand);
-@@ -1725,6 +_,9 @@
+@@ -1723,6 +_,9 @@
                          }
                      }
  
@@ -319,7 +319,7 @@
                      if (!itemstack.isEmpty()
                          && this.gameMode.useItem(this.player, interactionhand) instanceof InteractionResult.Success interactionresult$success1) {
                          if (interactionresult$success1.swingSource() == InteractionResult.SwingSource.CLIENT) {
-@@ -1745,6 +_,10 @@
+@@ -1743,6 +_,10 @@
  
      public void tick() {
          this.clientTickCount++;
@@ -330,7 +330,7 @@
          if (this.level != null && !this.pause) {
              this.level.tickRateManager().tick();
          }
-@@ -1835,6 +_,7 @@
+@@ -1833,6 +_,7 @@
  
                  this.tutorial.tick();
  
@@ -338,7 +338,7 @@
                  try {
                      this.level.tick(() -> true);
                  } catch (Throwable throwable1) {
-@@ -1848,6 +_,7 @@
+@@ -1846,6 +_,7 @@
  
                      throw new ReportedException(crashreport1);
                  }
@@ -346,7 +346,7 @@
              }
  
              profilerfiller.popPush("animateTick");
-@@ -1872,6 +_,10 @@
+@@ -1870,6 +_,10 @@
          profilerfiller.popPush("keyboard");
          this.keyboardHandler.tick();
          profilerfiller.pop();
@@ -357,7 +357,7 @@
      }
  
      private boolean isLevelRunningNormally() {
-@@ -2088,6 +_,7 @@
+@@ -2086,6 +_,7 @@
      }
  
      public void setLevel(ClientLevel p_91157_) {
@@ -365,7 +365,7 @@
          this.level = p_91157_;
          this.updateLevelInEngines(p_91157_);
      }
-@@ -2141,13 +_,16 @@
+@@ -2139,13 +_,16 @@
          IntegratedServer integratedserver = this.singleplayerServer;
          this.singleplayerServer = null;
          this.gameRenderer.resetData();
@@ -382,7 +382,7 @@
              }
  
              if (integratedserver != null) {
-@@ -2170,6 +_,7 @@
+@@ -2168,6 +_,7 @@
          } finally {
              this.clientLevelTeardownInProgress = false;
          }
@@ -390,7 +390,7 @@
      }
  
      public void clearDownloadedResourcePacks() {
-@@ -2295,6 +_,7 @@
+@@ -2293,6 +_,7 @@
  
      private void pickBlock() {
          if (this.hitResult != null && this.hitResult.getType() != HitResult.Type.MISS) {

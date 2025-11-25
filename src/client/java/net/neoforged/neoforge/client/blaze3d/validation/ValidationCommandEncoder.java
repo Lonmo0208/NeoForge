@@ -152,7 +152,7 @@ public class ValidationCommandEncoder implements CommandEncoder {
     }
 
     @Override
-    public void copyTextureToBuffer(GpuTexture texture, GpuBuffer buffer, int bufferOffset, Runnable callback, int mipLevel) {
+    public void copyTextureToBuffer(GpuTexture texture, GpuBuffer buffer, long bufferOffset, Runnable callback, int mipLevel) {
         if (!(texture instanceof ValidationGpuTexture validationTexture)) {
             throw new IllegalArgumentException();
         }
@@ -160,7 +160,7 @@ public class ValidationCommandEncoder implements CommandEncoder {
     }
 
     @Override
-    public void copyTextureToBuffer(GpuTexture texture, GpuBuffer buffer, int bufferOffset, Runnable callback, int mipLevel, int x, int y, int width, int height) {
+    public void copyTextureToBuffer(GpuTexture texture, GpuBuffer buffer, long bufferOffset, Runnable callback, int mipLevel, int x, int y, int width, int height) {
         if (!(texture instanceof ValidationGpuTexture validationTexture)) {
             throw new IllegalArgumentException();
         }

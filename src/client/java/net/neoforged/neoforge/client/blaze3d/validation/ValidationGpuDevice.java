@@ -103,7 +103,7 @@ public class ValidationGpuDevice implements GpuDevice {
     }
 
     @Override
-    public GpuBuffer createBuffer(@Nullable Supplier<String> label, int usage, int size) {
+    public GpuBuffer createBuffer(@Nullable Supplier<String> label, int usage, long size) {
         validator.validateBufferUsage(usage);
         return realDevice.createBuffer(label, usage, size);
     }
