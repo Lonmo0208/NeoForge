@@ -372,20 +372,20 @@
          GameType gametype = this.server.getForcedGameType();
          if (gametype != null) {
              return gametype;
-@@ -2066,6 +_,9 @@
+@@ -2066,6 +_,8 @@
  
      public void drop(boolean p_182295_) {
          Inventory inventory = this.getInventory();
 +        ItemStack selected = inventory.getSelectedItem();
 +        if (selected.isEmpty() || !selected.onDroppedByPlayer(this)) return;
-+        if (isUsingItem() && getUsedItemHand() == InteractionHand.MAIN_HAND && (p_182295_ || selected.getCount() == 1)) stopUsingItem(); // Forge: fix MC-231097 on the serverside
          ItemStack itemstack = inventory.removeFromSelected(p_182295_);
          this.containerMenu
              .findSlot(inventory, inventory.getSelectedSlot())
-@@ -2075,6 +_,7 @@
+@@ -2074,7 +_,7 @@
+             this.stopUsingItem();
          }
  
-         this.drop(itemstack, false, true);
+-        this.drop(itemstack, false, true);
 +        net.neoforged.neoforge.common.CommonHooks.onPlayerTossEvent(this, itemstack, false, true);
      }
  
