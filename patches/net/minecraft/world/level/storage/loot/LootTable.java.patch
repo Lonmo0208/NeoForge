@@ -105,13 +105,13 @@
 +    }
 +
 +    // Neo: Retrieve LootPools by name
-+    @org.jetbrains.annotations.Nullable
++    @org.jspecify.annotations.Nullable
 +    public LootPool getPool(String name) {
 +        return pools.stream().filter(e -> name.equals(e.getName())).findFirst().orElse(null);
 +    }
 +
 +    // Neo: Remove LootPools by name
-+    @org.jetbrains.annotations.Nullable
++    @org.jspecify.annotations.Nullable
 +    public LootPool removePool(String name) {
 +        checkFrozen();
 +        for (LootPool pool : this.pools) {

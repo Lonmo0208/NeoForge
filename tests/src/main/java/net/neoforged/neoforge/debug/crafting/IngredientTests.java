@@ -62,7 +62,7 @@ import net.neoforged.testframework.condition.TestEnabledIngredient;
 import net.neoforged.testframework.gametest.EmptyTemplate;
 import net.neoforged.testframework.gametest.GameTest;
 import net.neoforged.testframework.registration.RegistrationHelper;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @ForEachTest(groups = "crafting.ingredient")
 public class IngredientTests {
@@ -313,7 +313,7 @@ public class IngredientTests {
         private final ItemStack result;
         private final List<Ingredient> ingredients = new ArrayList<>();
         private final Map<String, Criterion<?>> criteria = new LinkedHashMap<>();
-        @org.jetbrains.annotations.Nullable
+        @org.jspecify.annotations.Nullable
         private String group;
 
         private CompressedShapelessRecipeBuilder(RecipeCategory p_250837_, ItemStack p_363612_) {

@@ -14,7 +14,7 @@ import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.neoforge.client.loading.ClientModLoader;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Custom button subclass to draw an indicator overlay on the button when updates are available.
@@ -23,8 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public class ModsButton extends Button.Plain {
     private static final Identifier VERSION_CHECK_ICONS = Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "textures/gui/version_check_icons.png");
 
-    @Nullable
-    private VersionChecker.Status showNotification;
+    private VersionChecker.@Nullable Status showNotification;
     private boolean hasCheckedForUpdates = false;
 
     public ModsButton(Builder builder) {

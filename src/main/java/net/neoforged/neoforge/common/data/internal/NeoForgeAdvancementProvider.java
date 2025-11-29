@@ -67,7 +67,7 @@ import net.neoforged.neoforge.common.advancements.critereon.PiglinCurrencyItemPr
 import net.neoforged.neoforge.common.advancements.critereon.PiglinNeutralArmorEntityPredicate;
 import net.neoforged.neoforge.common.advancements.critereon.SnowBootsEntityPredicate;
 import net.neoforged.neoforge.common.advancements.critereon.TridentEntityPredicate;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class NeoForgeAdvancementProvider extends AdvancementProvider {
     public NeoForgeAdvancementProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
@@ -333,9 +333,8 @@ public class NeoForgeAdvancementProvider extends AdvancementProvider {
             });
         }
 
-        @Nullable
         @SuppressWarnings("removal")
-        private Advancement.Builder findAndReplaceInHolder(AdvancementHolder advancementHolder, HolderLookup.Provider registries) {
+        private Advancement.@Nullable Builder findAndReplaceInHolder(AdvancementHolder advancementHolder, HolderLookup.Provider registries) {
             Advancement advancement = advancementHolder.value();
             Advancement.Builder builder = Advancement.Builder.advancement();
             boolean hasReplaced = false;

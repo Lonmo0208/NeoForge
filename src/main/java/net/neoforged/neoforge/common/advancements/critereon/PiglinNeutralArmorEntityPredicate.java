@@ -14,7 +14,7 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class PiglinNeutralArmorEntityPredicate implements EntitySubPredicate {
     public static final PiglinNeutralArmorEntityPredicate INSTANCE = new PiglinNeutralArmorEntityPredicate();

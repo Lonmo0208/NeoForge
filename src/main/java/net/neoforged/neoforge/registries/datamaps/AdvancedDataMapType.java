@@ -11,7 +11,7 @@ import java.util.Objects;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A version of {@link DataMapType data map types} that has two more features for compatibility and conflict handling: mergers and removers.

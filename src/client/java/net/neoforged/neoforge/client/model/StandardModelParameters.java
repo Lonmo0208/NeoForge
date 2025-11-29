@@ -15,7 +15,7 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.client.RenderTypeGroup;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Wrapper around all standard top-level model parameters added by vanilla and NeoForge except elements.
@@ -28,7 +28,7 @@ public record StandardModelParameters(
         TextureSlots.Data textures,
         @Nullable ItemTransforms itemTransforms,
         @Nullable Boolean ambientOcclusion,
-        @Nullable UnbakedModel.GuiLight guiLight,
+        UnbakedModel.@Nullable GuiLight guiLight,
         @Nullable Transformation rootTransform,
         RenderTypeGroup renderTypeGroup,
         Map<String, Boolean> partVisibility) {

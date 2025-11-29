@@ -26,7 +26,7 @@
      public static RenderType getMovingBlockRenderType(BlockState p_109294_) {
          Block block = p_109294_.getBlock();
          if (block instanceof LeavesBlock) {
-@@ -391,11 +_,15 @@
+@@ -391,6 +_,8 @@
          }
      }
  
@@ -35,13 +35,6 @@
      public static RenderType getRenderType(BlockState p_366653_) {
          ChunkSectionLayer chunksectionlayer = getChunkRenderType(p_366653_);
          return chunksectionlayer == ChunkSectionLayer.TRANSLUCENT ? Sheets.translucentBlockItemSheet() : Sheets.cutoutBlockSheet();
-     }
- 
-+    /** @deprecated Neo: See {@link net.minecraft.client.renderer.item.BlockModelWrapper#renderType}. */
-+    @Deprecated // Note: this method does NOT support model-based render types
-     public static ChunkSectionLayer getRenderLayer(FluidState p_109288_) {
-         ChunkSectionLayer chunksectionlayer = LAYER_BY_FLUID.get(p_109288_.getType());
-         return chunksectionlayer != null ? chunksectionlayer : ChunkSectionLayer.SOLID;
 @@ -403,5 +_,30 @@
  
      public static void setCutoutLeaves(boolean p_455116_) {

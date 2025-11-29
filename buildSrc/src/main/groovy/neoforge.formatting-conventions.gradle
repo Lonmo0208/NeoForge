@@ -61,13 +61,14 @@ immaculate {
         }
 
         custom 'noNotNull', { String fileContents ->
-            if (fileContents.contains('@NotNull') || fileContents.contains('@Nonnull')) {
-                throw new GradleException('@NotNull and @Nonnull are disallowed.')
+            if (fileContents.contains('@NotNull') || fileContents.contains('@Nonnull') || fileContents.contains('@NonNull')) {
+                throw new GradleException('Non-nullability annotations are disallowed.')
             }
         }
 
-        custom 'jetbrainsNullable', { String fileContents ->
-            fileContents.replace('javax.annotation.Nullable', 'org.jetbrains.annotations.Nullable')
+        custom 'jspecifyNullable', { String fileContents ->
+            fileContents.replace('javax.annotation.Nullable', 'org.jspecify.annotations.Nullable')
+            fileContents.replace('org.jetbrains.annotations.Nullable', 'org.jspecify.annotations.Nullable')
         }
     }
 }

@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import joptsimple.internal.Strings;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.TextureSlots;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -33,9 +32,9 @@ import net.neoforged.neoforge.client.model.ExtendedUnbakedGeometry;
 import net.neoforged.neoforge.client.model.NeoForgeModelProperties;
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
 public class ObjGeometry implements ExtendedUnbakedGeometry {
     private static final Vector4f COLOR_WHITE = new Vector4f(1, 1, 1, 1);
@@ -308,10 +307,9 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
         quadBaker.setSprite(texture);
         quadBaker.setTintIndex(tintIndex);
 
-        int uv2 = 0;
         if (emissiveAmbient) {
             int fakeLight = (int) ((ambientColor.x() + ambientColor.y() + ambientColor.z()) * 15 / 3.0f);
-            uv2 = LightTexture.pack(fakeLight, fakeLight);
+            quadBaker.setLightEmission(fakeLight);
             quadBaker.setShade(fakeLight == 0 && shadeQuads);
         } else {
             quadBaker.setShade(shadeQuads);
@@ -346,7 +344,6 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
             quadBaker.setUv(
                     texture.getU(texCoord.x),
                     texture.getV((flipV ? 1 - texCoord.y : texCoord.y)));
-            quadBaker.setLight(uv2);
             quadBaker.setNormal(normal.x(), normal.y(), normal.z());
             if (i == 0) {
                 quadBaker.setDirection(Direction.getApproximateNearest(normal.x(), normal.y(), normal.z()));
@@ -454,13 +451,12 @@ public class ObjGeometry implements ExtendedUnbakedGeometry {
     }
 
     private class ModelMesh {
-        @Nullable
-        public ObjMaterialLibrary.Material mat;
+        public ObjMaterialLibrary.@Nullable Material mat;
         @Nullable
         public String smoothingGroup;
         public final List<int[][]> faces = Lists.newArrayList();
 
-        public ModelMesh(@Nullable ObjMaterialLibrary.Material currentMat, @Nullable String currentSmoothingGroup) {
+        public ModelMesh(ObjMaterialLibrary.@Nullable Material currentMat, @Nullable String currentSmoothingGroup) {
             this.mat = currentMat;
             this.smoothingGroup = currentSmoothingGroup;
         }

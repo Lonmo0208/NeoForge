@@ -5,9 +5,9 @@
      abstract int createFrameBufferObject();
  
 -    abstract void bindFrameBufferTextures(int p_412046_, int p_412388_, int p_412116_, int p_412536_, int p_412779_);
-+    abstract void bindFrameBufferTextures(int p_412046_, int p_412388_, int p_412116_, int p_412536_, int p_412779_, boolean useStencil);
++    abstract void bindFrameBufferTextures(int p_412046_, int p_412388_, int p_412116_, int p_412536_, @GpuBuffer.Usage int p_412779_, boolean useStencil);
 +
-+    public void bindFrameBufferTextures(int p_412046_, int p_412388_, int p_412116_, int p_412536_, int p_412779_) {
++    public void bindFrameBufferTextures(int p_412046_, int p_412388_, int p_412116_, int p_412536_, @GpuBuffer.Usage int p_412779_) {
 +        bindFrameBufferTextures(p_412046_, p_412388_, p_412116_, p_412536_, p_412779_, false);
 +    }
  
@@ -18,7 +18,7 @@
  
          @Override
 -        public void bindFrameBufferTextures(int p_412474_, int p_412101_, int p_412181_, int p_412742_, @GpuBuffer.Usage int p_412591_) {
-+        public void bindFrameBufferTextures(int p_412474_, int p_412101_, int p_412181_, int p_412742_, int p_412591_, boolean useStencil) {
++        public void bindFrameBufferTextures(int p_412474_, int p_412101_, int p_412181_, int p_412742_, @GpuBuffer.Usage int p_412591_, boolean useStencil) {
              ARBDirectStateAccess.glNamedFramebufferTexture(p_412474_, 36064, p_412101_, p_412742_);
              ARBDirectStateAccess.glNamedFramebufferTexture(p_412474_, 36096, p_412181_, p_412742_);
 +            if (useStencil) {

@@ -41,7 +41,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.fml.loading.toposort.TopologicalSort;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 public final class CreativeModeTabRegistry {

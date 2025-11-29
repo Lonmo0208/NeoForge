@@ -217,10 +217,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.joml.Vector3fc;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Class for various client-side-only hooks.
@@ -471,48 +470,6 @@ public class ClientHooks {
     @SuppressWarnings("deprecation")
     public static Material getBlockMaterial(Identifier loc) {
         return new Material(TextureAtlas.LOCATION_BLOCKS, loc);
-    }
-
-    /**
-     * Computes the packed normal of a quad based on the stored vertex positions.
-     */
-    public static int computeQuadNormal(Vector3fc position0, Vector3fc position1, Vector3fc position2, Vector3fc position3) {
-        float dx0 = position3.x() - position1.x();
-        float dy0 = position3.y() - position1.y();
-        float dz0 = position3.z() - position1.z();
-        float dx1 = position2.x() - position0.x();
-        float dy1 = position2.y() - position0.y();
-        float dz1 = position2.z() - position0.z();
-
-        float nx = dy1 * dz0 - dz1 * dy0;
-        float ny = dz1 * dx0 - dx1 * dz0;
-        float nz = dx1 * dy0 - dy1 * dx0;
-
-        float length = Mth.sqrt(nx * nx + ny * ny + nz * nz);
-        if (length > 0) {
-            nx /= length;
-            ny /= length;
-            nz /= length;
-        }
-
-        int packedx = ((byte) Math.round(nx * 127)) & 0xFF;
-        int packedy = ((byte) Math.round(ny * 127)) & 0xFF;
-        int packedz = ((byte) Math.round(nz * 127)) & 0xFF;
-
-        return packedx | (packedy << 8) | (packedz << 16);
-    }
-
-    /**
-     * Modifies the passed {@code faceData} to fill in the vertex normals.
-     * The normals are computed from the vertex positions, see {@link #computeQuadNormal}.
-     */
-    public static void fillNormal(Vector3fc position0, Vector3fc position1, Vector3fc position2, Vector3fc position3) {
-        int normal = computeQuadNormal(position0, position1, position2, position3);
-
-        // TODO 1.21.11: quads can no longer store baked normals
-        //for (int i = 0; i < 4; i++) {
-        //    faceData[i * 8 + 7] = normal;
-        //}
     }
 
     public static boolean loadEntityShader(@Nullable Entity entity, GameRenderer gameRenderer) {
@@ -913,7 +870,7 @@ public class ClientHooks {
         EntitySpectatorShaderManager.init();
         RecipeBookManager.init();
         mc.gui.initModdedOverlays();
-        DimensionSpecialEffectsManager.init();
+        CustomEnvironmentEffectsRendererManager.init();
         NamedRenderTypeManager.init();
         ColorResolverManager.init();
         ItemDecoratorHandler.init();

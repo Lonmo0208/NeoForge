@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import net.neoforged.neoforge.client.blaze3d.GpuDeviceFeatures;
 import net.neoforged.neoforge.client.blaze3d.GpuDeviceProperties;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The validation GpuDevice is used to ensure that both mods and backends are complying with the B3D API contract correctly.
@@ -103,7 +103,7 @@ public class ValidationGpuDevice implements GpuDevice {
     }
 
     @Override
-    public GpuBuffer createBuffer(@Nullable Supplier<String> label, int usage, int size) {
+    public GpuBuffer createBuffer(@Nullable Supplier<String> label, int usage, long size) {
         validator.validateBufferUsage(usage);
         return realDevice.createBuffer(label, usage, size);
     }

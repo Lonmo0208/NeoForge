@@ -52,7 +52,7 @@ import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.loot.CanItemPerformAbility;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Currently used only for replacing shears item to shears_dig item ability
@@ -96,8 +96,7 @@ public final class NeoForgeLootTableProvider extends LootTableProvider {
         conditionReplacers.add(replacer);
     }
 
-    @Nullable
-    private LootTable.Builder findAndReplaceInLootTableBuilder(LootTable.Builder builder) {
+    private LootTable.@Nullable Builder findAndReplaceInLootTableBuilder(LootTable.Builder builder) {
         LootTable lootTable = builder.build();
 
         Optional<Identifier> randomSequence = getPrivateValue(LootTable.class, lootTable, "randomSequence");

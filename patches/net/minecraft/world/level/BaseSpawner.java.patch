@@ -21,15 +21,14 @@
  
                                  spawndata.getEquipment().ifPresent(mob::equip);
                              }
-@@ -281,5 +_,12 @@
+@@ -281,5 +_,11 @@
  
      public double getOSpin() {
          return this.oSpin;
 +    }
 +
 +    @Override
-+    @org.jetbrains.annotations.Nullable
-+    public com.mojang.datafixers.util.Either<net.minecraft.world.level.block.entity.BlockEntity, Entity> getOwner() {
++    public com.mojang.datafixers.util.@Nullable Either<net.minecraft.world.level.block.entity.BlockEntity, Entity> getOwner() {
 +        // The vanilla anonymous classes have proper overrides, but we return null here for compatibility.
 +        return null;
      }

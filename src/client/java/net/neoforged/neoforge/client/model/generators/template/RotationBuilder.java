@@ -8,14 +8,13 @@ package net.neoforged.neoforge.client.model.generators.template;
 import com.google.common.base.Preconditions;
 import net.minecraft.client.renderer.block.model.BlockElementRotation;
 import net.minecraft.core.Direction;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 public final class RotationBuilder {
     @Nullable
     private Vector3f origin;
-    @Nullable
-    private BlockElementRotation.RotationValue value;
+    private BlockElementRotation.@Nullable RotationValue value;
     private boolean rescale;
 
     /**

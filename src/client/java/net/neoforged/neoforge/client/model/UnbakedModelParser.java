@@ -22,7 +22,7 @@ import net.minecraft.util.GsonHelper;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class UnbakedModelParser {
     private static ImmutableMap<Identifier, UnbakedModelLoader<?>> LOADERS;

@@ -30,7 +30,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.IArmPoseTransformer;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@linkplain LogicalSide#CLIENT Client-only} extensions to {@link Item}.
@@ -70,8 +70,7 @@ public interface IClientItemExtensions {
      * @param itemStack    The stack being held
      * @return A custom ArmPose that can be used to define movement of the arm
      */
-    @Nullable
-    default HumanoidModel.ArmPose getArmPose(LivingEntity entityLiving, InteractionHand hand, ItemStack itemStack) {
+    default HumanoidModel.@Nullable ArmPose getArmPose(LivingEntity entityLiving, InteractionHand hand, ItemStack itemStack) {
         return null;
     }
 

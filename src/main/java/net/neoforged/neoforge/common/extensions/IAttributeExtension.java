@@ -26,7 +26,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.config.NeoForgeCommonConfig;
 import net.neoforged.neoforge.common.util.AttributeUtil;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface IAttributeExtension {
     public static final DecimalFormat FORMAT = Util.make(new DecimalFormat("#.##"), fmt -> fmt.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));;

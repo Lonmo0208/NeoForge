@@ -9,7 +9,7 @@ import com.mojang.logging.LogUtils;
 import java.util.Map;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 /**

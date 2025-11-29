@@ -1,15 +1,5 @@
 --- a/net/minecraft/client/gui/screens/Screen.java
 +++ b/net/minecraft/client/gui/screens/Screen.java
-@@ -50,7 +_,8 @@
- import org.slf4j.Logger;
- 
- @OnlyIn(Dist.CLIENT)
--public abstract class Screen extends AbstractContainerEventHandler implements Renderable {
-+public abstract class
-+Screen extends AbstractContainerEventHandler implements Renderable {
-     private static final Logger LOGGER = LogUtils.getLogger();
-     private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
-     public static final Identifier MENU_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/menu_background.png");
 @@ -107,6 +_,7 @@
      public final void renderWithTooltipAndSubtitles(GuiGraphics p_434220_, int p_435721_, int p_435145_, float p_435742_) {
          p_434220_.nextStratum();

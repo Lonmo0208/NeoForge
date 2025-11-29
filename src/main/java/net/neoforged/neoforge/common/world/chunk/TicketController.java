@@ -7,13 +7,12 @@ package net.neoforged.neoforge.common.world.chunk;
 
 import java.util.Objects;
 import java.util.UUID;
-import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.TicketStorage;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A class used to manage chunk loading tickets associated with a specific ID.
@@ -25,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
  * @param callback a callback to be called when the tickets are loaded, in order to validate whether they're still active or not. {@code null} should be used when a
  *                 callback needn't be provided
  */
-@ParametersAreNonnullByDefault
 public record TicketController(Identifier id, @Nullable LoadingValidationCallback callback) {
     public TicketController {
         Objects.requireNonNull(id, "id must not be null");

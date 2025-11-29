@@ -179,7 +179,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.resource.ReloadListenerSort;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EventHooks {
     public static boolean onMultiBlockPlace(@Nullable Entity entity, List<BlockSnapshot> blockSnapshots, Direction direction) {
@@ -572,7 +572,7 @@ public class EventHooks {
         NeoForge.EVENT_BUS.post(new PlayerFlyableFallEvent(player, distance, multiplier));
     }
 
-    public static boolean onPlayerSpawnSet(Player player, @Nullable ServerPlayer.RespawnConfig respawnConfig) {
+    public static boolean onPlayerSpawnSet(Player player, ServerPlayer.@Nullable RespawnConfig respawnConfig) {
         return NeoForge.EVENT_BUS.post(new PlayerSetSpawnEvent(player, respawnConfig)).isCanceled();
     }
 

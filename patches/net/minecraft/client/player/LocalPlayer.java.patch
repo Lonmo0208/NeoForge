@@ -1,13 +1,5 @@
 --- a/net/minecraft/client/player/LocalPlayer.java
 +++ b/net/minecraft/client/player/LocalPlayer.java
-@@ -318,6 +_,7 @@
-         ServerboundPlayerActionPacket.Action serverboundplayeractionpacket$action = p_108701_
-             ? ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS
-             : ServerboundPlayerActionPacket.Action.DROP_ITEM;
-+        if (isUsingItem() && getUsedItemHand() == InteractionHand.MAIN_HAND && (p_108701_ || getUseItem().getCount() == 1)) stopUsingItem(); // Forge: fix MC-231097 on the clientside
-         ItemStack itemstack = this.getInventory().removeFromSelected(p_108701_);
-         this.connection.send(new ServerboundPlayerActionPacket(serverboundplayeractionpacket$action, BlockPos.ZERO, Direction.DOWN));
-         return !itemstack.isEmpty();
 @@ -526,7 +_,14 @@
  
      @Override
@@ -24,7 +16,7 @@
      }
  
      @Override
-@@ -773,6 +_,7 @@
+@@ -768,6 +_,7 @@
              && this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING)
              && (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
          this.input.tick();
@@ -32,7 +24,7 @@
          this.minecraft.getTutorial().onInput(this.input);
          boolean flag3 = false;
          if (this.autoJumpTime > 0) {
-@@ -817,7 +_,7 @@
+@@ -812,7 +_,7 @@
          }
  
          boolean flag4 = false;
@@ -41,7 +33,7 @@
              if (this.minecraft.gameMode.isSpectator()) {
                  if (!abilities.flying) {
                      abilities.flying = true;
-@@ -914,7 +_,7 @@
+@@ -909,7 +_,7 @@
      }
  
      private boolean shouldStopSwimSprinting() {
@@ -50,7 +42,7 @@
      }
  
      public Portal.Transition getActivePortalLocalTransition() {
-@@ -959,6 +_,10 @@
+@@ -954,6 +_,10 @@
      @Override
      public void rideTick() {
          super.rideTick();

@@ -20,12 +20,11 @@
          }
      }
  
-@@ -445,9 +_,21 @@
+@@ -445,9 +_,20 @@
          private final boolean twoHanded;
          private final boolean affectsOffhandPose;
  
-+        @org.jetbrains.annotations.Nullable
-+        private final net.neoforged.neoforge.client.IArmPoseTransformer forgeArmPose;
++        private final net.neoforged.neoforge.client.@org.jspecify.annotations.Nullable IArmPoseTransformer forgeArmPose;
 +
 +        @net.neoforged.fml.common.asm.enumextension.ReservedConstructor
          ArmPose(boolean p_102896_, boolean p_470634_) {
