@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/block/model/ItemModelGenerator.java
 +++ b/net/minecraft/client/renderer/block/model/ItemModelGenerator.java
-@@ -55,8 +_,8 @@
+@@ -58,8 +_,8 @@
                  break;
              }
  

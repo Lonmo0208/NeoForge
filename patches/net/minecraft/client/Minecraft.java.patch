@@ -268,18 +268,19 @@
                      this.player.swing(InteractionHand.MAIN_HAND);
                      return true;
                  } else {
-@@ -1655,8 +_,10 @@
+@@ -1655,9 +_,10 @@
                              }
  
                              this.player.resetAttackStrengthTicker();
 +                            net.neoforged.neoforge.common.CommonHooks.onEmptyLeftClick(this.player);
                      }
  
-+                    if (inputEvent.shouldSwingHand())
-                     this.player.swing(InteractionHand.MAIN_HAND);
-                     return flag;
-                 }
-@@ -1673,6 +_,11 @@
+-                    if (!this.player.isSpectator()) {
++                    if (!this.player.isSpectator() && inputEvent.shouldSwingHand()) {
+                         this.player.swing(InteractionHand.MAIN_HAND);
+                     }
+ 
+@@ -1676,6 +_,11 @@
                  }
  
                  for (InteractionHand interactionhand : InteractionHand.values()) {
@@ -291,7 +292,7 @@
                      ItemStack itemstack = this.player.getItemInHand(interactionhand);
                      if (!itemstack.isItemEnabled(this.level.enabledFeatures())) {
                          return;
-@@ -1694,7 +_,7 @@
+@@ -1697,7 +_,7 @@
                                      }
  
                                      if (interactionresult instanceof InteractionResult.Success interactionresult$success2) {
@@ -300,7 +301,7 @@
                                              this.player.swing(interactionhand);
                                          }
  
-@@ -1707,7 +_,7 @@
+@@ -1710,7 +_,7 @@
                                  int i = itemstack.getCount();
                                  InteractionResult interactionresult1 = this.gameMode.useItemOn(this.player, interactionhand, blockhitresult);
                                  if (interactionresult1 instanceof InteractionResult.Success interactionresult$success) {
@@ -309,7 +310,7 @@
                                          this.player.swing(interactionhand);
                                          if (!itemstack.isEmpty() && (itemstack.getCount() != i || this.player.hasInfiniteMaterials())) {
                                              this.gameRenderer.itemInHandRenderer.itemUsed(interactionhand);
-@@ -1723,6 +_,9 @@
+@@ -1726,6 +_,9 @@
                          }
                      }
  
@@ -319,7 +320,7 @@
                      if (!itemstack.isEmpty()
                          && this.gameMode.useItem(this.player, interactionhand) instanceof InteractionResult.Success interactionresult$success1) {
                          if (interactionresult$success1.swingSource() == InteractionResult.SwingSource.CLIENT) {
-@@ -1743,6 +_,10 @@
+@@ -1746,6 +_,10 @@
  
      public void tick() {
          this.clientTickCount++;
@@ -330,7 +331,7 @@
          if (this.level != null && !this.pause) {
              this.level.tickRateManager().tick();
          }
-@@ -1833,6 +_,7 @@
+@@ -1836,6 +_,7 @@
  
                  this.tutorial.tick();
  
@@ -338,7 +339,7 @@
                  try {
                      this.level.tick(() -> true);
                  } catch (Throwable throwable1) {
-@@ -1846,6 +_,7 @@
+@@ -1849,6 +_,7 @@
  
                      throw new ReportedException(crashreport1);
                  }
@@ -346,7 +347,7 @@
              }
  
              profilerfiller.popPush("animateTick");
-@@ -1870,6 +_,10 @@
+@@ -1873,6 +_,10 @@
          profilerfiller.popPush("keyboard");
          this.keyboardHandler.tick();
          profilerfiller.pop();
@@ -357,7 +358,7 @@
      }
  
      private boolean isLevelRunningNormally() {
-@@ -2086,6 +_,7 @@
+@@ -2089,6 +_,7 @@
      }
  
      public void setLevel(ClientLevel p_91157_) {
@@ -365,7 +366,7 @@
          this.level = p_91157_;
          this.updateLevelInEngines(p_91157_);
      }
-@@ -2139,13 +_,16 @@
+@@ -2150,13 +_,16 @@
          IntegratedServer integratedserver = this.singleplayerServer;
          this.singleplayerServer = null;
          this.gameRenderer.resetData();
@@ -382,7 +383,7 @@
              }
  
              if (integratedserver != null) {
-@@ -2168,6 +_,7 @@
+@@ -2179,6 +_,7 @@
          } finally {
              this.clientLevelTeardownInProgress = false;
          }
@@ -390,7 +391,7 @@
      }
  
      public void clearDownloadedResourcePacks() {
-@@ -2293,6 +_,7 @@
+@@ -2311,6 +_,7 @@
  
      private void pickBlock() {
          if (this.hitResult != null && this.hitResult.getType() != HitResult.Type.MISS) {

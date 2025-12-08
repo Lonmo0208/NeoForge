@@ -32,7 +32,7 @@
                      this.markPosition(p_140418_, chunkaccess.getPersistedStatus().getChunkType());
                      return chunkaccess;
                  } else {
-@@ -773,6 +_,7 @@
+@@ -776,6 +_,7 @@
                  Profiler.get().incrementCounter("chunkSave");
                  this.activeChunkWrites.incrementAndGet();
                  SerializableChunkData serializablechunkdata = SerializableChunkData.copyOf(this.level, p_140259_);
@@ -40,7 +40,7 @@
                  CompletableFuture<CompoundTag> completablefuture = CompletableFuture.supplyAsync(serializablechunkdata::write, Util.backgroundExecutor());
                  this.write(chunkpos, completablefuture::join).handle((p_432454_, p_432455_) -> {
                      if (p_432455_ != null) {
-@@ -839,9 +_,11 @@
+@@ -842,9 +_,11 @@
  
      private static void markChunkPendingToSend(ServerPlayer p_295834_, LevelChunk p_296281_) {
          p_295834_.connection.chunkSender.markChunkPendingToSend(p_296281_);
@@ -52,7 +52,7 @@
          p_294215_.connection.chunkSender.dropChunk(p_294215_, p_294758_);
      }
  
-@@ -944,7 +_,7 @@
+@@ -947,7 +_,7 @@
              ChunkHolder chunkholder = this.visibleChunkMap.get(longiterator.nextLong());
              if (chunkholder != null) {
                  LevelChunk levelchunk = chunkholder.getTickingChunk();
@@ -61,7 +61,7 @@
                      p_401784_.add(levelchunk);
                  }
              }
-@@ -968,6 +_,18 @@
+@@ -971,6 +_,18 @@
          return tristate == TriState.DEFAULT ? this.anyPlayerCloseEnoughForSpawningInternal(p_183880_) : tristate.toBoolean(true);
      }
  
@@ -80,7 +80,7 @@
      boolean anyPlayerCloseEnoughTo(BlockPos p_461043_, int p_460915_) {
          Vec3 vec3 = new Vec3(p_461043_);
  
-@@ -1097,6 +_,7 @@
+@@ -1100,6 +_,7 @@
                  this.playerMap.unIgnorePlayer(p_140185_);
              }
  
@@ -88,7 +88,7 @@
              this.updateChunkTracking(p_140185_);
          }
      }
-@@ -1148,7 +_,7 @@
+@@ -1151,7 +_,7 @@
      }
  
      protected void addEntity(Entity p_140200_) {
@@ -97,7 +97,7 @@
              EntityType<?> entitytype = p_140200_.getType();
              int i = entitytype.clientTrackingRange() * 16;
              if (i != 0) {
-@@ -1307,6 +_,20 @@
+@@ -1310,6 +_,20 @@
          }
      }
  
@@ -118,7 +118,7 @@
      class DistanceManager extends net.minecraft.server.level.DistanceManager {
          protected DistanceManager(TicketStorage p_394597_, Executor p_140459_, Executor p_140460_) {
              super(p_394597_, p_140459_, p_140460_);
-@@ -1438,5 +_,20 @@
+@@ -1441,5 +_,20 @@
                  this.updatePlayer(serverplayer);
              }
          }

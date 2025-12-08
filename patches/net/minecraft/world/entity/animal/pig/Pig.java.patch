@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/animal/pig/Pig.java
 +++ b/net/minecraft/world/entity/animal/pig/Pig.java
-@@ -208,10 +_,11 @@
+@@ -174,10 +_,11 @@
  
      @Override
      public void thunderHit(ServerLevel p_480720_, LightningBolt p_481450_) {

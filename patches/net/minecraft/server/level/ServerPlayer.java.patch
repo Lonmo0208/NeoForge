@@ -234,10 +234,10 @@
          this.containerMenu = this.inventoryMenu;
      }
  
-@@ -1637,6 +_,15 @@
-         this.setShoulderEntityLeft(p_9016_.getShoulderEntityLeft());
+@@ -1629,6 +_,15 @@
          this.setShoulderEntityRight(p_9016_.getShoulderEntityRight());
          this.setLastDeathLocation(p_9016_.getLastDeathLocation());
+         this.waypointIcon().copyFrom(p_9016_.waypointIcon());
 +
 +        //Copy over a section of the Entity Data from the old player.
 +        //Allows mods to specify data that persists after players respawn.
@@ -249,7 +249,7 @@
 +        this.tabListFooter = p_9016_.tabListFooter;
      }
  
-     @Override
+     private void transferInventoryXpAndScore(Player p_482380_) {
 @@ -1741,6 +_,8 @@
  
      public boolean setGameMode(GameType p_143404_) {
