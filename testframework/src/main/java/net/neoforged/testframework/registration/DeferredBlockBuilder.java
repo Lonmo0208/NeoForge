@@ -140,7 +140,7 @@ public class DeferredBlockBuilder<T extends Block> extends DeferredBlock<T> {
         //Capture the color into a local tint source, which has a unit mapcodec for serialization
         final ConstantItemTintSourceBuilder source = new ConstantItemTintSourceBuilder(color);
 
-        helper.eventListeners().accept((final RegisterColorHandlersEvent.Block event) -> event.register((p_92567_, p_92568_, p_92569_, p_92570_) -> color, value()));
+        helper.eventListeners().accept((final RegisterColorHandlersEvent.Block event) -> event.register((state, level, pos, tintIndex) -> color, value()));
         helper.eventListeners().accept((final RegisterColorHandlersEvent.ItemTintSources event) -> {
             if (hasItem) {
                 event.register(key.identifier(), source.type());
@@ -158,7 +158,7 @@ public class DeferredBlockBuilder<T extends Block> extends DeferredBlock<T> {
         }
 
         @Override
-        public int calculate(ItemStack p_388652_, @Nullable ClientLevel p_390356_, @Nullable LivingEntity p_390510_) {
+        public int calculate(ItemStack itemStack, @Nullable ClientLevel level, @Nullable LivingEntity owner) {
             return color;
         }
 

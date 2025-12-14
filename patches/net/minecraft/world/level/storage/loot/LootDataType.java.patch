@@ -27,5 +27,5 @@
 +        this(registryKey, codec, validator, defaultValue, net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodec(codec), idSetter);
 +    }
  
-     public void runValidation(ValidationContext p_279366_, ResourceKey<T> p_336149_, T p_279124_) {
-         this.validator.run(p_279366_, p_336149_, p_279124_);
+     public void runValidation(ValidationContext rootContext, ResourceKey<T> key, T value) {
+         this.validator.run(rootContext, key, value);

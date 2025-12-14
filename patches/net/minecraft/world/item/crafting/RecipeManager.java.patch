@@ -6,27 +6,27 @@
      private Map<ResourceKey<Recipe<?>>, List<RecipeManager.ServerDisplayInfo>> recipeToDisplay = Map.of();
 +    private Object2IntMap<ResourceKey<net.minecraft.world.item.crafting.Recipe<?>>> recipePriorities = it.unimi.dsi.fastutil.objects.Object2IntMaps.emptyMap(); // Neo: recipe priorities set from RecipePriorityManager.
  
-     public RecipeManager(HolderLookup.Provider p_324137_) {
-         this.registries = p_324137_;
+     public RecipeManager(HolderLookup.Provider registries) {
+         this.registries = registries;
 @@ -71,7 +_,7 @@
-     protected RecipeMap prepare(ResourceManager p_379845_, ProfilerFiller p_380058_) {
+     protected RecipeMap prepare(ResourceManager manager, ProfilerFiller profiler) {
          SortedMap<Identifier, Recipe<?>> sortedmap = new TreeMap<>();
          SimpleJsonResourceReloadListener.scanDirectory(
--            p_379845_, RECIPE_LISTER, this.registries.createSerializationContext(JsonOps.INSTANCE), Recipe.CODEC, sortedmap
-+            p_379845_, RECIPE_LISTER, new net.neoforged.neoforge.common.conditions.ConditionalOps<>(this.registries.createSerializationContext(JsonOps.INSTANCE), getContext()), Recipe.CODEC, sortedmap // Neo: add condition context
+-            manager, RECIPE_LISTER, this.registries.createSerializationContext(JsonOps.INSTANCE), Recipe.CODEC, sortedmap
++            manager, RECIPE_LISTER, new net.neoforged.neoforge.common.conditions.ConditionalOps<>(this.registries.createSerializationContext(JsonOps.INSTANCE), getContext()), Recipe.CODEC, sortedmap // Neo: add condition context
          );
          List<RecipeHolder<?>> list = new ArrayList<>(sortedmap.size());
-         sortedmap.forEach((p_466665_, p_466666_) -> {
+         sortedmap.forEach((id, recipe) -> {
 @@ -88,6 +_,7 @@
      }
  
-     public void finalizeRecipeLoading(FeatureFlagSet p_379660_) {
+     public void finalizeRecipeLoading(FeatureFlagSet enabledFlags) {
 +        this.recipes.order(this.recipePriorities); // Neo: order recipes by priority.
          List<SelectableRecipe.SingleInputEntry<StonecutterRecipe>> list = new ArrayList<>();
          List<RecipeManager.IngredientCollector> list1 = RECIPE_PROPERTY_SETS.entrySet()
              .stream()
 @@ -258,6 +_,16 @@
-         return p_380850_ -> p_380850_.getType() == p_381108_ && p_380850_ instanceof SingleItemRecipe singleitemrecipe
+         return recipe -> recipe.getType() == type && recipe instanceof SingleItemRecipe singleitemrecipe
              ? Optional.of(singleitemrecipe.input())
              : Optional.empty();
 +    }

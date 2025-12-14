@@ -51,7 +51,7 @@ public class ContainerTypeTest {
         }
 
         @Override
-        public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
+        public ItemStack quickMoveStack(Player player, int slotIndex) {
             return ItemStack.EMPTY;
         }
 

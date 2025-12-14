@@ -6,13 +6,13 @@
  public interface BlockStateModel extends net.neoforged.neoforge.client.extensions.BlockStateModelExtension {
 +    /** @deprecated Neo: Use {@link #collectParts(net.minecraft.world.level.BlockAndTintGetter, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, RandomSource, List)}. */
 +    @Deprecated
-     void collectParts(RandomSource p_410417_, List<BlockModelPart> p_410254_);
+     void collectParts(RandomSource random, List<BlockModelPart> output);
  
 +    /** @deprecated Neo: Use {@link #collectParts(net.minecraft.world.level.BlockAndTintGetter, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, RandomSource)}. */
 +    @Deprecated
-     default List<BlockModelPart> collectParts(RandomSource p_410570_) {
+     default List<BlockModelPart> collectParts(RandomSource random) {
          List<BlockModelPart> list = new ObjectArrayList<>();
-         this.collectParts(p_410570_, list);
+         this.collectParts(random, list);
          return list;
      }
  
@@ -23,7 +23,7 @@
      @OnlyIn(Dist.CLIENT)
 @@ -70,32 +_,43 @@
                  )
-                 .apply(p_409971_, Weighted::new)
+                 .apply(i, Weighted::new)
          );
 -        Codec<WeightedVariants.Unbaked> HARDCODED_WEIGHTED_CODEC = ExtraCodecs.nonEmptyList(ELEMENT_CODEC.listOf())
 +        @org.jetbrains.annotations.ApiStatus.Internal
@@ -32,12 +32,12 @@
 +        Codec<Weighted<Either<net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel, SingleVariant.Unbaked>>> WEIGHTED_MODEL_CODEC = net.neoforged.neoforge.client.model.block.BlockStateModelHooks.makeElementCodec();
 +        Codec<WeightedVariants.Unbaked> HARDCODED_WEIGHTED_CODEC = ExtraCodecs.nonEmptyList(WEIGHTED_MODEL_CODEC.listOf())
              .flatComapMap(
-                 p_409703_ -> new WeightedVariants.Unbaked(
--                    WeightedList.of(Lists.transform((List<Weighted<Variant>>)p_409703_, p_409617_ -> p_409617_.map(SingleVariant.Unbaked::new)))
-+                    WeightedList.of(Lists.transform(p_409703_, p_409617_ -> p_409617_.map(either -> either.map(m -> m, m -> m))))
+                 w -> new WeightedVariants.Unbaked(
+-                    WeightedList.of(Lists.transform((List<Weighted<Variant>>)w, e -> e.map(SingleVariant.Unbaked::new)))
++                    WeightedList.of(Lists.transform(w, e -> e.map(either -> either.map(m -> m, m -> m))))
                  ),
-                 p_409817_ -> {
-                     List<Weighted<BlockStateModel.Unbaked>> list = p_409817_.entries().unwrap();
+                 unbaked -> {
+                     List<Weighted<BlockStateModel.Unbaked>> list = unbaked.entries().unwrap();
 -                    List<Weighted<Variant>> list1 = new ArrayList<>(list.size());
 +                    List<Weighted<Either<net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel, SingleVariant.Unbaked>>> list1 = new ArrayList<>(list.size());
  
@@ -63,10 +63,10 @@
                  }
              );
 -        Codec<BlockStateModel.Unbaked> CODEC = Codec.either(HARDCODED_WEIGHTED_CODEC, SingleVariant.Unbaked.CODEC)
--            .flatComapMap(p_410308_ -> p_410308_.map(p_410746_ -> p_410746_, p_410169_ -> p_410169_), p_410404_ -> {
+-            .flatComapMap(v -> v.map(l -> l, r -> r), o -> {
 +        Codec<BlockStateModel.Unbaked> CODEC = Codec.either(HARDCODED_WEIGHTED_CODEC, SINGLE_MODEL_CODEC)
-+            .flatComapMap(p_410308_ -> p_410308_.map(p_410746_ -> p_410746_, p_410169_ -> p_410169_.map(m -> m, m -> m)), p_410404_ -> {
-                 return switch (p_410404_) {
++            .flatComapMap(v -> v.map(l -> l, r -> r.map(m -> m, m -> m)), o -> {
+                 return switch (o) {
 -                    case SingleVariant.Unbaked singlevariant$unbaked -> DataResult.success(Either.right(singlevariant$unbaked));
 +                    case net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel customModel -> DataResult.success(Either.right(Either.left(customModel)));
 +                    case SingleVariant.Unbaked singlevariant$unbaked -> DataResult.success(Either.right(Either.right(singlevariant$unbaked)));

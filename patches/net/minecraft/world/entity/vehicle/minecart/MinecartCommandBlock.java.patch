@@ -3,9 +3,9 @@
 @@ -84,6 +_,8 @@
  
      @Override
-     public InteractionResult interact(Player p_479614_, InteractionHand p_481796_) {
-+        InteractionResult ret = super.interact(p_479614_, p_481796_);
+     public InteractionResult interact(Player player, InteractionHand hand) {
++        InteractionResult ret = super.interact(player, hand);
 +        if (ret.consumesAction()) return ret;
-         if (!p_479614_.canUseGameMasterBlocks()) {
+         if (!player.canUseGameMasterBlocks()) {
              return InteractionResult.PASS;
          } else {

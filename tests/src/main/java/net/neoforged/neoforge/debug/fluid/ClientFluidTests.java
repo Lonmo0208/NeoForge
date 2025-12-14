@@ -40,8 +40,8 @@ public class ClientFluidTests {
     static class WaterGlassBlock extends TransparentBlock {
         private static final Direction HIDE_DIRECTION = Direction.NORTH;
 
-        public WaterGlassBlock(Properties p_309186_) {
-            super(p_309186_);
+        public WaterGlassBlock(Properties properties) {
+            super(properties);
         }
 
         @Override

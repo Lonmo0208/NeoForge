@@ -11,15 +11,15 @@
 @@ -182,7 +_,7 @@
      }
  
-     public static void initRenderer(long p_409720_, int p_69581_, boolean p_69582_, ShaderSource p_460676_, boolean p_410401_) {
--        DEVICE = new GlDevice(p_409720_, p_69581_, p_69582_, p_460676_, p_410401_);
-+        DEVICE = net.neoforged.neoforge.client.ClientHooks.createGpuDevice(p_409720_, p_69581_, p_69582_, p_460676_, p_410401_);
+     public static void initRenderer(long windowHandle, int logVerbosity, boolean synchronousLogs, ShaderSource shaderSource, boolean wantsDebugLabels) {
+-        DEVICE = new GlDevice(windowHandle, logVerbosity, synchronousLogs, shaderSource, wantsDebugLabels);
++        DEVICE = net.neoforged.neoforge.client.ClientHooks.createGpuDevice(windowHandle, logVerbosity, synchronousLogs, shaderSource, wantsDebugLabels);
          apiDescription = getDevice().getImplementationInformation();
          dynamicUniforms = new DynamicUniforms();
          samplerCache.initialize();
 @@ -315,6 +_,40 @@
          if (gpubufferslice2 != null) {
-             p_418212_.setUniform("Lighting", gpubufferslice2);
+             renderPass.setUniform("Lighting", gpubufferslice2);
          }
 +    }
 +

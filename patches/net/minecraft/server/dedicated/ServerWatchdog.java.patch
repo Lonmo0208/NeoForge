@@ -18,11 +18,11 @@
 @@ -75,17 +_,21 @@
      }
  
-     public static CrashReport createWatchdogCrashReport(String p_363165_, long p_364052_) {
-+        return createWatchdogCrashReport(p_363165_, p_364052_, "Watchdog");
+     public static CrashReport createWatchdogCrashReport(String message, long mainThreadId) {
++        return createWatchdogCrashReport(message, mainThreadId, "Watchdog");
 +    }
 +
-+    public static CrashReport createWatchdogCrashReport(String p_363165_, long p_364052_, String message) {
++    public static CrashReport createWatchdogCrashReport(String message, long mainThreadId, String message) {
          ThreadMXBean threadmxbean = ManagementFactory.getThreadMXBean();
          ThreadInfo[] athreadinfo = threadmxbean.dumpAllThreads(true, true);
          StringBuilder stringbuilder = new StringBuilder();
@@ -30,7 +30,7 @@
 +        Error error = new Error(message);
  
          for (ThreadInfo threadinfo : athreadinfo) {
-             if (threadinfo.getThreadId() == p_364052_) {
+             if (threadinfo.getThreadId() == mainThreadId) {
                  error.setStackTrace(threadinfo.getStackTrace());
              }
  

@@ -21,8 +21,8 @@
          Map<String, BlockStateModel.Unbaked> map = new HashMap<>();
 @@ -108,6 +_,17 @@
  
-         public Stream<MultiVariantGenerator.Entry> apply(VariantMutator p_404774_) {
-             return Stream.of(new MultiVariantGenerator.Entry(this.properties, this.variant.with(p_404774_)));
+         public Stream<MultiVariantGenerator.Entry> apply(VariantMutator mutator) {
+             return Stream.of(new MultiVariantGenerator.Entry(this.properties, this.variant.with(mutator)));
 +        }
 +
 +        // Neo: Support for unbaked mutators

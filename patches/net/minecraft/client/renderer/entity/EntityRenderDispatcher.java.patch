@@ -13,7 +13,7 @@
 +    }
 +
      @Override
-     public void onResourceManagerReload(ResourceManager p_174004_) {
+     public void onResourceManagerReload(ResourceManager resourceManager) {
          EntityRendererProvider.Context entityrendererprovider$context = new EntityRendererProvider.Context(
 @@ -220,5 +_,8 @@
          this.renderers = EntityRenderers.createEntityRenderers(entityrendererprovider$context);

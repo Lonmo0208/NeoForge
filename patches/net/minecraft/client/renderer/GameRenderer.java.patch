@@ -5,7 +5,7 @@
              this.submitNodeStorage,
              this.featureRenderDispatcher,
 -            List.of(
--                new GuiEntityRenderer(multibuffersource$buffersource, p_234219_.getEntityRenderDispatcher()),
+-                new GuiEntityRenderer(multibuffersource$buffersource, minecraft.getEntityRenderDispatcher()),
 -                new GuiSkinRenderer(multibuffersource$buffersource),
 -                new GuiBookModelRenderer(multibuffersource$buffersource),
 -                new GuiBannerResultRenderer(multibuffersource$buffersource, atlasmanager),
@@ -13,7 +13,7 @@
 -                new GuiProfilerChartRenderer(multibuffersource$buffersource)
 -            )
 +            net.neoforged.neoforge.client.ClientHooks.gatherPictureInPictureRenderers(List.of(
-+                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiEntityRenderState.class, buffers -> new GuiEntityRenderer(buffers, p_234219_.getEntityRenderDispatcher())),
++                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiEntityRenderState.class, buffers -> new GuiEntityRenderer(buffers, minecraft.getEntityRenderDispatcher())),
 +                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiSkinRenderState.class, GuiSkinRenderer::new),
 +                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiBookModelRenderState.class, GuiBookModelRenderer::new),
 +                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiBannerResultRenderState.class, buffers -> new GuiBannerResultRenderer(buffers, atlasmanager)),
@@ -21,13 +21,13 @@
 +                new net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<>(net.minecraft.client.gui.render.state.pip.GuiProfilerChartRenderState.class, GuiProfilerChartRenderer::new)
 +            ))
          );
-         this.screenEffectRenderer = new ScreenEffectRenderer(p_234219_, atlasmanager, multibuffersource$buffersource);
+         this.screenEffectRenderer = new ScreenEffectRenderer(minecraft, atlasmanager, multibuffersource$buffersource);
      }
 @@ -247,6 +_,7 @@
                  break;
              case null:
              default:
-+                if (!net.neoforged.neoforge.client.ClientHooks.loadEntityShader(p_109107_, this))
++                if (!net.neoforged.neoforge.client.ClientHooks.loadEntityShader(cameraEntity, this))
                  this.clearPostEffect();
          }
      }
@@ -36,7 +36,7 @@
              }
  
 -            return f;
-+            return net.neoforged.neoforge.client.ClientHooks.getFieldOfView(this, p_109142_, p_109143_, f, p_109144_);
++            return net.neoforged.neoforge.client.ClientHooks.getFieldOfView(this, camera, partialTicks, f, applyEffects);
          }
      }
  
@@ -55,9 +55,9 @@
                  }
              } else if (flag && this.minecraft.screen != null) {
                  try {
--                    this.minecraft.screen.renderWithTooltipAndSubtitles(guigraphics, i, j, p_348648_.getGameTimeDeltaTicks());
+-                    this.minecraft.screen.renderWithTooltipAndSubtitles(guigraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
 +                    // Neo: Wrap Screen#render to allow for GUI Layers and ScreenEvent.Render.[Pre/Post]
-+                    net.neoforged.neoforge.client.ClientHooks.drawScreen(this.minecraft.screen, guigraphics, i, j, p_348648_.getGameTimeDeltaTicks());
++                    net.neoforged.neoforge.client.ClientHooks.drawScreen(this.minecraft.screen, guigraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
                  } catch (Throwable throwable1) {
                      CrashReport crashreport1 = CrashReport.forThrowable(throwable1, "Rendering screen");
                      CrashReportCategory crashreportcategory1 = crashreport1.addCategory("Screen render details");

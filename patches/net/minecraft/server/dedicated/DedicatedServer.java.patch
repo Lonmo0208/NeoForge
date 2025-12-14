@@ -7,7 +7,7 @@
 +    private net.neoforged.neoforge.server.dedicated.@Nullable DedicatedLanServerPinger dediLanPinger;
  
      public DedicatedServer(
-         Thread p_214789_,
+         Thread serverThread,
 @@ -191,6 +_,7 @@
          Thread thread1 = new Thread("Server console handler") {
              @Override

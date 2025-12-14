@@ -13,6 +13,6 @@
 +        this(new ArrayList<>(initialCapacity));
 +    }
 +
-     ListTag(List<Tag> p_128721_) {
-         this.list = p_128721_;
+     ListTag(List<Tag> list) {
+         this.list = list;
      }

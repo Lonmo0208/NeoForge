@@ -227,7 +227,7 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         }
 
         @Override
-        public boolean saveEverything(boolean p_195515_, boolean p_195516_, boolean p_195517_) {
+        public boolean saveEverything(boolean silent, boolean flush, boolean force) {
             // The server is ephemeral
             return false;
         }
@@ -305,7 +305,7 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
         }
 
         @Override
-        public boolean isSingleplayerOwner(NameAndId p_433457_) {
+        public boolean isSingleplayerOwner(NameAndId nameAndId) {
             return false;
         }
 

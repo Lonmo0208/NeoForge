@@ -12,13 +12,13 @@
 +        OptionSpec<String> existing = optionparser.accepts("existing", "Existing resource packs that generated resources can reference").withRequiredArg();
 +        OptionSpec<String> mod = optionparser.accepts("mod", "A modid to dump").withRequiredArg().withValuesSeparatedBy(",");
 +        OptionSpec<Void> flat = optionparser.accepts("flat", "Do not append modid prefix to output directory when generating for multiple mods");
-         OptionSet optionset = optionparser.parse(p_129669_);
+         OptionSet optionset = optionparser.parse(args);
          if (!optionset.has(optionspec) && optionset.hasOptions()) {
              Path path = Paths.get(optionspec5.value(optionset));
 @@ -84,10 +_,17 @@
              boolean flag2 = flag || optionset.has(optionspec2);
              boolean flag3 = flag || optionset.has(optionspec3);
-             Collection<Path> collection = optionset.valuesOf(optionspec6).stream().map(p_129659_ -> Paths.get(p_129659_)).toList();
+             Collection<Path> collection = optionset.valuesOf(optionspec6).stream().map(x$0 -> Paths.get(x$0)).toList();
 -            DataGenerator datagenerator = new DataGenerator(path, SharedConstants.getCurrentVersion(), true);
 +            java.util.Set<String> mods = new java.util.HashSet<>(optionset.valuesOf(mod));
 +            boolean isFlat = mods.isEmpty() || optionset.has(flat);

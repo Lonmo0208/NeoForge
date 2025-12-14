@@ -16,9 +16,9 @@
 +    private final net.neoforged.neoforge.common.damagesource.IDeathMessageProvider msgFunction;
  
 +    @net.neoforged.fml.common.asm.enumextension.ReservedConstructor
-     private DeathMessageType(String p_270201_) {
--        this.id = p_270201_;
-+        this(p_270201_, net.neoforged.neoforge.common.damagesource.IDeathMessageProvider.DEFAULT);
+     private DeathMessageType(String id) {
+-        this.id = id;
++        this(id, net.neoforged.neoforge.common.damagesource.IDeathMessageProvider.DEFAULT);
 +    }
 +
 +    /**

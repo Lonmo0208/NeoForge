@@ -3,10 +3,10 @@
 @@ -75,6 +_,16 @@
  
      @Override
-     protected void onTake(Player p_150474_, ItemStack p_150475_) {
+     protected void onTake(Player player, ItemStack carried) {
 +        // Neo: Fire the AnvilCraftEvent.Pre here, before any changes are made to the anvil or the contained items.
 +        // If a user cancels the event, we presume they are handling any of the below logic themselves.
-+        var event = net.neoforged.neoforge.common.CommonHooks.fireAnvilCraftPre(this, p_150474_, p_150475_, this.inputSlots.getItem(0), this.inputSlots.getItem(1));
++        var event = net.neoforged.neoforge.common.CommonHooks.fireAnvilCraftPre(this, player, carried, this.inputSlots.getItem(0), this.inputSlots.getItem(1));
 +        if (event.isCanceled()) {
 +            return;
 +        }
@@ -14,17 +14,17 @@
 +        ItemStack leftInputSnapshot = this.inputSlots.getItem(0).copy();
 +        ItemStack rightInputSnapshot = this.inputSlots.getItem(1).copy();
 +
-         if (!p_150474_.hasInfiniteMaterials()) {
-             p_150474_.giveExperienceLevels(-this.cost.get());
+         if (!player.hasInfiniteMaterials()) {
+             player.giveExperienceLevels(-this.cost.get());
          }
 @@ -114,10 +_,30 @@
-                 p_150479_.levelEvent(1030, p_150480_, 0);
+                 level.levelEvent(1030, pos, 0);
              }
          });
 +
 +        // Neo: Fire post after all logic has taken place. For ease of use, we record the original input stacks and pass them to this method.
 +        // The modified stacks are available through the menu.
-+        net.neoforged.neoforge.common.CommonHooks.fireAnvilCraftPost(this, p_150474_, p_150475_, leftInputSnapshot, rightInputSnapshot);
++        net.neoforged.neoforge.common.CommonHooks.fireAnvilCraftPost(this, player, carried, leftInputSnapshot, rightInputSnapshot);
      }
  
      @Override

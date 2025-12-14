@@ -123,7 +123,7 @@ public class RecipeBookTestRecipe implements Recipe<CraftingInput> {
                 new ShapedCraftingRecipeDisplay(
                         width,
                         height,
-                        items.stream().map(p_380107_ -> p_380107_.map(Ingredient::display).orElse(SlotDisplay.Empty.INSTANCE)).toList(),
+                        items.stream().map(e -> e.map(Ingredient::display).orElse(SlotDisplay.Empty.INSTANCE)).toList(),
                         new SlotDisplay.ItemStackSlotDisplay(ingredients.result),
                         new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)));
     }

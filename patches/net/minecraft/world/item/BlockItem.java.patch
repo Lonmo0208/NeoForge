@@ -5,12 +5,12 @@
                      }
  
 -                    SoundType soundtype = blockstate1.getSoundType();
-+                    SoundType soundtype = blockstate1.getSoundType(level, blockpos, p_40577_.getPlayer());
++                    SoundType soundtype = blockstate1.getSoundType(level, blockpos, placeContext.getPlayer());
                      level.playSound(
                          player,
                          blockpos,
 -                        this.getPlaceSound(blockstate1),
-+                        this.getPlaceSound(blockstate1, level, blockpos, p_40577_.getPlayer()),
++                        this.getPlaceSound(blockstate1, level, blockpos, placeContext.getPlayer()),
                          SoundSource.BLOCKS,
                          (soundtype.getVolume() + 1.0F) / 2.0F,
                          soundtype.getPitch() * 0.8F
@@ -19,8 +19,8 @@
      }
  
 +    @Deprecated //Forge: Use more sensitive version {@link BlockItem#getPlaceSound(BlockState, IBlockReader, BlockPos, Entity) }
-     protected SoundEvent getPlaceSound(BlockState p_40588_) {
-         return p_40588_.getSoundType().getPlaceSound();
+     protected SoundEvent getPlaceSound(BlockState blockState) {
+         return blockState.getSoundType().getPlaceSound();
 +    }
 +
 +    //Forge: Sensitive version of BlockItem#getPlaceSound
@@ -28,4 +28,4 @@
 +        return state.getSoundType(world, pos, entity).getPlaceSound();
      }
  
-     public @Nullable BlockPlaceContext updatePlacementContext(BlockPlaceContext p_40609_) {
+     public @Nullable BlockPlaceContext updatePlacementContext(BlockPlaceContext context) {

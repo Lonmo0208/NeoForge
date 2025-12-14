@@ -14,7 +14,7 @@
  
      @Override
 +    @Deprecated // FORGE: use jumpInFluid instead
-     protected void jumpInLiquid(TagKey<Fluid> p_481380_) {
+     protected void jumpInLiquid(TagKey<Fluid> type) {
 +        this.jumpInLiquidInternal();
 +    }
 +

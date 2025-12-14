@@ -42,18 +42,18 @@
 +        this(containerFactory, chunkPos, minSectionY, lastUpdateTime, inhabitedTime, chunkStatus, blendingData, belowZeroRetrogen, upgradeData, carvingMask, heightmaps, packedTicks, postProcessingSections, lightCorrect, sectionData, entities, blockEntities, structureData, null, null);
 +    }
 +
-     public static SerializableChunkData parse(LevelHeightAccessor p_361938_, PalettedContainerFactory p_447248_, CompoundTag p_362040_) {
-         if (p_362040_.getString("Status").isEmpty()) {
+     public static SerializableChunkData parse(LevelHeightAccessor levelHeight, PalettedContainerFactory containerFactory, CompoundTag chunkData) {
+         if (chunkData.getString("Status").isEmpty()) {
              return null;
 @@ -186,6 +_,9 @@
                  }
              }
  
-+            CompoundTag attachmentData = p_362040_.getCompound(net.neoforged.neoforge.attachment.AttachmentHolder.ATTACHMENTS_NBT_KEY).orElse(null);
-+            ListTag auxLightData = p_362040_.getList(net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager.LIGHT_NBT_KEY).orElse(null);
++            CompoundTag attachmentData = chunkData.getCompound(net.neoforged.neoforge.attachment.AttachmentHolder.ATTACHMENTS_NBT_KEY).orElse(null);
++            ListTag auxLightData = chunkData.getList(net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager.LIGHT_NBT_KEY).orElse(null);
 +
              return new SerializableChunkData(
-                 p_447248_,
+                 containerFactory,
                  chunkpos,
 @@ -204,7 +_,9 @@
                  list2,
@@ -67,7 +67,7 @@
          }
      }
 @@ -264,6 +_,9 @@
-                 postLoadChunk(p_360452_, this.entities, this.blockEntities),
+                 postLoadChunk(level, this.entities, this.blockEntities),
                  BlendingData.unpack(this.blendingData)
              );
 +            if (this.auxLightData != null) {
@@ -81,7 +81,7 @@
          }
  
 +        if (this.attachmentData != null) {
-+            chunkaccess.readAttachmentsFromNBT(p_360452_.registryAccess(), this.attachmentData);
++            chunkaccess.readAttachmentsFromNBT(level.registryAccess(), this.attachmentData);
 +        }
 +
          if (chunktype == ChunkType.LEVELCHUNK) {
@@ -89,22 +89,22 @@
          } else {
 @@ -395,6 +_,18 @@
              CompoundTag compoundtag1 = packStructureData(
-                 StructurePieceSerializationContext.fromLevel(p_365319_), chunkpos, p_362284_.getAllStarts(), p_362284_.getAllReferences()
+                 StructurePieceSerializationContext.fromLevel(level), chunkpos, chunk.getAllStarts(), chunk.getAllReferences()
              );
 +
 +            CompoundTag attachmentData = null;
 +            try {
-+                attachmentData = p_362284_.writeAttachmentsToNBT(p_365319_.registryAccess());
++                attachmentData = chunk.writeAttachmentsToNBT(level.registryAccess());
 +            } catch (Exception exception) {
 +                LOGGER.error("Failed to write chunk attachments. An attachment has likely thrown an exception trying to write state. It will not persist. Report this to the mod author", exception);
 +            }
 +            ListTag auxLightData = null;
-+            if (p_362284_ instanceof LevelChunk levelChunk) {
++            if (chunk instanceof LevelChunk levelChunk) {
 +                auxLightData = levelChunk.getAuxLightManager(chunkpos).serializeNBT();
 +            }
 +
              return new SerializableChunkData(
-                 p_365319_.palettedContainerFactory(),
+                 level.palettedContainerFactory(),
                  chunkpos,
 @@ -413,7 +_,9 @@
                  list,
@@ -118,7 +118,7 @@
          }
      }
 @@ -481,6 +_,14 @@
-         this.heightmaps.forEach((p_362472_, p_363515_) -> compoundtag2.put(p_362472_.getSerializationKey(), new LongArrayTag(p_363515_)));
+         this.heightmaps.forEach((type, data) -> compoundtag2.put(type.getSerializationKey(), new LongArrayTag(data)));
          compoundtag.put("Heightmaps", compoundtag2);
          compoundtag.put("structures", this.structureData);
 +

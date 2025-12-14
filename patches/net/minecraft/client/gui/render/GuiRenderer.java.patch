@@ -11,24 +11,24 @@
      private @Nullable GpuTextureView itemsAtlasView;
      private @Nullable GpuTexture itemsAtlasDepth;
 @@ -128,19 +_,13 @@
-         MultiBufferSource.BufferSource p_415673_,
-         SubmitNodeCollector p_440036_,
-         FeatureRenderDispatcher p_439972_,
--        List<PictureInPictureRenderer<?>> p_415849_
+         MultiBufferSource.BufferSource bufferSource,
+         SubmitNodeCollector submitNodeCollector,
+         FeatureRenderDispatcher featureRenderDispatcher,
+-        List<PictureInPictureRenderer<?>> pictureInPictureRenderers
 +        List<net.neoforged.neoforge.client.gui.PictureInPictureRendererRegistration<?>> pipRendererFactories
      ) {
-         this.renderState = p_416418_;
-         this.bufferSource = p_415673_;
-         this.submitNodeCollector = p_440036_;
-         this.featureRenderDispatcher = p_439972_;
+         this.renderState = renderState;
+         this.bufferSource = bufferSource;
+         this.submitNodeCollector = submitNodeCollector;
+         this.featureRenderDispatcher = featureRenderDispatcher;
 -        Builder<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> builder = ImmutableMap.builder();
 -
--        for (PictureInPictureRenderer<?> pictureinpicturerenderer : p_415849_) {
+-        for (PictureInPictureRenderer<?> pictureinpicturerenderer : pictureInPictureRenderers) {
 -            builder.put((Class<? extends PictureInPictureRenderState>)pictureinpicturerenderer.getRenderStateClass(), pictureinpicturerenderer);
 -        }
 -
 -        this.pictureInPictureRenderers = builder.buildOrThrow();
-+        this.pictureInPictureRendererPools = net.neoforged.neoforge.client.gui.PictureInPictureRendererPool.createPools(p_415673_, pipRendererFactories);
++        this.pictureInPictureRendererPools = net.neoforged.neoforge.client.gui.PictureInPictureRendererPool.createPools(bufferSource, pipRendererFactories);
      }
  
      public void incrementFrameNumber() {
@@ -44,7 +44,7 @@
  
      private void preparePictureInPicture() {
          int i = Minecraft.getInstance().getWindow().getGuiScale();
--        this.renderState.forEachPictureInPicture(p_417621_ -> this.preparePictureInPictureState(p_417621_, i));
+-        this.renderState.forEachPictureInPicture(pictureInPictureState -> this.preparePictureInPictureState(pictureInPictureState, i));
 +        this.pictureInPictureRenderStatesScratch.clear();
 +        this.renderState.forEachPictureInPicture(state -> {
 +            if (this.preparePictureInPictureState(state, i, true)) {
@@ -59,22 +59,22 @@
 +        this.pictureInPictureRenderStatesScratch.clear();
      }
  
--    private <T extends PictureInPictureRenderState> void preparePictureInPictureState(T p_415554_, int p_415565_) {
--        PictureInPictureRenderer<T> pictureinpicturerenderer = (PictureInPictureRenderer<T>)this.pictureInPictureRenderers.get(p_415554_.getClass());
-+    private <T extends PictureInPictureRenderState> boolean preparePictureInPictureState(T p_415554_, int p_415565_, boolean firstPass) {
-+        var pool = (net.neoforged.neoforge.client.gui.PictureInPictureRendererPool<T>)this.pictureInPictureRendererPools.get(p_415554_.getClass());
+-    private <T extends PictureInPictureRenderState> void preparePictureInPictureState(T picturesInPictureState, int guiScale) {
+-        PictureInPictureRenderer<T> pictureinpicturerenderer = (PictureInPictureRenderer<T>)this.pictureInPictureRenderers.get(picturesInPictureState.getClass());
++    private <T extends PictureInPictureRenderState> boolean preparePictureInPictureState(T picturesInPictureState, int guiScale, boolean firstPass) {
++        var pool = (net.neoforged.neoforge.client.gui.PictureInPictureRendererPool<T>)this.pictureInPictureRendererPools.get(picturesInPictureState.getClass());
 +        if (pool == null) {
 +            return false;
 +        }
-+        PictureInPictureRenderer<T> pictureinpicturerenderer = pool.get(p_415554_, p_415565_, firstPass);
++        PictureInPictureRenderer<T> pictureinpicturerenderer = pool.get(picturesInPictureState, guiScale, firstPass);
          if (pictureinpicturerenderer != null) {
-             pictureinpicturerenderer.prepare(p_415554_, this.renderState, p_415565_);
+             pictureinpicturerenderer.prepare(picturesInPictureState, this.renderState, guiScale);
 +            return true;
          }
 +        return false;
      }
  
-     private void renderItemToAtlas(TrackingItemStackRenderState p_428843_, PoseStack p_416703_, int p_416443_, int p_416400_, int p_416052_) {
+     private void renderItemToAtlas(TrackingItemStackRenderState itemStackRenderState, PoseStack poseStack, int renderX, int renderY, int singleItemTextureSize) {
 @@ -699,7 +_,7 @@
              this.itemsAtlasDepthView.close();
          }

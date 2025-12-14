@@ -5,7 +5,7 @@
                      ItemStack itemstack = livingentity.getMainHandItem();
                      if (!itemstack.isEmpty()) {
 -                        if (enchantment.canEnchant(itemstack)
-+                        if (itemstack.supportsEnchantment(p_251252_) // Neo: Respect IItemExtension#supportsEnchantment
-                             && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantmentsForCrafting(itemstack).keySet(), p_251252_)) {
-                             itemstack.enchant(p_251252_, p_249941_);
++                        if (itemstack.supportsEnchantment(enchantmentHolder) // Neo: Respect IItemExtension#supportsEnchantment
+                             && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantmentsForCrafting(itemstack).keySet(), enchantmentHolder)) {
+                             itemstack.enchant(enchantmentHolder, level);
                              i++;

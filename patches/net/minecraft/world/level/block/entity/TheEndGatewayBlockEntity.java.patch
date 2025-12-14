@@ -3,9 +3,9 @@
 @@ -252,7 +_,7 @@
  
      @Override
-     public boolean shouldRenderFace(Direction p_59959_) {
--        return Block.shouldRenderFace(this.getBlockState(), this.level.getBlockState(this.getBlockPos().relative(p_59959_)), p_59959_);
-+        return Block.shouldRenderFace(this.level, this.worldPosition, this.getBlockState(), this.level.getBlockState(this.getBlockPos().relative(p_59959_)), p_59959_);
+     public boolean shouldRenderFace(Direction direction) {
+-        return Block.shouldRenderFace(this.getBlockState(), this.level.getBlockState(this.getBlockPos().relative(direction)), direction);
++        return Block.shouldRenderFace(this.level, this.worldPosition, this.getBlockState(), this.level.getBlockState(this.getBlockPos().relative(direction)), direction);
      }
  
      public int getParticleAmount() {

@@ -8,7 +8,7 @@
 +        net.neoforged.fml.ModLoader.postEvent(new net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent(ID_MAPPER));
      }
  
-     public static Map<Block, SpecialModelRenderer<?>> createBlockRenderers(SpecialModelRenderer.BakingContext p_435914_) {
+     public static Map<Block, SpecialModelRenderer<?>> createBlockRenderers(SpecialModelRenderer.BakingContext context) {
 @@ -222,6 +_,8 @@
              map.put(Blocks.CHEST, GIFT_CHEST);
              map.put(Blocks.TRAPPED_CHEST, GIFT_CHEST);
@@ -17,4 +17,4 @@
 +        net.neoforged.fml.ModLoader.postEvent(new net.neoforged.neoforge.client.event.RegisterSpecialBlockModelRendererEvent(map));
  
          Builder<Block, SpecialModelRenderer<?>> builder = ImmutableMap.builder();
-         map.forEach((p_432308_, p_432309_) -> {
+         map.forEach((block, model) -> {

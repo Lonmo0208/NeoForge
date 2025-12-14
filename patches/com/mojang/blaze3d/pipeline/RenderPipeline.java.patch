@@ -9,50 +9,50 @@
 +    /** @deprecated Neo: use {@link #RenderPipeline(Identifier, Identifier, Identifier, ShaderDefines, List, List, Optional, DepthTestFunction, PolygonMode, boolean, boolean, boolean, boolean, LogicOp, VertexFormat, VertexFormat.Mode, float, float, int, Optional)} instead */
 +    @Deprecated
      protected RenderPipeline(
-         Identifier p_467434_,
-         Identifier p_467154_,
+         Identifier location,
+         Identifier vertexShader,
 @@ -64,9 +_,34 @@
-         float p_409999_,
-         int p_415862_
+         float depthBiasConstant,
+         int sortKey
      ) {
--        this.location = p_467434_;
--        this.vertexShader = p_467154_;
--        this.fragmentShader = p_467193_;
-+        this(p_467434_, p_467154_, p_467193_, p_405426_, p_405334_, p_404693_, p_404667_, p_410224_, p_409822_, p_404907_, p_405688_, p_405411_, p_405477_, p_410051_, p_405109_, p_404708_, p_410755_, p_409999_, p_415862_, Optional.empty());
+-        this.location = location;
+-        this.vertexShader = vertexShader;
+-        this.fragmentShader = fragmentShader;
++        this(location, vertexShader, fragmentShader, shaderDefines, samplers, uniforms, blendFunction, depthTestFunction, polygonMode, cull, writeColor, writeAlpha, writeDepth, colorLogic, vertexFormat, vertexFormatMode, depthBiasScaleFactor, depthBiasConstant, sortKey, Optional.empty());
 +    }
 +
 +    protected RenderPipeline(
 +            Identifier p_405403_,
 +            Identifier p_405389_,
 +            Identifier p_404945_,
-+            ShaderDefines p_405426_,
-+            List<String> p_405334_,
-+            List<RenderPipeline.UniformDescription> p_404693_,
-+            Optional<BlendFunction> p_404667_,
-+            DepthTestFunction p_410224_,
-+            PolygonMode p_409822_,
-+            boolean p_404907_,
-+            boolean p_405688_,
-+            boolean p_405411_,
-+            boolean p_405477_,
-+            LogicOp p_410051_,
-+            VertexFormat p_405109_,
-+            VertexFormat.Mode p_404708_,
-+            float p_410755_,
-+            float p_409999_,
-+            int p_415862_,
++            ShaderDefines shaderDefines,
++            List<String> samplers,
++            List<RenderPipeline.UniformDescription> uniforms,
++            Optional<BlendFunction> blendFunction,
++            DepthTestFunction depthTestFunction,
++            PolygonMode polygonMode,
++            boolean cull,
++            boolean writeColor,
++            boolean writeAlpha,
++            boolean writeDepth,
++            LogicOp colorLogic,
++            VertexFormat vertexFormat,
++            VertexFormat.Mode vertexFormatMode,
++            float depthBiasScaleFactor,
++            float depthBiasConstant,
++            int sortKey,
 +            Optional<net.neoforged.neoforge.client.stencil.StencilTest> stencilTest
 +            ) {
 +        this.location = p_405403_;
 +        this.vertexShader = p_405389_;
 +        this.fragmentShader = p_404945_;
-         this.shaderDefines = p_405426_;
-         this.samplers = p_405334_;
-         this.uniforms = p_404693_;
+         this.shaderDefines = shaderDefines;
+         this.samplers = samplers;
+         this.uniforms = uniforms;
 @@ -83,6 +_,7 @@
-         this.depthBiasScaleFactor = p_410755_;
-         this.depthBiasConstant = p_409999_;
-         this.sortKey = p_415862_;
+         this.depthBiasScaleFactor = depthBiasScaleFactor;
+         this.depthBiasConstant = depthBiasConstant;
+         this.sortKey = sortKey;
 +        this.stencilTest = stencilTest;
      }
  
@@ -106,7 +106,7 @@
 +        return builder;
 +    }
 +
-     public static RenderPipeline.Builder builder(RenderPipeline.Snippet... p_405781_) {
+     public static RenderPipeline.Builder builder(RenderPipeline.Snippet... snippets) {
          RenderPipeline.Builder renderpipeline$builder = new RenderPipeline.Builder();
  
 @@ -209,6 +_,7 @@
@@ -131,16 +131,16 @@
 +            return this;
 +        }
 +
-         void withSnippet(RenderPipeline.Snippet p_405255_) {
-             if (p_405255_.vertexShader.isPresent()) {
-                 this.vertexShader = p_405255_.vertexShader;
+         void withSnippet(RenderPipeline.Snippet snippet) {
+             if (snippet.vertexShader.isPresent()) {
+                 this.vertexShader = snippet.vertexShader;
 @@ -439,6 +_,10 @@
-             if (p_405255_.vertexFormatMode.isPresent()) {
-                 this.vertexFormatMode = p_405255_.vertexFormatMode;
+             if (snippet.vertexFormatMode.isPresent()) {
+                 this.vertexFormatMode = snippet.vertexFormatMode;
              }
 +
-+            if (p_405255_.stencilTest.isPresent()) {
-+                this.stencilTest = p_405255_.stencilTest;
++            if (snippet.stencilTest.isPresent()) {
++                this.stencilTest = snippet.stencilTest;
 +            }
          }
  

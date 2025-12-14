@@ -69,12 +69,12 @@
              };
              thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 @@ -286,6 +_,9 @@
-             worlddimensions = dedicatedserverproperties.createDimensions(p_443153_.datapackWorldgen());
+             worlddimensions = dedicatedserverproperties.createDimensions(context.datapackWorldgen());
          }
  
 +        // Neo: Do a write-read-cycle to inject modded dimensions on first start of a dedicated server into its generated world dimensions list.
-+        var registryOps = net.minecraft.resources.RegistryOps.create(net.minecraft.nbt.NbtOps.INSTANCE, p_443153_.datapackWorldgen());
++        var registryOps = net.minecraft.resources.RegistryOps.create(net.minecraft.nbt.NbtOps.INSTANCE, context.datapackWorldgen());
 +        worlddimensions = WorldDimensions.CODEC.encoder().encodeStart(registryOps, worlddimensions).flatMap((writtenPayloadWithModdedDimensions) -> WorldDimensions.CODEC.decoder().parse(registryOps, writtenPayloadWithModdedDimensions)).resultOrPartial(LOGGER::error).orElse(worlddimensions);
-         WorldDimensions.Complete worlddimensions$complete = worlddimensions.bake(p_443610_);
-         Lifecycle lifecycle = worlddimensions$complete.lifecycle().add(p_443153_.datapackWorldgen().allRegistriesLifecycle());
+         WorldDimensions.Complete worlddimensions$complete = worlddimensions.bake(datapackDimensions);
+         Lifecycle lifecycle = worlddimensions$complete.lifecycle().add(context.datapackWorldgen().allRegistriesLifecycle());
          return new WorldLoader.DataLoadOutput<>(

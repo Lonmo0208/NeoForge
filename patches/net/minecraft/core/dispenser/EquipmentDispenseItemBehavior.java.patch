@@ -3,9 +3,9 @@
 @@ -26,6 +_,8 @@
          } else {
              LivingEntity livingentity = list.getFirst();
-             EquipmentSlot equipmentslot = livingentity.getEquipmentSlotForItem(p_371227_);
+             EquipmentSlot equipmentslot = livingentity.getEquipmentSlotForItem(dispensed);
 +            // Neo: Respect IItemExtension#canEquip in dispenseArmor
-+            if (!p_371227_.canEquip(equipmentslot, livingentity)) return false;
-             ItemStack itemstack = p_371227_.split(1);
++            if (!dispensed.canEquip(equipmentslot, livingentity)) return false;
+             ItemStack itemstack = dispensed.split(1);
              livingentity.setItemSlot(equipmentslot, itemstack);
              if (livingentity instanceof Mob mob) {

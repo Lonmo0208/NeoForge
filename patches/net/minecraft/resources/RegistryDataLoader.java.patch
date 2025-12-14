@@ -17,19 +17,19 @@
 +    )); // Neo: Keep the list so custom registries can be added later
  
      public static RegistryAccess.Frozen load(
-         ResourceManager p_364116_, List<HolderLookup.RegistryLookup<?>> p_321716_, List<RegistryDataLoader.RegistryData<?>> p_365382_
+         ResourceManager resourceManager, List<HolderLookup.RegistryLookup<?>> contextRegistries, List<RegistryDataLoader.RegistryData<?>> registriesToLoad
      ) {
--        return load((p_321412_, p_321413_) -> p_321412_.loadFromResources(p_364116_, p_321413_), p_321716_, p_365382_);
-+        return load((p_321412_, p_321413_) -> p_321412_.loadFromResources(p_364116_, p_321413_), p_321716_, p_365382_, true);
+-        return load((loader, context) -> loader.loadFromResources(resourceManager, context), contextRegistries, registriesToLoad);
++        return load((loader, context) -> loader.loadFromResources(resourceManager, context), contextRegistries, registriesToLoad, true);
      }
  
      public static RegistryAccess.Frozen load(
 @@ -172,18 +_,35 @@
-         List<HolderLookup.RegistryLookup<?>> p_250344_,
-         List<RegistryDataLoader.RegistryData<?>> p_363651_
+         List<HolderLookup.RegistryLookup<?>> contextRegistries,
+         List<RegistryDataLoader.RegistryData<?>> registriesToLoad
      ) {
--        return load((p_325557_, p_325558_) -> p_325557_.loadFromNetwork(p_364449_, p_360464_, p_325558_), p_250344_, p_363651_);
-+        return load((p_325557_, p_325558_) -> p_325557_.loadFromNetwork(p_364449_, p_360464_, p_325558_), p_250344_, p_363651_, false);
+-        return load((loader, context) -> loader.loadFromNetwork(entries, knownDataSource, context), contextRegistries, registriesToLoad);
++        return load((loader, context) -> loader.loadFromNetwork(entries, knownDataSource, context), contextRegistries, registriesToLoad, false);
      }
  
 +    /**
@@ -37,19 +37,19 @@
 +     */
 +    @Deprecated
      private static RegistryAccess.Frozen load(
-         RegistryDataLoader.LoadingFunction p_321713_, List<HolderLookup.RegistryLookup<?>> p_321856_, List<RegistryDataLoader.RegistryData<?>> p_364355_
+         RegistryDataLoader.LoadingFunction loadingFunction, List<HolderLookup.RegistryLookup<?>> contextRegistries, List<RegistryDataLoader.RegistryData<?>> registriesToLoad
      ) {
-+        return load(p_321713_, p_321856_, p_364355_, false);
++        return load(loadingFunction, contextRegistries, registriesToLoad, false);
 +    }
 +    private static RegistryAccess.Frozen load(
-+        RegistryDataLoader.LoadingFunction p_321713_, List<HolderLookup.RegistryLookup<?>> p_321856_, List<RegistryDataLoader.RegistryData<?>> p_364355_, boolean fromResources
++        RegistryDataLoader.LoadingFunction loadingFunction, List<HolderLookup.RegistryLookup<?>> contextRegistries, List<RegistryDataLoader.RegistryData<?>> registriesToLoad, boolean fromResources
 +    ) {
          Map<ResourceKey<?>, Exception> map = new HashMap<>();
-         List<RegistryDataLoader.Loader<?>> list = p_364355_.stream()
-             .map(p_321410_ -> p_321410_.create(Lifecycle.stable(), map))
+         List<RegistryDataLoader.Loader<?>> list = registriesToLoad.stream()
+             .map(r -> r.create(Lifecycle.stable(), map))
              .collect(Collectors.toUnmodifiableList());
-         RegistryOps.RegistryInfoLookup registryops$registryinfolookup = createContext(p_321856_, list);
-         list.forEach(p_321416_ -> p_321713_.apply((RegistryDataLoader.Loader<?>)p_321416_, registryops$registryinfolookup));
+         RegistryOps.RegistryInfoLookup registryops$registryinfolookup = createContext(contextRegistries, list);
+         list.forEach(loader -> loadingFunction.apply((RegistryDataLoader.Loader<?>)loader, registryops$registryinfolookup));
 +        if (fromResources && net.neoforged.neoforge.gametest.GameTestHooks.isGametestEnabled()) {
 +            var byKeyMap = list.stream().collect(java.util.stream.Collectors.toMap(d -> d.registry().key(), d -> d.registry));
 +            var envRegistry = (WritableRegistry) byKeyMap.get(Registries.TEST_ENVIRONMENT);
@@ -58,36 +58,36 @@
 +                net.neoforged.fml.ModLoader.postEvent(new net.neoforged.neoforge.event.RegisterGameTestsEvent(envRegistry, testsRegistry));
 +            }
 +        }
-         list.forEach(p_466125_ -> {
-             Registry<?> registry = p_466125_.registry();
+         list.forEach(p -> {
+             Registry<?> registry = p.registry();
  
 @@ -282,11 +_,16 @@
-         Resource p_326141_,
-         RegistrationInfo p_326033_
+         Resource thunk,
+         RegistrationInfo registrationInfo
      ) throws IOException {
-+        Decoder<Optional<E>> decoder = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodec(net.neoforged.neoforge.common.util.NeoForgeExtraCodecs.decodeOnly(p_326476_));
-         try (Reader reader = p_326141_.openAsReader()) {
++        Decoder<Optional<E>> decoder = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodec(net.neoforged.neoforge.common.util.NeoForgeExtraCodecs.decodeOnly(elementDecoder));
+         try (Reader reader = thunk.openAsReader()) {
              JsonElement jsonelement = StrictJsonParser.parse(reader);
--            DataResult<E> dataresult = p_326476_.parse(p_325932_, jsonelement);
+-            DataResult<E> dataresult = elementDecoder.parse(ops, jsonelement);
 -            E e = dataresult.getOrThrow();
-+            DataResult<Optional<E>> dataresult = decoder.parse(p_325932_, jsonelement);
++            DataResult<Optional<E>> dataresult = decoder.parse(ops, jsonelement);
 +            Optional<E> candidate = dataresult.getOrThrow();
 +            candidate.ifPresentOrElse(e -> {
-             p_326195_.register(p_326054_, e, p_326033_);
+             output.register(elementKey, e, registrationInfo);
 +            }, () -> {
-+                LOGGER.debug("Skipping loading registry entry {} as its conditions were not met", p_326054_);
++                LOGGER.debug("Skipping loading registry entry {} as its conditions were not met", elementKey);
 +            });
          }
      }
  
 @@ -298,7 +_,7 @@
-         Map<ResourceKey<?>, Exception> p_321649_
+         Map<ResourceKey<?>, Exception> loadingErrors
      ) {
-         FileToIdConverter filetoidconverter = FileToIdConverter.registry(p_321557_.key());
--        RegistryOps<JsonElement> registryops = RegistryOps.create(JsonOps.INSTANCE, p_321612_);
-+        RegistryOps<JsonElement> registryops = new net.neoforged.neoforge.common.conditions.ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, p_321612_), net.neoforged.neoforge.common.conditions.ICondition.IContext.TAGS_INVALID);
+         FileToIdConverter filetoidconverter = FileToIdConverter.registry(registry.key());
+-        RegistryOps<JsonElement> registryops = RegistryOps.create(JsonOps.INSTANCE, lookup);
++        RegistryOps<JsonElement> registryops = new net.neoforged.neoforge.common.conditions.ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, lookup), net.neoforged.neoforge.common.conditions.ICondition.IContext.TAGS_INVALID);
  
-         for (Entry<Identifier, Resource> entry : filetoidconverter.listMatchingResources(p_321535_).entrySet()) {
+         for (Entry<Identifier, Resource> entry : filetoidconverter.listMatchingResources(resourceManager).entrySet()) {
              Identifier identifier = entry.getKey();
 @@ -385,13 +_,20 @@
      public record NetworkedRegistryData(List<RegistrySynchronization.PackedRegistryEntry> elements, TagNetworkSerialization.NetworkPayload tags) {
@@ -99,16 +99,16 @@
 +            this(key, elementCodec, requiredNonEmpty, registryBuilder -> {});
 +        }
 +
-         RegistryData(ResourceKey<? extends Registry<T>> p_251360_, Codec<T> p_248976_) {
-             this(p_251360_, p_248976_, false);
+         RegistryData(ResourceKey<? extends Registry<T>> key, Codec<T> elementCodec) {
+             this(key, elementCodec, false);
          }
  
-         RegistryDataLoader.Loader<T> create(Lifecycle p_251662_, Map<ResourceKey<?>, Exception> p_251565_) {
--            WritableRegistry<T> writableregistry = new MappedRegistry<>(this.key, p_251662_);
+         RegistryDataLoader.Loader<T> create(Lifecycle lifecycle, Map<ResourceKey<?>, Exception> loadingErrors) {
+-            WritableRegistry<T> writableregistry = new MappedRegistry<>(this.key, lifecycle);
 +            net.neoforged.neoforge.registries.RegistryBuilder<T> registryBuilder = new net.neoforged.neoforge.registries.RegistryBuilder<>(key);
 +            registryBuilderConsumer.accept(registryBuilder);
 +
 +            WritableRegistry<T> writableregistry = (WritableRegistry<T>) registryBuilder.disableRegistrationCheck().create();
-             return new RegistryDataLoader.Loader<>(this, writableregistry, p_251565_);
+             return new RegistryDataLoader.Loader<>(this, writableregistry, loadingErrors);
          }
  

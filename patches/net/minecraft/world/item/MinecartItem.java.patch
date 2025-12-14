@@ -2,7 +2,7 @@
 +++ b/net/minecraft/world/item/MinecartItem.java
 @@ -34,7 +_,7 @@
          } else {
-             ItemStack itemstack = p_42943_.getItemInHand();
+             ItemStack itemstack = context.getItemInHand();
              RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock
 -                ? blockstate.getValue(((BaseRailBlock)blockstate.getBlock()).getShapeProperty())
 +                    ? ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, level, blockpos, null)

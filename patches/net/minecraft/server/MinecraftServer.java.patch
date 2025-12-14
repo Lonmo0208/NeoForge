@@ -2,16 +2,16 @@
 +++ b/net/minecraft/server/MinecraftServer.java
 @@ -284,7 +_,7 @@
  
-     public static <S extends MinecraftServer> S spin(Function<Thread, S> p_129873_) {
+     public static <S extends MinecraftServer> S spin(Function<Thread, S> factory) {
          AtomicReference<S> atomicreference = new AtomicReference<>();
 -        Thread thread = new Thread(() -> atomicreference.get().runServer(), "Server thread");
 +        Thread thread = new Thread(net.neoforged.fml.util.thread.SidedThreadGroups.SERVER, () -> atomicreference.get().runServer(), "Server thread");
-         thread.setUncaughtExceptionHandler((p_177909_, p_177910_) -> LOGGER.error("Uncaught exception in server thread", p_177910_));
+         thread.setUncaughtExceptionHandler((t, e) -> LOGGER.error("Uncaught exception in server thread", e));
          if (Runtime.getRuntime().availableProcessors() > 4) {
              thread.setPriority(8);
 @@ -330,9 +_,9 @@
-             this.structureTemplateManager = new StructureTemplateManager(p_236726_.resourceManager(), p_236724_, p_236728_, holdergetter);
-             this.serverThread = p_236723_;
+             this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), storageSource, fixerUpper, holdergetter);
+             this.serverThread = serverThread;
              this.executor = Util.backgroundExecutor();
 -            this.potionBrewing = PotionBrewing.bootstrap(this.worldData.enabledFeatures());
 +            this.potionBrewing = PotionBrewing.bootstrap(this.worldData.enabledFeatures(), this.registryAccess());
@@ -38,13 +38,13 @@
                  serverlevel1 = serverlevel;
              }
 @@ -509,6 +_,7 @@
-             p_177898_.setSpawn(LevelData.RespawnData.of(p_177897_.dimension(), BlockPos.ZERO.above(80), 0.0F, 0.0F));
+             levelData.setSpawn(LevelData.RespawnData.of(level.dimension(), BlockPos.ZERO.above(80), 0.0F, 0.0F));
          } else {
-             ServerChunkCache serverchunkcache = p_177897_.getChunkSource();
-+            if (net.neoforged.neoforge.event.EventHooks.onCreateWorldSpawn(p_177897_, p_177898_)) return;
+             ServerChunkCache serverchunkcache = level.getChunkSource();
++            if (net.neoforged.neoforge.event.EventHooks.onCreateWorldSpawn(level, levelData)) return;
              ChunkPos chunkpos = new ChunkPos(serverchunkcache.randomState().sampler().findSpawnPosition());
-             p_435683_.start(LevelLoadListener.Stage.PREPARE_GLOBAL_SPAWN, 0);
-             p_435683_.updateFocus(p_177897_.dimension(), chunkpos);
+             levelLoadListener.start(LevelLoadListener.Stage.PREPARE_GLOBAL_SPAWN, 0);
+             levelLoadListener.updateFocus(level.dimension(), chunkpos);
 @@ -575,6 +_,7 @@
                  TicketStorage ticketstorage = serverlevel.getDataStorage().get(TicketStorage.TYPE);
                  if (ticketstorage != null) {
@@ -102,9 +102,9 @@
          }
  
          this.tickCount++;
-+        net.neoforged.neoforge.event.EventHooks.fireServerTickPre(p_129871_, this);
++        net.neoforged.neoforge.event.EventHooks.fireServerTickPre(haveTime, this);
          this.tickRateManager.tick();
-         this.tickChildren(p_129871_);
+         this.tickChildren(haveTime);
          if (i - this.lastServerStatus >= STATUS_EXPIRE_TIME_NANOS) {
              this.lastServerStatus = i;
              this.status = this.buildServerStatus();
@@ -116,10 +116,10 @@
          this.smoothedTickTimeMillis = this.smoothedTickTimeMillis * 0.8F + (float)k / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND * 0.19999999F;
          this.logTickMethodTime(i);
          profilerfiller.pop();
-+        net.neoforged.neoforge.event.EventHooks.fireServerTickPost(p_129871_, this);
++        net.neoforged.neoforge.event.EventHooks.fireServerTickPost(haveTime, this);
      }
  
-     public void processPacketsAndTick(boolean p_470740_) {
+     public void processPacketsAndTick(boolean sprinting) {
 @@ -1061,6 +_,16 @@
          }
      }
@@ -161,15 +161,15 @@
              }
  
              profilerfiller.push("tick");
-+            net.neoforged.neoforge.event.EventHooks.fireLevelTickPre(serverlevel, p_129954_);
++            net.neoforged.neoforge.event.EventHooks.fireLevelTickPre(serverlevel, haveTime);
  
              try {
-                 serverlevel.tick(p_129954_);
+                 serverlevel.tick(haveTime);
 @@ -1141,9 +_,11 @@
                  serverlevel.fillReportDetails(crashreport);
                  throw new ReportedException(crashreport);
              }
-+            net.neoforged.neoforge.event.EventHooks.fireLevelTickPost(serverlevel, p_129954_);
++            net.neoforged.neoforge.event.EventHooks.fireLevelTickPost(serverlevel, haveTime);
  
              profilerfiller.pop();
              profilerfiller.pop();
@@ -190,16 +190,16 @@
 @@ -1185,11 +_,17 @@
      }
  
-     private void synchronizeTime(ServerLevel p_276371_) {
+     private void synchronizeTime(ServerLevel level) {
 -        this.playerList
 -            .broadcastAll(
--                new ClientboundSetTimePacket(p_276371_.getGameTime(), p_276371_.getDayTime(), p_276371_.getGameRules().get(GameRules.ADVANCE_TIME)),
--                p_276371_.dimension()
+-                new ClientboundSetTimePacket(level.getGameTime(), level.getDayTime(), level.getGameRules().get(GameRules.ADVANCE_TIME)),
+-                level.dimension()
 -            );
-+        ClientboundSetTimePacket vanillaPacket = new ClientboundSetTimePacket(p_276371_.getGameTime(), p_276371_.getDayTime(), p_276371_.getGameRules().get(GameRules.ADVANCE_TIME));
-+        net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload neoPacket = new net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload(p_276371_.getGameTime(), p_276371_.getDayTime(), p_276371_.getGameRules().get(GameRules.ADVANCE_TIME), p_276371_.getDayTimeFraction(), p_276371_.getDayTimePerTick());
++        ClientboundSetTimePacket vanillaPacket = new ClientboundSetTimePacket(level.getGameTime(), level.getDayTime(), level.getGameRules().get(GameRules.ADVANCE_TIME));
++        net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload neoPacket = new net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload(level.getGameTime(), level.getDayTime(), level.getGameRules().get(GameRules.ADVANCE_TIME), level.getDayTimeFraction(), level.getDayTimePerTick());
 +        for (ServerPlayer serverplayer : playerList.getPlayers()) {
-+            if (serverplayer.level().dimension() == p_276371_.dimension()) {
++            if (serverplayer.level().dimension() == level.dimension()) {
 +                if (serverplayer.connection.hasChannel(net.neoforged.neoforge.network.payload.ClientboundCustomSetTimePayload.TYPE)) {
 +                    serverplayer.connection.send(neoPacket);
 +                } else {
@@ -218,13 +218,13 @@
 +        return net.neoforged.neoforge.internal.BrandingControl.getServerBranding();
      }
  
-     public SystemReport fillSystemReport(SystemReport p_177936_) {
+     public SystemReport fillSystemReport(SystemReport systemReport) {
 @@ -1541,7 +_,7 @@
  
-     public CompletableFuture<Void> reloadResources(Collection<String> p_129862_) {
+     public CompletableFuture<Void> reloadResources(Collection<String> packsToEnable) {
          CompletableFuture<Void> completablefuture = CompletableFuture.<ImmutableList>supplyAsync(
--                () -> p_129862_.stream().map(this.packRepository::getPack).filter(Objects::nonNull).map(Pack::open).collect(ImmutableList.toImmutableList()),
-+                () -> this.packRepository.rebuildSelected(p_129862_).stream().map(Pack::open).collect(ImmutableList.toImmutableList()),
+-                () -> packsToEnable.stream().map(this.packRepository::getPack).filter(Objects::nonNull).map(Pack::open).collect(ImmutableList.toImmutableList()),
++                () -> this.packRepository.rebuildSelected(packsToEnable).stream().map(Pack::open).collect(ImmutableList.toImmutableList()),
                  this
              )
              .thenCompose(
@@ -239,14 +239,14 @@
                  this
              );
 @@ -1599,8 +_,10 @@
-         FeatureFlagSet featureflagset = p_249869_ ? FeatureFlagSet.of() : p_341632_.enabledFeatures();
-         FeatureFlagSet featureflagset1 = p_249869_ ? FeatureFlags.REGISTRY.allFlags() : p_341632_.enabledFeatures();
-         p_248681_.reload();
+         FeatureFlagSet featureflagset = initMode ? FeatureFlagSet.of() : initialDataConfig.enabledFeatures();
+         FeatureFlagSet featureflagset1 = initMode ? FeatureFlags.REGISTRY.allFlags() : initialDataConfig.enabledFeatures();
+         packRepository.reload();
 +        DataPackConfig.DEFAULT.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
 +        datapackconfig.addModPacks(net.neoforged.neoforge.common.CommonHooks.getModDataPacks());
-         if (p_341620_) {
--            return configureRepositoryWithSelection(p_248681_, List.of("vanilla"), featureflagset, false);
-+            return configureRepositoryWithSelection(p_248681_, net.neoforged.neoforge.common.CommonHooks.getModDataPacksWithVanilla(), featureflagset, false);
+         if (safeMode) {
+-            return configureRepositoryWithSelection(packRepository, List.of("vanilla"), featureflagset, false);
++            return configureRepositoryWithSelection(packRepository, net.neoforged.neoforge.common.CommonHooks.getModDataPacksWithVanilla(), featureflagset, false);
          } else {
              Set<String> set = Sets.newLinkedHashSet();
  
@@ -254,14 +254,14 @@
                  set.add("vanilla");
              }
  
-+            net.neoforged.neoforge.resource.ResourcePackLoader.reorderNewlyDiscoveredPacks(set, datapackconfig.getEnabled(), p_248681_);
++            net.neoforged.neoforge.resource.ResourcePackLoader.reorderNewlyDiscoveredPacks(set, datapackconfig.getEnabled(), packRepository);
 +
-             return configureRepositoryWithSelection(p_248681_, set, featureflagset, true);
+             return configureRepositoryWithSelection(packRepository, set, featureflagset, true);
          }
      }
 @@ -1845,6 +_,31 @@
  
-     public abstract boolean isSingleplayerOwner(NameAndId p_433457_);
+     public abstract boolean isSingleplayerOwner(NameAndId nameAndId);
  
 +    private Map<ResourceKey<Level>, long[]> perWorldTickTimes = Maps.newIdentityHashMap();
 +    @Nullable
@@ -288,7 +288,7 @@
 +        return worldArray;
 +    }
 +
-     public void dumpServerProperties(Path p_177911_) throws IOException {
+     public void dumpServerProperties(Path path) throws IOException {
      }
  
 @@ -2003,6 +_,10 @@

@@ -11,9 +11,9 @@
 @@ -137,7 +_,7 @@
          private final String id;
  
-         private LayerType(String p_387059_) {
--            this.id = p_387059_;
-+            this.id = p_387059_.replaceAll(":", "/");
+         private LayerType(String id) {
+-            this.id = id;
++            this.id = id.replaceAll(":", "/");
          }
  
          @Override

@@ -14,24 +14,24 @@
 @@ -158,9 +_,11 @@
  
      @Override
-     public void performRangedAttack(LivingEntity p_479036_, float p_480954_) {
+     public void performRangedAttack(LivingEntity target, float power) {
 -        ItemStack itemstack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
 -        ItemStack itemstack1 = this.getProjectile(itemstack);
--        AbstractArrow abstractarrow = this.getArrow(itemstack1, p_480954_, itemstack);
+-        AbstractArrow abstractarrow = this.getArrow(itemstack1, power, itemstack);
 +        ItemStack weapon = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
 +        ItemStack itemstack1 = this.getProjectile(weapon);
-+        AbstractArrow abstractarrow = this.getArrow(itemstack1, p_480954_, weapon);
++        AbstractArrow abstractarrow = this.getArrow(itemstack1, power, weapon);
 +        if (weapon.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem weaponItem)
 +            abstractarrow = weaponItem.customArrow(abstractarrow, itemstack1, weapon);
-         double d0 = p_479036_.getX() - this.getX();
-         double d1 = p_479036_.getY(0.3333333333333333) - abstractarrow.getY();
-         double d2 = p_479036_.getZ() - this.getZ();
+         double d0 = target.getX() - this.getX();
+         double d1 = target.getY(0.3333333333333333) - abstractarrow.getY();
+         double d2 = target.getZ() - this.getZ();
 @@ -180,7 +_,7 @@
  
      @Override
-     public boolean canUseNonMeleeWeapon(ItemStack p_480354_) {
--        return p_480354_.getItem() == Items.BOW;
-+        return p_480354_.is(net.neoforged.neoforge.common.Tags.Items.SKELETON_USABLE_BOWS);
+     public boolean canUseNonMeleeWeapon(ItemStack item) {
+-        return item.getItem() == Items.BOW;
++        return item.is(net.neoforged.neoforge.common.Tags.Items.SKELETON_USABLE_BOWS);
      }
  
      @Override

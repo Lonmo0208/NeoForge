@@ -4,10 +4,10 @@
                  break;
              }
  
--            SpriteContents spritecontents = p_405519_.sprites().get(material, p_405600_).contents();
+-            SpriteContents spritecontents = modelBaker.sprites().get(material, name).contents();
 -            list.addAll(processFrames(i, s, spritecontents));
-+            net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = p_405519_.sprites().get(material, p_405600_);
++            net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = modelBaker.sprites().get(material, name);
 +            list.addAll(processFrames(i, s, sprite.contents()));
          }
  
-         return SimpleUnbakedGeometry.bake(list, p_387202_, p_405519_, p_387172_, p_405600_);
+         return SimpleUnbakedGeometry.bake(list, textureSlots, modelBaker, modelState, name);

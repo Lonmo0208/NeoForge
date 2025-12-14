@@ -150,7 +150,7 @@ public abstract class AbstractTestScreen extends Screen {
             public abstract void reset();
 
             @Override
-            public boolean mouseClicked(MouseButtonEvent event, boolean p_432750_) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                 if (event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                     setSelected(this);
                     return true;
@@ -276,15 +276,15 @@ public abstract class AbstractTestScreen extends Screen {
             }
 
             @Override
-            public boolean mouseClicked(MouseButtonEvent event, boolean p_432750_) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
                 if (isTitle) return false;
 
-                if (browseButton.isMouseOver(event.x(), event.y())) return browseButton.mouseClicked(event, p_432750_);
+                if (browseButton.isMouseOver(event.x(), event.y())) return browseButton.mouseClicked(event, doubleClick);
                 if (event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && (event.hasShiftDown() || event.hasControlDown())) {
                     openBrowseGUI();
                     return false;
                 }
-                return super.mouseClicked(event, p_432750_);
+                return super.mouseClicked(event, doubleClick);
             }
 
             private void openBrowseGUI() {
@@ -299,7 +299,7 @@ public abstract class AbstractTestScreen extends Screen {
                         showAsGroup.setValue(false);
                         groupableList.resetRows("");
 
-                        addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, (p_97691_) -> minecraft.setScreen(outer))
+                        addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, (button) -> minecraft.setScreen(outer))
                                 .size(60, 20)
                                 .pos(this.width - 20 - 60, this.height - 29)
                                 .build());

@@ -277,8 +277,8 @@ public class IngredientTests {
         private static final MapCodec<CompressedShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(
                 p_337958_ -> p_337958_.group(
                         Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::group),
-                        CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(p_301133_ -> p_301133_.category()),
-                        ItemStack.CODEC.fieldOf("result").forGetter(p_301142_ -> p_301142_.assemble(null, null)),
+                        CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(o -> o.category()),
+                        ItemStack.CODEC.fieldOf("result").forGetter(o -> o.assemble(null, null)),
                         SizedIngredient.NESTED_CODEC
                                 .listOf()
                                 .fieldOf("ingredients")
@@ -316,34 +316,34 @@ public class IngredientTests {
         @org.jspecify.annotations.Nullable
         private String group;
 
-        private CompressedShapelessRecipeBuilder(RecipeCategory p_250837_, ItemStack p_363612_) {
-            this.category = p_250837_;
-            this.result = p_363612_;
+        private CompressedShapelessRecipeBuilder(RecipeCategory category, ItemStack result) {
+            this.category = category;
+            this.result = result;
         }
 
-        public static CompressedShapelessRecipeBuilder compressedShapeless(RecipeCategory p_250714_, ItemLike p_249659_) {
-            return compressedShapeless(p_250714_, p_249659_, 1);
+        public static CompressedShapelessRecipeBuilder compressedShapeless(RecipeCategory category, ItemLike item) {
+            return compressedShapeless(category, item, 1);
         }
 
-        public static CompressedShapelessRecipeBuilder compressedShapeless(RecipeCategory p_252339_, ItemLike p_250836_, int p_249928_) {
-            return new CompressedShapelessRecipeBuilder(p_252339_, p_250836_.asItem().getDefaultInstance().copyWithCount(p_249928_));
+        public static CompressedShapelessRecipeBuilder compressedShapeless(RecipeCategory category, ItemLike item, int count) {
+            return new CompressedShapelessRecipeBuilder(category, item.asItem().getDefaultInstance().copyWithCount(count));
         }
 
-        public CompressedShapelessRecipeBuilder requires(Ingredient p_126187_, int p_126188_) {
-            for (int i = 0; i < p_126188_; i++) {
-                this.ingredients.add(p_126187_);
+        public CompressedShapelessRecipeBuilder requires(Ingredient ingredient, int count) {
+            for (int i = 0; i < count; i++) {
+                this.ingredients.add(ingredient);
             }
 
             return this;
         }
 
-        public CompressedShapelessRecipeBuilder unlockedBy(String p_176781_, Criterion<?> p_300897_) {
-            this.criteria.put(p_176781_, p_300897_);
+        public CompressedShapelessRecipeBuilder unlockedBy(String name, Criterion<?> criterion) {
+            this.criteria.put(name, criterion);
             return this;
         }
 
-        public CompressedShapelessRecipeBuilder group(@Nullable String p_126195_) {
-            this.group = p_126195_;
+        public CompressedShapelessRecipeBuilder group(@Nullable String group) {
+            this.group = group;
             return this;
         }
 
@@ -353,22 +353,22 @@ public class IngredientTests {
         }
 
         @Override
-        public void save(RecipeOutput p_301215_, ResourceKey<Recipe<?>> p_379987_) {
-            this.ensureValid(p_379987_);
-            Advancement.Builder advancement$builder = p_301215_.advancement()
-                    .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(p_379987_))
-                    .rewards(AdvancementRewards.Builder.recipe(p_379987_))
+        public void save(RecipeOutput output, ResourceKey<Recipe<?>> id) {
+            this.ensureValid(id);
+            Advancement.Builder advancement$builder = output.advancement()
+                    .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id))
+                    .rewards(AdvancementRewards.Builder.recipe(id))
                     .requirements(AdvancementRequirements.Strategy.OR);
             this.criteria.forEach(advancement$builder::addCriterion);
             ShapelessRecipe shapelessrecipe = new CompressedShapelessRecipe(
                     Objects.requireNonNullElse(this.group, ""), RecipeBuilder.determineBookCategory(this.category), this.result, CompressedShapelessRecipe.compressIngredients(this.ingredients));
-            p_301215_.accept(
-                    p_379987_, shapelessrecipe, advancement$builder.build(p_379987_.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
+            output.accept(
+                    id, shapelessrecipe, advancement$builder.build(id.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
         }
 
-        private void ensureValid(ResourceKey<Recipe<?>> p_379745_) {
+        private void ensureValid(ResourceKey<Recipe<?>> id) {
             if (this.criteria.isEmpty()) {
-                throw new IllegalStateException("No way of obtaining recipe " + p_379745_.identifier());
+                throw new IllegalStateException("No way of obtaining recipe " + id.identifier());
             }
         }
     }

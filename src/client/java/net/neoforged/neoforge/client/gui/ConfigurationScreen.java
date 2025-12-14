@@ -931,10 +931,10 @@ public final class ConfigurationScreen extends OptionsSubScreen {
         }
 
         @Override
-        public void render(GuiGraphics graphics, int p_281550_, int p_282878_, float p_282465_) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float a) {
             setUndoButtonstate(undoManager.canUndo()); // in render()? Really? --- Yes! This is how vanilla does it.
             setResetButtonstate(isAnyNondefault());
-            super.render(graphics, p_281550_, p_282878_, p_282465_);
+            super.render(graphics, mouseX, mouseY, a);
         }
 
         @Override
@@ -1229,9 +1229,9 @@ public final class ConfigurationScreen extends OptionsSubScreen {
         }
 
         @Override
-        public void render(GuiGraphics graphics, int p_281550_, int p_282878_, float p_282465_) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float a) {
             doneButton.active = spec.test(cfgList);
-            super.render(graphics, p_281550_, p_282878_, p_282465_);
+            super.render(graphics, mouseX, mouseY, a);
         }
 
         protected void onChanged(final String key) {

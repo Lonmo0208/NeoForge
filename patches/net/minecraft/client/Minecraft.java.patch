@@ -5,9 +5,9 @@
          }, Util.nonCriticalIoPool());
          LOGGER.info("Setting user: {}", this.user.getName());
 -        LOGGER.debug("(Session ID is {})", this.user.getSessionId());
-         this.demo = p_91084_.game.demo;
-         this.allowsMultiplayer = !p_91084_.game.disableMultiplayer;
-         this.allowsChat = !p_91084_.game.disableChat;
+         this.demo = gameConfig.game.demo;
+         this.allowsMultiplayer = !gameConfig.game.disableMultiplayer;
+         this.allowsChat = !gameConfig.game.disableChat;
 @@ -485,21 +_,25 @@
              LOGGER.error("Couldn't set icon", (Throwable)ioexception);
          }
@@ -24,9 +24,9 @@
              this.options.glDebugVerbosity,
 -            SharedConstants.DEBUG_SYNCHRONOUS_GL_LOGS,
 +            SharedConstants.DEBUG_SYNCHRONOUS_GL_LOGS || enableGlDebug,
-             (p_465335_, p_465336_) -> this.getShaderManager().getShader(p_465335_, p_465336_),
--            p_91084_.game.renderDebugLabels
-+            p_91084_.game.renderDebugLabels || enableGlDebug
+             (id, type) -> this.getShaderManager().getShader(id, type),
+-            gameConfig.game.renderDebugLabels
++            gameConfig.game.renderDebugLabels || enableGlDebug
          );
          this.options.applyGraphicsPreset(this.options.graphicsPreset().get());
          LOGGER.info("Using optional rendering extensions: {}", String.join(", ", RenderSystem.getDevice().getEnabledExtensions()));
@@ -38,7 +38,7 @@
 +        ClientBootstrap.bootstrap();
          this.resourcePackRepository.reload();
          this.options.loadSelectedResourcePacks(this.resourcePackRepository);
-         this.languageManager = new LanguageManager(this.options.languageCode, p_344151_ -> {
+         this.languageManager = new LanguageManager(this.options.languageCode, languageData -> {
 @@ -538,6 +_,7 @@
          RenderSystem.setupDefaultState();
          this.window.setErrorSection("Post startup");
@@ -75,11 +75,11 @@
          this.window.setAllowCursorChanges(this.options.allowCursorChanges().get());
 @@ -670,9 +_,9 @@
          GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_LOADING_OVERLAY_MS);
-         Minecraft.GameLoadCookie minecraft$gameloadcookie = new Minecraft.GameLoadCookie(realmsclient, p_91084_.quickPlay);
+         Minecraft.GameLoadCookie minecraft$gameloadcookie = new Minecraft.GameLoadCookie(realmsclient, gameConfig.quickPlay);
          this.setOverlay(
 -            new LoadingOverlay(
 +            net.neoforged.neoforge.client.ClientHooks.createLoadingOverlay(
-                 this, reloadinstance, p_465340_ -> Util.ifElse(p_465340_, p_299772_ -> this.rollbackResourcePacks(p_299772_, minecraft$gameloadcookie), () -> {
+                 this, reloadinstance, maybeT -> Util.ifElse(maybeT, t -> this.rollbackResourcePacks(t, minecraft$gameloadcookie), () -> {
 -                    if (SharedConstants.IS_RUNNING_IN_IDE) {
 +                    if (SharedConstants.IS_RUNNING_IN_IDE && false /* Neo: Disable self-test */) {
                          this.selfTest();
@@ -88,11 +88,11 @@
 @@ -709,6 +_,7 @@
      }
  
-     private void onResourceLoadFinished(Minecraft.@Nullable GameLoadCookie p_299896_) {
+     private void onResourceLoadFinished(Minecraft.@Nullable GameLoadCookie loadCookie) {
 +        net.neoforged.neoforge.client.ClientHooks.fireResourceLoadFinishedEvent(!this.gameLoadFinished);
          if (!this.gameLoadFinished) {
              this.gameLoadFinished = true;
-             this.onGameLoadFinished(p_299896_);
+             this.onGameLoadFinished(loadCookie);
 @@ -745,6 +_,8 @@
              runnable = () -> this.setScreen(screen);
          }
@@ -114,12 +114,12 @@
 @@ -833,7 +_,7 @@
      }
  
-     private void rollbackResourcePacks(Throwable p_91240_, Minecraft.@Nullable GameLoadCookie p_299846_) {
+     private void rollbackResourcePacks(Throwable t, Minecraft.@Nullable GameLoadCookie loadCookie) {
 -        if (this.resourcePackRepository.getSelectedIds().size() > 1) {
 +        if (this.resourcePackRepository.getSelectedPacks().stream().anyMatch(e -> !e.isRequired())) { //Forge: This caused infinite loop if any resource packs are forced. Such as mod resources. So check if we can disable any.
-             this.clearResourcePacksOnError(p_91240_, null, p_299846_);
+             this.clearResourcePacksOnError(t, null, loadCookie);
          } else {
-             Util.throwAsRuntime(p_91240_);
+             Util.throwAsRuntime(t);
 @@ -889,6 +_,8 @@
          DiscontinuousFrame discontinuousframe = TracyClient.createDiscontinuousFrame("Client Tick");
  
@@ -130,7 +130,7 @@
  
              while (this.running) {
 @@ -992,7 +_,7 @@
-             p_307414_.soundManager.emergencyShutdown();
+             minecraft.soundManager.emergencyShutdown();
          }
  
 -        System.exit(i);
@@ -155,18 +155,18 @@
  
 +        net.neoforged.neoforge.client.ClientHooks.clearGuiLayers(this);
 +        Screen old = this.screen;
-+        if (p_91153_ != null) {
-+            var event = new net.neoforged.neoforge.client.event.ScreenEvent.Opening(old, p_91153_);
++        if (screen != null) {
++            var event = new net.neoforged.neoforge.client.event.ScreenEvent.Opening(old, screen);
 +            if (net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event).isCanceled()) return;
-+            p_91153_ = event.getNewScreen();
++            screen = event.getNewScreen();
 +        }
 +
-+        if (old != null && p_91153_ != old) {
++        if (old != null && screen != old) {
 +            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.ScreenEvent.Closing(old));
 +            old.removed();
 +        }
 +
-         this.screen = p_91153_;
+         this.screen = screen;
          if (this.screen != null) {
              this.screen.added();
 @@ -1171,6 +_,7 @@
@@ -190,7 +190,7 @@
              profilerfiller.push("gameRenderer");
              if (!this.noRender) {
 +                net.neoforged.neoforge.client.ClientHooks.fireRenderFramePre(this.deltaTracker);
-                 this.gameRenderer.render(this.deltaTracker, p_91384_);
+                 this.gameRenderer.render(this.deltaTracker, advanceGameTime);
 +                net.neoforged.neoforge.client.ClientHooks.fireRenderFramePost(this.deltaTracker);
              }
  
@@ -361,10 +361,10 @@
 @@ -2089,6 +_,7 @@
      }
  
-     public void setLevel(ClientLevel p_91157_) {
+     public void setLevel(ClientLevel level) {
 +        if (this.level != null) net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Unload(this.level));
-         this.level = p_91157_;
-         this.updateLevelInEngines(p_91157_);
+         this.level = level;
+         this.updateLevelInEngines(level);
      }
 @@ -2150,13 +_,16 @@
          IntegratedServer integratedserver = this.singleplayerServer;

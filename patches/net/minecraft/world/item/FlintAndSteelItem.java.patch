@@ -1,14 +1,14 @@
 --- a/net/minecraft/world/item/FlintAndSteelItem.java
 +++ b/net/minecraft/world/item/FlintAndSteelItem.java
 @@ -28,7 +_,8 @@
-         Level level = p_41297_.getLevel();
-         BlockPos blockpos = p_41297_.getClickedPos();
+         Level level = context.getLevel();
+         BlockPos blockpos = context.getClickedPos();
          BlockState blockstate = level.getBlockState(blockpos);
 -        if (!CampfireBlock.canLight(blockstate) && !CandleBlock.canLight(blockstate) && !CandleCakeBlock.canLight(blockstate)) {
-+        BlockState blockstate2 = blockstate.getToolModifiedState(p_41297_, net.neoforged.neoforge.common.ItemAbilities.FIRESTARTER_LIGHT, false);
++        BlockState blockstate2 = blockstate.getToolModifiedState(context, net.neoforged.neoforge.common.ItemAbilities.FIRESTARTER_LIGHT, false);
 +        if (blockstate2 == null) {
-             BlockPos blockpos1 = blockpos.relative(p_41297_.getClickedFace());
-             if (BaseFireBlock.canBePlacedAt(level, blockpos1, p_41297_.getHorizontalDirection())) {
+             BlockPos blockpos1 = blockpos.relative(context.getClickedFace());
+             if (BaseFireBlock.canBePlacedAt(level, blockpos1, context.getHorizontalDirection())) {
                  level.playSound(player, blockpos1, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
 @@ -47,7 +_,7 @@
              }
@@ -18,7 +18,7 @@
 +            level.setBlock(blockpos, blockstate2, 11);
              level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockpos);
              if (player != null) {
-                 p_41297_.getItemInHand().hurtAndBreak(1, player, p_41297_.getHand().asEquipmentSlot());
+                 context.getItemInHand().hurtAndBreak(1, player, context.getHand().asEquipmentSlot());
 @@ -55,5 +_,10 @@
  
              return InteractionResult.SUCCESS;

@@ -10,14 +10,14 @@
 +    /** Neo: Prevent immediate spawning from conversions to capture conversion results for events */
 +    protected boolean preventConversionSpawns = false;
  
-     protected Mob(EntityType<? extends Mob> p_21368_, Level p_21369_) {
-         super(p_21368_, p_21369_);
+     protected Mob(EntityType<? extends Mob> type, Level level) {
+         super(type, level);
 @@ -232,7 +_,10 @@
      }
  
-     public void setTarget(@Nullable LivingEntity p_21544_) {
--        this.target = p_21544_;
-+        net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(this, p_21544_, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
+     public void setTarget(@Nullable LivingEntity target) {
+-        this.target = target;
++        net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(this, target, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
 +        if(!changeTargetEvent.isCanceled()) {
 +             this.target = changeTargetEvent.getNewAboutToBeSetTarget();
 +        }
@@ -39,20 +39,20 @@
      protected void updateControlFlags() {
 @@ -371,6 +_,9 @@
          if (this.isNoAi()) {
-             p_421640_.putBoolean("NoAI", this.isNoAi());
+             output.putBoolean("NoAI", this.isNoAi());
          }
 +        if (this.spawnType != null) {
-+            p_421640_.putString("neoforge:spawn_type", this.spawnType.name());
++            output.putString("neoforge:spawn_type", this.spawnType.name());
 +        }
      }
  
      @Override
 @@ -389,6 +_,14 @@
-         this.lootTable = p_422339_.read("DeathLootTable", LootTable.KEY_CODEC);
-         this.lootTableSeed = p_422339_.getLongOr("DeathLootTableSeed", 0L);
-         this.setNoAi(p_422339_.getBooleanOr("NoAI", false));
+         this.lootTable = input.read("DeathLootTable", LootTable.KEY_CODEC);
+         this.lootTableSeed = input.getLongOr("DeathLootTableSeed", 0L);
+         this.setNoAi(input.getBooleanOr("NoAI", false));
 +
-+        p_422339_.getString("neoforge:spawn_type")
++        input.getString("neoforge:spawn_type")
 +                .ifPresent(spawnType -> {
 +                    try {
 +                        this.spawnType = EntitySpawnReason.valueOf(spawnType);
@@ -72,12 +72,12 @@
  
              for (ItemEntity itementity : this.level()
 @@ -605,6 +_,8 @@
-     private double getApproximateAttributeWith(ItemStack p_371461_, Holder<Attribute> p_371421_, EquipmentSlot p_371891_) {
-         double d0 = this.getAttributes().hasAttribute(p_371421_) ? this.getAttributeBaseValue(p_371421_) : 0.0;
-         ItemAttributeModifiers itemattributemodifiers = p_371461_.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+     private double getApproximateAttributeWith(ItemStack itemStack, Holder<Attribute> attribute, EquipmentSlot slot) {
+         double d0 = this.getAttributes().hasAttribute(attribute) ? this.getAttributeBaseValue(attribute) : 0.0;
+         ItemAttributeModifiers itemattributemodifiers = itemStack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 +        // Neo: Respect gameplay modifiers
-+        itemattributemodifiers = p_371461_.getAttributeModifiers();
-         return itemattributemodifiers.compute(p_371421_, d0, p_371891_);
++        itemattributemodifiers = itemStack.getAttributeModifiers();
+         return itemattributemodifiers.compute(attribute, d0, slot);
      }
  
 @@ -642,6 +_,7 @@
@@ -98,20 +98,20 @@
 +    @Deprecated
 +    @org.jetbrains.annotations.ApiStatus.OverrideOnly
      public @Nullable SpawnGroupData finalizeSpawn(
-         ServerLevelAccessor p_21434_, DifficultyInstance p_21435_, EntitySpawnReason p_363352_, @Nullable SpawnGroupData p_21437_
+         ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData groupData
      ) {
 @@ -1055,6 +_,7 @@
          }
  
          this.setLeftHanded(randomsource.nextFloat() < 0.05F);
-+        this.spawnType = p_363352_;
-         return p_21437_;
++        this.spawnType = spawnReason;
+         return groupData;
      }
  
 @@ -1199,6 +_,7 @@
              } else {
-                 p_371709_.type().convert(this, t, p_371709_);
-                 p_371266_.finalizeConversion(t);
+                 params.type().convert(this, t, params);
+                 afterConversion.finalizeConversion(t);
 +                if (!preventConversionSpawns)
                  if (this.level() instanceof ServerLevel serverlevel) {
                      serverlevel.addFreshEntity(t);
@@ -121,13 +121,13 @@
  
      @Override
 +    @Deprecated // FORGE: use jumpInFluid instead
-     protected void jumpInLiquid(TagKey<Fluid> p_204045_) {
-+        this.jumpInLiquidInternal(() -> super.jumpInLiquid(p_204045_));
+     protected void jumpInLiquid(TagKey<Fluid> type) {
++        this.jumpInLiquidInternal(() -> super.jumpInLiquid(type));
 +    }
 +
 +    private void jumpInLiquidInternal(Runnable onSuper) {
          if (this.getNavigation().canFloat()) {
--            super.jumpInLiquid(p_204045_);
+-            super.jumpInLiquid(type);
 +            onSuper.run();
          } else {
              this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3, 0.0));
@@ -141,7 +141,7 @@
 +
      @VisibleForTesting
      public void removeFreeWill() {
-         this.removeAllGoals(p_351790_ -> true);
+         this.removeAllGoals(goal -> true);
 @@ -1432,5 +_,40 @@
  
      public float chargeSpeedModifier() {

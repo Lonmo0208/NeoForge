@@ -3,23 +3,23 @@
 @@ -698,13 +_,18 @@
  
      @Override
-     protected void dropAllDeathLoot(ServerLevel p_479911_, DamageSource p_479438_) {
-+        super.dropAllDeathLoot(p_479911_, p_479438_);
+     protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
++        super.dropAllDeathLoot(level, source);
 +    }
 +
 +    @Override
-+    protected void dropEquipment(ServerLevel p_479911_) { // Forge: move extra drops to dropEquipment to allow them to be captured by LivingDropsEvent
-+        super.dropEquipment(p_479911_);
++    protected void dropEquipment(ServerLevel level) { // Forge: move extra drops to dropEquipment to allow them to be captured by LivingDropsEvent
++        super.dropEquipment(level);
          ItemStack itemstack = this.getItemBySlot(EquipmentSlot.MAINHAND);
          if (!itemstack.isEmpty()) {
-             this.spawnAtLocation(p_479911_, itemstack);
+             this.spawnAtLocation(level, itemstack);
              this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
          }
  
--        super.dropAllDeathLoot(p_479911_, p_479438_);
+-        super.dropAllDeathLoot(level, source);
      }
  
-     public static boolean isPathClear(Fox p_480404_, LivingEntity p_479734_) {
+     public static boolean isPathClear(Fox fox, LivingEntity target) {
 @@ -860,6 +_,17 @@
          @Override
          protected void breed() {

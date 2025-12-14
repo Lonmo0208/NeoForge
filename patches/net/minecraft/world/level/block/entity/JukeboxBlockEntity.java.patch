@@ -27,8 +27,8 @@
 +        }
 +    }
      @Override
-     public void setTheItem(ItemStack p_304781_) {
-         this.item = p_304781_;
+     public void setTheItem(ItemStack itemStack) {
+         this.item = itemStack;
 +        itemChanged();
 +    }
 +    private void itemChanged() {

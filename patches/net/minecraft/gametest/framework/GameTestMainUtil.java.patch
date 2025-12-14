@@ -7,4 +7,4 @@
 +            net.neoforged.neoforge.server.loading.ServerModLoader.load(true); // Load mods before the level and packs are loaded
              String s = optionset.valueOf(universe);
              createOrResetDir(s);
-             p_397859_.accept(s);
+             onUniverseCreated.accept(s);

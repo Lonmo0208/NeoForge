@@ -1,30 +1,30 @@
 --- a/net/minecraft/client/renderer/entity/layers/EquipmentLayerRenderer.java
 +++ b/net/minecraft/client/renderer/entity/layers/EquipmentLayerRenderer.java
 @@ -67,18 +_,22 @@
-         int p_435821_,
-         int p_436591_
+         int outlineColor,
+         int order
      ) {
-+        net.neoforged.neoforge.client.extensions.common.IClientItemExtensions extensions = net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(p_371670_);
-+        p_371731_ = extensions.getGenericArmorModel(p_371670_, p_387484_, p_371731_);
-         List<EquipmentClientInfo.Layer> list = this.equipmentAssets.get(p_387603_).getLayers(p_387484_);
++        net.neoforged.neoforge.client.extensions.common.IClientItemExtensions extensions = net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(itemStack);
++        model = extensions.getGenericArmorModel(itemStack, layerType, model);
+         List<EquipmentClientInfo.Layer> list = this.equipmentAssets.get(equipmentAssetId).getLayers(layerType);
          if (!list.isEmpty()) {
--            int i = DyedItemColor.getOrDefault(p_371670_, 0);
-+            int i = extensions.getDefaultDyeColor(p_371670_);
-             boolean flag = p_371670_.hasFoil();
-             int j = p_436591_;
+-            int i = DyedItemColor.getOrDefault(itemStack, 0);
++            int i = extensions.getDefaultDyeColor(itemStack);
+             boolean flag = itemStack.hasFoil();
+             int j = order;
  
 +            int idx = 0;
              for (EquipmentClientInfo.Layer equipmentclientinfo$layer : list) {
 -                int k = getColorForLayer(equipmentclientinfo$layer, i);
-+                int k = extensions.getArmorLayerTintColor(p_371670_, equipmentclientinfo$layer, idx, i);
++                int k = extensions.getArmorLayerTintColor(itemStack, equipmentclientinfo$layer, idx, i);
                  if (k != 0) {
-                     Identifier identifier = equipmentclientinfo$layer.usePlayerTexture() && p_469270_ != null
-                         ? p_469270_
-                         : this.layerTextureLookup.apply(new EquipmentLayerRenderer.LayerTextureKey(p_387484_, equipmentclientinfo$layer));
-+                    identifier = net.neoforged.neoforge.client.ClientHooks.getArmorTexture(p_371670_, p_387484_, equipmentclientinfo$layer, identifier);
-                     p_435795_.order(j++)
+                     Identifier identifier = equipmentclientinfo$layer.usePlayerTexture() && playerTextureOverride != null
+                         ? playerTextureOverride
+                         : this.layerTextureLookup.apply(new EquipmentLayerRenderer.LayerTextureKey(layerType, equipmentclientinfo$layer));
++                    identifier = net.neoforged.neoforge.client.ClientHooks.getArmorTexture(itemStack, layerType, equipmentclientinfo$layer, identifier);
+                     submitNodeCollector.order(j++)
                          .submitModel(
-                             p_371731_,
+                             model,
 @@ -101,6 +_,7 @@
  
                      flag = false;
@@ -32,4 +32,4 @@
 +                idx++;
              }
  
-             ArmorTrim armortrim = p_371670_.get(DataComponents.TRIM);
+             ArmorTrim armortrim = itemStack.get(DataComponents.TRIM);

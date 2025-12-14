@@ -6,7 +6,7 @@
              );
 -            default -> throw new IllegalArgumentException("Unknown TooltipComponent");
 +            default -> {
-+                ClientTooltipComponent result = net.neoforged.neoforge.client.gui.ClientTooltipComponentManager.createClientTooltipComponent(p_169951_);
++                ClientTooltipComponent result = net.neoforged.neoforge.client.gui.ClientTooltipComponentManager.createClientTooltipComponent(component);
 +                if (result != null) yield result;
 +                throw new IllegalArgumentException("Unknown TooltipComponent");
 +            }

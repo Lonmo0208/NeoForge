@@ -39,11 +39,11 @@
 +        return new MultiVariant(WeightedList.of(), WeightedList.of(customBlockStateModel));
      }
  
-     public MultiVariant with(VariantMutator p_409928_) {
+     public MultiVariant with(VariantMutator mutator) {
 +        if (!this.customBlockStateModels.isEmpty()) {
-+            return new MultiVariant(this.variants, this.customBlockStateModels.map(model -> model.with(p_409928_)));
++            return new MultiVariant(this.variants, this.customBlockStateModels.map(model -> model.with(mutator)));
 +        }
-         return new MultiVariant(this.variants.map(p_409928_));
+         return new MultiVariant(this.variants.map(mutator));
      }
  
 +    /**

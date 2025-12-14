@@ -3,20 +3,20 @@
 @@ -32,6 +_,8 @@
                  return false;
              } else {
-                 int i = this.getUseDuration(p_40667_, p_40669_) - p_40670_;
-+                i = net.neoforged.neoforge.event.EventHooks.onArrowLoose(p_40667_, p_40668_, player, i, !itemstack.isEmpty());
+                 int i = this.getUseDuration(itemStack, entity) - remainingTime;
++                i = net.neoforged.neoforge.event.EventHooks.onArrowLoose(itemStack, level, player, i, !itemstack.isEmpty());
 +                if (i < 0) return false;
                  float f = getPowerForTime(i);
                  if (f < 0.1) {
                      return false;
 @@ -89,6 +_,10 @@
-     public InteractionResult use(Level p_40672_, Player p_40673_, InteractionHand p_40674_) {
-         ItemStack itemstack = p_40673_.getItemInHand(p_40674_);
-         boolean flag = !p_40673_.getProjectile(itemstack).isEmpty();
+     public InteractionResult use(Level level, Player player, InteractionHand hand) {
+         ItemStack itemstack = player.getItemInHand(hand);
+         boolean flag = !player.getProjectile(itemstack).isEmpty();
 +
-+        InteractionResult ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(itemstack, p_40672_, p_40673_, p_40674_, flag);
++        InteractionResult ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(itemstack, level, player, hand, flag);
 +        if (ret != null) return ret;
 +
-         if (!p_40673_.hasInfiniteMaterials() && !flag) {
+         if (!player.hasInfiniteMaterials() && !flag) {
              return InteractionResult.FAIL;
          } else {

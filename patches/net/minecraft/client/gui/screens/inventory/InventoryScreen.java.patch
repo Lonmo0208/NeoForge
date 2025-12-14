@@ -4,43 +4,43 @@
      }
  
      public static void renderEntityInInventoryFollowsMouse(
-+            GuiGraphics p_282802_,
-+            int p_275688_,
-+            int p_275245_,
-+            int p_275535_,
-+            int p_294406_,
-+            int p_294663_,
-+            float p_275604_,
-+            float p_275546_,
-+            float p_295352_,
-+            LivingEntity p_275689_
++            GuiGraphics graphics,
++            int x0,
++            int y0,
++            int x1,
++            int y1,
++            int size,
++            float offsetY,
++            float mouseX,
++            float mouseY,
++            LivingEntity entity
 +    ) {
-+        float f = (p_275688_ + p_275535_) / 2.0F;
-+        float f1 = (p_275245_ + p_294406_) / 2.0F;
-+        float f2 = (float)Math.atan((f - p_275546_) / 40.0F);
-+        float f3 = (float)Math.atan((f1 - p_295352_) / 40.0F);
++        float f = (x0 + x1) / 2.0F;
++        float f1 = (y0 + y1) / 2.0F;
++        float f2 = (float)Math.atan((f - mouseX) / 40.0F);
++        float f3 = (float)Math.atan((f1 - mouseY) / 40.0F);
 +        // Forge: Allow passing in direct angle components instead of mouse position
-+        renderEntityInInventoryFollowsAngle(p_282802_, p_275688_, p_275245_, p_275535_, p_294406_, p_294663_, p_275604_, f2, f3, p_275689_);
++        renderEntityInInventoryFollowsAngle(graphics, x0, y0, x1, y1, size, offsetY, f2, f3, entity);
 +    }
 +
 +    public static void renderEntityInInventoryFollowsAngle(
-         GuiGraphics p_282802_,
-         int p_275688_,
-         int p_275245_,
+         GuiGraphics graphics,
+         int x0,
+         int y0,
 @@ -114,14 +_,14 @@
-         int p_294406_,
-         int p_294663_,
-         float p_275604_,
--        float p_275546_,
--        float p_295352_,
+         int y1,
+         int size,
+         float offsetY,
+-        float mouseX,
+-        float mouseY,
 +        float angleXComponent,
 +        float angleYComponent,
-         LivingEntity p_275689_
+         LivingEntity entity
      ) {
-         float f = (p_275688_ + p_275535_) / 2.0F;
-         float f1 = (p_275245_ + p_294406_) / 2.0F;
--        float f2 = (float)Math.atan((f - p_275546_) / 40.0F);
--        float f3 = (float)Math.atan((f1 - p_295352_) / 40.0F);
+         float f = (x0 + x1) / 2.0F;
+         float f1 = (y0 + y1) / 2.0F;
+-        float f2 = (float)Math.atan((f - mouseX) / 40.0F);
+-        float f3 = (float)Math.atan((f1 - mouseY) / 40.0F);
 +        float f2 = angleXComponent;
 +        float f3 = angleYComponent;
          Quaternionf quaternionf = new Quaternionf().rotateZ((float) Math.PI);

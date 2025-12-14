@@ -2,10 +2,10 @@
 +++ b/net/minecraft/world/entity/ai/behavior/VillagerMakeLove.java
 @@ -114,6 +_,8 @@
              villager.setAge(-24000);
-             villager.snapTo(p_478139_.getX(), p_478139_.getY(), p_478139_.getZ(), 0.0F, 0.0F);
-             p_24656_.addFreshEntityWithPassengers(villager);
+             villager.snapTo(source.getX(), source.getY(), source.getZ(), 0.0F, 0.0F);
+             level.addFreshEntityWithPassengers(villager);
 +            // Neo: If villager is blocked from spawning (e.g., FinalizeSpawnEvent), then breed should be unsuccessful
 +            if (!villager.isAddedToLevel()) return Optional.empty();
-             p_24656_.broadcastEntityEvent(villager, (byte)12);
+             level.broadcastEntityEvent(villager, (byte)12);
              return Optional.of(villager);
          }

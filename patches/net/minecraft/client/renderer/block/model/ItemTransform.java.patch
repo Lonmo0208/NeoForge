@@ -12,15 +12,15 @@
 +        this(rotation, translation, scale, new Vector3f());
 +    }
 +
-     public void apply(boolean p_111764_, PoseStack.Pose p_405188_) {
+     public void apply(boolean applyLeftHandFix, PoseStack.Pose pose) {
          if (this == NO_TRANSFORM) {
-             p_405188_.translate(-0.5F, -0.5F, -0.5F);
+             pose.translate(-0.5F, -0.5F, -0.5F);
 @@ -42,6 +_,7 @@
                  new Quaternionf().rotationXYZ(this.rotation.x() * (float) (Math.PI / 180.0), f1 * (float) (Math.PI / 180.0), f2 * (float) (Math.PI / 180.0))
              );
-             p_405188_.scale(this.scale.x(), this.scale.y(), this.scale.z());
-+            p_405188_.rotate(net.neoforged.neoforge.common.util.TransformationHelper.quatFromXYZ(rightRotation.x(), rightRotation.y() * (p_111764_ ? -1 : 1), rightRotation.z() * (p_111764_ ? -1 : 1), true));
-             p_405188_.translate(-0.5F, -0.5F, -0.5F);
+             pose.scale(this.scale.x(), this.scale.y(), this.scale.z());
++            pose.rotate(net.neoforged.neoforge.common.util.TransformationHelper.quatFromXYZ(rightRotation.x(), rightRotation.y() * (applyLeftHandFix ? -1 : 1), rightRotation.z() * (applyLeftHandFix ? -1 : 1), true));
+             pose.translate(-0.5F, -0.5F, -0.5F);
          }
      }
 @@ -62,7 +_,8 @@
@@ -32,4 +32,4 @@
 +            return new ItemTransform(vector3f, vector3f1, vector3f2, rightRotation);
          }
  
-         private Vector3f getVector3f(JsonObject p_111779_, String p_111780_, Vector3f p_253777_) {
+         private Vector3f getVector3f(JsonObject object, String key, Vector3f def) {

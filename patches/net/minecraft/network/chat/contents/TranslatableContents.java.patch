@@ -1,9 +1,9 @@
 --- a/net/minecraft/network/chat/contents/TranslatableContents.java
 +++ b/net/minecraft/network/chat/contents/TranslatableContents.java
 @@ -78,6 +_,16 @@
-         this.key = p_265775_;
-         this.fallback = p_265204_;
-         this.args = p_265752_;
+         this.key = key;
+         this.fallback = fallback;
+         this.args = args;
 +        // Neo: This is transitively called by some static initializers. To allow using Minecraft classes from tests
 +        // without fully initializing FML, we disable the validation if FML is not initialized.
 +        var loader = net.neoforged.fml.loading.FMLLoader.getCurrentOrNull();
@@ -32,7 +32,7 @@
  
              try {
 @@ -167,6 +_,12 @@
-     public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> p_237521_, Style p_237522_) {
+     public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> output, Style currentStyle) {
          this.decompose();
  
 +        if (!net.neoforged.neoforge.common.util.InsertingContents.pushTranslation(this)) {
@@ -42,7 +42,7 @@
 +
 +        try {
          for (FormattedText formattedtext : this.decomposedParts) {
-             Optional<T> optional = formattedtext.visit(p_237521_, p_237522_);
+             Optional<T> optional = formattedtext.visit(output, currentStyle);
              if (optional.isPresent()) {
 @@ -175,12 +_,21 @@
          }
@@ -54,7 +54,7 @@
      }
  
      @Override
-     public <T> Optional<T> visit(FormattedText.ContentConsumer<T> p_237519_) {
+     public <T> Optional<T> visit(FormattedText.ContentConsumer<T> output) {
          this.decompose();
  
 +        if (!net.neoforged.neoforge.common.util.InsertingContents.pushTranslation(this)) {
@@ -64,7 +64,7 @@
 +
 +        try {
          for (FormattedText formattedtext : this.decomposedParts) {
-             Optional<T> optional = formattedtext.visit(p_237519_);
+             Optional<T> optional = formattedtext.visit(output);
              if (optional.isPresent()) {
 @@ -189,6 +_,9 @@
          }

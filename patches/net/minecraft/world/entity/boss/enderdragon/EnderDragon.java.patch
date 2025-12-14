@@ -14,9 +14,9 @@
 +            this.subEntities[i].setId(id + i + 1);
      }
  
-     public void setDragonFight(EndDragonFight p_287736_) {
+     public void setDragonFight(EndDragonFight fight) {
 @@ -148,8 +_,19 @@
-         p_326491_.define(DATA_PHASE, EnderDragonPhase.HOVERING.getId());
+         entityData.define(DATA_PHASE, EnderDragonPhase.HOVERING.getId());
      }
  
 +    private net.minecraft.world.entity.@Nullable EntityReference<Player> unlimitedLastHurtByPlayer = null;
@@ -37,11 +37,11 @@
              this.setHealth(this.getHealth());
 @@ -438,7 +_,7 @@
                      BlockPos blockpos = new BlockPos(k1, l1, i2);
-                     BlockState blockstate = p_376795_.getBlockState(blockpos);
+                     BlockState blockstate = level.getBlockState(blockpos);
                      if (!blockstate.isAir() && !blockstate.is(BlockTags.DRAGON_TRANSPARENT)) {
--                        if (p_376795_.getGameRules().get(GameRules.MOB_GRIEFING) && !blockstate.is(BlockTags.DRAGON_IMMUNE)) {
-+                        if (net.neoforged.neoforge.common.CommonHooks.canEntityDestroy(p_376795_, blockpos, this) && !blockstate.is(BlockTags.DRAGON_IMMUNE)) {
-                             flag1 = p_376795_.removeBlock(blockpos, false) || flag1;
+-                        if (level.getGameRules().get(GameRules.MOB_GRIEFING) && !blockstate.is(BlockTags.DRAGON_IMMUNE)) {
++                        if (net.neoforged.neoforge.common.CommonHooks.canEntityDestroy(level, blockpos, this) && !blockstate.is(BlockTags.DRAGON_IMMUNE)) {
+                             flag1 = level.removeBlock(blockpos, false) || flag1;
                          } else {
                              flag = true;
 @@ -530,7 +_,8 @@
@@ -78,8 +78,8 @@
 +    }
 +
 +    @Override
-     public void recreateFromPacket(ClientboundAddEntityPacket p_218825_) {
-         super.recreateFromPacket(p_218825_);
+     public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+         super.recreateFromPacket(packet);
 +        if (true) return; // Forge: Fix MC-158205: Moved into setId()
          EnderDragonPart[] aenderdragonpart = this.getSubEntities();
  

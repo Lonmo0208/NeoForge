@@ -12,7 +12,7 @@
 @@ -28,6 +_,19 @@
              throw new RejectedExecutionException("Server already shutting down");
          } else {
-             this.packetsToBeHandled.add(new PacketProcessor.ListenerAndPacket<>(p_446530_, p_445832_));
+             this.packetsToBeHandled.add(new PacketProcessor.ListenerAndPacket<>(listener, packet));
 +        }
 +    }
 +

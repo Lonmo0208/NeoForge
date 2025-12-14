@@ -5,18 +5,18 @@
              }
  
 -            return new Vector4f(f5, f1, f2, 1.0F);
-+            return net.neoforged.neoforge.client.ClientHooks.getFogColor(p_423439_, p_423466_, p_423475_, p_423484_, p_423652_, f5, f1, f2);
++            return net.neoforged.neoforge.client.ClientHooks.getFogColor(camera, partialTicks, level, renderDistance, darkenWorldAmount, f5, f1, f2);
          }
      }
  
 @@ -167,9 +_,11 @@
-         Entity entity = p_423468_.entity();
+         Entity entity = camera.entity();
          FogData fogdata = new FogData();
  
 +        FogEnvironment chosenEnvironment = null;
          for (FogEnvironment fogenvironment : FOG_ENVIRONMENTS) {
              if (fogenvironment.isApplicable(fogtype, entity)) {
-                 fogenvironment.setupFog(fogdata, p_423468_, p_423641_, f1, p_423597_);
+                 fogenvironment.setupFog(fogdata, camera, level, f1, deltaTracker);
 +                chosenEnvironment = fogenvironment;
                  break;
              }
@@ -26,7 +26,7 @@
          fogdata.renderDistanceStart = f1 - f2;
          fogdata.renderDistanceEnd = f1;
 +
-+        net.neoforged.neoforge.client.ClientHooks.onSetupFog(chosenEnvironment, fogtype, p_423468_, f, p_423600_, fogdata);
++        net.neoforged.neoforge.client.ClientHooks.onSetupFog(chosenEnvironment, fogtype, camera, f, renderDistanceInChunks, fogdata);
  
          try (GpuBuffer.MappedView gpubuffer$mappedview = RenderSystem.getDevice()
                  .createCommandEncoder()

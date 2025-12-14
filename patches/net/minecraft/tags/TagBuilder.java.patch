@@ -19,8 +19,8 @@
      public static TagBuilder create() {
 @@ -34,5 +_,21 @@
  
-     public TagBuilder addOptionalTag(Identifier p_467982_) {
-         return this.add(TagEntry.optionalTag(p_467982_));
+     public TagBuilder addOptionalTag(Identifier id) {
+         return this.add(TagEntry.optionalTag(id));
 +    }
 +
 +    // FORGE: Set the replace property of this tag.

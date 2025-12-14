@@ -3,10 +3,10 @@
 @@ -29,27 +_,33 @@
          double d2 = vec3.y() + direction.getStepY() * 1.125F;
          double d3 = vec3.z() + direction.getStepZ() * d0;
-         BlockPos blockpos = p_302460_.pos().relative(direction);
+         BlockPos blockpos = source.pos().relative(direction);
 +        AbstractBoat abstractboat = this.type.create(serverlevel, EntitySpawnReason.DISPENSER);
 +        if (abstractboat != null) {
-+            EntityType.<AbstractBoat>createDefaultStackConfig(serverlevel, p_123376_, null).accept(abstractboat);
++            EntityType.<AbstractBoat>createDefaultStackConfig(serverlevel, dispensed, null).accept(abstractboat);
 +            abstractboat.setYRot(direction.toYRot());
 +            serverlevel.addFreshEntity(abstractboat);
 +        }
@@ -17,7 +17,7 @@
          } else {
 -            if (!serverlevel.getBlockState(blockpos).isAir() || !serverlevel.getFluidState(blockpos.below()).is(FluidTags.WATER)) {
 +            if (!serverlevel.getBlockState(blockpos).isAir() || !canBoatInFluid(abstractboat, serverlevel.getFluidState(blockpos.below()))) {
-                 return this.defaultDispenseItemBehavior.dispense(p_302460_, p_123376_);
+                 return this.defaultDispenseItemBehavior.dispense(source, dispensed);
              }
  
              d4 = 0.0;
@@ -26,13 +26,13 @@
 -        AbstractBoat abstractboat = this.type.create(serverlevel, EntitySpawnReason.DISPENSER);
          if (abstractboat != null) {
              abstractboat.setInitialPos(d1, d2 + d4, d3);
--            EntityType.<AbstractBoat>createDefaultStackConfig(serverlevel, p_123376_, null).accept(abstractboat);
+-            EntityType.<AbstractBoat>createDefaultStackConfig(serverlevel, dispensed, null).accept(abstractboat);
 -            abstractboat.setYRot(direction.toYRot());
 -            serverlevel.addFreshEntity(abstractboat);
-             p_123376_.shrink(1);
+             dispensed.shrink(1);
          }
  
-         return p_123376_;
+         return dispensed;
 +    }
 +
 +    private static boolean canBoatInFluid(@org.jspecify.annotations.Nullable AbstractBoat boat, net.minecraft.world.level.material.FluidState fluid) {

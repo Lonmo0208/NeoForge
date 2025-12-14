@@ -11,10 +11,10 @@
  
 @@ -137,7 +_,7 @@
      @Override
-     protected InteractionResult mobInteract(Player p_478090_, InteractionHand p_480474_) {
-         ItemStack itemstack = p_478090_.getItemInHand(p_480474_);
+     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+         ItemStack itemstack = player.getItemInHand(hand);
 -        if (itemstack.is(Items.SHEARS) && this.readyForShearing()) {
 +        if (false && itemstack.is(Items.SHEARS) && this.readyForShearing()) { // Neo: Shear logic is handled by IShearable
              if (this.level() instanceof ServerLevel serverlevel) {
                  this.shear(serverlevel, SoundSource.PLAYERS, itemstack);
-                 this.gameEvent(GameEvent.SHEAR, p_478090_);
+                 this.gameEvent(GameEvent.SHEAR, player);

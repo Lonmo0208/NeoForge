@@ -11,7 +11,7 @@
 +    });
  
      public static GameTestServer create(
-         Thread p_206607_, LevelStorageSource.LevelStorageAccess p_206608_, PackRepository p_206609_, Optional<String> p_397118_, boolean p_397698_
+         Thread serverThread, LevelStorageSource.LevelStorageAccess levelStorageSource, PackRepository packRepository, Optional<String> testSelection, boolean verify
 @@ -98,7 +_,7 @@
          arraylist.addFirst("vanilla");
          WorldDataConfiguration worlddataconfiguration = new WorldDataConfiguration(new DataPackConfig(arraylist, List.of()), ENABLED_FEATURES);
@@ -19,7 +19,7 @@
 -            "Test Level", GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(ENABLED_FEATURES), worlddataconfiguration
 +            "Test Level", GameType.CREATIVE, false, Difficulty.NORMAL, true, TEST_GAME_RULES, worlddataconfiguration
          );
-         WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(p_206609_, worlddataconfiguration, false, true);
+         WorldLoader.PackConfig worldloader$packconfig = new WorldLoader.PackConfig(packRepository, worlddataconfiguration, false, true);
          WorldLoader.InitConfig worldloader$initconfig = new WorldLoader.InitConfig(
 @@ -159,10 +_,12 @@
      public boolean initServer() {
@@ -52,15 +52,15 @@
              }
 @@ -240,11 +_,11 @@
  
-     private static void logFailedTest(GameTestInfo p_401161_) {
-         if (p_401161_.getRotation() != Rotation.NONE) {
+     private static void logFailedTest(GameTestInfo testInfo) {
+         if (testInfo.getRotation() != Rotation.NONE) {
 -            LOGGER.info(
 +            LOGGER.error(
-                 "   - {} with rotation {}: {}", p_401161_.id(), p_401161_.getRotation().getSerializedName(), p_401161_.getError().getDescription().getString()
+                 "   - {} with rotation {}: {}", testInfo.id(), testInfo.getRotation().getSerializedName(), testInfo.getError().getDescription().getString()
              );
          } else {
--            LOGGER.info("   - {}: {}", p_401161_.id(), p_401161_.getError().getDescription().getString());
-+            LOGGER.error("   - {}: {}", p_401161_.id(), p_401161_.getError().getDescription().getString());
+-            LOGGER.info("   - {}: {}", testInfo.id(), testInfo.getError().getDescription().getString());
++            LOGGER.error("   - {}: {}", testInfo.id(), testInfo.getError().getDescription().getString());
          }
      }
  

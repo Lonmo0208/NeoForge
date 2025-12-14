@@ -4,11 +4,11 @@
      private final boolean animated;
      private final Function<ItemStack, RenderType> renderType;
  
--    BlockModelWrapper(List<ItemTintSource> p_388185_, List<BakedQuad> p_405671_, ModelRenderProperties p_404871_, Function<ItemStack, RenderType> p_469530_) {
-+    public BlockModelWrapper(List<ItemTintSource> p_388185_, List<BakedQuad> p_405671_, ModelRenderProperties p_404871_, Function<ItemStack, RenderType> p_469530_) {
-         this.tints = p_388185_;
-         this.quads = p_405671_;
-         this.properties = p_404871_;
+-    BlockModelWrapper(List<ItemTintSource> tints, List<BakedQuad> quads, ModelRenderProperties properties, Function<ItemStack, RenderType> renderType) {
++    public BlockModelWrapper(List<ItemTintSource> tints, List<BakedQuad> quads, ModelRenderProperties properties, Function<ItemStack, RenderType> renderType) {
+         this.tints = tints;
+         this.quads = quads;
+         this.properties = properties;
 @@ -176,7 +_,9 @@
              TextureSlots textureslots = resolvedmodel.getTopTextureSlots();
              List<BakedQuad> list = resolvedmodel.bakeTopGeometry(textureslots, modelbaker, BlockModelRotation.IDENTITY).getAll();

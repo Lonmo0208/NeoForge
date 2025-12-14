@@ -13,10 +13,10 @@
  
      private void finishConversion() {
          this.convertTo(
--            EntityType.ZOGLIN, ConversionParams.single(this, true, false), p_393201_ -> p_393201_.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0))
-+            EntityType.ZOGLIN, ConversionParams.single(this, true, false), p_393201_ -> {
-+                p_393201_.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
-+                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_393201_);
+-            EntityType.ZOGLIN, ConversionParams.single(this, true, false), zoglin -> zoglin.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0))
++            EntityType.ZOGLIN, ConversionParams.single(this, true, false), zoglin -> {
++                zoglin.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
++                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, zoglin);
 +            }
          );
      }

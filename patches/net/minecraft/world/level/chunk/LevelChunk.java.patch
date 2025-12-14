@@ -1,19 +1,19 @@
 --- a/net/minecraft/world/level/chunk/LevelChunk.java
 +++ b/net/minecraft/world/level/chunk/LevelChunk.java
 @@ -154,6 +_,7 @@
-         this.setAllStarts(p_196851_.getAllStarts());
-         this.setAllReferences(p_196851_.getAllReferences());
+         this.setAllStarts(protoChunk.getAllStarts());
+         this.setAllReferences(protoChunk.getAllReferences());
  
-+        net.neoforged.neoforge.attachment.AttachmentInternals.copyChunkAttachmentsOnPromotion(p_196850_.registryAccess(), p_196851_.getAttachmentHolder(), this.getAttachmentHolder());
-         for (Entry<Heightmap.Types, Heightmap> entry : p_196851_.getHeightmaps()) {
++        net.neoforged.neoforge.attachment.AttachmentInternals.copyChunkAttachmentsOnPromotion(level.registryAccess(), protoChunk.getAttachmentHolder(), this.getAttachmentHolder());
+         for (Entry<Heightmap.Types, Heightmap> entry : protoChunk.getHeightmaps()) {
              if (ChunkStatus.FULL.heightmapsAfter().contains(entry.getKey())) {
                  this.setHeightmap(entry.getKey(), entry.getValue().getRawData());
 @@ -290,7 +_,7 @@
                      this.level.getChunkSource().onSectionEmptinessChanged(this.chunkPos.x, SectionPos.blockToSectionCoord(i), this.chunkPos.z, flag1);
                  }
  
--                if (LightEngine.hasDifferentLightProperties(blockstate, p_62866_)) {
-+                if (LightEngine.hasDifferentLightProperties(this, p_62865_, blockstate, p_62866_)) {
+-                if (LightEngine.hasDifferentLightProperties(blockstate, state)) {
++                if (LightEngine.hasDifferentLightProperties(this, pos, blockstate, state)) {
                      ProfilerFiller profilerfiller = Profiler.get();
                      profilerfiller.push("updateSkyLightSources");
                      this.skyLightSources.update(this, j, i, l);
@@ -21,51 +21,51 @@
                  if (!levelchunksection.getBlockState(j, k, l).is(block)) {
                      return null;
                  } else {
--                    if (!this.level.isClientSide() && (p_393859_ & 512) == 0) {
-+                    if (!this.level.isClientSide() && !this.level.captureBlockSnapshots && (p_393859_ & 512) == 0) {
-                         p_62866_.onPlace(this.level, p_62865_, blockstate, flag2);
+-                    if (!this.level.isClientSide() && (flags & 512) == 0) {
++                    if (!this.level.isClientSide() && !this.level.captureBlockSnapshots && (flags & 512) == 0) {
+                         state.onPlace(this.level, pos, blockstate, flag2);
                      }
  
 @@ -372,6 +_,10 @@
  
-     public @Nullable BlockEntity getBlockEntity(BlockPos p_62868_, LevelChunk.EntityCreationType p_62869_) {
-         BlockEntity blockentity = this.blockEntities.get(p_62868_);
+     public @Nullable BlockEntity getBlockEntity(BlockPos pos, LevelChunk.EntityCreationType creationType) {
+         BlockEntity blockentity = this.blockEntities.get(pos);
 +        if (blockentity != null && blockentity.isRemoved()) {
-+            blockEntities.remove(p_62868_);
++            blockEntities.remove(pos);
 +            blockentity = null;
 +        }
          if (blockentity == null) {
-             CompoundTag compoundtag = this.pendingBlockEntities.remove(p_62868_);
+             CompoundTag compoundtag = this.pendingBlockEntities.remove(pos);
              if (compoundtag != null) {
 @@ -389,9 +_,6 @@
                      this.addAndRegisterBlockEntity(blockentity);
                  }
              }
 -        } else if (blockentity.isRemoved()) {
--            this.blockEntities.remove(p_62868_);
+-            this.blockEntities.remove(pos);
 -            return null;
          }
  
          return blockentity;
 @@ -406,6 +_,7 @@
  
-             this.level.onBlockEntityAdded(p_156391_);
-             this.updateBlockEntityTicker(p_156391_);
-+            this.level.addFreshBlockEntities(java.util.List.of(p_156391_));
+             this.level.onBlockEntityAdded(blockEntity);
+             this.updateBlockEntityTicker(blockEntity);
++            this.level.addFreshBlockEntities(java.util.List.of(blockEntity));
          }
      }
  
 @@ -449,6 +_,7 @@
-             BlockEntity blockentity = this.blockEntities.put(blockpos.immutable(), p_156374_);
-             if (blockentity != null && blockentity != p_156374_) {
+             BlockEntity blockentity = this.blockEntities.put(blockpos.immutable(), blockEntity);
+             if (blockentity != null && blockentity != blockEntity) {
                  blockentity.setRemoved();
 +                auxLightManager.removeLightAt(blockpos);
              }
          }
      }
 @@ -457,9 +_,14 @@
-     public @Nullable CompoundTag getBlockEntityNbtForSaving(BlockPos p_62932_, HolderLookup.Provider p_323699_) {
-         BlockEntity blockentity = this.getBlockEntity(p_62932_);
+     public @Nullable CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos, HolderLookup.Provider registryAccess) {
+         BlockEntity blockentity = this.getBlockEntity(blockPos);
          if (blockentity != null && !blockentity.isRemoved()) {
 +            try {
              CompoundTag compoundtag1 = blockentity.saveWithFullMetadata(this.level.registryAccess());
@@ -76,23 +76,23 @@
 +                return null;
 +            }
          } else {
-             CompoundTag compoundtag = this.pendingBlockEntities.get(p_62932_);
+             CompoundTag compoundtag = this.pendingBlockEntities.get(blockPos);
              if (compoundtag != null) {
 @@ -482,6 +_,7 @@
                  }
  
                  blockentity.setRemoved();
-+                auxLightManager.removeLightAt(p_62919_);
++                auxLightManager.removeLightAt(pos);
              }
          }
  
 @@ -539,7 +_,7 @@
-                 (p_421432_, p_421433_, p_421434_) -> {
-                     BlockEntity blockentity = this.getBlockEntity(p_421432_, LevelChunk.EntityCreationType.IMMEDIATE);
-                     if (blockentity != null && p_421434_ != null && blockentity.getType() == p_421433_) {
+                 (pos, type, tag) -> {
+                     BlockEntity blockentity = this.getBlockEntity(pos, LevelChunk.EntityCreationType.IMMEDIATE);
+                     if (blockentity != null && tag != null && blockentity.getType() == type) {
 -                        blockentity.loadWithComponents(
 +                        blockentity.handleUpdateTag(
-                             TagValueInput.create(problemreporter$scopedcollector.forChild(blockentity.problemPath()), this.level.registryAccess(), p_421434_)
+                             TagValueInput.create(problemreporter$scopedcollector.forChild(blockentity.problemPath()), this.level.registryAccess(), tag)
                          );
                      }
 @@ -679,6 +_,7 @@
@@ -102,17 +102,17 @@
 +        this.blockEntities.values().forEach(BlockEntity::onChunkUnloaded);
          this.blockEntities.values().forEach(BlockEntity::setRemoved);
          this.blockEntities.clear();
-         this.tickersInLevel.values().forEach(p_187966_ -> p_187966_.rebind(NULL_TICKER));
+         this.tickersInLevel.values().forEach(ticker -> ticker.rebind(NULL_TICKER));
 @@ -686,6 +_,7 @@
      }
  
      public void registerAllBlockEntitiesAfterLevelLoad() {
 +        this.level.addFreshBlockEntities(this.blockEntities.values());
-         this.blockEntities.values().forEach(p_427220_ -> {
+         this.blockEntities.values().forEach(blockEntity -> {
              if (this.level instanceof ServerLevel serverlevel) {
-                 this.addGameEventListener(p_427220_, serverlevel);
+                 this.addGameEventListener(blockEntity, serverlevel);
 @@ -738,6 +_,19 @@
-         return new LevelChunk.BoundTickingBlockEntity<>(p_156376_, p_156377_);
+         return new LevelChunk.BoundTickingBlockEntity<>(blockEntity, ticker);
      }
  
 +    // Neo: Threadsafe lighting system for BlockEntities that change lighting based on dynamic data changing.

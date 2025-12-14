@@ -1,14 +1,14 @@
 --- a/net/minecraft/world/level/block/CrafterBlock.java
 +++ b/net/minecraft/world/level/block/CrafterBlock.java
 @@ -186,7 +_,8 @@
-         ServerLevel p_335887_, BlockPos p_307620_, CrafterBlockEntity p_307387_, ItemStack p_307296_, BlockState p_307501_, RecipeHolder<?> p_335494_
+         ServerLevel level, BlockPos pos, CrafterBlockEntity blockEntity, ItemStack results, BlockState blockState, RecipeHolder<?> recipe
      ) {
-         Direction direction = p_307501_.getValue(ORIENTATION).front();
--        Container container = HopperBlockEntity.getContainerAt(p_335887_, p_307620_.relative(direction));
-+        var containerOrHandler = HopperBlockEntity.getContainerOrHandlerAt(p_335887_, p_307620_.relative(direction), direction.getOpposite());
+         Direction direction = blockState.getValue(ORIENTATION).front();
+-        Container container = HopperBlockEntity.getContainerAt(level, pos.relative(direction));
++        var containerOrHandler = HopperBlockEntity.getContainerOrHandlerAt(level, pos.relative(direction), direction.getOpposite());
 +        Container container = containerOrHandler.container();
-         ItemStack itemstack = p_307296_.copy();
-         if (container != null && (container instanceof CrafterBlockEntity || p_307296_.getCount() > container.getMaxStackSize(p_307296_))) {
+         ItemStack itemstack = results.copy();
+         if (container != null && (container instanceof CrafterBlockEntity || results.getCount() > container.getMaxStackSize(results))) {
              while (!itemstack.isEmpty()) {
 @@ -198,10 +_,14 @@
  
@@ -18,9 +18,9 @@
 +        } else if (!containerOrHandler.isEmpty()) {
              while (!itemstack.isEmpty()) {
                  int i = itemstack.getCount();
--                itemstack = HopperBlockEntity.addItem(p_307387_, container, itemstack, direction.getOpposite());
+-                itemstack = HopperBlockEntity.addItem(blockEntity, container, itemstack, direction.getOpposite());
 +                if (container != null) {
-+                    itemstack = HopperBlockEntity.addItem(p_307387_, container, itemstack, direction.getOpposite());
++                    itemstack = HopperBlockEntity.addItem(blockEntity, container, itemstack, direction.getOpposite());
 +                } else {
 +                    itemstack = net.neoforged.neoforge.transfer.item.ItemUtil.insertItemReturnRemaining(containerOrHandler.itemHandler(), itemstack, false, null);
 +                }

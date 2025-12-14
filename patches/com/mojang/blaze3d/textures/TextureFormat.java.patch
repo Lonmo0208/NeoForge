@@ -17,8 +17,8 @@
  
      private final int pixelSize;
  
--    private TextureFormat(int p_404990_) {
--        this.pixelSize = p_404990_;
+-    private TextureFormat(int pixelSize) {
+-        this.pixelSize = pixelSize;
 +    private TextureFormat(int pixelSize) {
 +        this.pixelSize = pixelSize;
      }

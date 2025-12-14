@@ -295,7 +295,7 @@ public class ExtendedGameTestHelper extends GameTestHelper {
             }
 
             @Override
-            public void testAddedForRerun(GameTestInfo p_320937_, GameTestInfo p_320294_, GameTestRunner p_320147_) {}
+            public void testAddedForRerun(GameTestInfo original, GameTestInfo copy, GameTestRunner runner) {}
         });
     }
 

@@ -2,7 +2,7 @@
 +++ b/net/minecraft/world/item/crafting/BannerDuplicateRecipe.java
 @@ -81,7 +_,7 @@
          for (int i = 0; i < nonnulllist.size(); i++) {
-             ItemStack itemstack = p_345377_.getItem(i);
+             ItemStack itemstack = input.getItem(i);
              if (!itemstack.isEmpty()) {
 -                ItemStack itemstack1 = itemstack.getItem().getCraftingRemainder();
 +                ItemStack itemstack1 = itemstack.getCraftingRemainder();

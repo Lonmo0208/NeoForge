@@ -13,8 +13,8 @@
 +        return new TagEntry(this.id, this.tag, required);
 +    }
 +
-     public static TagEntry element(Identifier p_468706_) {
-         return new TagEntry(p_468706_, false, true);
+     public static TagEntry element(Identifier id) {
+         return new TagEntry(id, false, true);
      }
 @@ -109,6 +_,19 @@
          }

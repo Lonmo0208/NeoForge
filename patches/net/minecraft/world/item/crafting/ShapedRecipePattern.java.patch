@@ -35,17 +35,17 @@
 @@ -206,16 +_,16 @@
  
      public record Data(Map<Character, Ingredient> key, List<String> pattern) {
-         private static final Codec<List<String>> PATTERN_CODEC = Codec.STRING.listOf().comapFlatMap(p_312085_ -> {
--            if (p_312085_.size() > 3) {
+         private static final Codec<List<String>> PATTERN_CODEC = Codec.STRING.listOf().comapFlatMap(strings -> {
+-            if (strings.size() > 3) {
 -                return DataResult.error(() -> "Invalid pattern: too many rows, 3 is maximum");
-+            if (p_312085_.size() > maxHeight) {
++            if (strings.size() > maxHeight) {
 +                return DataResult.error(() -> "Invalid pattern: too many rows, %s is maximum".formatted(maxHeight));
-             } else if (p_312085_.isEmpty()) {
+             } else if (strings.isEmpty()) {
                  return DataResult.error(() -> "Invalid pattern: empty pattern not allowed");
              } else {
-                 int i = p_312085_.getFirst().length();
+                 int i = strings.getFirst().length();
  
-                 for (String s : p_312085_) {
+                 for (String s : strings) {
 -                    if (s.length() > 3) {
 -                        return DataResult.error(() -> "Invalid pattern: too many columns, 3 is maximum");
 +                    if (s.length() > maxWidth) {

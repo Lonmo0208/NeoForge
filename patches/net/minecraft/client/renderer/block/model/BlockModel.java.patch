@@ -25,8 +25,8 @@
 +     * @deprecated Neo: use {@link net.neoforged.neoforge.client.model.UnbakedModelParser#parse(Reader)} instead
 +     */
 +    @Deprecated
-     public static BlockModel fromStream(Reader p_111462_) {
-         return GsonHelper.fromJson(GSON, p_111462_, BlockModel.class);
+     public static BlockModel fromStream(Reader reader) {
+         return GsonHelper.fromJson(GSON, reader, BlockModel.class);
      }
  
 +    public BlockModel(
@@ -49,18 +49,18 @@
 +
      @OnlyIn(Dist.CLIENT)
      public static class Deserializer implements JsonDeserializer<BlockModel> {
-         public BlockModel deserialize(JsonElement p_111498_, Type p_111499_, JsonDeserializationContext p_111500_) throws JsonParseException {
+         public BlockModel deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 @@ -62,7 +_,12 @@
              }
  
              Identifier identifier = s.isEmpty() ? null : Identifier.parse(s);
 -            return new BlockModel(unbakedgeometry, unbakedmodel$guilight, obool, itemtransforms, textureslots$data, identifier);
 +
-+            var rootTransform = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRootTransform(jsonobject, p_111500_);
++            var rootTransform = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRootTransform(jsonobject, context);
 +            var renderTypeGroup = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRenderType(jsonobject);
 +            var partVisibility = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializePartVisibility(jsonobject);
 +
 +            return new BlockModel(unbakedgeometry, unbakedmodel$guilight, obool, itemtransforms, textureslots$data, identifier, rootTransform, renderTypeGroup, partVisibility);
          }
  
-         private TextureSlots.Data getTextureMap(JsonObject p_111510_) {
+         private TextureSlots.Data getTextureMap(JsonObject object) {

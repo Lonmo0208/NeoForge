@@ -38,7 +38,7 @@
 +        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityEvent.EntityConstructing(this));
      }
  
-     public boolean isColliding(BlockPos p_20040_, BlockState p_20041_) {
+     public boolean isColliding(BlockPos pos, BlockState state) {
 @@ -524,7 +_,7 @@
          }
  
@@ -52,43 +52,43 @@
                  return blockpos;
              } else {
                  BlockState blockstate = this.level().getBlockState(blockpos);
--                return (!(p_216987_ <= 0.5) || !blockstate.is(BlockTags.FENCES))
+-                return (!(offset <= 0.5) || !blockstate.is(BlockTags.FENCES))
 -                        && !blockstate.is(BlockTags.WALLS)
 -                        && !(blockstate.getBlock() instanceof FenceGateBlock)
-+                return (!(p_216987_ <= 0.5) || !blockstate.collisionExtendsVertically(this.level(), blockpos, this))
-                     ? blockpos.atY(Mth.floor(this.position.y - p_216987_))
++                return (!(offset <= 0.5) || !blockstate.collisionExtendsVertically(this.level(), blockpos, this))
+                     ? blockpos.atY(Mth.floor(this.position.y - offset))
                      : blockpos;
              }
 @@ -1317,20 +_,20 @@
-         return !blockstate.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !blockstate.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? p_278049_ : blockpos;
+         return !blockstate.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !blockstate.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? affectingPos : blockpos;
      }
  
--    protected void playCombinationStepSounds(BlockState p_277472_, BlockState p_277630_) {
--        SoundType soundtype = p_277472_.getSoundType();
+-    protected void playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound) {
+-        SoundType soundtype = primaryStepSound.getSoundType();
 -        this.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
--        this.playMuffledStepSound(p_277630_);
-+    protected void playCombinationStepSounds(BlockState p_277472_, BlockState p_277630_, BlockPos primaryPos, BlockPos secondaryPos) {
+-        this.playMuffledStepSound(secondaryStepSound);
++    protected void playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound, BlockPos primaryPos, BlockPos secondaryPos) {
 +        // Neo: Allow the blockstate full control over step sounds
-+        p_277472_.playStepSound(this.level, primaryPos, this, .15F, 1F);
-+        this.playMuffledStepSound(p_277630_, secondaryPos);
++        primaryStepSound.playStepSound(this.level, primaryPos, this, .15F, 1F);
++        this.playMuffledStepSound(secondaryStepSound, secondaryPos);
      }
  
--    protected void playMuffledStepSound(BlockState p_283110_) {
--        SoundType soundtype = p_283110_.getSoundType();
+-    protected void playMuffledStepSound(BlockState blockState) {
+-        SoundType soundtype = blockState.getSoundType();
 -        this.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.05F, soundtype.getPitch() * 0.8F);
-+    protected void playMuffledStepSound(BlockState p_283110_, BlockPos pos) {
++    protected void playMuffledStepSound(BlockState blockState, BlockPos pos) {
 +        // Neo: Allow the blockstate full control over step sounds
-+        p_283110_.playStepSound(this.level, pos, this, .05F, .8F);
++        blockState.playStepSound(this.level, pos, this, .05F, .8F);
      }
  
-     protected void playStepSound(BlockPos p_20135_, BlockState p_20136_) {
--        SoundType soundtype = p_20136_.getSoundType();
+     protected void playStepSound(BlockPos pos, BlockState blockState) {
+-        SoundType soundtype = blockState.getSoundType();
 -        this.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
 +        // Neo: Allow the blockstate full control over step sounds
-+        p_20136_.playStepSound(this.level(), p_20135_, this, .15F, 1F);
++        blockState.playStepSound(this.level(), pos, this, .15F, 1F);
      }
  
-     private boolean shouldPlayAmethystStepSound(BlockState p_278069_) {
+     private boolean shouldPlayAmethystStepSound(BlockState affectingState) {
 @@ -1483,7 +_,7 @@
      }
  
@@ -181,10 +181,10 @@
      }
  
 +    @Deprecated // Forge: Use isEyeInFluidType instead
-     public boolean isEyeInFluid(TagKey<Fluid> p_204030_) {
-+        if (p_204030_ == FluidTags.WATER) return this.isEyeInFluidType(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value());
-+        else if (p_204030_ == FluidTags.LAVA) return this.isEyeInFluidType(net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value());
-         return this.fluidOnEyes.contains(p_204030_);
+     public boolean isEyeInFluid(TagKey<Fluid> type) {
++        if (type == FluidTags.WATER) return this.isEyeInFluidType(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value());
++        else if (type == FluidTags.LAVA) return this.isEyeInFluidType(net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value());
+         return this.fluidOnEyes.contains(type);
      }
  
      public boolean isInLava() {
@@ -192,51 +192,51 @@
 +        return !this.firstTick && this.forgeFluidTypeHeight.getDouble(net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value()) > 0.0D;
      }
  
-     public void moveRelative(float p_19921_, Vec3 p_19922_) {
+     public void moveRelative(float speed, Vec3 input) {
 @@ -1995,6 +_,11 @@
-                 p_422475_.store("data", CustomData.CODEC, this.customData);
+                 output.store("data", CustomData.CODEC, this.customData);
              }
  
-+            var attachments = p_422475_.child(ATTACHMENTS_NBT_KEY);
++            var attachments = output.child(ATTACHMENTS_NBT_KEY);
 +            serializeAttachments(attachments);
-+            if (attachments.isEmpty()) p_422475_.discard(ATTACHMENTS_NBT_KEY);
-+            p_422475_.storeNullable("NeoForgeData", net.minecraft.nbt.CompoundTag.CODEC, persistentData);
++            if (attachments.isEmpty()) output.discard(ATTACHMENTS_NBT_KEY);
++            output.storeNullable("NeoForgeData", net.minecraft.nbt.CompoundTag.CODEC, persistentData);
 +
-             this.addAdditionalSaveData(p_422475_);
+             this.addAdditionalSaveData(output);
              if (this.isVehicle()) {
-                 ValueOutput.ValueOutputList valueoutput$valueoutputlist = p_422475_.childrenList("Passengers");
+                 ValueOutput.ValueOutputList valueoutput$valueoutputlist = output.childrenList("Passengers");
 @@ -2055,6 +_,8 @@
-                 this.setTicksFrozen(p_422206_.getIntOr("TicksFrozen", 0));
-                 this.hasVisualFire = p_422206_.getBooleanOr("HasVisualFire", false);
-                 this.customData = p_422206_.read("data", CustomData.CODEC).orElse(CustomData.EMPTY);
-+                p_422206_.read("NeoForgeData", net.minecraft.nbt.CompoundTag.CODEC).ifPresent(neoData -> this.persistentData = neoData);
-+                p_422206_.child(ATTACHMENTS_NBT_KEY).ifPresent(attachments -> this.deserializeAttachments(attachments));
+                 this.setTicksFrozen(input.getIntOr("TicksFrozen", 0));
+                 this.hasVisualFire = input.getBooleanOr("HasVisualFire", false);
+                 this.customData = input.read("data", CustomData.CODEC).orElse(CustomData.EMPTY);
++                input.read("NeoForgeData", net.minecraft.nbt.CompoundTag.CODEC).ifPresent(neoData -> this.persistentData = neoData);
++                input.child(ATTACHMENTS_NBT_KEY).ifPresent(attachments -> this.deserializeAttachments(attachments));
                  this.tags.clear();
-                 p_422206_.read("Tags", TAG_LIST_CODEC).ifPresent(this.tags::addAll);
-                 this.readAdditionalSaveData(p_422206_);
+                 input.read("Tags", TAG_LIST_CODEC).ifPresent(this.tags::addAll);
+                 this.readAdditionalSaveData(input);
 @@ -2100,6 +_,8 @@
          } else {
-             ItemEntity itementity = new ItemEntity(p_426271_, this.getX() + p_426167_.x, this.getY() + p_426167_.y, this.getZ() + p_426167_.z, p_426002_);
+             ItemEntity itementity = new ItemEntity(level, this.getX() + offset.x, this.getY() + offset.y, this.getZ() + offset.z, itemStack);
              itementity.setDefaultPickUpDelay();
 +            if (captureDrops() != null) captureDrops().add(itementity);
 +            else
-             p_426271_.addFreshEntity(itementity);
+             level.addFreshEntity(itementity);
              return itementity;
          }
 @@ -2158,11 +_,11 @@
          }
  
-         ItemStack itemstack = p_19978_.getItemInHand(p_19979_);
--        if (itemstack.is(Items.SHEARS) && this.shearOffAllLeashConnections(p_19978_)) {
-+        if (itemstack.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHEARS_HARVEST) && this.shearOffAllLeashConnections(p_19978_)) {
-             itemstack.hurtAndBreak(1, p_19978_, p_19979_);
+         ItemStack itemstack = player.getItemInHand(hand);
+-        if (itemstack.is(Items.SHEARS) && this.shearOffAllLeashConnections(player)) {
++        if (itemstack.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHEARS_HARVEST) && this.shearOffAllLeashConnections(player)) {
+             itemstack.hurtAndBreak(1, player, hand);
              return InteractionResult.SUCCESS;
          } else if (this instanceof Mob mob
 -            && itemstack.is(Items.SHEARS)
 +            && itemstack.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHEARS_REMOVE_ARMOR)
-             && mob.canShearEquipment(p_19978_)
-             && !p_19978_.isSecondaryUseActive()
-             && this.attemptToShearEquipment(p_19978_, p_19979_, itemstack, mob)) {
+             && mob.canShearEquipment(player)
+             && !player.isSecondaryUseActive()
+             && this.attemptToShearEquipment(player, hand, itemstack, mob)) {
 @@ -2270,7 +_,11 @@
  
      public void rideTick() {
@@ -254,8 +254,8 @@
                  }
              }
  
-+        if (!net.neoforged.neoforge.event.EventHooks.canMountEntity(this, p_19966_, true)) return false;
-             if (p_19967_ || this.canRide(p_19966_) && p_19966_.canAddPassenger(this)) {
++        if (!net.neoforged.neoforge.event.EventHooks.canMountEntity(this, entityToRide, true)) return false;
+             if (force || this.canRide(entityToRide) && entityToRide.canAddPassenger(this)) {
                  if (this.isPassenger()) {
                      this.stopRiding();
 @@ -2365,6 +_,7 @@
@@ -283,16 +283,16 @@
 +        return this.isVisuallySwimming() && !this.isInWater() && !this.isInFluidType((fluidType, height) -> this.canSwimInFluidType(fluidType));
      }
  
-     public void setSwimming(boolean p_20283_) {
+     public void setSwimming(boolean swimming) {
 @@ -2728,7 +_,7 @@
              this.igniteForSeconds(8.0F);
          }
  
--        this.hurtServer(p_19927_, this.damageSources().lightningBolt(), 5.0F);
-+        this.hurt(this.damageSources().lightningBolt(), p_19928_.getDamage());
+-        this.hurtServer(level, this.damageSources().lightningBolt(), 5.0F);
++        this.hurt(this.damageSources().lightningBolt(), lightningBolt.getDamage());
      }
  
-     public void onAboveBubbleColumn(boolean p_399860_, BlockPos p_399894_) {
+     public void onAboveBubbleColumn(boolean dragDown, BlockPos pos) {
 @@ -2861,7 +_,7 @@
      }
  
@@ -301,27 +301,27 @@
 +        return this.getType().getDescription(); // Forge: Use getter to allow overriding by mods
      }
  
-     public boolean is(Entity p_20356_) {
+     public boolean is(Entity other) {
 @@ -2916,10 +_,11 @@
      }
  
-     protected final boolean isInvulnerableToBase(DamageSource p_20122_) {
+     protected final boolean isInvulnerableToBase(DamageSource source) {
 -        return this.isRemoved()
 +        boolean isVanillaInvulnerable = this.isRemoved()
-             || this.invulnerable && !p_20122_.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !p_20122_.isCreativePlayer()
-             || p_20122_.is(DamageTypeTags.IS_FIRE) && this.fireImmune()
-             || p_20122_.is(DamageTypeTags.IS_FALL) && this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
-+        return net.neoforged.neoforge.common.CommonHooks.isEntityInvulnerableTo(this, p_20122_, isVanillaInvulnerable);
+             || this.invulnerable && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.isCreativePlayer()
+             || source.is(DamageTypeTags.IS_FIRE) && this.fireImmune()
+             || source.is(DamageTypeTags.IS_FALL) && this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
++        return net.neoforged.neoforge.common.CommonHooks.isEntityInvulnerableTo(this, source, isVanillaInvulnerable);
      }
  
      public boolean isInvulnerable() {
 @@ -2946,6 +_,7 @@
      }
  
-     public @Nullable Entity teleport(TeleportTransition p_379899_) {
-+        if (!net.neoforged.neoforge.common.CommonHooks.onTravelToDimension(this, p_379899_.newLevel().dimension())) return null;
+     public @Nullable Entity teleport(TeleportTransition transition) {
++        if (!net.neoforged.neoforge.common.CommonHooks.onTravelToDimension(this, transition.newLevel().dimension())) return null;
          if (this.level() instanceof ServerLevel serverlevel && !this.isRemoved()) {
-             ServerLevel serverlevel1 = p_379899_.newLevel();
+             ServerLevel serverlevel1 = transition.newLevel();
              boolean flag = serverlevel1.dimension() != serverlevel.dimension();
 @@ -3169,6 +_,7 @@
          return this.stringUUID;
@@ -341,14 +341,14 @@
          this.eyeHeight = entitydimensions1.eyeHeight();
          this.reapplyPosition();
 @@ -3558,9 +_,36 @@
-         return Mth.lerp(p_352259_, this.yRotO, this.yRot);
+         return Mth.lerp(partial, this.yRotO, this.yRot);
      }
  
 +    @Deprecated // Forge: Use no parameter version instead, only for vanilla Tags
-     public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> p_204032_, double p_204033_) {
+     public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> type, double flowScale) {
 +        this.updateFluidHeightAndDoFluidPushing(true);
-+        if(p_204032_ == FluidTags.WATER) return this.isInFluidType(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value());
-+        else if (p_204032_ == FluidTags.LAVA) return this.isInFluidType(net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value());
++        if(type == FluidTags.WATER) return this.isInFluidType(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value());
++        else if (type == FluidTags.LAVA) return this.isInFluidType(net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value());
 +        else return false;
 +    }
 +
@@ -394,7 +394,7 @@
                      for (int j2 = i1; j2 < j1; j2++) {
                          blockpos$mutableblockpos.set(l1, i2, j2);
                          FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
--                        if (fluidstate.is(p_204032_)) {
+-                        if (fluidstate.is(type)) {
 +                        net.neoforged.neoforge.fluids.FluidType fluidType = fluidstate.getFluidType();
 +                        if (!fluidType.isAir()) {
                              double d1 = i2 + fluidstate.getHeight(this.level(), blockpos$mutableblockpos);
@@ -442,7 +442,7 @@
                  }
  
                  Vec3 vec32 = this.getDeltaMovement();
--                vec3 = vec3.scale(p_204033_);
+-                vec3 = vec3.scale(flowScale);
 +                interim.flowVector = interim.flowVector.scale(this.getFluidMotionScale(fluidType));
                  double d2 = 0.003;
 -                if (Math.abs(vec32.x) < 0.003 && Math.abs(vec32.z) < 0.003 && vec3.length() < 0.0045000000000000005) {
@@ -455,7 +455,7 @@
 +                this.setDeltaMovement(this.getDeltaMovement().add(interim.flowVector));
              }
  
--            this.fluidHeight.put(p_204032_, d0);
+-            this.fluidHeight.put(type, d0);
 -            return flag1;
 +            this.setFluidTypeHeight(fluidType, interim.fluidHeight);
 +            });
@@ -468,10 +468,10 @@
      }
  
 +    @Deprecated // Forge: Use getFluidTypeHeight instead
-     public double getFluidHeight(TagKey<Fluid> p_204037_) {
-+        if (p_204037_ == FluidTags.WATER) return getFluidTypeHeight(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value());
-+        else if (p_204037_ == FluidTags.LAVA) return getFluidTypeHeight(net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value());
-         return this.fluidHeight.getDouble(p_204037_);
+     public double getFluidHeight(TagKey<Fluid> type) {
++        if (type == FluidTags.WATER) return getFluidTypeHeight(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value());
++        else if (type == FluidTags.LAVA) return getFluidTypeHeight(net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value());
+         return this.fluidHeight.getDouble(type);
      }
  
 @@ -3785,6 +_,10 @@
@@ -480,14 +480,14 @@
          }
 +        // Neo: ensure target chunk is loaded.
 +        if (this.isAddedToLevel() && !this.level.isClientSide() && !this.isRemoved()) {
-+            this.level.getChunk((int) Math.floor(p_20344_) >> 4, (int) Math.floor(p_20346_) >> 4);
++            this.level.getChunk((int) Math.floor(x) >> 4, (int) Math.floor(z) >> 4);
 +        }
      }
  
      public void checkDespawn() {
 @@ -3925,6 +_,130 @@
  
-     public boolean mayInteract(ServerLevel p_376870_, BlockPos p_146844_) {
+     public boolean mayInteract(ServerLevel level, BlockPos pos) {
          return true;
 +    }
 +

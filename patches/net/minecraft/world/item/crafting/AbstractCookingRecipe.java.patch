@@ -7,5 +7,5 @@
 -                        ItemStack.STRICT_SINGLE_ITEM_CODEC.fieldOf("result").forGetter(SingleItemRecipe::result),
 +                        ItemStack.CODEC.fieldOf("result").forGetter(SingleItemRecipe::result),
                          Codec.FLOAT.fieldOf("experience").orElse(0.0F).forGetter(AbstractCookingRecipe::experience),
-                         Codec.INT.fieldOf("cookingtime").orElse(p_379669_).forGetter(AbstractCookingRecipe::cookingTime)
+                         Codec.INT.fieldOf("cookingtime").orElse(defaultCookingTime).forGetter(AbstractCookingRecipe::cookingTime)
                      )

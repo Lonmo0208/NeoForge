@@ -9,4 +9,4 @@
 +            entity.getType().getTags().map(tag -> "#" + tag.location()).forEach(list::add);
          }
  
-         p_434750_.addToGroup(GROUP, list);
+         displayer.addToGroup(GROUP, list);

@@ -15,53 +15,53 @@
 +    private final java.util.Map<ResourceKey<?>, java.util.List<net.neoforged.neoforge.common.conditions.ICondition>> conditions;
  
 +    @Deprecated
-     public RegistriesDatapackGenerator(PackOutput p_256643_, CompletableFuture<HolderLookup.Provider> p_255780_) {
-+        this(p_256643_, p_255780_, null, java.util.Map.of());
+     public RegistriesDatapackGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
++        this(output, registries, null, java.util.Map.of());
 +    }
 +
-+    public RegistriesDatapackGenerator(PackOutput p_256643_, CompletableFuture<HolderLookup.Provider> p_255780_, java.util.@org.jspecify.annotations.Nullable Set<String> modIds) {
-+        this(p_256643_, p_255780_, modIds, java.util.Map.of());
++    public RegistriesDatapackGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, java.util.@org.jspecify.annotations.Nullable Set<String> modIds) {
++        this(output, registries, modIds, java.util.Map.of());
 +    }
 +
-+    public RegistriesDatapackGenerator(PackOutput p_256643_, CompletableFuture<HolderLookup.Provider> p_255780_, java.util.@org.jspecify.annotations.Nullable Set<String> modIds, java.util.Map<ResourceKey<?>, java.util.List<net.neoforged.neoforge.common.conditions.ICondition>> conditions) {
++    public RegistriesDatapackGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, java.util.@org.jspecify.annotations.Nullable Set<String> modIds, java.util.Map<ResourceKey<?>, java.util.List<net.neoforged.neoforge.common.conditions.ICondition>> conditions) {
 +        this.namespacePredicate = modIds == null ? namespace -> true : modIds::contains;
-         this.registries = p_255780_;
-         this.output = p_256643_;
+         this.registries = registries;
+         this.output = output;
 +        this.conditions = conditions;
      }
  
      @Override
 @@ -33,8 +_,7 @@
-                 p_326736_ -> {
-                     DynamicOps<JsonElement> dynamicops = p_326736_.createSerializationContext(JsonOps.INSTANCE);
+                 access -> {
+                     DynamicOps<JsonElement> dynamicops = access.createSerializationContext(JsonOps.INSTANCE);
                      return CompletableFuture.allOf(
 -                        RegistryDataLoader.WORLDGEN_REGISTRIES
 -                            .stream()
 +                        net.neoforged.neoforge.registries.DataPackRegistriesHooks.getDataPackRegistriesWithDimensions()
                              .flatMap(
-                                 p_256552_ -> this.dumpRegistryCap(p_255785_, p_326736_, dynamicops, (RegistryDataLoader.RegistryData<?>)p_256552_).stream()
+                                 v -> this.dumpRegistryCap(cache, access, dynamicops, (RegistryDataLoader.RegistryData<?>)v).stream()
                              )
 @@ -48,19 +_,21 @@
-         CachedOutput p_256502_, HolderLookup.Provider p_256492_, DynamicOps<JsonElement> p_256000_, RegistryDataLoader.RegistryData<T> p_256449_
+         CachedOutput cache, HolderLookup.Provider registries, DynamicOps<JsonElement> writeOps, RegistryDataLoader.RegistryData<T> v
      ) {
-         ResourceKey<? extends Registry<T>> resourcekey = p_256449_.key();
-+        var conditionalCodec = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodecWithConditions(p_256449_.elementCodec());
-         return p_256492_.lookup(resourcekey)
+         ResourceKey<? extends Registry<T>> resourcekey = v.key();
++        var conditionalCodec = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodecWithConditions(v.elementCodec());
+         return registries.lookup(resourcekey)
              .map(
-                 p_367836_ -> {
+                 registry -> {
                      PackOutput.PathProvider packoutput$pathprovider = this.output.createRegistryElementsPathProvider(resourcekey);
                      return CompletableFuture.allOf(
-                         p_367836_.listElements()
+                         registry.listElements()
 +                            .filter(holder -> this.namespacePredicate.test(holder.key().identifier().getNamespace()))
                              .map(
-                                 p_466063_ -> dumpValue(
-                                     packoutput$pathprovider.json(p_466063_.key().identifier()),
-                                     p_256502_,
-                                     p_256000_,
--                                    p_256449_.elementCodec(),
--                                    p_466063_.value()
+                                 e -> dumpValue(
+                                     packoutput$pathprovider.json(e.key().identifier()),
+                                     cache,
+                                     writeOps,
+-                                    v.elementCodec(),
+-                                    e.value()
 +                                    conditionalCodec,
-+                                    Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(conditions.getOrDefault(p_466063_.key(), java.util.List.of()), p_466063_.value()))
++                                    Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(conditions.getOrDefault(e.key(), java.util.List.of()), e.value()))
                                  )
                              )
                              .toArray(CompletableFuture[]::new)
@@ -69,8 +69,8 @@
      }
  
      private static <E> CompletableFuture<?> dumpValue(
--        Path p_255678_, CachedOutput p_256438_, DynamicOps<JsonElement> p_256127_, Encoder<E> p_255938_, E p_256590_
-+        Path p_255678_, CachedOutput p_256438_, DynamicOps<JsonElement> p_256127_, Encoder<java.util.Optional<net.neoforged.neoforge.common.conditions.WithConditions<E>>> p_255938_, java.util.Optional<net.neoforged.neoforge.common.conditions.WithConditions<E>> p_256590_
+-        Path path, CachedOutput cache, DynamicOps<JsonElement> ops, Encoder<E> codec, E value
++        Path path, CachedOutput cache, DynamicOps<JsonElement> ops, Encoder<java.util.Optional<net.neoforged.neoforge.common.conditions.WithConditions<E>>> codec, java.util.Optional<net.neoforged.neoforge.common.conditions.WithConditions<E>> value
      ) {
-         return p_255938_.encodeStart(p_256127_, p_256590_)
+         return codec.encodeStart(ops, value)
              .mapOrElse(

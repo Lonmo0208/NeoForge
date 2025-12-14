@@ -8,9 +8,9 @@
 +public record BlockElementFace(@Nullable Direction cullForDirection, int tintIndex, String texture, BlockElementFace.@Nullable UVs uvs, Quadrant rotation, net.neoforged.neoforge.client.model.@Nullable ExtraFaceData faceData, org.apache.commons.lang3.mutable.MutableObject<BlockElement> parent) {
      public static final int NO_TINT = -1;
  
-     public static float getU(BlockElementFace.UVs p_405199_, Quadrant p_404689_, int p_404785_) {
+     public static float getU(BlockElementFace.UVs uvs, Quadrant rotation, int vertex) {
 @@ -26,6 +_,21 @@
-         return p_405500_.getVertexV(p_404709_.rotateVertexIndex(p_405113_)) / 16.0F;
+         return uvs.getVertexV(rotation.rotateVertexIndex(index)) / 16.0F;
      }
  
 +    public BlockElementFace(@Nullable Direction cullForDirection, int tintIndex, String texture, BlockElementFace.@Nullable UVs uvs, Quadrant rotation) {
@@ -41,4 +41,4 @@
 +            return new BlockElementFace(direction, i, s, blockelementface$uvs, quadrant, faceData, new org.apache.commons.lang3.mutable.MutableObject<>());
          }
  
-         private static int getTintIndex(JsonObject p_111369_) {
+         private static int getTintIndex(JsonObject object) {

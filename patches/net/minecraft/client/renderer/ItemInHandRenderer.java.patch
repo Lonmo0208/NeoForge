@@ -1,77 +1,77 @@
 --- a/net/minecraft/client/renderer/ItemInHandRenderer.java
 +++ b/net/minecraft/client/renderer/ItemInHandRenderer.java
 @@ -158,9 +_,9 @@
-         p_109362_.translate(f * 0.3F, -1.1F, 0.45F);
+         poseStack.translate(f * 0.3F, -1.1F, 0.45F);
          Identifier identifier = this.minecraft.player.getSkin().body().texturePath();
-         if (p_109365_ == HumanoidArm.RIGHT) {
--            avatarrenderer.renderRightHand(p_109362_, p_439677_, p_109364_, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
-+            avatarrenderer.renderRightHand(p_109362_, p_439677_, p_109364_, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE), this.minecraft.player);
+         if (arm == HumanoidArm.RIGHT) {
+-            avatarrenderer.renderRightHand(poseStack, submitNodeCollector, lightCoords, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
++            avatarrenderer.renderRightHand(poseStack, submitNodeCollector, lightCoords, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE), this.minecraft.player);
          } else {
--            avatarrenderer.renderLeftHand(p_109362_, p_439677_, p_109364_, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
-+            avatarrenderer.renderLeftHand(p_109362_, p_439677_, p_109364_, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE), this.minecraft.player);
+-            avatarrenderer.renderLeftHand(poseStack, submitNodeCollector, lightCoords, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
++            avatarrenderer.renderLeftHand(poseStack, submitNodeCollector, lightCoords, identifier, this.minecraft.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE), this.minecraft.player);
          }
  
-         p_109362_.popPose();
+         poseStack.popPose();
 @@ -221,7 +_,7 @@
-         p_109367_.translate(-0.5F, -0.5F, 0.0F);
-         p_109367_.scale(0.0078125F, 0.0078125F, 0.0078125F);
-         MapId mapid = p_109370_.get(DataComponents.MAP_ID);
+         poseStack.translate(-0.5F, -0.5F, 0.0F);
+         poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
+         MapId mapid = itemStack.get(DataComponents.MAP_ID);
 -        MapItemSavedData mapitemsaveddata = MapItem.getSavedData(mapid, this.minecraft.level);
-+        MapItemSavedData mapitemsaveddata = MapItem.getSavedData(p_109370_, this.minecraft.level);
++        MapItemSavedData mapitemsaveddata = MapItem.getSavedData(itemStack, this.minecraft.level);
          RenderType rendertype = mapitemsaveddata == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD;
-         p_438977_.submitCustomGeometry(p_109367_, rendertype, (p_439463_, p_439903_) -> {
-             p_439903_.addVertex(p_439463_, -7.0F, 135.0F, 0.0F).setColor(-1).setUv(0.0F, 1.0F).setLight(p_109369_);
+         submitNodeCollector.submitCustomGeometry(poseStack, rendertype, (pose, buffer) -> {
+             buffer.addVertex(pose, -7.0F, 135.0F, 0.0F).setColor(-1).setUv(0.0F, 1.0F).setLight(lightCoords);
 @@ -258,9 +_,9 @@
          AvatarRenderer<AbstractClientPlayer> avatarrenderer = this.entityRenderDispatcher.getPlayerRenderer(abstractclientplayer);
          Identifier identifier = abstractclientplayer.getSkin().body().texturePath();
          if (flag) {
--            avatarrenderer.renderRightHand(p_109347_, p_440503_, p_109349_, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
-+            avatarrenderer.renderRightHand(p_109347_, p_440503_, p_109349_, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE), abstractclientplayer);
+-            avatarrenderer.renderRightHand(poseStack, submitNodeCollector, lightCoords, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
++            avatarrenderer.renderRightHand(poseStack, submitNodeCollector, lightCoords, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE), abstractclientplayer);
          } else {
--            avatarrenderer.renderLeftHand(p_109347_, p_440503_, p_109349_, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
-+            avatarrenderer.renderLeftHand(p_109347_, p_440503_, p_109349_, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE), abstractclientplayer);
+-            avatarrenderer.renderLeftHand(poseStack, submitNodeCollector, lightCoords, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
++            avatarrenderer.renderLeftHand(poseStack, submitNodeCollector, lightCoords, identifier, abstractclientplayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE), abstractclientplayer);
          }
      }
  
 @@ -332,12 +_,14 @@
          if (iteminhandrenderer$handrenderselection.renderMainHand) {
              float f4 = interactionhand == InteractionHand.MAIN_HAND ? f : 0.0F;
-             float f5 = this.itemModelResolver.swapAnimationScale(this.mainHandItem) * (1.0F - Mth.lerp(p_109315_, this.oMainHandHeight, this.mainHandHeight));
-+            if(!net.neoforged.neoforge.client.ClientHooks.renderSpecificFirstPersonHand(InteractionHand.MAIN_HAND, p_109316_, p_439610_, p_109319_, p_109315_, f1, f4, f5, this.mainHandItem))
-             this.renderArmWithItem(p_109318_, p_109315_, f1, InteractionHand.MAIN_HAND, f4, this.mainHandItem, f5, p_109316_, p_439610_, p_109319_);
+             float f5 = this.itemModelResolver.swapAnimationScale(this.mainHandItem) * (1.0F - Mth.lerp(frameInterp, this.oMainHandHeight, this.mainHandHeight));
++            if(!net.neoforged.neoforge.client.ClientHooks.renderSpecificFirstPersonHand(InteractionHand.MAIN_HAND, poseStack, submitNodeCollector, lightCoords, frameInterp, f1, f4, f5, this.mainHandItem))
+             this.renderArmWithItem(player, frameInterp, f1, InteractionHand.MAIN_HAND, f4, this.mainHandItem, f5, poseStack, submitNodeCollector, lightCoords);
          }
  
          if (iteminhandrenderer$handrenderselection.renderOffHand) {
              float f6 = interactionhand == InteractionHand.OFF_HAND ? f : 0.0F;
-             float f7 = this.itemModelResolver.swapAnimationScale(this.offHandItem) * (1.0F - Mth.lerp(p_109315_, this.oOffHandHeight, this.offHandHeight));
-+            if(!net.neoforged.neoforge.client.ClientHooks.renderSpecificFirstPersonHand(InteractionHand.OFF_HAND, p_109316_, p_439610_, p_109319_, p_109315_, f1, f6, f7, this.offHandItem))
-             this.renderArmWithItem(p_109318_, p_109315_, f1, InteractionHand.OFF_HAND, f6, this.offHandItem, f7, p_109316_, p_439610_, p_109319_);
+             float f7 = this.itemModelResolver.swapAnimationScale(this.offHandItem) * (1.0F - Mth.lerp(frameInterp, this.oOffHandHeight, this.offHandHeight));
++            if(!net.neoforged.neoforge.client.ClientHooks.renderSpecificFirstPersonHand(InteractionHand.OFF_HAND, poseStack, submitNodeCollector, lightCoords, frameInterp, f1, f6, f7, this.offHandItem))
+             this.renderArmWithItem(player, frameInterp, f1, InteractionHand.OFF_HAND, f6, this.offHandItem, f7, poseStack, submitNodeCollector, lightCoords);
          }
  
 @@ -398,13 +_,13 @@
-                 if (flag && !p_109372_.isInvisible()) {
-                     this.renderPlayerArm(p_109379_, p_439736_, p_109381_, p_109378_, p_109376_, humanoidarm);
+                 if (flag && !player.isInvisible()) {
+                     this.renderPlayerArm(poseStack, submitNodeCollector, lightCoords, inverseArmHeight, attack, humanoidarm);
                  }
--            } else if (p_109377_.has(DataComponents.MAP_ID)) {
-+            } else if (p_109377_.getItem() instanceof MapItem) {
+-            } else if (itemStack.has(DataComponents.MAP_ID)) {
++            } else if (itemStack.getItem() instanceof MapItem) {
                  if (flag && this.offHandItem.isEmpty()) {
-                     this.renderTwoHandedMap(p_109379_, p_439736_, p_109381_, p_109374_, p_109378_, p_109376_);
+                     this.renderTwoHandedMap(poseStack, submitNodeCollector, lightCoords, xRot, inverseArmHeight, attack);
                  } else {
-                     this.renderOneHandedMap(p_109379_, p_439736_, p_109381_, p_109378_, humanoidarm, p_109376_, p_109377_);
+                     this.renderOneHandedMap(poseStack, submitNodeCollector, lightCoords, inverseArmHeight, humanoidarm, attack, itemStack);
                  }
--            } else if (p_109377_.is(Items.CROSSBOW)) {
-+            } else if (p_109377_.getItem() instanceof CrossbowItem) {
-                 this.applyItemArmTransform(p_109379_, humanoidarm, p_109378_);
-                 boolean flag1 = CrossbowItem.isCharged(p_109377_);
+-            } else if (itemStack.is(Items.CROSSBOW)) {
++            } else if (itemStack.getItem() instanceof CrossbowItem) {
+                 this.applyItemArmTransform(poseStack, humanoidarm, inverseArmHeight);
+                 boolean flag1 = CrossbowItem.isCharged(itemStack);
                  boolean flag2 = humanoidarm == HumanoidArm.RIGHT;
 @@ -449,6 +_,8 @@
              } else {
                  boolean flag3 = humanoidarm == HumanoidArm.RIGHT;
                  int j = flag3 ? 1 : -1;
 +                // Neo: Allow items to define custom arm animation
-+                if (!net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(p_109377_).applyForgeHandTransform(p_109379_, minecraft.player, humanoidarm, p_109377_, p_109373_, p_109378_, p_109376_))
-                 if (p_109372_.isUsingItem() && p_109372_.getUseItemRemainingTicks() > 0 && p_109372_.getUsedItemHand() == p_109375_) {
-                     ItemUseAnimation itemuseanimation = p_109377_.getUseAnimation();
++                if (!net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(itemStack).applyForgeHandTransform(poseStack, minecraft.player, humanoidarm, itemStack, frameInterp, inverseArmHeight, attack))
+                 if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
+                     ItemUseAnimation itemuseanimation = itemStack.getUseAnimation();
                      if (!itemuseanimation.hasCustomArmTransform()) {
 @@ -593,9 +_,18 @@
              this.mainHandHeight = Mth.clamp(this.mainHandHeight - 0.4F, 0.0F, 1.0F);

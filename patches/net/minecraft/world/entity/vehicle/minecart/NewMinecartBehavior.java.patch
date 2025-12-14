@@ -2,10 +2,10 @@
 +++ b/net/minecraft/world/entity/vehicle/minecart/NewMinecartBehavior.java
 @@ -169,7 +_,7 @@
  
-     public void adjustToRails(BlockPos p_480196_, BlockState p_481921_, boolean p_480143_) {
-         if (BaseRailBlock.isRail(p_481921_)) {
--            RailShape railshape = p_481921_.getValue(((BaseRailBlock)p_481921_.getBlock()).getShapeProperty());
-+            RailShape railshape = ((BaseRailBlock)p_481921_.getBlock()).getRailDirection(p_481921_, this.level(), p_480196_, this.minecart);
+     public void adjustToRails(BlockPos targetBlockPos, BlockState currentState, boolean instant) {
+         if (BaseRailBlock.isRail(currentState)) {
+-            RailShape railshape = currentState.getValue(((BaseRailBlock)currentState.getBlock()).getShapeProperty());
++            RailShape railshape = ((BaseRailBlock)currentState.getBlock()).getRailDirection(currentState, this.level(), targetBlockPos, this.minecart);
              Pair<Vec3i, Vec3i> pair = AbstractMinecart.exits(railshape);
              Vec3 vec3 = new Vec3(pair.getFirst()).scale(0.5);
              Vec3 vec31 = new Vec3(pair.getSecond()).scale(0.5);
@@ -15,31 +15,31 @@
                  this.minecart.setOldPosAndRot();
 -                if (blockstate.is(Blocks.ACTIVATOR_RAIL)) {
 +                if (blockstate.getBlock() instanceof PoweredRailBlock poweredRail && poweredRail.isActivatorRail()) {
-                     this.minecart.activateMinecart(p_479741_, blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockstate.getValue(PoweredRailBlock.POWERED));
+                     this.minecart.activateMinecart(level, blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockstate.getValue(PoweredRailBlock.POWERED));
                  }
  
 -                RailShape railshape = blockstate.getValue(((BaseRailBlock)blockstate.getBlock()).getShapeProperty());
 +                RailShape railshape = ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, this.level(), blockpos, this.minecart);;
-                 Vec3 vec31 = this.calculateTrackSpeed(p_479741_, vec3.horizontal(), newminecartbehavior$trackiteration, blockpos, blockstate, railshape);
+                 Vec3 vec31 = this.calculateTrackSpeed(level, vec3.horizontal(), newminecartbehavior$trackiteration, blockpos, blockstate, railshape);
                  if (newminecartbehavior$trackiteration.firstIteration) {
                      newminecartbehavior$trackiteration.movementLeft = vec31.horizontalDistance();
 @@ -392,7 +_,7 @@
      }
  
-     private Vec3 calculateHaltTrackSpeed(Vec3 p_481316_, BlockState p_481338_) {
--        if (p_481338_.is(Blocks.POWERED_RAIL) && !p_481338_.getValue(PoweredRailBlock.POWERED)) {
-+        if (p_481338_.getBlock() instanceof PoweredRailBlock poweredRail && !poweredRail.isActivatorRail() && !p_481338_.getValue(PoweredRailBlock.POWERED)) {
-             return p_481316_.length() < 0.03 ? Vec3.ZERO : p_481316_.scale(0.5);
+     private Vec3 calculateHaltTrackSpeed(Vec3 deltaMovement, BlockState state) {
+-        if (state.is(Blocks.POWERED_RAIL) && !state.getValue(PoweredRailBlock.POWERED)) {
++        if (state.getBlock() instanceof PoweredRailBlock poweredRail && !poweredRail.isActivatorRail() && !state.getValue(PoweredRailBlock.POWERED)) {
+             return deltaMovement.length() < 0.03 ? Vec3.ZERO : deltaMovement.scale(0.5);
          } else {
-             return p_481316_;
+             return deltaMovement;
 @@ -400,7 +_,7 @@
      }
  
-     private Vec3 calculateBoostTrackSpeed(Vec3 p_481833_, BlockPos p_480436_, BlockState p_478356_) {
--        if (p_478356_.is(Blocks.POWERED_RAIL) && p_478356_.getValue(PoweredRailBlock.POWERED)) {
-+        if (p_478356_.getBlock() instanceof PoweredRailBlock poweredRail && !poweredRail.isActivatorRail() && p_478356_.getValue(PoweredRailBlock.POWERED)) {
-             if (p_481833_.length() > 0.01) {
-                 return p_481833_.normalize().scale(p_481833_.length() + 0.06);
+     private Vec3 calculateBoostTrackSpeed(Vec3 deltaMovement, BlockPos pos, BlockState state) {
+-        if (state.is(Blocks.POWERED_RAIL) && state.getValue(PoweredRailBlock.POWERED)) {
++        if (state.getBlock() instanceof PoweredRailBlock poweredRail && !poweredRail.isActivatorRail() && state.getValue(PoweredRailBlock.POWERED)) {
+             if (deltaMovement.length() > 0.01) {
+                 return deltaMovement.normalize().scale(deltaMovement.length() + 0.06);
              } else {
 @@ -449,10 +_,11 @@
                  }
@@ -52,6 +52,6 @@
                      if (BaseRailBlock.isRail(blockstate)) {
 -                        RailShape railshape = blockstate.getValue(((BaseRailBlock)blockstate.getBlock()).getShapeProperty());
 +                        RailShape railshape = ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, this.level(), railPos, this.minecart);;
-                         if (this.restAtVShape(p_479906_, railshape)) {
+                         if (this.restAtVShape(shape, railshape)) {
                              return 0.0;
                          }
