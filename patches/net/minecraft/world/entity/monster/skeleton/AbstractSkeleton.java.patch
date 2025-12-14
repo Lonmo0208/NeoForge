@@ -4,28 +4,26 @@
          if (this.level() != null && !this.level().isClientSide()) {
              this.goalSelector.removeGoal(this.meleeGoal);
              this.goalSelector.removeGoal(this.bowGoal);
--            ItemStack itemstack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
--            if (itemstack.is(Items.BOW)) {
+-            ItemStack usedWeapon = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
+-            if (usedWeapon.is(Items.BOW)) {
 +            ItemStack itemstack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
 +            if (itemstack.getItem() instanceof net.minecraft.world.item.BowItem) {
-                 int i = this.getHardAttackInterval();
+                 int minAttackInterval = this.getHardAttackInterval();
                  if (this.level().getDifficulty() != Difficulty.HARD) {
-                     i = this.getAttackInterval();
+                     minAttackInterval = this.getAttackInterval();
 @@ -158,9 +_,11 @@
  
      @Override
      public void performRangedAttack(LivingEntity target, float power) {
--        ItemStack itemstack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
--        ItemStack itemstack1 = this.getProjectile(itemstack);
--        AbstractArrow abstractarrow = this.getArrow(itemstack1, power, itemstack);
-+        ItemStack weapon = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
-+        ItemStack itemstack1 = this.getProjectile(weapon);
-+        AbstractArrow abstractarrow = this.getArrow(itemstack1, power, weapon);
-+        if (weapon.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem weaponItem)
-+            abstractarrow = weaponItem.customArrow(abstractarrow, itemstack1, weapon);
-         double d0 = target.getX() - this.getX();
-         double d1 = target.getY(0.3333333333333333) - abstractarrow.getY();
-         double d2 = target.getZ() - this.getZ();
+-        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
++        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
+         ItemStack projectile = this.getProjectile(bowItem);
+         AbstractArrow arrow = this.getArrow(projectile, power, bowItem);
++        if (bowItem.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem weaponItem)
++            arrow = weaponItem.customArrow(arrow, projectile, bowItem);
+         double xd = target.getX() - this.getX();
+         double yd = target.getY(0.3333333333333333) - arrow.getY();
+         double zd = target.getZ() - this.getZ();
 @@ -180,7 +_,7 @@
  
      @Override

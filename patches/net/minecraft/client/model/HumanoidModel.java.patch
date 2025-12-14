@@ -27,7 +27,7 @@
 +        private final net.neoforged.neoforge.client.@org.jspecify.annotations.Nullable IArmPoseTransformer forgeArmPose;
 +
 +        @net.neoforged.fml.common.asm.enumextension.ReservedConstructor
-         ArmPose(boolean twoHanded, boolean affectsOffhandPose) {
+         private ArmPose(boolean twoHanded, boolean affectsOffhandPose) {
              this.twoHanded = twoHanded;
              this.affectsOffhandPose = affectsOffhandPose;
 +            this.forgeArmPose = null;
@@ -55,4 +55,4 @@
 +            return net.neoforged.fml.common.asm.enumextension.ExtensionInfo.nonExtended(HumanoidModel.ArmPose.class);
          }
  
-         public <S extends ArmedEntityRenderState> void animateUseItem(
+         public <S extends ArmedEntityRenderState> void animateUseItem(S state, PoseStack poseStack, float ticksUsingItem, HumanoidArm arm, ItemStack actualItem) {

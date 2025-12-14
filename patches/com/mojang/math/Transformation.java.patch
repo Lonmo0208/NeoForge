@@ -1,6 +1,6 @@
 --- a/com/mojang/math/Transformation.java
 +++ b/com/mojang/math/Transformation.java
-@@ -161,6 +_,19 @@
+@@ -160,6 +_,19 @@
          return Objects.hash(this.matrix);
      }
  

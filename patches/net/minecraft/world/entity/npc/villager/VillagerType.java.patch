@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/npc/villager/VillagerType.java
 +++ b/net/minecraft/world/entity/npc/villager/VillagerType.java
-@@ -27,6 +_,8 @@
+@@ -26,6 +_,8 @@
      public static final ResourceKey<VillagerType> TAIGA = createKey("taiga");
      public static final Codec<Holder<VillagerType>> CODEC = RegistryFixedCodec.create(Registries.VILLAGER_TYPE);
      public static final StreamCodec<RegistryFriendlyByteBuf, Holder<VillagerType>> STREAM_CODEC = ByteBufCodecs.holderRegistry(Registries.VILLAGER_TYPE);
@@ -9,7 +9,7 @@
      private static final Map<ResourceKey<Biome>, ResourceKey<VillagerType>> BY_BIOME = Util.make(Maps.newHashMap(), map -> {
          map.put(Biomes.BADLANDS, DESERT);
          map.put(Biomes.DESERT, DESERT);
-@@ -78,6 +_,9 @@
+@@ -77,6 +_,9 @@
      }
  
      public static ResourceKey<VillagerType> byBiome(Holder<Biome> biome) {

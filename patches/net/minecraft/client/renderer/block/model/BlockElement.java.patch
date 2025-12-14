@@ -26,9 +26,9 @@
                      }
                  }
  
--                return new BlockElement(vector3f, vector3f1, map, blockelementrotation, flag, i);
-+                var faceData = net.neoforged.neoforge.client.model.ExtraFaceData.read(jsonobject.get("neoforge_data"), net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT);
-+                return new BlockElement(vector3f, vector3f1, map, blockelementrotation, flag, i, faceData);
+-                return new BlockElement(from, to, faces, rotation, shade, lightEmission);
++                var faceData = net.neoforged.neoforge.client.model.ExtraFaceData.read(object.get("neoforge_data"), net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT);
++                return new BlockElement(from, to, faces, rotation, shade, lightEmission, faceData);
              }
          }
  

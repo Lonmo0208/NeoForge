@@ -1,6 +1,6 @@
 --- a/com/mojang/blaze3d/pipeline/RenderPipeline.java
 +++ b/com/mojang/blaze3d/pipeline/RenderPipeline.java
-@@ -42,7 +_,10 @@
+@@ -40,7 +_,10 @@
      private final float depthBiasConstant;
      private final int sortKey;
      private static int sortKeySeed;
@@ -11,7 +11,7 @@
      protected RenderPipeline(
          Identifier location,
          Identifier vertexShader,
-@@ -64,9 +_,34 @@
+@@ -62,9 +_,34 @@
          float depthBiasConstant,
          int sortKey
      ) {
@@ -49,7 +49,7 @@
          this.shaderDefines = shaderDefines;
          this.samplers = samplers;
          this.uniforms = uniforms;
-@@ -83,6 +_,7 @@
+@@ -81,6 +_,7 @@
          this.depthBiasScaleFactor = depthBiasScaleFactor;
          this.depthBiasConstant = depthBiasConstant;
          this.sortKey = sortKey;
@@ -57,7 +57,7 @@
      }
  
      public int getSortKey() {
-@@ -177,6 +_,51 @@
+@@ -175,6 +_,51 @@
              || this.writeDepth;
      }
  
@@ -107,17 +107,17 @@
 +    }
 +
      public static RenderPipeline.Builder builder(RenderPipeline.Snippet... snippets) {
-         RenderPipeline.Builder renderpipeline$builder = new RenderPipeline.Builder();
+         RenderPipeline.Builder builder = new RenderPipeline.Builder();
  
-@@ -209,6 +_,7 @@
+@@ -206,6 +_,7 @@
          private Optional<VertexFormat.Mode> vertexFormatMode = Optional.empty();
          private float depthBiasScaleFactor;
          private float depthBiasConstant;
 +        private Optional<net.neoforged.neoforge.client.stencil.StencilTest> stencilTest = Optional.empty();
  
-         Builder() {
+         private Builder() {
          }
-@@ -365,6 +_,16 @@
+@@ -362,6 +_,16 @@
              return this;
          }
  
@@ -131,10 +131,10 @@
 +            return this;
 +        }
 +
-         void withSnippet(RenderPipeline.Snippet snippet) {
+         private void withSnippet(RenderPipeline.Snippet snippet) {
              if (snippet.vertexShader.isPresent()) {
                  this.vertexShader = snippet.vertexShader;
-@@ -439,6 +_,10 @@
+@@ -436,6 +_,10 @@
              if (snippet.vertexFormatMode.isPresent()) {
                  this.vertexFormatMode = snippet.vertexFormatMode;
              }
@@ -145,7 +145,7 @@
          }
  
          public RenderPipeline.Snippet buildSnippet() {
-@@ -457,7 +_,8 @@
+@@ -454,7 +_,8 @@
                  this.writeDepth,
                  this.colorLogic,
                  this.vertexFormat,
@@ -155,7 +155,7 @@
              );
          }
  
-@@ -492,7 +_,8 @@
+@@ -489,7 +_,8 @@
                      this.vertexFormatMode.get(),
                      this.depthBiasScaleFactor,
                      this.depthBiasConstant,
@@ -165,7 +165,7 @@
                  );
              }
          }
-@@ -515,8 +_,30 @@
+@@ -511,8 +_,30 @@
          Optional<Boolean> writeDepth,
          Optional<LogicOp> colorLogic,
          Optional<VertexFormat> vertexFormat,

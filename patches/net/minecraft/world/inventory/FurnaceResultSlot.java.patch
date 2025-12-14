@@ -1,7 +1,7 @@
 --- a/net/minecraft/world/inventory/FurnaceResultSlot.java
 +++ b/net/minecraft/world/inventory/FurnaceResultSlot.java
 @@ -48,6 +_,9 @@
-             abstractfurnaceblockentity.awardUsedRecipesAndPopExperience(serverplayer);
+             abstractFurnaceBlockEntity.awardUsedRecipesAndPopExperience(serverPlayer);
          }
  
 +        if (this.removeCount != 0) {

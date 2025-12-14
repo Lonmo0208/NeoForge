@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/player/LocalPlayer.java
 +++ b/net/minecraft/client/player/LocalPlayer.java
-@@ -526,7 +_,14 @@
+@@ -520,7 +_,14 @@
  
      @Override
      public void playSound(SoundEvent sound, float volume, float pitch) {
@@ -16,24 +16,24 @@
      }
  
      @Override
-@@ -768,6 +_,7 @@
+@@ -762,6 +_,7 @@
              && this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING)
              && (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
          this.input.tick();
 +        net.neoforged.neoforge.client.ClientHooks.onMovementInputUpdate(this, this.input);
          this.minecraft.getTutorial().onInput(this.input);
-         boolean flag3 = false;
+         boolean wasAutoJump = false;
          if (this.autoJumpTime > 0) {
-@@ -812,7 +_,7 @@
+@@ -806,7 +_,7 @@
          }
  
-         boolean flag4 = false;
+         boolean justToggledCreativeFlight = false;
 -        if (abilities.mayfly) {
 +        if (this.mayFly()) {
              if (this.minecraft.gameMode.isSpectator()) {
                  if (!abilities.flying) {
                      abilities.flying = true;
-@@ -909,7 +_,7 @@
+@@ -903,7 +_,7 @@
      }
  
      private boolean shouldStopSwimSprinting() {
@@ -42,7 +42,7 @@
      }
  
      public Portal.Transition getActivePortalLocalTransition() {
-@@ -954,6 +_,10 @@
+@@ -948,6 +_,10 @@
      @Override
      public void rideTick() {
          super.rideTick();
@@ -51,5 +51,5 @@
 +            this.input.keyPresses = new Input(input.forward(), input.backward(), input.left(), input.right(), input.jump(), false, input.sprint());
 +        }
          this.handsBusy = false;
-         if (this.getControlledVehicle() instanceof AbstractBoat abstractboat) {
-             abstractboat.setInput(
+         if (this.getControlledVehicle() instanceof AbstractBoat boat) {
+             boat.setInput(this.input.keyPresses.left(), this.input.keyPresses.right(), this.input.keyPresses.forward(), this.input.keyPresses.backward());

@@ -17,7 +17,6 @@
  
 +    @net.neoforged.fml.common.asm.enumextension.ReservedConstructor
      private DamageScaling(String id) {
--        this.id = id;
 +        this(id, net.neoforged.neoforge.common.damagesource.IScalingFunction.DEFAULT);
 +    }
 +
@@ -36,7 +35,7 @@
 +     * @apiNote This method must be called as early as possible, as if {@link #CODEC} is resolved before this is called, it will be unusable.
 +     */
 +    private DamageScaling(String id, net.neoforged.neoforge.common.damagesource.IScalingFunction scaling) {
-+        this.id = id;
+         this.id = id;
 +        this.scaling = scaling;
      }
  

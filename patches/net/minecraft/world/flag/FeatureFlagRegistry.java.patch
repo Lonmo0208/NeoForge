@@ -36,14 +36,14 @@
 +            if (this.id >= 64 && false) {
                  throw new IllegalStateException("Too many feature flags");
              } else {
--                FeatureFlag featureflag = new FeatureFlag(this.universe, this.id++);
--                FeatureFlag featureflag1 = this.flags.put(name, featureflag);
-+                FeatureFlag featureflag = new FeatureFlag(this.universe, this.id % FeatureFlagSet.MAX_CONTAINER_SIZE, this.id / FeatureFlagSet.MAX_CONTAINER_SIZE, modded);
+-                FeatureFlag result = new FeatureFlag(this.universe, this.id++);
+-                FeatureFlag previous = this.flags.put(name, result);
++                FeatureFlag result = new FeatureFlag(this.universe, this.id % FeatureFlagSet.MAX_CONTAINER_SIZE, this.id / FeatureFlagSet.MAX_CONTAINER_SIZE, modded);
 +                this.id++;
-+                FeatureFlag featureflag1 = this.flags.put(p_250098_, featureflag);
-                 if (featureflag1 != null) {
++                FeatureFlag previous = this.flags.put(p_250098_, result);
+                 if (previous != null) {
 -                    throw new IllegalStateException("Duplicate feature flag " + name);
 +                    throw new IllegalStateException("Duplicate feature flag " + p_250098_);
                  } else {
-                     return featureflag;
+                     return result;
                  }

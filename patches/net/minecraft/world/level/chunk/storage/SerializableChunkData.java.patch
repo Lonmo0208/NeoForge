@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/chunk/storage/SerializableChunkData.java
 +++ b/net/minecraft/world/level/chunk/storage/SerializableChunkData.java
-@@ -92,7 +_,9 @@
+@@ -91,7 +_,9 @@
      List<SerializableChunkData.SectionData> sectionData,
      List<CompoundTag> entities,
      List<CompoundTag> blockEntities,
@@ -11,7 +11,7 @@
  ) {
      private static final Codec<List<SavedTick<Block>>> BLOCK_TICKS_CODEC = SavedTick.codec(BuiltInRegistries.BLOCK.byNameCodec()).listOf();
      private static final Codec<List<SavedTick<Fluid>>> FLUID_TICKS_CODEC = SavedTick.codec(BuiltInRegistries.FLUID.byNameCodec()).listOf();
-@@ -108,6 +_,33 @@
+@@ -107,6 +_,33 @@
      public static final String BLOCK_LIGHT_TAG = "BlockLight";
      public static final String SKY_LIGHT_TAG = "SkyLight";
  
@@ -45,7 +45,7 @@
      public static SerializableChunkData parse(LevelHeightAccessor levelHeight, PalettedContainerFactory containerFactory, CompoundTag chunkData) {
          if (chunkData.getString("Status").isEmpty()) {
              return null;
-@@ -186,6 +_,9 @@
+@@ -185,6 +_,9 @@
                  }
              }
  
@@ -54,42 +54,42 @@
 +
              return new SerializableChunkData(
                  containerFactory,
-                 chunkpos,
-@@ -204,7 +_,9 @@
-                 list2,
-                 list3,
-                 list4,
--                compoundtag1
-+                compoundtag1,
+                 chunkPos,
+@@ -203,7 +_,9 @@
+                 sectionData,
+                 entities,
+                 blockEntities,
+-                structureData
++                structureData,
 +                attachmentData,
 +                auxLightData
              );
          }
      }
-@@ -264,6 +_,9 @@
+@@ -263,6 +_,9 @@
                  postLoadChunk(level, this.entities, this.blockEntities),
                  BlendingData.unpack(this.blendingData)
              );
 +            if (this.auxLightData != null) {
-+                ((LevelChunk) chunkaccess).getAuxLightManager(chunkPos).deserializeNBT(this.auxLightData);
++                ((LevelChunk) chunk).getAuxLightManager(chunkPos).deserializeNBT(this.auxLightData);
 +            }
          } else {
-             ProtoChunkTicks<Block> protochunkticks = ProtoChunkTicks.load(this.packedTicks.blocks());
-             ProtoChunkTicks<Fluid> protochunkticks1 = ProtoChunkTicks.load(this.packedTicks.fluids());
-@@ -312,6 +_,10 @@
+             ProtoChunkTicks<Block> blockTicks = ProtoChunkTicks.load(this.packedTicks.blocks());
+             ProtoChunkTicks<Fluid> fluidTicks = ProtoChunkTicks.load(this.packedTicks.fluids());
+@@ -304,6 +_,10 @@
              }
          }
  
 +        if (this.attachmentData != null) {
-+            chunkaccess.readAttachmentsFromNBT(level.registryAccess(), this.attachmentData);
++            chunk.readAttachmentsFromNBT(level.registryAccess(), this.attachmentData);
 +        }
 +
-         if (chunktype == ChunkType.LEVELCHUNK) {
-             return new ImposterProtoChunk((LevelChunk)chunkaccess, false);
+         if (chunkType == ChunkType.LEVELCHUNK) {
+             return new ImposterProtoChunk((LevelChunk)chunk, false);
          } else {
-@@ -395,6 +_,18 @@
-             CompoundTag compoundtag1 = packStructureData(
-                 StructurePieceSerializationContext.fromLevel(level), chunkpos, chunk.getAllStarts(), chunk.getAllReferences()
+@@ -387,6 +_,18 @@
+             CompoundTag structureData = packStructureData(
+                 StructurePieceSerializationContext.fromLevel(level), pos, chunk.getAllStarts(), chunk.getAllReferences()
              );
 +
 +            CompoundTag attachmentData = null;
@@ -100,35 +100,35 @@
 +            }
 +            ListTag auxLightData = null;
 +            if (chunk instanceof LevelChunk levelChunk) {
-+                auxLightData = levelChunk.getAuxLightManager(chunkpos).serializeNBT();
++                auxLightData = levelChunk.getAuxLightManager(pos).serializeNBT();
 +            }
 +
              return new SerializableChunkData(
                  level.palettedContainerFactory(),
-                 chunkpos,
-@@ -413,7 +_,9 @@
-                 list,
-                 list2,
-                 list1,
--                compoundtag1
-+                compoundtag1,
+                 pos,
+@@ -405,7 +_,9 @@
+                 sectionData,
+                 entities,
+                 blockEntities,
+-                structureData
++                structureData,
 +                attachmentData,
 +                auxLightData
              );
          }
      }
-@@ -481,6 +_,14 @@
-         this.heightmaps.forEach((type, data) -> compoundtag2.put(type.getSerializationKey(), new LongArrayTag(data)));
-         compoundtag.put("Heightmaps", compoundtag2);
-         compoundtag.put("structures", this.structureData);
+@@ -473,6 +_,14 @@
+         this.heightmaps.forEach((type, data) -> heightmapsTag.put(type.getSerializationKey(), new LongArrayTag(data)));
+         tag.put("Heightmaps", heightmapsTag);
+         tag.put("structures", this.structureData);
 +
 +        if (attachmentData != null) {
-+            compoundtag.put(net.neoforged.neoforge.attachment.AttachmentHolder.ATTACHMENTS_NBT_KEY, attachmentData);
++            tag.put(net.neoforged.neoforge.attachment.AttachmentHolder.ATTACHMENTS_NBT_KEY, attachmentData);
 +        }
 +        if (auxLightData != null) {
-+            compoundtag.put(net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager.LIGHT_NBT_KEY, auxLightData);
++            tag.put(net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager.LIGHT_NBT_KEY, auxLightData);
 +        }
 +
-         return compoundtag;
+         return tag;
      }
  

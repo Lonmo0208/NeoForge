@@ -3,16 +3,16 @@
 @@ -49,7 +_,7 @@
      @Override
      public boolean overrideStackedOnOther(ItemStack self, Slot slot, ClickAction clickAction, Player player) {
-         BundleContents bundlecontents = self.get(DataComponents.BUNDLE_CONTENTS);
--        if (bundlecontents == null) {
-+        if (bundlecontents == null || self.getCount() != 1) {
+         BundleContents initialContents = self.get(DataComponents.BUNDLE_CONTENTS);
+-        if (initialContents == null) {
++        if (initialContents == null || self.getCount() != 1) {
              return false;
          } else {
-             ItemStack itemstack = slot.getItem();
-@@ -88,6 +_,7 @@
-     public boolean overrideOtherStackedOnMe(
-         ItemStack self, ItemStack other, Slot slot, ClickAction clickAction, Player player, SlotAccess carriedItem
-     ) {
+             ItemStack other = slot.getItem();
+@@ -86,6 +_,7 @@
+ 
+     @Override
+     public boolean overrideOtherStackedOnMe(ItemStack self, ItemStack other, Slot slot, ClickAction clickAction, Player player, SlotAccess carriedItem) {
 +        if (self.getCount() != 1) return false;
          if (clickAction == ClickAction.PRIMARY && other.isEmpty()) {
              toggleSelectedItem(self, -1);

@@ -1,17 +1,17 @@
 --- a/net/minecraft/world/entity/animal/feline/Cat.java
 +++ b/net/minecraft/world/entity/animal/feline/Cat.java
-@@ -385,9 +_,9 @@
+@@ -384,9 +_,9 @@
                      }
-                 } else if (this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
+                 } else if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
                      if (!this.level().isClientSide()) {
--                        this.usePlayerItem(player, hand, itemstack);
-                         FoodProperties foodproperties = itemstack.get(DataComponents.FOOD);
-                         this.heal(foodproperties != null ? foodproperties.nutrition() : 1.0F);
-+                        this.usePlayerItem(player, hand, itemstack);
+-                        this.usePlayerItem(player, hand, itemStack);
+                         FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
+                         this.heal(foodProperties != null ? foodProperties.nutrition() : 1.0F);
++                        this.usePlayerItem(player, hand, itemStack);
                          this.playEatingSound();
                      }
  
-@@ -449,7 +_,7 @@
+@@ -448,7 +_,7 @@
      }
  
      private void tryToTame(Player player) {

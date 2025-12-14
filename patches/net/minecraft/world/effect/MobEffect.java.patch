@@ -17,7 +17,7 @@
      public int getBlendInDurationTicks() {
          return this.blendInDurationTicks;
      }
-@@ -142,6 +_,18 @@
+@@ -137,6 +_,18 @@
          return this;
      }
  
@@ -36,7 +36,7 @@
      public MobEffect setBlendDuration(int ticks) {
          return this.setBlendDuration(ticks, ticks, ticks);
      }
-@@ -199,8 +_,16 @@
+@@ -194,8 +_,16 @@
          return this.requiredFeatures;
      }
  

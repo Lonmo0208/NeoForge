@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/StemBlock.java
 +++ b/net/minecraft/world/level/block/StemBlock.java
-@@ -64,23 +_,23 @@
+@@ -63,23 +_,23 @@
  
      @Override
      protected boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {
@@ -12,25 +12,25 @@
      protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 +        if (!level.isAreaLoaded(pos, 1)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light
          if (level.getRawBrightness(pos, 0) >= 9) {
--            float f = CropBlock.getGrowthSpeed(this, level, pos);
--            if (random.nextInt((int)(25.0F / f) + 1) == 0) {
+-            float growthSpeed = CropBlock.getGrowthSpeed(this, level, pos);
+-            if (random.nextInt((int)(25.0F / growthSpeed) + 1) == 0) {
 +            float f = CropBlock.getGrowthSpeed(state, level, pos);
 +            if (net.neoforged.neoforge.common.CommonHooks.canCropGrow(level, pos, state, random.nextInt((int)(25.0F / f) + 1) == 0)) {
-                 int i = state.getValue(AGE);
-                 if (i < 7) {
--                    state = state.setValue(AGE, i + 1);
+                 int age = state.getValue(AGE);
+                 if (age < 7) {
+-                    state = state.setValue(AGE, age + 1);
 -                    level.setBlock(pos, state, 2);
-+                    level.setBlock(pos, state.setValue(AGE, i + 1), 2);
++                    level.setBlock(pos, state.setValue(AGE, age + 1), 2);
                  } else {
                      Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-                     BlockPos blockpos = pos.relative(direction);
-                     BlockState blockstate = level.getBlockState(blockpos.below());
--                    if (level.getBlockState(blockpos).isAir() && (blockstate.is(Blocks.FARMLAND) || blockstate.is(BlockTags.DIRT))) {
-+                    if (level.isEmptyBlock(blockpos) && (blockstate.getBlock() instanceof net.minecraft.world.level.block.FarmBlock || blockstate.is(BlockTags.DIRT))) {
-                         Registry<Block> registry = level.registryAccess().lookupOrThrow(Registries.BLOCK);
-                         Optional<Block> optional = registry.getOptional(this.fruit);
-                         Optional<Block> optional1 = registry.getOptional(this.attachedStem);
-@@ -90,6 +_,7 @@
+                     BlockPos relative = pos.relative(direction);
+                     BlockState stateBelow = level.getBlockState(relative.below());
+-                    if (level.getBlockState(relative).isAir() && (stateBelow.is(Blocks.FARMLAND) || stateBelow.is(BlockTags.DIRT))) {
++                    if (level.isEmptyBlock(relative) && (stateBelow.getBlock() instanceof net.minecraft.world.level.block.FarmBlock || stateBelow.is(BlockTags.DIRT))) {
+                         Registry<Block> blocks = level.registryAccess().lookupOrThrow(Registries.BLOCK);
+                         Optional<Block> fruit = blocks.getOptional(this.fruit);
+                         Optional<Block> stem = blocks.getOptional(this.attachedStem);
+@@ -89,6 +_,7 @@
                          }
                      }
                  }

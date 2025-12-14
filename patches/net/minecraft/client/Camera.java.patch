@@ -10,7 +10,7 @@
          this.initialized = true;
 @@ -66,7 +_,10 @@
              this.setRotation(entity.getViewYRot(a), entity.getViewXRot(a));
-             this.setPosition(newminecartbehavior.getCartLerpPosition(a).add(vec3));
+             this.setPosition(behavior.getCartLerpPosition(a).add(positionOffset));
          } else {
 -            this.setRotation(entity.getViewYRot(a), entity.getViewXRot(a));
 +            var cameraSetup = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.ViewportEvent.ComputeCameraAngles(
@@ -28,18 +28,18 @@
 +                this.setRotation(this.yRot + 180.0F, -this.xRot, -this.roll);
              }
  
-             float f1 = 4.0F;
+             float cameraDistance = 4.0F;
 @@ -93,7 +_,7 @@
-                 f = (float)livingentity.getAttributeValue(Attributes.CAMERA_DISTANCE);
+                 mountDistance = (float)mount.getAttributeValue(Attributes.CAMERA_DISTANCE);
              }
  
--            this.move(-this.getMaxZoom(Math.max(f2 * f1, f3 * f)), 0.0F, 0.0F);
-+            this.move(-this.getMaxZoom(net.neoforged.neoforge.client.ClientHooks.getDetachedCameraDistance(this, mirror, f1, f2, f3, f)), 0.0F, 0.0F);
+-            this.move(-this.getMaxZoom(Math.max(cameraScale * cameraDistance, mountScale * mountDistance)), 0.0F, 0.0F);
++            this.move(-this.getMaxZoom(net.neoforged.neoforge.client.ClientHooks.getDetachedCameraDistance(this, mirror, cameraDistance, cameraScale, mountScale, mountDistance)), 0.0F, 0.0F);
          } else if (entity instanceof LivingEntity && ((LivingEntity)entity).isSleeping()) {
-             Direction direction = ((LivingEntity)entity).getBedOrientation();
-             this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);
+             Direction bedOrientation = ((LivingEntity)entity).getBedOrientation();
+             this.setRotation(bedOrientation != null ? bedOrientation.toYRot() - 180.0F : 0.0F, 0.0F);
 @@ -135,10 +_,17 @@
-         this.setPosition(new Vec3(this.position.x + vector3f.x, this.position.y + vector3f.y, this.position.z + vector3f.z));
+         this.setPosition(new Vec3(this.position.x + offset.x, this.position.y + offset.y, this.position.z + offset.z));
      }
  
 +    /** @deprecated Neo: call {@link #setRotation(float, float, float)} instead */
@@ -57,7 +57,7 @@
          FORWARDS.rotate(this.rotation, this.forwards);
          UP.rotate(this.rotation, this.up);
          LEFT.rotate(this.rotation, this.left);
-@@ -264,6 +_,17 @@
+@@ -258,6 +_,17 @@
  
      public float getPartialTickTime() {
          return this.partialTickTime;

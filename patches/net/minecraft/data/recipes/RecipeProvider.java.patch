@@ -1,6 +1,6 @@
 --- a/net/minecraft/data/recipes/RecipeProvider.java
 +++ b/net/minecraft/data/recipes/RecipeProvider.java
-@@ -605,8 +_,7 @@
+@@ -574,8 +_,7 @@
      }
  
      protected void waxRecipes(FeatureFlagSet flagSet) {
@@ -10,7 +10,7 @@
              .forEach(
                  (block, waxedBlock) -> {
                      if (waxedBlock.requiredFeatures().isSubsetOf(flagSet)) {
-@@ -766,6 +_,10 @@
+@@ -735,6 +_,10 @@
          return Ingredient.of(this.items.getOrThrow(id));
      }
  
@@ -21,13 +21,13 @@
      protected ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item) {
          return ShapedRecipeBuilder.shaped(this.items, category, item);
      }
-@@ -811,13 +_,13 @@
-                         final List<CompletableFuture<?>> list = new ArrayList<>();
-                         RecipeOutput recipeoutput = new RecipeOutput() {
+@@ -780,13 +_,13 @@
+                         final List<CompletableFuture<?>> tasks = new ArrayList<>();
+                         RecipeOutput recipeOutput = new RecipeOutput() {
                              @Override
 -                            public void accept(ResourceKey<Recipe<?>> id, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
 +                            public void accept(ResourceKey<Recipe<?>> id, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
-                                 if (!set.add(id)) {
+                                 if (!allRecipes.add(id)) {
                                      throw new IllegalStateException("Duplicate recipe " + id.identifier());
                                  } else {
 -                                    this.saveRecipe(id, recipe);
@@ -38,27 +38,25 @@
                                      }
                                  }
                              }
-@@ -836,15 +_,21 @@
+@@ -805,13 +_,19 @@
                              }
  
                              private void saveRecipe(ResourceKey<Recipe<?>> id, Recipe<?> recipe) {
+-                                tasks.add(DataProvider.saveStable(cache, registries, Recipe.CODEC, recipe, recipePathProvider.json(id.identifier())));
 +                                saveRecipe(id, recipe, new net.neoforged.neoforge.common.conditions.ICondition[0]);
 +                            }
 +                            private void saveRecipe(ResourceKey<Recipe<?>> id, Recipe<?> recipe, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
-                                 list.add(
--                                    DataProvider.saveStable(cache, registries, Recipe.CODEC, recipe, packoutput$pathprovider.json(id.identifier()))
-+                                    DataProvider.saveStable(cache, registries, Recipe.CONDITIONAL_CODEC, Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(recipe, conditions)), packoutput$pathprovider.json(id.identifier()))
-                                 );
++                                tasks.add(DataProvider.saveStable(cache, registries, Recipe.CONDITIONAL_CODEC, Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(recipe, conditions)), recipePathProvider.json(id.identifier())));
                              }
  
                              private void saveAdvancement(AdvancementHolder advancementHolder) {
 +                                saveAdvancement(advancementHolder, new net.neoforged.neoforge.common.conditions.ICondition[0]);
 +                            }
 +                            private void saveAdvancement(AdvancementHolder advancementHolder, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
-                                 list.add(
+                                 tasks.add(
                                      DataProvider.saveStable(
--                                        cache, registries, Advancement.CODEC, advancementHolder.value(), packoutput$pathprovider1.json(advancementHolder.id())
-+                                        cache, registries, Advancement.CONDITIONAL_CODEC, Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(advancementHolder.value(), conditions)), packoutput$pathprovider1.json(advancementHolder.id())
+-                                        cache, registries, Advancement.CODEC, advancementHolder.value(), advancementPathProvider.json(advancementHolder.id())
++                                        cache, registries, Advancement.CONDITIONAL_CODEC, Optional.of(new net.neoforged.neoforge.common.conditions.WithConditions<>(advancementHolder.value(), conditions)), advancementPathProvider.json(advancementHolder.id())
                                      )
                                  );
                              }

@@ -8,26 +8,26 @@
  
      private PrimaryLevelData(
          @Nullable CompoundTag loadedPlayerTag,
-@@ -162,7 +_,7 @@
-         Dynamic<T> input, LevelSettings settings, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle worldGenSettingsLifecycle
+@@ -168,7 +_,7 @@
+         Lifecycle worldGenSettingsLifecycle
      ) {
-         long i = input.get("Time").asLong(0L);
+         long gameTime = input.get("Time").asLong(0L);
 -        return new PrimaryLevelData(
-+        PrimaryLevelData result = new PrimaryLevelData(
++        var result = new PrimaryLevelData(
              input.get("Player").flatMap(CompoundTag.CODEC::parse).result().orElse(null),
              input.get("WasModded").asBoolean(false),
              input.get("spawn").read(LevelData.RespawnData.CODEC).result().orElse(LevelData.RespawnData.DEFAULT),
-@@ -184,7 +_,8 @@
-                 .asStream()
-                 .flatMap(b -> b.asString().result().stream())
-                 .collect(Collectors.toCollection(Sets::newLinkedHashSet)),
+@@ -187,7 +_,8 @@
+             input.get("WanderingTraderSpawnChance").asInt(0),
+             input.get("WanderingTraderId").read(UUIDUtil.CODEC).result().orElse(null),
+             input.get("ServerBrands").asStream().flatMap(b -> b.asString().result().stream()).collect(Collectors.toCollection(Sets::newLinkedHashSet)),
 -            input.get("removed_features").asStream().flatMap(b -> b.asString().result().stream()).collect(Collectors.toSet()),
 +            // Neo: Append removed modded feature flags
 +            updateRemovedFeatureFlags(input.get("removed_features").asStream().flatMap(b -> b.asString().result().stream()), input.get("enabled_features").asStream().flatMap(features -> features.asString().result().stream())).collect(Collectors.toSet()),
              new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS, input.get("ScheduledEvents").asStream()),
              (CompoundTag)input.get("CustomBossEvents").orElseEmptyMap().getValue(),
              input.get("DragonFight").read(EndDragonFight.Data.CODEC).resultOrPartial(LOGGER::error).orElse(EndDragonFight.Data.DEFAULT),
-@@ -192,7 +_,11 @@
+@@ -195,7 +_,11 @@
              worldOptions,
              specialWorldProperty,
              worldGenSettingsLifecycle
@@ -40,7 +40,7 @@
      }
  
      @Override
-@@ -257,6 +_,12 @@
+@@ -260,6 +_,12 @@
          tag.putInt("WanderingTraderSpawnDelay", this.wanderingTraderSpawnDelay);
          tag.putInt("WanderingTraderSpawnChance", this.wanderingTraderSpawnChance);
          tag.storeNullable("WanderingTraderId", UUIDUtil.CODEC, this.wanderingTraderId);
@@ -53,7 +53,7 @@
      }
  
      private static ListTag stringCollectionToTag(Set<String> values) {
-@@ -547,10 +_,58 @@
+@@ -550,10 +_,58 @@
          return this.settings.copy();
      }
  

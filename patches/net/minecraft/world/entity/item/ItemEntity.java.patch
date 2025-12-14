@@ -11,7 +11,7 @@
  
      public ItemEntity(EntityType<? extends ItemEntity> type, Level level) {
          super(type, level);
-@@ -68,6 +_,7 @@
+@@ -66,6 +_,7 @@
          this.setPos(x, y, z);
          this.setDeltaMovement(deltaX, deltaY, deltaZ);
          this.setItem(itemStack);
@@ -19,7 +19,7 @@
      }
  
      @Override
-@@ -105,6 +_,7 @@
+@@ -103,6 +_,7 @@
  
      @Override
      public void tick() {
@@ -27,27 +27,27 @@
          if (this.getItem().isEmpty()) {
              this.discard();
          } else {
-@@ -117,6 +_,9 @@
+@@ -115,6 +_,9 @@
              this.yo = this.getY();
              this.zo = this.getZ();
-             Vec3 vec3 = this.getDeltaMovement();
+             Vec3 oldMovement = this.getDeltaMovement();
 +            net.neoforged.neoforge.fluids.FluidType fluidType = this.getMaxHeightFluidType();
 +            if (!fluidType.isAir() && !fluidType.isVanilla() && this.getFluidTypeHeight(fluidType) > 0.1F) fluidType.setItemMovement(this);
 +            else
              if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > 0.1F) {
                  this.setUnderwaterMovement();
              } else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > 0.1F) {
-@@ -139,7 +_,8 @@
+@@ -137,7 +_,8 @@
                  this.applyEffectsFromBlocks();
-                 float f = 0.98F;
+                 float friction = 0.98F;
                  if (this.onGround()) {
--                    f = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
+-                    friction = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
 +                    BlockPos groundPos = getBlockPosBelowThatAffectsMyMovement();
-+                    f = this.level().getBlockState(groundPos).getFriction(level(), groundPos, this) * 0.98F;
++                    friction = this.level().getBlockState(groundPos).getFriction(level(), groundPos, this) * 0.98F;
                  }
  
-                 this.setDeltaMovement(this.getDeltaMovement().multiply(f, 0.98, f));
-@@ -171,7 +_,15 @@
+                 this.setDeltaMovement(this.getDeltaMovement().multiply(friction, 0.98, friction));
+@@ -169,7 +_,15 @@
                  }
              }
  
@@ -90,10 +90,10 @@
          this.thrower = EntityReference.read(input, "Thrower");
          this.setItem(input.read("Item", ItemStack.CODEC).orElse(ItemStack.EMPTY));
 @@ -323,7 +_,22 @@
-             ItemStack itemstack = this.getItem();
-             Item item = itemstack.getItem();
-             int i = itemstack.getCount();
--            if (this.pickupDelay == 0 && (this.target == null || this.target.equals(player.getUUID())) && player.getInventory().add(itemstack)) {
+             ItemStack itemStack = this.getItem();
+             Item item = itemStack.getItem();
+             int orgCount = itemStack.getCount();
+-            if (this.pickupDelay == 0 && (this.target == null || this.target.equals(player.getUUID())) && player.getInventory().add(itemStack)) {
 +
 +            // Neo: Fire item pickup pre/post and adjust handling logic to adhere to the event result.
 +            var result = net.neoforged.neoforge.event.EventHooks.fireItemPickupPre(this, player).canPickup();
@@ -102,16 +102,16 @@
 +            }
 +
 +            // Make a copy of the original stack for use in ItemEntityPickupEvent.Post
-+            ItemStack originalCopy = itemstack.copy();
++            ItemStack originalCopy = itemStack.copy();
 +            // Subvert the vanilla conditions (pickup delay and target check) if the result is true.
-+            if ((result.isTrue() || this.pickupDelay == 0 && (this.target == null || this.target.equals(player.getUUID()))) && player.getInventory().add(itemstack)) {
++            if ((result.isTrue() || this.pickupDelay == 0 && (this.target == null || this.target.equals(player.getUUID()))) && player.getInventory().add(itemStack)) {
 +                // Fire ItemEntityPickupEvent.Post
 +                net.neoforged.neoforge.event.EventHooks.fireItemPickupPost(this, player, originalCopy);
-+                // Update `i` to reflect the actual pickup amount. Vanilla is wrong here and always reports the whole stack.
-+                i = originalCopy.getCount() - itemstack.getCount();
++                // Update `orgCount` to reflect the actual pickup amount. Vanilla is wrong here and always reports the whole stack.
++                orgCount = originalCopy.getCount() - itemStack.getCount();
 +
-                 player.take(this, i);
-                 if (itemstack.isEmpty()) {
+                 player.take(this, orgCount);
+                 if (itemStack.isEmpty()) {
                      this.discard();
 @@ -377,6 +_,15 @@
          this.target = target;

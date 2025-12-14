@@ -14,9 +14,9 @@
 @@ -75,7 +_,13 @@
          EntityType<T> type, ServerLevelAccessor level, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random
      ) {
-         SpawnPlacements.Data spawnplacements$data = DATA_BY_TYPE.get(type);
--        return spawnplacements$data == null || ((SpawnPredicate<T>)spawnplacements$data.predicate).test(type, level, spawnReason, pos, random);
-+        boolean vanillaResult = spawnplacements$data == null || spawnplacements$data.predicate.test((EntityType)type, level, spawnReason, pos, random);
+         SpawnPlacements.Data data = DATA_BY_TYPE.get(type);
+-        return data == null || ((SpawnPredicate<T>)data.predicate).test(type, level, spawnReason, pos, random);
++        boolean vanillaResult = data == null || data.predicate.test((EntityType)type, level, spawnReason, pos, random);
 +        return net.neoforged.neoforge.event.EventHooks.checkSpawnPlacements(type, level, spawnReason, pos, random, vanillaResult);
 +    }
 +

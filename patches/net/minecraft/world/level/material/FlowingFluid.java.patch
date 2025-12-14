@@ -1,24 +1,15 @@
 --- a/net/minecraft/world/level/material/FlowingFluid.java
 +++ b/net/minecraft/world/level/material/FlowingFluid.java
-@@ -172,7 +_,7 @@
-             BlockState blockstate = level.getBlockState(blockpos);
-             FluidState fluidstate = blockstate.getFluidState();
-             if (fluidstate.getType().isSame(this) && canPassThroughWall(direction, level, pos, state, blockpos, blockstate)) {
--                if (fluidstate.isSource()) {
-+                if (fluidstate.isSource() && net.neoforged.neoforge.event.EventHooks.canCreateFluidSource(level, blockpos, blockstate)) {
-                     j++;
+@@ -168,7 +_,7 @@
+             BlockState blockState = level.getBlockState(relativePos);
+             FluidState fluidState = blockState.getFluidState();
+             if (fluidState.getType().isSame(this) && canPassThroughWall(direction, level, pos, state, relativePos, blockState)) {
+-                if (fluidState.isSource()) {
++                if (fluidState.isSource() && net.neoforged.neoforge.event.EventHooks.canCreateFluidSource(level, relativePos, blockState)) {
+                     neighbourSources++;
                  }
  
-@@ -180,7 +_,7 @@
-             }
-         }
- 
--        if (j >= 2 && this.canConvertToSource(level)) {
-+        if (j >= 2) {
-             BlockState blockstate1 = level.getBlockState(blockpos$mutableblockpos.setWithOffset(pos, Direction.DOWN));
-             FluidState fluidstate1 = blockstate1.getFluidState();
-             if (blockstate1.isSolid() || this.isSourceBlockOfThisType(fluidstate1)) {
-@@ -262,6 +_,15 @@
+@@ -256,6 +_,15 @@
          return this.getSource().defaultFluidState().setValue(FALLING, falling);
      }
  

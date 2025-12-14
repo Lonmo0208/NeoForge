@@ -27,11 +27,11 @@
      }
  
      static Block getFirst(Block block) {
-         Block block = block;
+         Block candiate = block;
  
--        for (Block block1 = PREVIOUS_BY_BLOCK.get().get(block); block1 != null; block1 = PREVIOUS_BY_BLOCK.get().get(block1)) {
-+        for (Block block1 = net.neoforged.neoforge.common.DataMapHooks.getPreviousOxidizedStage(block); block1 != null; block1 = net.neoforged.neoforge.common.DataMapHooks.getPreviousOxidizedStage(block1)) {
-             block = block1;
+-        for (Block previous = PREVIOUS_BY_BLOCK.get().get(block); previous != null; previous = PREVIOUS_BY_BLOCK.get().get(previous)) {
++        for (Block previous = net.neoforged.neoforge.common.DataMapHooks.getPreviousOxidizedStage(block); previous != null; previous = net.neoforged.neoforge.common.DataMapHooks.getPreviousOxidizedStage(previous)) {
+             candiate = previous;
          }
  
 @@ -79,7 +_,7 @@

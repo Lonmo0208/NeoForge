@@ -3,23 +3,23 @@
 @@ -86,7 +_,8 @@
              return null;
          } else {
-             BlockState blockstate = context.getLevel().getBlockState(context.getClickedPos().below());
--            if (blockstate.is(BlockTags.BAMBOO_PLANTABLE_ON)) {
-+            var soilDecision = blockstate.canSustainPlant(context.getLevel(), context.getClickedPos().below(), net.minecraft.core.Direction.UP, this.defaultBlockState());
-+            if (soilDecision.isDefault() ? blockstate.is(BlockTags.BAMBOO_PLANTABLE_ON) : soilDecision.isTrue()) {
-                 if (blockstate.is(Blocks.BAMBOO_SAPLING)) {
+             BlockState belowState = context.getLevel().getBlockState(context.getClickedPos().below());
+-            if (belowState.is(BlockTags.BAMBOO_PLANTABLE_ON)) {
++            var soilDecision = belowState.canSustainPlant(context.getLevel(), context.getClickedPos().below(), net.minecraft.core.Direction.UP, this.defaultBlockState());
++            if (soilDecision.isDefault() ? belowState.is(BlockTags.BAMBOO_PLANTABLE_ON) : soilDecision.isTrue()) {
+                 if (belowState.is(Blocks.BAMBOO_SAPLING)) {
                      return this.defaultBlockState().setValue(AGE, 0);
-                 } else if (blockstate.is(Blocks.BAMBOO)) {
+                 } else if (belowState.is(Blocks.BAMBOO)) {
 @@ -119,10 +_,11 @@
      @Override
      protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
          if (state.getValue(STAGE) == 0) {
 -            if (random.nextInt(3) == 0 && level.isEmptyBlock(pos.above()) && level.getRawBrightness(pos.above(), 0) >= 9) {
 +            if (level.isEmptyBlock(pos.above()) && level.getRawBrightness(pos.above(), 0) >= 9) {
-                 int i = this.getHeightBelowUpToMax(level, pos) + 1;
--                if (i < 16) {
-+                if (i < 16 && net.neoforged.neoforge.common.CommonHooks.canCropGrow(level, pos, state, random.nextInt(3) == 0)) {
-                     this.growBamboo(state, level, pos, random, i);
+                 int height = this.getHeightBelowUpToMax(level, pos) + 1;
+-                if (height < 16) {
++                if (height < 16 && net.neoforged.neoforge.common.CommonHooks.canCropGrow(level, pos, state, random.nextInt(3) == 0)) {
+                     this.growBamboo(state, level, pos, random, height);
 +                    net.neoforged.neoforge.common.CommonHooks.fireCropGrowPost(level, pos, state);
                  }
              }

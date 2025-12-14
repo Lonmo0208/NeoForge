@@ -11,7 +11,7 @@
          this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(SHAPE, RailShape.NORTH_SOUTH).setValue(WATERLOGGED, false));
      }
  
-@@ -185,6 +_,6 @@
+@@ -183,6 +_,6 @@
  
      @Override
      protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

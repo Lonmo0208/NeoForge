@@ -4,10 +4,10 @@
                  break;
              }
  
--            SpriteContents spritecontents = modelBaker.sprites().get(material, name).contents();
--            list.addAll(processFrames(i, s, spritecontents));
+-            SpriteContents sprite = modelBaker.sprites().get(material, name).contents();
+-            elements.addAll(processFrames(layerIndex, textureReference, sprite));
 +            net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = modelBaker.sprites().get(material, name);
-+            list.addAll(processFrames(i, s, sprite.contents()));
++            elements.addAll(processFrames(layerIndex, textureReference, sprite.contents()));
          }
  
-         return SimpleUnbakedGeometry.bake(list, textureSlots, modelBaker, modelState, name);
+         return SimpleUnbakedGeometry.bake(elements, textureSlots, modelBaker, modelState, name);

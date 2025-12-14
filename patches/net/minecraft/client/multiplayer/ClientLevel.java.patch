@@ -3,21 +3,21 @@
 @@ -135,7 +_,7 @@
      private final @Nullable EndFlashState endFlashState;
      private final Minecraft minecraft = Minecraft.getInstance();
-     final List<AbstractClientPlayer> players = Lists.newArrayList();
--    final List<EnderDragonPart> dragonParts = Lists.newArrayList();
-+    final List<net.neoforged.neoforge.entity.PartEntity<?>> dragonParts = Lists.newArrayList();
+     private final List<AbstractClientPlayer> players = Lists.newArrayList();
+-    private final List<EnderDragonPart> dragonParts = Lists.newArrayList();
++    private final List<net.neoforged.neoforge.entity.PartEntity<?>> dragonParts = Lists.newArrayList();
      private final Map<MapId, MapItemSavedData> mapData = Maps.newHashMap();
      private int skyFlashTime;
-     private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(
-@@ -154,6 +_,7 @@
-             cache.put(
-                 BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(pos -> this.calculateBlockTint(pos, BiomeColors.WATER_COLOR_RESOLVER))
-             );
-+            net.neoforged.neoforge.client.ColorResolverManager.registerBlockTintCaches(ClientLevel.this, cache);
-         }
-     );
+     private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(new Object2ObjectArrayMap<>(3), cache -> {
+@@ -143,6 +_,7 @@
+         cache.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache(pos -> this.calculateBlockTint(pos, BiomeColors.FOLIAGE_COLOR_RESOLVER)));
+         cache.put(BiomeColors.DRY_FOLIAGE_COLOR_RESOLVER, new BlockTintCache(pos -> this.calculateBlockTint(pos, BiomeColors.DRY_FOLIAGE_COLOR_RESOLVER)));
+         cache.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(pos -> this.calculateBlockTint(pos, BiomeColors.WATER_COLOR_RESOLVER)));
++        net.neoforged.neoforge.client.ColorResolverManager.registerBlockTintCaches(ClientLevel.this, cache);
+     });
      private final ClientChunkCache chunkSource;
-@@ -167,6 +_,7 @@
+     private final Deque<Runnable> lightUpdateQueue = Queues.newArrayDeque();
+@@ -155,6 +_,7 @@
      private final int seaLevel;
      private boolean tickDayTime;
      private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
@@ -25,7 +25,7 @@
  
      public void handleBlockChangedAck(int sequence) {
          if (SharedConstants.DEBUG_BLOCK_BREAK) {
-@@ -212,10 +_,15 @@
+@@ -200,10 +_,15 @@
      @Override
      public boolean setBlock(BlockPos pos, BlockState blockState, @Block.UpdateFlags int updateFlags, int updateLimit) {
          if (this.blockStatePredictionHandler.isPredicting()) {
@@ -33,15 +33,15 @@
 +            // Fixes MC-36093 and permits correct server-side only cancellation of block changes.
 +            var snapshot = net.neoforged.neoforge.common.util.BlockSnapshot.create(this.dimension(), this, pos, updateFlags);
 +
-             BlockState blockstate = this.getBlockState(pos);
-             boolean flag = super.setBlock(pos, blockState, updateFlags, updateLimit);
-             if (flag) {
-                 this.blockStatePredictionHandler.retainKnownServerState(pos, blockstate, this.minecraft.player);
+             BlockState oldState = this.getBlockState(pos);
+             boolean success = super.setBlock(pos, blockState, updateFlags, updateLimit);
+             if (success) {
+                 this.blockStatePredictionHandler.retainKnownServerState(pos, oldState, this.minecraft.player);
 +                this.blockStatePredictionHandler.retainSnapshot(pos, snapshot);
              }
  
-             return flag;
-@@ -252,6 +_,7 @@
+             return success;
+@@ -240,6 +_,7 @@
          if (this.canHaveWeather()) {
              this.prepareWeather();
          }
@@ -49,7 +49,7 @@
      }
  
      private EnvironmentAttributeSystem.Builder addEnvironmentAttributeLayers(EnvironmentAttributeSystem.Builder environmentAttributes) {
-@@ -329,7 +_,7 @@
+@@ -319,7 +_,7 @@
      private void tickTime() {
          this.clientLevelData.setGameTime(this.clientLevelData.getGameTime() + 1L);
          if (this.tickDayTime) {
@@ -58,7 +58,7 @@
          }
      }
  
-@@ -364,7 +_,11 @@
+@@ -354,7 +_,11 @@
          entity.setOldPosAndRot();
          entity.tickCount++;
          Profiler.get().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
@@ -70,8 +70,8 @@
 +        }
          Profiler.get().pop();
  
-         for (Entity entity : entity.getPassengers()) {
-@@ -415,8 +_,10 @@
+         for (Entity passenger : entity.getPassengers()) {
+@@ -405,8 +_,10 @@
      }
  
      public void addEntity(Entity entity) {
@@ -82,9 +82,9 @@
      }
  
      public void removeEntity(int id, Entity.RemovalReason reason) {
-@@ -585,6 +_,13 @@
-         float pitch,
-         long seed
+@@ -552,6 +_,13 @@
+     public void playSeededSound(
+         @Nullable Entity except, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed
      ) {
 +        net.neoforged.neoforge.event.PlayLevelSoundEvent.AtPosition event = net.neoforged.neoforge.event.EventHooks.onPlaySoundAtPosition(this, x, y, z, sound, source, volume, pitch);
 +        if (event.isCanceled() || event.getSound() == null) return;
@@ -96,7 +96,7 @@
          if (except == this.minecraft.player) {
              this.playSound(x, y, z, sound.value(), source, volume, pitch, false, seed);
          }
-@@ -594,6 +_,12 @@
+@@ -561,6 +_,12 @@
      public void playSeededSound(
          @Nullable Entity except, Entity sourceEntity, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed
      ) {
@@ -109,7 +109,7 @@
          if (except == this.minecraft.player) {
              this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(sound.value(), source, volume, pitch, sourceEntity, seed));
          }
-@@ -858,7 +_,7 @@
+@@ -766,7 +_,7 @@
          return this.players;
      }
  
@@ -118,25 +118,25 @@
          return this.dragonParts;
      }
  
-@@ -966,7 +_,7 @@
+@@ -872,7 +_,7 @@
  
      @Override
      public void addDestroyBlockEffect(BlockPos pos, BlockState blockState) {
 -        if (!blockState.isAir() && blockState.shouldSpawnTerrainParticles()) {
 +        if (!blockState.isAir() && !net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions.of(blockState).addDestroyEffects(blockState, this, pos, this.minecraft.particleEngine)) {
-             VoxelShape voxelshape = blockState.getShape(this, pos);
-             double d0 = 0.25;
-             voxelshape.forAllBoxes(
-@@ -1000,7 +_,7 @@
-                                             d6 - 0.5,
-                                             blockState,
-                                             pos
+             VoxelShape shape = blockState.getShape(this, pos);
+             double density = 0.25;
+             shape.forAllBoxes(
+@@ -898,7 +_,7 @@
+                                     .add(
+                                         new TerrainParticle(
+                                             this, pos.getX() + x, pos.getY() + y, pos.getZ() + z, relX - 0.5, relY - 0.5, relZ - 0.5, blockState, pos
 -                                        )
 +                                        ).updateSprite(blockState, pos)
                                      );
                              }
                          }
-@@ -1010,9 +_,16 @@
+@@ -908,9 +_,16 @@
          }
      }
  
@@ -148,22 +148,22 @@
 +    }
 +
 +    public void addBreakingBlockEffect(BlockPos pos, Direction direction, net.minecraft.world.phys.@Nullable HitResult hitResult) {
-         BlockState blockstate = this.getBlockState(pos);
--        if (blockstate.getRenderShape() != RenderShape.INVISIBLE && blockstate.shouldSpawnTerrainParticles()) {
-+        if (blockstate.getRenderShape() != RenderShape.INVISIBLE && !net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions.of(blockstate).addHitEffects(blockstate, this, hitResult, this.minecraft.particleEngine)) {
-             int i = pos.getX();
-             int j = pos.getY();
-             int k = pos.getZ();
-@@ -1045,7 +_,7 @@
-                 d0 = i + aabb.maxX + 0.1F;
+         BlockState blockState = this.getBlockState(pos);
+-        if (blockState.getRenderShape() != RenderShape.INVISIBLE && blockState.shouldSpawnTerrainParticles()) {
++        if (blockState.getRenderShape() != RenderShape.INVISIBLE && !net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions.of(blockState).addHitEffects(blockState, this, hitResult, this.minecraft.particleEngine)) {
+             int x = pos.getX();
+             int y = pos.getY();
+             int z = pos.getZ();
+@@ -943,7 +_,7 @@
+                 xp = x + shape.maxX + 0.1F;
              }
  
--            this.minecraft.particleEngine.add(new TerrainParticle(this, d0, d1, d2, 0.0, 0.0, 0.0, blockstate, pos).setPower(0.2F).scale(0.6F));
-+            this.minecraft.particleEngine.add(new TerrainParticle(this, d0, d1, d2, 0.0, 0.0, 0.0, blockstate, pos).updateSprite(blockstate, pos).setPower(0.2F).scale(0.6F));
+-            this.minecraft.particleEngine.add(new TerrainParticle(this, xp, yp, zp, 0.0, 0.0, 0.0, blockState, pos).setPower(0.2F).scale(0.6F));
++            this.minecraft.particleEngine.add(new TerrainParticle(this, xp, yp, zp, 0.0, 0.0, 0.0, blockState, pos).updateSprite(blockState, pos).setPower(0.2F).scale(0.6F));
          }
      }
  
-@@ -1190,6 +_,7 @@
+@@ -1088,6 +_,7 @@
          }
  
          public void setDifficulty(Difficulty difficulty) {
@@ -171,8 +171,8 @@
              this.difficulty = difficulty;
          }
  
-@@ -1231,6 +_,9 @@
-                     ClientLevel.this.dragonParts.addAll(Arrays.asList(enderdragon.getSubEntities()));
+@@ -1129,6 +_,9 @@
+                     ClientLevel.this.dragonParts.addAll(Arrays.asList(dragon.getSubEntities()));
                      break;
                  default:
 +                    if (entity.isMultipartEntity()) {
@@ -181,8 +181,8 @@
              }
          }
  
-@@ -1244,10 +_,62 @@
-                     ClientLevel.this.dragonParts.removeAll(Arrays.asList(enderdragon.getSubEntities()));
+@@ -1142,10 +_,62 @@
+                     ClientLevel.this.dragonParts.removeAll(Arrays.asList(dragon.getSubEntities()));
                      break;
                  default:
 +                    if (entity.isMultipartEntity()) {

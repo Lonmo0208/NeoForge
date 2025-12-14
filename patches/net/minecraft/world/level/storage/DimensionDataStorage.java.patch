@@ -23,43 +23,43 @@
          this.dataFolder = dataFolder;
          this.registries = registries;
 @@ -59,7 +_,7 @@
-         if (t != null) {
-             return t;
+         if (data != null) {
+             return data;
          } else {
--            T t1 = (T)type.constructor().get();
-+            T t1 = (T)type.factory().create(this.level);
-             this.set(type, t1);
-             return t1;
+-            T newData = (T)type.constructor().get();
++            T newData = (T)type.factory().create(this.level);
+             this.set(type, newData);
+             return newData;
          }
-@@ -83,7 +_,7 @@
-                     type.id(), type.dataFixType(), SharedConstants.getCurrentVersion().dataVersion().version()
-                 );
-                 RegistryOps<Tag> registryops = this.registries.createSerializationContext(NbtOps.INSTANCE);
+@@ -81,7 +_,7 @@
+             if (Files.exists(file)) {
+                 CompoundTag tag = this.readTagFromDisk(type.id(), type.dataFixType(), SharedConstants.getCurrentVersion().dataVersion().version());
+                 RegistryOps<Tag> ops = this.registries.createSerializationContext(NbtOps.INSTANCE);
 -                return type.codec()
 +                return type.codecFactory().create(this.level)
-                     .parse(registryops, compoundtag.get("data"))
+                     .parse(ops, tag.get("data"))
                      .resultOrPartial(error -> LOGGER.error("Failed to parse saved data for '{}': {}", type, error))
                      .orElse(null);
-@@ -100,7 +_,7 @@
+@@ -98,7 +_,7 @@
          data.setDirty();
      }
  
 -    public CompoundTag readTagFromDisk(String id, DataFixTypes type, int newVersion) throws IOException {
 +    public CompoundTag readTagFromDisk(String id, @Nullable DataFixTypes type, int newVersion) throws IOException {
-         CompoundTag compoundtag1;
+         CompoundTag var8;
          try (
-             InputStream inputstream = Files.newInputStream(this.getDataFile(id));
-@@ -115,9 +_,19 @@
+             InputStream in = Files.newInputStream(this.getDataFile(id));
+@@ -113,9 +_,19 @@
                  }
              }
  
--            int i = NbtUtils.getDataVersion(compoundtag, 1343);
--            compoundtag1 = type.update(this.fixerUpper, compoundtag, i, newVersion);
+-            int version = NbtUtils.getDataVersion(tag, 1343);
+-            var8 = type.update(this.fixerUpper, tag, version, newVersion);
 +            if (type != null) {
-+                int i = NbtUtils.getDataVersion(compoundtag, 1343);
-+                compoundtag1 = type.update(this.fixerUpper, compoundtag, i, newVersion);
++                int version = NbtUtils.getDataVersion(tag, 1343);
++                var8 = type.update(this.fixerUpper, tag, version, newVersion);
 +            } else {
-+                compoundtag1 = compoundtag;
++                var8 = tag;
 +            }
          }
 +
@@ -69,18 +69,18 @@
 +                Util.ioPool()
 +        );
  
-         return compoundtag1;
+         return var8;
      }
-@@ -189,7 +_,7 @@
+@@ -187,7 +_,7 @@
      }
  
      private <T extends SavedData> CompoundTag encodeUnchecked(SavedDataType<T> type, SavedData data, RegistryOps<Tag> ops) {
 -        Codec<T> codec = type.codec();
 +        Codec<T> codec = type.codecFactory().create(this.level);
-         CompoundTag compoundtag = new CompoundTag();
-         compoundtag.put("data", codec.encodeStart(ops, (T)data).getOrThrow());
-         NbtUtils.addCurrentDataVersion(compoundtag);
-@@ -200,7 +_,11 @@
+         CompoundTag tag = new CompoundTag();
+         tag.put("data", codec.encodeStart(ops, (T)data).getOrThrow());
+         NbtUtils.addCurrentDataVersion(tag);
+@@ -198,7 +_,11 @@
          Path path = this.getDataFile(type.id());
  
          try {
@@ -90,6 +90,6 @@
 +                Files.createDirectories(path.getParent());
 +            }
 +            net.neoforged.neoforge.common.IOUtilities.writeNbtCompressed(tag, path);
-         } catch (IOException ioexception) {
-             LOGGER.error("Could not save data to {}", path.getFileName(), ioexception);
+         } catch (IOException var5) {
+             LOGGER.error("Could not save data to {}", path.getFileName(), var5);
          }

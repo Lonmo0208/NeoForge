@@ -53,14 +53,14 @@
 @@ -62,7 +_,12 @@
              }
  
-             Identifier identifier = s.isEmpty() ? null : Identifier.parse(s);
--            return new BlockModel(unbakedgeometry, unbakedmodel$guilight, obool, itemtransforms, textureslots$data, identifier);
+             Identifier parentLocation = parentName.isEmpty() ? null : Identifier.parse(parentName);
+-            return new BlockModel(elements, guiLight, hasAmbientOcclusion, transforms, textureMap, parentLocation);
 +
-+            var rootTransform = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRootTransform(jsonobject, context);
-+            var renderTypeGroup = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRenderType(jsonobject);
-+            var partVisibility = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializePartVisibility(jsonobject);
++            var rootTransform = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRootTransform(object, context);
++            var renderTypeGroup = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializeRenderType(object);
++            var partVisibility = net.neoforged.neoforge.client.model.NeoForgeModelProperties.deserializePartVisibility(object);
 +
-+            return new BlockModel(unbakedgeometry, unbakedmodel$guilight, obool, itemtransforms, textureslots$data, identifier, rootTransform, renderTypeGroup, partVisibility);
++            return new BlockModel(elements, guiLight, hasAmbientOcclusion, transforms, textureMap, parentLocation, rootTransform, renderTypeGroup, partVisibility);
          }
  
          private TextureSlots.Data getTextureMap(JsonObject object) {

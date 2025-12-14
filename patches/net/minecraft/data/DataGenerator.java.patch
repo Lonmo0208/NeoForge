@@ -1,7 +1,7 @@
 --- a/net/minecraft/data/DataGenerator.java
 +++ b/net/minecraft/data/DataGenerator.java
 @@ -21,6 +_,7 @@
-     final Map<String, DataProvider> providersToRun = new LinkedHashMap<>();
+     private final Map<String, DataProvider> providersToRun = new LinkedHashMap<>();
      private final WorldVersion version;
      private final boolean alwaysGenerate;
 +    private final Map<String, DataProvider> providersView = java.util.Collections.unmodifiableMap(this.providersToRun);
@@ -13,13 +13,13 @@
              } else {
                  LOGGER.info("Starting provider: {}", providerId);
 +                net.neoforged.fml.loading.progress.StartupNotificationManager.addModMessage("Generating: " + providerId);
-                 stopwatch1.start();
-                 hashcache.applyUpdate(hashcache.generateUpdate(providerId, provider::run).join());
-                 stopwatch1.stop();
+                 stopwatch.start();
+                 cache.applyUpdate(cache.generateUpdate(providerId, provider::run).join());
+                 stopwatch.stop();
 @@ -56,6 +_,55 @@
      public DataGenerator.PackGenerator getBuiltinDatapack(boolean toRun, String packId) {
-         Path path = this.vanillaPackOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("minecraft").resolve("datapacks").resolve(packId);
-         return new DataGenerator.PackGenerator(toRun, packId, new PackOutput(path));
+         Path packOutputDir = this.vanillaPackOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("minecraft").resolve("datapacks").resolve(packId);
+         return new DataGenerator.PackGenerator(toRun, packId, new PackOutput(packOutputDir));
 +    }
 +
 +    public PackGenerator getBuiltinDatapack(boolean run, String namespace, String path) {

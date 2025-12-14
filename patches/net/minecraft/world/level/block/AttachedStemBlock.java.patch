@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/AttachedStemBlock.java
 +++ b/net/minecraft/world/level/block/AttachedStemBlock.java
-@@ -81,7 +_,7 @@
+@@ -80,7 +_,7 @@
  
      @Override
      protected boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {

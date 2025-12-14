@@ -16,8 +16,8 @@
 +    }
 +
      private static boolean isFaceOccludedByState(Direction direction, float height, BlockState state) {
-         VoxelShape voxelshape = state.getFaceOcclusionShape(direction.getOpposite());
-         if (voxelshape == Shapes.empty()) {
+         VoxelShape occluder = state.getFaceOcclusionShape(direction.getOpposite());
+         if (occluder == Shapes.empty()) {
 @@ -65,15 +_,22 @@
          return isFaceOccludedByState(direction.getOpposite(), 1.0F, state);
      }
@@ -33,119 +33,119 @@
 +    }
 +
      public void tesselate(BlockAndTintGetter level, BlockPos pos, VertexConsumer builder, BlockState blockState, FluidState fluidState) {
--        boolean flag = fluidState.is(FluidTags.LAVA);
--        TextureAtlasSprite textureatlassprite = flag ? this.lavaStill : this.waterStill;
--        TextureAtlasSprite textureatlassprite1 = flag ? this.lavaFlowing : this.waterFlowing;
--        int i = flag ? 16777215 : BiomeColors.getAverageWaterColor(level, pos);
-+        TextureAtlasSprite[] atextureatlassprite = net.neoforged.neoforge.client.textures.FluidSpriteCache.getFluidSprites(level, pos, fluidState);
-+        TextureAtlasSprite textureatlassprite = atextureatlassprite[0]; // Neo: Custom still sprite
-+        TextureAtlasSprite textureatlassprite1 = atextureatlassprite[1]; // Neo: Custom flowing sprite
-+        int i = net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions.of(fluidState).getTintColor(fluidState, level, pos);
-+        float alpha = (i >> 24 & 255) / 255.0F;
-         float f = (i >> 16 & 0xFF) / 255.0F;
-         float f1 = (i >> 8 & 0xFF) / 255.0F;
-         float f2 = (i & 0xFF) / 255.0F;
-@@ -89,12 +_,12 @@
-         FluidState fluidstate4 = blockstate4.getFluidState();
-         BlockState blockstate5 = level.getBlockState(pos.relative(Direction.EAST));
-         FluidState fluidstate5 = blockstate5.getFluidState();
--        boolean flag1 = !isNeighborSameFluid(fluidState, fluidstate1);
--        boolean flag2 = shouldRenderFace(fluidState, blockState, Direction.DOWN, fluidstate) && !isFaceOccludedByNeighbor(Direction.DOWN, 0.8888889F, blockstate);
--        boolean flag3 = shouldRenderFace(fluidState, blockState, Direction.NORTH, fluidstate2);
--        boolean flag4 = shouldRenderFace(fluidState, blockState, Direction.SOUTH, fluidstate3);
--        boolean flag5 = shouldRenderFace(fluidState, blockState, Direction.WEST, fluidstate4);
--        boolean flag6 = shouldRenderFace(fluidState, blockState, Direction.EAST, fluidstate5);
-+        boolean flag1 = !isNeighborStateHidingOverlay(fluidState, blockstate1, Direction.DOWN);
-+        boolean flag2 = shouldRenderFace(fluidState, blockState, Direction.DOWN, blockstate) && !isFaceOccludedByNeighbor(Direction.DOWN, 0.8888889F, blockstate);
-+        boolean flag3 = shouldRenderFace(fluidState, blockState, Direction.NORTH, blockstate2);
-+        boolean flag4 = shouldRenderFace(fluidState, blockState, Direction.SOUTH, blockstate3);
-+        boolean flag5 = shouldRenderFace(fluidState, blockState, Direction.WEST, blockstate4);
-+        boolean flag6 = shouldRenderFace(fluidState, blockState, Direction.EAST, blockstate5);
-         if (flag1 || flag2 || flag6 || flag5 || flag3 || flag4) {
-             float f3 = level.getShade(Direction.DOWN, true);
-             float f4 = level.getShade(Direction.UP, true);
-@@ -169,15 +_,15 @@
-                 float f54 = f4 * f;
-                 float f55 = f4 * f1;
-                 float f56 = f4 * f2;
--                this.vertex(builder, f37 + 0.0F, f38 + f8, f39 + 0.0F, f54, f55, f56, f17, f21, l);
--                this.vertex(builder, f37 + 0.0F, f38 + f10, f39 + 1.0F, f54, f55, f56, f18, f22, l);
--                this.vertex(builder, f37 + 1.0F, f38 + f9, f39 + 1.0F, f54, f55, f56, f19, f23, l);
--                this.vertex(builder, f37 + 1.0F, f38 + f7, f39 + 0.0F, f54, f55, f56, f20, f24, l);
-+                this.vertex(builder, f37 + 0.0F, f38 + f8, f39 + 0.0F, f54, f55, f56, alpha, f17, f21, l);
-+                this.vertex(builder, f37 + 0.0F, f38 + f10, f39 + 1.0F, f54, f55, f56, alpha, f18, f22, l);
-+                this.vertex(builder, f37 + 1.0F, f38 + f9, f39 + 1.0F, f54, f55, f56, alpha, f19, f23, l);
-+                this.vertex(builder, f37 + 1.0F, f38 + f7, f39 + 0.0F, f54, f55, f56, alpha, f20, f24, l);
+-        boolean isLava = fluidState.is(FluidTags.LAVA);
+-        TextureAtlasSprite stillSprite = isLava ? this.lavaStill : this.waterStill;
+-        TextureAtlasSprite flowingSprite = isLava ? this.lavaFlowing : this.waterFlowing;
+-        int col = isLava ? 16777215 : BiomeColors.getAverageWaterColor(level, pos);
++        TextureAtlasSprite[] fluidSprites = net.neoforged.neoforge.client.textures.FluidSpriteCache.getFluidSprites(level, pos, fluidState);
++        TextureAtlasSprite stillSprite = fluidSprites[0]; // Neo: Custom still sprite
++        TextureAtlasSprite flowingSprite = fluidSprites[1]; // Neo: Custom flowing sprite
++        int col = net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions.of(fluidState).getTintColor(fluidState, level, pos);
++        float alpha = (col >> 24 & 255) / 255.0F;
+         float r = (col >> 16 & 0xFF) / 255.0F;
+         float g = (col >> 8 & 0xFF) / 255.0F;
+         float b = (col & 0xFF) / 255.0F;
+@@ -89,13 +_,13 @@
+         FluidState fluidStateWest = blockStateWest.getFluidState();
+         BlockState blockStateEast = level.getBlockState(pos.relative(Direction.EAST));
+         FluidState fluidStateEast = blockStateEast.getFluidState();
+-        boolean renderUp = !isNeighborSameFluid(fluidState, fluidStateUp);
+-        boolean renderDown = shouldRenderFace(fluidState, blockState, Direction.DOWN, fluidStateDown)
++        boolean renderUp = !isNeighborStateHidingOverlay(fluidState, blockStateUp, Direction.DOWN);
++        boolean renderDown = shouldRenderFace(fluidState, blockState, Direction.DOWN, blockStateDown)
+             && !isFaceOccludedByNeighbor(Direction.DOWN, 0.8888889F, blockStateDown);
+-        boolean renderNorth = shouldRenderFace(fluidState, blockState, Direction.NORTH, fluidStateNorth);
+-        boolean renderSouth = shouldRenderFace(fluidState, blockState, Direction.SOUTH, fluidStateSouth);
+-        boolean renderWest = shouldRenderFace(fluidState, blockState, Direction.WEST, fluidStateWest);
+-        boolean renderEast = shouldRenderFace(fluidState, blockState, Direction.EAST, fluidStateEast);
++        boolean renderNorth = shouldRenderFace(fluidState, blockState, Direction.NORTH, blockStateNorth);
++        boolean renderSouth = shouldRenderFace(fluidState, blockState, Direction.SOUTH, blockStateSouth);
++        boolean renderWest = shouldRenderFace(fluidState, blockState, Direction.WEST, blockStateWest);
++        boolean renderEast = shouldRenderFace(fluidState, blockState, Direction.EAST, blockStateEast);
+         if (renderUp || renderDown || renderEast || renderWest || renderNorth || renderSouth) {
+             float c10 = level.getShade(Direction.DOWN, true);
+             float c11 = level.getShade(Direction.UP, true);
+@@ -181,15 +_,15 @@
+                 float topRed = c11 * r;
+                 float topGreen = c11 * g;
+                 float topBlue = c11 * b;
+-                this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, u00, v00, topColor);
+-                this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, u01, v01, topColor);
+-                this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, u10, v10, topColor);
+-                this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, u11, v11, topColor);
++                this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, alpha, u00, v00, topColor);
++                this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, alpha, u01, v01, topColor);
++                this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, alpha, u10, v10, topColor);
++                this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, alpha, u11, v11, topColor);
                  if (fluidState.shouldRenderBackwardUpFace(level, pos.above())) {
--                    this.vertex(builder, f37 + 0.0F, f38 + f8, f39 + 0.0F, f54, f55, f56, f17, f21, l);
--                    this.vertex(builder, f37 + 1.0F, f38 + f7, f39 + 0.0F, f54, f55, f56, f20, f24, l);
--                    this.vertex(builder, f37 + 1.0F, f38 + f9, f39 + 1.0F, f54, f55, f56, f19, f23, l);
--                    this.vertex(builder, f37 + 0.0F, f38 + f10, f39 + 1.0F, f54, f55, f56, f18, f22, l);
-+                    this.vertex(builder, f37 + 0.0F, f38 + f8, f39 + 0.0F, f54, f55, f56, alpha, f17, f21, l);
-+                    this.vertex(builder, f37 + 1.0F, f38 + f7, f39 + 0.0F, f54, f55, f56, alpha, f20, f24, l);
-+                    this.vertex(builder, f37 + 1.0F, f38 + f9, f39 + 1.0F, f54, f55, f56, alpha, f19, f23, l);
-+                    this.vertex(builder, f37 + 0.0F, f38 + f10, f39 + 1.0F, f54, f55, f56, alpha, f18, f22, l);
+-                    this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, u00, v00, topColor);
+-                    this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, u11, v11, topColor);
+-                    this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, u10, v10, topColor);
+-                    this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, u01, v01, topColor);
++                    this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, alpha, u00, v00, topColor);
++                    this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, alpha, u11, v11, topColor);
++                    this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, alpha, u10, v10, topColor);
++                    this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, alpha, u01, v01, topColor);
                  }
              }
  
-@@ -190,10 +_,10 @@
-                 float f47 = f3 * f;
-                 float f49 = f3 * f1;
-                 float f51 = f3 * f2;
--                this.vertex(builder, f37, f38 + f16, f39 + 1.0F, f47, f49, f51, f41, f44, k);
--                this.vertex(builder, f37, f38 + f16, f39, f47, f49, f51, f41, f43, k);
--                this.vertex(builder, f37 + 1.0F, f38 + f16, f39, f47, f49, f51, f42, f43, k);
--                this.vertex(builder, f37 + 1.0F, f38 + f16, f39 + 1.0F, f47, f49, f51, f42, f44, k);
-+                this.vertex(builder, f37, f38 + f16, f39 + 1.0F, f47, f49, f51, alpha, f41, f44, k);
-+                this.vertex(builder, f37, f38 + f16, f39, f47, f49, f51, alpha, f41, f43, k);
-+                this.vertex(builder, f37 + 1.0F, f38 + f16, f39, f47, f49, f51, alpha, f42, f43, k);
-+                this.vertex(builder, f37 + 1.0F, f38 + f16, f39 + 1.0F, f47, f49, f51, alpha, f42, f44, k);
+@@ -202,10 +_,10 @@
+                 float belowRed = c10 * r;
+                 float belowGreen = c10 * g;
+                 float belowBlue = c10 * b;
+-                this.vertex(builder, x, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, u0, v1, belowColor);
+-                this.vertex(builder, x, y + bottomOffs, z, belowRed, belowGreen, belowBlue, u0, v0, belowColor);
+-                this.vertex(builder, x + 1.0F, y + bottomOffs, z, belowRed, belowGreen, belowBlue, u1, v0, belowColor);
+-                this.vertex(builder, x + 1.0F, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, u1, v1, belowColor);
++                this.vertex(builder, x, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, alpha, u0, v1, belowColor);
++                this.vertex(builder, x, y + bottomOffs, z, belowRed, belowGreen, belowBlue, alpha, u0, v0, belowColor);
++                this.vertex(builder, x + 1.0F, y + bottomOffs, z, belowRed, belowGreen, belowBlue, alpha, u1, v0, belowColor);
++                this.vertex(builder, x + 1.0F, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, alpha, u1, v1, belowColor);
              }
  
-             int j = this.getLightColor(level, pos);
-@@ -247,10 +_,9 @@
-                 if (flag7 && !isFaceOccludedByNeighbor(direction, Math.max(f45, f46), level.getBlockState(pos.relative(direction)))) {
-                     BlockPos blockpos = pos.relative(direction);
-                     TextureAtlasSprite textureatlassprite2 = textureatlassprite1;
--                    if (!flag) {
--                        Block block = level.getBlockState(blockpos).getBlock();
--                        if (block instanceof HalfTransparentBlock || block instanceof LeavesBlock) {
--                            textureatlassprite2 = this.waterOverlay;
-+                    if (atextureatlassprite[2] != null) {
-+                        if (level.getBlockState(blockpos).shouldDisplayFluidOverlay(level, blockpos, fluidState)) {
-+                            textureatlassprite2 = atextureatlassprite[2];
+             int sideColor = this.getLightColor(level, pos);
+@@ -259,10 +_,9 @@
+                 if (renderCondition && !isFaceOccludedByNeighbor(faceDir, Math.max(hh0, hh1), level.getBlockState(pos.relative(faceDir)))) {
+                     BlockPos tPos = pos.relative(faceDir);
+                     TextureAtlasSprite sprite = flowingSprite;
+-                    if (!isLava) {
+-                        Block relativeBlock = level.getBlockState(tPos).getBlock();
+-                        if (relativeBlock instanceof HalfTransparentBlock || relativeBlock instanceof LeavesBlock) {
+-                            sprite = this.waterOverlay;
++                    if (fluidSprites[2] != null) {
++                        if (level.getBlockState(tPos).shouldDisplayFluidOverlay(level, tPos, fluidState)) {
++                            sprite = fluidSprites[2];
                          }
                      }
  
-@@ -263,15 +_,15 @@
-                     float f34 = f4 * f33 * f;
-                     float f35 = f4 * f33 * f1;
-                     float f36 = f4 * f33 * f2;
--                    this.vertex(builder, f48, f38 + f45, f50, f34, f35, f36, f57, f30, j);
--                    this.vertex(builder, f52, f38 + f46, f53, f34, f35, f36, f29, f31, j);
--                    this.vertex(builder, f52, f38 + f16, f53, f34, f35, f36, f29, f32, j);
--                    this.vertex(builder, f48, f38 + f16, f50, f34, f35, f36, f57, f32, j);
--                    if (textureatlassprite2 != this.waterOverlay) {
--                        this.vertex(builder, f48, f38 + f16, f50, f34, f35, f36, f57, f32, j);
--                        this.vertex(builder, f52, f38 + f16, f53, f34, f35, f36, f29, f32, j);
--                        this.vertex(builder, f52, f38 + f46, f53, f34, f35, f36, f29, f31, j);
--                        this.vertex(builder, f48, f38 + f45, f50, f34, f35, f36, f57, f30, j);
-+                    this.vertex(builder, f48, f38 + f45, f50, f34, f35, f36, alpha, f57, f30, j);
-+                    this.vertex(builder, f52, f38 + f46, f53, f34, f35, f36, alpha, f29, f31, j);
-+                    this.vertex(builder, f52, f38 + f16, f53, f34, f35, f36, alpha, f29, f32, j);
-+                    this.vertex(builder, f48, f38 + f16, f50, f34, f35, f36, alpha, f57, f32, j);
-+                    if (textureatlassprite2 != atextureatlassprite[2]) { // Neo: use custom fluid's overlay texture
-+                        this.vertex(builder, f48, f38 + f16, f50, f34, f35, f36, alpha, f57, f32, j);
-+                        this.vertex(builder, f52, f38 + f16, f53, f34, f35, f36, alpha, f29, f32, j);
-+                        this.vertex(builder, f52, f38 + f46, f53, f34, f35, f36, alpha, f29, f31, j);
-+                        this.vertex(builder, f48, f38 + f45, f50, f34, f35, f36, alpha, f57, f30, j);
+@@ -275,15 +_,15 @@
+                     float red = c11 * br * r;
+                     float green = c11 * br * g;
+                     float blue = c11 * br * b;
+-                    this.vertex(builder, x0, y + hh0, z0, red, green, blue, u0, v01x, sideColor);
+-                    this.vertex(builder, x1, y + hh1, z1, red, green, blue, u1, v02, sideColor);
+-                    this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, u1, v1, sideColor);
+-                    this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, u0, v1, sideColor);
++                    this.vertex(builder, x0, y + hh0, z0, red, green, blue, alpha, u0, v01x, sideColor);
++                    this.vertex(builder, x1, y + hh1, z1, red, green, blue, alpha, u1, v02, sideColor);
++                    this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, alpha, u1, v1, sideColor);
++                    this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, alpha, u0, v1, sideColor);
+                     if (sprite != this.waterOverlay) {
+-                        this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, u0, v1, sideColor);
+-                        this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, u1, v1, sideColor);
+-                        this.vertex(builder, x1, y + hh1, z1, red, green, blue, u1, v02, sideColor);
+-                        this.vertex(builder, x0, y + hh0, z0, red, green, blue, u0, v01x, sideColor);
++                        this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, alpha, u0, v1, sideColor);
++                        this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, alpha, u1, v1, sideColor);
++                        this.vertex(builder, x1, y + hh1, z1, red, green, blue, alpha, u1, v02, sideColor);
++                        this.vertex(builder, x0, y + hh0, z0, red, green, blue, alpha, u0, v01x, sideColor);
                      }
                  }
              }
-@@ -312,6 +_,26 @@
+@@ -324,6 +_,26 @@
      private float getHeight(BlockAndTintGetter level, Fluid fluidType, BlockPos pos) {
-         BlockState blockstate = level.getBlockState(pos);
-         return this.getHeight(level, fluidType, pos, blockstate, blockstate.getFluidState());
+         BlockState state = level.getBlockState(pos);
+         return this.getHeight(level, fluidType, pos, state, state.getFluidState());
 +    }
 +
 +    private void vertex(

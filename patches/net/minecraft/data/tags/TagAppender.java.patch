@@ -35,39 +35,39 @@
  
              @Override
              public TagAppender<U, T> addOptional(U element) {
--                tagappender.add(converter.apply(element));
-+                tagappender.addOptional(converter.apply(element));
+-                original.add(converter.apply(element));
++                original.addOptional(converter.apply(element));
                  return this;
              }
  
 @@ -81,6 +_,30 @@
              @Override
              public TagAppender<U, T> addOptionalTag(TagKey<T> tag) {
-                 tagappender.addOptionalTag(tag);
+                 original.addOptionalTag(tag);
 +                return this;
 +            }
 +
 +            @Override
 +            public TagAppender<U, T> add(net.minecraft.tags.TagEntry entry) {
-+                tagappender.add(entry);
++                original.add(entry);
 +                return this;
 +            }
 +
 +            @Override
 +            public TagAppender<U, T> replace(boolean value) {
-+                tagappender.replace(value);
++                original.replace(value);
 +                return this;
 +            }
 +
 +            @Override
 +            public TagAppender<U, T> remove(final U u) {
-+                tagappender.remove(converter.apply(u));
++                original.remove(converter.apply(u));
 +                return this;
 +            }
 +
 +            @Override
 +            public TagAppender<U, T> remove(TagKey<T> tag) {
-+                tagappender.remove(tag);
++                original.remove(tag);
                  return this;
              }
          };

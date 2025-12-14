@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/chunk/storage/SectionStorage.java
 +++ b/net/minecraft/world/level/chunk/storage/SectionStorage.java
-@@ -301,6 +_,19 @@
+@@ -299,6 +_,19 @@
          this.simpleRegionStorage.close();
      }
  
@@ -17,6 +17,6 @@
 +        }
 +    }
 +
-     record PackedChunk<T>(Int2ObjectMap<T> sectionsByY, boolean versionChanged) {
+     private record PackedChunk<T>(Int2ObjectMap<T> sectionsByY, boolean versionChanged) {
          public static <T> SectionStorage.PackedChunk<T> parse(
              Codec<T> codec, DynamicOps<Tag> ops, Tag tag, SimpleRegionStorage simpleRegionStorage, LevelHeightAccessor levelHeightAccessor

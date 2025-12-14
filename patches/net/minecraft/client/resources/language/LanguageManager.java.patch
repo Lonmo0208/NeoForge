@@ -10,7 +10,7 @@
      }
  
 @@ -69,8 +_,12 @@
-         this.reloadCallback.accept(clientlanguage);
+         this.reloadCallback.accept(locale);
      }
  
 +    private java.util.Locale javaLocale; // Forge: add locale information for modders

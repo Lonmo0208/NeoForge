@@ -1,24 +1,24 @@
 --- a/net/minecraft/world/level/NaturalSpawner.java
 +++ b/net/minecraft/world/level/NaturalSpawner.java
-@@ -74,7 +_,7 @@
+@@ -72,7 +_,7 @@
  
          for (Entity entity : entities) {
              if (!(entity instanceof Mob mob && (mob.isPersistenceRequired() || mob.requiresCustomPersistence()))) {
--                MobCategory mobcategory = entity.getType().getCategory();
-+                MobCategory mobcategory = entity.getClassification(true);
-                 if (mobcategory != MobCategory.MISC) {
-                     BlockPos blockpos = entity.blockPosition();
-                     chunkGetter.query(
-@@ -215,7 +_,7 @@
-                                     l1++;
+-                MobCategory category = entity.getType().getCategory();
++                MobCategory category = entity.getClassification(true);
+                 if (category != MobCategory.MISC) {
+                     BlockPos pos = entity.blockPosition();
+                     chunkGetter.query(ChunkPos.asLong(pos), chunk -> {
+@@ -205,7 +_,7 @@
+                                     groupSize++;
                                      level.addFreshEntityWithPassengers(mob);
                                      spawnCallback.run(mob, chunk);
--                                    if (j >= mob.getMaxSpawnClusterSize()) {
-+                                    if (j >= net.neoforged.neoforge.event.EventHooks.getMaxSpawnClusterSize(mob)) {
+-                                    if (clusterSize >= mob.getMaxSpawnClusterSize()) {
++                                    if (clusterSize >= net.neoforged.neoforge.event.EventHooks.getMaxSpawnClusterSize(mob)) {
                                          return;
                                      }
  
-@@ -290,7 +_,7 @@
+@@ -282,7 +_,7 @@
          return nearestPlayerDistanceSqr > mob.getType().getCategory().getDespawnDistance() * mob.getType().getCategory().getDespawnDistance()
                  && mob.removeWhenFarAway(nearestPlayerDistanceSqr)
              ? false
@@ -27,9 +27,9 @@
      }
  
      private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
-@@ -321,9 +_,14 @@
-         BlockPos pos,
-         @Nullable Holder<Biome> biome
+@@ -308,9 +_,14 @@
+     private static WeightedList<MobSpawnSettings.SpawnerData> mobsAt(
+         ServerLevel level, StructureManager structureManager, ChunkGenerator generator, MobCategory mobCategory, BlockPos pos, @Nullable Holder<Biome> biome
      ) {
 -        return isInNetherFortressBounds(pos, level, mobCategory, structureManager)
 -            ? NetherFortressStructure.FORTRESS_ENEMIES
@@ -45,13 +45,13 @@
      }
  
      public static boolean isInNetherFortressBounds(BlockPos pos, ServerLevel level, MobCategory category, StructureManager structureManager) {
-@@ -410,8 +_,7 @@
+@@ -395,8 +_,7 @@
  
-                                 entity.snapTo(d0, blockpos.getY(), d1, random.nextFloat() * 360.0F, 0.0F);
+                                 entity.snapTo(fx, pos.getY(), fz, random.nextFloat() * 360.0F, 0.0F);
                                  if (entity instanceof Mob mob
 -                                    && mob.checkSpawnRules(level, EntitySpawnReason.CHUNK_GENERATION)
 -                                    && mob.checkSpawnObstruction(level)) {
 +                                    && net.neoforged.neoforge.event.EventHooks.checkSpawnPosition(mob, level, EntitySpawnReason.CHUNK_GENERATION)) {
-                                     spawngroupdata = mob.finalizeSpawn(
-                                         level, level.getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.CHUNK_GENERATION, spawngroupdata
+                                     groupSpawnData = mob.finalizeSpawn(
+                                         level, level.getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.CHUNK_GENERATION, groupSpawnData
                                      );

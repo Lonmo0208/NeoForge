@@ -1,7 +1,7 @@
 --- a/net/minecraft/world/item/enchantment/Enchantment.java
 +++ b/net/minecraft/world/item/enchantment/Enchantment.java
-@@ -124,6 +_,10 @@
-         return map;
+@@ -121,6 +_,10 @@
+         return itemStacks;
      }
  
 +    /**
@@ -11,7 +11,7 @@
      public HolderSet<Item> getSupportedItems() {
          return this.definition.supportedItems();
      }
-@@ -132,10 +_,20 @@
+@@ -129,10 +_,20 @@
          return this.definition.slots().stream().anyMatch(group -> group.test(slot));
      }
  
@@ -32,8 +32,8 @@
      public boolean isSupportedItem(ItemStack item) {
          return item.is(this.definition.supportedItems);
      }
-@@ -188,6 +_,10 @@
-         return mutablecomponent;
+@@ -185,6 +_,10 @@
+         return result;
      }
  
 +    /**
@@ -43,7 +43,7 @@
      public boolean canEnchant(ItemStack itemStack) {
          return this.definition.supportedItems().contains(itemStack.getItemHolder());
      }
-@@ -519,12 +_,26 @@
+@@ -518,12 +_,26 @@
          return new Enchantment.Builder(definition);
      }
  
@@ -70,7 +70,7 @@
          public Builder(Enchantment.EnchantmentDefinition definition) {
              this.definition = definition;
          }
-@@ -577,6 +_,16 @@
+@@ -576,6 +_,16 @@
              return this;
          }
  
@@ -86,15 +86,14 @@
 +
          private <E> List<E> getEffectsList(DataComponentType<List<E>> type) {
              return (List<E>)this.effectLists.computeIfAbsent(type, k -> {
-                 ArrayList<E> arraylist = new ArrayList<>();
-@@ -587,7 +_,9 @@
+                 ArrayList<E> newList = new ArrayList<>();
+@@ -586,7 +_,8 @@
  
          public Enchantment build(Identifier descriptionKey) {
              return new Enchantment(
--                Component.translatable(Util.makeDescriptionId("enchantment", descriptionKey)), this.definition, this.exclusiveSet, this.effectMapBuilder.build()
+-                Component.translatable(Util.makeDescriptionId("enchantment", descriptionKey)),
 +                // Neo: permit custom name components instead of a single hardcoded translatable component.
 +                this.nameFactory.apply(Component.translatable(Util.makeDescriptionId("enchantment", descriptionKey))),
-+                this.definition, this.exclusiveSet, this.effectMapBuilder.build()
-             );
-         }
-     }
+                 this.definition,
+                 this.exclusiveSet,
+                 this.effectMapBuilder.build()

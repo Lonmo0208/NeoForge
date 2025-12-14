@@ -1,14 +1,14 @@
 --- a/net/minecraft/world/entity/animal/wolf/Wolf.java
 +++ b/net/minecraft/world/entity/animal/wolf/Wolf.java
 @@ -456,10 +_,11 @@
-         Item item = itemstack.getItem();
+         Item item = itemStack.getItem();
          if (this.isTame()) {
-             if (this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
--                this.usePlayerItem(player, hand, itemstack);
-                 FoodProperties foodproperties = itemstack.get(DataComponents.FOOD);
-                 float f = foodproperties != null ? foodproperties.nutrition() : 1.0F;
-                 this.heal(2.0F * f);
-+                this.usePlayerItem(player, hand, itemstack);
+             if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
+-                this.usePlayerItem(player, hand, itemStack);
+                 FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
+                 float nutrition = foodProperties != null ? foodProperties.nutrition() : 1.0F;
+                 this.heal(2.0F * nutrition);
++                this.usePlayerItem(player, hand, itemStack);
 +                this.gameEvent(GameEvent.EAT); // Neo: add EAT game event
                  return InteractionResult.SUCCESS;
              }

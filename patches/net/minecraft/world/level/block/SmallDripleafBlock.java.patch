@@ -1,11 +1,11 @@
 --- a/net/minecraft/world/level/block/SmallDripleafBlock.java
 +++ b/net/minecraft/world/level/block/SmallDripleafBlock.java
-@@ -88,6 +_,8 @@
+@@ -86,6 +_,8 @@
          } else {
-             BlockPos blockpos = pos.below();
-             BlockState blockstate = level.getBlockState(blockpos);
-+            var soilDecision = blockstate.canSustainPlant(level, blockpos, Direction.UP, state);
+             BlockPos belowPos = pos.below();
+             BlockState belowState = level.getBlockState(belowPos);
++            var soilDecision = belowState.canSustainPlant(level, belowPos, Direction.UP, state);
 +            if (!soilDecision.isDefault()) return soilDecision.isTrue();
-             return this.mayPlaceOn(blockstate, level, blockpos);
+             return this.mayPlaceOn(belowState, level, belowPos);
          }
      }

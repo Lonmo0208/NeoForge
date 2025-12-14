@@ -17,12 +17,12 @@
 +    public <E extends BlockEntity, S extends BlockEntityRenderState> S tryExtractRenderState(
 +            E blockEntity, float partialTicks, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress, net.minecraft.client.renderer.culling.@Nullable Frustum frustum
 +    ) {
-         BlockEntityRenderer<E, S> blockentityrenderer = this.getRenderer(blockEntity);
-         if (blockentityrenderer == null) {
+         BlockEntityRenderer<E, S> renderer = this.getRenderer(blockEntity);
+         if (renderer == null) {
              return null;
          } else if (!blockEntity.hasLevel() || !blockEntity.getType().isValid(blockEntity.getBlockState())) {
 +            return null;
-+        } else if (frustum != null && !frustum.isVisible(blockentityrenderer.getRenderBoundingBox(blockEntity))) {
++        } else if (frustum != null && !frustum.isVisible(renderer.getRenderBoundingBox(blockEntity))) {
              return null;
-         } else if (!blockentityrenderer.shouldRender(blockEntity, this.cameraPos)) {
+         } else if (!renderer.shouldRender(blockEntity, this.cameraPos)) {
              return null;

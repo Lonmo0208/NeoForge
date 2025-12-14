@@ -6,9 +6,9 @@
      private boolean centered;
 +    private int page;
  
-     public AdvancementTab(
-         Minecraft minecraft, AdvancementsScreen screen, AdvancementTabType type, int index, AdvancementNode rootNode, DisplayInfo display
-@@ -56,6 +_,15 @@
+     public AdvancementTab(Minecraft minecraft, AdvancementsScreen screen, AdvancementTabType type, int index, AdvancementNode rootNode, DisplayInfo display) {
+         this.minecraft = minecraft;
+@@ -54,6 +_,15 @@
          this.addWidget(this.root, rootNode.holder());
      }
  
@@ -24,14 +24,14 @@
      public AdvancementTabType getType() {
          return this.type;
      }
-@@ -150,8 +_,8 @@
+@@ -148,8 +_,8 @@
              return null;
          } else {
-             for (AdvancementTabType advancementtabtype : AdvancementTabType.values()) {
--                if (index < advancementtabtype.getMax()) {
--                    return new AdvancementTab(minecraft, screen, advancementtabtype, index, root, optional.get());
-+                if ((index % AdvancementTabType.MAX_TABS) < advancementtabtype.getMax()) {
-+                    return new AdvancementTab(minecraft, screen, advancementtabtype, index % AdvancementTabType.MAX_TABS, index / AdvancementTabType.MAX_TABS, root, optional.get());
+             for (AdvancementTabType type : AdvancementTabType.values()) {
+-                if (index < type.getMax()) {
+-                    return new AdvancementTab(minecraft, screen, type, index, root, display.get());
++                if ((index % AdvancementTabType.MAX_TABS) < type.getMax()) {
++                    return new AdvancementTab(minecraft, screen, type, index % AdvancementTabType.MAX_TABS, index / AdvancementTabType.MAX_TABS, root, display.get());
                  }
  
-                 index -= advancementtabtype.getMax();
+                 index -= type.getMax();

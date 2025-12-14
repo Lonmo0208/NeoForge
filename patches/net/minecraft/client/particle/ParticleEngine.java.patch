@@ -18,16 +18,16 @@
      }
  
      public void createTrackingEmitter(Entity entity, ParticleOptions particle) {
-@@ -65,7 +_,7 @@
-     ) {
-         ParticleProvider<T> particleprovider = (ParticleProvider<T>)this.resourceManager
-             .getProviders()
--            .get(BuiltInRegistries.PARTICLE_TYPE.getId(options.getType()));
-+            .get(BuiltInRegistries.PARTICLE_TYPE.getKey(options.getType()));
-         return particleprovider == null
-             ? null
-             : particleprovider.createParticle(options, this.level, x, y, z, xa, ya, za, this.random);
-@@ -115,6 +_,8 @@
+@@ -59,7 +_,7 @@
+     }
+ 
+     private <T extends ParticleOptions> @Nullable Particle makeParticle(T options, double x, double y, double z, double xa, double ya, double za) {
+-        ParticleProvider<T> provider = (ParticleProvider<T>)this.resourceManager.getProviders().get(BuiltInRegistries.PARTICLE_TYPE.getId(options.getType()));
++        ParticleProvider<T> provider = (ParticleProvider<T>)this.resourceManager.getProviders().get(BuiltInRegistries.PARTICLE_TYPE.getKey(options.getType()));
+         return provider == null ? null : provider.createParticle(options, this.level, x, y, z, xa, ya, za, this.random);
+     }
+ 
+@@ -107,6 +_,8 @@
              return new ItemPickupParticleGroup(this);
          } else if (type == ParticleRenderType.ELDER_GUARDIANS) {
              return new ElderGuardianParticleGroup(this);
@@ -36,12 +36,12 @@
          } else {
              return (ParticleGroup<?>)(type == ParticleRenderType.NO_RENDER ? new NoRenderParticleGroup(this) : new QuadParticleGroup(this, type));
          }
-@@ -125,7 +_,7 @@
+@@ -117,7 +_,7 @@
      }
  
      public void extract(ParticlesRenderState particlesRenderState, Frustum frustum, Camera camera, float partialTickTime) {
--        for (ParticleRenderType particlerendertype : RENDER_ORDER) {
-+        for (ParticleRenderType particlerendertype : this.particleRenderOrder) {
-             ParticleGroup<?> particlegroup = this.particles.get(particlerendertype);
-             if (particlegroup != null && !particlegroup.isEmpty()) {
-                 particlesRenderState.add(particlegroup.extractRenderState(frustum, camera, partialTickTime));
+-        for (ParticleRenderType particleType : RENDER_ORDER) {
++        for (ParticleRenderType particleType : this.particleRenderOrder) {
+             ParticleGroup<?> particles = this.particles.get(particleType);
+             if (particles != null && !particles.isEmpty()) {
+                 particlesRenderState.add(particles.extractRenderState(frustum, camera, partialTickTime));

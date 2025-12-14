@@ -22,16 +22,16 @@
      }
  
      @Override
-@@ -153,7 +_,7 @@
+@@ -154,7 +_,7 @@
          );
          this.connection
              .setupInboundProtocol(
--                GameProtocols.CLIENTBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registryaccess$frozen)),
-+                GameProtocols.CLIENTBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registryaccess$frozen, this.connectionType)),
+-                GameProtocols.CLIENTBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registries)),
++                GameProtocols.CLIENTBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registries, this.connectionType)),
                  new ClientPacketListener(
                      this.minecraft,
                      this.connection,
-@@ -171,14 +_,22 @@
+@@ -172,13 +_,21 @@
                          this.customReportDetails,
                          this.serverLinks(),
                          this.seenPlayers,
@@ -41,7 +41,7 @@
                      )
                  )
              );
-+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.TagsUpdatedEvent(registryaccess$frozen, true, this.connection.isMemoryConnection()));
++        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.TagsUpdatedEvent(registries, true, this.connection.isMemoryConnection()));
 +        // Packets can only be sent after the outbound protocol is set up again
 +        if (!this.initializedConnection && this.connectionType.isOther()) {
 +            // Neo: Fallback detection for servers with a delayed brand payload (BungeeCord)
@@ -50,13 +50,12 @@
 +        net.neoforged.neoforge.network.registration.NetworkRegistry.onConfigurationFinished(this);
          this.connection.send(ServerboundFinishConfigurationPacket.INSTANCE);
          this.connection
-             .setupOutboundProtocol(
--                GameProtocols.SERVERBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registryaccess$frozen), new GameProtocols.Context() {
-+                GameProtocols.SERVERBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registryaccess$frozen, this.connectionType), new GameProtocols.Context() {
-                     @Override
-                     public boolean hasInfiniteMaterials() {
-                         return true;
-@@ -196,6 +_,53 @@
+-            .setupOutboundProtocol(GameProtocols.SERVERBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registries), new GameProtocols.Context() {
++            .setupOutboundProtocol(GameProtocols.SERVERBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(registries, connectionType), new GameProtocols.Context() {
+                 @Override
+                 public boolean hasInfiniteMaterials() {
+                     return true;
+@@ -195,6 +_,53 @@
      public void onDisconnect(DisconnectionDetails reason) {
          super.onDisconnect(reason);
          this.minecraft.clearDownloadedResourcePacks();

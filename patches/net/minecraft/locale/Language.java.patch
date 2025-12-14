@@ -1,27 +1,27 @@
 --- a/net/minecraft/locale/Language.java
 +++ b/net/minecraft/locale/Language.java
-@@ -36,9 +_,11 @@
-         DeprecatedTranslationsInfo deprecatedtranslationsinfo = DeprecatedTranslationsInfo.loadFromDefaultResource();
-         Map<String, String> map = new HashMap<>();
-         BiConsumer<String, String> biconsumer = map::put;
--        parseTranslations(biconsumer, "/assets/minecraft/lang/en_us.json");
+@@ -35,9 +_,11 @@
+         DeprecatedTranslationsInfo deprecatedInfo = DeprecatedTranslationsInfo.loadFromDefaultResource();
+         Map<String, String> loadedData = new HashMap<>();
+         BiConsumer<String, String> output = loadedData::put;
+-        parseTranslations(output, "/assets/minecraft/lang/en_us.json");
 +        Map<String, net.minecraft.network.chat.Component> componentMap = new java.util.HashMap<>();
-+        parseTranslations(biconsumer, componentMap::put, "/assets/minecraft/lang/en_us.json");
-         deprecatedtranslationsinfo.applyToMap(map);
--        final Map<String, String> map1 = Map.copyOf(map);
-+        final Map<String, String> map1 = map; // Neo keep the map mutable to make LanguageHook work
-+        net.neoforged.neoforge.server.LanguageHook.captureLanguageMap(map, componentMap);
++        parseTranslations(output, componentMap::put, "/assets/minecraft/lang/en_us.json");
+         deprecatedInfo.applyToMap(loadedData);
+-        final Map<String, String> storage = Map.copyOf(loadedData);
++        final Map<String, String> storage = loadedData; // Neo keep the map mutable to make LanguageHook work
++        net.neoforged.neoforge.server.LanguageHook.captureLanguageMap(loadedData, componentMap);
          return new Language() {
              @Override
              public String getOrDefault(String elementId, String defaultValue) {
-@@ -65,21 +_,51 @@
+@@ -62,21 +_,51 @@
                      )
                      .isPresent();
              }
 +
 +            @Override
 +            public Map<String, String> getLanguageData() {
-+                return map;
++                return loadedData;
 +            }
 +
 +            @Override
@@ -37,11 +37,11 @@
 +    }
 +
 +    private static void parseTranslations(BiConsumer<String, String> output, BiConsumer<String, net.minecraft.network.chat.Component> componentConsumer, String path) {
-         try (InputStream inputstream = Language.class.getResourceAsStream(path)) {
--            loadFromJson(inputstream, output);
-+            loadFromJson(inputstream, output, componentConsumer);
-         } catch (JsonParseException | IOException ioexception) {
-             LOGGER.error("Couldn't read strings from {}", path, ioexception);
+         try (InputStream stream = Language.class.getResourceAsStream(path)) {
+-            loadFromJson(stream, output);
++            loadFromJson(stream, output, componentConsumer);
+         } catch (JsonParseException | IOException var7) {
+             LOGGER.error("Couldn't read strings from {}", path, var7);
          }
      }
  
@@ -50,9 +50,9 @@
 +    }
 +
 +    public static void loadFromJson(InputStream stream, BiConsumer<String, String> output, BiConsumer<String, net.minecraft.network.chat.Component> componentConsumer) {
-         JsonObject jsonobject = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), JsonObject.class);
+         JsonObject entries = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), JsonObject.class);
  
-         for (Entry<String, JsonElement> entry : jsonobject.entrySet()) {
+         for (Entry<String, JsonElement> entry : entries.entrySet()) {
 +            if (entry.getValue().isJsonArray()) {
 +                var component = net.minecraft.network.chat.ComponentSerialization.CODEC
 +                    .parse(com.mojang.serialization.JsonOps.INSTANCE, entry.getValue())
@@ -64,10 +64,10 @@
 +                continue;
 +            }
 +
-             String s = UNSUPPORTED_FORMAT_PATTERN.matcher(GsonHelper.convertToString(entry.getValue(), entry.getKey())).replaceAll("%$1s");
-             output.accept(entry.getKey(), s);
+             String text = UNSUPPORTED_FORMAT_PATTERN.matcher(GsonHelper.convertToString(entry.getValue(), entry.getKey())).replaceAll("%$1s");
+             output.accept(entry.getKey(), text);
          }
-@@ -91,6 +_,13 @@
+@@ -88,6 +_,13 @@
  
      public static void inject(Language language) {
          instance = language;

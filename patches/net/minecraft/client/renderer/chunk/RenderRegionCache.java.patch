@@ -4,9 +4,9 @@
              }
          }
  
--        return new RenderSectionRegion(level, l, i1, j1, asectioncopy);
-+        var modelDataManager = level.getModelDataManager().snapshotSectionRegion(l, i1, j1, k1, l1, i2);
-+        return new RenderSectionRegion(level, l, i1, j1, asectioncopy, modelDataManager);
+-        return new RenderSectionRegion(level, minSectionX, minSectionY, minSectionZ, regionSections);
++        var modelDataManager = level.getModelDataManager().snapshotSectionRegion(minSectionX, minSectionY, minSectionZ, maxSectionX, maxSectionY, maxSectionZ);
++        return new RenderSectionRegion(level, minSectionX, minSectionY, minSectionZ, regionSections, modelDataManager);
      }
  
      private SectionCopy getSectionDataCopy(Level level, int sectionX, int sectionY, int sectionZ) {

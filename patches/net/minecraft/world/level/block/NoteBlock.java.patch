@@ -18,6 +18,6 @@
 +        net.neoforged.neoforge.event.level.NoteBlockEvent.Play e = new net.neoforged.neoforge.event.level.NoteBlockEvent.Play(level, pos, state, state.getValue(NOTE), state.getValue(INSTRUMENT));
 +        if (net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(e).isCanceled()) return false;
 +        state = state.setValue(NOTE, e.getVanillaNoteId()).setValue(INSTRUMENT, e.getInstrument());
-         NoteBlockInstrument noteblockinstrument = state.getValue(INSTRUMENT);
-         float f;
-         if (noteblockinstrument.isTunable()) {
+         NoteBlockInstrument instrument = state.getValue(INSTRUMENT);
+         float pitch;
+         if (instrument.isTunable()) {

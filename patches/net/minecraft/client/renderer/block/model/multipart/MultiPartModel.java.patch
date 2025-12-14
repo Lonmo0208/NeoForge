@@ -13,12 +13,12 @@
          }
 @@ -46,9 +_,36 @@
  
-         for (BlockStateModel blockstatemodel : this.models) {
-             random.setSeed(i);
--            blockstatemodel.collectParts(random, output);
+         for (BlockStateModel model : this.models) {
+             random.setSeed(seed);
+-            model.collectParts(random, output);
 -        }
 -    }
-+            blockstatemodel.collectParts(level, pos, state, random, output);
++            model.collectParts(level, pos, state, random, output);
 +        }
 +    }
 +
@@ -52,10 +52,10 @@
      @OnlyIn(Dist.CLIENT)
      public record Selector<T>(Predicate<BlockState> condition, T model) {
 @@ -85,7 +_,6 @@
-                     bitset.set(i);
+                     selectedModels.set(i);
                  }
              }
 -
-             return this.subsets.computeIfAbsent(bitset, selected -> {
-                 Builder<BlockStateModel> builder = ImmutableList.builder();
+             return this.subsets.computeIfAbsent(selectedModels, selected -> {
+                 Builder<BlockStateModel> result = ImmutableList.builder();
  

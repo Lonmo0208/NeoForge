@@ -1,7 +1,7 @@
 --- a/net/minecraft/core/DefaultedMappedRegistry.java
 +++ b/net/minecraft/core/DefaultedMappedRegistry.java
 @@ -38,6 +_,12 @@
-         return identifier == null ? this.defaultKey : identifier;
+         return k == null ? this.defaultKey : k;
      }
  
 +    @Nullable

@@ -20,31 +20,31 @@
          this.validateWrite(key);
          Objects.requireNonNull(key);
          Objects.requireNonNull(value);
-+        int i = id;
-+        if (i > this.getMaxId())
-+            throw new IllegalStateException(String.format(java.util.Locale.ENGLISH, "Invalid id %d - maximum id range of %d exceeded.", i, this.getMaxId()));
++        int newId = id;
++        if (newId > this.getMaxId())
++            throw new IllegalStateException(String.format(java.util.Locale.ENGLISH, "Invalid id %d - maximum id range of %d exceeded.", newId, this.getMaxId()));
 +
          if (this.byLocation.containsKey(key.identifier())) {
              throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("Adding duplicate key '" + key + "' to registry"));
          } else if (this.byValue.containsKey(value)) {
 @@ -102,16 +_,18 @@
-                 reference.bindKey(key);
+                 holder.bindKey(key);
              } else {
-                 reference = this.byKey.computeIfAbsent(key, k -> Holder.Reference.createStandAlone(this, (ResourceKey<T>)k));
+                 holder = this.byKey.computeIfAbsent(key, k -> Holder.Reference.createStandAlone(this, (ResourceKey<T>)k));
 +                // Forge: Bind the value immediately so it can be queried while the registry is not frozen
-+                reference.bindValue(value);
++                holder.bindValue(value);
              }
  
-             this.byKey.put(key, reference);
-             this.byLocation.put(key.identifier(), reference);
-             this.byValue.put(value, reference);
--            int i = this.byId.size();
-             this.byId.add(reference);
-             this.toId.put(value, i);
+             this.byKey.put(key, holder);
+             this.byLocation.put(key.identifier(), holder);
+             this.byValue.put(value, holder);
+-            int newId = this.byId.size();
+             this.byId.add(holder);
+             this.toId.put(value, newId);
              this.registrationInfos.put(key, registrationInfo);
              this.registryLifecycle = this.registryLifecycle.add(registrationInfo.lifecycle());
-+            this.addCallbacks.forEach(addCallback -> addCallback.onAdd(this, i, key, value));
-             return reference;
++            this.addCallbacks.forEach(addCallback -> addCallback.onAdd(this, newId, key, value));
+             return holder;
          }
      }
 @@ -134,7 +_,7 @@
@@ -74,7 +74,7 @@
 @@ -169,12 +_,12 @@
      }
  
-     Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> key) {
+     private Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> key) {
 -        return this.byKey.computeIfAbsent(key, id -> {
 +        return this.byKey.computeIfAbsent(resolve(key), p_258169_ -> {
              if (this.unregisteredIntrusiveHolders != null) {
@@ -91,9 +91,9 @@
  
      @Override
      public @Nullable T getValue(@Nullable Identifier key) {
--        Holder.Reference<T> reference = this.byLocation.get(key);
-+        Holder.Reference<T> reference = this.byLocation.get(key != null ? resolve(key) : null);
-         return getValueFromNullable(reference);
+-        Holder.Reference<T> result = this.byLocation.get(key);
++        Holder.Reference<T> result = this.byLocation.get(key != null ? resolve(key) : null);
+         return getValueFromNullable(result);
      }
  
 @@ -262,13 +_,23 @@
@@ -118,7 +118,7 @@
          } else {
              this.frozen = true;
 -            this.byValue.forEach((value, holder) -> holder.bindValue((T)value));
-             List<Identifier> list = this.byKey
+             List<Identifier> unboundEntries = this.byKey
                  .entrySet()
                  .stream()
 @@ -284,11 +_,15 @@
@@ -137,7 +137,7 @@
 +                    //throw new IllegalStateException("Tags already present before freezing");
 +                    return this;
                  } else {
-                     List<Identifier> list1 = this.frozenTags
+                     List<Identifier> unboundTags = this.frozenTags
                          .entrySet()
 @@ -443,6 +_,55 @@
                  }
@@ -194,4 +194,4 @@
 +        return byValue.containsKey(value);
      }
  
-     interface TagSet<T> {
+     private interface TagSet<T> {

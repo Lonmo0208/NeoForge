@@ -1,27 +1,27 @@
 --- a/net/minecraft/client/gui/screens/debug/DebugOptionsScreen.java
 +++ b/net/minecraft/client/gui/screens/debug/DebugOptionsScreen.java
 @@ -184,6 +_,10 @@
-             DebugScreenEntry debugscreenentry = DebugScreenEntries.getEntry(location);
-             this.isAllowed = debugscreenentry != null && debugscreenentry.isAllowed(DebugOptionsScreen.this.minecraft.showOnlyReducedInfo());
-             String s = location.getPath();
+             DebugScreenEntry entry = DebugScreenEntries.getEntry(location);
+             this.isAllowed = entry != null && entry.isAllowed(DebugOptionsScreen.this.minecraft.showOnlyReducedInfo());
+             String name = location.getPath();
 +            // Neo: Display the full RL for modded entries
-+            if(!location.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
-+                s = location.toString();
++            if (!location.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
++                name = location.toString();
 +            }
              if (this.isAllowed) {
-                 this.name = s;
+                 this.name = name;
              } else {
 @@ -244,8 +_,11 @@
          public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float a) {
-             int i = this.getContentX();
-             int j = this.getContentY();
--            graphics.drawString(DebugOptionsScreen.this.minecraft.font, this.name, i, j + 5, this.isAllowed ? -1 : -8355712);
+             int x = this.getContentX();
+             int y = this.getContentY();
+-            graphics.drawString(DebugOptionsScreen.this.minecraft.font, this.name, x, y + 5, this.isAllowed ? -1 : -8355712);
 +            // Neo: Moved 'k' up for 'maxX' calculation for scrolling string render
-             int k = i + this.getContentWidth() - this.never.getWidth() - this.overlay.getWidth() - this.always.getWidth();
+             int buttonsStartX = x + this.getContentWidth() - this.never.getWidth() - this.overlay.getWidth() - this.always.getWidth();
 +            // Neo: Scroll entry names that go out of bounds
 +
-+            graphics.drawScrollingString(graphics.textRenderer(), DebugOptionsScreen.this.minecraft.font, Component.literal(this.name).withColor(this.isAllowed ? -1 : -8355712), i, k, j + 5);
-             if (!this.isAllowed && hovered && mouseX < k) {
++            graphics.drawScrollingString(graphics.textRenderer(), DebugOptionsScreen.this.minecraft.font, Component.literal(this.name).withColor(this.isAllowed ? -1 : -8355712), x, buttonsStartX, y + 5);
+             if (!this.isAllowed && hovered && mouseX < buttonsStartX) {
                  graphics.setTooltipForNextFrame(DebugOptionsScreen.NOT_ALLOWED_TOOLTIP, mouseX, mouseY);
              }
 @@ -308,6 +_,9 @@
@@ -31,9 +31,9 @@
 +            // Neo: Custom entry appending logic to better handle searching, categories and sorting
 +            net.neoforged.neoforge.client.ClientHooks.updateDebugScreenEntriesForSearch(value, category -> addEntry(new CategoryEntry(category.label())), id -> addEntry(new OptionEntry(id)));
 +            if(false){
-             List<Map.Entry<Identifier, DebugScreenEntry>> list = new ArrayList<>(DebugScreenEntries.allEntries().entrySet());
-             list.sort(COMPARATOR);
-             DebugEntryCategory debugentrycategory = null;
+             List<Map.Entry<Identifier, DebugScreenEntry>> all = new ArrayList<>(DebugScreenEntries.allEntries().entrySet());
+             all.sort(COMPARATOR);
+             DebugEntryCategory currentCategory = null;
 @@ -322,6 +_,7 @@
  
                      this.addEntry(DebugOptionsScreen.this.new OptionEntry(entry.getKey()));

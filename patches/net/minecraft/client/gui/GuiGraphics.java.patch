@@ -2,13 +2,13 @@
 +++ b/net/minecraft/client/gui/GuiGraphics.java
 @@ -100,6 +_,7 @@
      private @Nullable Runnable deferredTooltip;
-     @Nullable Style hoveredTextStyle;
-     @Nullable Style clickableTextStyle;
+     private @Nullable Style hoveredTextStyle;
+     private @Nullable Style clickableTextStyle;
 +    private ItemStack tooltipStack = ItemStack.EMPTY;
  
      private GuiGraphics(Minecraft minecraft, Matrix3x2fStack pose, GuiRenderState guiRenderState, int mouseX, int mouseY) {
          this.minecraft = minecraft;
-@@ -971,6 +_,8 @@
+@@ -877,6 +_,8 @@
              this.renderItemCooldown(itemStack, x, y);
              this.renderItemCount(font, itemStack, x, y, countText);
              this.pose.popMatrix();
@@ -17,17 +17,13 @@
          }
      }
  
-@@ -983,6 +_,7 @@
+@@ -889,9 +_,21 @@
      }
  
      public void setTooltipForNextFrame(Font font, ItemStack itemStack, int xo, int yo) {
 +        this.tooltipStack = itemStack;
          this.setTooltipForNextFrame(
-             font,
-             Screen.getTooltipFromItem(this.minecraft, itemStack),
-@@ -991,6 +_,17 @@
-             yo,
-             itemStack.get(DataComponents.TOOLTIP_STYLE)
+             font, Screen.getTooltipFromItem(this.minecraft, itemStack), itemStack.getTooltipImage(), xo, yo, itemStack.get(DataComponents.TOOLTIP_STYLE)
          );
 +        this.tooltipStack = ItemStack.EMPTY;
 +    }
@@ -43,20 +39,19 @@
      }
  
      public void setTooltipForNextFrame(Font font, List<Component> texts, Optional<TooltipComponent> optionalImage, int xo, int yo) {
-@@ -1000,11 +_,7 @@
-     public void setTooltipForNextFrame(
-         Font font, List<Component> texts, Optional<TooltipComponent> optionalImage, int xo, int yo, @Nullable Identifier style
-     ) {
--        List<ClientTooltipComponent> list = texts.stream()
+@@ -899,10 +_,7 @@
+     }
+ 
+     public void setTooltipForNextFrame(Font font, List<Component> texts, Optional<TooltipComponent> optionalImage, int xo, int yo, @Nullable Identifier style) {
+-        List<ClientTooltipComponent> components = texts.stream()
 -            .map(Component::getVisualOrderText)
 -            .map(ClientTooltipComponent::create)
 -            .collect(Util.toMutableList());
--        optionalImage.ifPresent(image -> list.add(list.isEmpty() ? 0 : 1, ClientTooltipComponent.create(image)));
-+        List<ClientTooltipComponent> list = net.neoforged.neoforge.client.ClientHooks.gatherTooltipComponents(this.tooltipStack, texts, optionalImage, xo, guiWidth(), guiHeight(), font);
-         this.setTooltipForNextFrameInternal(font, list, xo, yo, DefaultTooltipPositioner.INSTANCE, style, false);
++        List<ClientTooltipComponent> components = net.neoforged.neoforge.client.ClientHooks.gatherTooltipComponents(this.tooltipStack, texts, optionalImage, xo, guiWidth(), guiHeight(), font);
+         optionalImage.ifPresent(image -> components.add(components.isEmpty() ? 0 : 1, ClientTooltipComponent.create(image)));
+         this.setTooltipForNextFrameInternal(font, components, xo, yo, DefaultTooltipPositioner.INSTANCE, style, false);
      }
- 
-@@ -1017,13 +_,14 @@
+@@ -916,13 +_,14 @@
      }
  
      public void setComponentTooltipForNextFrame(Font font, List<Component> lines, int xo, int yo) {
@@ -73,7 +68,7 @@
              xo,
              yo,
              DefaultTooltipPositioner.INSTANCE,
-@@ -1032,6 +_,28 @@
+@@ -931,6 +_,28 @@
          );
      }
  
@@ -102,7 +97,7 @@
      public void setTooltipForNextFrame(Font font, List<? extends FormattedCharSequence> lines, int xo, int yo) {
          this.setTooltipForNextFrame(font, lines, xo, yo, null);
      }
-@@ -1069,7 +_,8 @@
+@@ -954,12 +_,24 @@
      ) {
          if (!lines.isEmpty()) {
              if (this.deferredTooltip == null || replaceExisting) {
@@ -112,22 +107,12 @@
              }
          }
      }
-@@ -1077,6 +_,25 @@
-     public void renderTooltip(
-         Font font, List<ClientTooltipComponent> lines, int xo, int yo, ClientTooltipPositioner positioner, @Nullable Identifier style
-     ) {
-+        this.renderTooltip(font, lines, xo, yo, positioner, style, ItemStack.EMPTY);
+ 
+     public void renderTooltip(Font font, List<ClientTooltipComponent> lines, int xo, int yo, ClientTooltipPositioner positioner, @Nullable Identifier style) {
++        renderTooltip(font, lines, xo, yo, positioner, style, ItemStack.EMPTY);
 +    }
 +
-+    public void renderTooltip(
-+            Font font,
-+            List<ClientTooltipComponent> lines,
-+            int xo,
-+            int yo,
-+            ClientTooltipPositioner positioner,
-+            @Nullable Identifier style,
-+            ItemStack tooltipStack
-+    ) {
++    public void renderTooltip(Font font, List<ClientTooltipComponent> lines, int xo, int yo, ClientTooltipPositioner positioner, @Nullable Identifier style, ItemStack tooltipStack) {
 +        var preEvent = net.neoforged.neoforge.client.ClientHooks.onRenderTooltipPre(tooltipStack, this, xo, yo, guiWidth(), guiHeight(), lines, font, positioner);
 +        if (preEvent.isCanceled()) return;
 +
@@ -135,23 +120,23 @@
 +        xo = preEvent.getX();
 +        yo = preEvent.getY();
 +
-         int i = 0;
-         int j = lines.size() == 1 ? -2 : 0;
+         int textWidth = 0;
+         int tempHeight = lines.size() == 1 ? -2 : 0;
  
-@@ -1095,7 +_,8 @@
-         int l = vector2ic.x();
-         int i1 = vector2ic.y();
+@@ -978,7 +_,8 @@
+         int x = positionedTooltip.x();
+         int y = positionedTooltip.y();
          this.pose.pushMatrix();
--        TooltipRenderUtil.renderTooltipBackground(this, l, i1, i, j, style);
-+        var textureEvent = net.neoforged.neoforge.client.ClientHooks.onRenderTooltipTexture(this.tooltipStack, this, l, i1, preEvent.getFont(), lines, style);
-+        TooltipRenderUtil.renderTooltipBackground(this, l, i1, i, j, textureEvent.getTexture());
-         int j1 = i1;
+-        TooltipRenderUtil.renderTooltipBackground(this, x, y, textWidth, tempHeight, style);
++        var textureEvent = net.neoforged.neoforge.client.ClientHooks.onRenderTooltipTexture(this.tooltipStack, this, x, y, preEvent.getFont(), lines, style);
++        TooltipRenderUtil.renderTooltipBackground(this, x, y, textWidth, tempHeight, textureEvent.getTexture());
+         int localY = y;
  
-         for (int k1 = 0; k1 < lines.size(); k1++) {
-@@ -1325,6 +_,31 @@
+         for (int i = 0; i < lines.size(); i++) {
+@@ -1169,6 +_,31 @@
+ 
      public void submitProfilerChartRenderState(List<ResultField> chartData, int x0, int y0, int x1, int y1) {
-         this.guiRenderState
-             .submitPicturesInPictureState(new GuiProfilerChartRenderState(chartData, x0, y0, x1, y1, this.scissorStack.peek()));
+         this.guiRenderState.submitPicturesInPictureState(new GuiProfilerChartRenderState(chartData, x0, y0, x1, y1, this.scissorStack.peek()));
 +    }
 +
 +    /**

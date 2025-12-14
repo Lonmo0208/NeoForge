@@ -5,6 +5,6 @@
              Bootstrap.bootStrap();
              Util.startTimerHackThread();
 +            net.neoforged.neoforge.server.loading.ServerModLoader.load(true); // Load mods before the level and packs are loaded
-             String s = optionset.valueOf(universe);
-             createOrResetDir(s);
-             onUniverseCreated.accept(s);
+             String universePath = options.valueOf(universe);
+             createOrResetDir(universePath);
+             onUniverseCreated.accept(universePath);

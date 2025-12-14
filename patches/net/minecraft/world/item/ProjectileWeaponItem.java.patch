@@ -43,28 +43,28 @@
      public static ItemStack getHeldProjectile(LivingEntity entity, Predicate<ItemStack> valid) {
          if (valid.test(entity.getItemInHand(InteractionHand.OFF_HAND))) {
              return entity.getItemInHand(InteractionHand.OFF_HAND);
-@@ -91,7 +_,7 @@
-             abstractarrow.setCritArrow(true);
+@@ -97,7 +_,7 @@
+             arrowx.setCritArrow(true);
          }
  
--        return abstractarrow;
-+        return customArrow(abstractarrow, projectile, weapon);
+-        return arrowx;
++        return customArrow(arrowx, projectile, weapon);
      }
  
      protected static List<ItemStack> draw(ItemStack weapon, ItemStack projectile, LivingEntity shooter) {
-@@ -114,7 +_,8 @@
+@@ -122,7 +_,8 @@
      }
  
      protected static ItemStack useAmmo(ItemStack weapon, ItemStack projectile, LivingEntity holder, boolean forceInfinite) {
--        int i = !forceInfinite && !holder.hasInfiniteMaterials() && holder.level() instanceof ServerLevel serverlevel
+-        int ammoToUse = !forceInfinite && !holder.hasInfiniteMaterials() && holder.level() instanceof ServerLevel serverLevel
 +        // Neo: Adjust this check to respect ArrowItem#isInfinite, bypassing processAmmoUse if true.
-+        int i = !forceInfinite && holder.level() instanceof ServerLevel serverlevel && !(holder.hasInfiniteMaterials() || (projectile.getItem() instanceof ArrowItem ai && ai.isInfinite(projectile, weapon, holder)))
-             ? EnchantmentHelper.processAmmoUse(serverlevel, weapon, projectile, 1)
++        int ammoToUse = !forceInfinite && holder.level() instanceof ServerLevel serverLevel && !(holder.hasInfiniteMaterials() || (projectile.getItem() instanceof ArrowItem ai && ai.isInfinite(projectile, weapon, holder)))
+             ? EnchantmentHelper.processAmmoUse(serverLevel, weapon, projectile, 1)
              : 0;
-         if (i > projectile.getCount()) {
-@@ -131,5 +_,20 @@
+         if (ammoToUse > projectile.getCount()) {
+@@ -139,5 +_,20 @@
  
-             return itemstack;
+             return used;
          }
 +    }
 +

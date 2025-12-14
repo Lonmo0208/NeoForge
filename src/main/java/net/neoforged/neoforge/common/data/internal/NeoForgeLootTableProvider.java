@@ -65,7 +65,7 @@ public final class NeoForgeLootTableProvider extends LootTableProvider {
     }
 
     @Override
-    protected void validate(WritableRegistry<LootTable> writableregistry, ValidationContext validationcontext, ProblemReporter.Collector problemreporter$collector) {
+    protected void validate(WritableRegistry<LootTable> tables, ValidationContext validationContext, ProblemReporter.Collector problems) {
         // Do not validate against all registered loot tables
     }
 

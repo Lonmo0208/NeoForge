@@ -28,9 +28,9 @@
      public void free(RenderTarget resource) {
 @@ -30,6 +_,6 @@
      public boolean canUsePhysicalResource(ResourceDescriptor<?> other) {
-         return !(other instanceof RenderTargetDescriptor rendertargetdescriptor)
+         return !(other instanceof RenderTargetDescriptor descriptor)
              ? false
--            : this.width == rendertargetdescriptor.width && this.height == rendertargetdescriptor.height && this.useDepth == rendertargetdescriptor.useDepth;
-+            : this.width == rendertargetdescriptor.width && this.height == rendertargetdescriptor.height && this.useDepth == rendertargetdescriptor.useDepth && this.useStencil == rendertargetdescriptor.useStencil;
+-            : this.width == descriptor.width && this.height == descriptor.height && this.useDepth == descriptor.useDepth;
++            : this.width == descriptor.width && this.height == descriptor.height && this.useDepth == descriptor.useDepth && this.useStencil == descriptor.useStencil;
      }
  }

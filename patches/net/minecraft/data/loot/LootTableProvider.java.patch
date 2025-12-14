@@ -1,51 +1,51 @@
 --- a/net/minecraft/data/loot/LootTableProvider.java
 +++ b/net/minecraft/data/loot/LootTableProvider.java
-@@ -61,7 +_,8 @@
+@@ -59,7 +_,8 @@
      private CompletableFuture<?> run(CachedOutput cache, HolderLookup.Provider registries) {
-         WritableRegistry<LootTable> writableregistry = new MappedRegistry<>(Registries.LOOT_TABLE, Lifecycle.experimental());
-         Map<RandomSupport.Seed128bit, Identifier> map = new Object2ObjectOpenHashMap<>();
+         WritableRegistry<LootTable> tables = new MappedRegistry<>(Registries.LOOT_TABLE, Lifecycle.experimental());
+         Map<RandomSupport.Seed128bit, Identifier> randomSequenceSeeds = new Object2ObjectOpenHashMap<>();
 -        this.subProviders.forEach(subProvider -> subProvider.provider().apply(registries).generate((id, lootTable) -> {
 +        Map<LootTable, List<net.neoforged.neoforge.common.conditions.ICondition>> conditionsPerTable = new java.util.IdentityHashMap<>();
 +        getTables().forEach(subProvider -> subProvider.provider().apply(registries).generate((id, lootTable) -> {
-             Identifier identifier = sequenceIdForLootTable(id);
-             Identifier identifier1 = map.put(RandomSequence.seedForKey(identifier), identifier);
-             if (identifier1 != null) {
-@@ -71,24 +_,18 @@
-             lootTable.setRandomSequence(identifier);
-             LootTable loottable = lootTable.setParamSet(subProvider.paramSet).build();
-             writableregistry.register(id, loottable, RegistrationInfo.BUILT_IN);
+             Identifier sequenceId = sequenceIdForLootTable(id);
+             Identifier previous = randomSequenceSeeds.put(RandomSequence.seedForKey(sequenceId), sequenceId);
+             if (previous != null) {
+@@ -69,24 +_,18 @@
+             lootTable.setRandomSequence(sequenceId);
+             LootTable table = lootTable.setParamSet(subProvider.paramSet).build();
+             tables.register(id, table, RegistrationInfo.BUILT_IN);
 +            var conditions = lootTable.buildConditions();
 +            if (!conditions.isEmpty()) {
-+                conditionsPerTable.put(loottable, conditions);
++                conditionsPerTable.put(table, conditions);
 +            }
          }));
-         writableregistry.freeze();
-         ProblemReporter.Collector problemreporter$collector = new ProblemReporter.Collector();
-         HolderGetter.Provider holdergetter$provider = new RegistryAccess.ImmutableRegistryAccess(List.of(writableregistry)).freeze();
-         ValidationContext validationcontext = new ValidationContext(problemreporter$collector, LootContextParamSets.ALL_PARAMS, holdergetter$provider);
+         tables.freeze();
+         ProblemReporter.Collector problems = new ProblemReporter.Collector();
+         HolderGetter.Provider validationProvider = new RegistryAccess.ImmutableRegistryAccess(List.of(tables)).freeze();
+         ValidationContext validationContext = new ValidationContext(problems, LootContextParamSets.ALL_PARAMS, validationProvider);
  
--        for (ResourceKey<LootTable> resourcekey : Sets.difference(this.requiredTables, writableregistry.registryKeySet())) {
--            problemreporter$collector.report(new LootTableProvider.MissingTableProblem(resourcekey));
+-        for (ResourceKey<LootTable> missingTable : Sets.difference(this.requiredTables, tables.registryKeySet())) {
+-            problems.report(new LootTableProvider.MissingTableProblem(missingTable));
 -        }
-+        validate(writableregistry, validationcontext, problemreporter$collector);
++        validate(tables, validationContext, problems);
  
--        writableregistry.listElements()
+-        tables.listElements()
 -            .forEach(
 -                tableHolder -> tableHolder.value()
 -                    .validate(
--                        validationcontext.setContextKeySet(tableHolder.value().getParamSet())
+-                        validationContext.setContextKeySet(tableHolder.value().getParamSet())
 -                            .enterElement(new ProblemReporter.RootElementPathElement(tableHolder.key()), tableHolder.key())
 -                    )
 -            );
-         if (!problemreporter$collector.isEmpty()) {
-             problemreporter$collector.forEach((id, problem) -> LOGGER.warn("Found validation problem in {}: {}", id, problem.description()));
+         if (!problems.isEmpty()) {
+             problems.forEach((id, problem) -> LOGGER.warn("Found validation problem in {}: {}", id, problem.description()));
              throw new IllegalStateException("Failed to validate loot tables, see logs");
-@@ -97,9 +_,29 @@
-                 ResourceKey<LootTable> resourcekey1 = entry.getKey();
-                 LootTable loottable = entry.getValue();
-                 Path path = this.pathProvider.json(resourcekey1.identifier());
--                return DataProvider.saveStable(cache, registries, LootTable.DIRECT_CODEC, loottable, path);
-+                var conditional = new net.neoforged.neoforge.common.conditions.WithConditions<>(conditionsPerTable.getOrDefault(loottable, List.of()), loottable);
+@@ -95,9 +_,29 @@
+                 ResourceKey<LootTable> id = entry.getKey();
+                 LootTable table = entry.getValue();
+                 Path path = this.pathProvider.json(id.identifier());
+-                return DataProvider.saveStable(cache, registries, LootTable.DIRECT_CODEC, table, path);
++                var conditional = new net.neoforged.neoforge.common.conditions.WithConditions<>(conditionsPerTable.getOrDefault(table, List.of()), table);
 +                return DataProvider.saveStable(cache, registries, LootTable.CONDITIONAL_DIRECT_CODEC, java.util.Optional.of(conditional), path);
              }).toArray(CompletableFuture[]::new));
          }
@@ -55,17 +55,17 @@
 +        return this.subProviders;
 +    }
 +
-+    protected void validate(WritableRegistry<LootTable> writableregistry, ValidationContext validationcontext, ProblemReporter.Collector problemreporter$collector) {
-+        for (ResourceKey<LootTable> resourcekey : Sets.difference(this.requiredTables, writableregistry.registryKeySet())) {
-+            problemreporter$collector.report(new LootTableProvider.MissingTableProblem(resourcekey));
++    protected void validate(WritableRegistry<LootTable> tables, ValidationContext validationContext, ProblemReporter.Collector problems) {
++        for (ResourceKey<LootTable> missingTable : Sets.difference(this.requiredTables, tables.registryKeySet())) {
++            problems.report(new LootTableProvider.MissingTableProblem(missingTable));
 +        }
 +
-+        writableregistry.listElements()
++        tables.listElements()
 +                .forEach(
-+                        p_380823_ -> p_380823_.value()
++                        tableHolder -> tableHolder.value()
 +                                .validate(
-+                                        validationcontext.setContextKeySet(p_380823_.value().getParamSet())
-+                                                .enterElement(new ProblemReporter.RootElementPathElement(p_380823_.key()), p_380823_.key())
++                                        validationContext.setContextKeySet(tableHolder.value().getParamSet())
++                                                .enterElement(new ProblemReporter.RootElementPathElement(tableHolder.key()), tableHolder.key())
 +                                )
 +                );
      }

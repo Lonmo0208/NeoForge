@@ -10,5 +10,5 @@
 +        net.neoforged.neoforge.common.CommonHooks.verifyEntityDataAccessorRegistration(STACK_WALKER.getCallerClass(), clazz);
 +        if (false && LOGGER.isDebugEnabled()) { // Neo: disable this check as we are handling it in the above hook
              try {
-                 Class<?> oclass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
-                 if (!oclass.equals(clazz)) {
+                 Class<?> aClass = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
+                 if (!aClass.equals(clazz)) {

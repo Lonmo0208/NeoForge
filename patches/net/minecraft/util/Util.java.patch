@@ -1,17 +1,17 @@
 --- a/net/minecraft/util/Util.java
 +++ b/net/minecraft/util/Util.java
-@@ -268,8 +_,8 @@
+@@ -266,8 +_,8 @@
                  .getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().dataVersion().version()))
                  .getChoiceType(reference, name);
-         } catch (IllegalArgumentException illegalargumentexception) {
+         } catch (IllegalArgumentException var4) {
 -            LOGGER.error("No data fixer registered for {}", name);
 -            if (SharedConstants.IS_RUNNING_IN_IDE) {
 +            LOGGER.debug("No data fixer registered for {}", name);
 +            if (SharedConstants.IS_RUNNING_IN_IDE && false) {
-                 throw illegalargumentexception;
+                 throw var4;
              }
          }
-@@ -679,20 +_,20 @@
+@@ -677,20 +_,20 @@
  
      public static void logAndPauseIfInIde(String message) {
          LOGGER.error(message);

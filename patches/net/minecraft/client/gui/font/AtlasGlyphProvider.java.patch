@@ -1,7 +1,7 @@
 --- a/net/minecraft/client/gui/font/AtlasGlyphProvider.java
 +++ b/net/minecraft/client/gui/font/AtlasGlyphProvider.java
-@@ -95,6 +_,15 @@
-             buffer.addVertex(pose, f1, f2, z).setUv(this.sprite.getU1(), this.sprite.getV0()).setColor(color).setLight(packedLightCoords);
+@@ -93,6 +_,15 @@
+             buffer.addVertex(pose, x1, y0, z).setUv(this.sprite.getU1(), this.sprite.getV0()).setColor(color).setLight(packedLightCoords);
          }
  
 +        /**

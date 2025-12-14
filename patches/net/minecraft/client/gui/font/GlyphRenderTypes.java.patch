@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/font/GlyphRenderTypes.java
 +++ b/net/minecraft/client/gui/font/GlyphRenderTypes.java
-@@ -10,27 +_,49 @@
+@@ -10,25 +_,49 @@
  import net.neoforged.api.distmarker.OnlyIn;
  
  @OnlyIn(Dist.CLIENT)
@@ -29,13 +29,13 @@
      }
  
      public static GlyphRenderTypes createForColorTexture(Identifier name) {
-         return new GlyphRenderTypes(
--            RenderTypes.text(name), RenderTypes.textSeeThrough(name), RenderTypes.textPolygonOffset(name), RenderPipelines.GUI_TEXT
+-        return new GlyphRenderTypes(RenderTypes.text(name), RenderTypes.textSeeThrough(name), RenderTypes.textPolygonOffset(name), RenderPipelines.GUI_TEXT);
++        return new GlyphRenderTypes(
 +            RenderTypes.text(name), RenderTypes.textSeeThrough(name), RenderTypes.textPolygonOffset(name), RenderPipelines.GUI_TEXT,
 +            net.neoforged.neoforge.client.NeoForgeRenderTypes.getTextFiltered(name),
 +            net.neoforged.neoforge.client.NeoForgeRenderTypes.getTextSeeThroughFiltered(name),
 +            net.neoforged.neoforge.client.NeoForgeRenderTypes.getTextPolygonOffsetFiltered(name)
-         );
++        );
      }
  
      public RenderType select(Font.DisplayMode mode) {

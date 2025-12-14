@@ -1,11 +1,11 @@
 --- a/net/minecraft/world/entity/ai/behavior/StartAttacking.java
 +++ b/net/minecraft/world/entity/ai/behavior/StartAttacking.java
-@@ -28,7 +_,11 @@
-                             if (!body.canAttack(livingentity)) {
+@@ -29,7 +_,11 @@
+                             if (!body.canAttack(targetEntity)) {
                                  return false;
                              } else {
--                                attackTarget.set(livingentity);
-+                                net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(body, livingentity, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
+-                                attackTarget.set(targetEntity);
++                                net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(body, targetEntity, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
 +                                if (changeTargetEvent.isCanceled() || changeTargetEvent.getNewAboutToBeSetTarget() == null)
 +                                    return false;
 +

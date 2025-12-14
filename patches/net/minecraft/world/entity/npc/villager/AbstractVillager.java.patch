@@ -7,4 +7,4 @@
 +        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.TradeWithVillagerEvent(this.tradingPlayer, offer, this));
      }
  
-     protected abstract void rewardTradeXp(MerchantOffer offer);
+     protected abstract void rewardTradeXp(final MerchantOffer offer);

@@ -1,16 +1,17 @@
 --- a/net/minecraft/world/level/TicketStorage.java
 +++ b/net/minecraft/world/level/TicketStorage.java
-@@ -36,7 +_,8 @@
+@@ -34,7 +_,9 @@
+     private static final Logger LOGGER = LogUtils.getLogger();
      private static final Codec<Pair<ChunkPos, Ticket>> TICKET_ENTRY = Codec.mapPair(ChunkPos.CODEC.fieldOf("chunk_pos"), Ticket.CODEC).codec();
      public static final Codec<TicketStorage> CODEC = RecordCodecBuilder.create(
-         i -> i.group(TICKET_ENTRY.listOf().optionalFieldOf("tickets", List.of()).forGetter(TicketStorage::packTickets))
--            .apply(i, TicketStorage::fromPacked)
-+            .and(net.neoforged.neoforge.common.world.chunk.ForcedChunkManager.defineExtraStorageParams())
-+            .apply(i, (tickets, neoData) -> net.neoforged.neoforge.common.world.chunk.ForcedChunkManager.readStoredTickets(TicketStorage::fromPacked, tickets, neoData))
+-        i -> i.group(TICKET_ENTRY.listOf().optionalFieldOf("tickets", List.of()).forGetter(TicketStorage::packTickets)).apply(i, TicketStorage::fromPacked)
++        i -> i.group(TICKET_ENTRY.listOf().optionalFieldOf("tickets", List.of()).forGetter(TicketStorage::packTickets))
++                .and(net.neoforged.neoforge.common.world.chunk.ForcedChunkManager.defineExtraStorageParams())
++                .apply(i, (tickets, neoData) -> net.neoforged.neoforge.common.world.chunk.ForcedChunkManager.readStoredTickets(TicketStorage::fromPacked, tickets, neoData))
      );
      public static final SavedDataType<TicketStorage> TYPE = new SavedDataType<>("chunks", TicketStorage::new, CODEC, DataFixTypes.SAVED_DATA_FORCED_CHUNKS);
      private final Long2ObjectOpenHashMap<List<Ticket>> tickets;
-@@ -49,6 +_,7 @@
+@@ -47,6 +_,7 @@
          this.tickets = tickets;
          this.deactivatedTickets = deactivatedTickets;
          this.updateForcedChunks();
@@ -18,7 +19,7 @@
      }
  
      public TicketStorage() {
-@@ -172,6 +_,7 @@
+@@ -170,6 +_,7 @@
          if (ticket.getType().equals(TicketType.FORCED)) {
              this.chunksWithForcedTickets.add(key);
          }
@@ -26,7 +27,7 @@
  
          this.setDirty();
          return true;
-@@ -258,6 +_,7 @@
+@@ -256,6 +_,7 @@
                  if (ticket.getType().equals(TicketType.FORCED)) {
                      this.updateForcedChunks();
                  }
@@ -34,7 +35,7 @@
  
                  this.setDirty();
                  return true;
-@@ -300,11 +_,14 @@
+@@ -298,11 +_,14 @@
  
      public void deactivateTicketsOnClosing() {
          this.removeTicketIf((ticket, chunkPos) -> ticket.getType() != TicketType.UNKNOWN, this.deactivatedTickets);
@@ -43,29 +44,29 @@
      }
  
      public void removeTicketIf(TicketStorage.TicketPredicate predicate, @Nullable Long2ObjectOpenHashMap<List<Ticket>> removedTickets) {
-         ObjectIterator<Entry<List<Ticket>>> objectiterator = this.tickets.long2ObjectEntrySet().fastIterator();
-         boolean flag = false;
+         ObjectIterator<Entry<List<Ticket>>> ticketsPerChunkIterator = this.tickets.long2ObjectEntrySet().fastIterator();
+         boolean removedForced = false;
 +        boolean updateNaturalSpawning = false;
  
-         while (objectiterator.hasNext()) {
-             Entry<List<Ticket>> entry = objectiterator.next();
-@@ -333,6 +_,7 @@
+         while (ticketsPerChunkIterator.hasNext()) {
+             Entry<List<Ticket>> entry = ticketsPerChunkIterator.next();
+@@ -331,6 +_,7 @@
                      if (ticket.getType().equals(TicketType.FORCED)) {
-                         flag = true;
+                         removedForced = true;
                      }
 +                    if (ticket.getType().forceNaturalSpawning()) updateNaturalSpawning = true;
                  }
              }
  
-@@ -355,6 +_,7 @@
-         if (flag) {
+@@ -353,6 +_,7 @@
+         if (removedForced) {
              this.updateForcedChunks();
          }
 +        if (updateNaturalSpawning) this.updateForcedNaturalSpawning();
      }
  
      public void replaceTicketLevelOfType(int newLevel, TicketType ticketType) {
-@@ -408,5 +_,26 @@
+@@ -406,5 +_,26 @@
  
      public interface TicketPredicate {
          boolean test(Ticket ticket, long chunkPos);

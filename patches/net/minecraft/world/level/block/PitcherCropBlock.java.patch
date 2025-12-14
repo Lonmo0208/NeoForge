@@ -20,8 +20,8 @@
  
      @Override
      public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
--        float f = CropBlock.getGrowthSpeed(this, level, pos);
-+        float f = CropBlock.getGrowthSpeed(state, level, pos);
-         boolean flag = random.nextInt((int)(25.0F / f) + 1) == 0;
-         if (flag) {
+-        float growthSpeed = CropBlock.getGrowthSpeed(this, level, pos);
++        float growthSpeed = CropBlock.getGrowthSpeed(state, level, pos);
+         boolean shouldProgressGrowth = random.nextInt((int)(25.0F / growthSpeed) + 1) == 0;
+         if (shouldProgressGrowth) {
              this.grow(level, state, pos, 1);

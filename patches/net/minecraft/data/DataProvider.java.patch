@@ -1,6 +1,6 @@
 --- a/net/minecraft/data/DataProvider.java
 +++ b/net/minecraft/data/DataProvider.java
-@@ -28,7 +_,16 @@
+@@ -27,7 +_,16 @@
  import org.slf4j.Logger;
  
  public interface DataProvider {
@@ -17,12 +17,12 @@
          m.put("type", 0);
          m.put("parent", 1);
          m.defaultReturnValue(2);
-@@ -80,7 +_,7 @@
+@@ -77,7 +_,7 @@
  
-                 try (JsonWriter jsonwriter = new JsonWriter(new OutputStreamWriter(hashingoutputstream, StandardCharsets.UTF_8))) {
-                     jsonwriter.setSerializeNulls(false);
--                    jsonwriter.setIndent("  ");
-+                    jsonwriter.setIndent(" ".repeat(java.lang.Math.max(0, INDENT_WIDTH.get()))); // Neo: Allow changing the indent width without needing to mixin this lambda.
-                     GsonHelper.writeValue(jsonwriter, root, KEY_COMPARATOR);
+                 try (JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(hashedBytes, StandardCharsets.UTF_8))) {
+                     jsonWriter.setSerializeNulls(false);
+-                    jsonWriter.setIndent("  ");
++                    jsonWriter.setIndent(" ".repeat(java.lang.Math.max(0, INDENT_WIDTH.get()))); // Neo: Allow changing the indent width without needing to mixin this lambda.
+                     GsonHelper.writeValue(jsonWriter, root, KEY_COMPARATOR);
                  }
  

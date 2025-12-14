@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/effect/MobEffectInstance.java
 +++ b/net/minecraft/world/effect/MobEffectInstance.java
-@@ -337,11 +_,11 @@
+@@ -336,11 +_,11 @@
                  .compareFalseFirst(this.isAmbient(), o.isAmbient())
                  .compareFalseFirst(this.isInfiniteDuration(), o.isInfiniteDuration())
                  .compare(this.getDuration(), o.getDuration())

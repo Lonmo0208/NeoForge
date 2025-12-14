@@ -30,15 +30,15 @@
      }
  
      private static void forAllKeyMappings(InputConstants.Key key, Consumer<KeyMapping> operation) {
--        List<KeyMapping> list = MAP.get(key);
+-        List<KeyMapping> keyMappings = MAP.get(key);
 +        forAllKeyMappings(key, operation, false);
 +    }
 +
 +    private static void forAllKeyMappings(InputConstants.Key key, Consumer<KeyMapping> operation, boolean releasing) {
-+        List<KeyMapping> list = MAP.getAll(key, releasing);
-         if (list != null && !list.isEmpty()) {
-             for (KeyMapping keymapping : list) {
-                 operation.accept(keymapping);
++        List<KeyMapping> keyMappings = MAP.getAll(key, releasing);
+         if (keyMappings != null && !keyMappings.isEmpty()) {
+             for (KeyMapping keyMapping : keyMappings) {
+                 operation.accept(keyMapping);
 @@ -105,8 +_,83 @@
          this.registerMapping(this.key);
      }
@@ -178,5 +178,5 @@
 +         */
 +        @Deprecated
          public static KeyMapping.Category register(Identifier id) {
-             KeyMapping.Category keymapping$category = new KeyMapping.Category(id);
-             if (SORT_ORDER.contains(keymapping$category)) {
+             KeyMapping.Category category = new KeyMapping.Category(id);
+             if (SORT_ORDER.contains(category)) {

@@ -1,20 +1,20 @@
 --- a/net/minecraft/client/gui/components/BossHealthOverlay.java
 +++ b/net/minecraft/client/gui/components/BossHealthOverlay.java
-@@ -67,13 +_,16 @@
+@@ -67,6 +_,8 @@
  
-             for (LerpingBossEvent lerpingbossevent : this.events.values()) {
-                 int k = i / 2 - 91;
-+                var event = net.neoforged.neoforge.client.ClientHooks.onCustomizeBossEventProgress(graphics, this.minecraft.getWindow(), lerpingbossevent, k, j, 10 + this.minecraft.font.lineHeight);
-+                if (!event.isCanceled()) {
-                 this.drawBar(graphics, k, j, lerpingbossevent);
-                 Component component = lerpingbossevent.getName();
-                 int l = this.minecraft.font.width(component);
-                 int i1 = i / 2 - l / 2;
-                 int j1 = j - 9;
-                 graphics.drawString(this.minecraft.font, component, i1, j1, -1);
--                j += 10 + 9;
+             for (LerpingBossEvent event : this.events.values()) {
+                 int xLeft = screenWidth / 2 - 91;
++                var customizeEvent = net.neoforged.neoforge.client.ClientHooks.onCustomizeBossEventProgress(graphics, this.minecraft.getWindow(), event, xLeft, yOffset, 10 + this.minecraft.font.lineHeight);
++                if (!customizeEvent.isCanceled()) {
+                 this.drawBar(graphics, xLeft, yOffset, event);
+                 Component msg = event.getName();
+                 int width = this.minecraft.font.width(msg);
+@@ -74,6 +_,8 @@
+                 int y = yOffset - 9;
+                 graphics.drawString(this.minecraft.font, msg, x, y, -1);
+                 yOffset += 10 + 9;
 +                }
-+                j += event.getIncrement();
-                 if (j >= graphics.guiHeight() / 3) {
++                yOffset += customizeEvent.getIncrement();
+                 if (yOffset >= graphics.guiHeight() / 3) {
                      break;
                  }

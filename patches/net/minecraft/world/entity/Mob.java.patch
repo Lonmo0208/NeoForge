@@ -66,21 +66,21 @@
              && this.canPickUpLoot()
              && this.isAlive()
              && !this.dead
--            && serverlevel.getGameRules().get(GameRules.MOB_GRIEFING)) {
-+            && net.neoforged.neoforge.event.EventHooks.canEntityGrief(serverlevel, this)) {
-             Vec3i vec3i = this.getPickupReach();
+-            && serverLevel.getGameRules().get(GameRules.MOB_GRIEFING)) {
++            && net.neoforged.neoforge.event.EventHooks.canEntityGrief(serverLevel, this)) {
+             Vec3i pickupReach = this.getPickupReach();
  
-             for (ItemEntity itementity : this.level()
-@@ -605,6 +_,8 @@
+             for (ItemEntity entity : this.level()
+@@ -602,6 +_,8 @@
      private double getApproximateAttributeWith(ItemStack itemStack, Holder<Attribute> attribute, EquipmentSlot slot) {
-         double d0 = this.getAttributes().hasAttribute(attribute) ? this.getAttributeBaseValue(attribute) : 0.0;
-         ItemAttributeModifiers itemattributemodifiers = itemStack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+         double baseValue = this.getAttributes().hasAttribute(attribute) ? this.getAttributeBaseValue(attribute) : 0.0;
+         ItemAttributeModifiers attributeModifiers = itemStack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 +        // Neo: Respect gameplay modifiers
-+        itemattributemodifiers = itemStack.getAttributeModifiers();
-         return itemattributemodifiers.compute(attribute, d0, slot);
++        attributeModifiers = itemStack.getAttributeModifiers();
+         return attributeModifiers.compute(attribute, baseValue, slot);
      }
  
-@@ -642,6 +_,7 @@
+@@ -641,6 +_,7 @@
  
      @Override
      public void checkDespawn() {
@@ -88,7 +88,7 @@
          if (this.level().getDifficulty() == Difficulty.PEACEFUL && !this.getType().isAllowedInPeaceful()) {
              this.discard();
          } else if (!this.isPersistenceRequired() && !this.requiresCustomPersistence()) {
-@@ -1043,6 +_,11 @@
+@@ -1038,6 +_,11 @@
          }
      }
  
@@ -100,23 +100,23 @@
      public @Nullable SpawnGroupData finalizeSpawn(
          ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData groupData
      ) {
-@@ -1055,6 +_,7 @@
+@@ -1050,6 +_,7 @@
          }
  
-         this.setLeftHanded(randomsource.nextFloat() < 0.05F);
+         this.setLeftHanded(random.nextFloat() < 0.05F);
 +        this.spawnType = spawnReason;
          return groupData;
      }
  
-@@ -1199,6 +_,7 @@
+@@ -1196,6 +_,7 @@
              } else {
-                 params.type().convert(this, t, params);
-                 afterConversion.finalizeConversion(t);
+                 params.type().convert(this, newMob, params);
+                 afterConversion.finalizeConversion(newMob);
 +                if (!preventConversionSpawns)
-                 if (this.level() instanceof ServerLevel serverlevel) {
-                     serverlevel.addFreshEntity(t);
+                 if (this.level() instanceof ServerLevel serverLevel) {
+                     serverLevel.addFreshEntity(newMob);
                  }
-@@ -1362,14 +_,24 @@
+@@ -1359,14 +_,24 @@
      }
  
      @Override
@@ -142,7 +142,7 @@
      @VisibleForTesting
      public void removeFreeWill() {
          this.removeAllGoals(goal -> true);
-@@ -1432,5 +_,40 @@
+@@ -1427,5 +_,40 @@
  
      public float chargeSpeedModifier() {
          return 1.0F;

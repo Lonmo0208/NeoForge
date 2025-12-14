@@ -1,24 +1,24 @@
 --- a/net/minecraft/world/entity/boss/wither/WitherBoss.java
 +++ b/net/minecraft/world/entity/boss/wither/WitherBoss.java
-@@ -321,7 +_,7 @@
+@@ -318,7 +_,7 @@
  
              if (this.destroyBlocksTick > 0) {
                  this.destroyBlocksTick--;
 -                if (this.destroyBlocksTick == 0 && level.getGameRules().get(GameRules.MOB_GRIEFING)) {
 +                if (this.destroyBlocksTick == 0 && net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, this)) {
-                     boolean flag = false;
-                     int l = Mth.floor(this.getBbWidth() / 2.0F + 1.0F);
-                     int i1 = Mth.floor(this.getBbHeight());
-@@ -330,7 +_,7 @@
-                         this.getBlockX() - l, this.getBlockY(), this.getBlockZ() - l, this.getBlockX() + l, this.getBlockY() + i1, this.getBlockZ() + l
+                     boolean destroyed = false;
+                     int width = Mth.floor(this.getBbWidth() / 2.0F + 1.0F);
+                     int height = Mth.floor(this.getBbHeight());
+@@ -332,7 +_,7 @@
+                         this.getBlockZ() + width
                      )) {
-                         BlockState blockstate = level.getBlockState(blockpos);
--                        if (canDestroy(blockstate)) {
-+                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockpos, blockstate)) {
-                             flag = level.destroyBlock(blockpos, true, this) || flag;
+                         BlockState state = level.getBlockState(blockPos);
+-                        if (canDestroy(state)) {
++                        if (state.canEntityDestroy(this.level(), blockPos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockPos, state)) {
+                             destroyed = level.destroyBlock(blockPos, true, this) || destroyed;
                          }
                      }
-@@ -349,6 +_,10 @@
+@@ -351,6 +_,10 @@
          }
      }
  

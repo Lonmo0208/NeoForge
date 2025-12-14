@@ -6,30 +6,30 @@
      ) {
 +        net.neoforged.neoforge.client.extensions.common.IClientItemExtensions extensions = net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(itemStack);
 +        model = extensions.getGenericArmorModel(itemStack, layerType, model);
-         List<EquipmentClientInfo.Layer> list = this.equipmentAssets.get(equipmentAssetId).getLayers(layerType);
-         if (!list.isEmpty()) {
--            int i = DyedItemColor.getOrDefault(itemStack, 0);
-+            int i = extensions.getDefaultDyeColor(itemStack);
-             boolean flag = itemStack.hasFoil();
-             int j = order;
+         List<EquipmentClientInfo.Layer> layers = this.equipmentAssets.get(equipmentAssetId).getLayers(layerType);
+         if (!layers.isEmpty()) {
+-            int dyeColor = DyedItemColor.getOrDefault(itemStack, 0);
++            int dyeColor = extensions.getDefaultDyeColor(itemStack);
+             boolean renderFoil = itemStack.hasFoil();
+             int nextOrder = order;
  
 +            int idx = 0;
-             for (EquipmentClientInfo.Layer equipmentclientinfo$layer : list) {
--                int k = getColorForLayer(equipmentclientinfo$layer, i);
-+                int k = extensions.getArmorLayerTintColor(itemStack, equipmentclientinfo$layer, idx, i);
-                 if (k != 0) {
-                     Identifier identifier = equipmentclientinfo$layer.usePlayerTexture() && playerTextureOverride != null
+             for (EquipmentClientInfo.Layer layer : layers) {
+-                int color = getColorForLayer(layer, dyeColor);
++                int color = extensions.getArmorLayerTintColor(itemStack, layer, idx, dyeColor);
+                 if (color != 0) {
+                     Identifier layerTexture = layer.usePlayerTexture() && playerTextureOverride != null
                          ? playerTextureOverride
-                         : this.layerTextureLookup.apply(new EquipmentLayerRenderer.LayerTextureKey(layerType, equipmentclientinfo$layer));
-+                    identifier = net.neoforged.neoforge.client.ClientHooks.getArmorTexture(itemStack, layerType, equipmentclientinfo$layer, identifier);
-                     submitNodeCollector.order(j++)
+                         : this.layerTextureLookup.apply(new EquipmentLayerRenderer.LayerTextureKey(layerType, layer));
++                    layerTexture = net.neoforged.neoforge.client.ClientHooks.getArmorTexture(itemStack, layerType, layer, layerTexture);
+                     submitNodeCollector.order(nextOrder++)
                          .submitModel(
                              model,
-@@ -101,6 +_,7 @@
+@@ -110,6 +_,7 @@
  
-                     flag = false;
+                     renderFoil = false;
                  }
 +                idx++;
              }
  
-             ArmorTrim armortrim = itemStack.get(DataComponents.TRIM);
+             ArmorTrim trim = itemStack.get(DataComponents.TRIM);

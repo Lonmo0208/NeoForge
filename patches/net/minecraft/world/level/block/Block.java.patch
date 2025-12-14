@@ -9,16 +9,16 @@
      private static final LoadingCache<VoxelShape, Boolean> SHAPE_FULL_BLOCK_CACHE = CacheBuilder.newBuilder()
          .maximumSize(512L)
          .weakKeys()
-@@ -241,7 +_,7 @@
+@@ -237,7 +_,7 @@
          this.createBlockStateDefinition(builder);
          this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
          this.registerDefaultState(this.stateDefinition.any());
 -        if (SharedConstants.IS_RUNNING_IN_IDE) {
 +        if (SharedConstants.IS_RUNNING_IN_IDE && false) {
-             String s = this.getClass().getSimpleName();
-             if (!s.endsWith("Block")) {
-                 LOGGER.error("Block classes should end with Block and {} doesn't.", s);
-@@ -297,12 +_,22 @@
+             String className = this.getClass().getSimpleName();
+             if (!className.endsWith("Block")) {
+                 LOGGER.error("Block classes should end with Block and {} doesn't.", className);
+@@ -290,12 +_,22 @@
          }
      }
  
@@ -31,17 +31,17 @@
 +    }
 +
 +    public static boolean shouldRenderFace(BlockGetter level, BlockPos pos, BlockState state, BlockState neighborState, Direction direction) {
-         VoxelShape voxelshape = neighborState.getFaceOcclusionShape(direction.getOpposite());
-         if (voxelshape == Shapes.block()) {
+         VoxelShape occluder = neighborState.getFaceOcclusionShape(direction.getOpposite());
+         if (occluder == Shapes.block()) {
              return false;
          } else if (state.skipRendering(neighborState, direction)) {
              return false;
 +        } else if (neighborState.hidesNeighborFace(level, pos.relative(direction), state, direction.getOpposite()) && state.supportsExternalFaceHiding()) {
 +            return false;
-         } else if (voxelshape == Shapes.empty()) {
+         } else if (occluder == Shapes.empty()) {
              return true;
          } else {
-@@ -375,24 +_,30 @@
+@@ -368,22 +_,28 @@
  
      public static void dropResources(BlockState state, Level level, BlockPos pos) {
          if (level instanceof ServerLevel) {
@@ -49,7 +49,7 @@
              getDrops(state, (ServerLevel)level, pos, null).forEach(stack -> popResource(level, pos, stack));
 -            state.spawnAfterBreak((ServerLevel)level, pos, ItemStack.EMPTY, true);
 +            List<ItemEntity> captured = stopCapturingDrops();
-+            net.neoforged.neoforge.common.CommonHooks.handleBlockDrops((ServerLevel) level, pos, state, null, captured, null, ItemStack.EMPTY);
++            net.neoforged.neoforge.common.CommonHooks.handleBlockDrops((ServerLevel)level, pos, state, null, captured, null, ItemStack.EMPTY);
          }
      }
  
@@ -59,38 +59,35 @@
              getDrops(state, (ServerLevel)level, pos, blockEntity).forEach(stack -> popResource((ServerLevel)level, pos, stack));
 -            state.spawnAfterBreak((ServerLevel)level, pos, ItemStack.EMPTY, true);
 +            List<ItemEntity> captured = stopCapturingDrops();
-+            net.neoforged.neoforge.common.CommonHooks.handleBlockDrops((ServerLevel) level, pos, state, blockEntity, captured, null, ItemStack.EMPTY);
++            net.neoforged.neoforge.common.CommonHooks.handleBlockDrops((ServerLevel)level, pos, state, blockEntity, captured, null, ItemStack.EMPTY);
          }
      }
  
-     public static void dropResources(
--        BlockState state, Level level, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity breaker, ItemStack tool
-+            BlockState state, Level level, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity breaker, ItemStack tool
-     ) {
+     public static void dropResources(BlockState state, Level level, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity breaker, ItemStack tool) {
          if (level instanceof ServerLevel) {
 +            beginCapturingDrops();
              getDrops(state, (ServerLevel)level, pos, blockEntity, breaker, tool).forEach(stack -> popResource(level, pos, stack));
 -            state.spawnAfterBreak((ServerLevel)level, pos, tool, true);
 +            List<ItemEntity> captured = stopCapturingDrops();
-+            net.neoforged.neoforge.common.CommonHooks.handleBlockDrops((ServerLevel) level, pos, state, blockEntity, captured, breaker, tool);
++            net.neoforged.neoforge.common.CommonHooks.handleBlockDrops((ServerLevel)level, pos, state, blockEntity, captured, breaker, tool);
          }
      }
  
-@@ -420,19 +_,26 @@
+@@ -411,19 +_,26 @@
      }
  
      private static void popResource(Level level, Supplier<ItemEntity> entityFactory, ItemStack itemStack) {
--        if (level instanceof ServerLevel serverlevel && !itemStack.isEmpty() && serverlevel.getGameRules().get(GameRules.BLOCK_DROPS)) {
+-        if (level instanceof ServerLevel serverLevel && !itemStack.isEmpty() && serverLevel.getGameRules().get(GameRules.BLOCK_DROPS)) {
 +        if (level instanceof ServerLevel serverLevel && !itemStack.isEmpty() && serverLevel.getGameRules().get(GameRules.BLOCK_DROPS) && !level.restoringBlockSnapshots) {
-             ItemEntity itementity = entityFactory.get();
-             itementity.setDefaultPickUpDelay();
--            level.addFreshEntity(itementity);
+             ItemEntity entity = entityFactory.get();
+             entity.setDefaultPickUpDelay();
+-            level.addFreshEntity(entity);
 +            // Neo: Add drops to the captured list if capturing is enabled.
 +            if (capturedDrops != null) {
-+                capturedDrops.add(itementity);
++                capturedDrops.add(entity);
 +            }
 +            else {
-+                level.addFreshEntity(itementity);
++                level.addFreshEntity(entity);
 +            }
          }
      }
@@ -106,7 +103,7 @@
      public float getExplosionResistance() {
          return this.explosionResistance;
      }
-@@ -501,6 +_,7 @@
+@@ -492,6 +_,7 @@
      public void handlePrecipitation(BlockState state, Level level, BlockPos pos, Biome.Precipitation precipitation) {
      }
  
@@ -114,7 +111,7 @@
      public boolean dropFromExplosion(Explosion explosion) {
          return true;
      }
-@@ -584,6 +_,35 @@
+@@ -574,6 +_,35 @@
          return state.setValue(property, (T)value);
      }
  

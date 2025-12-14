@@ -1,11 +1,11 @@
 --- a/net/minecraft/world/entity/projectile/Projectile.java
 +++ b/net/minecraft/world/entity/projectile/Projectile.java
-@@ -352,7 +_,7 @@
+@@ -343,7 +_,7 @@
      @Override
      public boolean mayInteract(ServerLevel level, BlockPos pos) {
-         Entity entity = this.getOwner();
--        return entity instanceof Player ? entity.mayInteract(level, pos) : entity == null || level.getGameRules().get(GameRules.MOB_GRIEFING);
-+        return entity instanceof Player ? entity.mayInteract(level, pos) : entity == null || net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, entity);
+         Entity owner = this.getOwner();
+-        return owner instanceof Player ? owner.mayInteract(level, pos) : owner == null || level.getGameRules().get(GameRules.MOB_GRIEFING);
++        return owner instanceof Player ? owner.mayInteract(level, pos) : owner == null || net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, owner);
      }
  
      public boolean mayBreak(ServerLevel level) {

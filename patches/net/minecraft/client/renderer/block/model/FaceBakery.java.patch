@@ -2,20 +2,20 @@
 +++ b/net/minecraft/client/renderer/block/model/FaceBakery.java
 @@ -77,6 +_,8 @@
  
-         Direction direction = calculateFacing(avector3fc);
-         if (elementRotation == null && direction != null) {
+         Direction finalDirection = calculateFacing(vertexPositions);
+         if (elementRotation == null && finalDirection != null) {
 +            // Neo: Suppress winding re-calculation when the quads may not be axis-aligned due to root transforms
 +            if (!modelState.mayApplyArbitraryRotation())
-             recalculateWinding(avector3fc, along, direction);
+             recalculateWinding(vertexPositions, vertexPackedUvs, finalDirection);
          }
  
 @@ -93,7 +_,10 @@
-             Objects.requireNonNullElse(direction, Direction.UP),
+             Objects.requireNonNullElse(finalDirection, Direction.UP),
              icon,
              shade,
 -            lightEmission
 +            Math.max(lightEmission, face.faceData().lightEmission()),
-+            partCache.normals(net.neoforged.neoforge.client.model.quad.BakedNormals.of(net.neoforged.neoforge.client.model.quad.BakedNormals.computeQuadNormal(avector3fc[0], avector3fc[1], avector3fc[2], avector3fc[3]))),
++            partCache.normals(net.neoforged.neoforge.client.model.quad.BakedNormals.of(net.neoforged.neoforge.client.model.quad.BakedNormals.computeQuadNormal(vertexPositions[0], vertexPositions[1], vertexPositions[2], vertexPositions[3]))),
 +            partCache.colors(net.neoforged.neoforge.client.model.quad.BakedColors.of(face.faceData().color())),
 +            face.faceData().ambientOcclusion()
          );

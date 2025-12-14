@@ -4,8 +4,8 @@
              }
          }
  
--        return Mth.lerp(effectScale, 1.0F, f);
-+        return net.neoforged.neoforge.client.ClientHooks.getFieldOfViewModifier(this, f, effectScale);
+-        return Mth.lerp(effectScale, 1.0F, modifier);
++        return net.neoforged.neoforge.client.ClientHooks.getFieldOfViewModifier(this, modifier, effectScale);
      }
  
      @Override

@@ -16,13 +16,13 @@
  
      private ModelDiscovery.ModelWrapper createAndQueueWrapper(Identifier id, UnbakedModel rawModel) {
 @@ -64,6 +_,8 @@
-         if (!flag) {
-             this.parentDiscoveryQueue.add(modeldiscovery$modelwrapper);
+         if (!isRoot) {
+             this.parentDiscoveryQueue.add(result);
          }
 +        // Neo: Allow UnbakedModels to resolve additional dependencies
 +        rawModel.resolveDependencies(this.resolver);
  
-         return modeldiscovery$modelwrapper;
+         return result;
      }
 @@ -143,16 +_,18 @@
          private static final ModelDiscovery.Slot<TextureSlots> KEY_TEXTURE_SLOTS = slot(4);
@@ -33,9 +33,9 @@
 +        private static final ModelDiscovery.Slot<net.minecraft.util.context.ContextMap> KEY_ADDITIONAL_PROPERTIES = slot(7);
 +        private static final int SLOT_COUNT = 8;
          private final Identifier id;
-         boolean valid;
-         ModelDiscovery.@Nullable ModelWrapper parent;
-         final UnbakedModel wrapped;
+         private boolean valid;
+         private ModelDiscovery.@Nullable ModelWrapper parent;
+         private final UnbakedModel wrapped;
 -        private final AtomicReferenceArray<@Nullable Object> fixedSlots = new AtomicReferenceArray<>(7);
 +        private final AtomicReferenceArray<@Nullable Object> fixedSlots = new AtomicReferenceArray<>(SLOT_COUNT);
          private final Map<ModelState, QuadCollection> modelBakeCache = new ConcurrentHashMap<>();
@@ -46,22 +46,21 @@
              return new ModelDiscovery.Slot<>(index);
          }
  
-@@ -228,7 +_,7 @@
-             QuadCollection quadcollection = this.getSlot(KEY_DEFAULT_GEOMETRY);
-             return quadcollection != null
-                 ? quadcollection
--                : this.updateSlot(KEY_DEFAULT_GEOMETRY, this.getTopGeometry().bake(textureSlots, baker, state, this));
-+                : this.updateSlot(KEY_DEFAULT_GEOMETRY, this.getTopGeometry().bake(textureSlots, baker, state, this, this.getTopAdditionalProperties()));
+@@ -224,15 +_,20 @@
+ 
+         private QuadCollection bakeDefaultState(TextureSlots textureSlots, ModelBaker baker, ModelState state) {
+             QuadCollection result = this.getSlot(KEY_DEFAULT_GEOMETRY);
+-            return result != null ? result : this.updateSlot(KEY_DEFAULT_GEOMETRY, this.getTopGeometry().bake(textureSlots, baker, state, this));
++            return result != null ? result : this.updateSlot(KEY_DEFAULT_GEOMETRY, this.getTopGeometry().bake(textureSlots, baker, state, this, this.getTopAdditionalProperties()));
          }
  
          @Override
-@@ -237,8 +_,13 @@
-                 ? this.bakeDefaultState(textureSlots, baker, state)
-                 : this.modelBakeCache.computeIfAbsent(state, s -> {
-                     UnbakedGeometry unbakedgeometry = this.getTopGeometry();
--                    return unbakedgeometry.bake(textureSlots, baker, s, this);
-+                    return unbakedgeometry.bake(textureSlots, baker, s, this, this.getTopAdditionalProperties());
-                 });
+         public QuadCollection bakeTopGeometry(TextureSlots textureSlots, ModelBaker baker, ModelState state) {
+             return state == BlockModelRotation.IDENTITY ? this.bakeDefaultState(textureSlots, baker, state) : this.modelBakeCache.computeIfAbsent(state, s -> {
+                 UnbakedGeometry topGeometry = this.getTopGeometry();
+-                return topGeometry.bake(textureSlots, baker, s, this);
++                return topGeometry.bake(textureSlots, baker, s, this, this.getTopAdditionalProperties());
+             });
 +        }
 +
 +        @Override

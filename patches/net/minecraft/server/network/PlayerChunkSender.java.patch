@@ -8,9 +8,9 @@
 +        connection.send(chunk.getAuxLightManager(chunk.getPos()).sendLightDataTo(
 +                new ClientboundLevelChunkWithLightPacket(chunk, level.getLightEngine(), null, null)
 +        ));
-         ChunkPos chunkpos = chunk.getPos();
+         ChunkPos pos = chunk.getPos();
          if (SharedConstants.DEBUG_VERBOSE_SERVER_EVENTS) {
-             LOGGER.debug("SEN {}", chunkpos);
+             LOGGER.debug("SEN {}", pos);
          }
  
          level.debugSynchronizers().startTrackingChunk(connection.player, chunk.getPos());

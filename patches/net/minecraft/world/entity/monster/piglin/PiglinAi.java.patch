@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/entity/monster/piglin/PiglinAi.java
 +++ b/net/minecraft/world/entity/monster/piglin/PiglinAi.java
 @@ -383,7 +_,7 @@
-         ItemStack itemstack = body.getItemInHand(InteractionHand.OFF_HAND);
+         ItemStack itemStack = body.getItemInHand(InteractionHand.OFF_HAND);
          body.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
          if (body.isAdult()) {
--            boolean flag = isBarterCurrency(itemstack);
-+            boolean flag = itemstack.isPiglinCurrency();
-             if (barteringEnabled && flag) {
+-            boolean barterCurrency = isBarterCurrency(itemStack);
++            boolean barterCurrency = itemStack.isPiglinCurrency();
+             if (barteringEnabled && barterCurrency) {
                  throwItems(body, getBarterResponseItems(body));
-             } else if (!flag) {
-@@ -467,7 +_,7 @@
+             } else if (!barterCurrency) {
+@@ -465,7 +_,7 @@
              return false;
          } else if (isAdmiringDisabled(body) && body.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
              return false;
@@ -17,8 +17,8 @@
 +        } else if (itemStack.isPiglinCurrency()) {
              return isNotHoldingLovedItemInOffHand(body);
          } else {
-             boolean flag = body.canAddToInventory(itemStack);
-@@ -557,7 +_,7 @@
+             boolean hasSpace = body.canAddToInventory(itemStack);
+@@ -561,7 +_,7 @@
      }
  
      protected static boolean canAdmire(Piglin body, ItemStack playerHeldItemStack) {
@@ -27,16 +27,16 @@
      }
  
      protected static void wasHurtBy(ServerLevel level, Piglin body, LivingEntity attacker) {
-@@ -646,7 +_,7 @@
+@@ -650,7 +_,7 @@
  
      public static boolean isWearingSafeArmor(LivingEntity livingEntity) {
-         for (EquipmentSlot equipmentslot : EquipmentSlotGroup.ARMOR) {
--            if (livingEntity.getItemBySlot(equipmentslot).is(ItemTags.PIGLIN_SAFE_ARMOR)) {
-+            if (livingEntity.getItemBySlot(equipmentslot).makesPiglinsNeutral(livingEntity)) {
+         for (EquipmentSlot slot : EquipmentSlotGroup.ARMOR) {
+-            if (livingEntity.getItemBySlot(slot).is(ItemTags.PIGLIN_SAFE_ARMOR)) {
++            if (livingEntity.getItemBySlot(slot).makesPiglinsNeutral(livingEntity)) {
                  return true;
              }
          }
-@@ -798,7 +_,7 @@
+@@ -799,7 +_,7 @@
      }
  
      private static boolean hasCrossbow(LivingEntity body) {

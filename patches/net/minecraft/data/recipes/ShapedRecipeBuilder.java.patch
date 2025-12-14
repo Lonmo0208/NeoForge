@@ -40,9 +40,9 @@
 @@ -109,7 +_,7 @@
              Objects.requireNonNullElse(this.group, ""),
              RecipeBuilder.determineBookCategory(this.category),
-             shapedrecipepattern,
+             pattern,
 -            new ItemStack(this.result, this.count),
 +            this.resultStack,
              this.showNotification
          );
-         output.accept(
+         output.accept(id, recipe, advancement.build(id.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));

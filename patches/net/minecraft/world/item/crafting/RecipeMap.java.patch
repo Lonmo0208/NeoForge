@@ -12,7 +12,7 @@
 @@ -31,6 +_,25 @@
          }
  
-         return new RecipeMap(builder.build(), builder1.build());
+         return new RecipeMap(byType.build(), byKey.build());
 +    }
 +
 +    // Neo: handle ordering according to any recipe priorities

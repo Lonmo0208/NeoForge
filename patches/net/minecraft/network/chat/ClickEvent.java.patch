@@ -1,6 +1,6 @@
 --- a/net/minecraft/network/chat/ClickEvent.java
 +++ b/net/minecraft/network/chat/ClickEvent.java
-@@ -58,7 +_,7 @@
+@@ -57,7 +_,7 @@
          }
  
          public static DataResult<ClickEvent.Action> filterForSerialization(ClickEvent.Action action) {

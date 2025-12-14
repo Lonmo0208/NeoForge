@@ -11,8 +11,8 @@
 +
 +    @Override
      public Optional<ValueInput.ValueInputList> childrenList(String name) {
-         ListTag listtag = this.getOptionalTypedTag(name, ListTag.TYPE);
-         return listtag != null ? Optional.of(this.wrapList(name, this.context, listtag)) : Optional.empty();
+         ListTag list = this.getOptionalTypedTag(name, ListTag.TYPE);
+         return list != null ? Optional.of(this.wrapList(name, this.context, list)) : Optional.empty();
 @@ -214,6 +_,11 @@
      @Override
      public HolderLookup.Provider lookup() {

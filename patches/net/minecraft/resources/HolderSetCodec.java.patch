@@ -8,7 +8,7 @@
 +    private final Codec<Either<net.neoforged.neoforge.registries.holdersets.ICustomHolderSet<E>, Either<TagKey<E>, List<Holder<E>>>>> combinedCodec;
  
      private static <E> Codec<List<Holder<E>>> homogenousList(Codec<Holder<E>> elementCodec, boolean alwaysUseList) {
-         Codec<List<Holder<E>>> codec = elementCodec.listOf().validate(ExtraCodecs.ensureHomogenous(Holder::kind));
+         Codec<List<Holder<E>>> listCodec = elementCodec.listOf().validate(ExtraCodecs.ensureHomogenous(Holder::kind));
 @@ -36,6 +_,10 @@
          this.elementCodec = elementCodec;
          this.homogenousListCodec = homogenousList(elementCodec, alwaysUseList);
@@ -21,24 +21,24 @@
  
      @Override
 @@ -44,14 +_,17 @@
-             Optional<HolderGetter<E>> optional = registryops.getter(this.registryKey);
-             if (optional.isPresent()) {
-                 HolderGetter<E> holdergetter = optional.get();
+             Optional<HolderGetter<E>> registryOptional = registryOps.getter(this.registryKey);
+             if (registryOptional.isPresent()) {
+                 HolderGetter<E> registry = registryOptional.get();
 -                return this.registryAwareCodec
 -                    .decode(ops, input)
 +                // Neo: use the wrapped codec to decode custom/tag/list instead of just tag/list
 +                return this.combinedCodec.decode(ops, input)
                      .flatMap(
                          p -> {
-                             DataResult<HolderSet<E>> dataresult = p.getFirst()
+                             DataResult<HolderSet<E>> result = p.getFirst()
                                  .map(
 +                                    DataResult::success,
 +                                    tagOrList -> tagOrList.map(
-                                     tag -> lookupTag(holdergetter, (TagKey<E>)tag),
+                                     tag -> lookupTag(registry, (TagKey<E>)tag),
                                      values -> DataResult.success(HolderSet.direct((List<? extends Holder<E>>)values))
 +                                    )
                                  );
-                             return dataresult.map(holders -> Pair.of((HolderSet<E>)holders, (T)p.getSecond()));
+                             return result.map(holders -> Pair.of((HolderSet<E>)holders, (T)p.getSecond()));
                          }
 @@ -76,6 +_,9 @@
                      return DataResult.error(() -> "HolderSet " + input + " is not valid in current registry set");

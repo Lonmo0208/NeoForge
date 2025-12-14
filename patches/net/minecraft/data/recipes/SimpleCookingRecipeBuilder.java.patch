@@ -72,11 +72,11 @@
          this.criteria.put(name, criterion);
          return this;
 @@ -111,7 +_,7 @@
-         this.criteria.forEach(advancement$builder::addCriterion);
-         AbstractCookingRecipe abstractcookingrecipe = this.factory
+         this.criteria.forEach(advancement::addCriterion);
+         AbstractCookingRecipe recipe = this.factory
              .create(
 -                Objects.requireNonNullElse(this.group, ""), this.bookCategory, this.ingredient, new ItemStack(this.result), this.experience, this.cookingTime
 +                Objects.requireNonNullElse(this.group, ""), this.bookCategory, this.ingredient, this.stackResult, this.experience, this.cookingTime
              );
-         output.accept(
-             id, abstractcookingrecipe, advancement$builder.build(id.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/"))
+         output.accept(id, recipe, advancement.build(id.identifier().withPrefix("recipes/" + this.category.getFolderName() + "/")));
+     }

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/ToggleKeyMapping.java
 +++ b/net/minecraft/client/ToggleKeyMapping.java
-@@ -31,12 +_,17 @@
+@@ -29,12 +_,17 @@
      @Override
      public void setDown(boolean down) {
          if (this.needsToggle.getAsBoolean()) {

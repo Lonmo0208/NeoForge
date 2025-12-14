@@ -2,11 +2,11 @@
 +++ b/net/minecraft/client/gui/components/debug/DebugEntryLookingAtEntity.java
 @@ -25,6 +_,9 @@
          if (entity != null) {
-             list.add(ChatFormatting.UNDERLINE + "Targeted Entity");
-             list.add(String.valueOf(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType())));
+             result.add(ChatFormatting.UNDERLINE + "Targeted Entity");
+             result.add(String.valueOf(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType())));
 +
 +            // Neo: Add entity type tags for the targeted entity
-+            entity.getType().getTags().map(tag -> "#" + tag.location()).forEach(list::add);
++            entity.getType().getTags().map(tag -> "#" + tag.location()).forEach(result::add);
          }
  
-         displayer.addToGroup(GROUP, list);
+         displayer.addToGroup(GROUP, result);

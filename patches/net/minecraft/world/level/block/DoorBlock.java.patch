@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/DoorBlock.java
 +++ b/net/minecraft/world/level/block/DoorBlock.java
-@@ -125,7 +_,7 @@
+@@ -118,7 +_,7 @@
  
      @Override
      public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {

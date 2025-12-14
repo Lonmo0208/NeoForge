@@ -1,15 +1,15 @@
 --- a/net/minecraft/core/dispenser/ShearsDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/ShearsDispenseItemBehavior.java
-@@ -24,7 +_,7 @@
-         ServerLevel serverlevel = source.level();
-         if (!serverlevel.isClientSide()) {
-             BlockPos blockpos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
--            this.setSuccess(tryShearBeehive(serverlevel, dispensed, blockpos) || tryShearEntity(serverlevel, blockpos, dispensed));
-+            this.setSuccess(net.neoforged.neoforge.common.CommonHooks.tryDispenseShearsHarvestBlock(source, dispensed, serverlevel, blockpos) || tryShearBeehive(serverlevel, dispensed, blockpos) || tryShearEntity(serverlevel, blockpos, dispensed));
+@@ -22,7 +_,7 @@
+         ServerLevel level = source.level();
+         if (!level.isClientSide()) {
+             BlockPos pos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
+-            this.setSuccess(tryShearBeehive(level, dispensed, pos) || tryShearEntity(level, pos, dispensed));
++            this.setSuccess(net.neoforged.neoforge.common.CommonHooks.tryDispenseShearsHarvestBlock(source, dispensed, level, pos) || tryShearBeehive(level, dispensed, pos) || tryShearEntity(level, pos, dispensed));
              if (this.isSuccess()) {
-                 dispensed.hurtAndBreak(1, serverlevel, null, item -> {});
+                 dispensed.hurtAndBreak(1, level, null, item -> {});
              }
-@@ -56,8 +_,9 @@
+@@ -53,8 +_,9 @@
                  return true;
              }
  

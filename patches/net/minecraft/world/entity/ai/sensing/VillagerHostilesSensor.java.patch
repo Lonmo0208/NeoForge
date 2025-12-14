@@ -13,10 +13,10 @@
      }
  
      private boolean isClose(LivingEntity body, LivingEntity mob) {
--        float f = ACCEPTABLE_DISTANCE_FROM_HOSTILES.get(mob.getType());
+-        float distThreshold = ACCEPTABLE_DISTANCE_FROM_HOSTILES.get(mob.getType());
 +        var acceptableDistanceFromHostile = mob.getType().builtInRegistryHolder().getData(net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps.ACCEPTABLE_VILLAGER_DISTANCES);
-+        float f = acceptableDistanceFromHostile != null ? acceptableDistanceFromHostile.distance() : ACCEPTABLE_DISTANCE_FROM_HOSTILES.get(mob.getType());
-         return mob.distanceToSqr(body) <= f * f;
++        float distThreshold = acceptableDistanceFromHostile != null ? acceptableDistanceFromHostile.distance() : ACCEPTABLE_DISTANCE_FROM_HOSTILES.get(mob.getType());
+         return mob.distanceToSqr(body) <= distThreshold * distThreshold;
      }
  
 @@ -37,6 +_,7 @@

@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/network/ServerConfigurationPacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerConfigurationPacketListenerImpl.java
-@@ -82,6 +_,15 @@
+@@ -81,6 +_,15 @@
      }
  
      public void startConfiguration() {
@@ -14,18 +14,18 @@
 +    // Neo: Hide vanilla's startConfiguration() in this method so we can call it in handlePong below.
 +    private void runConfiguration() {
          this.send(new ClientboundCustomPayloadPacket(new BrandPayload(this.server.getServerModName())));
-         ServerLinks serverlinks = this.server.serverLinks();
-         if (!serverlinks.isEmpty()) {
-@@ -91,6 +_,8 @@
-         LayeredRegistryAccess<RegistryLayer> layeredregistryaccess = this.server.registries();
-         List<KnownPack> list = this.server.getResourceManager().listPacks().flatMap(packResources -> packResources.location().knownPackInfo().stream()).toList();
+         ServerLinks serverLinks = this.server.serverLinks();
+         if (!serverLinks.isEmpty()) {
+@@ -94,6 +_,8 @@
+             .flatMap(packResources -> packResources.location().knownPackInfo().stream())
+             .toList();
          this.send(new ClientboundUpdateEnabledFeaturesPacket(FeatureFlags.REGISTRY.toNames(this.server.getWorldData().enabledFeatures())));
 +        // Neo: we must sync the registries before vanilla sends tags in SynchronizeRegistriesTask!
 +        net.neoforged.neoforge.network.ConfigurationInitialization.configureEarlyTasks(this, this.configurationTasks::add);
-         this.synchronizeRegistriesTask = new SynchronizeRegistriesTask(list, layeredregistryaccess);
+         this.synchronizeRegistriesTask = new SynchronizeRegistriesTask(knownPacks, registries);
          this.configurationTasks.add(this.synchronizeRegistriesTask);
          this.addOptionalTasks();
-@@ -122,6 +_,32 @@
+@@ -125,6 +_,32 @@
          }
  
          this.server.getServerResourcePack().ifPresent(info -> this.configurationTasks.add(new ServerResourcePackConfigurationTask(info)));
@@ -58,7 +58,7 @@
      }
  
      @Override
-@@ -157,7 +_,13 @@
+@@ -160,7 +_,13 @@
      public void handleConfigurationFinished(ServerboundFinishConfigurationPacket packet) {
          PacketUtils.ensureRunningOnSameThread(packet, this, this.server.packetProcessor());
          this.finishCurrentTask(JoinWorldTask.TYPE);
@@ -72,13 +72,13 @@
 +        net.neoforged.neoforge.network.registration.NetworkRegistry.onConfigurationFinished(this);
  
          try {
-             PlayerList playerlist = this.server.getPlayerList();
-@@ -172,7 +_,7 @@
+             PlayerList playerList = this.server.getPlayerList();
+@@ -175,7 +_,7 @@
                  return;
              }
  
 -            Objects.requireNonNull(this.prepareSpawnTask).spawnPlayer(this.connection, this.createCookie(this.clientInformation));
 +            Objects.requireNonNull(this.prepareSpawnTask).spawnPlayer(this.connection, this.createCookie(this.clientInformation, this.connectionType));
-         } catch (Exception exception) {
-             LOGGER.error("Couldn't place player in world", (Throwable)exception);
+         } catch (Exception var4) {
+             LOGGER.error("Couldn't place player in world", (Throwable)var4);
              this.disconnect(DISCONNECT_REASON_INVALID_DATA);

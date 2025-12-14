@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/KeyboardHandler.java
 +++ b/net/minecraft/client/KeyboardHandler.java
-@@ -511,7 +_,11 @@
+@@ -506,7 +_,11 @@
              if (screen != null) {
                  try {
                      if (action != 1 && action != 2) {
@@ -13,7 +13,7 @@
                              if (options.keyDebugModifier.matches(event)) {
                                  this.usedDebugKeyAsModifier = false;
                              }
-@@ -520,7 +_,11 @@
+@@ -515,7 +_,11 @@
                          }
                      } else {
                          screen.afterKeyboardAction();
@@ -24,9 +24,9 @@
 +                            net.neoforged.neoforge.client.ClientHooks.onScreenKeyPressedPost(screen, event)
 +                        ) {
                              if (this.minecraft.screen == null) {
-                                 InputConstants.Key inputconstants$key = InputConstants.getKey(event);
-                                 KeyMapping.set(inputconstants$key, false);
-@@ -596,6 +_,7 @@
+                                 InputConstants.Key key = InputConstants.getKey(event);
+                                 KeyMapping.set(key, false);
+@@ -591,6 +_,7 @@
                      }
                  }
              }
@@ -34,7 +34,7 @@
          }
      }
  
-@@ -604,7 +_,9 @@
+@@ -599,7 +_,9 @@
              Screen screen = this.minecraft.screen;
              if (screen != null && this.minecraft.getOverlay() == null) {
                  try {
@@ -42,6 +42,6 @@
 +                    if (net.neoforged.neoforge.client.ClientHooks.onScreenCharTypedPre(screen, event)) return;
 +                    if (screen.charTyped(event)) return;
 +                    net.neoforged.neoforge.client.ClientHooks.onScreenCharTypedPost(screen, event);
-                 } catch (Throwable throwable) {
-                     CrashReport crashreport = CrashReport.forThrowable(throwable, "charTyped event handler");
-                     screen.fillCrashDetails(crashreport);
+                 } catch (Throwable var8) {
+                     CrashReport report = CrashReport.forThrowable(var8, "charTyped event handler");
+                     screen.fillCrashDetails(report);

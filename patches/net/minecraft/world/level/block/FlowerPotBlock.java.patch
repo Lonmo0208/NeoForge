@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/FlowerPotBlock.java
 +++ b/net/minecraft/world/level/block/FlowerPotBlock.java
-@@ -37,6 +_,7 @@
+@@ -35,6 +_,7 @@
      );
      private static final Map<Block, Block> POTTED_BY_CONTENT = Maps.newHashMap();
      private static final VoxelShape SHAPE = Block.column(6.0, 0.0, 6.0);
@@ -8,15 +8,12 @@
      private final Block potted;
  
      @Override
-@@ -44,10 +_,31 @@
+@@ -42,10 +_,31 @@
          return CODEC;
      }
  
 +    @Deprecated // Mods should use the constructor below
      public FlowerPotBlock(Block potted, BlockBehaviour.Properties properties) {
--        super(properties);
--        this.potted = potted;
--        POTTED_BY_CONTENT.put(potted, this);
 +        this(Blocks.FLOWER_POT == null ? null : () -> (FlowerPotBlock) Blocks.FLOWER_POT, () -> potted, properties);
 +        if (Blocks.FLOWER_POT != null) {
 +            ((FlowerPotBlock)Blocks.FLOWER_POT).addPlant(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(potted), () -> this);
@@ -30,7 +27,9 @@
 +     * @param emptyPot The empty pot for this pot, or null for self.
 +     */
 +    public FlowerPotBlock(java.util.function.@org.jspecify.annotations.Nullable Supplier<FlowerPotBlock> emptyPot, java.util.function.Supplier<? extends Block> potted, BlockBehaviour.Properties properties) {
-+        super(properties);
+         super(properties);
+-        this.potted = potted;
+-        POTTED_BY_CONTENT.put(potted, this);
 +        this.potted = null; // Unused, redirected by coremod
 +        this.flowerDelegate = potted;
 +        if (emptyPot == null) {
@@ -43,17 +42,17 @@
      }
  
      @Override
-@@ -60,7 +_,7 @@
+@@ -58,7 +_,7 @@
          ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult
      ) {
-         BlockState blockstate = (itemStack.getItem() instanceof BlockItem blockitem
--                ? POTTED_BY_CONTENT.getOrDefault(blockitem.getBlock(), Blocks.AIR)
-+                ? getEmptyPot().fullPots.getOrDefault(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(blockitem.getBlock()), () -> Blocks.AIR).get()
+         BlockState newContents = (itemStack.getItem() instanceof BlockItem blockItem
+-                ? POTTED_BY_CONTENT.getOrDefault(blockItem.getBlock(), Blocks.AIR)
++                ? getEmptyPot().fullPots.getOrDefault(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(blockItem.getBlock()), () -> Blocks.AIR).get()
                  : Blocks.AIR)
              .defaultBlockState();
-         if (blockstate.isAir()) {
-@@ -86,7 +_,7 @@
-                 player.drop(itemstack, false);
+         if (newContents.isAir()) {
+@@ -84,7 +_,7 @@
+                 player.drop(plant, false);
              }
  
 -            level.setBlock(pos, Blocks.FLOWER_POT.defaultBlockState(), 3);
@@ -61,7 +60,7 @@
              level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
              return InteractionResult.SUCCESS;
          }
-@@ -118,12 +_,44 @@
+@@ -116,12 +_,44 @@
      }
  
      public Block getPotted() {

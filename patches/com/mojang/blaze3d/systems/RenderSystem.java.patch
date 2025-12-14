@@ -1,6 +1,6 @@
 --- a/com/mojang/blaze3d/systems/RenderSystem.java
 +++ b/com/mojang/blaze3d/systems/RenderSystem.java
-@@ -79,6 +_,7 @@
+@@ -77,6 +_,7 @@
      private static @Nullable DynamicUniforms dynamicUniforms;
      private static final ScissorState scissorStateForRenderTypeDraws = new ScissorState();
      private static SamplerCache samplerCache = new SamplerCache();
@@ -8,7 +8,7 @@
  
      public static SamplerCache getSamplerCache() {
          return samplerCache;
-@@ -182,7 +_,7 @@
+@@ -180,7 +_,7 @@
      }
  
      public static void initRenderer(long windowHandle, int logVerbosity, boolean synchronousLogs, ShaderSource shaderSource, boolean wantsDebugLabels) {
@@ -17,9 +17,9 @@
          apiDescription = getDevice().getImplementationInformation();
          dynamicUniforms = new DynamicUniforms();
          samplerCache.initialize();
-@@ -315,6 +_,40 @@
-         if (gpubufferslice2 != null) {
-             renderPass.setUniform("Lighting", gpubufferslice2);
+@@ -310,6 +_,40 @@
+         if (shaderLights != null) {
+             renderPass.setUniform("Lighting", shaderLights);
          }
 +    }
 +

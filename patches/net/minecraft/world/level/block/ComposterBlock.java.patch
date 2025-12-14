@@ -28,28 +28,28 @@
 @@ -249,7 +_,7 @@
          ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult
      ) {
-         int i = state.getValue(LEVEL);
--        if (i < 8 && COMPOSTABLES.containsKey(itemStack.getItem())) {
-+        if (i < 8 && getValue(itemStack) > 0) {
-             if (i < 7 && !level.isClientSide()) {
-                 BlockState blockstate = addItem(player, state, level, pos, itemStack);
-                 level.levelEvent(1500, pos, state != blockstate ? 1 : 0);
+         int fillLevel = state.getValue(LEVEL);
+-        if (fillLevel < 8 && COMPOSTABLES.containsKey(itemStack.getItem())) {
++        if (fillLevel < 8 && getValue(itemStack) > 0) {
+             if (fillLevel < 7 && !level.isClientSide()) {
+                 BlockState newState = addItem(player, state, level, pos, itemStack);
+                 level.levelEvent(1500, pos, state != newState ? 1 : 0);
 @@ -276,7 +_,7 @@
  
      public static BlockState insertItem(Entity sourceEntity, BlockState state, ServerLevel level, ItemStack itemStack, BlockPos pos) {
-         int i = state.getValue(LEVEL);
--        if (i < 7 && COMPOSTABLES.containsKey(itemStack.getItem())) {
-+        if (i < 7 && getValue(itemStack) > 0) {
-             BlockState blockstate = addItem(sourceEntity, state, level, pos, itemStack);
+         int fillLevel = state.getValue(LEVEL);
+-        if (fillLevel < 7 && COMPOSTABLES.containsKey(itemStack.getItem())) {
++        if (fillLevel < 7 && getValue(itemStack) > 0) {
+             BlockState newState = addItem(sourceEntity, state, level, pos, itemStack);
              itemStack.shrink(1);
-             return blockstate;
+             return newState;
 @@ -307,7 +_,7 @@
  
-     static BlockState addItem(@Nullable Entity sourceEntity, BlockState state, LevelAccessor level, BlockPos pos, ItemStack itemStack) {
-         int i = state.getValue(LEVEL);
--        float f = COMPOSTABLES.getFloat(itemStack.getItem());
-+        float f = getValue(itemStack);
-         if ((i != 0 || !(f > 0.0F)) && !(level.getRandom().nextDouble() < f)) {
+     private static BlockState addItem(@Nullable Entity sourceEntity, BlockState state, LevelAccessor level, BlockPos pos, ItemStack itemStack) {
+         int fillLevel = state.getValue(LEVEL);
+-        float chance = COMPOSTABLES.getFloat(itemStack.getItem());
++        float chance = getValue(itemStack);
+         if ((fillLevel != 0 || !(chance > 0.0F)) && !(level.getRandom().nextDouble() < chance)) {
              return state;
          } else {
 @@ -407,7 +_,7 @@

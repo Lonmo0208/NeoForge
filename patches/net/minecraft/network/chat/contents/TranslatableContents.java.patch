@@ -1,6 +1,6 @@
 --- a/net/minecraft/network/chat/contents/TranslatableContents.java
 +++ b/net/minecraft/network/chat/contents/TranslatableContents.java
-@@ -78,6 +_,16 @@
+@@ -77,6 +_,16 @@
          this.key = key;
          this.fallback = fallback;
          this.args = args;
@@ -17,21 +17,21 @@
      }
  
      @Override
-@@ -89,6 +_,13 @@
-         Language language = Language.getInstance();
-         if (language != this.decomposedWith) {
-             this.decomposedWith = language;
+@@ -88,6 +_,13 @@
+         Language currentLanguage = Language.getInstance();
+         if (currentLanguage != this.decomposedWith) {
+             this.decomposedWith = currentLanguage;
 +
-+            Component langComponent = language.getComponent(this.key);
++            Component langComponent = currentLanguage.getComponent(this.key);
 +            if (langComponent != null) {
 +                this.decomposedParts = ImmutableList.of(langComponent);
 +                return;
 +            }
 +
-             String s = this.fallback != null ? language.getOrDefault(this.key, this.fallback) : language.getOrDefault(this.key);
+             String format = this.fallback != null ? currentLanguage.getOrDefault(this.key, this.fallback) : currentLanguage.getOrDefault(this.key);
  
              try {
-@@ -167,6 +_,12 @@
+@@ -166,6 +_,12 @@
      public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> output, Style currentStyle) {
          this.decompose();
  
@@ -41,10 +41,10 @@
 +        }
 +
 +        try {
-         for (FormattedText formattedtext : this.decomposedParts) {
-             Optional<T> optional = formattedtext.visit(output, currentStyle);
-             if (optional.isPresent()) {
-@@ -175,12 +_,21 @@
+         for (FormattedText part : this.decomposedParts) {
+             Optional<T> result = part.visit(output, currentStyle);
+             if (result.isPresent()) {
+@@ -174,12 +_,21 @@
          }
  
          return Optional.empty();
@@ -63,10 +63,10 @@
 +        }
 +
 +        try {
-         for (FormattedText formattedtext : this.decomposedParts) {
-             Optional<T> optional = formattedtext.visit(output);
-             if (optional.isPresent()) {
-@@ -189,6 +_,9 @@
+         for (FormattedText part : this.decomposedParts) {
+             Optional<T> result = part.visit(output);
+             if (result.isPresent()) {
+@@ -188,6 +_,9 @@
          }
  
          return Optional.empty();

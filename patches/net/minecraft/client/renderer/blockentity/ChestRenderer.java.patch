@@ -2,7 +2,7 @@
 +++ b/net/minecraft/client/renderer/blockentity/ChestRenderer.java
 @@ -77,6 +_,8 @@
          if (state.type != ChestType.SINGLE) {
-             state.lightCoords = neighborcombineresult.apply(new BrightnessCombiner<>()).applyAsInt(state.lightCoords);
+             state.lightCoords = combineResult.apply(new BrightnessCombiner<>()).applyAsInt(state.lightCoords);
          }
 +
 +        state.customMaterial = getCustomMaterial(blockEntity, state);
@@ -10,15 +10,15 @@
  
      public void submit(ChestRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
 @@ -87,7 +_,7 @@
-         float f = state.open;
-         f = 1.0F - f;
-         f = 1.0F - f * f * f;
+         float open = state.open;
+         open = 1.0F - open;
+         open = 1.0F - open * open * open;
 -        Material material = Sheets.chooseMaterial(state.material, state.type);
 +        Material material = state.customMaterial != null ? state.customMaterial : Sheets.chooseMaterial(state.material, state.type);
-         RenderType rendertype = material.renderType(RenderTypes::entityCutout);
-         TextureAtlasSprite textureatlassprite = this.materials.get(material);
+         RenderType renderType = material.renderType(RenderTypes::entityCutout);
+         TextureAtlasSprite sprite = this.materials.get(material);
          if (state.type != ChestType.SINGLE) {
-@@ -153,5 +_,20 @@
+@@ -126,5 +_,20 @@
          } else {
              return ChestRenderState.ChestMaterialType.REGULAR;
          }

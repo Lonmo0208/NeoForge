@@ -5,5 +5,5 @@
      }
  
 +    @Deprecated //Forge: use the ItemStack sensitive version
-     boolean emptyContents(@Nullable LivingEntity user, Level level, BlockPos pos, @Nullable BlockHitResult hitResult);
+     boolean emptyContents(final @Nullable LivingEntity user, final Level level, final BlockPos pos, final @Nullable BlockHitResult hitResult);
  }

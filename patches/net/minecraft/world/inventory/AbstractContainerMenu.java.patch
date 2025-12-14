@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/inventory/AbstractContainerMenu.java
 +++ b/net/minecraft/world/inventory/AbstractContainerMenu.java
-@@ -565,6 +_,12 @@
+@@ -559,6 +_,12 @@
      }
  
      private boolean tryItemClickBehaviourOverride(Player player, ClickAction clickAction, Slot slot, ItemStack clicked, ItemStack carried) {
@@ -10,6 +10,6 @@
 +            return true;
 +        }
 +
-         FeatureFlagSet featureflagset = player.level().enabledFeatures();
-         return carried.isItemEnabled(featureflagset) && carried.overrideStackedOnOther(slot, clickAction, player)
+         FeatureFlagSet enabledFeatures = player.level().enabledFeatures();
+         return carried.isItemEnabled(enabledFeatures) && carried.overrideStackedOnOther(slot, clickAction, player)
              ? true

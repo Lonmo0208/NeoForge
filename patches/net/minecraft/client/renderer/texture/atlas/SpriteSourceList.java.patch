@@ -13,15 +13,15 @@
 +    }
 +
 +    public List<SpriteSource.Loader> list(ResourceManager resourceManager, java.util.Set<net.minecraft.server.packs.metadata.MetadataSectionType<?>> additionalMetadata) {
-         final Map<Identifier, SpriteSource.DiscardableLoader> map = new HashMap<>();
-         SpriteSource.Output spritesource$output = new SpriteSource.Output() {
+         final Map<Identifier, SpriteSource.DiscardableLoader> sprites = new HashMap<>();
+         SpriteSource.Output output = new SpriteSource.Output() {
              @Override
 @@ -58,7 +_,7 @@
                  }
              }
          };
--        this.sources.forEach(s -> s.run(resourceManager, spritesource$output));
-+        this.sources.forEach(s -> s.run(resourceManager, spritesource$output, additionalMetadata));
-         Builder<SpriteSource.Loader> builder = ImmutableList.builder();
-         builder.add(loader -> MissingTextureAtlasSprite.create());
-         builder.addAll(map.values());
+-        this.sources.forEach(s -> s.run(resourceManager, output));
++        this.sources.forEach(s -> s.run(resourceManager, output, additionalMetadata));
+         Builder<SpriteSource.Loader> result = ImmutableList.builder();
+         result.add(loader -> MissingTextureAtlasSprite.create());
+         result.addAll(sprites.values());

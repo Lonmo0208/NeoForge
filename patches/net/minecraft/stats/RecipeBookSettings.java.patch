@@ -1,6 +1,6 @@
 --- a/net/minecraft/stats/RecipeBookSettings.java
 +++ b/net/minecraft/stats/RecipeBookSettings.java
-@@ -13,7 +_,8 @@
+@@ -12,7 +_,8 @@
  import net.minecraft.world.inventory.RecipeBookType;
  
  public final class RecipeBookSettings {
@@ -10,7 +10,7 @@
          RecipeBookSettings.TypeSettings.STREAM_CODEC,
          o -> o.crafting,
          RecipeBookSettings.TypeSettings.STREAM_CODEC,
-@@ -22,6 +_,9 @@
+@@ -21,6 +_,9 @@
          o -> o.blastFurnace,
          RecipeBookSettings.TypeSettings.STREAM_CODEC,
          o -> o.smoker,
@@ -20,7 +20,7 @@
          RecipeBookSettings::new
      );
      public static final MapCodec<RecipeBookSettings> MAP_CODEC = RecordCodecBuilder.mapCodec(
-@@ -30,6 +_,7 @@
+@@ -29,6 +_,7 @@
                  RecipeBookSettings.TypeSettings.FURNACE_MAP_CODEC.forGetter(o -> o.furnace),
                  RecipeBookSettings.TypeSettings.BLAST_FURNACE_MAP_CODEC.forGetter(o -> o.blastFurnace),
                  RecipeBookSettings.TypeSettings.SMOKER_MAP_CODEC.forGetter(o -> o.smoker)
@@ -28,7 +28,7 @@
              )
              .apply(i, RecipeBookSettings::new)
      );
-@@ -37,6 +_,7 @@
+@@ -36,6 +_,7 @@
      private RecipeBookSettings.TypeSettings furnace;
      private RecipeBookSettings.TypeSettings blastFurnace;
      private RecipeBookSettings.TypeSettings smoker;
@@ -36,7 +36,7 @@
  
      public RecipeBookSettings() {
          this(
-@@ -53,10 +_,21 @@
+@@ -52,10 +_,21 @@
          RecipeBookSettings.TypeSettings blastFurnace,
          RecipeBookSettings.TypeSettings smoker
      ) {
@@ -58,7 +58,7 @@
      }
  
      @VisibleForTesting
-@@ -66,6 +_,7 @@
+@@ -65,6 +_,7 @@
              case FURNACE -> this.furnace;
              case BLAST_FURNACE -> this.blastFurnace;
              case SMOKER -> this.smoker;
@@ -66,7 +66,7 @@
          };
      }
  
-@@ -82,6 +_,9 @@
+@@ -81,6 +_,9 @@
                  break;
              case SMOKER:
                  this.smoker = operator.apply(this.smoker);
@@ -76,7 +76,7 @@
          }
      }
  
-@@ -102,7 +_,7 @@
+@@ -101,7 +_,7 @@
      }
  
      public RecipeBookSettings copy() {
@@ -85,7 +85,7 @@
      }
  
      public void replaceFrom(RecipeBookSettings other) {
-@@ -110,6 +_,8 @@
+@@ -109,6 +_,8 @@
          this.furnace = other.furnace;
          this.blastFurnace = other.blastFurnace;
          this.smoker = other.smoker;

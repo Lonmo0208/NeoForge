@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/entity/npc/villager/Villager.java
 +++ b/net/minecraft/world/entity/npc/villager/Villager.java
-@@ -324,7 +_,7 @@
+@@ -323,7 +_,7 @@
      @Override
      public InteractionResult mobInteract(Player player, InteractionHand hand) {
-         ItemStack itemstack = player.getItemInHand(hand);
--        if (itemstack.is(Items.VILLAGER_SPAWN_EGG) || !this.isAlive() || this.isTrading() || this.isSleeping()) {
-+        if (itemstack.is(Items.VILLAGER_SPAWN_EGG) || !this.isAlive() || this.isTrading() || this.isSleeping() || player.isSecondaryUseActive()) {
+         ItemStack itemStack = player.getItemInHand(hand);
+-        if (itemStack.is(Items.VILLAGER_SPAWN_EGG) || !this.isAlive() || this.isTrading() || this.isSleeping()) {
++        if (itemStack.is(Items.VILLAGER_SPAWN_EGG) || !this.isAlive() || this.isTrading() || this.isSleeping() || player.isSecondaryUseActive()) {
              return super.mobInteract(player, hand);
          } else if (this.isBaby()) {
              this.setUnhappy();
-@@ -771,10 +_,11 @@
+@@ -770,10 +_,11 @@
  
      @Override
      public void thunderHit(ServerLevel level, LightningBolt lightningBolt) {
@@ -22,7 +22,7 @@
                  w.setPersistenceRequired();
                  this.releaseAllPois();
              });
-@@ -794,7 +_,10 @@
+@@ -793,7 +_,10 @@
      @Override
      public boolean wantsToPickUp(ServerLevel level, ItemStack itemStack) {
          Item item = itemStack.getItem();

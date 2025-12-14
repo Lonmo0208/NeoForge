@@ -32,9 +32,9 @@
  
      @Override
      public CompletableFuture<?> run(CachedOutput cache) {
-         Map<ResourceKey<EquipmentAsset>, EquipmentClientInfo> map = new HashMap<>();
+         Map<ResourceKey<EquipmentAsset>, EquipmentClientInfo> equipmentAssets = new HashMap<>();
 -        bootstrap((id, asset) -> {
 +        registerModels((id, asset) -> {
-             if (map.putIfAbsent(id, asset) != null) {
+             if (equipmentAssets.putIfAbsent(id, asset) != null) {
                  throw new IllegalStateException("Tried to register equipment asset twice for id: " + id);
              }

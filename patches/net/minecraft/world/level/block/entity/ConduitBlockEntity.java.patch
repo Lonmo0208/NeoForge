@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/level/block/entity/ConduitBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/ConduitBlockEntity.java
-@@ -148,10 +_,8 @@
-                         BlockPos blockpos1 = worldPosition.offset(j1, k1, l1);
-                         BlockState blockstate = level.getBlockState(blockpos1);
+@@ -149,10 +_,8 @@
+                         BlockPos testPos = worldPosition.offset(ox, oy, ozx);
+                         BlockState testBlock = level.getBlockState(testPos);
  
--                        for (Block block : VALID_BLOCKS) {
--                            if (blockstate.is(block)) {
--                                effectBlocks.add(blockpos1);
+-                        for (Block type : VALID_BLOCKS) {
+-                            if (testBlock.is(type)) {
+-                                effectBlocks.add(testPos);
 -                            }
-+                        if (blockstate.isConduitFrame(level, blockpos1, worldPosition)) {
-+                            effectBlocks.add(blockpos1);
++                        if (testBlock.isConduitFrame(level, testPos, worldPosition)) {
++                            effectBlocks.add(testPos);
                          }
                      }
                  }

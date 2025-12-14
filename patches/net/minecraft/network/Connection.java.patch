@@ -3,7 +3,7 @@
 @@ -81,6 +_,8 @@
      private boolean handlingFault;
      private volatile @Nullable DisconnectionDetails delayedDisconnect;
-     @Nullable BandwidthDebugMonitor bandwidthDebugMonitor;
+     private @Nullable BandwidthDebugMonitor bandwidthDebugMonitor;
 +    @Nullable
 +    private ProtocolInfo<?> inboundProtocol;
  
@@ -25,18 +25,18 @@
      @Override
 @@ -115,6 +_,13 @@
                  } else {
-                     Component component = Component.translatable("disconnect.genericReason", "Internal Exception: " + cause);
-                     PacketListener packetlistener = this.packetListener;
-+                    if (packetlistener != null) {
-+                        ConnectionProtocol protocol = packetlistener.protocol();
+                     Component reason = Component.translatable("disconnect.genericReason", "Internal Exception: " + cause);
+                     PacketListener listener = this.packetListener;
++                    if (listener != null) {
++                        ConnectionProtocol protocol = listener.protocol();
 +                        if (protocol == ConnectionProtocol.CONFIGURATION || protocol == ConnectionProtocol.PLAY) {
 +                            // Neo: Always log critical network exceptions for config and play packets
 +                            LOGGER.error("Exception caught in connection", cause);
 +                        }
 +                    }
-                     DisconnectionDetails disconnectiondetails;
-                     if (packetlistener != null) {
-                         disconnectiondetails = packetlistener.createDisconnectionInfo(component, cause);
+                     DisconnectionDetails details;
+                     if (listener != null) {
+                         details = listener.createDisconnectionInfo(reason, cause);
 @@ -200,6 +_,7 @@
          if (protocol.flow() != this.getReceiving()) {
              throw new IllegalStateException("Invalid inbound protocol: " + protocol.id());
@@ -44,22 +44,22 @@
 +            this.inboundProtocol = protocol;
              this.packetListener = packetListener;
              this.disconnectListener = null;
-             UnconfiguredPipelineHandler.InboundConfigurationTask unconfiguredpipelinehandler$inboundconfigurationtask = UnconfiguredPipelineHandler.setupInboundProtocol(
-@@ -228,7 +_,12 @@
-             if (bundlerinfo != null) {
-                 PacketBundleUnpacker packetbundleunpacker = new PacketBundleUnpacker(bundlerinfo);
-                 unconfiguredpipelinehandler$outboundconfigurationtask = unconfiguredpipelinehandler$outboundconfigurationtask.andThen(
--                    ctx -> ctx.pipeline().addAfter("encoder", "unbundler", packetbundleunpacker)
-+                    ctx -> {
-+                        ctx.pipeline().addAfter("encoder", "unbundler", packetbundleunpacker);
-+                        // Neo: our handlers must be between the encoder and the unbundler, so re-inject them
-+                        // Note, this call must be inside the .andThen lambda, or it will actually run before the unbundler gets added.
-+                        net.neoforged.neoforge.network.filters.NetworkFilters.injectIfNecessary(this);
-+                    }
-                 );
+             UnconfiguredPipelineHandler.InboundConfigurationTask configMessage = UnconfiguredPipelineHandler.setupInboundProtocol(protocol);
+@@ -221,7 +_,12 @@
+             BundlerInfo bundlerInfo = protocol.bundlerInfo();
+             if (bundlerInfo != null) {
+                 PacketBundleUnpacker newUnbundler = new PacketBundleUnpacker(bundlerInfo);
+-                configMessage = configMessage.andThen(ctx -> ctx.pipeline().addAfter("encoder", "unbundler", newUnbundler));
++                configMessage = configMessage.andThen(ctx -> {
++                    ctx.pipeline().addAfter("encoder", "unbundler", newUnbundler);
++                    // Neo: our handlers must be between the encoder and the unbundler, so re-inject them
++                    // Note, this call must be inside the .andThen lambda, or it will actually run before the unbundler gets added.
++                    net.neoforged.neoforge.network.filters.NetworkFilters.injectIfNecessary(this);
++                });
              }
  
-@@ -393,7 +_,7 @@
+             boolean isLoginProtocol = protocol.id() == ConnectionProtocol.LOGIN;
+@@ -381,7 +_,7 @@
          if (this.address == null) {
              return "local";
          } else {
@@ -68,15 +68,15 @@
          }
      }
  
-@@ -436,6 +_,7 @@
+@@ -424,6 +_,7 @@
      }
  
-     public static ChannelFuture connect(InetSocketAddress address, EventLoopGroupHolder eventLoopGroupHolder, final Connection connection) {
+     public static ChannelFuture connect(InetSocketAddress address, EventLoopGroupHolder eventLoopGroupHolder, Connection connection) {
 +        net.neoforged.neoforge.network.DualStackUtils.checkIPv6(address.getAddress());
          return new Bootstrap().group(eventLoopGroupHolder.eventLoopGroup()).handler(new ChannelInitializer<Channel>() {
              @Override
              protected void initChannel(Channel channel) {
-@@ -592,5 +_,17 @@
+@@ -586,5 +_,17 @@
  
      public void setBandwidthLogger(LocalSampleLogger bandwidthLogger) {
          this.bandwidthDebugMonitor = new BandwidthDebugMonitor(bandwidthLogger);

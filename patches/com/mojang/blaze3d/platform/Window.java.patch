@@ -1,6 +1,6 @@
 --- a/com/mojang/blaze3d/platform/Window.java
 +++ b/com/mojang/blaze3d/platform/Window.java
-@@ -93,6 +_,10 @@
+@@ -95,6 +_,10 @@
          GLFW.glfwWindowHint(139267, 3);
          GLFW.glfwWindowHint(139272, 204801);
          GLFW.glfwWindowHint(139270, 1);
@@ -8,31 +8,31 @@
 +        if (earlyLoadingScreen != null) {
 +            this.handle = takeOverWindow(earlyLoadingScreen, title);
 +        } else {
-         this.handle = GLFW.glfwCreateWindow(this.width, this.height, title, this.fullscreen && monitor != null ? monitor.getMonitor() : 0L, 0L);
-         if (monitor != null) {
-             VideoMode videomode = monitor.getPreferredVidMode(this.fullscreen ? this.preferredFullscreenVideoMode : Optional.empty());
-@@ -105,6 +_,7 @@
-             this.windowedX = this.x = aint1[0];
-             this.windowedY = this.y = aint[0];
+         this.handle = GLFW.glfwCreateWindow(this.width, this.height, title, this.fullscreen && initialMonitor != null ? initialMonitor.getMonitor() : 0L, 0L);
+         if (initialMonitor != null) {
+             VideoMode mode = initialMonitor.getPreferredVidMode(this.fullscreen ? this.preferredFullscreenVideoMode : Optional.empty());
+@@ -107,6 +_,7 @@
+             this.windowedX = this.x = actualX[0];
+             this.windowedY = this.y = actualY[0];
          }
 +        }
  
          this.setMode();
          this.refreshFramebufferSize();
-@@ -206,8 +_,10 @@
+@@ -208,8 +_,10 @@
      }
  
      public void defaultErrorCallback(int errorCode, long description) {
 -        RenderSystem.assertOnRenderThread();
-         String s = MemoryUtil.memUTF8(description);
+         String errorString = MemoryUtil.memUTF8(description);
 +        if (!RenderSystem.isOnRenderThread()) {
-+            throw new IllegalStateException("Encountered GL error off-thread @ " + errorSection + ": " + errorCode + ": " + s);
++            throw new IllegalStateException("Encountered GL error off-thread @ " + errorSection + ": " + errorCode + ": " + errorString);
 +        }
          LOGGER.error("########## GL ERROR ##########");
          LOGGER.error("@ {}", this.errorSection);
-         LOGGER.error("{}: {}", errorCode, s);
-@@ -513,5 +_,27 @@
-         WindowInitFailed(String message) {
+         LOGGER.error("{}: {}", errorCode, errorString);
+@@ -515,5 +_,27 @@
+         private WindowInitFailed(String message) {
              super(message);
          }
 +    }

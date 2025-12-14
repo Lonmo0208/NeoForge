@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/blockentity/LecternRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/LecternRenderer.java
-@@ -63,4 +_,10 @@
+@@ -67,4 +_,10 @@
              poseStack.popPose();
          }
      }

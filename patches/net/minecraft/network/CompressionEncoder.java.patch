@@ -12,13 +12,13 @@
 @@ -17,6 +_,12 @@
  
      protected void encode(ChannelHandlerContext ctx, ByteBuf uncompressed, ByteBuf out) {
-         int i = uncompressed.readableBytes();
-+        if (!DISABLE_PACKET_DEBUG && i > net.minecraft.network.CompressionDecoder.MAXIMUM_UNCOMPRESSED_LENGTH) {
+         int uncompressedLength = uncompressed.readableBytes();
++        if (!DISABLE_PACKET_DEBUG && uncompressedLength > net.minecraft.network.CompressionDecoder.MAXIMUM_UNCOMPRESSED_LENGTH) {
 +            uncompressed.markReaderIndex();
-+            LOGGER.error("Attempted to send packet over maximum protocol size: {} > {}\nData:\n{}", i, net.minecraft.network.CompressionDecoder.MAXIMUM_UNCOMPRESSED_LENGTH,
++            LOGGER.error("Attempted to send packet over maximum protocol size: {} > {}\nData:\n{}", uncompressedLength, net.minecraft.network.CompressionDecoder.MAXIMUM_UNCOMPRESSED_LENGTH,
 +                    net.neoforged.neoforge.logging.PacketDump.getContentDump(uncompressed));
 +            uncompressed.resetReaderIndex();
 +        }
-         if (i > 8388608) {
-             throw new IllegalArgumentException("Packet too big (is " + i + ", should be less than 8388608)");
+         if (uncompressedLength > 8388608) {
+             throw new IllegalArgumentException("Packet too big (is " + uncompressedLength + ", should be less than 8388608)");
          } else {

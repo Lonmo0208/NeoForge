@@ -1,6 +1,6 @@
 --- a/net/minecraft/data/tags/TagsProvider.java
 +++ b/net/minecraft/data/tags/TagsProvider.java
-@@ -32,26 +_,49 @@
+@@ -31,26 +_,49 @@
      private final CompletableFuture<TagsProvider.TagLookup<T>> parentProvider;
      protected final ResourceKey<? extends Registry<T>> registryKey;
      protected final Map<Identifier, TagBuilder> builders = Maps.newLinkedHashMap();
@@ -52,28 +52,28 @@
      }
  
      protected abstract void addTags(HolderLookup.Provider registries);
-@@ -84,7 +_,10 @@
-                                     Identifier identifier = entry.getKey();
-                                     TagBuilder tagbuilder = entry.getValue();
-                                     List<TagEntry> list = tagbuilder.build();
--                                    List<TagEntry> list1 = list.stream().filter(e -> !e.verifyIfPresent(predicate, predicate1)).toList();
-+                                    List<TagEntry> list1 = java.util.stream.Stream.concat(list.stream(), tagbuilder.getRemoveEntries())
+@@ -80,7 +_,10 @@
+                                     Identifier id = entry.getKey();
+                                     TagBuilder builder = entry.getValue();
+                                     List<TagEntry> entries = builder.build();
+-                                    List<TagEntry> unresolvedEntries = entries.stream().filter(e -> !e.verifyIfPresent(elementCheck, tagCheck)).toList();
++                                    List<TagEntry> unresolvedEntries = java.util.stream.Stream.concat(entries.stream(), builder.getRemoveEntries())
 +                                               // Neo: Assume tags from other namespaces always exists
-+                                              .filter((e) -> e.getId().getNamespace().equals(modId) && !e.verifyIfPresent(predicate, predicate1))
++                                              .filter((e) -> e.getId().getNamespace().equals(modId) && !e.verifyIfPresent(elementCheck, tagCheck))
 +                                              .toList();
-                                     if (!list1.isEmpty()) {
+                                     if (!unresolvedEntries.isEmpty()) {
                                          throw new IllegalArgumentException(
                                              String.format(
-@@ -95,8 +_,10 @@
+@@ -91,8 +_,10 @@
                                              )
                                          );
                                      } else {
--                                        Path path = this.pathProvider.json(identifier);
--                                        return DataProvider.saveStable(cache, c.contents, TagFile.CODEC, new TagFile(list, false), path);
-+                                        Path path = this.getPath(identifier);
+-                                        Path path = this.pathProvider.json(id);
+-                                        return DataProvider.saveStable(cache, c.contents, TagFile.CODEC, new TagFile(entries, false), path);
++                                        Path path = this.getPath(id);
 +                                        if (path == null) return CompletableFuture.completedFuture(null); // Neo: Allow running this data provider without writing it. Recipe provider needs valid tags.
-+                                        var removed = tagbuilder.getRemoveEntries().toList();
-+                                        return DataProvider.saveStable(cache, c.contents, TagFile.CODEC, new TagFile(list, tagbuilder.isReplace(), removed), path);
++                                        var removed = builder.getRemoveEntries().toList();
++                                        return DataProvider.saveStable(cache, c.contents, TagFile.CODEC, new TagFile(entries, builder.isReplace(), removed), path);
                                      }
                                  }
                              )

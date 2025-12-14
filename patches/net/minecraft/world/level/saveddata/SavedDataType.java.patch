@@ -34,7 +34,7 @@
 +
      @Override
      public boolean equals(Object obj) {
-         return obj instanceof SavedDataType<?> saveddatatype && this.id.equals(saveddatatype.id);
+         return obj instanceof SavedDataType<?> type && this.id.equals(type.id);
 @@ -18,5 +_,10 @@
      @Override
      public String toString() {

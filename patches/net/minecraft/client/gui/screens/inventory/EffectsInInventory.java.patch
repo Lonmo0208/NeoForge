@@ -1,89 +1,58 @@
 --- a/net/minecraft/client/gui/screens/inventory/EffectsInInventory.java
 +++ b/net/minecraft/client/gui/screens/inventory/EffectsInInventory.java
 @@ -47,7 +_,15 @@
-         int j = this.screen.width - i;
-         Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
-         if (!collection.isEmpty() && j >= 32) {
--            int k = j >= 120 ? j - 7 : 32;
-+            boolean flag = j >= 120;
-+            var event = net.neoforged.neoforge.client.ClientHooks.onScreenPotionSize(screen, j, !flag, i);
+         int availableWidth = this.screen.width - xo;
+         Collection<MobEffectInstance> activeEffects = this.minecraft.player.getActiveEffects();
+         if (!activeEffects.isEmpty() && availableWidth >= 32) {
+-            int maxWidth = availableWidth >= 120 ? availableWidth - 7 : 32;
++            boolean wideDisplay = availableWidth >= 120;
++            var event = net.neoforged.neoforge.client.ClientHooks.onScreenPotionSize(screen, availableWidth, !wideDisplay, xo);
 +            if (event.isCanceled()) return;
-+            flag = !event.isCompact();
-+            i = event.getHorizontalOffset();
++            wideDisplay = !event.isCompact();
++            xo = event.getHorizontalOffset();
 +
-+            collection = collection.stream().filter(net.neoforged.neoforge.client.ClientHooks::shouldRenderEffect).sorted().collect(java.util.stream.Collectors.toList());
++            activeEffects = activeEffects.stream().filter(net.neoforged.neoforge.client.ClientHooks::shouldRenderEffect).sorted().collect(java.util.stream.Collectors.toList());
 +
-+            int k = flag ? j - 7 : 32;
-             int l = 33;
-             if (collection.size() > 5) {
-                 l = 132 / (collection.size() - 1);
-@@ -65,11 +_,14 @@
++            int maxWidth = wideDisplay ? availableWidth - 7 : 32;
+             int yStep = 33;
+             if (activeEffects.size() > 5) {
+                 yStep = 132 / (activeEffects.size() - 1);
+@@ -63,11 +_,14 @@
          Font font = this.screen.getFont();
  
-         for (MobEffectInstance mobeffectinstance : iterable) {
-+            var renderer = net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions.of(mobeffectinstance);
-             boolean flag = mobeffectinstance.isAmbient();
-             Component component = this.getEffectName(mobeffectinstance);
-             Component component1 = MobEffectUtil.formatDuration(mobeffectinstance, 1.0F, this.minecraft.level.tickRateManager().tickrate());
-             int j = this.renderBackground(graphics, font, component, component1, x0, i, flag, maxWidth);
--            this.renderText(graphics, component, component1, font, x0, i, j, yStep, mouseX, mouseY);
-+            if (!renderer.renderInventoryText(mobeffectinstance, screen, graphics, x0, i, 0))
-+            this.renderText(graphics, component, component1, font, x0, i, j, yStep, mouseX, mouseY, mobeffectinstance);
-+            if (!renderer.renderInventoryIcon(mobeffectinstance, screen, graphics, x0 + 7, i, 0))
-             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Gui.getMobEffectSprite(mobeffectinstance.getEffect()), x0 + 7, i + 7, 18, 18);
-             i += yStep;
+         for (MobEffectInstance effect : sortedEffects) {
++            var renderer = net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions.of(effect);
+             boolean isAmbient = effect.isAmbient();
+             Component effectText = this.getEffectName(effect);
+             Component duration = MobEffectUtil.formatDuration(effect, 1.0F, this.minecraft.level.tickRateManager().tickrate());
+             int textureWidth = this.renderBackground(graphics, font, effectText, duration, x0, y0, isAmbient, maxWidth);
+-            this.renderText(graphics, effectText, duration, font, x0, y0, textureWidth, yStep, mouseX, mouseY);
++            if (!renderer.renderInventoryText(effect, screen, graphics, x0, y0, 0))
++            this.renderText(graphics, effectText, duration, font, x0, y0, textureWidth, yStep, mouseX, mouseY, effect);
++            if (!renderer.renderInventoryIcon(effect, screen, graphics, x0 + 7, y0, 0))
+             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Gui.getMobEffectSprite(effect.getEffect()), x0 + 7, y0 + 7, 18, 18);
+             y0 += yStep;
          }
-@@ -85,17 +_,35 @@
-         return k;
+@@ -83,9 +_,15 @@
+         return textureWidth;
      }
  
--    private void renderText(
--        GuiGraphics graphics,
--        Component effectText,
--        Component duration,
--        Font font,
--        int x0,
--        int y0,
--        int textureWidth,
--        int yStep,
--        int mouseX,
--        int mouseY
 +    // Neo: Call the method that takes the effect instance for which the text is being rendered
-+    @Deprecated
-+    private void renderText(
-+        GuiGraphics graphics,
-+        Component effectText,
-+        Component duration,
-+        Font font,
-+        int x0,
-+        int y0,
-+        int textureWidth,
-+        int yStep,
-+        int mouseX,
-+        int mouseY
-+    ) {
+     private void renderText(
+         GuiGraphics graphics, Component effectText, Component duration, Font font, int x0, int y0, int textureWidth, int yStep, int mouseX, int mouseY
+     ) {
 +        renderText(graphics, effectText, duration, font, x0, y0, textureWidth, yStep, mouseX, mouseY, null);
 +    }
-+
 +    private void renderText(
-+        GuiGraphics graphics,
-+        Component effectText,
-+        Component duration,
-+        Font font,
-+        int x0,
-+        int y0,
-+        int textureWidth,
-+        int yStep,
-+        int mouseX,
-+        int mouseY
-+        , @org.jspecify.annotations.Nullable MobEffectInstance effectInstance
-     ) {
-         int i = x0 + 32;
-         int j = y0 + 7;
-@@ -112,7 +_,12 @@
++        GuiGraphics graphics, Component effectText, Component duration, Font font, int x0, int y0, int textureWidth, int yStep, int mouseX, int mouseY, @org.jspecify.annotations.Nullable MobEffectInstance effectInstance
++    ) {
+         int textX = x0 + 32;
+         int textY = y0 + 7;
+         int maxTextWidth = textureWidth - 32 - 7;
+@@ -101,7 +_,12 @@
          }
  
-         if (flag && mouseX >= x0 && mouseX <= x0 + textureWidth && mouseY >= y0 && mouseY <= y0 + yStep) {
+         if (isCompact && mouseX >= x0 && mouseX <= x0 + textureWidth && mouseY >= y0 && mouseY <= y0 + yStep) {
 -            graphics.setTooltipForNextFrame(this.screen.getFont(), List.of(effectText, duration), Optional.empty(), mouseX, mouseY);
 +            // Neo: Allow mods to adjust the tooltip shown when hovering a mob effect.
 +            var list = List.of(effectText, duration);

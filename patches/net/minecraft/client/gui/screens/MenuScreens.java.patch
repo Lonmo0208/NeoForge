@@ -8,12 +8,12 @@
 +    }
 +
 +    public static <T extends AbstractContainerMenu> java.util.Optional<ScreenConstructor<T, ?>> getScreenFactory(MenuType<T> type) {
-         MenuScreens.ScreenConstructor<T, ?> screenconstructor = getConstructor(type);
-         if (screenconstructor == null) {
+         MenuScreens.ScreenConstructor<T, ?> constructor = getConstructor(type);
+         if (constructor == null) {
              LOGGER.warn("Failed to create screen for menu type: {}", BuiltInRegistries.MENU.getKey(type));
          } else {
--            screenconstructor.fromPacket(title, type, minecraft, containerId);
-+            return java.util.Optional.of(screenconstructor);
+-            constructor.fromPacket(title, type, minecraft, containerId);
++            return java.util.Optional.of(constructor);
          }
 +        return java.util.Optional.empty();
      }
@@ -30,7 +30,7 @@
          MenuType<? extends M> type, MenuScreens.ScreenConstructor<M, U> factory
      ) {
 @@ -60,6 +_,12 @@
-         if (screenconstructor != null) {
+         if (prev != null) {
              throw new IllegalStateException("Duplicate registration for " + BuiltInRegistries.MENU.getKey(type));
          }
 +    }

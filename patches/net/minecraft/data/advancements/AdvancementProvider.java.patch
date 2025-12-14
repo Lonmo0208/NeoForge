@@ -4,8 +4,8 @@
                      throw new IllegalStateException("Duplicate advancement " + holder.id());
                  } else {
                      Path path = this.pathProvider.json(holder.id());
--                    list.add(DataProvider.saveStable(cache, lookup, Advancement.CODEC, holder.value(), path));
-+                    list.add(DataProvider.saveStable(cache, lookup, Advancement.CODEC, holder.value(), path));// TODO: make conditional
+-                    tasks.add(DataProvider.saveStable(cache, lookup, Advancement.CODEC, holder.value(), path));
++                    tasks.add(DataProvider.saveStable(cache, lookup, Advancement.CODEC, holder.value(), path));// TODO: make conditional
                  }
              };
  

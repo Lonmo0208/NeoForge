@@ -24,10 +24,10 @@
 @@ -21,7 +_,8 @@
              return EMPTY;
          } else {
-             long i = computeMask(universe, 0L, flags);
--            return new FeatureFlagSet(universe, i);
+             long mask = computeMask(universe, 0L, flags);
+-            return new FeatureFlagSet(universe, mask);
 +            long[] extMask = computeExtendedMask(universe, 0, 0L, flags);
-+            return new FeatureFlagSet(universe, i, extMask);
++            return new FeatureFlagSet(universe, mask, extMask);
          }
      }
  
@@ -41,18 +41,18 @@
      }
  
      public static FeatureFlagSet of(FeatureFlag flag, FeatureFlag... flags) {
--        long i = flags.length == 0 ? flag.mask : computeMask(flag.universe, flag.mask, Arrays.asList(flags));
--        return new FeatureFlagSet(flag.universe, i);
+-        long mask = flags.length == 0 ? flag.mask : computeMask(flag.universe, flag.mask, Arrays.asList(flags));
+-        return new FeatureFlagSet(flag.universe, mask);
 +        long i = flags.length == 0 ? (flag.extMaskIndex >= 0 ? 0L : flag.mask) : computeMask(flag.universe, flag.extMaskIndex >= 0 ? 0L : flag.mask, Arrays.asList(flags));
 +        long[] extMask = computeExtendedMask(flag.universe, flag.extMaskIndex, flag.mask, flags.length == 0 ? java.util.List.of() : Arrays.asList(flags));
 +        return new FeatureFlagSet(flag.universe, i, extMask);
      }
  
      private static long computeMask(FeatureFlagUniverse universe, long mask, Iterable<FeatureFlag> flags) {
-         for (FeatureFlag featureflag : flags) {
-+            if (featureflag.extMaskIndex >= 0) continue;
-             if (universe != featureflag.universe) {
-                 throw new IllegalStateException("Mismatched feature universe, expected '" + universe + "', but got '" + featureflag.universe + "'");
+         for (FeatureFlag f : flags) {
++            if (f.extMaskIndex >= 0) continue;
+             if (universe != f.universe) {
+                 throw new IllegalStateException("Mismatched feature universe, expected '" + universe + "', but got '" + f.universe + "'");
              }
 @@ -50,8 +_,36 @@
          return mask;
@@ -147,11 +147,11 @@
          }
      }
  
-@@ -89,7 +_,15 @@
+@@ -89,17 +_,29 @@
              throw new IllegalArgumentException("Mismatched set elements: '" + this.universe + "' != '" + other.universe + "'");
          } else {
-             long i = this.mask & ~other.mask;
--            return i == 0L ? EMPTY : new FeatureFlagSet(this.universe, i);
+             long newMask = this.mask & ~other.mask;
+-            return newMask == 0L ? EMPTY : new FeatureFlagSet(this.universe, newMask);
 +            long[] extMask = EMPTY_EXT_MASK;
 +            if (this.extendedMask.length > 0 || other.extendedMask.length > 0) {
 +                extMask = new long[this.extendedMask.length];
@@ -160,16 +160,14 @@
 +                    extMask[idx] = this.extendedMask[idx] & ~otherMask;
 +                }
 +            }
-+            return i == 0L && extMask.length == 0 ? EMPTY : new FeatureFlagSet(this.universe, i, extMask);
++            return newMask == 0L && extMask.length == 0 ? EMPTY : new FeatureFlagSet(this.universe, newMask, extMask);
          }
      }
  
-@@ -97,11 +_,15 @@
+     @Override
      public boolean equals(Object o) {
-         return this == o
-             ? true
--            : o instanceof FeatureFlagSet featureflagset && this.universe == featureflagset.universe && this.mask == featureflagset.mask;
-+            : o instanceof FeatureFlagSet featureflagset && this.universe == featureflagset.universe && this.mask == featureflagset.mask && Arrays.equals(this.extendedMask, featureflagset.extendedMask);
+-        return this == o ? true : o instanceof FeatureFlagSet that && this.universe == that.universe && this.mask == that.mask;
++        return this == o ? true : o instanceof FeatureFlagSet that && this.universe == that.universe && this.mask == that.mask && Arrays.equals(this.extendedMask, that.extendedMask);
      }
  
      @Override

@@ -3,13 +3,13 @@
 @@ -25,7 +_,7 @@
  
      protected boolean checkExtraStartConditions(ServerLevel level, E body) {
-         LivingEntity livingentity = getAttackTarget(body);
--        return body.isHolding(Items.CROSSBOW)
-+        return body.isHolding(is -> is.getItem() instanceof CrossbowItem)
-             && BehaviorUtils.canSee(body, livingentity)
-             && BehaviorUtils.isWithinAttackRange(body, livingentity, 0);
+         LivingEntity attackTarget = getAttackTarget(body);
+-        return body.isHolding(Items.CROSSBOW) && BehaviorUtils.canSee(body, attackTarget) && BehaviorUtils.isWithinAttackRange(body, attackTarget, 0);
++        return body.isHolding(is -> is.getItem() instanceof CrossbowItem) && BehaviorUtils.canSee(body, attackTarget) && BehaviorUtils.isWithinAttackRange(body, attackTarget, 0);
      }
-@@ -45,7 +_,7 @@
+ 
+     protected boolean canStillUse(ServerLevel level, E body, long timestamp) {
+@@ -43,7 +_,7 @@
              body.stopUsingItem();
          }
  
@@ -18,7 +18,7 @@
              body.setChargingCrossbow(false);
              body.getUseItem().set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY);
          }
-@@ -53,7 +_,7 @@
+@@ -51,7 +_,7 @@
  
      private void crossbowAttack(E body, LivingEntity target) {
          if (this.crossbowState == CrossbowAttack.CrossbowState.UNCHARGED) {

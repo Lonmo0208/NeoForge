@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/Options.java
 +++ b/net/minecraft/client/Options.java
-@@ -898,9 +_,10 @@
+@@ -867,9 +_,10 @@
              }
          },
          new OptionInstance.LazyEnum<>(
@@ -12,24 +12,24 @@
                      && !Minecraft.getInstance().getSoundManager().getAvailableSoundDevices().contains(device)
                  ? Optional.empty()
                  : Optional.of(device),
-@@ -1029,7 +_,7 @@
+@@ -998,7 +_,7 @@
          this.incompatibleResourcePacks.clear();
  
-         for (Pack pack : packRepository.getSelectedPacks()) {
--            if (!pack.isFixedPosition()) {
-+            if (!pack.isFixedPosition() && !pack.isHidden()) {
-                 this.resourcePacks.add(pack.getId());
-                 if (!pack.getCompatibility().isCompatible()) {
-                     this.incompatibleResourcePacks.add(pack.getId());
-@@ -1402,6 +_,7 @@
+         for (Pack entry : packRepository.getSelectedPacks()) {
+-            if (!entry.isFixedPosition()) {
++            if (!entry.isFixedPosition() && !entry.isHidden()) {
+                 this.resourcePacks.add(entry.getId());
+                 if (!entry.getCompatibility().isCompatible()) {
+                     this.incompatibleResourcePacks.add(entry.getId());
+@@ -1369,6 +_,7 @@
      }
  
      public Options(Minecraft minecraft, File workingDirectory) {
 +        setForgeKeybindProperties();
          this.minecraft = minecraft;
          this.optionsFile = new File(workingDirectory, "options.txt");
-         boolean flag = Runtime.getRuntime().maxMemory() >= 1000000000L;
-@@ -1425,6 +_,7 @@
+         boolean largeDistances = Runtime.getRuntime().maxMemory() >= 1000000000L;
+@@ -1392,6 +_,7 @@
              value -> this.setGraphicsPresetToCustom()
          );
          this.syncWrites = Util.getPlatform() == Util.OS.WINDOWS;
@@ -37,27 +37,28 @@
          this.load();
      }
  
-@@ -1556,10 +_,14 @@
+@@ -1521,10 +_,15 @@
          access.process("musicFrequency", this.musicFrequency);
  
-         for (KeyMapping keymapping : this.keyMappings) {
--            String s = keymapping.saveString();
-+            String s = keymapping.saveString() + (keymapping.getKeyModifier() != net.neoforged.neoforge.client.settings.KeyModifier.NONE ? ":" + keymapping.getKeyModifier() : "");
-             String s1 = access.process("key_" + keymapping.getName(), s);
-             if (!s.equals(s1)) {
--                keymapping.setKey(InputConstants.getKey(s1));
-+                if (s1.indexOf(':') != -1) {
-+                    String[] pts = s1.split(":");
-+                    keymapping.setKeyModifierAndCode(net.neoforged.neoforge.client.settings.KeyModifier.valueFromString(pts[1]), InputConstants.getKey(pts[0]));
-+                } else
-+                    keymapping.setKeyModifierAndCode(net.neoforged.neoforge.client.settings.KeyModifier.NONE, InputConstants.getKey(s1));
+         for (KeyMapping keyMapping : this.keyMappings) {
+-            String currentValue = keyMapping.saveString();
++            String currentValue = keyMapping.saveString() + (keyMapping.getKeyModifier() != net.neoforged.neoforge.client.settings.KeyModifier.NONE ? ":" + keyMapping.getKeyModifier() : "");
+             String newValue = access.process("key_" + keyMapping.getName(), currentValue);
+             if (!currentValue.equals(newValue)) {
+-                keyMapping.setKey(InputConstants.getKey(newValue));
++                if (newValue.indexOf(':') != -1) {
++                    String[] pts = newValue.split(":");
++                    keyMapping.setKeyModifierAndCode(net.neoforged.neoforge.client.settings.KeyModifier.valueFromString(pts[1]), InputConstants.getKey(pts[0]));
++                } else {
++                    keyMapping.setKeyModifierAndCode(net.neoforged.neoforge.client.settings.KeyModifier.NONE, InputConstants.getKey(newValue));
++                }
              }
          }
  
-@@ -1849,6 +_,23 @@
+@@ -1812,6 +_,23 @@
          }
  
-         repository.setSelected(set);
+         repository.setSelected(selected);
 +    }
 +
 +    private void setForgeKeybindProperties() {

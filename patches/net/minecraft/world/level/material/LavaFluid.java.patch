@@ -1,22 +1,22 @@
 --- a/net/minecraft/world/level/material/LavaFluid.java
 +++ b/net/minecraft/world/level/material/LavaFluid.java
 @@ -92,7 +_,7 @@
-                     BlockState blockstate = level.getBlockState(blockpos);
-                     if (blockstate.isAir()) {
-                         if (this.hasFlammableNeighbours(level, blockpos)) {
--                            level.setBlockAndUpdate(blockpos, BaseFireBlock.getState(level, blockpos));
-+                            level.setBlockAndUpdate(blockpos, net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, blockpos, pos, BaseFireBlock.getState(level, blockpos)));
+                     BlockState blockState = level.getBlockState(testPos);
+                     if (blockState.isAir()) {
+                         if (this.hasFlammableNeighbours(level, testPos)) {
+-                            level.setBlockAndUpdate(testPos, BaseFireBlock.getState(level, testPos));
++                            level.setBlockAndUpdate(testPos, net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, testPos, pos, BaseFireBlock.getState(level, testPos)));
                              return;
                          }
-                     } else if (blockstate.blocksMotion()) {
+                     } else if (blockState.blocksMotion()) {
 @@ -106,8 +_,8 @@
                          return;
                      }
  
--                    if (level.isEmptyBlock(blockpos1.above()) && this.isFlammable(level, blockpos1)) {
--                        level.setBlockAndUpdate(blockpos1.above(), BaseFireBlock.getState(level, blockpos1));
-+                    if (level.isEmptyBlock(blockpos1.above()) && this.isFlammable(level, blockpos1, Direction.UP)) {
-+                        level.setBlockAndUpdate(blockpos1.above(), net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, blockpos1.above(), pos, BaseFireBlock.getState(level, blockpos1)));
+-                    if (level.isEmptyBlock(testPos.above()) && this.isFlammable(level, testPos)) {
+-                        level.setBlockAndUpdate(testPos.above(), BaseFireBlock.getState(level, testPos));
++                    if (level.isEmptyBlock(testPos.above()) && this.isFlammable(level, testPos, Direction.UP)) {
++                        level.setBlockAndUpdate(testPos.above(), net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, testPos.above(), pos, BaseFireBlock.getState(level, testPos)));
                      }
                  }
              }
@@ -51,8 +51,8 @@
      public @Nullable ParticleOptions getDripParticle() {
          return ParticleTypes.DRIPPING_LAVA;
 @@ -205,7 +_,7 @@
-             FluidState fluidstate = level.getFluidState(pos);
-             if (this.is(FluidTags.LAVA) && fluidstate.is(FluidTags.WATER)) {
+             FluidState fluidState = level.getFluidState(pos);
+             if (this.is(FluidTags.LAVA) && fluidState.is(FluidTags.WATER)) {
                  if (state.getBlock() instanceof LiquidBlock) {
 -                    level.setBlock(pos, Blocks.STONE.defaultBlockState(), 3);
 +                    level.setBlock(pos, net.neoforged.neoforge.event.EventHooks.fireFluidPlaceBlockEvent(level, pos, pos, Blocks.STONE.defaultBlockState()), 3);

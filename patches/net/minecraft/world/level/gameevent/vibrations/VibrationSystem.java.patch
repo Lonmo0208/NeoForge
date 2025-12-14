@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/gameevent/vibrations/VibrationSystem.java
 +++ b/net/minecraft/world/level/gameevent/vibrations/VibrationSystem.java
-@@ -52,6 +_,8 @@
+@@ -50,6 +_,8 @@
          GameEvent.RESONATE_15.key()
      );
      int NO_VIBRATION_FREQUENCY = 0;
@@ -9,7 +9,7 @@
      ToIntFunction<ResourceKey<GameEvent>> VIBRATION_FREQUENCY_FOR_EVENT = Util.make(new Reference2IntOpenHashMap<>(), map -> {
          map.defaultReturnValue(0);
          map.put(GameEvent.STEP.key(), 1);
-@@ -105,11 +_,13 @@
+@@ -103,11 +_,13 @@
      VibrationSystem.User getVibrationUser();
  
      static int getGameEventFrequency(Holder<GameEvent> event) {

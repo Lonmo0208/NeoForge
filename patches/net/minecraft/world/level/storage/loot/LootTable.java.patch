@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/storage/loot/LootTable.java
 +++ b/net/minecraft/world/level/storage/loot/LootTable.java
-@@ -41,12 +_,14 @@
+@@ -40,12 +_,14 @@
              i -> i.group(
                      LootContextParamSets.CODEC.lenientOptionalFieldOf("type", DEFAULT_PARAM_SET).forGetter(t -> t.paramSet),
                      Identifier.CODEC.optionalFieldOf("random_sequence").forGetter(t -> t.randomSequence),
@@ -17,8 +17,8 @@
      public static final Codec<Holder<LootTable>> CODEC = RegistryFileCodec.create(Registries.LOOT_TABLE, DIRECT_CODEC);
      public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, Optional.empty(), List.of(), List.of());
      private final ContextKeySet paramSet;
-@@ -58,7 +_,7 @@
-     LootTable(ContextKeySet paramSet, Optional<Identifier> randomSequence, List<LootPool> pools, List<LootItemFunction> functions) {
+@@ -57,7 +_,7 @@
+     private LootTable(ContextKeySet paramSet, Optional<Identifier> randomSequence, List<LootPool> pools, List<LootItemFunction> functions) {
          this.paramSet = paramSet;
          this.randomSequence = randomSequence;
 -        this.pools = pools;
@@ -26,7 +26,7 @@
          this.functions = functions;
          this.compositeFunction = LootItemFunctions.compose(functions);
      }
-@@ -81,10 +_,12 @@
+@@ -80,10 +_,12 @@
          };
      }
  
@@ -37,9 +37,9 @@
  
 +    @Deprecated // Use a non-'Raw' version of 'getRandomItems', so that the Forge Global Loot Modifiers will be applied
      public void getRandomItemsRaw(LootContext context, Consumer<ItemStack> output) {
-         LootContext.VisitedEntry<?> visitedentry = LootContext.createVisitedEntry(this);
-         if (context.pushVisitedElement(visitedentry)) {
-@@ -101,18 +_,15 @@
+         LootContext.VisitedEntry<?> breadcrumb = LootContext.createVisitedEntry(this);
+         if (context.pushVisitedElement(breadcrumb)) {
+@@ -100,18 +_,15 @@
      }
  
      public void getRandomItems(LootParams params, long optionalLootTableSeed, Consumer<ItemStack> output) {
@@ -61,17 +61,17 @@
      }
  
      public ObjectArrayList<ItemStack> getRandomItems(LootParams params, RandomSource randomSource) {
-@@ -129,7 +_,8 @@
+@@ -128,7 +_,8 @@
  
      private ObjectArrayList<ItemStack> getRandomItems(LootContext context) {
-         ObjectArrayList<ItemStack> objectarraylist = new ObjectArrayList<>();
--        this.getRandomItems(context, objectarraylist::add);
-+        this.getRandomItemsRaw(context, createStackSplitter(context.getLevel(), objectarraylist::add));
-+        objectarraylist = net.neoforged.neoforge.common.CommonHooks.modifyLoot(this.getLootTableId(), objectarraylist, context);
-         return objectarraylist;
+         ObjectArrayList<ItemStack> result = new ObjectArrayList<>();
+-        this.getRandomItems(context, result::add);
++        this.getRandomItemsRaw(context, createStackSplitter(context.getLevel(), result::add));
++        result = net.neoforged.neoforge.common.CommonHooks.modifyLoot(this.getLootTableId(), result, context);
+         return result;
      }
  
-@@ -220,11 +_,68 @@
+@@ -219,11 +_,68 @@
          return new LootTable.Builder();
      }
  
@@ -140,7 +140,7 @@
  
          public LootTable.Builder withPool(LootPool.Builder pool) {
              this.pools.add(pool.build());
-@@ -252,6 +_,20 @@
+@@ -251,6 +_,20 @@
  
          public LootTable build() {
              return new LootTable(this.paramSet, this.randomSequence, this.pools.build(), this.functions.build());

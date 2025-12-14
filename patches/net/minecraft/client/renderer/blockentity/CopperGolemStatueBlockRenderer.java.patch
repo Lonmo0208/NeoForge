@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/blockentity/CopperGolemStatueBlockRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/CopperGolemStatueBlockRenderer.java
-@@ -66,4 +_,10 @@
+@@ -64,4 +_,10 @@
              poseStack.popPose();
          }
      }

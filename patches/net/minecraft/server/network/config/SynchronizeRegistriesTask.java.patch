@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/network/config/SynchronizeRegistriesTask.java
 +++ b/net/minecraft/server/network/config/SynchronizeRegistriesTask.java
-@@ -45,11 +_,10 @@
+@@ -44,11 +_,10 @@
      }
  
      public void handleResponse(List<KnownPack> acceptedPacks, Consumer<Packet<?>> connection) {

@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/commands/TeleportCommand.java
 +++ b/net/minecraft/server/commands/TeleportCommand.java
-@@ -251,6 +_,14 @@
+@@ -244,6 +_,14 @@
          float xRot,
          @Nullable LookAt lookAt
      ) throws CommandSyntaxException {
@@ -12,6 +12,6 @@
 +        y = event.getTargetY();
 +        z = event.getTargetZ();
 +
-         BlockPos blockpos = BlockPos.containing(x, y, z);
-         if (!Level.isInSpawnableBounds(blockpos)) {
+         BlockPos blockPos = BlockPos.containing(x, y, z);
+         if (!Level.isInSpawnableBounds(blockPos)) {
              throw INVALID_POSITION.create();

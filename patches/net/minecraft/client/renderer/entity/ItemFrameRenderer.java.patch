@@ -6,22 +6,22 @@
  
 +        if (!net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.client.event.RenderItemInFrameEvent(state, this, poseStack, submitNodeCollector)).isCanceled()) {
          if (state.mapId != null) {
-             int j = state.rotation % 4 * 2;
-             poseStack.mulPose(Axis.ZP.rotationDegrees(j * 360.0F / 8.0F));
+             int rotation = state.rotation % 4 * 2;
+             poseStack.mulPose(Axis.ZP.rotationDegrees(rotation * 360.0F / 8.0F));
 @@ -110,6 +_,7 @@
              poseStack.scale(0.5F, 0.5F, 0.5F);
-             state.item.submit(poseStack, submitNodeCollector, k, OverlayTexture.NO_OVERLAY, state.outlineColor);
+             state.item.submit(poseStack, submitNodeCollector, lightVal, OverlayTexture.NO_OVERLAY, state.outlineColor);
          }
 +        }
  
          poseStack.popPose();
      }
 @@ -145,7 +_,7 @@
-         if (!itemstack.isEmpty()) {
-             MapId mapid = entity.getFramedMapId(itemstack);
-             if (mapid != null) {
--                MapItemSavedData mapitemsaveddata = entity.level().getMapData(mapid);
-+                MapItemSavedData mapitemsaveddata = net.minecraft.world.item.MapItem.getSavedData(itemstack, entity.level());
-                 if (mapitemsaveddata != null) {
-                     this.mapRenderer.extractRenderState(mapid, mapitemsaveddata, state.mapRenderState);
-                     state.mapId = mapid;
+         if (!itemStack.isEmpty()) {
+             MapId framedMapId = entity.getFramedMapId(itemStack);
+             if (framedMapId != null) {
+-                MapItemSavedData mapData = entity.level().getMapData(framedMapId);
++                MapItemSavedData mapData = net.minecraft.world.item.MapItem.getSavedData(itemStack, entity.level());
+                 if (mapData != null) {
+                     this.mapRenderer.extractRenderState(framedMapId, mapData, state.mapRenderState);
+                     state.mapId = framedMapId;

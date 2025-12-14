@@ -11,16 +11,16 @@
          .thenComparing(h -> h.entry.name());
 @@ -54,6 +_,14 @@
  
-         for (Stitcher.Holder<T> holder : list) {
+         for (Stitcher.Holder<T> holder : holders) {
              if (!this.addToStorage(holder)) {
 +                if (LOGGER.isInfoEnabled()) {
 +                    StringBuilder sb = new StringBuilder();
 +                    sb.append("Unable to fit: ").append(holder.entry().name());
 +                    sb.append(" - size: ").append(holder.entry.width()).append("x").append(holder.entry.height());
 +                    sb.append(" - Maybe try a lower resolution resourcepack?\n");
-+                    list.forEach(h -> sb.append("\t").append(h).append("\n"));
++                    holders.forEach(h -> sb.append("\t").append(h).append("\n"));
 +                    LOGGER.info(sb.toString());
 +                }
-                 throw new StitcherException(holder.entry, list.stream().map(h -> h.entry).collect(ImmutableList.toImmutableList()));
+                 throw new StitcherException(holder.entry, holders.stream().map(h -> h.entry).collect(ImmutableList.toImmutableList()));
              }
          }

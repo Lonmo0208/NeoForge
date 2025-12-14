@@ -68,16 +68,16 @@
  
 @@ -216,8 +_,9 @@
      public static boolean suckInItems(Level level, Hopper hopper) {
-         BlockPos blockpos = BlockPos.containing(hopper.getLevelX(), hopper.getLevelY() + 1.0, hopper.getLevelZ());
-         BlockState blockstate = level.getBlockState(blockpos);
--        Container container = getSourceContainer(level, hopper, blockpos, blockstate);
+         BlockPos blockPos = BlockPos.containing(hopper.getLevelX(), hopper.getLevelY() + 1.0, hopper.getLevelZ());
+         BlockState blockState = level.getBlockState(blockPos);
+-        Container container = getSourceContainer(level, hopper, blockPos, blockState);
 -        if (container != null) {
-+        var containerOrHandler = getSourceContainerOrHandler(level, hopper, blockpos, blockstate);
++        var containerOrHandler = getSourceContainerOrHandler(level, hopper, blockPos, blockState);
 +        if (containerOrHandler.container() != null) {
 +            Container container = containerOrHandler.container();
              Direction direction = Direction.DOWN;
  
-             for (int i : getSlots(container, direction)) {
+             for (int slot : getSlots(container, direction)) {
 @@ -227,6 +_,8 @@
              }
  
@@ -85,8 +85,8 @@
 +        } else if (containerOrHandler.itemHandler() != null) {
 +            return net.neoforged.neoforge.transfer.item.VanillaInventoryCodeHooks.extractHook(hopper, containerOrHandler.itemHandler());
          } else {
-             boolean flag = hopper.isGridAligned()
-                 && blockstate.isCollisionShapeFullBlock(level, blockpos)
+             boolean isBlocked = hopper.isGridAligned()
+                 && blockState.isCollisionShapeFullBlock(level, blockPos)
 @@ -354,6 +_,8 @@
          return level.getEntitiesOfClass(ItemEntity.class, aabb, EntitySelector.ENTITY_STILL_ALIVE);
      }
@@ -96,8 +96,8 @@
      public static @Nullable Container getContainerAt(Level level, BlockPos pos) {
          return getContainerAt(level, pos, level.getBlockState(pos), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
      }
-@@ -393,6 +_,28 @@
-         return !list.isEmpty() ? (Container)list.get(level.random.nextInt(list.size())) : null;
+@@ -389,6 +_,28 @@
+         return !entities.isEmpty() ? (Container)entities.get(level.random.nextInt(entities.size())) : null;
      }
  
 +    private static net.neoforged.neoforge.transfer.item.ContainerOrHandler getSourceContainerOrHandler(Level level, Hopper hopper, BlockPos pos, BlockState state) {
@@ -125,7 +125,7 @@
      private static boolean canMergeItems(ItemStack a, ItemStack b) {
          return a.getCount() <= a.getMaxStackSize() && ItemStack.isSameItemSameComponents(a, b);
      }
-@@ -450,5 +_,9 @@
+@@ -446,5 +_,9 @@
      @Override
      protected AbstractContainerMenu createMenu(int containerId, Inventory inventory) {
          return new HopperMenu(containerId, inventory, this);

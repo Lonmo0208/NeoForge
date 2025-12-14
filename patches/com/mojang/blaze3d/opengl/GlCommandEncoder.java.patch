@@ -34,15 +34,15 @@
      private void verifyColorTexture(GpuTexture colorTexture) {
          if (!colorTexture.getFormat().hasColorAspect()) {
              throw new IllegalStateException("Trying to clear a non-color texture as color");
-@@ -672,8 +_,19 @@
-                 boolean flag = source.getFormat().hasDepthAspect();
-                 int i = ((GlTexture)source).glId();
-                 int j = ((GlTexture)destination).glId();
--                this.device.directStateAccess().bindFrameBufferTextures(this.readFbo, flag ? 0 : i, flag ? i : 0, 0, 0);
--                this.device.directStateAccess().bindFrameBufferTextures(this.drawFbo, flag ? 0 : j, flag ? j : 0, 0, 0);
+@@ -635,11 +_,22 @@
+                 boolean isDepth = source.getFormat().hasDepthAspect();
+                 int sourceId = ((GlTexture)source).glId();
+                 int destId = ((GlTexture)destination).glId();
+-                this.device.directStateAccess().bindFrameBufferTextures(this.readFbo, isDepth ? 0 : sourceId, isDepth ? sourceId : 0, 0, 0);
+-                this.device.directStateAccess().bindFrameBufferTextures(this.drawFbo, isDepth ? 0 : destId, isDepth ? destId : 0, 0, 0);
 +                var hasStencil = source.getFormat().hasStencilAspect();
-+                this.device.directStateAccess().bindFrameBufferTextures(this.readFbo, flag ? 0 : i, flag ? i : 0, 0, 0, hasStencil);
-+                this.device.directStateAccess().bindFrameBufferTextures(this.drawFbo, flag ? 0 : j, flag ? j : 0, 0, 0, hasStencil);
++                this.device.directStateAccess().bindFrameBufferTextures(this.readFbo, isDepth ? 0 : sourceId, isDepth ? sourceId : 0, 0, 0, hasStencil);
++                this.device.directStateAccess().bindFrameBufferTextures(this.drawFbo, isDepth ? 0 : destId, isDepth ? destId : 0, 0, 0, hasStencil);
 +                var bufferMask = 0;
 +                if (source.getFormat().hasColorAspect()) {
 +                    bufferMask |= GlConst.GL_COLOR_BUFFER_BIT;
@@ -55,17 +55,12 @@
 +                }
                  this.device
                      .directStateAccess()
-                     .blitFrameBuffers(
-@@ -687,7 +_,7 @@
-                         destY,
-                         width,
-                         height,
--                        flag ? 256 : 16384,
-+                        bufferMask,
-                         9728
-                     );
-                 int k = GlStateManager._getError();
-@@ -1008,6 +_,26 @@
+-                    .blitFrameBuffers(this.readFbo, this.drawFbo, sourceX, sourceY, width, height, destX, destY, width, height, isDepth ? 256 : 16384, 9728);
++                    .blitFrameBuffers(this.readFbo, this.drawFbo, sourceX, sourceY, width, height, destX, destY, width, height, bufferMask, 9728);
+                 int error = GlStateManager._getError();
+                 if (error != 0) {
+                     throw new IllegalStateException(
+@@ -971,6 +_,26 @@
              GlStateManager._scissorBox(renderPass.getScissorX(), renderPass.getScissorY(), renderPass.getScissorWidth(), renderPass.getScissorHeight());
          } else {
              GlStateManager._disableScissorTest();

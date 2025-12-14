@@ -6,6 +6,6 @@
      public InteractionResult interact(Player player, InteractionHand hand) {
 +        InteractionResult ret = super.interact(player, hand);
 +        if (ret.consumesAction()) return ret;
-         ItemStack itemstack = player.getItemInHand(hand);
-         if (this.addFuel(player.position(), itemstack)) {
-             itemstack.consume(1, player);
+         ItemStack itemStack = player.getItemInHand(hand);
+         if (this.addFuel(player.position(), itemStack)) {
+             itemStack.consume(1, player);

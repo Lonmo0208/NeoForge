@@ -94,8 +94,6 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.getRawServerJar().set(cleanArtifactsDir.map(dir -> dir.file("raw-server.jar")));
             task.getCleanServerJar().set(cleanArtifactsDir.map(dir -> dir.file("server.jar")));
             task.getCleanJoinedJar().set(cleanArtifactsDir.map(dir -> dir.file("joined.jar")));
-            task.getMergedMappings().set(cleanArtifactsDir.map(dir -> dir.file("merged-mappings.txt")));
-            task.getClientMappings().set(cleanArtifactsDir.map(dir -> dir.file("client-mappings.txt")));
             task.getNeoFormArtifact().set(mcAndNeoFormVersion.map(version -> "net.neoforged:neoform:" + version + "@zip"));
         });
 
@@ -340,8 +338,6 @@ public class NeoDevPlugin implements Plugin<Project> {
             // to *not* download them before it is unpacked.
             task.addMinecraftServerLibraries(configurations.minecraftServerClasspath);
             task.addMinecraftClientLibraries(configurations.minecraftClientClasspath);
-            // We need the NeoForm zip for the SRG mappings.
-            task.addLibraries(configurations.neoFormMappingsFiles);
             task.getRepositoryURLs().set(installerRepositoryUrls);
             task.getUniversalJar().set(universalJar.flatMap(AbstractArchiveTask::getArchiveFile));
             task.getInstallerProfile().set(neoDevBuildDir.map(dir -> dir.file("installer-profile.json")));
@@ -616,7 +612,8 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.getDestinationDirectory().set(minecraftArtifactsDir);
             task.getArchiveFileName().set("minecraft-resources.jar");
             task.from(project.zipTree(createSources.flatMap(CreateMinecraftArtifacts::getSourcesArtifact)));
-            task.exclude("**/*.java", "META-INF/*");
+            // TODO: we are manually excluding the signing info, maybe NFRT should handle it?
+            task.exclude("**/*.java", "META-INF/*.RSA", "META-INF/*.SF");
         });
 
         return new DecompilationSetup(createSources, vanillaResources);
@@ -659,10 +656,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             if (type == BinaryPatchBaseType.SERVER || type == BinaryPatchBaseType.JOINED) {
                 task.getMinecraft().from(createCleanArtifacts.flatMap(CreateCleanArtifacts::getRawServerJar));
             }
-            // The client mappings are a superset of the server mappings and can be used to remap the server too.
-            task.getMappings().set(createCleanArtifacts.flatMap(CreateCleanArtifacts::getClientMappings));
             task.getOutput().set(binpatchesDir.map(dir -> dir.file(type + "-base.jar")));
-            task.getNeoFormMappings().from(neoDevConfigurations.neoFormMappingsFiles);
             task.classpath(installerToolsConfig);
         });
 

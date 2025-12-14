@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/advancements/AdvancementsScreen.java
 +++ b/net/minecraft/client/gui/screens/advancements/AdvancementsScreen.java
-@@ -52,6 +_,7 @@
+@@ -51,6 +_,7 @@
      private final Map<AdvancementHolder, AdvancementTab> tabs = Maps.newLinkedHashMap();
      private @Nullable AdvancementTab selectedTab;
      private boolean isScrolling;
@@ -8,7 +8,7 @@
  
      public AdvancementsScreen(ClientAdvancements advancements) {
          this(advancements, null);
-@@ -76,6 +_,16 @@
+@@ -75,6 +_,16 @@
              this.advancements.setSelectedTab(this.selectedTab == null ? null : this.selectedTab.getRootNode().holder(), true);
          }
  
@@ -24,47 +24,47 @@
 +
          this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build());
          this.layout.visitWidgets(x$0 -> {
-             AbstractWidget abstractwidget = this.addRenderableWidget(x$0);
-@@ -109,7 +_,7 @@
-             int j = (this.height - 140) / 2;
+             AbstractWidget var10000 = this.addRenderableWidget(x$0);
+@@ -108,7 +_,7 @@
+             int yo = (this.height - 140) / 2;
  
-             for (AdvancementTab advancementtab : this.tabs.values()) {
--                if (advancementtab.isMouseOver(i, j, event.x(), event.y())) {
-+                if (advancementtab.getPage() == tabPage && advancementtab.isMouseOver(i, j, event.x(), event.y())) {
-                     this.advancements.setSelectedTab(advancementtab.getRootNode().holder(), true);
+             for (AdvancementTab tab : this.tabs.values()) {
+-                if (tab.isMouseOver(xo, yo, event.x(), event.y())) {
++                if (tab.getPage() == tabPage && tab.isMouseOver(xo, yo, event.x(), event.y())) {
+                     this.advancements.setSelectedTab(tab.getRootNode().holder(), true);
                      break;
                  }
-@@ -135,6 +_,11 @@
+@@ -134,6 +_,11 @@
          super.render(graphics, mouseX, mouseY, a);
-         int i = (this.width - 252) / 2;
-         int j = (this.height - 140) / 2;
+         int xo = (this.width - 252) / 2;
+         int yo = (this.height - 140) / 2;
 +        if (maxPages != 0) {
 +            net.minecraft.network.chat.Component page = Component.literal(String.format("%d / %d", tabPage + 1, maxPages + 1));
 +            int width = this.font.width(page);
-+            graphics.drawString(this.font, page.getVisualOrderText(), i + (252 / 2) - (width / 2), j - 44, -1);
++            graphics.drawString(this.font, page.getVisualOrderText(), xo + (252 / 2) - (width / 2), yo - 44, -1);
 +        }
          graphics.nextStratum();
-         this.renderInside(graphics, i, j);
+         this.renderInside(graphics, xo, yo);
          graphics.nextStratum();
-@@ -200,10 +_,12 @@
+@@ -199,10 +_,12 @@
          graphics.blit(RenderPipelines.GUI_TEXTURED, WINDOW_LOCATION, xo, yo, 0.0F, 0.0F, 252, 140, 256, 256);
          if (this.tabs.size() > 1) {
-             for (AdvancementTab advancementtab : this.tabs.values()) {
-+                if (advancementtab.getPage() == tabPage)
-                 advancementtab.drawTab(graphics, xo, yo, mouseX, mouseY, advancementtab == this.selectedTab);
+             for (AdvancementTab tab : this.tabs.values()) {
++                if (tab.getPage() == tabPage)
+                 tab.drawTab(graphics, xo, yo, mouseX, mouseY, tab == this.selectedTab);
              }
  
-             for (AdvancementTab advancementtab1 : this.tabs.values()) {
-+                if (advancementtab1.getPage() == tabPage)
-                 advancementtab1.drawIcon(graphics, xo, yo);
+             for (AdvancementTab tab : this.tabs.values()) {
++                if (tab.getPage() == tabPage)
+                 tab.drawIcon(graphics, xo, yo);
              }
          }
-@@ -222,7 +_,7 @@
+@@ -221,7 +_,7 @@
  
          if (this.tabs.size() > 1) {
-             for (AdvancementTab advancementtab : this.tabs.values()) {
--                if (advancementtab.isMouseOver(xo, yo, mouseX, mouseY)) {
-+                if (advancementtab.getPage() == tabPage && advancementtab.isMouseOver(xo, yo, (double)mouseX, (double)mouseY)) {
-                     graphics.setTooltipForNextFrame(this.font, advancementtab.getTitle(), mouseX, mouseY);
+             for (AdvancementTab tab : this.tabs.values()) {
+-                if (tab.isMouseOver(xo, yo, mouseX, mouseY)) {
++                if (tab.getPage() == tabPage && tab.isMouseOver(xo, yo, (double)mouseX, (double)mouseY)) {
+                     graphics.setTooltipForNextFrame(this.font, tab.getTitle(), mouseX, mouseY);
                  }
              }

@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/entity/FuelValues.java
 +++ b/net/minecraft/world/level/block/entity/FuelValues.java
-@@ -32,6 +_,10 @@
+@@ -31,6 +_,10 @@
          return Collections.unmodifiableSequencedSet(this.values.keySet());
      }
  
@@ -11,7 +11,7 @@
      public int burnDuration(ItemStack itemStack) {
          return itemStack.isEmpty() ? 0 : this.values.getInt(itemStack.getItem());
      }
-@@ -41,7 +_,11 @@
+@@ -40,7 +_,11 @@
      }
  
      public static FuelValues vanillaBurnTimes(HolderLookup.Provider registries, FeatureFlagSet enabledFeatures, int baseUnit) {

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/blockentity/SpawnerRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/SpawnerRenderer.java
-@@ -63,4 +_,10 @@
+@@ -67,4 +_,10 @@
          entityRenderer.submit(displayEntity, camera, 0.0, 0.0, 0.0, poseStack, submitNodeCollector);
          poseStack.popPose();
      }

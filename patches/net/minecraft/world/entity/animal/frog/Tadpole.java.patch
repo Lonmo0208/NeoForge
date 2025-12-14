@@ -5,9 +5,9 @@
  
      private void ageUp() {
 +        if (!net.neoforged.neoforge.event.EventHooks.canLivingConvert(this, EntityType.FROG, (timer) -> {})) return;
-         if (this.level() instanceof ServerLevel serverlevel) {
+         if (this.level() instanceof ServerLevel serverLevel) {
              this.convertTo(EntityType.FROG, ConversionParams.single(this, false, false), frog -> {
 +                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, frog);
-                 frog.finalizeSpawn(serverlevel, serverlevel.getCurrentDifficultyAt(frog.blockPosition()), EntitySpawnReason.CONVERSION, null);
+                 frog.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(frog.blockPosition()), EntitySpawnReason.CONVERSION, null);
                  frog.setPersistenceRequired();
                  frog.fudgePositionAfterSizeChange(this.getDimensions(this.getPose()));

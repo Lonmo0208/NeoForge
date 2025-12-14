@@ -3,10 +3,10 @@
 @@ -50,9 +_,10 @@
      @Override
      protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-         int i = state.getValue(AGE);
--        if (i < 3 && random.nextInt(10) == 0) {
-+        if (i < 3 && net.neoforged.neoforge.common.CommonHooks.canCropGrow(level, pos, state, random.nextInt(10) == 0)) {
-             state = state.setValue(AGE, i + 1);
+         int age = state.getValue(AGE);
+-        if (age < 3 && random.nextInt(10) == 0) {
++        if (age < 3 && net.neoforged.neoforge.common.CommonHooks.canCropGrow(level, pos, state, random.nextInt(10) == 0)) {
+             state = state.setValue(AGE, age + 1);
              level.setBlock(pos, state, 2);
 +            net.neoforged.neoforge.common.CommonHooks.fireCropGrowPost(level, pos, state);
          }

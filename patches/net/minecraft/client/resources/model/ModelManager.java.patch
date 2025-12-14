@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/resources/model/ModelManager.java
 +++ b/net/minecraft/client/resources/model/ModelManager.java
-@@ -67,6 +_,9 @@
+@@ -66,6 +_,9 @@
      private SpecialBlockModelRenderer specialBlockModelRenderer = SpecialBlockModelRenderer.EMPTY;
      private ModelBakery.MissingModels missingModels;
      private Object2IntMap<BlockState> modelGroups = Object2IntMaps.emptyMap();
@@ -10,7 +10,7 @@
  
      public ModelManager(BlockColors blockColors, AtlasManager atlasManager, PlayerSkinRenderCache playerSkinRenderCache) {
          this.blockColors = blockColors;
-@@ -80,7 +_,14 @@
+@@ -79,7 +_,14 @@
      }
  
      public ItemModel getItemModel(Identifier id) {
@@ -26,68 +26,72 @@
      }
  
      public ClientItem.Properties getItemProperties(Identifier id) {
-@@ -97,17 +_,20 @@
+@@ -99,17 +_,20 @@
      ) {
-         ResourceManager resourcemanager = currentReload.resourceManager();
-         CompletableFuture<EntityModelSet> completablefuture = CompletableFuture.supplyAsync(EntityModelSet::vanilla, taskExecutor);
+         ResourceManager manager = currentReload.resourceManager();
+         CompletableFuture<EntityModelSet> entityModelSet = CompletableFuture.supplyAsync(EntityModelSet::vanilla, taskExecutor);
 +        var pendingAnimations = currentReload.get(net.neoforged.neoforge.client.entity.animation.json.AnimationLoader.STATE_KEY);
-         CompletableFuture<SpecialBlockModelRenderer> completablefuture1 = completablefuture.thenApplyAsync(
+         CompletableFuture<SpecialBlockModelRenderer> specialBlockModelRenderer = entityModelSet.thenApplyAsync(
              entityModels -> SpecialBlockModelRenderer.vanilla(
 -                new SpecialModelRenderer.BakingContext.Simple(entityModels, this.atlasManager, this.playerSkinRenderCache)
 +                new SpecialModelRenderer.BakingContext.Simple(entityModels, this.atlasManager, this.playerSkinRenderCache, pendingAnimations)
              ),
              taskExecutor
          );
-         CompletableFuture<Map<Identifier, UnbakedModel>> completablefuture2 = loadBlockModels(resourcemanager, taskExecutor);
-         CompletableFuture<BlockStateModelLoader.LoadedModels> completablefuture3 = BlockStateModelLoader.loadBlockStates(resourcemanager, taskExecutor);
-         CompletableFuture<ClientItemInfoLoader.LoadedClientInfos> completablefuture4 = ClientItemInfoLoader.scheduleLoad(resourcemanager, taskExecutor);
--        CompletableFuture<ModelManager.ResolvedModels> completablefuture5 = CompletableFuture.allOf(completablefuture2, completablefuture3, completablefuture4)
--            .thenApplyAsync(unused -> discoverModelDependencies(completablefuture2.join(), completablefuture3.join(), completablefuture4.join()), taskExecutor);
+         CompletableFuture<Map<Identifier, UnbakedModel>> modelCache = loadBlockModels(manager, taskExecutor);
+         CompletableFuture<BlockStateModelLoader.LoadedModels> blockStateModels = BlockStateModelLoader.loadBlockStates(manager, taskExecutor);
+         CompletableFuture<ClientItemInfoLoader.LoadedClientInfos> itemStackModels = ClientItemInfoLoader.scheduleLoad(manager, taskExecutor);
+-        CompletableFuture<ModelManager.ResolvedModels> modelDiscovery = CompletableFuture.allOf(modelCache, blockStateModels, itemStackModels)
+-            .thenApplyAsync(unused -> discoverModelDependencies(modelCache.join(), blockStateModels.join(), itemStackModels.join()), taskExecutor);
 +        CompletableFuture<net.neoforged.neoforge.client.model.standalone.StandaloneModelLoader.LoadedModels> standaloneModelsFuture =
 +                net.neoforged.neoforge.client.model.standalone.StandaloneModelLoader.load(taskExecutor);
-+        CompletableFuture<ModelManager.ResolvedModels> completablefuture5 = CompletableFuture.allOf(completablefuture2, completablefuture3, completablefuture4, standaloneModelsFuture)
-+            .thenApplyAsync(unused -> discoverModelDependencies(completablefuture2.join(), completablefuture3.join(), completablefuture4.join(), standaloneModelsFuture.join()), taskExecutor);
-         CompletableFuture<Object2IntMap<BlockState>> completablefuture6 = completablefuture3.thenApplyAsync(
++        CompletableFuture<ModelManager.ResolvedModels> modelDiscovery = CompletableFuture.allOf(modelCache, blockStateModels, itemStackModels, standaloneModelsFuture)
++            .thenApplyAsync(unused -> discoverModelDependencies(modelCache.join(), blockStateModels.join(), itemStackModels.join(), standaloneModelsFuture.join()), taskExecutor);
+         CompletableFuture<Object2IntMap<BlockState>> modelGroups = blockStateModels.thenApplyAsync(
              models -> buildModelGroups(this.blockColors, models), taskExecutor
          );
-@@ -124,6 +_,7 @@
-                 completablefuture,
-                 completablefuture1,
-                 completablefuture2
-+                , standaloneModelsFuture
+@@ -125,7 +_,8 @@
+                 itemStackModels,
+                 entityModelSet,
+                 specialBlockModelRenderer,
+-                modelCache
++                modelCache,
++                standaloneModelsFuture
              )
              .thenComposeAsync(
                  unused -> {
-@@ -144,7 +_,10 @@
-                         completablefuture4.join().contents(),
-                         modelmanager$resolvedmodels.models(),
-                         modelmanager$resolvedmodels.missing()
-+                        , standaloneModelsFuture.join(),
+@@ -148,8 +_,11 @@
+                         blockStateModels.join().models(),
+                         itemStackModels.join().contents(),
+                         resolvedModels.models(),
+-                        resolvedModels.missing()
++                        resolvedModels.missing(),
++                        standaloneModelsFuture.join(),
 +                        pendingAnimations
                      );
-+                    this.modelBakery.set(modelbakery);
++                    this.modelBakery.set(bakery);
                      return loadModels(
-                         spriteloader$preparations,
-                         spriteloader$preparations1,
-@@ -165,7 +_,7 @@
+                         blockAtlasSprites, itemAtlasSprites, bakery, groups, entityModelSet.join(), specialBlockModelRenderer.join(), taskExecutor
+                     );
+@@ -164,7 +_,7 @@
          return CompletableFuture.<Map<Identifier, Resource>>supplyAsync(() -> MODEL_LISTER.listMatchingResources(manager), executor)
              .thenCompose(
                  resources -> {
--                    List<CompletableFuture<Pair<Identifier, BlockModel>>> list = new ArrayList<>(resources.size());
-+                    List<CompletableFuture<Pair<Identifier, UnbakedModel>>> list = new ArrayList<>(resources.size());
+-                    List<CompletableFuture<Pair<Identifier, BlockModel>>> result = new ArrayList<>(resources.size());
++                    List<CompletableFuture<Pair<Identifier, UnbakedModel>>> result = new ArrayList<>(resources.size());
  
-                     for (Entry<Identifier, Resource> entry : resources.entrySet()) {
-                         list.add(CompletableFuture.supplyAsync(() -> {
-@@ -174,7 +_,7 @@
+                     for (Entry<Identifier, Resource> resource : resources.entrySet()) {
+                         result.add(CompletableFuture.supplyAsync(() -> {
+@@ -173,7 +_,7 @@
                              try {
-                                 Pair pair;
-                                 try (Reader reader = entry.getValue().openAsReader()) {
--                                    pair = Pair.of(identifier, BlockModel.fromStream(reader));
-+                                    pair = Pair.of(identifier, net.neoforged.neoforge.client.model.UnbakedModelParser.parse(reader));
+                                 Pair var3;
+                                 try (Reader reader = resource.getValue().openAsReader()) {
+-                                    var3 = Pair.of(modelId, BlockModel.fromStream(reader));
++                                    var3 = Pair.of(modelId, net.neoforged.neoforge.client.model.UnbakedModelParser.parse(reader));
                                  }
  
-                                 return pair;
-@@ -193,15 +_,26 @@
+                                 return var3;
+@@ -190,15 +_,26 @@
              );
      }
  
@@ -104,32 +108,32 @@
 +    private static ModelManager.ResolvedModels discoverModelDependencies(
 +            Map<Identifier, UnbakedModel> allModels, BlockStateModelLoader.LoadedModels blockStateModels, ClientItemInfoLoader.LoadedClientInfos itemInfos, net.neoforged.neoforge.client.model.standalone.StandaloneModelLoader.LoadedModels standaloneModels
 +    ) {
-         ModelManager.ResolvedModels modelmanager$resolvedmodels;
-         try (Zone zone = Profiler.get().zone("dependencies")) {
-             ModelDiscovery modeldiscovery = new ModelDiscovery(allModels, MissingBlockModel.missingModel());
-             modeldiscovery.addSpecialModel(ItemModelGenerator.GENERATED_ITEM_MODEL_ID, new ItemModelGenerator());
-             blockStateModels.models().values().forEach(modeldiscovery::addRoot);
-             itemInfos.contents().values().forEach(info -> modeldiscovery.addRoot(info.model()));
-+            standaloneModels.models().values().forEach(modeldiscovery::addRoot);
-             modelmanager$resolvedmodels = new ModelManager.ResolvedModels(modeldiscovery.missingModel(), modeldiscovery.resolve());
+         ModelManager.ResolvedModels var5;
+         try (Zone ignored = Profiler.get().zone("dependencies")) {
+             ModelDiscovery result = new ModelDiscovery(allModels, MissingBlockModel.missingModel());
+             result.addSpecialModel(ItemModelGenerator.GENERATED_ITEM_MODEL_ID, new ItemModelGenerator());
+             blockStateModels.models().values().forEach(result::addRoot);
+             itemInfos.contents().values().forEach(info -> result.addRoot(info.model()));
++            standaloneModels.models().values().forEach(result::addRoot);
+             var5 = new ModelManager.ResolvedModels(result.missingModel(), result.resolve());
          }
  
-@@ -274,6 +_,9 @@
+@@ -271,6 +_,9 @@
                                  references.stream().sorted().map(reference -> "    " + reference).collect(Collectors.joining("\n"))
                              )
                          );
 +                    try (Zone ignored = Profiler.get().zone("neoforge_modify_baking_result")) {
 +                        net.neoforged.neoforge.client.ClientHooks.onModifyBakingResult(bakingResult, blockAtlas, bakery);
 +                    }
-                     Map<BlockState, BlockStateModel> map = createBlockStateToModelDispatch(bakingResult.blockStateModels(), bakingResult.missingModels().block());
-                     return new ModelManager.ReloadState(bakingResult, modelGroups, map, entityModelSet, specialBlockModelRenderer);
-                 }
-@@ -314,6 +_,16 @@
-         this.itemProperties = modelbakery$bakingresult.itemProperties();
+                     Map<BlockState, BlockStateModel> modelByStateCache = createBlockStateToModelDispatch(
+                         bakingResult.blockStateModels(), bakingResult.missingModels().block()
+                     );
+@@ -313,6 +_,16 @@
+         this.itemProperties = bakedModels.itemProperties();
          this.modelGroups = preparations.modelGroups;
-         this.missingModels = modelbakery$bakingresult.missingModels();
-+        this.bakedStandaloneModels = modelbakery$bakingresult.standaloneModels();
-+        net.neoforged.neoforge.client.ClientHooks.onModelBake(this, modelbakery$bakingresult, this.modelBakery.get());
+         this.missingModels = bakedModels.missingModels();
++        this.bakedStandaloneModels = bakedModels.standaloneModels();
++        net.neoforged.neoforge.client.ClientHooks.onModelBake(this, bakedModels, this.modelBakery.get());
 +        this.reportedMissingItemModels = new java.util.HashSet<>();
 +        for (net.minecraft.world.item.Item item : BuiltInRegistries.ITEM) {
 +            Identifier modelId = item.components().get(net.minecraft.core.component.DataComponents.ITEM_MODEL);
@@ -141,7 +145,7 @@
          this.blockModelShaper.replaceCache(preparations.modelCache);
          this.specialBlockModelRenderer = preparations.specialBlockModelRenderer;
          this.entityModelSet = preparations.entityModelSet;
-@@ -343,6 +_,15 @@
+@@ -342,6 +_,15 @@
  
      public Supplier<EntityModelSet> entityModels() {
          return () -> this.entityModelSet;

@@ -50,7 +50,7 @@
      }
  
      protected void fadeWidgets(float widgetFade) {
-@@ -471,6 +_,10 @@
+@@ -467,6 +_,10 @@
      public void onFilesDrop(List<Path> files) {
      }
  
@@ -61,7 +61,7 @@
      private void scheduleNarration(long delay, boolean ignoreSuppression) {
          this.nextNarrationTime = Util.getMillis() + delay;
          if (ignoreSuppression) {
-@@ -623,6 +_,14 @@
+@@ -616,6 +_,14 @@
  
      public @Nullable Music getBackgroundMusic() {
          return null;

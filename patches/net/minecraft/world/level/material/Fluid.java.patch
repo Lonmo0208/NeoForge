@@ -20,7 +20,7 @@
      protected @Nullable ParticleOptions getDripParticle() {
 @@ -107,6 +_,11 @@
  
-     public abstract VoxelShape getShape(FluidState state, BlockGetter level, BlockPos pos);
+     public abstract VoxelShape getShape(final FluidState state, final BlockGetter level, final BlockPos pos);
  
 +    @Override
 +    public String toString() {// Neo: Patch in a toString similar to Item#toString so that FluidStack#toString is more readable

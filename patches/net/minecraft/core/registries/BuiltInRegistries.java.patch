@@ -1,6 +1,6 @@
 --- a/net/minecraft/core/registries/BuiltInRegistries.java
 +++ b/net/minecraft/core/registries/BuiltInRegistries.java
-@@ -433,6 +_,10 @@
+@@ -431,6 +_,10 @@
          ((MappedRegistry)registry).bindAllTagsToEmpty();
      }
  
@@ -9,5 +9,5 @@
 +    }
 +
      @FunctionalInterface
-     interface RegistryBootstrap<T> {
+     private interface RegistryBootstrap<T> {
          Object run(Registry<T> registry);

@@ -11,32 +11,32 @@
  
 @@ -46,7 +_,7 @@
              poseStack.pushPose();
-             AABB aabb = state.item.getModelBoundingBox();
-             float f = -((float)aabb.minY) + 0.0625F;
--            float f1 = Mth.sin(state.ageInTicks / 10.0F + state.bobOffset) * 0.1F + 0.1F;
-+            float f1 = state.shouldBob ? Mth.sin(state.ageInTicks / 10.0F + state.bobOffset) * 0.1F + 0.1F : 0;
-             poseStack.translate(0.0F, f1 + f, 0.0F);
-             float f2 = ItemEntity.getSpin(state.ageInTicks, state.bobOffset);
-             poseStack.mulPose(Axis.YP.rotation(f2));
+             AABB boundingBox = state.item.getModelBoundingBox();
+             float minOffsetY = -((float)boundingBox.minY) + 0.0625F;
+-            float bob = Mth.sin(state.ageInTicks / 10.0F + state.bobOffset) * 0.1F + 0.1F;
++            float bob = state.shouldBob ? Mth.sin(state.ageInTicks / 10.0F + state.bobOffset) * 0.1F + 0.1F : 0;
+             poseStack.translate(0.0F, bob + minOffsetY, 0.0F);
+             float spin = ItemEntity.getSpin(state.ageInTicks, state.bobOffset);
+             poseStack.mulPose(Axis.YP.rotation(spin));
 @@ -78,7 +_,9 @@
-                     float f1 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
-                     float f2 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
-                     float f3 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
--                    poseStack.translate(f1, f2, f3);
+                     float xo = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
+                     float yo = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
+                     float zo = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
+-                    poseStack.translate(xo, yo, zo);
 +                    if (state.shouldSpread) {
-+                        poseStack.translate(f1, f2, f3);
++                        poseStack.translate(xo, yo, zo);
 +                    }
-                     itemstackrenderstate.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
+                     item.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
                      poseStack.popPose();
                  }
 @@ -92,7 +_,9 @@
                      poseStack.pushPose();
-                     float f5 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-                     float f6 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
--                    poseStack.translate(f5, f6, 0.0F);
+                     float xo = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+                     float yo = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+-                    poseStack.translate(xo, yo, 0.0F);
 +                    if (state.shouldSpread) {
-+                        poseStack.translate(f5, f6, 0.0F);
++                        poseStack.translate(xo, yo, 0.0F);
 +                    }
-                     itemstackrenderstate.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
+                     item.submit(poseStack, submitNodeCollector, lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
                      poseStack.popPose();
-                     poseStack.translate(0.0F, 0.0F, f4);
+                     poseStack.translate(0.0F, 0.0F, offsetZ);

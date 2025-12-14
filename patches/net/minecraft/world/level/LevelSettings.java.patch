@@ -1,21 +1,34 @@
 --- a/net/minecraft/world/level/LevelSettings.java
 +++ b/net/minecraft/world/level/LevelSettings.java
-@@ -15,10 +_,14 @@
+@@ -15,6 +_,7 @@
      private final boolean allowCommands;
      private final GameRules gameRules;
      private final WorldDataConfiguration dataConfiguration;
 +    private final com.mojang.serialization.Lifecycle lifecycle;
  
      public LevelSettings(
-         String levelName, GameType gameType, boolean hardcore, Difficulty difficulty, boolean allowCommands, GameRules gameRules, WorldDataConfiguration dataConfiguration
+         String levelName,
+@@ -25,6 +_,19 @@
+         GameRules gameRules,
+         WorldDataConfiguration dataConfiguration
      ) {
 +        this(levelName, gameType, hardcore, difficulty, allowCommands, gameRules, dataConfiguration, com.mojang.serialization.Lifecycle.stable());
 +    }
-+    public LevelSettings(String levelName, GameType gameType, boolean hardcore, Difficulty difficulty, boolean allowCommands, GameRules gameRules, WorldDataConfiguration dataConfiguration, com.mojang.serialization.Lifecycle lifecycle) {
++
++    public LevelSettings(
++            String levelName,
++            GameType gameType,
++            boolean hardcore,
++            Difficulty difficulty,
++            boolean allowCommands,
++            GameRules gameRules,
++            WorldDataConfiguration dataConfiguration,
++            com.mojang.serialization.Lifecycle lifecycle
++    ) {
          this.levelName = levelName;
          this.gameType = gameType;
          this.hardcore = hardcore;
-@@ -26,6 +_,7 @@
+@@ -32,6 +_,7 @@
          this.allowCommands = allowCommands;
          this.gameRules = gameRules;
          this.dataConfiguration = dataConfiguration;
@@ -23,9 +36,9 @@
      }
  
      public static LevelSettings parse(Dynamic<?> input, WorldDataConfiguration loadConfig) {
-@@ -37,7 +_,8 @@
+@@ -43,7 +_,8 @@
              input.get("Difficulty").asNumber().map(n -> Difficulty.byId(n.byteValue())).result().orElse(Difficulty.NORMAL),
-             input.get("allowCommands").asBoolean(gametype == GameType.CREATIVE),
+             input.get("allowCommands").asBoolean(gameType == GameType.CREATIVE),
              GameRules.codec(loadConfig.enabledFeatures()).parse(input.get("game_rules").orElseEmptyMap()).resultOrPartial(LOGGER::warn).orElseThrow(),
 -            loadConfig
 +            loadConfig,
@@ -33,7 +46,7 @@
          );
      }
  
-@@ -70,15 +_,15 @@
+@@ -76,15 +_,15 @@
      }
  
      public LevelSettings withGameType(GameType gameType) {
@@ -52,7 +65,7 @@
      }
  
      public LevelSettings copy() {
-@@ -89,7 +_,16 @@
+@@ -95,7 +_,16 @@
              this.difficulty,
              this.allowCommands,
              this.gameRules.copy(this.dataConfiguration.enabledFeatures()),

@@ -3,9 +3,9 @@
 @@ -20,7 +_,7 @@
          private static String readAccounted(DataInput input, NbtAccounter accounter) throws IOException {
              accounter.accountBytes(36L);
-             String s = input.readUTF();
--            accounter.accountBytes(2L, s.length());
-+            accounter.readUTF(s);
-             return s;
+             String data = input.readUTF();
+-            accounter.accountBytes(2L, data.length());
++            accounter.readUTF(data);
+             return data;
          }
  

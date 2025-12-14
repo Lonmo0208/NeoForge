@@ -16,4 +16,4 @@
 +        // Neo: we do this automatically for modded PoiTypes in NeoForgeRegistryCallbacks
          matchingStates.forEach(
              blockState -> {
-                 Holder<PoiType> holder = TYPE_BY_STATE.put(blockState, type);
+                 Holder<PoiType> previous = TYPE_BY_STATE.put(blockState, type);

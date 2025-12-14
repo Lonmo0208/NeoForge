@@ -18,9 +18,9 @@
 +        }
 +
          if (!renderState.rainColumns.isEmpty()) {
-             RenderType rendertype = RenderTypes.weather(RAIN_LOCATION, Minecraft.useShaderTransparency());
-             this.renderInstances(bufferSource.getBuffer(rendertype), renderState.rainColumns, cameraPos, 1.0F, renderState.radius, renderState.intensity);
-@@ -160,6 +_,10 @@
+             RenderType renderType = RenderTypes.weather(RAIN_LOCATION, Minecraft.useShaderTransparency());
+             this.renderInstances(bufferSource.getBuffer(renderType), renderState.rainColumns, cameraPos, 1.0F, renderState.radius, renderState.intensity);
+@@ -157,6 +_,10 @@
      }
  
      public void tickRainParticles(ClientLevel level, Camera camera, int ticks, ParticleStatus particleStatus, int weatherRadius) {
@@ -28,6 +28,6 @@
 +        if (customWeatherEffectRenderer != null && customWeatherEffectRenderer.tickRain(level, ticks, camera))
 +            return;
 +
-         float f = level.getRainLevel(1.0F);
-         if (!(f <= 0.0F)) {
-             RandomSource randomsource = RandomSource.create(ticks * 312987231L);
+         float rainLevel = level.getRainLevel(1.0F);
+         if (!(rainLevel <= 0.0F)) {
+             RandomSource random = RandomSource.create(ticks * 312987231L);

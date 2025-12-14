@@ -2,12 +2,12 @@
 +++ b/net/minecraft/world/level/chunk/LevelChunkSection.java
 @@ -69,7 +_,7 @@
  
-         FluidState fluidstate = blockstate.getFluidState();
-         FluidState fluidstate1 = state.getFluidState();
--        if (!blockstate.isAir()) {
-+        if (!blockstate.isEmpty()) { // Neo: Fix MC-232360 for modded blocks (Makes modded isAir blocks not be replaced with Blocks.AIR in all-air chunk sections)
+         FluidState previousFluid = previous.getFluidState();
+         FluidState fluid = state.getFluidState();
+-        if (!previous.isAir()) {
++        if (!previousFluid.isEmpty()) { // Neo: Fix MC-232360 for modded blocks (Makes modded isAir blocks not be replaced with Blocks.AIR in all-air chunk sections)
              this.nonEmptyBlockCount--;
-             if (blockstate.isRandomlyTicking()) {
+             if (previous.isRandomlyTicking()) {
                  this.tickingBlockCount--;
 @@ -80,7 +_,7 @@
              this.tickingFluidCount--;
@@ -21,7 +21,7 @@
 @@ -118,7 +_,7 @@
  
              public void accept(BlockState state, int count) {
-                 FluidState fluidstate = state.getFluidState();
+                 FluidState fluid = state.getFluidState();
 -                if (!state.isAir()) {
 +                if (!state.isEmpty()) { // Neo: Fix MC-232360 for modded blocks (Makes modded isAir blocks not be replaced with Blocks.AIR in all-air chunk sections)
                      this.nonEmptyBlockCount += count;

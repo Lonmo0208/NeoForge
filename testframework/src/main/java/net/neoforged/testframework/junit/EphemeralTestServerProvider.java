@@ -116,7 +116,7 @@ public class EphemeralTestServerProvider implements ParameterResolver, Extension
                 LevelStorageSource storage = LevelStorageSource.createDefault(tempDir.resolve("world"));
                 LevelStorageSource.LevelStorageAccess storageAccess = storage.validateAndCreateAccess("main");
                 PackRepository packrepository = ServerPacksSource.createPackRepository(storageAccess);
-                final MinecraftServer server = MinecraftServer.spin(
+                JUnitServer server = MinecraftServer.spin(
                         thread -> JUnitServer.create(thread, tempDir, storageAccess, packrepository));
 
                 FMLLoader.getCurrent().addCloseCallback(() -> {

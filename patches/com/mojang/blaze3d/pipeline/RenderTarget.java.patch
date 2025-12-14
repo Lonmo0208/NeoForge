@@ -28,9 +28,9 @@
              this.width = width;
              this.height = height;
              if (this.useDepth) {
--                this.depthTexture = gpudevice.createTexture(() -> this.label + " / Depth", 15, TextureFormat.DEPTH32, width, height, 1, 1);
+-                this.depthTexture = device.createTexture(() -> this.label + " / Depth", 15, TextureFormat.DEPTH32, width, height, 1, 1);
 +                var format = this.useStencil ? net.neoforged.neoforge.client.ClientHooks.getStencilFormat() : TextureFormat.DEPTH32;
-+                this.depthTexture = gpudevice.createTexture(() -> this.label + " / Depth", 15, format, width, height, 1, 1);
-                 this.depthTextureView = gpudevice.createTextureView(this.depthTexture);
++                this.depthTexture = device.createTexture(() -> this.label + " / Depth", 15, format, width, height, 1, 1);
+                 this.depthTextureView = device.createTextureView(this.depthTexture);
              }
  

@@ -1,59 +1,59 @@
 --- a/net/minecraft/world/level/block/FireBlock.java
 +++ b/net/minecraft/world/level/block/FireBlock.java
-@@ -117,13 +_,13 @@
+@@ -115,13 +_,13 @@
      protected BlockState getStateForPlacement(BlockGetter level, BlockPos pos) {
-         BlockPos blockpos = pos.below();
-         BlockState blockstate = level.getBlockState(blockpos);
--        if (!this.canBurn(blockstate) && !blockstate.isFaceSturdy(level, blockpos, Direction.UP)) {
-+        if (!this.canCatchFire(level, blockpos, Direction.UP) && !blockstate.isFaceSturdy(level, blockpos, Direction.UP)) {
-             BlockState blockstate1 = this.defaultBlockState();
+         BlockPos below = pos.below();
+         BlockState belowState = level.getBlockState(below);
+-        if (!this.canBurn(belowState) && !belowState.isFaceSturdy(level, below, Direction.UP)) {
++        if (!this.canCatchFire(level, below, Direction.UP) && !belowState.isFaceSturdy(level, below, Direction.UP)) {
+             BlockState result = this.defaultBlockState();
  
              for (Direction direction : Direction.values()) {
-                 BooleanProperty booleanproperty = PROPERTY_BY_DIRECTION.get(direction);
-                 if (booleanproperty != null) {
--                    blockstate1 = blockstate1.setValue(booleanproperty, this.canBurn(level.getBlockState(pos.relative(direction))));
-+                    blockstate1 = blockstate1.setValue(booleanproperty, Boolean.valueOf(this.canCatchFire(level, pos.relative(direction), direction.getOpposite())));
+                 BooleanProperty property = PROPERTY_BY_DIRECTION.get(direction);
+                 if (property != null) {
+-                    result = result.setValue(property, this.canBurn(level.getBlockState(pos.relative(direction))));
++                    result = result.setValue(property, Boolean.valueOf(this.canCatchFire(level, pos.relative(direction), direction.getOpposite())));
                  }
              }
  
-@@ -148,7 +_,7 @@
+@@ -146,7 +_,7 @@
              }
  
-             BlockState blockstate = level.getBlockState(pos.below());
--            boolean flag = blockstate.is(level.dimensionType().infiniburn());
-+            boolean flag = blockstate.isFireSource(level, pos.below(), Direction.UP);
-             int i = state.getValue(AGE);
-             if (!flag && level.isRaining() && this.isNearRain(level, pos) && random.nextFloat() < 0.2F + i * 0.03F) {
+             BlockState belowState = level.getBlockState(pos.below());
+-            boolean infiniBurn = belowState.is(level.dimensionType().infiniburn());
++            boolean infiniBurn = belowState.isFireSource(level, pos.below(), Direction.UP);
+             int age = state.getValue(AGE);
+             if (!infiniBurn && level.isRaining() && this.isNearRain(level, pos) && random.nextFloat() < 0.2F + age * 0.03F) {
                  level.removeBlock(pos, false);
-@@ -169,7 +_,7 @@
+@@ -167,7 +_,7 @@
                          return;
                      }
  
--                    if (i == 15 && random.nextInt(4) == 0 && !this.canBurn(level.getBlockState(pos.below()))) {
-+                    if (i == 15 && random.nextInt(4) == 0 && !this.canCatchFire(level, pos.below(), Direction.UP)) {
+-                    if (age == 15 && random.nextInt(4) == 0 && !this.canBurn(level.getBlockState(pos.below()))) {
++                    if (age == 15 && random.nextInt(4) == 0 && !this.canCatchFire(level, pos.below(), Direction.UP)) {
                          level.removeBlock(pos, false);
                          return;
                      }
-@@ -177,12 +_,12 @@
+@@ -175,12 +_,12 @@
  
-                 boolean flag1 = level.environmentAttributes().getValue(EnvironmentAttributes.INCREASED_FIRE_BURNOUT, pos);
-                 int k = flag1 ? -50 : 0;
--                this.checkBurnOut(level, pos.east(), 300 + k, random, i);
--                this.checkBurnOut(level, pos.west(), 300 + k, random, i);
--                this.checkBurnOut(level, pos.below(), 250 + k, random, i);
--                this.checkBurnOut(level, pos.above(), 250 + k, random, i);
--                this.checkBurnOut(level, pos.north(), 300 + k, random, i);
--                this.checkBurnOut(level, pos.south(), 300 + k, random, i);
-+                this.checkBurnOut(level, pos.east(), 300 + k, random, i, Direction.WEST);
-+                this.checkBurnOut(level, pos.west(), 300 + k, random, i, Direction.EAST);
-+                this.checkBurnOut(level, pos.below(), 250 + k, random, i, Direction.UP);
-+                this.checkBurnOut(level, pos.above(), 250 + k, random, i, Direction.DOWN);
-+                this.checkBurnOut(level, pos.north(), 300 + k, random, i, Direction.SOUTH);
-+                this.checkBurnOut(level, pos.south(), 300 + k, random, i, Direction.NORTH);
-                 BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+                 boolean increasedBurnout = level.environmentAttributes().getValue(EnvironmentAttributes.INCREASED_FIRE_BURNOUT, pos);
+                 int extra = increasedBurnout ? -50 : 0;
+-                this.checkBurnOut(level, pos.east(), 300 + extra, random, age);
+-                this.checkBurnOut(level, pos.west(), 300 + extra, random, age);
+-                this.checkBurnOut(level, pos.below(), 250 + extra, random, age);
+-                this.checkBurnOut(level, pos.above(), 250 + extra, random, age);
+-                this.checkBurnOut(level, pos.north(), 300 + extra, random, age);
+-                this.checkBurnOut(level, pos.south(), 300 + extra, random, age);
++                this.checkBurnOut(level, pos.east(), 300 + extra, random, age, Direction.WEST);
++                this.checkBurnOut(level, pos.west(), 300 + extra, random, age, Direction.EAST);
++                this.checkBurnOut(level, pos.below(), 250 + extra, random, age, Direction.UP);
++                this.checkBurnOut(level, pos.above(), 250 + extra, random, age, Direction.DOWN);
++                this.checkBurnOut(level, pos.north(), 300 + extra, random, age, Direction.SOUTH);
++                this.checkBurnOut(level, pos.south(), 300 + extra, random, age, Direction.NORTH);
+                 BlockPos.MutableBlockPos testPos = new BlockPos.MutableBlockPos();
  
-                 for (int l = -1; l <= 1; l++) {
-@@ -225,33 +_,32 @@
+                 for (int xx = -1; xx <= 1; xx++) {
+@@ -221,33 +_,32 @@
              || level.isRainingAt(testPos.south());
      }
  
@@ -72,28 +72,28 @@
      }
  
 -    private void checkBurnOut(Level level, BlockPos pos, int chance, RandomSource random, int age) {
--        int i = this.getBurnOdds(level.getBlockState(pos));
+-        int odds = this.getBurnOdds(level.getBlockState(pos));
 +    private void checkBurnOut(Level level, BlockPos pos, int chance, RandomSource random, int age, Direction face) {
-+        int i = level.getBlockState(pos).getFlammability(level, pos, face);
-         if (random.nextInt(chance) < i) {
-             BlockState blockstate = level.getBlockState(pos);
-+            blockstate.onCaughtFire(level, pos, face, null);
++        int odds = level.getBlockState(pos).getFlammability(level, pos, face);
+         if (random.nextInt(chance) < odds) {
+             BlockState oldState = level.getBlockState(pos);
++            oldState.onCaughtFire(level, pos, face, null);
 +
              if (random.nextInt(age + 10) < 5 && !level.isRainingAt(pos)) {
-                 int j = Math.min(age + random.nextInt(5) / 4, 15);
-                 level.setBlock(pos, this.getStateWithAge(level, pos, j), 3);
+                 int newAge = Math.min(age + random.nextInt(5) / 4, 15);
+                 level.setBlock(pos, this.getStateWithAge(level, pos, newAge), 3);
              } else {
                  level.removeBlock(pos, false);
              }
 -
--            Block block = blockstate.getBlock();
+-            Block block = oldState.getBlock();
 -            if (block instanceof TntBlock) {
 -                TntBlock.prime(level, pos);
 -            }
          }
      }
  
-@@ -262,7 +_,7 @@
+@@ -258,7 +_,7 @@
  
      private boolean isValidFireLocation(BlockGetter level, BlockPos pos) {
          for (Direction direction : Direction.values()) {
@@ -102,16 +102,16 @@
                  return true;
              }
          }
-@@ -278,7 +_,7 @@
+@@ -274,7 +_,7 @@
  
              for (Direction direction : Direction.values()) {
-                 BlockState blockstate = level.getBlockState(pos.relative(direction));
--                i = Math.max(this.getIgniteOdds(blockstate), i);
-+                i = Math.max(blockstate.getFireSpreadSpeed(level, pos.relative(direction), direction.getOpposite()), i);
+                 BlockState blockState = level.getBlockState(pos.relative(direction));
+-                odds = Math.max(this.getIgniteOdds(blockState), odds);
++                odds = Math.max(blockState.getFireSpreadSpeed(level, pos.relative(direction), direction.getOpposite()), odds);
              }
  
-             return i;
-@@ -286,6 +_,7 @@
+             return odds;
+@@ -282,6 +_,7 @@
      }
  
      @Override
@@ -119,7 +119,7 @@
      protected boolean canBurn(BlockState state) {
          return this.getIgniteOdds(state) > 0;
      }
-@@ -306,8 +_,21 @@
+@@ -302,8 +_,21 @@
      }
  
      public void setFlammable(Block block, int igniteOdds, int burnOdds) {

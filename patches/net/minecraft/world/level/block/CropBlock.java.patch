@@ -15,13 +15,13 @@
      protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 +        if (!level.isAreaLoaded(pos, 1)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light
          if (level.getRawBrightness(pos, 0) >= 9) {
-             int i = this.getAge(state);
-             if (i < this.getMaxAge()) {
--                float f = getGrowthSpeed(this, level, pos);
--                if (random.nextInt((int)(25.0F / f) + 1) == 0) {
+             int age = this.getAge(state);
+             if (age < this.getMaxAge()) {
+-                float growthSpeed = getGrowthSpeed(this, level, pos);
+-                if (random.nextInt((int)(25.0F / growthSpeed) + 1) == 0) {
 +                float f = getGrowthSpeed(state, level, pos);
 +                if (net.neoforged.neoforge.common.CommonHooks.canCropGrow(level, pos, state, random.nextInt((int)(25.0F / f) + 1) == 0)) {
-                     level.setBlock(pos, this.getStateForAge(i + 1), 2);
+                     level.setBlock(pos, this.getStateForAge(age + 1), 2);
 +                    net.neoforged.neoforge.common.CommonHooks.fireCropGrowPost(level, pos, state);
                  }
              }
@@ -31,22 +31,22 @@
      }
  
 -    protected static float getGrowthSpeed(Block type, BlockGetter level, BlockPos pos) {
-+    protected static float getGrowthSpeed(BlockState blockState, BlockGetter level, BlockPos pos) {
-+        Block type = blockState.getBlock();
-         float f = 1.0F;
-         BlockPos blockpos = pos.below();
++    protected static float getGrowthSpeed(BlockState cropBlockState, BlockGetter level, BlockPos pos) {
++        Block type = cropBlockState.getBlock();
+         float speed = 1.0F;
+         BlockPos below = pos.below();
  
 @@ -104,9 +_,10 @@
-             for (int j = -1; j <= 1; j++) {
-                 float f1 = 0.0F;
-                 BlockState blockstate = level.getBlockState(blockpos.offset(i, 0, j));
--                if (blockstate.is(Blocks.FARMLAND)) {
-+                var soilDecision = blockstate.canSustainPlant(level, blockpos.offset(i, 0, j), net.minecraft.core.Direction.UP, blockState);
-+                if (soilDecision.isDefault() ? blockstate.getBlock() instanceof net.minecraft.world.level.block.FarmBlock : soilDecision.isTrue()) {
-                     f1 = 1.0F;
--                    if (blockstate.getValue(FarmBlock.MOISTURE) > 0) {
-+                    if (blockstate.isFertile(level, pos.offset(i, 0, j))) {
-                         f1 = 3.0F;
+             for (int zz = -1; zz <= 1; zz++) {
+                 float blockSpeed = 0.0F;
+                 BlockState blockState = level.getBlockState(below.offset(xx, 0, zz));
+-                if (blockState.is(Blocks.FARMLAND)) {
++                var soilDecision = blockState.canSustainPlant(level, below.offset(xx, 0, zz), net.minecraft.core.Direction.UP, blockState);
++                if (soilDecision.isDefault() ? blockState.getBlock() instanceof net.minecraft.world.level.block.FarmBlock : soilDecision.isTrue()) {
+                     blockSpeed = 1.0F;
+-                    if (blockState.getValue(FarmBlock.MOISTURE) > 0) {
++                    if (blockState.isFertile(level, pos.offset(xx, 0, zz))) {
+                         blockSpeed = 3.0F;
                      }
                  }
 @@ -142,6 +_,8 @@
@@ -62,8 +62,8 @@
  
      @Override
      protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
--        if (level instanceof ServerLevel serverlevel && entity instanceof Ravager && serverlevel.getGameRules().get(GameRules.MOB_GRIEFING)) {
-+        if (level instanceof ServerLevel serverlevel && entity instanceof Ravager && net.neoforged.neoforge.event.EventHooks.canEntityGrief(serverlevel, entity)) {
-             serverlevel.destroyBlock(pos, true, entity);
+-        if (level instanceof ServerLevel serverLevel && entity instanceof Ravager && serverLevel.getGameRules().get(GameRules.MOB_GRIEFING)) {
++        if (level instanceof ServerLevel serverLevel && entity instanceof Ravager && net.neoforged.neoforge.event.EventHooks.canEntityGrief(serverLevel, entity)) {
+             serverLevel.destroyBlock(pos, true, entity);
          }
  

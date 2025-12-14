@@ -1,11 +1,11 @@
 --- a/net/minecraft/world/entity/decoration/LeashFenceKnotEntity.java
 +++ b/net/minecraft/world/entity/decoration/LeashFenceKnotEntity.java
-@@ -72,7 +_,7 @@
+@@ -74,7 +_,7 @@
          if (this.level().isClientSide()) {
              return InteractionResult.SUCCESS;
          } else {
 -            if (player.getItemInHand(hand).is(Items.SHEARS)) {
 +            if (player.getItemInHand(hand).canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHEARS_HARVEST)) {
-                 InteractionResult interactionresult = super.interact(player, hand);
-                 if (interactionresult instanceof InteractionResult.Success interactionresult$success && interactionresult$success.wasItemInteraction()) {
-                     return interactionresult;
+                 InteractionResult result = super.interact(player, hand);
+                 if (result instanceof InteractionResult.Success success && success.wasItemInteraction()) {
+                     return result;

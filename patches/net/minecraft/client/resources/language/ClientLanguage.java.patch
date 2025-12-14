@@ -19,27 +19,27 @@
      }
  
      public static ClientLanguage loadFrom(ResourceManager resourceManager, List<String> languageStack, boolean defaultRightToLeft) {
-         Map<String, String> map = new HashMap<>();
+         Map<String, String> translations = new HashMap<>();
 +        Map<String, net.minecraft.network.chat.Component> componentMap = new HashMap<>();
  
-         for (String s : languageStack) {
-             String s1 = String.format(Locale.ROOT, "lang/%s.json", s);
-+            map.putAll(net.neoforged.fml.i18n.I18nManager.loadTranslations(s));
+         for (String languageCode : languageStack) {
+             String path = String.format(Locale.ROOT, "lang/%s.json", languageCode);
++            translations.putAll(net.neoforged.fml.i18n.I18nManager.loadTranslations(languageCode));
  
-             for (String s2 : resourceManager.getNamespaces()) {
+             for (String namespace : resourceManager.getNamespaces()) {
                  try {
-                     Identifier identifier = Identifier.fromNamespaceAndPath(s2, s1);
--                    appendFrom(s, resourceManager.getResourceStack(identifier), map);
-+                    appendFrom(s, resourceManager.getResourceStack(identifier), map, componentMap);
-                 } catch (Exception exception) {
-                     LOGGER.warn("Skipped language file: {}:{} ({})", s2, s1, exception.toString());
+                     Identifier location = Identifier.fromNamespaceAndPath(namespace, path);
+-                    appendFrom(languageCode, resourceManager.getResourceStack(location), translations);
++                    appendFrom(languageCode, resourceManager.getResourceStack(location), translations, componentMap);
+                 } catch (Exception var10) {
+                     LOGGER.warn("Skipped language file: {}:{} ({})", namespace, path, var10.toString());
                  }
 @@ -46,13 +_,18 @@
          }
  
-         DeprecatedTranslationsInfo.loadFromDefaultResource().applyToMap(map);
--        return new ClientLanguage(Map.copyOf(map), defaultRightToLeft);
-+        return new ClientLanguage(Map.copyOf(map), defaultRightToLeft, Map.copyOf(componentMap));
+         DeprecatedTranslationsInfo.loadFromDefaultResource().applyToMap(translations);
+-        return new ClientLanguage(Map.copyOf(translations), defaultRightToLeft);
++        return new ClientLanguage(Map.copyOf(translations), defaultRightToLeft, Map.copyOf(componentMap));
      }
  
 +    @Deprecated
@@ -49,11 +49,11 @@
 +
 +    private static void appendFrom(String languageCode, List<Resource> resources, Map<String, String> translations, Map<String, net.minecraft.network.chat.Component> componentMap) {
          for (Resource resource : resources) {
-             try (InputStream inputstream = resource.open()) {
--                Language.loadFromJson(inputstream, translations::put);
-+                Language.loadFromJson(inputstream, translations::put, componentMap::put);
-             } catch (IOException ioexception) {
-                 LOGGER.warn("Failed to load translations for {} from pack {}", languageCode, resource.sourcePackId(), ioexception);
+             try (InputStream inputStream = resource.open()) {
+-                Language.loadFromJson(inputStream, translations::put);
++                Language.loadFromJson(inputStream, translations::put, componentMap::put);
+             } catch (IOException var10) {
+                 LOGGER.warn("Failed to load translations for {} from pack {}", languageCode, resource.sourcePackId(), var10);
              }
 @@ -77,5 +_,15 @@
      @Override

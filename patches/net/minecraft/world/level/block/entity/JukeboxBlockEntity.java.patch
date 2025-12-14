@@ -1,7 +1,7 @@
 --- a/net/minecraft/world/level/block/entity/JukeboxBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/JukeboxBlockEntity.java
 @@ -109,9 +_,34 @@
-         return itemstack;
+         return retrievedItem;
      }
  
 +    // Neo: Support deferring non-transactional notification and song player update until the end of a transaction
@@ -32,6 +32,6 @@
 +        itemChanged();
 +    }
 +    private void itemChanged() {
-         boolean flag = !this.item.isEmpty();
-         Optional<Holder<JukeboxSong>> optional = JukeboxSong.fromStack(this.level.registryAccess(), this.item);
-         this.notifyItemChangedInJukebox(flag);
+         boolean itemWasInserted = !this.item.isEmpty();
+         Optional<Holder<JukeboxSong>> maybeSong = JukeboxSong.fromStack(this.level.registryAccess(), this.item);
+         this.notifyItemChangedInJukebox(itemWasInserted);

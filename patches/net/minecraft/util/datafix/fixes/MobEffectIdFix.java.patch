@@ -28,6 +28,6 @@
      private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> input, Dynamic<T> output) {
 -        output = updateMobEffectIdField(input, "EffectId", output, "id");
 +        output = updateMobEffectIdFieldConsideringForge(input, "EffectId", output, "id", "forge:effect_id");
-         Optional<Dynamic<T>> optional = input.get("EffectDuration").result();
-         return output.replaceField("EffectDuration", "duration", optional);
+         Optional<Dynamic<T>> duration = input.get("EffectDuration").result();
+         return output.replaceField("EffectDuration", "duration", duration);
      }

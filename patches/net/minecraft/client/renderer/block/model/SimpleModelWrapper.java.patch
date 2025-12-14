@@ -14,27 +14,27 @@
 +    }
 +
      public static BlockModelPart bake(ModelBaker modelBakery, Identifier location, ModelState state) {
-         ResolvedModel resolvedmodel = modelBakery.getModel(location);
-+        return bake(modelBakery, resolvedmodel, state);
+         ResolvedModel model = modelBakery.getModel(location);
++        return bake(modelBakery, model, state);
 +    }
 +
 +    // Neo: split off to allow baking an existing ResolvedModel into a BlockModelPart
-+    public static BlockModelPart bake(ModelBaker modelBakery, ResolvedModel resolvedmodel, ModelState state) {
-         TextureSlots textureslots = resolvedmodel.getTopTextureSlots();
-         boolean flag = resolvedmodel.getTopAmbientOcclusion();
-         TextureAtlasSprite textureatlassprite = resolvedmodel.resolveParticleSprite(textureslots, modelBakery);
++    public static BlockModelPart bake(ModelBaker modelBakery, ResolvedModel model, ModelState state) {
+         TextureSlots textureSlots = model.getTopTextureSlots();
+         boolean hasAmbientOcclusion = model.getTopAmbientOcclusion();
+         TextureAtlasSprite particleSprite = model.resolveParticleSprite(textureSlots, modelBakery);
 @@ -41,15 +_,22 @@
          }
  
-         if (multimap != null) {
--            LOGGER.warn("Rejecting block model {}, since it contains sprites from outside of supported atlas: {}", location, multimap);
-+            LOGGER.warn("Rejecting block model {}, since it contains sprites from outside of supported atlas: {}", resolvedmodel.debugName(), multimap);
+         if (forbiddenSprites != null) {
+-            LOGGER.warn("Rejecting block model {}, since it contains sprites from outside of supported atlas: {}", location, forbiddenSprites);
++            LOGGER.warn("Rejecting block model {}, since it contains sprites from outside of supported atlas: {}", model.debugName(), forbiddenSprites);
              return modelBakery.missingBlockModelPart();
          } else {
--            return new SimpleModelWrapper(quadcollection, flag, textureatlassprite);
-+            var renderTypeGroup = resolvedmodel.getTopAdditionalProperties().getOptional(net.neoforged.neoforge.client.model.NeoForgeModelProperties.RENDER_TYPE);
+-            return new SimpleModelWrapper(geometry, hasAmbientOcclusion, particleSprite);
++            var renderTypeGroup = model.getTopAdditionalProperties().getOptional(net.neoforged.neoforge.client.model.NeoForgeModelProperties.RENDER_TYPE);
 +            var renderTypes = renderTypeGroup == null || renderTypeGroup.isEmpty() ? null : renderTypeGroup.block();
-+            return new SimpleModelWrapper(quadcollection, flag, textureatlassprite, renderTypes);
++            return new SimpleModelWrapper(geometry, hasAmbientOcclusion, particleSprite, renderTypes);
          }
      }
  

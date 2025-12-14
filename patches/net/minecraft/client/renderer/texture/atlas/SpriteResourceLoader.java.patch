@@ -6,15 +6,15 @@
      static SpriteResourceLoader create(Set<MetadataSectionType<?>> additionalMetadataSections) {
 -        return (spriteLocation, resource) -> {
 +        return (spriteLocation, resource, constructor) -> {
-             Optional<AnimationMetadataSection> optional;
-             Optional<TextureMetadataSection> optional1;
-             List<MetadataSectionType.WithValue<?>> list;
+             Optional<AnimationMetadataSection> animationInfo;
+             Optional<TextureMetadataSection> textureInfo;
+             List<MetadataSectionType.WithValue<?>> additionalMetadata;
 @@ -68,9 +_,14 @@
-                 framesize = new FrameSize(nativeimage.getWidth(), nativeimage.getHeight());
+                 frameSize = new FrameSize(image.getWidth(), image.getHeight());
              }
  
--            return new SpriteContents(spriteLocation, framesize, nativeimage, optional, list, optional1);
-+            return constructor.create(spriteLocation, framesize, nativeimage, optional, list, optional1);
+-            return new SpriteContents(spriteLocation, frameSize, image, animationInfo, additionalMetadata, textureInfo);
++            return constructor.create(spriteLocation, frameSize, image, animationInfo, additionalMetadata, textureInfo);
          };
      }
  

@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/animal/parrot/Parrot.java
 +++ b/net/minecraft/world/entity/animal/parrot/Parrot.java
-@@ -78,9 +_,11 @@
+@@ -77,9 +_,11 @@
      private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Parrot.class, EntityDataSerializers.INT);
      private static final Predicate<Mob> NOT_PARROT_PREDICATE = new Predicate<Mob>() {
          public boolean test(@Nullable Mob input) {
@@ -10,10 +10,10 @@
      };
 +    /** @deprecated Neo: use the {@link net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps#PARROT_IMITATIONS data map} instead */
 +    @Deprecated
-     static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), map -> {
+     private static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), map -> {
          map.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
          map.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
-@@ -270,7 +_,7 @@
+@@ -267,7 +_,7 @@
              }
  
              if (!this.level().isClientSide()) {
@@ -22,19 +22,19 @@
                      this.tame(player);
                      this.level().broadcastEntityEvent(this, (byte)7);
                  } else {
-@@ -332,7 +_,10 @@
+@@ -327,7 +_,10 @@
  
      public static SoundEvent getAmbient(Level level, RandomSource random) {
          if (level.getDifficulty() != Difficulty.PEACEFUL && random.nextInt(1000) == 0) {
--            List<EntityType<?>> list = Lists.newArrayList(MOB_SOUND_MAP.keySet());
+-            List<EntityType<?>> keys = Lists.newArrayList(MOB_SOUND_MAP.keySet());
 +            final var entities = new java.util.HashSet<>(MOB_SOUND_MAP.keySet());
 +            final var registry = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENTITY_TYPE);
 +            registry.getDataMap(net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps.PARROT_IMITATIONS).keySet().forEach(key -> entities.add(registry.getValue(key)));
-+            List<EntityType<?>> list = Lists.newArrayList(entities);
-             return getImitatedSound(list.get(random.nextInt(list.size())));
++            List<EntityType<?>> keys = Lists.newArrayList(entities);
+             return getImitatedSound(keys.get(random.nextInt(keys.size())));
          } else {
              return SoundEvents.PARROT_AMBIENT;
-@@ -340,7 +_,9 @@
+@@ -335,7 +_,9 @@
      }
  
      private static SoundEvent getImitatedSound(EntityType<?> id) {

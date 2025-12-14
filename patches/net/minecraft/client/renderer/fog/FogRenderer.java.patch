@@ -1,32 +1,32 @@
 --- a/net/minecraft/client/renderer/fog/FogRenderer.java
 +++ b/net/minecraft/client/renderer/fog/FogRenderer.java
 @@ -151,7 +_,7 @@
-                 f2 = Mth.lerp(f6, f2, f2 * f7);
+                 fogBlue = Mth.lerp(brightenFactor, fogBlue, fogBlue * targetScale);
              }
  
--            return new Vector4f(f5, f1, f2, 1.0F);
-+            return net.neoforged.neoforge.client.ClientHooks.getFogColor(camera, partialTicks, level, renderDistance, darkenWorldAmount, f5, f1, f2);
+-            return new Vector4f(fogRed, fogGreen, fogBlue, 1.0F);
++            return net.neoforged.neoforge.client.ClientHooks.getFogColor(camera, partialTicks, level, renderDistance, darkenWorldAmount, fogRed, fogGreen, fogBlue);
          }
      }
  
 @@ -167,9 +_,11 @@
          Entity entity = camera.entity();
-         FogData fogdata = new FogData();
+         FogData fog = new FogData();
  
 +        FogEnvironment chosenEnvironment = null;
-         for (FogEnvironment fogenvironment : FOG_ENVIRONMENTS) {
-             if (fogenvironment.isApplicable(fogtype, entity)) {
-                 fogenvironment.setupFog(fogdata, camera, level, f1, deltaTracker);
-+                chosenEnvironment = fogenvironment;
+         for (FogEnvironment fogEnvironment : FOG_ENVIRONMENTS) {
+             if (fogEnvironment.isApplicable(fogType, entity)) {
+                 fogEnvironment.setupFog(fog, camera, level, renderDistanceInBlocks, deltaTracker);
++                chosenEnvironment = fogEnvironment;
                  break;
              }
          }
 @@ -177,6 +_,8 @@
-         float f2 = Mth.clamp(f1 / 10.0F, 4.0F, 64.0F);
-         fogdata.renderDistanceStart = f1 - f2;
-         fogdata.renderDistanceEnd = f1;
+         float renderDistanceFogSpan = Mth.clamp(renderDistanceInBlocks / 10.0F, 4.0F, 64.0F);
+         fog.renderDistanceStart = renderDistanceInBlocks - renderDistanceFogSpan;
+         fog.renderDistanceEnd = renderDistanceInBlocks;
 +
-+        net.neoforged.neoforge.client.ClientHooks.onSetupFog(chosenEnvironment, fogtype, camera, f, renderDistanceInChunks, fogdata);
++        net.neoforged.neoforge.client.ClientHooks.onSetupFog(chosenEnvironment, fogType, camera, partialTickTime, renderDistanceInChunks, fog);
  
-         try (GpuBuffer.MappedView gpubuffer$mappedview = RenderSystem.getDevice()
-                 .createCommandEncoder()
+         try (GpuBuffer.MappedView view = RenderSystem.getDevice().createCommandEncoder().mapBuffer(this.regularBuffer.currentBuffer(), false, true)) {
+             this.updateBuffer(

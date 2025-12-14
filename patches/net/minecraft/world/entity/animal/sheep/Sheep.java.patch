@@ -3,9 +3,9 @@
 @@ -137,7 +_,7 @@
      @Override
      public InteractionResult mobInteract(Player player, InteractionHand hand) {
-         ItemStack itemstack = player.getItemInHand(hand);
--        if (itemstack.is(Items.SHEARS)) {
-+        if (false && itemstack.is(Items.SHEARS)) { // Neo: Shear logic is handled by IShearable
-             if (this.level() instanceof ServerLevel serverlevel && this.readyForShearing()) {
-                 this.shear(serverlevel, SoundSource.PLAYERS, itemstack);
+         ItemStack itemStack = player.getItemInHand(hand);
+-        if (itemStack.is(Items.SHEARS)) {
++        if (false && itemStack.is(Items.SHEARS)) { // Neo: Shear logic is handled by IShearable
+             if (this.level() instanceof ServerLevel level && this.readyForShearing()) {
+                 this.shear(level, SoundSource.PLAYERS, itemStack);
                  this.gameEvent(GameEvent.SHEAR, player);

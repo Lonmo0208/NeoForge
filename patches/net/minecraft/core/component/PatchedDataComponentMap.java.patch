@@ -6,10 +6,10 @@
      public <T> @Nullable T set(DataComponentType<T> type, @Nullable T value) {
 +        net.neoforged.neoforge.common.CommonHooks.validateComponent(value);
          this.ensureMapOwnership();
-         T t = this.prototype.get(type);
-         Optional<T> optional;
+         T defaultValue = this.prototype.get(type);
+         Optional<T> lastValue;
 @@ -204,6 +_,10 @@
-         return i;
+         return size;
      }
  
 +    public boolean isPatchEmpty() {
@@ -19,7 +19,7 @@
      public DataComponentPatch asPatch() {
          if (this.patch.isEmpty()) {
              return DataComponentPatch.EMPTY;
-@@ -233,7 +_,23 @@
+@@ -231,7 +_,23 @@
  
      @Override
      public int hashCode() {

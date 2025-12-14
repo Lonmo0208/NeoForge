@@ -9,5 +9,5 @@
          } else {
 +            if (!level.isAreaLoaded(pos, 3)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
              if (level.getMaxLocalRawBrightness(pos.above()) >= 9) {
-                 BlockState blockstate = this.defaultBlockState();
+                 BlockState defaultBlockState = this.defaultBlockState();
  

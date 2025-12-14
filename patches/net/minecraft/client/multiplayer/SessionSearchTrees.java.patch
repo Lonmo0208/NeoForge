@@ -1,15 +1,15 @@
 --- a/net/minecraft/client/multiplayer/SessionSearchTrees.java
 +++ b/net/minecraft/client/multiplayer/SessionSearchTrees.java
-@@ -65,7 +_,7 @@
-                 Registry<Item> registry = registryaccess.lookupOrThrow(Registries.ITEM);
-                 Item.TooltipContext item$tooltipcontext = Item.TooltipContext.of(registryaccess);
-                 ContextMap contextmap = SlotDisplayContext.fromLevel(level);
--                TooltipFlag tooltipflag = TooltipFlag.Default.NORMAL;
-+                TooltipFlag tooltipflag = net.neoforged.neoforge.client.ClientTooltipFlag.of(TooltipFlag.Default.NORMAL);
-                 CompletableFuture<?> completablefuture = this.recipeSearch;
+@@ -64,7 +_,7 @@
+                 Registry<Item> itemRegistries = registryAccess.lookupOrThrow(Registries.ITEM);
+                 Item.TooltipContext tooltipContext = Item.TooltipContext.of(registryAccess);
+                 ContextMap recipeContext = SlotDisplayContext.fromLevel(level);
+-                TooltipFlag tooltipFlag = TooltipFlag.Default.NORMAL;
++                TooltipFlag tooltipFlag = net.neoforged.neoforge.client.ClientTooltipFlag.of(TooltipFlag.Default.NORMAL);
+                 CompletableFuture<?> previous = this.recipeSearch;
                  this.recipeSearch = CompletableFuture.supplyAsync(
                      () -> new FullTextSearchTree<>(
-@@ -90,44 +_,60 @@
+@@ -89,44 +_,60 @@
      }
  
      public void updateCreativeTags(List<ItemStack> items) {
@@ -21,14 +21,14 @@
 -            CREATIVE_TAGS,
 +            key,
              () -> {
--                CompletableFuture<?> completablefuture = this.creativeByTagSearch;
+-                CompletableFuture<?> previous = this.creativeByTagSearch;
 -                this.creativeByTagSearch = CompletableFuture.supplyAsync(
-+                CompletableFuture<?> completablefuture = net.neoforged.neoforge.client.CreativeModeTabSearchRegistry.getTagSearchTree(key);
++                CompletableFuture<?> previous = net.neoforged.neoforge.client.CreativeModeTabSearchRegistry.getTagSearchTree(key);
 +                net.neoforged.neoforge.client.CreativeModeTabSearchRegistry.putTagSearchTree(key, CompletableFuture.supplyAsync(
                      () -> new IdSearchTree<>(itemStack -> itemStack.getTags().map(TagKey::location), items), Util.backgroundExecutor()
 -                );
 +                ));
-                 completablefuture.cancel(true);
+                 previous.cancel(true);
              }
          );
      }
@@ -51,22 +51,22 @@
 -            CREATIVE_NAMES,
 +            key,
              () -> {
-                 Item.TooltipContext item$tooltipcontext = Item.TooltipContext.of(registries);
--                TooltipFlag tooltipflag = TooltipFlag.Default.NORMAL.asCreative();
--                CompletableFuture<?> completablefuture = this.creativeByNameSearch;
+                 Item.TooltipContext tooltipContext = Item.TooltipContext.of(registries);
+-                TooltipFlag tooltipFlag = TooltipFlag.Default.NORMAL.asCreative();
+-                CompletableFuture<?> previous = this.creativeByNameSearch;
 -                this.creativeByNameSearch = CompletableFuture.supplyAsync(
-+                TooltipFlag tooltipflag = net.neoforged.neoforge.client.ClientTooltipFlag.of(TooltipFlag.Default.NORMAL.asCreative());
-+                CompletableFuture<?> completablefuture = net.neoforged.neoforge.client.CreativeModeTabSearchRegistry.getNameSearchTree(key);
++                TooltipFlag tooltipFlag = net.neoforged.neoforge.client.ClientTooltipFlag.of(TooltipFlag.Default.NORMAL.asCreative());
++                CompletableFuture<?> previous = net.neoforged.neoforge.client.CreativeModeTabSearchRegistry.getNameSearchTree(key);
 +                net.neoforged.neoforge.client.CreativeModeTabSearchRegistry.putNameSearchTree(key, CompletableFuture.supplyAsync(
                      () -> new FullTextSearchTree<>(
-                         itemStack -> getTooltipLines(Stream.of(itemStack), item$tooltipcontext, tooltipflag),
+                         itemStack -> getTooltipLines(Stream.of(itemStack), tooltipContext, tooltipFlag),
                          itemStack -> itemStack.getItemHolder().unwrapKey().map(ResourceKey::identifier).stream(),
                          itemStacks
                      ),
                      Util.backgroundExecutor()
 -                );
 +                ));
-                 completablefuture.cancel(true);
+                 previous.cancel(true);
              }
          );
      }
