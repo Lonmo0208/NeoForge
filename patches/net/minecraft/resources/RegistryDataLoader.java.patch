@@ -1,5 +1,14 @@
 --- a/net/minecraft/resources/RegistryDataLoader.java
 +++ b/net/minecraft/resources/RegistryDataLoader.java
+@@ -96,6 +_,8 @@
+ import org.slf4j.Logger;
+ 
+ public class RegistryDataLoader {
++    // Neo: Used as a marker to skip registration elements that were disabled due to conditions
++    private static final Exception SKIPPED_ELEMENT_MARKER = new Exception();
+     private static final Logger LOGGER = LogUtils.getLogger();
+     private static final Comparator<ResourceKey<?>> ERROR_KEY_COMPARATOR = Comparator.<ResourceKey<?>, Identifier>comparing(ResourceKey::registry).thenComparing(ResourceKey::identifier);
+     private static final RegistrationInfo NETWORK_REGISTRATION_INFO = new RegistrationInfo(Optional.empty(), Lifecycle.experimental());
 @@ -148,7 +_,7 @@
      public static final List<RegistryDataLoader.RegistryData<?>> DIMENSION_REGISTRIES = List.of(
          new RegistryDataLoader.RegistryData<>(Registries.LEVEL_STEM, LevelStem.CODEC)
@@ -62,6 +71,23 @@
                          loadTasks.forEach(p -> {
                              WritableRegistry<?> registry = p.registry;
  
+@@ -397,7 +_,15 @@
+                 Either var6;
+                 try (Reader reader = thunk.openAsReader()) {
+                     JsonElement json = StrictJsonParser.parse(reader);
+-                    var6 = Either.left(elementDecoder.parse(ops, json).getOrThrow());
++
++                    // Neo: Allow a condition to skip the entire element, in which case we return a special marker error to skip it in the loader. Look for uses of SKIPPED_ELEMENT_MARKER
++                    var conditionalDecoder = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodec(net.neoforged.neoforge.common.util.NeoForgeExtraCodecs.decodeOnly(elementDecoder));
++                    var candidate = conditionalDecoder.parse(ops, json).getOrThrow();
++                    if (candidate.isPresent()) {
++                        var6 = Either.left(candidate.get());
++                    } else {
++                        var6 = Either.right(SKIPPED_ELEMENT_MARKER);
++                    }
+                 }
+ 
+                 return var6;
 @@ -437,7 +_,11 @@
          }
      }
@@ -88,6 +114,21 @@
              this.loadingErrors = loadingErrors;
              this.concurrentRegistrationGetter = new ConcurrentHolderGetter<>(this.registryWriteLock, this.registry.createRegistrationLookup());
          }
+@@ -485,7 +_,13 @@
+                 elements.forEach(
+                     element -> element.value
+                         .ifLeft(value -> this.registry.register(element.key, (T)value, element.registrationInfo))
+-                        .ifRight(error -> this.loadingErrors.put(element.key, error))
++                        .ifRight(error -> {
++                            if (error == SKIPPED_ELEMENT_MARKER) {
++                                LOGGER.debug("Skipping loading registry entry {} as its conditions were not met", element.key);
++                            } else {
++                                this.loadingErrors.put(element.key, error);
++                            }
++                        })
+                 );
+                 this.elementsRegistered = true;
+             }
 @@ -514,7 +_,7 @@
              return CompletableFuture.<Map<Identifier, Resource>>supplyAsync(() -> lister.listMatchingResources(this.resourceManager), executor)
                  .thenCompose(

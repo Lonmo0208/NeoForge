@@ -1,9 +1,10 @@
 --- a/net/minecraft/server/ReloadableServerRegistries.java
 +++ b/net/minecraft/server/ReloadableServerRegistries.java
-@@ -61,6 +_,16 @@
+@@ -60,7 +_,16 @@
+         return CompletableFuture.supplyAsync(() -> {
              WritableRegistry<T> registry = new MappedRegistry<>(type.registryKey(), Lifecycle.experimental());
              Map<Identifier, T> elements = new HashMap<>();
-             SimpleJsonResourceReloadListener.scanDirectory(manager, type.registryKey(), ops, type.codec(), elements);
+-            SimpleJsonResourceReloadListener.scanDirectory(manager, type.registryKey(), ops, type.codec(), elements);
 +            var provider = net.neoforged.neoforge.common.CommonHooks.extractLookupProvider(ops);
 +            Map<Identifier, Optional<T>> optionalMap = new HashMap<>();
 +            SimpleJsonResourceReloadListener.scanDirectoryWithOptionalValues(manager, type.registryKey(), ops, type.conditionalCodec(), optionalMap);
