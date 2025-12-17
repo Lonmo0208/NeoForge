@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/storage/loot/LootPool.java
 +++ b/net/minecraft/world/level/storage/loot/LootPool.java
-@@ -33,7 +_,8 @@
+@@ -32,7 +_,8 @@
                  LootItemCondition.DIRECT_CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(p -> p.conditions),
                  LootItemFunctions.ROOT_CODEC.listOf().optionalFieldOf("functions", List.of()).forGetter(p -> p.functions),
                  NumberProviders.CODEC.fieldOf("rolls").forGetter(p -> p.rolls),
@@ -10,7 +10,7 @@
              )
              .apply(i, LootPool::new)
      );
-@@ -50,7 +_,8 @@
+@@ -49,7 +_,8 @@
          List<LootItemCondition> conditions,
          List<LootItemFunction> functions,
          NumberProvider rolls,
@@ -20,7 +20,7 @@
      ) {
          this.entries = entries;
          this.conditions = conditions;
-@@ -59,6 +_,7 @@
+@@ -58,6 +_,7 @@
          this.compositeFunction = LootItemFunctions.compose(functions);
          this.rolls = rolls;
          this.bonusRolls = bonusRolls;
@@ -28,8 +28,8 @@
      }
  
      private void addRandomItem(Consumer<ItemStack> result, LootContext context) {
-@@ -122,6 +_,57 @@
-         this.bonusRolls.validate(output.forChild(new ProblemReporter.FieldPathElement("bonus_rolls")));
+@@ -113,6 +_,57 @@
+         Validatable.validate(output, "bonus_rolls", this.bonusRolls);
      }
  
 +    // Neo: Implement LootPool freezing to prevent manipulation outside of Neo APIs
@@ -86,7 +86,7 @@
      public static LootPool.Builder lootPool() {
          return new LootPool.Builder();
      }
-@@ -132,6 +_,8 @@
+@@ -123,6 +_,8 @@
          private final ImmutableList.Builder<LootItemFunction> functions = ImmutableList.builder();
          private NumberProvider rolls = ConstantValue.exactly(1.0F);
          private NumberProvider bonusRolls = ConstantValue.exactly(0.0F);
@@ -95,7 +95,7 @@
  
          public LootPool.Builder setRolls(NumberProvider rolls) {
              this.rolls = rolls;
-@@ -162,8 +_,13 @@
+@@ -153,8 +_,13 @@
              return this;
          }
  

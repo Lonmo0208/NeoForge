@@ -36,7 +36,7 @@
          if (this.splash != null && !this.minecraft.options.hideSplashTexts().get()) {
              this.splash.render(graphics, this.width, this.font, widgetFade);
          }
-@@ -312,7 +_,13 @@
+@@ -310,7 +_,13 @@
              versionString = versionString + I18n.get("menu.modded");
          }
  

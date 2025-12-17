@@ -55,7 +55,7 @@
 +
 +    public static void renderFluid(Minecraft minecraft, PoseStack poseStack, MultiBufferSource bufferSource, Identifier texture) {
          BlockPos pos = BlockPos.containing(minecraft.player.getX(), minecraft.player.getEyeY(), minecraft.player.getZ());
-         float br = LightTexture.getBrightness(minecraft.player.level().dimensionType(), minecraft.player.level().getMaxLocalRawBrightness(pos));
+         float br = Lightmap.getBrightness(minecraft.player.level().dimensionType(), minecraft.player.level().getMaxLocalRawBrightness(pos));
          int color = ARGB.colorFromFloat(0.1F, br, br, br);
 @@ -169,7 +_,7 @@
          float uo = -minecraft.player.getYRot() / 64.0F;

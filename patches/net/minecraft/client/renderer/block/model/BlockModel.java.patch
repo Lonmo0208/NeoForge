@@ -47,10 +47,10 @@
 +        net.neoforged.neoforge.client.model.NeoForgeModelProperties.fillPartVisibilityProperty(propertiesBuilder, this.partVisibility);
 +    }
 +
-     @OnlyIn(Dist.CLIENT)
      public static class Deserializer implements JsonDeserializer<BlockModel> {
          public BlockModel deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-@@ -62,7 +_,12 @@
+             JsonObject object = json.getAsJsonObject();
+@@ -61,7 +_,12 @@
              }
  
              Identifier parentLocation = parentName.isEmpty() ? null : Identifier.parse(parentName);

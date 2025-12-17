@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/WeatherEffectRenderer.java
 +++ b/net/minecraft/client/renderer/WeatherEffectRenderer.java
-@@ -91,7 +_,19 @@
+@@ -92,7 +_,19 @@
          }
      }
  
@@ -20,7 +20,7 @@
          if (!renderState.rainColumns.isEmpty()) {
              RenderType renderType = RenderTypes.weather(RAIN_LOCATION, Minecraft.useShaderTransparency());
              this.renderInstances(bufferSource.getBuffer(renderType), renderState.rainColumns, cameraPos, 1.0F, renderState.radius, renderState.intensity);
-@@ -157,6 +_,10 @@
+@@ -158,6 +_,10 @@
      }
  
      public void tickRainParticles(ClientLevel level, Camera camera, int ticks, ParticleStatus particleStatus, int weatherRadius) {

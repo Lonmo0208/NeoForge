@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/BucketItem.java
 +++ b/net/minecraft/world/item/BucketItem.java
-@@ -58,7 +_,7 @@
+@@ -59,7 +_,7 @@
                      ItemStack taken = bucketPickupBlock.pickupBlock(player, level, pos, blockState);
                      if (!taken.isEmpty()) {
                          player.awardStat(Stats.ITEM_USED.get(this));
@@ -9,7 +9,7 @@
                          level.gameEvent(player, GameEvent.FLUID_PICKUP, pos);
                          ItemStack result = ItemUtils.createFilledResult(itemStack, player, taken);
                          if (!level.isClientSide()) {
-@@ -72,8 +_,8 @@
+@@ -73,8 +_,8 @@
                  return InteractionResult.FAIL;
              } else {
                  BlockState clicked = level.getBlockState(pos);
@@ -20,7 +20,7 @@
                      this.checkExtraContent(player, level, itemStack, placePos);
                      if (player instanceof ServerPlayer) {
                          CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, placePos, itemStack);
-@@ -98,7 +_,12 @@
+@@ -99,7 +_,12 @@
      }
  
      @Override
@@ -33,7 +33,7 @@
          if (!(this.content instanceof FlowingFluid flowingFluid)) {
              return false;
          } else {
-@@ -108,9 +_,14 @@
+@@ -109,9 +_,14 @@
              boolean shiftKeyDown = user != null && user.isShiftKeyDown();
              boolean placeLiquid = mayReplace
                  || block instanceof LiquidBlockContainer container && container.canPlaceLiquid(user, level, pos, blockState, this.content);
@@ -49,7 +49,7 @@
              } else if (level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) && this.content.is(FluidTags.WATER)) {
                  int x = pos.getX();
                  int y = pos.getY();
-@@ -126,8 +_,8 @@
+@@ -124,8 +_,8 @@
                  }
  
                  return true;
@@ -60,7 +60,7 @@
                  this.playEmptySound(user, level, pos);
                  return true;
              } else {
-@@ -146,9 +_,15 @@
+@@ -144,9 +_,15 @@
      }
  
      protected void playEmptySound(@Nullable LivingEntity user, LevelAccessor level, BlockPos pos) {

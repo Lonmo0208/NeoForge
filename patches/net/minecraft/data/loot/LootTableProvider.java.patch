@@ -10,7 +10,7 @@
              Identifier sequenceId = sequenceIdForLootTable(id);
              Identifier previous = randomSequenceSeeds.put(RandomSequence.seedForKey(sequenceId), sequenceId);
              if (previous != null) {
-@@ -69,24 +_,18 @@
+@@ -69,17 +_,18 @@
              lootTable.setRandomSequence(sequenceId);
              LootTable table = lootTable.setParamSet(subProvider.paramSet).build();
              tables.register(id, table, RegistrationInfo.BUILT_IN);
@@ -22,25 +22,18 @@
          tables.freeze();
          ProblemReporter.Collector problems = new ProblemReporter.Collector();
          HolderGetter.Provider validationProvider = new RegistryAccess.ImmutableRegistryAccess(List.of(tables)).freeze();
-         ValidationContext validationContext = new ValidationContext(problems, LootContextParamSets.ALL_PARAMS, validationProvider);
+         ValidationContextSource validationContext = new ValidationContextSource(problems, validationProvider);
  
 -        for (ResourceKey<LootTable> missingTable : Sets.difference(this.requiredTables, tables.registryKeySet())) {
 -            problems.report(new LootTableProvider.MissingTableProblem(missingTable));
 -        }
 +        validate(tables, validationContext, problems);
  
--        tables.listElements()
--            .forEach(
--                tableHolder -> tableHolder.value()
--                    .validate(
--                        validationContext.setContextKeySet(tableHolder.value().getParamSet())
--                            .enterElement(new ProblemReporter.RootElementPathElement(tableHolder.key()), tableHolder.key())
--                    )
--            );
+-        LootDataType.TABLE.runValidation(validationContext, tables);
          if (!problems.isEmpty()) {
              problems.forEach((id, problem) -> LOGGER.warn("Found validation problem in {}: {}", id, problem.description()));
              throw new IllegalStateException("Failed to validate loot tables, see logs");
-@@ -95,9 +_,29 @@
+@@ -88,9 +_,29 @@
                  ResourceKey<LootTable> id = entry.getKey();
                  LootTable table = entry.getValue();
                  Path path = this.pathProvider.json(id.identifier());
@@ -55,7 +48,7 @@
 +        return this.subProviders;
 +    }
 +
-+    protected void validate(WritableRegistry<LootTable> tables, ValidationContext validationContext, ProblemReporter.Collector problems) {
++    protected void validate(WritableRegistry<LootTable> tables, ValidationContextSource validationContext, ProblemReporter.Collector problems) {
 +        for (ResourceKey<LootTable> missingTable : Sets.difference(this.requiredTables, tables.registryKeySet())) {
 +            problems.report(new LootTableProvider.MissingTableProblem(missingTable));
 +        }
@@ -64,7 +57,7 @@
 +                .forEach(
 +                        tableHolder -> tableHolder.value()
 +                                .validate(
-+                                        validationContext.setContextKeySet(tableHolder.value().getParamSet())
++                                        validationContext.context(tableHolder.value().getParamSet())
 +                                                .enterElement(new ProblemReporter.RootElementPathElement(tableHolder.key()), tableHolder.key())
 +                                )
 +                );

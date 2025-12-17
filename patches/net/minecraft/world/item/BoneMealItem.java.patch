@@ -26,4 +26,4 @@
 +        if (event.isCanceled()) return event.isSuccessful();
          if (state.getBlock() instanceof BonemealableBlock block && block.isValidBonemealTarget(level, pos, state)) {
              if (level instanceof ServerLevel) {
-                 if (block.isBonemealSuccess(level, level.random, pos, state)) {
+                 if (block.isBonemealSuccess(level, level.getRandom(), pos, state)) {

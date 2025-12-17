@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/ChatScreen.java
 +++ b/net/minecraft/client/gui/screens/ChatScreen.java
-@@ -115,7 +_,10 @@
+@@ -120,7 +_,10 @@
          } else if (event.isConfirmation()) {
              this.handleChatInput(this.input.getValue(), true);
              this.exitReason = ChatScreen.ExitReason.DONE;

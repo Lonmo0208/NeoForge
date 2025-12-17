@@ -1,15 +1,14 @@
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -152,7 +_,7 @@
- import org.jspecify.annotations.Nullable;
+@@ -157,6 +_,7 @@
  import org.slf4j.Logger;
  
--public abstract class Entity implements Nameable, EntityAccess, ScoreHolder, SyncedDataHolder, DataComponentGetter, ItemOwner, SlotProvider, DebugValueSource, net.neoforged.neoforge.common.extensions.IEntityExtension {
-+public abstract class Entity extends net.neoforged.neoforge.attachment.AttachmentHolder implements Nameable, EntityAccess, ScoreHolder, SyncedDataHolder, DataComponentGetter, ItemOwner, SlotProvider, DebugValueSource, net.neoforged.neoforge.common.extensions.IEntityExtension {
-     private static final Logger LOGGER = LogUtils.getLogger();
-     public static final String TAG_ID = "id";
-     public static final String TAG_UUID = "UUID";
-@@ -190,6 +_,7 @@
+ public abstract class Entity
++    extends net.neoforged.neoforge.attachment.AttachmentHolder
+     implements Nameable,
+     EntityAccess,
+     ScoreHolder,
+@@ -203,6 +_,7 @@
      private static final int MAX_BLOCK_ITERATIONS_ALONG_TRAVEL_PER_TICK = 16;
      private static final double MAX_MOVEMENT_RESETTING_TRACE_DISTANCE = 8.0;
      private static double viewScale = 1.0;
@@ -17,18 +16,18 @@
      private final EntityType<?> type;
      private boolean requiresPrecisePosition;
      private int id = ENTITY_COUNTER.incrementAndGet();
-@@ -232,8 +_,10 @@
+@@ -245,8 +_,10 @@
      public int tickCount;
      private int remainingFireTicks;
      protected boolean wasTouchingWater;
 +    @Deprecated // Neo: Use forgeFluidTypeHeight instead
-     protected Object2DoubleMap<TagKey<Fluid>> fluidHeight = new Object2DoubleArrayMap<>(2);
+     protected final Object2DoubleMap<TagKey<Fluid>> fluidHeight = new Object2DoubleArrayMap<>(2);
      protected boolean wasEyeInWater;
 +    @Deprecated // Neo: Use forgeFluidTypeOnEyes instead
      private final Set<TagKey<Fluid>> fluidOnEyes = new HashSet<>();
      public int invulnerableTime;
      protected boolean firstTick = true;
-@@ -305,7 +_,10 @@
+@@ -318,7 +_,10 @@
          this.defineSynchedData(entityDataBuilder);
          this.entityData = entityDataBuilder.build();
          this.setPos(0.0, 0.0, 0.0);
@@ -39,7 +38,7 @@
      }
  
      public boolean isColliding(BlockPos pos, BlockState state) {
-@@ -523,7 +_,7 @@
+@@ -541,7 +_,7 @@
          }
  
          if (this.isInLava()) {
@@ -48,7 +47,7 @@
          }
  
          this.checkBelowWorld();
-@@ -973,9 +_,7 @@
+@@ -991,9 +_,7 @@
                  return getOnPos;
              } else {
                  BlockState belowState = this.level().getBlockState(getOnPos);
@@ -59,7 +58,7 @@
                      ? getOnPos.atY(Mth.floor(this.position.y - offset))
                      : getOnPos;
              }
-@@ -1326,20 +_,20 @@
+@@ -1344,20 +_,20 @@
          return !aboveState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !aboveState.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? affectingPos : abovePos;
      }
  
@@ -89,7 +88,7 @@
      }
  
      private boolean shouldPlayAmethystStepSound(BlockState affectingState) {
-@@ -1491,7 +_,7 @@
+@@ -1509,7 +_,7 @@
      }
  
      public boolean isInShallowWater() {
@@ -98,7 +97,7 @@
      }
  
      public boolean isInClouds() {
-@@ -1510,26 +_,34 @@
+@@ -1528,26 +_,34 @@
  
      public void updateSwimming() {
          if (this.isSwimming()) {
@@ -139,7 +138,7 @@
              if (!this.wasTouchingWater && !this.firstTick) {
                  this.doWaterSplashEffect();
              }
-@@ -1544,6 +_,7 @@
+@@ -1562,6 +_,7 @@
      private void updateFluidOnEyes() {
          this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
          this.fluidOnEyes.clear();
@@ -147,16 +146,16 @@
          double eyeY = this.getEyeY();
          if (!(
              this.getVehicle() instanceof AbstractBoat boat && !boat.isUnderWater() && boat.getBoundingBox().maxY >= eyeY && boat.getBoundingBox().minY <= eyeY
-@@ -1552,7 +_,7 @@
+@@ -1570,7 +_,7 @@
              FluidState fluidState = this.level().getFluidState(pos);
              double blockFluidHeight = pos.getY() + fluidState.getHeight(this.level(), pos);
              if (blockFluidHeight > eyeY) {
--                fluidState.getTags().forEach(this.fluidOnEyes::add);
+-                fluidState.tags().forEach(this.fluidOnEyes::add);
 +                this.forgeFluidTypeOnEyes = fluidState.getFluidType();
              }
          }
      }
-@@ -1600,12 +_,13 @@
+@@ -1618,12 +_,13 @@
      }
  
      public boolean canSpawnSprintParticle() {
@@ -171,7 +170,7 @@
          if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
              Vec3 movement = this.getDeltaMovement();
              BlockPos entityPosition = this.blockPosition();
-@@ -1620,16 +_,19 @@
+@@ -1638,16 +_,19 @@
              }
  
              this.level()
@@ -193,7 +192,7 @@
      }
  
      public void moveRelative(float speed, Vec3 input) {
-@@ -2005,6 +_,11 @@
+@@ -2023,6 +_,11 @@
                  output.store("data", CustomData.CODEC, this.customData);
              }
  
@@ -205,7 +204,7 @@
              this.addAdditionalSaveData(output);
              if (this.isVehicle()) {
                  ValueOutput.ValueOutputList passengersList = output.childrenList("Passengers");
-@@ -2067,6 +_,8 @@
+@@ -2085,6 +_,8 @@
                  this.setTicksFrozen(input.getIntOr("TicksFrozen", 0));
                  this.hasVisualFire = input.getBooleanOr("HasVisualFire", false);
                  this.customData = input.read("data", CustomData.CODEC).orElse(CustomData.EMPTY);
@@ -214,7 +213,7 @@
                  this.tags.clear();
                  input.read("Tags", TAG_LIST_CODEC).ifPresent(this.tags::addAll);
                  this.readAdditionalSaveData(input);
-@@ -2112,6 +_,8 @@
+@@ -2133,6 +_,8 @@
          } else {
              ItemEntity entity = new ItemEntity(level, this.getX() + offset.x, this.getY() + offset.y, this.getZ() + offset.z, itemStack);
              entity.setDefaultPickUpDelay();
@@ -223,7 +222,7 @@
              level.addFreshEntity(entity);
              return entity;
          }
-@@ -2170,11 +_,11 @@
+@@ -2191,11 +_,11 @@
          }
  
          ItemStack heldItem = player.getItemInHand(hand);
@@ -237,7 +236,7 @@
              && target.canShearEquipment(player)
              && !player.isSecondaryUseActive()
              && this.attemptToShearEquipment(player, hand, heldItem, target)) {
-@@ -2282,7 +_,11 @@
+@@ -2303,7 +_,11 @@
  
      public void rideTick() {
          this.setDeltaMovement(Vec3.ZERO);
@@ -250,7 +249,7 @@
          if (this.isPassenger()) {
              this.getVehicle().positionRider(this);
          }
-@@ -2342,6 +_,7 @@
+@@ -2363,6 +_,7 @@
                  }
              }
  
@@ -258,7 +257,7 @@
              if (force || this.canRide(entityToRide) && entityToRide.canAddPassenger(this)) {
                  if (this.isPassenger()) {
                      this.stopRiding();
-@@ -2377,6 +_,7 @@
+@@ -2398,6 +_,7 @@
      public void removeVehicle() {
          if (this.vehicle != null) {
              Entity oldVehicle = this.vehicle;
@@ -266,7 +265,7 @@
              this.vehicle = null;
              oldVehicle.removePassenger(this);
              Entity.RemovalReason removalReason = this.getRemovalReason();
-@@ -2427,6 +_,8 @@
+@@ -2448,6 +_,8 @@
          return this.passengers.isEmpty();
      }
  
@@ -275,7 +274,7 @@
      protected boolean couldAcceptPassenger() {
          return true;
      }
-@@ -2623,7 +_,7 @@
+@@ -2644,7 +_,7 @@
      }
  
      public boolean isVisuallyCrawling() {
@@ -284,7 +283,7 @@
      }
  
      public void setSwimming(boolean swimming) {
-@@ -2739,7 +_,7 @@
+@@ -2760,7 +_,7 @@
              this.igniteForSeconds(8.0F);
          }
  
@@ -293,7 +292,7 @@
      }
  
      public void onAboveBubbleColumn(boolean dragDown, BlockPos pos) {
-@@ -2864,7 +_,7 @@
+@@ -2879,7 +_,7 @@
      }
  
      protected Component getTypeName() {
@@ -302,7 +301,7 @@
      }
  
      public boolean is(Entity other) {
-@@ -2919,10 +_,11 @@
+@@ -2934,10 +_,11 @@
      }
  
      protected final boolean isInvulnerableToBase(DamageSource source) {
@@ -310,12 +309,12 @@
 +        boolean isVanillaInvulnerable = this.isRemoved()
              || this.invulnerable && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.isCreativePlayer()
              || source.is(DamageTypeTags.IS_FIRE) && this.fireImmune()
-             || source.is(DamageTypeTags.IS_FALL) && this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
+             || source.is(DamageTypeTags.IS_FALL) && this.is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
 +        return net.neoforged.neoforge.common.CommonHooks.isEntityInvulnerableTo(this, source, isVanillaInvulnerable);
      }
  
      public boolean isInvulnerable() {
-@@ -2949,6 +_,7 @@
+@@ -2964,6 +_,7 @@
      }
  
      public @Nullable Entity teleport(TeleportTransition transition) {
@@ -323,7 +322,7 @@
          if (this.level() instanceof ServerLevel serverLevel && !this.isRemoved()) {
              ServerLevel newLevel = transition.newLevel();
              boolean otherDimension = newLevel.dimension() != serverLevel.dimension();
-@@ -3171,6 +_,7 @@
+@@ -3186,6 +_,7 @@
          return this.stringUUID;
      }
  
@@ -331,7 +330,7 @@
      public boolean isPushedByFluid() {
          return true;
      }
-@@ -3268,6 +_,8 @@
+@@ -3283,6 +_,8 @@
          EntityDimensions oldDim = this.dimensions;
          Pose pose = this.getPose();
          EntityDimensions newDim = this.getDimensions(pose);
@@ -340,7 +339,7 @@
          this.dimensions = newDim;
          this.eyeHeight = newDim.eyeHeight();
          this.reapplyPosition();
-@@ -3549,9 +_,36 @@
+@@ -3564,9 +_,36 @@
          return Mth.lerp(partial, this.yRotO, this.yRot);
      }
  
@@ -378,7 +377,7 @@
          } else {
              AABB box = this.getBoundingBox().deflate(0.001);
              int x0 = Mth.floor(box.minX);
-@@ -3566,25 +_,37 @@
+@@ -3581,25 +_,37 @@
              Vec3 current = Vec3.ZERO;
              int numberOfCurrents = 0;
              BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -423,7 +422,7 @@
                                  }
                              }
                          }
-@@ -3592,27 +_,30 @@
+@@ -3607,27 +_,30 @@
                  }
              }
  
@@ -464,7 +463,7 @@
          }
      }
  
-@@ -3625,7 +_,10 @@
+@@ -3640,7 +_,10 @@
          return !this.level().hasChunksAt(x0, z0, x1, z1);
      }
  
@@ -475,7 +474,7 @@
          return this.fluidHeight.getDouble(type);
      }
  
-@@ -3776,6 +_,10 @@
+@@ -3791,6 +_,10 @@
                  }
              }
          }
@@ -486,7 +485,7 @@
      }
  
      public void checkDespawn() {
-@@ -3916,6 +_,130 @@
+@@ -3931,6 +_,130 @@
  
      public boolean mayInteract(ServerLevel level, BlockPos pos) {
          return true;

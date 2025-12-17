@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/components/BossHealthOverlay.java
 +++ b/net/minecraft/client/gui/components/BossHealthOverlay.java
-@@ -67,6 +_,8 @@
+@@ -68,6 +_,8 @@
  
              for (LerpingBossEvent event : this.events.values()) {
                  int xLeft = screenWidth / 2 - 91;
@@ -9,7 +9,7 @@
                  this.drawBar(graphics, xLeft, yOffset, event);
                  Component msg = event.getName();
                  int width = this.minecraft.font.width(msg);
-@@ -74,6 +_,8 @@
+@@ -75,6 +_,8 @@
                  int y = yOffset - 9;
                  graphics.drawString(this.minecraft.font, msg, x, y, -1);
                  yOffset += 10 + 9;

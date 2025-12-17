@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/item/BlockModelWrapper.java
 +++ b/net/minecraft/client/renderer/item/BlockModelWrapper.java
-@@ -175,7 +_,9 @@
+@@ -174,7 +_,9 @@
              TextureSlots textureSlots = resolvedModel.getTopTextureSlots();
              List<BakedQuad> quads = resolvedModel.bakeTopGeometry(textureSlots, baker, BlockModelRotation.IDENTITY).getAll();
              ModelRenderProperties properties = ModelRenderProperties.fromResolvedModel(baker, resolvedModel, textureSlots);

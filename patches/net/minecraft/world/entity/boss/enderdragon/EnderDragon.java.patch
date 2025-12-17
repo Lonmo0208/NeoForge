@@ -44,7 +44,7 @@
                              destroyedBlock = level.removeBlock(blockPos, false) || destroyedBlock;
                          } else {
                              hitWall = true;
-@@ -528,7 +_,8 @@
+@@ -535,7 +_,8 @@
  
          if (this.level() instanceof ServerLevel level) {
              if (this.dragonDeathTime > 150 && this.dragonDeathTime % 5 == 0 && level.getGameRules().get(GameRules.MOB_DROPS)) {
@@ -54,7 +54,7 @@
              }
  
              if (this.dragonDeathTime == 1 && !this.isSilent()) {
-@@ -546,7 +_,8 @@
+@@ -553,7 +_,8 @@
  
          if (this.dragonDeathTime == 200 && this.level() instanceof ServerLevel level) {
              if (level.getGameRules().get(GameRules.MOB_DROPS)) {
@@ -64,7 +64,7 @@
              }
  
              if (this.dragonFight != null) {
-@@ -852,8 +_,19 @@
+@@ -859,8 +_,19 @@
      }
  
      @Override

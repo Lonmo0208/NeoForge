@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/advancements/AdvancementsScreen.java
 +++ b/net/minecraft/client/gui/screens/advancements/AdvancementsScreen.java
-@@ -51,6 +_,7 @@
+@@ -50,6 +_,7 @@
      private final Map<AdvancementHolder, AdvancementTab> tabs = Maps.newLinkedHashMap();
      private @Nullable AdvancementTab selectedTab;
      private boolean isScrolling;
@@ -8,24 +8,7 @@
  
      public AdvancementsScreen(ClientAdvancements advancements) {
          this(advancements, null);
-@@ -75,6 +_,16 @@
-             this.advancements.setSelectedTab(this.selectedTab == null ? null : this.selectedTab.getRootNode().holder(), true);
-         }
- 
-+        if (this.tabs.size() > AdvancementTabType.MAX_TABS) {
-+            int guiLeft = (this.width - 252) / 2;
-+            int guiTop = (this.height - 140) / 2;
-+            addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal("<"), b -> tabPage = Math.max(tabPage - 1, 0         ))
-+                    .pos(guiLeft, guiTop - 50).size(20, 20).build());
-+            addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal(">"), b -> tabPage = Math.min(tabPage + 1, maxPages))
-+                    .pos(guiLeft + WINDOW_WIDTH - 20, guiTop - 50).size(20, 20).build());
-+            maxPages = this.tabs.size() / AdvancementTabType.MAX_TABS;
-+        }
-+
-         this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build());
-         this.layout.visitWidgets(x$0 -> {
-             AbstractWidget var10000 = this.addRenderableWidget(x$0);
-@@ -108,7 +_,7 @@
+@@ -105,7 +_,7 @@
              int yo = (this.height - 140) / 2;
  
              for (AdvancementTab tab : this.tabs.values()) {
@@ -34,7 +17,7 @@
                      this.advancements.setSelectedTab(tab.getRootNode().holder(), true);
                      break;
                  }
-@@ -134,6 +_,11 @@
+@@ -131,6 +_,11 @@
          super.render(graphics, mouseX, mouseY, a);
          int xo = (this.width - 252) / 2;
          int yo = (this.height - 140) / 2;
@@ -46,7 +29,7 @@
          graphics.nextStratum();
          this.renderInside(graphics, xo, yo);
          graphics.nextStratum();
-@@ -199,10 +_,12 @@
+@@ -196,10 +_,12 @@
          graphics.blit(RenderPipelines.GUI_TEXTURED, WINDOW_LOCATION, xo, yo, 0.0F, 0.0F, 252, 140, 256, 256);
          if (this.tabs.size() > 1) {
              for (AdvancementTab tab : this.tabs.values()) {
@@ -59,7 +42,7 @@
                  tab.drawIcon(graphics, xo, yo);
              }
          }
-@@ -221,7 +_,7 @@
+@@ -218,7 +_,7 @@
  
          if (this.tabs.size() > 1) {
              for (AdvancementTab tab : this.tabs.values()) {

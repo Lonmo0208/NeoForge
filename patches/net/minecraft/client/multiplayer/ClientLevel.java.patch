@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/multiplayer/ClientLevel.java
 +++ b/net/minecraft/client/multiplayer/ClientLevel.java
-@@ -135,7 +_,7 @@
+@@ -136,7 +_,7 @@
      private final @Nullable EndFlashState endFlashState;
      private final Minecraft minecraft = Minecraft.getInstance();
      private final List<AbstractClientPlayer> players = Lists.newArrayList();
@@ -9,7 +9,7 @@
      private final Map<MapId, MapItemSavedData> mapData = Maps.newHashMap();
      private int skyFlashTime;
      private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(new Object2ObjectArrayMap<>(3), cache -> {
-@@ -143,6 +_,7 @@
+@@ -144,6 +_,7 @@
          cache.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache(pos -> this.calculateBlockTint(pos, BiomeColors.FOLIAGE_COLOR_RESOLVER)));
          cache.put(BiomeColors.DRY_FOLIAGE_COLOR_RESOLVER, new BlockTintCache(pos -> this.calculateBlockTint(pos, BiomeColors.DRY_FOLIAGE_COLOR_RESOLVER)));
          cache.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache(pos -> this.calculateBlockTint(pos, BiomeColors.WATER_COLOR_RESOLVER)));
@@ -17,7 +17,7 @@
      });
      private final ClientChunkCache chunkSource;
      private final Deque<Runnable> lightUpdateQueue = Queues.newArrayDeque();
-@@ -155,6 +_,7 @@
+@@ -156,6 +_,7 @@
      private final int seaLevel;
      private boolean tickDayTime;
      private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
@@ -25,7 +25,7 @@
  
      public void handleBlockChangedAck(int sequence) {
          if (SharedConstants.DEBUG_BLOCK_BREAK) {
-@@ -200,10 +_,15 @@
+@@ -201,10 +_,15 @@
      @Override
      public boolean setBlock(BlockPos pos, BlockState blockState, @Block.UpdateFlags int updateFlags, int updateLimit) {
          if (this.blockStatePredictionHandler.isPredicting()) {
@@ -41,7 +41,7 @@
              }
  
              return success;
-@@ -240,6 +_,7 @@
+@@ -241,6 +_,7 @@
          if (this.canHaveWeather()) {
              this.prepareWeather();
          }
@@ -49,7 +49,7 @@
      }
  
      private EnvironmentAttributeSystem.Builder addEnvironmentAttributeLayers(EnvironmentAttributeSystem.Builder environmentAttributes) {
-@@ -319,7 +_,7 @@
+@@ -320,7 +_,7 @@
      private void tickTime() {
          this.clientLevelData.setGameTime(this.clientLevelData.getGameTime() + 1L);
          if (this.tickDayTime) {
@@ -58,20 +58,7 @@
          }
      }
  
-@@ -354,7 +_,11 @@
-         entity.setOldPosAndRot();
-         entity.tickCount++;
-         Profiler.get().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
--        entity.tick();
-+        // Neo: Permit cancellation of Entity#tick via EntityTickEvent.Pre
-+        if (!net.neoforged.neoforge.event.EventHooks.fireEntityTickPre(entity).isCanceled()) {
-+            entity.tick();
-+            net.neoforged.neoforge.event.EventHooks.fireEntityTickPost(entity);
-+        }
-         Profiler.get().pop();
- 
-         for (Entity passenger : entity.getPassengers()) {
-@@ -405,8 +_,10 @@
+@@ -406,8 +_,10 @@
      }
  
      public void addEntity(Entity entity) {
@@ -82,7 +69,7 @@
      }
  
      public void removeEntity(int id, Entity.RemovalReason reason) {
-@@ -552,6 +_,13 @@
+@@ -553,6 +_,13 @@
      public void playSeededSound(
          @Nullable Entity except, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed
      ) {
@@ -96,7 +83,7 @@
          if (except == this.minecraft.player) {
              this.playSound(x, y, z, sound.value(), source, volume, pitch, false, seed);
          }
-@@ -561,6 +_,12 @@
+@@ -562,6 +_,12 @@
      public void playSeededSound(
          @Nullable Entity except, Entity sourceEntity, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed
      ) {
@@ -109,7 +96,7 @@
          if (except == this.minecraft.player) {
              this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(sound.value(), source, volume, pitch, sourceEntity, seed));
          }
-@@ -766,7 +_,7 @@
+@@ -767,7 +_,7 @@
          return this.players;
      }
  
@@ -118,7 +105,7 @@
          return this.dragonParts;
      }
  
-@@ -872,7 +_,7 @@
+@@ -873,7 +_,7 @@
  
      @Override
      public void addDestroyBlockEffect(BlockPos pos, BlockState blockState) {
@@ -127,7 +114,7 @@
              VoxelShape shape = blockState.getShape(this, pos);
              double density = 0.25;
              shape.forAllBoxes(
-@@ -898,7 +_,7 @@
+@@ -899,7 +_,7 @@
                                      .add(
                                          new TerrainParticle(
                                              this, pos.getX() + x, pos.getY() + y, pos.getZ() + z, relX - 0.5, relY - 0.5, relZ - 0.5, blockState, pos
@@ -136,7 +123,7 @@
                                      );
                              }
                          }
-@@ -908,9 +_,16 @@
+@@ -909,9 +_,16 @@
          }
      }
  
@@ -154,7 +141,7 @@
              int x = pos.getX();
              int y = pos.getY();
              int z = pos.getZ();
-@@ -943,7 +_,7 @@
+@@ -944,7 +_,7 @@
                  xp = x + shape.maxX + 0.1F;
              }
  
@@ -171,7 +158,7 @@
              this.difficulty = difficulty;
          }
  
-@@ -1129,6 +_,9 @@
+@@ -1133,6 +_,9 @@
                      ClientLevel.this.dragonParts.addAll(Arrays.asList(dragon.getSubEntities()));
                      break;
                  default:
@@ -181,7 +168,7 @@
              }
          }
  
-@@ -1142,10 +_,62 @@
+@@ -1146,10 +_,62 @@
                      ClientLevel.this.dragonParts.removeAll(Arrays.asList(dragon.getSubEntities()));
                      break;
                  default:

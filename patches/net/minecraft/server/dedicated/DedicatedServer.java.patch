@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -93,6 +_,7 @@
+@@ -97,6 +_,7 @@
      private final Map<String, String> codeOfConductTexts;
      private @Nullable ManagementServer jsonRpcServer;
      private long lastHeartbeat;
@@ -8,15 +8,15 @@
  
      public DedicatedServer(
          Thread serverThread,
-@@ -191,6 +_,7 @@
-         Thread consoleThread = new Thread("Server console handler") {
+@@ -199,6 +_,7 @@
+ 
              @Override
              public void run() {
 +                if (net.neoforged.neoforge.server.console.TerminalHandler.handleCommands(DedicatedServer.this)) return;
                  BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
  
                  String line;
-@@ -264,11 +_,13 @@
+@@ -272,11 +_,13 @@
              this.tickTimeLogger = new RemoteSampleLogger(TpsDebugDimensions.values().length, this.debugSubscribers(), RemoteDebugSampleType.TICK_TIME);
              long levelNanoTime = Util.getNanos();
              this.services.nameToIdCache().resolveOfflineUsers(!this.usesAuthentication());
@@ -30,7 +30,7 @@
              if (properties.announcePlayerAchievements != null) {
                  this.worldData.getGameRules().set(GameRules.SHOW_ADVANCEMENT_MESSAGES, properties.announcePlayerAchievements, this);
              }
-@@ -297,6 +_,12 @@
+@@ -305,6 +_,12 @@
              }
  
              this.notificationManager().serverStarted();
@@ -43,7 +43,7 @@
              return true;
          }
      }
-@@ -431,6 +_,11 @@
+@@ -450,6 +_,11 @@
              this.queryThreadGs4.stop();
          }
  
@@ -55,7 +55,7 @@
          if (this.jsonRpcServer != null) {
              try {
                  this.jsonRpcServer.stop(true);
-@@ -720,7 +_,12 @@
+@@ -739,7 +_,12 @@
      @Override
      protected void stopServer() {
          this.notificationManager().serverShuttingDown();

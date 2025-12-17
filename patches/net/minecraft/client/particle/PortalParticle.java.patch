@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/particle/PortalParticle.java
 +++ b/net/minecraft/client/particle/PortalParticle.java
-@@ -82,6 +_,7 @@
+@@ -75,6 +_,7 @@
              this.x = this.xStart + this.xd * var4;
              this.y = this.yStart + this.yd * var4 + (1.0F - pos);
              this.z = this.zStart + this.zd * var4;

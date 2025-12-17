@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/GameRenderer.java
 +++ b/net/minecraft/client/renderer/GameRenderer.java
-@@ -168,14 +_,14 @@
+@@ -175,14 +_,14 @@
              bufferSource,
              this.submitNodeStorage,
              this.featureRenderDispatcher,
@@ -23,7 +23,7 @@
          );
          this.screenEffectRenderer = new ScreenEffectRenderer(minecraft, atlasManager, bufferSource);
      }
-@@ -245,6 +_,7 @@
+@@ -253,6 +_,7 @@
                  break;
              case null:
              default:
@@ -31,7 +31,7 @@
                  this.clearPostEffect();
          }
      }
-@@ -381,7 +_,7 @@
+@@ -389,7 +_,7 @@
                  fov *= Mth.lerp(effectScale, 1.0F, 0.85714287F);
              }
  
@@ -40,7 +40,7 @@
          }
      }
  
-@@ -397,6 +_,10 @@
+@@ -405,6 +_,10 @@
                  return;
              }
  
@@ -51,7 +51,7 @@
              hurt /= camera.hurtDuration;
              hurt = Mth.sin(hurt * hurt * hurt * hurt * (float) Math.PI);
              float rr = camera.getHurtDir();
-@@ -534,7 +_,8 @@
+@@ -547,7 +_,8 @@
                  }
              } else if (resourcesLoaded && this.minecraft.screen != null) {
                  try {
@@ -61,7 +61,7 @@
                  } catch (Throwable var14) {
                      CrashReport report = CrashReport.forThrowable(var14, "Rendering screen");
                      CrashReportCategory category = report.addCategory("Screen render details");
-@@ -792,6 +_,9 @@
+@@ -811,6 +_,9 @@
                  fogColor,
                  !shouldCreateBossFog
              );

@@ -15,9 +15,9 @@
 +    // FORGE: is this tag set to replace or not?
 +    private boolean replace = false;
      private final List<TagEntry> entries = new ArrayList<>();
+     private boolean replace = false;
  
-     public static TagBuilder create() {
-@@ -34,5 +_,21 @@
+@@ -44,5 +_,21 @@
  
      public TagBuilder addOptionalTag(Identifier id) {
          return this.add(TagEntry.optionalTag(id));

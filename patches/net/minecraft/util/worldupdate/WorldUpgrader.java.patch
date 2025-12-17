@@ -1,6 +1,6 @@
 --- a/net/minecraft/util/worldupdate/WorldUpgrader.java
 +++ b/net/minecraft/util/worldupdate/WorldUpgrader.java
-@@ -93,7 +_,7 @@
+@@ -52,7 +_,7 @@
          this.eraseCache = eraseCache;
          this.dataFixer = dataFixer;
          this.levelStorage = levelSource;

@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/storage/loot/LootTable.java
 +++ b/net/minecraft/world/level/storage/loot/LootTable.java
-@@ -40,12 +_,14 @@
+@@ -39,12 +_,14 @@
              i -> i.group(
                      LootContextParamSets.CODEC.lenientOptionalFieldOf("type", DEFAULT_PARAM_SET).forGetter(t -> t.paramSet),
                      Identifier.CODEC.optionalFieldOf("random_sequence").forGetter(t -> t.randomSequence),
@@ -17,7 +17,7 @@
      public static final Codec<Holder<LootTable>> CODEC = RegistryFileCodec.create(Registries.LOOT_TABLE, DIRECT_CODEC);
      public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, Optional.empty(), List.of(), List.of());
      private final ContextKeySet paramSet;
-@@ -57,7 +_,7 @@
+@@ -56,7 +_,7 @@
      private LootTable(ContextKeySet paramSet, Optional<Identifier> randomSequence, List<LootPool> pools, List<LootItemFunction> functions) {
          this.paramSet = paramSet;
          this.randomSequence = randomSequence;
@@ -26,7 +26,7 @@
          this.functions = functions;
          this.compositeFunction = LootItemFunctions.compose(functions);
      }
-@@ -80,10 +_,12 @@
+@@ -79,10 +_,12 @@
          };
      }
  
@@ -39,7 +39,7 @@
      public void getRandomItemsRaw(LootContext context, Consumer<ItemStack> output) {
          LootContext.VisitedEntry<?> breadcrumb = LootContext.createVisitedEntry(this);
          if (context.pushVisitedElement(breadcrumb)) {
-@@ -100,18 +_,15 @@
+@@ -99,18 +_,15 @@
      }
  
      public void getRandomItems(LootParams params, long optionalLootTableSeed, Consumer<ItemStack> output) {
@@ -61,7 +61,7 @@
      }
  
      public ObjectArrayList<ItemStack> getRandomItems(LootParams params, RandomSource randomSource) {
-@@ -128,7 +_,8 @@
+@@ -127,7 +_,8 @@
  
      private ObjectArrayList<ItemStack> getRandomItems(LootContext context) {
          ObjectArrayList<ItemStack> result = new ObjectArrayList<>();
@@ -71,7 +71,7 @@
          return result;
      }
  
-@@ -219,11 +_,68 @@
+@@ -214,11 +_,68 @@
          return new LootTable.Builder();
      }
  
@@ -140,7 +140,7 @@
  
          public LootTable.Builder withPool(LootPool.Builder pool) {
              this.pools.add(pool.build());
-@@ -251,6 +_,20 @@
+@@ -246,6 +_,20 @@
  
          public LootTable build() {
              return new LootTable(this.paramSet, this.randomSequence, this.pools.build(), this.functions.build());

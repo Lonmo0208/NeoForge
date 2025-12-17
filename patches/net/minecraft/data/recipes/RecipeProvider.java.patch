@@ -1,6 +1,6 @@
 --- a/net/minecraft/data/recipes/RecipeProvider.java
 +++ b/net/minecraft/data/recipes/RecipeProvider.java
-@@ -574,8 +_,7 @@
+@@ -575,8 +_,7 @@
      }
  
      protected void waxRecipes(FeatureFlagSet flagSet) {
@@ -10,7 +10,7 @@
              .forEach(
                  (block, waxedBlock) -> {
                      if (waxedBlock.requiredFeatures().isSubsetOf(flagSet)) {
-@@ -735,6 +_,10 @@
+@@ -736,6 +_,10 @@
          return Ingredient.of(this.items.getOrThrow(id));
      }
  
@@ -21,9 +21,14 @@
      protected ShapedRecipeBuilder shaped(RecipeCategory category, ItemLike item) {
          return ShapedRecipeBuilder.shaped(this.items, category, item);
      }
-@@ -780,13 +_,13 @@
+@@ -780,18 +_,14 @@
+                         final Set<ResourceKey<Recipe<?>>> allRecipes = Sets.newHashSet();
                          final List<CompletableFuture<?>> tasks = new ArrayList<>();
                          RecipeOutput recipeOutput = new RecipeOutput() {
+-                            {
+-                                Objects.requireNonNull(Runner.this);
+-                            }
+-
                              @Override
 -                            public void accept(ResourceKey<Recipe<?>> id, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
 +                            public void accept(ResourceKey<Recipe<?>> id, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder, net.neoforged.neoforge.common.conditions.ICondition... conditions) {
@@ -38,7 +43,7 @@
                                      }
                                  }
                              }
-@@ -805,13 +_,19 @@
+@@ -810,13 +_,19 @@
                              }
  
                              private void saveRecipe(ResourceKey<Recipe<?>> id, Recipe<?> recipe) {

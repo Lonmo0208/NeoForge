@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/particle/VibrationSignalParticle.java
 +++ b/net/minecraft/client/particle/VibrationSignalParticle.java
-@@ -78,6 +_,7 @@
+@@ -79,6 +_,7 @@
                  this.x = Mth.lerp(alpha, this.x, destination.x());
                  this.y = Mth.lerp(alpha, this.y, destination.y());
                  this.z = Mth.lerp(alpha, this.z, destination.z());

@@ -8,7 +8,7 @@
  
      private GuiGraphics(Minecraft minecraft, Matrix3x2fStack pose, GuiRenderState guiRenderState, int mouseX, int mouseY) {
          this.minecraft = minecraft;
-@@ -877,6 +_,8 @@
+@@ -881,6 +_,8 @@
              this.renderItemCooldown(itemStack, x, y);
              this.renderItemCount(font, itemStack, x, y, countText);
              this.pose.popMatrix();
@@ -17,7 +17,7 @@
          }
      }
  
-@@ -889,9 +_,21 @@
+@@ -893,9 +_,21 @@
      }
  
      public void setTooltipForNextFrame(Font font, ItemStack itemStack, int xo, int yo) {
@@ -39,7 +39,7 @@
      }
  
      public void setTooltipForNextFrame(Font font, List<Component> texts, Optional<TooltipComponent> optionalImage, int xo, int yo) {
-@@ -899,10 +_,7 @@
+@@ -903,10 +_,7 @@
      }
  
      public void setTooltipForNextFrame(Font font, List<Component> texts, Optional<TooltipComponent> optionalImage, int xo, int yo, @Nullable Identifier style) {
@@ -51,7 +51,7 @@
          optionalImage.ifPresent(image -> components.add(components.isEmpty() ? 0 : 1, ClientTooltipComponent.create(image)));
          this.setTooltipForNextFrameInternal(font, components, xo, yo, DefaultTooltipPositioner.INSTANCE, style, false);
      }
-@@ -916,13 +_,14 @@
+@@ -935,13 +_,14 @@
      }
  
      public void setComponentTooltipForNextFrame(Font font, List<Component> lines, int xo, int yo) {
@@ -68,7 +68,7 @@
              xo,
              yo,
              DefaultTooltipPositioner.INSTANCE,
-@@ -931,6 +_,28 @@
+@@ -950,6 +_,28 @@
          );
      }
  
@@ -97,7 +97,7 @@
      public void setTooltipForNextFrame(Font font, List<? extends FormattedCharSequence> lines, int xo, int yo) {
          this.setTooltipForNextFrame(font, lines, xo, yo, null);
      }
-@@ -954,12 +_,24 @@
+@@ -973,12 +_,24 @@
      ) {
          if (!lines.isEmpty()) {
              if (this.deferredTooltip == null || replaceExisting) {
@@ -123,7 +123,7 @@
          int textWidth = 0;
          int tempHeight = lines.size() == 1 ? -2 : 0;
  
-@@ -978,7 +_,8 @@
+@@ -997,7 +_,8 @@
          int x = positionedTooltip.x();
          int y = positionedTooltip.y();
          this.pose.pushMatrix();
@@ -133,7 +133,7 @@
          int localY = y;
  
          for (int i = 0; i < lines.size(); i++) {
-@@ -1169,6 +_,31 @@
+@@ -1189,6 +_,31 @@
  
      public void submitProfilerChartRenderState(List<ResultField> chartData, int x0, int y0, int x1, int y1) {
          this.guiRenderState.submitPicturesInPictureState(new GuiProfilerChartRenderState(chartData, x0, y0, x1, y1, this.scissorStack.peek()));

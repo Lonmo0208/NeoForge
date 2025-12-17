@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/entity/EntityRenderer.java
 +++ b/net/minecraft/client/renderer/entity/EntityRenderer.java
-@@ -121,6 +_,8 @@
+@@ -122,6 +_,8 @@
  
      protected void submitNameTag(S state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
          if (state.nameTag != null) {
@@ -9,7 +9,7 @@
              submitNodeCollector.submitNameTag(
                  poseStack, state.nameTagAttachment, 0, state.nameTag, !state.isDiscrete, state.lightCoords, state.distanceToCameraSq, camera
              );
-@@ -154,6 +_,7 @@
+@@ -155,6 +_,7 @@
          state.y = Mth.lerp((double)partialTicks, entity.yOld, entity.getY());
          state.z = Mth.lerp((double)partialTicks, entity.zOld, entity.getZ());
          state.isInvisible = entity.isInvisible();
@@ -17,7 +17,7 @@
          state.ageInTicks = entity.tickCount + partialTicks;
          state.boundingBoxWidth = entity.getBbWidth();
          state.boundingBoxHeight = entity.getBbHeight();
-@@ -172,9 +_,10 @@
+@@ -173,9 +_,10 @@
  
          if (this.entityRenderDispatcher.camera != null) {
              state.distanceToCameraSq = this.entityRenderDispatcher.distanceToSqr(entity);

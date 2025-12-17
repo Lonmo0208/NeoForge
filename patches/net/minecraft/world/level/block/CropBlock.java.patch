@@ -27,7 +27,7 @@
              }
          }
 @@ -96,7 +_,8 @@
-         return Mth.nextInt(level.random, 2, 5);
+         return Mth.nextInt(level.getRandom(), 2, 5);
      }
  
 -    protected static float getGrowthSpeed(Block type, BlockGetter level, BlockPos pos) {

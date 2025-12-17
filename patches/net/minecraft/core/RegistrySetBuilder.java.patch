@@ -1,6 +1,6 @@
 --- a/net/minecraft/core/RegistrySetBuilder.java
 +++ b/net/minecraft/core/RegistrySetBuilder.java
-@@ -69,6 +_,10 @@
+@@ -70,6 +_,10 @@
          return this.add(key, Lifecycle.stable(), bootstrap);
      }
  
@@ -11,7 +11,7 @@
      private RegistrySetBuilder.BuildState createState(RegistryAccess context) {
          RegistrySetBuilder.BuildState state = RegistrySetBuilder.BuildState.create(context, this.entries.stream().map(RegistrySetBuilder.RegistryStub::key));
          this.entries.forEach(e -> e.apply(state));
-@@ -182,16 +_,22 @@
+@@ -187,16 +_,22 @@
                  holder.supplier = () -> cloner.clone((T)elementHolder.value(), patchProvider, targetProvider.get());
                  entries.put(elementKey, holder);
              });
@@ -43,7 +43,7 @@
              return lookupFromMap(registryKey, lifecycle, owner, entries);
          }
      }
-@@ -237,7 +_,7 @@
+@@ -242,7 +_,7 @@
              RegistrySetBuilder.UniversalLookup lookup = new RegistrySetBuilder.UniversalLookup(owner);
              Builder<Identifier, HolderGetter<?>> registries = ImmutableMap.builder();
              context.registries()
@@ -52,7 +52,7 @@
              newRegistries.forEach(newRegistry -> registries.put(newRegistry.identifier(), lookup));
              return new RegistrySetBuilder.BuildState(owner, lookup, registries.build(), new HashMap<>(), errors);
          }
-@@ -260,6 +_,11 @@
+@@ -269,6 +_,11 @@
                  public <S> HolderGetter<S> lookup(ResourceKey<? extends Registry<? extends S>> key) {
                      return (HolderGetter<S>)BuildState.this.registries.getOrDefault(key.identifier(), BuildState.this.lookup);
                  }
@@ -64,7 +64,7 @@
              };
          }
  
-@@ -410,6 +_,26 @@
+@@ -419,6 +_,26 @@
          @Override
          public Optional<Holder.Reference<Object>> get(ResourceKey<Object> id) {
              return Optional.of(this.getOrCreate(id));

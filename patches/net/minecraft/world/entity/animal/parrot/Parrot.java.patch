@@ -13,7 +13,7 @@
      private static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.newHashMap(), map -> {
          map.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
          map.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
-@@ -267,7 +_,7 @@
+@@ -268,7 +_,7 @@
              }
  
              if (!this.level().isClientSide()) {
@@ -22,7 +22,7 @@
                      this.tame(player);
                      this.level().broadcastEntityEvent(this, (byte)7);
                  } else {
-@@ -327,7 +_,10 @@
+@@ -328,7 +_,10 @@
  
      public static SoundEvent getAmbient(Level level, RandomSource random) {
          if (level.getDifficulty() != Difficulty.PEACEFUL && random.nextInt(1000) == 0) {
@@ -34,7 +34,7 @@
              return getImitatedSound(keys.get(random.nextInt(keys.size())));
          } else {
              return SoundEvents.PARROT_AMBIENT;
-@@ -335,7 +_,9 @@
+@@ -336,7 +_,9 @@
      }
  
      private static SoundEvent getImitatedSound(EntityType<?> id) {

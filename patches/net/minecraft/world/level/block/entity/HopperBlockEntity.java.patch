@@ -97,7 +97,7 @@
          return getContainerAt(level, pos, level.getBlockState(pos), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
      }
 @@ -389,6 +_,28 @@
-         return !entities.isEmpty() ? (Container)entities.get(level.random.nextInt(entities.size())) : null;
+         return !entities.isEmpty() ? (Container)entities.get(level.getRandom().nextInt(entities.size())) : null;
      }
  
 +    private static net.neoforged.neoforge.transfer.item.ContainerOrHandler getSourceContainerOrHandler(Level level, Hopper hopper, BlockPos pos, BlockState state) {

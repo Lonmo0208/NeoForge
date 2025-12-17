@@ -1,6 +1,6 @@
 --- a/com/mojang/blaze3d/opengl/GlCommandEncoder.java
 +++ b/com/mojang/blaze3d/opengl/GlCommandEncoder.java
-@@ -201,7 +_,8 @@
+@@ -203,7 +_,8 @@
              throw new IllegalStateException("Close the existing render pass before creating a new one!");
          } else {
              this.verifyDepthTexture(depthTexture);
@@ -10,7 +10,7 @@
              GL11.glDrawBuffer(0);
              GL11.glClearDepth(clearDepth);
              GlStateManager._depthMask(true);
-@@ -213,6 +_,23 @@
+@@ -215,6 +_,23 @@
          }
      }
  
@@ -34,7 +34,7 @@
      private void verifyColorTexture(GpuTexture colorTexture) {
          if (!colorTexture.getFormat().hasColorAspect()) {
              throw new IllegalStateException("Trying to clear a non-color texture as color");
-@@ -635,11 +_,22 @@
+@@ -641,11 +_,22 @@
                  boolean isDepth = source.getFormat().hasDepthAspect();
                  int sourceId = ((GlTexture)source).glId();
                  int destId = ((GlTexture)destination).glId();
@@ -60,7 +60,7 @@
                  int error = GlStateManager._getError();
                  if (error != 0) {
                      throw new IllegalStateException(
-@@ -971,6 +_,26 @@
+@@ -1000,6 +_,26 @@
              GlStateManager._scissorBox(renderPass.getScissorX(), renderPass.getScissorY(), renderPass.getScissorWidth(), renderPass.getScissorHeight());
          } else {
              GlStateManager._disableScissorTest();

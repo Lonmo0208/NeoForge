@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/ConnectScreen.java
 +++ b/net/minecraft/client/gui/screens/ConnectScreen.java
-@@ -104,6 +_,8 @@
+@@ -109,6 +_,8 @@
                      }
  
                      if (resolvedAddress.isEmpty()) {

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/resources/language/LanguageManager.java
 +++ b/net/minecraft/client/resources/language/LanguageManager.java
-@@ -30,7 +_,7 @@
+@@ -29,7 +_,7 @@
      private final Consumer<ClientLanguage> reloadCallback;
  
      public LanguageManager(String languageCode, Consumer<ClientLanguage> reloadCallback) {
@@ -9,7 +9,7 @@
          this.reloadCallback = reloadCallback;
      }
  
-@@ -69,8 +_,12 @@
+@@ -68,8 +_,12 @@
          this.reloadCallback.accept(locale);
      }
  

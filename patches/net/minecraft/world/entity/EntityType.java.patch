@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/EntityType.java
 +++ b/net/minecraft/world/entity/EntityType.java
-@@ -1227,6 +_,11 @@
+@@ -1225,6 +_,11 @@
      private final FeatureFlagSet requiredFeatures;
      private final boolean allowedInPeaceful;
  
@@ -12,7 +12,7 @@
      private static <T extends Entity> EntityType<T> register(ResourceKey<EntityType<?>> id, EntityType.Builder<T> builder) {
          return Registry.register(BuiltInRegistries.ENTITY_TYPE, id, builder.build(id));
      }
-@@ -1264,6 +_,30 @@
+@@ -1262,6 +_,30 @@
          FeatureFlagSet requiredFeatures,
          boolean allowedInPeaceful
      ) {
@@ -43,7 +43,7 @@
          this.factory = factory;
          this.category = category;
          this.canSpawnFarFromPlayer = canSpawnFarFromPlayer;
-@@ -1279,6 +_,10 @@
+@@ -1277,6 +_,10 @@
          this.lootTable = lootTable;
          this.requiredFeatures = requiredFeatures;
          this.allowedInPeaceful = allowedInPeaceful;
@@ -54,7 +54,7 @@
      }
  
      public @Nullable T spawn(
-@@ -1359,6 +_,13 @@
+@@ -1357,6 +_,13 @@
                  mob.yHeadRot = mob.getYRot();
                  mob.yBodyRot = mob.getYRot();
                  mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), spawnReason, null);
@@ -68,7 +68,7 @@
              }
  
              if (postSpawnConfig != null) {
-@@ -1562,14 +_,23 @@
+@@ -1560,14 +_,23 @@
      }
  
      public int clientTrackingRange() {
@@ -92,7 +92,7 @@
          return this != PLAYER
              && this != LLAMA_SPIT
              && this != WITHER
-@@ -1625,9 +_,12 @@
+@@ -1615,9 +_,12 @@
      }
  
      public boolean onlyOpCanSetNbt() {
@@ -100,12 +100,12 @@
          return OP_ONLY_CUSTOM_DATA.contains(this);
      }
  
-+    public Stream<TagKey<EntityType<?>>> getTags() {return this.builtInRegistryHolder().tags();}
++    public Stream<net.minecraft.tags.TagKey<EntityType<?>>> getTags() {return this.builtInRegistryHolder().tags();}
 +
      public static class Builder<T extends Entity> {
          private final EntityType.EntityFactory<T> factory;
          private final MobCategory category;
-@@ -1647,6 +_,10 @@
+@@ -1637,6 +_,10 @@
          );
          private final DependantName<EntityType<?>, String> descriptionId = id -> Util.makeDescriptionId("entity", id.identifier());
          private boolean allowedInPeaceful = true;
@@ -116,7 +116,7 @@
  
          private Builder(EntityType.EntityFactory<T> factory, MobCategory category) {
              this.factory = factory;
-@@ -1765,6 +_,26 @@
+@@ -1755,6 +_,26 @@
              return this;
          }
  
@@ -143,7 +143,7 @@
          public EntityType<T> build(ResourceKey<EntityType<?>> name) {
              if (this.serialize) {
                  Util.fetchChoiceType(References.ENTITY_TREE, name.identifier().toString());
-@@ -1785,7 +_,11 @@
+@@ -1775,7 +_,11 @@
                  this.descriptionId.get(name),
                  this.lootTable.get(name),
                  this.requiredFeatures,

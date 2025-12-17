@@ -20,7 +20,7 @@
          }
      }
  
-@@ -445,9 +_,20 @@
+@@ -444,9 +_,20 @@
          private final boolean twoHanded;
          private final boolean affectsOffhandPose;
  
@@ -41,7 +41,7 @@
          }
  
          public boolean isTwoHanded() {
-@@ -456,6 +_,14 @@
+@@ -455,6 +_,14 @@
  
          public boolean affectsOffhandPose() {
              return this.affectsOffhandPose;

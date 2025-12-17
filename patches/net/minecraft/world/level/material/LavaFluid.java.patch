@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/material/LavaFluid.java
 +++ b/net/minecraft/world/level/material/LavaFluid.java
-@@ -92,7 +_,7 @@
+@@ -93,7 +_,7 @@
                      BlockState blockState = level.getBlockState(testPos);
                      if (blockState.isAir()) {
                          if (this.hasFlammableNeighbours(level, testPos)) {
@@ -9,7 +9,7 @@
                              return;
                          }
                      } else if (blockState.blocksMotion()) {
-@@ -106,8 +_,8 @@
+@@ -107,8 +_,8 @@
                          return;
                      }
  
@@ -20,7 +20,7 @@
                      }
                  }
              }
-@@ -123,7 +_,7 @@
+@@ -124,7 +_,7 @@
  
      private boolean hasFlammableNeighbours(LevelReader level, BlockPos pos) {
          for (Direction direction : Direction.values()) {
@@ -29,7 +29,7 @@
                  return true;
              }
          }
-@@ -131,10 +_,20 @@
+@@ -132,10 +_,20 @@
          return false;
      }
  
@@ -50,7 +50,7 @@
      @Override
      public @Nullable ParticleOptions getDripParticle() {
          return ParticleTypes.DRIPPING_LAVA;
-@@ -205,7 +_,7 @@
+@@ -206,7 +_,7 @@
              FluidState fluidState = level.getFluidState(pos);
              if (this.is(FluidTags.LAVA) && fluidState.is(FluidTags.WATER)) {
                  if (state.getBlock() instanceof LiquidBlock) {

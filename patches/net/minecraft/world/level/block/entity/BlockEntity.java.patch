@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/entity/BlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/BlockEntity.java
-@@ -36,15 +_,18 @@
+@@ -37,15 +_,18 @@
  import org.jspecify.annotations.Nullable;
  import org.slf4j.Logger;
  
@@ -20,7 +20,7 @@
  
      public BlockEntity(BlockEntityType<?> type, BlockPos worldPosition, BlockState blockState) {
          this.type = type;
-@@ -60,7 +_,7 @@
+@@ -61,7 +_,7 @@
      }
  
      public boolean isValidBlockState(BlockState blockState) {
@@ -29,7 +29,7 @@
      }
  
      public static BlockPos getPosFromTag(ChunkPos base, CompoundTag entityTag) {
-@@ -91,6 +_,8 @@
+@@ -92,6 +_,8 @@
      }
  
      protected void loadAdditional(ValueInput input) {
@@ -38,7 +38,7 @@
      }
  
      public final void loadWithComponents(ValueInput input) {
-@@ -103,6 +_,11 @@
+@@ -104,6 +_,11 @@
      }
  
      protected void saveAdditional(ValueOutput output) {
@@ -50,7 +50,7 @@
      }
  
      public final CompoundTag saveWithFullMetadata(HolderLookup.Provider registries) {
-@@ -236,10 +_,14 @@
+@@ -237,10 +_,14 @@
  
      public void setRemoved() {
          this.remove = true;
@@ -65,7 +65,7 @@
      }
  
      public void preRemoveSideEffects(BlockPos pos, BlockState state) {
-@@ -269,6 +_,32 @@
+@@ -270,6 +_,32 @@
  
      public BlockEntityType<?> getType() {
          return this.type;

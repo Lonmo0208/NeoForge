@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/inventory/MerchantScreen.java
 +++ b/net/minecraft/client/gui/screens/inventory/MerchantScreen.java
-@@ -235,7 +_,11 @@
+@@ -233,7 +_,11 @@
              graphics.renderItemDecorations(this.font, costA, sellItem1X, decorHeight);
          } else {
              graphics.renderItemDecorations(this.font, baseCostA, sellItem1X, decorHeight, baseCostA.getCount() == 1 ? "1" : null);

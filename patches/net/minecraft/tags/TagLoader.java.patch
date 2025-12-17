@@ -18,7 +18,7 @@
                  missingElements.add(entry);
              }
          }
-@@ -107,7 +_,7 @@
+@@ -111,7 +_,7 @@
                      missing -> LOGGER.error(
                          "Couldn't load tag {} as it is missing following references: {}",
                          id,
@@ -27,7 +27,7 @@
                      )
                  )
                  .ifRight(tag -> newTags.put(id, (List<T>)tag))
-@@ -174,7 +_,11 @@
+@@ -188,7 +_,11 @@
          }
      }
  

@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/enchantment/Enchantment.java
 +++ b/net/minecraft/world/item/enchantment/Enchantment.java
-@@ -121,6 +_,10 @@
+@@ -118,6 +_,10 @@
          return itemStacks;
      }
  
@@ -11,7 +11,7 @@
      public HolderSet<Item> getSupportedItems() {
          return this.definition.supportedItems();
      }
-@@ -129,10 +_,20 @@
+@@ -126,10 +_,20 @@
          return this.definition.slots().stream().anyMatch(group -> group.test(slot));
      }
  
@@ -32,7 +32,7 @@
      public boolean isSupportedItem(ItemStack item) {
          return item.is(this.definition.supportedItems);
      }
-@@ -185,6 +_,10 @@
+@@ -182,6 +_,10 @@
          return result;
      }
  
@@ -41,9 +41,9 @@
 +     */
 +    @Deprecated
      public boolean canEnchant(ItemStack itemStack) {
-         return this.definition.supportedItems().contains(itemStack.getItemHolder());
+         return this.definition.supportedItems().contains(itemStack.typeHolder());
      }
-@@ -518,12 +_,26 @@
+@@ -521,12 +_,26 @@
          return new Enchantment.Builder(definition);
      }
  
@@ -58,7 +58,7 @@
 +
      public static class Builder {
          private final Enchantment.EnchantmentDefinition definition;
-         private HolderSet<Enchantment> exclusiveSet = HolderSet.direct();
+         private HolderSet<Enchantment> exclusiveSet = HolderSet.empty();
          private final Map<DataComponentType<?>, List<?>> effectLists = new HashMap<>();
          private final DataComponentMap.Builder effectMapBuilder = DataComponentMap.builder();
  
@@ -70,7 +70,7 @@
          public Builder(Enchantment.EnchantmentDefinition definition) {
              this.definition = definition;
          }
-@@ -576,6 +_,16 @@
+@@ -579,6 +_,16 @@
              return this;
          }
  
@@ -87,7 +87,7 @@
          private <E> List<E> getEffectsList(DataComponentType<List<E>> type) {
              return (List<E>)this.effectLists.computeIfAbsent(type, k -> {
                  ArrayList<E> newList = new ArrayList<>();
-@@ -586,7 +_,8 @@
+@@ -589,7 +_,8 @@
  
          public Enchantment build(Identifier descriptionKey) {
              return new Enchantment(

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/block/model/BlockStateModel.java
 +++ b/net/minecraft/client/renderer/block/model/BlockStateModel.java
-@@ -22,14 +_,20 @@
+@@ -23,14 +_,20 @@
  
  @OnlyIn(Dist.CLIENT)
  public interface BlockStateModel extends net.neoforged.neoforge.client.extensions.BlockStateModelExtension {
@@ -20,8 +20,8 @@
 +    @Deprecated
      TextureAtlasSprite particleIcon();
  
-     @OnlyIn(Dist.CLIENT)
-@@ -67,30 +_,41 @@
+     public static class SimpleCachedUnbakedRoot implements BlockStateModel.UnbakedRoot {
+@@ -70,30 +_,41 @@
              i -> i.group(Variant.MAP_CODEC.forGetter(Weighted::value), ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(Weighted::weight))
                  .apply(i, Weighted::new)
          );

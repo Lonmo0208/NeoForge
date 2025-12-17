@@ -73,7 +73,7 @@
          }
      }
  
-@@ -411,19 +_,26 @@
+@@ -413,19 +_,26 @@
      }
  
      private static void popResource(Level level, Supplier<ItemEntity> entityFactory, ItemStack itemStack) {
@@ -103,7 +103,7 @@
      public float getExplosionResistance() {
          return this.explosionResistance;
      }
-@@ -492,6 +_,7 @@
+@@ -494,6 +_,7 @@
      public void handlePrecipitation(BlockState state, Level level, BlockPos pos, Biome.Precipitation precipitation) {
      }
  
@@ -111,7 +111,7 @@
      public boolean dropFromExplosion(Explosion explosion) {
          return true;
      }
-@@ -574,6 +_,35 @@
+@@ -576,6 +_,35 @@
          return state.setValue(property, (T)value);
      }
  

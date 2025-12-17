@@ -1,6 +1,6 @@
 --- a/net/minecraft/core/registries/Registries.java
 +++ b/net/minecraft/core/registries/Registries.java
-@@ -309,10 +_,10 @@
+@@ -313,10 +_,10 @@
      }
  
      public static String elementsDirPath(ResourceKey<? extends Registry<?>> registryKey) {

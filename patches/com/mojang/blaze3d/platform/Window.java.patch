@@ -1,17 +1,17 @@
 --- a/com/mojang/blaze3d/platform/Window.java
 +++ b/com/mojang/blaze3d/platform/Window.java
-@@ -95,6 +_,10 @@
-         GLFW.glfwWindowHint(139267, 3);
-         GLFW.glfwWindowHint(139272, 204801);
-         GLFW.glfwWindowHint(139270, 1);
+@@ -99,6 +_,10 @@
+         Monitor initialMonitor = this.screenManager.getMonitor(GLFW.glfwGetPrimaryMonitor());
+         this.windowedWidth = this.width = Math.max(displayData.width(), 1);
+         this.windowedHeight = this.height = Math.max(displayData.height(), 1);
 +        var earlyLoadingScreen = net.neoforged.fml.loading.EarlyLoadingScreenController.current();
 +        if (earlyLoadingScreen != null) {
 +            this.handle = takeOverWindow(earlyLoadingScreen, title);
 +        } else {
-         this.handle = GLFW.glfwCreateWindow(this.width, this.height, title, this.fullscreen && initialMonitor != null ? initialMonitor.getMonitor() : 0L, 0L);
-         if (initialMonitor != null) {
-             VideoMode mode = initialMonitor.getPreferredVidMode(this.fullscreen ? this.preferredFullscreenVideoMode : Optional.empty());
-@@ -107,6 +_,7 @@
+         WindowAndDevice windowAndDevice = this.initializeBackend(
+             backends,
+             this.width,
+@@ -121,6 +_,7 @@
              this.windowedX = this.x = actualX[0];
              this.windowedY = this.y = actualY[0];
          }
@@ -19,7 +19,7 @@
  
          this.setMode();
          this.refreshFramebufferSize();
-@@ -208,8 +_,10 @@
+@@ -239,8 +_,10 @@
      }
  
      public void defaultErrorCallback(int errorCode, long description) {
@@ -31,7 +31,7 @@
          LOGGER.error("########## GL ERROR ##########");
          LOGGER.error("@ {}", this.errorSection);
          LOGGER.error("{}: {}", errorCode, errorString);
-@@ -515,5 +_,27 @@
+@@ -546,5 +_,27 @@
          private WindowInitFailed(String message) {
              super(message);
          }

@@ -82,15 +82,6 @@
  
                      for (Entry<Identifier, Resource> resource : resources.entrySet()) {
                          result.add(CompletableFuture.supplyAsync(() -> {
-@@ -173,7 +_,7 @@
-                             try {
-                                 Pair var3;
-                                 try (Reader reader = resource.getValue().openAsReader()) {
--                                    var3 = Pair.of(modelId, BlockModel.fromStream(reader));
-+                                    var3 = Pair.of(modelId, net.neoforged.neoforge.client.model.UnbakedModelParser.parse(reader));
-                                 }
- 
-                                 return var3;
 @@ -190,15 +_,26 @@
              );
      }
@@ -145,19 +136,3 @@
          this.blockModelShaper.replaceCache(preparations.modelCache);
          this.specialBlockModelRenderer = preparations.specialBlockModelRenderer;
          this.entityModelSet = preparations.entityModelSet;
-@@ -342,6 +_,15 @@
- 
-     public Supplier<EntityModelSet> entityModels() {
-         return () -> this.entityModelSet;
-+    }
-+
-+    public ModelBakery getModelBakery() {
-+        return this.modelBakery.get();
-+    }
-+
-+    @org.jspecify.annotations.Nullable
-+    public <T> T getStandaloneModel(net.neoforged.neoforge.client.model.standalone.StandaloneModelKey<T> modelKey) {
-+        return this.bakedStandaloneModels.get(modelKey);
-     }
- 
-     @OnlyIn(Dist.CLIENT)

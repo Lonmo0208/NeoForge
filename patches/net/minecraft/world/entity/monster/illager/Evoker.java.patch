@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/monster/illager/Evoker.java
 +++ b/net/minecraft/world/entity/monster/illager/Evoker.java
-@@ -290,7 +_,7 @@
+@@ -311,7 +_,7 @@
                  return false;
              } else {
                  ServerLevel level = getServerLevel(Evoker.this.level());

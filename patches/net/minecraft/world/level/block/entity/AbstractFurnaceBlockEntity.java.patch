@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity.java
-@@ -68,9 +_,14 @@
+@@ -73,9 +_,14 @@
          public int get(int dataId) {
              switch (dataId) {
                  case 0:
@@ -16,7 +16,7 @@
                  case 2:
                      return AbstractFurnaceBlockEntity.this.cookingTimer;
                  case 3:
-@@ -104,12 +_,14 @@
+@@ -109,12 +_,14 @@
      };
      private final Reference2IntOpenHashMap<ResourceKey<Recipe<?>>> recipesUsed = new Reference2IntOpenHashMap<>();
      private final RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
@@ -31,7 +31,7 @@
      }
  
      private boolean isLit() {
-@@ -121,10 +_,10 @@
+@@ -126,10 +_,10 @@
          super.loadAdditional(input);
          this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
          ContainerHelper.loadAllItems(input, this.items);
@@ -46,7 +46,7 @@
          this.recipesUsed.clear();
          this.recipesUsed.putAll(input.read("RecipesUsed", RECIPES_USED_CODEC).orElse(Map.of()));
      }
-@@ -132,10 +_,10 @@
+@@ -137,10 +_,10 @@
      @Override
      protected void saveAdditional(ValueOutput output) {
          super.saveAdditional(output);
@@ -61,7 +61,7 @@
          ContainerHelper.saveAllItems(output, this.items);
          output.store("RecipesUsed", RECIPES_USED_CODEC, this.recipesUsed);
      }
-@@ -166,11 +_,15 @@
+@@ -171,11 +_,15 @@
                  entity.litTotalTime = entity.litTimeRemaining;
                  if (entity.isLit()) {
                      changed = true;
@@ -78,7 +78,7 @@
                          }
                      }
                  }
-@@ -223,9 +_,9 @@
+@@ -228,9 +_,9 @@
                  } else if (!ItemStack.isSameItemSameComponents(resultItemStack, burnResult)) {
                      return false;
                  } else {
@@ -90,7 +90,7 @@
                  }
              }
          } else {
-@@ -262,7 +_,7 @@
+@@ -267,7 +_,7 @@
      }
  
      protected int getBurnDuration(FuelValues fuelValues, ItemStack itemStack) {
@@ -99,7 +99,7 @@
      }
  
      private static int getTotalCookTime(ServerLevel level, AbstractFurnaceBlockEntity entity) {
-@@ -306,17 +_,57 @@
+@@ -311,17 +_,57 @@
  
      @Override
      public void setItem(int slot, ItemStack itemStack) {
@@ -158,7 +158,7 @@
      @Override
      public boolean canPlaceItem(int slot, ItemStack itemStack) {
          if (slot == 2) {
-@@ -325,7 +_,7 @@
+@@ -330,7 +_,7 @@
              return true;
          } else {
              ItemStack fuelSlot = this.items.get(1);

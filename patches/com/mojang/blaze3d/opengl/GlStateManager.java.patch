@@ -8,11 +8,10 @@
      private static final GlStateManager.ScissorState SCISSOR = new GlStateManager.ScissorState();
      private static int activeTexture;
      private static final int TEXTURE_COUNT = 12;
-@@ -597,5 +_,120 @@
-     @OnlyIn(Dist.CLIENT)
+@@ -589,4 +_,119 @@
      private static class TextureState {
          public int binding;
-+    }
+     }
 +
 +    public static void _disableStencilTest() {
 +        RenderSystem.assertOnRenderThread();
@@ -127,5 +126,5 @@
 +        public int backStencilFail = GL11.GL_KEEP;
 +        public int backDepthFail = GL11.GL_KEEP;
 +        public int backPass = GL11.GL_KEEP;
-     }
++     }
  }

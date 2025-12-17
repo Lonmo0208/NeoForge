@@ -1,6 +1,6 @@
 --- a/net/minecraft/data/tags/TagAppender.java
 +++ b/net/minecraft/data/tags/TagAppender.java
-@@ -54,6 +_,30 @@
+@@ -55,6 +_,30 @@
                  builder.addOptionalTag(tag.location());
                  return this;
              }
@@ -31,7 +31,7 @@
          };
      }
  
-@@ -68,7 +_,7 @@
+@@ -73,7 +_,7 @@
  
              @Override
              public TagAppender<U, T> addOptional(U element) {
@@ -40,7 +40,7 @@
                  return this;
              }
  
-@@ -81,6 +_,30 @@
+@@ -86,6 +_,30 @@
              @Override
              public TagAppender<U, T> addOptionalTag(TagKey<T> tag) {
                  original.addOptionalTag(tag);

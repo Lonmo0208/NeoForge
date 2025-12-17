@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/ItemStack.java
 +++ b/net/minecraft/world/item/ItemStack.java
-@@ -252,6 +_,10 @@
+@@ -250,6 +_,10 @@
          return !this.isEmpty() && this.components.hasNonDefault(type);
      }
  
@@ -11,16 +11,7 @@
      public ItemStack(ItemLike item) {
          this(item, 1);
      }
-@@ -347,7 +_,7 @@
-     }
- 
-     public boolean is(Holder<Item> item) {
--        return this.getItem().builtInRegistryHolder() == item;
-+        return is(item.value()); // Neo: Fix comparing for custom holders such as DeferredHolders
-     }
- 
-     public boolean is(HolderSet<Item> set) {
-@@ -359,13 +_,27 @@
+@@ -338,13 +_,27 @@
      }
  
      public InteractionResult useOn(UseOnContext context) {
@@ -49,7 +40,7 @@
              if (player != null && result instanceof InteractionResult.Success success && success.wasItemInteraction()) {
                  player.awardStat(Stats.ITEM_USED.get(usedItem));
              }
-@@ -414,7 +_,7 @@
+@@ -393,7 +_,7 @@
      }
  
      public int getMaxStackSize() {
@@ -58,7 +49,7 @@
      }
  
      public boolean isStackable() {
-@@ -426,19 +_,19 @@
+@@ -405,19 +_,19 @@
      }
  
      public boolean isDamaged() {
@@ -82,7 +73,7 @@
      }
  
      public boolean isBroken() {
-@@ -450,6 +_,11 @@
+@@ -429,6 +_,11 @@
      }
  
      public void hurtAndBreak(int amount, ServerLevel level, @Nullable ServerPlayer player, Consumer<Item> onBreak) {
@@ -94,7 +85,7 @@
          int newAmount = this.processDurabilityChange(amount, level, player);
          if (newAmount != 0) {
              this.applyDamage(this.getDamageValue() + newAmount, player, onBreak);
-@@ -457,6 +_,10 @@
+@@ -436,6 +_,10 @@
      }
  
      private int processDurabilityChange(int amount, ServerLevel level, @Nullable ServerPlayer player) {
@@ -105,7 +96,7 @@
          if (!this.isDamageableItem()) {
              return 0;
          } else if (player != null && player.hasInfiniteMaterials()) {
-@@ -467,8 +_,12 @@
+@@ -446,8 +_,12 @@
      }
  
      private void applyDamage(int newDamage, @Nullable ServerPlayer player, Consumer<Item> onBreak) {
@@ -120,7 +111,7 @@
          }
  
          this.setDamageValue(newDamage);
-@@ -498,7 +_,7 @@
+@@ -477,7 +_,7 @@
      public void hurtAndBreak(int amount, LivingEntity owner, EquipmentSlot slot) {
          if (owner.level() instanceof ServerLevel serverLevel) {
              this.hurtAndBreak(
@@ -129,7 +120,7 @@
              );
          }
      }
-@@ -825,7 +_,7 @@
+@@ -804,7 +_,7 @@
      }
  
      public Component getStyledHoverName() {
@@ -138,7 +129,7 @@
          if (this.has(DataComponents.CUSTOM_NAME)) {
              hoverName.withStyle(ChatFormatting.ITALIC);
          }
-@@ -851,6 +_,7 @@
+@@ -830,6 +_,7 @@
              List<Component> lines = Lists.newArrayList();
              lines.add(this.getStyledHoverName());
              this.addDetailsToTooltip(context, display, player, tooltipFlag, lines::add);
@@ -146,7 +137,7 @@
              return lines;
          }
      }
-@@ -879,7 +_,8 @@
+@@ -858,7 +_,8 @@
          this.addToTooltip(DataComponents.DYED_COLOR, context, display, builder, tooltipFlag);
          this.addToTooltip(DataComponents.PROFILE, context, display, builder, tooltipFlag);
          this.addToTooltip(DataComponents.LORE, context, display, builder, tooltipFlag);
@@ -156,7 +147,7 @@
          this.addUnitComponentToTooltip(DataComponents.INTANGIBLE_PROJECTILE, INTANGIBLE_TOOLTIP, display, builder);
          this.addUnitComponentToTooltip(DataComponents.UNBREAKABLE, UNBREAKABLE_TOOLTIP, display, builder);
          this.addToTooltip(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, context, display, builder, tooltipFlag);
-@@ -932,7 +_,10 @@
+@@ -911,7 +_,10 @@
              builder.accept(component);
          }
      }
@@ -168,7 +159,7 @@
      private void addAttributeTooltips(Consumer<Component> consumer, TooltipDisplay display, @Nullable Player player) {
          if (display.shows(DataComponents.ATTRIBUTE_MODIFIERS)) {
              for (EquipmentSlotGroup slot : EquipmentSlotGroup.values()) {
-@@ -987,6 +_,17 @@
+@@ -966,6 +_,17 @@
          return !this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
      }
  
@@ -186,7 +177,7 @@
      public ItemEnchantments getEnchantments() {
          return this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
      }
-@@ -1010,14 +_,26 @@
+@@ -989,14 +_,26 @@
      }
  
      public void forEachModifier(EquipmentSlotGroup slot, TriConsumer<Holder<Attribute>, AttributeModifier, ItemAttributeModifiers.Display> consumer) {
@@ -213,7 +204,7 @@
          EnchantmentHelper.forEachModifier(this, slot, consumer);
      }
  
-@@ -1029,7 +_,7 @@
+@@ -1008,7 +_,7 @@
  
          MutableComponent result = ComponentUtils.wrapInSquareBrackets(hoverName);
          if (!this.isEmpty()) {
@@ -222,7 +213,7 @@
          }
  
          return result;
-@@ -1105,11 +_,14 @@
+@@ -1084,11 +_,14 @@
          }
      }
  

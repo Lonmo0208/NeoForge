@@ -1,8 +1,8 @@
 --- a/net/minecraft/client/gui/screens/worldselection/CreateWorldScreen.java
 +++ b/net/minecraft/client/gui/screens/worldselection/CreateWorldScreen.java
-@@ -163,6 +_,7 @@
-     ) {
+@@ -162,6 +_,7 @@
          queueLoadScreen(minecraft, PREPARING_WORLD_DATA);
+         long start = Util.getMillis();
          PackRepository vanillaOnlyPackRepository = new PackRepository(new ServerPacksSource(minecraft.directoryValidator()));
 +        net.neoforged.neoforge.resource.ResourcePackLoader.populatePackRepository(vanillaOnlyPackRepository, net.minecraft.server.packs.PackType.SERVER_DATA, false);
          WorldDataConfiguration dataConfig = SharedConstants.IS_RUNNING_IN_IDE

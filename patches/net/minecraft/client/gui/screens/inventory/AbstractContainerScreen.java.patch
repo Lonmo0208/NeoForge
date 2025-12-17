@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.java
 +++ b/net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.java
-@@ -114,6 +_,7 @@
+@@ -123,6 +_,7 @@
              this.onStopHovering(previouslyHoveredSlot);
          }
  
@@ -8,7 +8,7 @@
          graphics.pose().popMatrix();
      }
  
-@@ -197,7 +_,7 @@
+@@ -206,7 +_,7 @@
              ItemStack item = this.hoveredSlot.getItem();
              if (this.menu.getCarried().isEmpty() || this.showTooltipWithItemInHand(item)) {
                  graphics.setTooltipForNextFrame(
@@ -17,7 +17,7 @@
                  );
              }
          }
-@@ -213,7 +_,8 @@
+@@ -222,7 +_,8 @@
  
      private void renderFloatingItem(GuiGraphics graphics, ItemStack carried, int x, int y, @Nullable String itemCount) {
          graphics.renderItem(carried, x, y);
@@ -27,7 +27,7 @@
      }
  
      protected void renderLabels(GuiGraphics graphics, int xm, int ym) {
-@@ -268,6 +_,13 @@
+@@ -277,6 +_,13 @@
                  graphics.fill(x, y, x + 16, y + 16, -2130706433);
              }
  
@@ -41,7 +41,7 @@
              int seed = slot.x + slot.y * this.imageWidth;
              if (slot.isFake()) {
                  graphics.renderFakeItem(itemStack, x, y, seed);
-@@ -275,7 +_,8 @@
+@@ -284,7 +_,8 @@
                  graphics.renderItem(itemStack, x, y, seed);
              }
  
@@ -51,7 +51,7 @@
          }
      }
  
-@@ -315,7 +_,8 @@
+@@ -324,7 +_,8 @@
          if (super.mouseClicked(event, doubleClick)) {
              return true;
          } else {
@@ -61,7 +61,7 @@
              Slot slot = this.getHoveredSlot(event.x(), event.y());
              this.doubleclick = this.lastClickSlot == slot && doubleClick;
              this.skipNextRelease = false;
-@@ -325,6 +_,7 @@
+@@ -334,6 +_,7 @@
                  int xo = this.leftPos;
                  int yo = this.topPos;
                  boolean clickedOutside = this.hasClickedOutside(event.x(), event.y(), xo, yo);
@@ -69,16 +69,16 @@
                  int slotId = -1;
                  if (slot != null) {
                      slotId = slot.index;
-@@ -350,7 +_,7 @@
+@@ -359,7 +_,7 @@
                          }
                      } else if (!this.isQuickCrafting) {
                          if (this.menu.getCarried().isEmpty()) {
 -                            if (cloning) {
 +                            if (this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey)) {
-                                 this.slotClicked(slot, slotId, event.button(), ClickType.CLONE);
+                                 this.slotClicked(slot, slotId, event.button(), ContainerInput.CLONE);
                              } else {
                                  boolean quickKey = slotId != -999 && event.hasShiftDown();
-@@ -374,7 +_,7 @@
+@@ -383,7 +_,7 @@
                                  this.quickCraftingType = 0;
                              } else if (event.button() == 1) {
                                  this.quickCraftingType = 1;
@@ -87,7 +87,7 @@
                                  this.quickCraftingType = 2;
                              }
                          }
-@@ -451,10 +_,13 @@
+@@ -453,10 +_,13 @@
  
      @Override
      public boolean mouseReleased(MouseButtonEvent event) {
@@ -101,25 +101,16 @@
          int slotId = -1;
          if (slot != null) {
              slotId = slot.index;
-@@ -471,7 +_,7 @@
+@@ -473,7 +_,7 @@
                          if (target != null
                              && target.mayPickup(this.minecraft.player)
                              && target.hasItem()
 -                            && target.container == slot.container
 +                            && target.isSameInventory(slot)
                              && AbstractContainerMenu.canItemQuickReplace(target, this.lastQuickMoved, true)) {
-                             this.slotClicked(target, target.index, event.button(), ClickType.QUICK_MOVE);
+                             this.slotClicked(target, target.index, event.button(), ContainerInput.QUICK_MOVE);
                          }
-@@ -536,7 +_,7 @@
- 
-                 this.slotClicked(null, -999, AbstractContainerMenu.getQuickcraftMask(2, this.quickCraftingType), ClickType.QUICK_CRAFT);
-             } else if (!this.menu.getCarried().isEmpty()) {
--                if (this.minecraft.options.keyPickItem.matchesMouse(event)) {
-+                if (this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey)) {
-                     this.slotClicked(slot, slotId, event.button(), ClickType.CLONE);
-                 } else {
-                     boolean quickKey = slotId != -999 && event.hasShiftDown();
-@@ -605,34 +_,40 @@
+@@ -601,34 +_,40 @@
  
      @Override
      public boolean keyPressed(KeyEvent event) {
@@ -136,11 +127,11 @@
              if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
 -                if (this.minecraft.options.keyPickItem.matches(event)) {
 +                if (this.minecraft.options.keyPickItem.isActiveAndMatches(key)) {
-                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 0, ClickType.CLONE);
+                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 0, ContainerInput.CLONE);
 -                } else if (this.minecraft.options.keyDrop.matches(event)) {
 +                    handled = true;
 +                } else if (this.minecraft.options.keyDrop.isActiveAndMatches(key)) {
-                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, event.hasControlDown() ? 1 : 0, ClickType.THROW);
+                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, event.hasControlDown() ? 1 : 0, ContainerInput.THROW);
 +                    handled = true;
                  }
 +            } else if (this.minecraft.options.keyDrop.isActiveAndMatches(key)) {
@@ -157,17 +148,17 @@
          if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
 -            if (this.minecraft.options.keySwapOffhand.matches(event)) {
 +            if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(key)) {
-                 this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
+                 this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ContainerInput.SWAP);
                  return true;
              }
  
              for (int i = 0; i < 9; i++) {
 -                if (this.minecraft.options.keyHotbarSlots[i].matches(event)) {
 +                if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(key)) {
-                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ClickType.SWAP);
+                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ContainerInput.SWAP);
                      return true;
                  }
-@@ -675,6 +_,18 @@
+@@ -690,6 +_,18 @@
      @Override
      public T getMenu() {
          return this.menu;
