@@ -130,14 +130,14 @@ public class DataGeneratorTest {
 
         gen.addProvider(true, new PackMetadataGenerator(packOutput)
                 .add(GeneratingOverlayMetadataSection.neoforgeType(PackType.SERVER_DATA), new GeneratingOverlayMetadataSection(List.of(
-                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(0), PackFormat.of(Integer.MAX_VALUE)), "neoforge_overlays_test")))))
+                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(15), PackFormat.of(Integer.MAX_VALUE)), "neoforge_overlays_test")))))
                 .add(GeneratingOverlayMetadataSection.type(PackType.SERVER_DATA), new GeneratingOverlayMetadataSection(List.of(
-                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(0), PackFormat.of(Integer.MAX_VALUE)), "pack_overlays_test")),
-                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(0), PackFormat.of(Integer.MAX_VALUE)), "conditional_overlays_enabled"), NeoForgeConditions.modLoaded(NeoForgeMod.MOD_ID)),
-                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(0), PackFormat.of(Integer.MAX_VALUE)), "conditional_overlays_disabled"), NeoForgeConditions.modLoaded("does_not_exist")))))
+                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(15), PackFormat.of(Integer.MAX_VALUE)), "pack_overlays_test")),
+                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(15), PackFormat.of(Integer.MAX_VALUE)), "conditional_overlays_enabled"), NeoForgeConditions.modLoaded(NeoForgeMod.MOD_ID)),
+                        new WithConditions<>(new OverlayMetadataSection.OverlayEntry(new InclusiveRange<>(PackFormat.of(15), PackFormat.of(Integer.MAX_VALUE)), "conditional_overlays_disabled"), NeoForgeConditions.modLoaded("does_not_exist")))))
                 .add(PackMetadataSection.CLIENT_TYPE, new PackMetadataSection(
                         Component.literal("NeoForge tests resource pack"),
-                        new InclusiveRange<>(PackFormat.of(0), PackFormat.of(Integer.MAX_VALUE, Integer.MAX_VALUE)))));
+                        new InclusiveRange<>(PackFormat.of(15), PackFormat.of(Integer.MAX_VALUE, Integer.MAX_VALUE)))));
         gen.addProvider(true, new Lang(packOutput));
         gen.addProvider(true, new SoundDefinitions(packOutput, event.getResourceManager(PackType.CLIENT_RESOURCES)));
         gen.addProvider(true, new ParticleDescriptions(packOutput, event.getResourceManager(PackType.CLIENT_RESOURCES)));
