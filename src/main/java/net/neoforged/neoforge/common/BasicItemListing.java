@@ -53,8 +53,8 @@ public class BasicItemListing implements ItemListing {
     @Nullable
     @Override
     public MerchantOffer getOffer(ServerLevel level, Entity p_219693_, RandomSource p_219694_) {
-        ItemCost cost = new ItemCost(price.getItemHolder(), price.getCount(), DataComponentExactPredicate.EMPTY, price); // TODO: Porting 1.20.5 do something proper for the components here
-        Optional<ItemCost> optionalSecondCost = price2.isEmpty() ? Optional.empty() : Optional.of(new ItemCost(price2.getItemHolder(), price2.getCount(), DataComponentExactPredicate.EMPTY, price2));
+        ItemCost cost = new ItemCost(price.typeHolder(), price.getCount(), DataComponentExactPredicate.EMPTY, price); // TODO: Porting 1.20.5 do something proper for the components here
+        Optional<ItemCost> optionalSecondCost = price2.isEmpty() ? Optional.empty() : Optional.of(new ItemCost(price2.typeHolder(), price2.getCount(), DataComponentExactPredicate.EMPTY, price2));
         return new MerchantOffer(cost, optionalSecondCost, forSale, maxTrades, xp, priceMult);
     }
 }

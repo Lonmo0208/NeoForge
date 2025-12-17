@@ -147,6 +147,7 @@ public class NeoDevPlugin implements Plugin<Project> {
         // 5. Split source jar from 4. into client and server.
         var splitPatchedSources = tasks.register("splitPatchedSources", SplitMergedSources.class, task -> {
             task.setGroup(INTERNAL_GROUP);
+            task.getOriginalResourcesJar().set(decompilationSetup.vanillaResources.flatMap(Zip::getArchiveFile));
             task.getMergedJar().set(applyPatches.flatMap(ApplyPatches::getPatchedJar));
             task.getCommonJar().set(neoDevBuildDir.map(dir -> dir.file("artifacts/common-patched-sources.jar")));
             task.getClientJar().set(neoDevBuildDir.map(dir -> dir.file("artifacts/client-patched-sources.jar")));
