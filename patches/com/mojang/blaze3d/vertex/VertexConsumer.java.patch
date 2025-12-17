@@ -9,7 +9,7 @@
              Vector3f pos = matrix.transformPosition(position, new Vector3f());
              float u = UVPair.unpackU(packedUv);
              float v = UVPair.unpackV(packedUv);
-+            applyBakedNormals(pos, quad.bakedNormals(), vertex, pose.normal()); // Neo: apply baked normals from the quad
++            applyBakedNormals(normal, quad.bakedNormals(), vertex, pose.normal()); // Neo: apply baked normals from the quad
              this.addVertex(pos.x(), pos.y(), pos.z(), color, u, v, overlayCoords, light, normal.x(), normal.y(), normal.z());
          }
      }
