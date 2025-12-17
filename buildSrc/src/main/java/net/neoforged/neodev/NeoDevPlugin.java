@@ -90,9 +90,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.setDescription("This task retrieves various files for the Minecraft version without applying NeoForge patches to them");
             var cleanArtifactsDir = neoDevBuildDir.map(dir -> dir.dir("artifacts/clean"));
             task.getRawClientJar().set(cleanArtifactsDir.map(dir -> dir.file("raw-client.jar")));
-            task.getCleanClientJar().set(cleanArtifactsDir.map(dir -> dir.file("client.jar")));
             task.getRawServerJar().set(cleanArtifactsDir.map(dir -> dir.file("raw-server.jar")));
-            task.getCleanServerJar().set(cleanArtifactsDir.map(dir -> dir.file("server.jar")));
             task.getCleanJoinedJar().set(cleanArtifactsDir.map(dir -> dir.file("joined.jar")));
             task.getNeoFormArtifact().set(mcAndNeoFormVersion.map(version -> "net.neoforged:neoform:" + version + "@zip"));
         });
