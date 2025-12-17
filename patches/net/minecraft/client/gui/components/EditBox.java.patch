@@ -1,5 +1,6 @@
-++++ REJECTED HUNK: 1
-@@ -619,6 +619,10 @@
+--- a/net/minecraft/client/gui/components/EditBox.java
++++ b/net/minecraft/client/gui/components/EditBox.java
+@@ -606,6 +_,10 @@
          this.hint = (Component)(hasNoStyle ? hint.copy().withStyle(DEFAULT_HINT_STYLE) : hint);
      }
  
@@ -10,4 +11,3 @@
      @FunctionalInterface
      @OnlyIn(Dist.CLIENT)
      public interface TextFormatter {
-++++ END HUNK

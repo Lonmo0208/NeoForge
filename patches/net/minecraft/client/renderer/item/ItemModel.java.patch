@@ -1,5 +1,6 @@
-++++ REJECTED HUNK: 1
-@@ -36,7 +36,22 @@
+--- a/net/minecraft/client/renderer/item/ItemModel.java
++++ b/net/minecraft/client/renderer/item/ItemModel.java
+@@ -36,7 +_,22 @@
          PlayerSkinRenderCache playerSkinRenderCache,
          ItemModel missingItemModel,
          @Nullable RegistryContextSwapper contextSwapper
@@ -22,4 +23,3 @@
      }
  
      @OnlyIn(Dist.CLIENT)
-++++ END HUNK

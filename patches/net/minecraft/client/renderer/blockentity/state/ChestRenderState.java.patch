@@ -1,5 +1,6 @@
-++++ REJECTED HUNK: 1
-@@ -10,6 +10,7 @@
+--- a/net/minecraft/client/renderer/blockentity/state/ChestRenderState.java
++++ b/net/minecraft/client/renderer/blockentity/state/ChestRenderState.java
+@@ -10,6 +_,7 @@
      public float open;
      public float angle;
      public ChestRenderState.ChestMaterialType material = ChestRenderState.ChestMaterialType.REGULAR;
@@ -7,4 +8,3 @@
  
      @OnlyIn(Dist.CLIENT)
      public static enum ChestMaterialType {
-++++ END HUNK

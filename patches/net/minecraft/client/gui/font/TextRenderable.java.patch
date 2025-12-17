@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/font/TextRenderable.java
 +++ b/net/minecraft/client/gui/font/TextRenderable.java
-@@ -10,6 +_,15 @@
+@@ -13,6 +_,15 @@
  public interface TextRenderable {
      void render(Matrix4f pose, VertexConsumer buffer, int packedLightCoords, boolean flat);
  

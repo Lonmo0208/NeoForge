@@ -8,7 +8,7 @@
      private static final GlStateManager.ScissorState SCISSOR = new GlStateManager.ScissorState();
      private static int activeTexture;
      private static final int TEXTURE_COUNT = 12;
-@@ -589,4 +_,119 @@
+@@ -598,4 +_,119 @@
      private static class TextureState {
          public int binding;
      }

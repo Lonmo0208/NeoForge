@@ -9,3 +9,12 @@
  
      public Font(Font.Provider provider) {
          this.provider = provider;
+@@ -216,6 +_,8 @@
+     public StringSplitter getSplitter() {
+         return this.splitter;
+     }
++
++    @Override public Font self() { return this; }
+ 
+     @OnlyIn(Dist.CLIENT)
+     public static enum DisplayMode {

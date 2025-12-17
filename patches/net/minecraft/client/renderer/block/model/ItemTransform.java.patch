@@ -23,7 +23,7 @@
              pose.translate(-0.5F, -0.5F, -0.5F);
          }
      }
-@@ -62,7 +_,8 @@
+@@ -63,7 +_,8 @@
              translation.set(Mth.clamp(translation.x, -5.0F, 5.0F), Mth.clamp(translation.y, -5.0F, 5.0F), Mth.clamp(translation.z, -5.0F, 5.0F));
              Vector3f scale = this.getVector3f(object, "scale", DEFAULT_SCALE);
              scale.set(Mth.clamp(scale.x, -4.0F, 4.0F), Mth.clamp(scale.y, -4.0F, 4.0F), Mth.clamp(scale.z, -4.0F, 4.0F));

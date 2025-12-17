@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/block/model/BlockModelPart.java
 +++ b/net/minecraft/client/renderer/block/model/BlockModelPart.java
-@@ -10,6 +_,8 @@
+@@ -13,6 +_,8 @@
  public interface BlockModelPart extends net.neoforged.neoforge.client.extensions.BlockModelPartExtension {
      List<BakedQuad> getQuads(@Nullable Direction direction);
  

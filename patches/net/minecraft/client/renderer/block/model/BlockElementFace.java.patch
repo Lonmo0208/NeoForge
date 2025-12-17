@@ -9,7 +9,29 @@
      public static final int NO_TINT = -1;
  
      public static float getU(BlockElementFace.UVs uvs, Quadrant rotation, int vertex) {
-@@ -37,7 +_,9 @@
+@@ -26,6 +_,21 @@
+         return uvs.getVertexV(rotation.rotateVertexIndex(index)) / 16.0F;
+     }
+ 
++    public BlockElementFace(@Nullable Direction cullForDirection, int tintIndex, String texture, BlockElementFace.@Nullable UVs uvs, Quadrant rotation) {
++        this(cullForDirection, tintIndex, texture, uvs, rotation, null, new org.apache.commons.lang3.mutable.MutableObject<>());
++    }
++
++    @Override
++    public net.neoforged.neoforge.client.model.ExtraFaceData faceData() {
++        if (this.faceData != null) {
++            return this.faceData;
++        } else if (this.parent.getValue() != null) {
++            return this.parent.getValue().faceData();
++        } else {
++            return net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT;
++        }
++    }
++
+     @OnlyIn(Dist.CLIENT)
+     public static class Deserializer implements JsonDeserializer<BlockElementFace> {
+         private static final int DEFAULT_TINT_INDEX = -1;
+@@ -38,7 +_,9 @@
              String texture = getTexture(object);
              BlockElementFace.UVs uvs = getUVs(object);
              Quadrant rotation = getRotation(object);

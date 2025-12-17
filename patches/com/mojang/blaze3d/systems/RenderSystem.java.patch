@@ -8,8 +8,8 @@
  
      public static SamplerCache getSamplerCache() {
          return samplerCache;
-@@ -387,4 +_,38 @@
- 
+@@ -390,4 +_,38 @@
+     @OnlyIn(Dist.CLIENT)
      record GpuAsyncTask(Runnable callback, GpuFence fence) {
      }
 +

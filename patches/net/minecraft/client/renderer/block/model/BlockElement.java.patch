@@ -22,7 +22,7 @@
      public BlockElement(Vector3fc from, Vector3fc to, Map<Direction, BlockElementFace> faces) {
          this(from, to, faces, null, true, 0);
      }
-@@ -70,7 +_,8 @@
+@@ -71,7 +_,8 @@
                      }
                  }
  

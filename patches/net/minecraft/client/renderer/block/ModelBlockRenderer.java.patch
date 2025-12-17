@@ -261,7 +261,7 @@
              for (Direction direction : DIRECTIONS) {
                  renderQuadList(pose, builder, r, g, b, part.getQuads(direction), lightCoords, overlayCoords);
              }
-@@ -664,6 +_,9 @@
+@@ -666,6 +_,9 @@
  
          public AmbientOcclusionRenderStorage() {
          }

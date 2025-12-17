@@ -20,8 +20,8 @@
 +    @Deprecated
      TextureAtlasSprite particleIcon();
  
-     public static class SimpleCachedUnbakedRoot implements BlockStateModel.UnbakedRoot {
-@@ -70,30 +_,41 @@
+     @OnlyIn(Dist.CLIENT)
+@@ -72,30 +_,41 @@
              i -> i.group(Variant.MAP_CODEC.forGetter(Weighted::value), ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(Weighted::weight))
                  .apply(i, Weighted::new)
          );

@@ -1,5 +1,6 @@
-++++ REJECTED HUNK: 1
-@@ -39,9 +39,24 @@
+--- a/net/minecraft/client/renderer/special/SpecialModelRenderer.java
++++ b/net/minecraft/client/renderer/special/SpecialModelRenderer.java
+@@ -39,9 +_,24 @@
  
          PlayerSkinRenderCache playerSkinRenderCache();
  
@@ -25,4 +26,3 @@
          }
      }
  
-++++ END HUNK

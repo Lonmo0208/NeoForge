@@ -110,6 +110,15 @@
                              && AbstractContainerMenu.canItemQuickReplace(target, this.lastQuickMoved, true)) {
                              this.slotClicked(target, target.index, event.button(), ContainerInput.QUICK_MOVE);
                          }
+@@ -532,7 +_,7 @@
+             } else if (this.isQuickCrafting && !this.quickCraftSlots.isEmpty()) {
+                 this.quickCraftToSlots();
+             } else if (!this.menu.getCarried().isEmpty()) {
+-                if (this.minecraft.options.keyPickItem.matchesMouse(event)) {
++                if (this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey)) {
+                     this.slotClicked(slot, slotId, event.button(), ContainerInput.CLONE);
+                 } else {
+                     boolean quickKey = slotId != -999 && event.hasShiftDown();
 @@ -601,34 +_,40 @@
  
      @Override

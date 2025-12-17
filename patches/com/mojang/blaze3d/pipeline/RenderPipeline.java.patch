@@ -109,7 +109,7 @@
      public static RenderPipeline.Builder builder(RenderPipeline.Snippet... snippets) {
          RenderPipeline.Builder builder = new RenderPipeline.Builder();
  
-@@ -205,6 +_,7 @@
+@@ -206,6 +_,7 @@
          private Optional<VertexFormat.Mode> vertexFormatMode = Optional.empty();
          private float depthBiasScaleFactor;
          private float depthBiasConstant;
@@ -117,7 +117,7 @@
  
          private Builder() {
          }
-@@ -361,6 +_,16 @@
+@@ -362,6 +_,16 @@
              return this;
          }
  
@@ -134,7 +134,7 @@
          private void withSnippet(RenderPipeline.Snippet snippet) {
              if (snippet.vertexShader.isPresent()) {
                  this.vertexShader = snippet.vertexShader;
-@@ -435,6 +_,10 @@
+@@ -436,6 +_,10 @@
              if (snippet.vertexFormatMode.isPresent()) {
                  this.vertexFormatMode = snippet.vertexFormatMode;
              }
@@ -145,7 +145,7 @@
          }
  
          public RenderPipeline.Snippet buildSnippet() {
-@@ -453,7 +_,8 @@
+@@ -454,7 +_,8 @@
                  this.writeDepth,
                  this.colorLogic,
                  this.vertexFormat,
@@ -155,7 +155,7 @@
              );
          }
  
-@@ -488,7 +_,8 @@
+@@ -489,7 +_,8 @@
                      this.vertexFormatMode.get(),
                      this.depthBiasScaleFactor,
                      this.depthBiasConstant,
@@ -165,7 +165,7 @@
                  );
              }
          }
-@@ -509,8 +_,30 @@
+@@ -511,8 +_,30 @@
          Optional<Boolean> writeDepth,
          Optional<LogicOp> colorLogic,
          Optional<VertexFormat> vertexFormat,
@@ -196,4 +196,4 @@
 +        }
      }
  
-     public record UniformDescription(String name, UniformType type, @Nullable TextureFormat textureFormat) {
+     @OnlyIn(Dist.CLIENT)
