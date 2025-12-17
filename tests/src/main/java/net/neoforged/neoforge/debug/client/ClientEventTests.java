@@ -10,7 +10,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.math.Axis;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.AbstractHoglinRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -25,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -140,7 +140,7 @@ public class ClientEventTests {
 
                 ItemStackRenderState renderState = new ItemStackRenderState();
                 Minecraft.getInstance().getItemModelResolver().updateForTopItem(renderState, itemStack, ItemDisplayContext.GROUND, null, null, 0);
-                renderState.submit(event.getPoseStack(), event.getSubmitNodeCollector(), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                renderState.submit(event.getPoseStack(), event.getSubmitNodeCollector(), LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
 
                 event.getPoseStack().popPose();
             });

@@ -265,7 +265,7 @@ public class EnhancedAoRenderStorage extends ModelBlockRenderer.AmbientOcclusion
      * Interpolates lightmap from the 4 corners of a face.
      */
     private static int interpolateLightmap(AoCalculatedFace in, float[] weights) {
-        return blend(in.lightmap0, in.lightmap1, in.lightmap2, in.lightmap3, weights[0], weights[1], weights[2], weights[3]);
+        return LightCoordsUtil.smoothWeightedBlend(in.lightmap0, in.lightmap1, in.lightmap2, in.lightmap3, weights[0], weights[1], weights[2], weights[3]);
     }
 
     /**

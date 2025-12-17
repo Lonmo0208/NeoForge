@@ -155,7 +155,7 @@ public class IngredientTests {
 
                 // Axe is now damaged, we expect the recipe to work, even if we also add other random values to the compound
                 .thenExecute(crafter -> crafter.getItem(0).hurtAndBreak(2, helper.getLevel(), null, item -> {}))
-                .thenExecute(crafter -> CustomData.update(DataComponents.CUSTOM_DATA, crafter.getItem(0), tag -> tag.putFloat("abcd", helper.getLevel().random.nextFloat())))
+                .thenExecute(crafter -> CustomData.update(DataComponents.CUSTOM_DATA, crafter.getItem(0), tag -> tag.putFloat("abcd", helper.getLevel().getRandom().nextFloat())))
 
                 .thenExecute(() -> helper.pulseRedstone(1, 1, 2, 2))
                 .thenExecuteAfter(7, () -> helper.assertContainerContains(1, 2, 1, Items.ALLIUM))

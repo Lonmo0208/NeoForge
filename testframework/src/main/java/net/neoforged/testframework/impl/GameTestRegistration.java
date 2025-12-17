@@ -45,7 +45,7 @@ public final class GameTestRegistration {
         private final TestFramework framework;
         private final String testId;
 
-        public Instance(TestData<Holder<TestEnvironmentDefinition>> data, TestFramework framework, String testId) {
+        public Instance(TestData<Holder<TestEnvironmentDefinition<?>>> data, TestFramework framework, String testId) {
             super(data);
             this.framework = framework;
             this.testId = testId;

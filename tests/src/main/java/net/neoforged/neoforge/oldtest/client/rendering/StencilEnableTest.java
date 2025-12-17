@@ -12,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
@@ -21,6 +20,7 @@ import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -141,11 +141,11 @@ public class StencilEnableTest {
             SubmitNodeStorage store = dispatcher.getSubmitNodeStorage();
             RenderSystem.pushPipelineModifier(STENCIL_FILL_KEY);
             {
-                state.maskRenderState.submit(poseStack, store, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                state.maskRenderState.submit(poseStack, store, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
 
                 poseStack.pushPose();
                 poseStack.translate(10F / scale, -10F / scale, 0);
-                state.maskRenderState.submit(poseStack, store, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                state.maskRenderState.submit(poseStack, store, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
                 poseStack.popPose();
 
                 dispatcher.renderAllFeatures();
@@ -157,11 +157,11 @@ public class StencilEnableTest {
                 poseStack.scale(1.1F, 1.1F, 1.1F);
                 poseStack.translate(-.5F / scale, .5F / scale, 0);
 
-                state.maskedRenderState.submit(poseStack, store, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                state.maskedRenderState.submit(poseStack, store, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
 
                 poseStack.pushPose();
                 poseStack.translate(10F / scale, -10F / scale, 0);
-                state.maskedRenderState.submit(poseStack, store, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+                state.maskedRenderState.submit(poseStack, store, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
                 poseStack.popPose();
 
                 dispatcher.renderAllFeatures();
