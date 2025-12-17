@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 2
+@@ -191,6 +192,7 @@
+         Thread consoleThread = new Thread("Server console handler") {
+             @Override
+             public void run() {
++                if (net.neoforged.neoforge.server.console.TerminalHandler.handleCommands(DedicatedServer.this)) return;
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+ 
+                 String line;
+++++ END HUNK

@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 1
+@@ -10,6 +10,7 @@
+     public float open;
+     public float angle;
+     public ChestRenderState.ChestMaterialType material = ChestRenderState.ChestMaterialType.REGULAR;
++    public net.minecraft.client.resources.model.@org.jspecify.annotations.Nullable Material customMaterial;
+ 
+     @OnlyIn(Dist.CLIENT)
+     public static enum ChestMaterialType {
+++++ END HUNK

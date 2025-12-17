@@ -1,0 +1,13 @@
+++++ REJECTED HUNK: 1
+@@ -95,6 +95,10 @@
+         GLFW.glfwWindowHint(139267, 3);
+         GLFW.glfwWindowHint(139272, 204801);
+         GLFW.glfwWindowHint(139270, 1);
++        var earlyLoadingScreen = net.neoforged.fml.loading.EarlyLoadingScreenController.current();
++        if (earlyLoadingScreen != null) {
++            this.handle = takeOverWindow(earlyLoadingScreen, title);
++        } else {
+         this.handle = GLFW.glfwCreateWindow(this.width, this.height, title, this.fullscreen && initialMonitor != null ? initialMonitor.getMonitor() : 0L, 0L);
+         if (initialMonitor != null) {
+             VideoMode mode = initialMonitor.getPreferredVidMode(this.fullscreen ? this.preferredFullscreenVideoMode : Optional.empty());
+++++ END HUNK

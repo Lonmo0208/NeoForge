@@ -1,0 +1,34 @@
+++++ REJECTED HUNK: 10
+@@ -511,8 +602,30 @@
+         Optional<Boolean> writeDepth,
+         Optional<LogicOp> colorLogic,
+         Optional<VertexFormat> vertexFormat,
+-        Optional<VertexFormat.Mode> vertexFormatMode
++        Optional<VertexFormat.Mode> vertexFormatMode,
++        Optional<net.neoforged.neoforge.client.stencil.StencilTest> stencilTest
+     ) {
++        /** @deprecated Neo: use {@link #Snippet(Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional)} instead */
++        @Deprecated
++        public Snippet(
++                Optional<Identifier> vertexShader,
++                Optional<Identifier> fragmentShader,
++                Optional<ShaderDefines> shaderDefines,
++                Optional<List<String>> samplers,
++                Optional<List<RenderPipeline.UniformDescription>> uniforms,
++                Optional<BlendFunction> blendFunction,
++                Optional<DepthTestFunction> depthTestFunction,
++                Optional<PolygonMode> polygonMode,
++                Optional<Boolean> cull,
++                Optional<Boolean> writeColor,
++                Optional<Boolean> writeAlpha,
++                Optional<Boolean> writeDepth,
++                Optional<LogicOp> colorLogic,
++                Optional<VertexFormat> vertexFormat,
++                Optional<VertexFormat.Mode> vertexFormatMode
++        ) {
++            this(vertexShader, fragmentShader, shaderDefines, samplers, uniforms, blendFunction, depthTestFunction, polygonMode, cull, writeColor, writeAlpha, writeDepth, colorLogic, vertexFormat, vertexFormatMode, Optional.empty());
++        }
+     }
+ 
+     @OnlyIn(Dist.CLIENT)
+++++ END HUNK

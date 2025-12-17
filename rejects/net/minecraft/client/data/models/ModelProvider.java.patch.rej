@@ -1,0 +1,13 @@
+++++ REJECTED HUNK: 3
+@@ -77,8 +125,8 @@
+         }
+ 
+         public void validate() {
+-            Stream<Holder.Reference<Block>> holders = BuiltInRegistries.BLOCK.listElements().filter(entry -> true);
+-            List<Identifier> missingDefinitions = holders.filter(e -> !this.generators.containsKey(e.value())).map(e -> e.key().identifier()).toList();
++            var holders = knownBlocks.get();
++            List<Identifier> missingDefinitions = holders.filter(e -> !this.generators.containsKey(e.value())).map(e -> e.unwrapKey().orElseThrow().identifier()).toList();
+             if (!missingDefinitions.isEmpty()) {
+                 throw new IllegalStateException("Missing blockstate definitions for: " + missingDefinitions);
+             }
+++++ END HUNK

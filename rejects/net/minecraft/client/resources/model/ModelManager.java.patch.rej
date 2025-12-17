@@ -1,0 +1,30 @@
+++++ REJECTED HUNK: 7
+@@ -173,7 +190,7 @@
+                             try {
+                                 Pair var3;
+                                 try (Reader reader = resource.getValue().openAsReader()) {
+-                                    var3 = Pair.of(modelId, BlockModel.fromStream(reader));
++                                    var3 = Pair.of(modelId, net.neoforged.neoforge.client.model.UnbakedModelParser.parse(reader));
+                                 }
+ 
+                                 return var3;
+++++ END HUNK
+
+++++ REJECTED HUNK: 11
+@@ -342,6 +383,15 @@
+ 
+     public Supplier<EntityModelSet> entityModels() {
+         return () -> this.entityModelSet;
++    }
++
++    public ModelBakery getModelBakery() {
++        return this.modelBakery.get();
++    }
++
++    @org.jspecify.annotations.Nullable
++    public <T> T getStandaloneModel(net.neoforged.neoforge.client.model.standalone.StandaloneModelKey<T> modelKey) {
++        return this.bakedStandaloneModels.get(modelKey);
+     }
+ 
+     @OnlyIn(Dist.CLIENT)
+++++ END HUNK

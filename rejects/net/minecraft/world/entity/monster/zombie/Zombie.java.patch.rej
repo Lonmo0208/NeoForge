@@ -1,0 +1,14 @@
+++++ REJECTED HUNK: 2
+@@ -242,7 +243,10 @@
+         this.convertTo(
+             zombieType,
+             ConversionParams.single(this, true, true),
+-            newZombie -> newZombie.handleAttributes(level.getCurrentDifficultyAt(newZombie.blockPosition()).getSpecialMultiplier())
++            p_381517_ -> {
++                p_381517_.handleAttributes(level.getCurrentDifficultyAt(p_381517_.blockPosition()).getSpecialMultiplier());
++                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, p_381517_);
++            }
+         );
+     }
+ 
+++++ END HUNK

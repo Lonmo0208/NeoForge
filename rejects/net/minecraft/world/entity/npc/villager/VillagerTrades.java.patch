@@ -1,0 +1,24 @@
+++++ Target missing
+--- a/net/minecraft/world/entity/npc/villager/VillagerTrades.java
++++ b/net/minecraft/world/entity/npc/villager/VillagerTrades.java
+@@ -1387,6 +1387,7 @@
+         private final int villagerXp;
+ 
+         public EmeraldsForVillagerTypeItem(int cost, int maxUses, int villagerXp, Map<ResourceKey<VillagerType>, Item> trades) {
++            if (false) // Neo: disable this check so that mods can add custom villager types
+             BuiltInRegistries.VILLAGER_TYPE.registryKeySet().stream().filter(t -> !trades.containsKey(t)).findAny().ifPresent(t -> {
+                 throw new IllegalStateException("Missing trade for villager type: " + t);
+             });
+@@ -1403,8 +1404,10 @@
+                 if (type == null) {
+                     return null;
+                 } else {
+-                    ItemCost cost = new ItemCost(this.trades.get(type), this.cost);
+-                    return new MerchantOffer(cost, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, 0.05F);
++                    Item item = this.trades.get(type);
++                    if (item == null) return null;
++                    ItemCost itemcost = new ItemCost(item, this.cost);
++                    return new MerchantOffer(itemcost, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, 0.05F);
+                 }
+             } else {
+                 return null;

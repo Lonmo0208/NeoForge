@@ -1,0 +1,18 @@
+++++ REJECTED HUNK: 1
+@@ -71,6 +71,15 @@
+         return ELEMENTS.stream().filter(element -> (mask & element.mask()) != 0);
+     }
+ 
++    public static int findNextId() {
++        for (int i = 0; i < BY_ID.length; i++) {
++            if (BY_ID[i] == null) {
++                return i;
++            }
++        }
++        throw new IllegalStateException("VertexFormatElement count limit exceeded");
++    }
++
+     @OnlyIn(Dist.CLIENT)
+     public static enum Type {
+         FLOAT(4, "Float"),
+++++ END HUNK

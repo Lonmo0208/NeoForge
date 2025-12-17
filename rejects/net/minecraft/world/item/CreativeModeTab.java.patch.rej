@@ -1,0 +1,11 @@
+++++ REJECTED HUNK: 5
+@@ -105,7 +140,7 @@
+         ResourceKey<CreativeModeTab> key = BuiltInRegistries.CREATIVE_MODE_TAB
+             .getResourceKey(this)
+             .orElseThrow(() -> new IllegalStateException("Unregistered creative tab: " + this));
+-        this.displayItemsGenerator.accept(parameters, displayList);
++        net.neoforged.neoforge.event.EventHooks.onCreativeModeTabBuildContents(this, key, this.displayItemsGenerator, parameters, displayList);
+         this.displayItems = displayList.tabContents;
+         this.displayItemsSearchTab = displayList.searchTabContents;
+     }
+++++ END HUNK

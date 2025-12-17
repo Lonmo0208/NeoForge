@@ -1,0 +1,10 @@
+++++ REJECTED HUNK: 1
+@@ -116,6 +116,7 @@
+         return this.getType() == fluid;
+     }
+ 
++    @Deprecated //Forge: Use more sensitive version
+     public float getExplosionResistance() {
+         return this.getType().getExplosionResistance();
+     }
+++++ END HUNK

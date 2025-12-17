@@ -1,0 +1,40 @@
+++++ REJECTED HUNK: 2
+@@ -376,6 +377,15 @@
+             );
+         }
+ 
++        // Neo: start
++
++        @Override
++        public boolean isEmpty() {
++            return !getSectionMesh().hasRenderableLayers();
++        }
++
++        // Neo: end
++
+         @OnlyIn(Dist.CLIENT)
+         public abstract class CompileTask {
+             protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
+++++ END HUNK
+
+++++ REJECTED HUNK: 3
+@@ -404,10 +414,18 @@
+         @OnlyIn(Dist.CLIENT)
+         private class RebuildTask extends SectionRenderDispatcher.RenderSection.CompileTask {
+             protected final RenderSectionRegion region;
++            private final java.util.List<net.neoforged.neoforge.client.event.AddSectionGeometryEvent.AdditionalSectionRenderer> additionalRenderers;
+ 
++            /** @deprecated Neo: use {@link #RebuildTask(RenderSectionRegion, boolean, java.util.List)} instead */
++            @Deprecated
+             public RebuildTask(RenderSectionRegion region, boolean isRecompile) {
++                this(region, isRecompile, java.util.List.of());
++            }
++
++            public RebuildTask(RenderSectionRegion region, boolean isRecompile, java.util.List<net.neoforged.neoforge.client.event.AddSectionGeometryEvent.AdditionalSectionRenderer> additionalRenderers) {
+                 super(isRecompile);
+                 this.region = region;
++                this.additionalRenderers = additionalRenderers;
+             }
+ 
+             @Override
+++++ END HUNK

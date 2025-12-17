@@ -20,7 +20,7 @@ java {
 }
 
 dependencies {
-    compileOnly(platform("net.neoforged:minecraft-dependencies:${project.minecraft_dependencies_version}"))
+    compileOnly(platform("net.neoforged:minecraft-dependencies:${project.minecraft_version}"))
     compileOnly "org.slf4j:slf4j-api"
     compileOnly "com.google.code.gson:gson"
 

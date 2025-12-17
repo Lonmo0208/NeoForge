@@ -1,0 +1,15 @@
+++++ REJECTED HUNK: 7
+@@ -354,7 +362,11 @@
+         entity.setOldPosAndRot();
+         entity.tickCount++;
+         Profiler.get().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
+-        entity.tick();
++        // Neo: Permit cancellation of Entity#tick via EntityTickEvent.Pre
++        if (!net.neoforged.neoforge.event.EventHooks.fireEntityTickPre(entity).isCanceled()) {
++            entity.tick();
++            net.neoforged.neoforge.event.EventHooks.fireEntityTickPost(entity);
++        }
+         Profiler.get().pop();
+ 
+         for (Entity passenger : entity.getPassengers()) {
+++++ END HUNK

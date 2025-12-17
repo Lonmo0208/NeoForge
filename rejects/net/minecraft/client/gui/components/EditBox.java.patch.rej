@@ -1,0 +1,13 @@
+++++ REJECTED HUNK: 1
+@@ -619,6 +619,10 @@
+         this.hint = (Component)(hasNoStyle ? hint.copy().withStyle(DEFAULT_HINT_STYLE) : hint);
+     }
+ 
++    public boolean getTextShadow() {
++        return this.textShadow;
++    }
++
+     @FunctionalInterface
+     @OnlyIn(Dist.CLIENT)
+     public interface TextFormatter {
+++++ END HUNK

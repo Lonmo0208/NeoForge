@@ -1,0 +1,21 @@
+++++ REJECTED HUNK: 1
+@@ -25,9 +25,15 @@
+         return this.particleIcon;
+     }
+ 
+-    @Override
+-    public void collectParts(RandomSource random, List<BlockModelPart> output) {
+-        this.list.getRandomOrThrow(random).collectParts(random, output);
++    // Neo: Implement our overload so child models can have custom logic
++    @Override
++    public void collectParts(net.minecraft.world.level.BlockAndTintGetter level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state, RandomSource random, List<BlockModelPart> output) {
++        this.list.getRandomOrThrow(random).collectParts(level, pos, state, random, output);
++    }
++
++    @Override
++    public Object createGeometryKey(net.minecraft.world.level.BlockAndTintGetter level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state, RandomSource random) {
++        return this.list.getRandomOrThrow(random).createGeometryKey(level, pos, state, random);
+     }
+ 
+     @OnlyIn(Dist.CLIENT)
+++++ END HUNK

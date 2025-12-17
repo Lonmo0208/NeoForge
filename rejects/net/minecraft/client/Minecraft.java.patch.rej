@@ -1,0 +1,46 @@
+++++ REJECTED HUNK: 2
+@@ -481,21 +480,25 @@
+             LOGGER.error("Couldn't set icon", (Throwable)var18);
+         }
+ 
++        // FORGE: Move mouse and keyboard handler setup further below
+         this.mouseHandler = new MouseHandler(this);
+-        this.mouseHandler.setup(this.window);
+         this.keyboardHandler = new KeyboardHandler(this);
+-        this.keyboardHandler.setup(this.window);
++        // Neo: Enable GL debug labels and synchronous GL debug output via FML config
++        boolean enableGlDebug = net.neoforged.fml.loading.FMLConfig.getBoolConfigValue(net.neoforged.fml.loading.FMLConfig.ConfigValue.DEBUG_OPENGL);
+         RenderSystem.initRenderer(
+             this.window.handle(),
+             this.options.glDebugVerbosity,
+-            SharedConstants.DEBUG_SYNCHRONOUS_GL_LOGS,
++            SharedConstants.DEBUG_SYNCHRONOUS_GL_LOGS || enableGlDebug,
+             (id, type) -> this.getShaderManager().getShader(id, type),
+-            gameConfig.game.renderDebugLabels
++            gameConfig.game.renderDebugLabels || enableGlDebug
+         );
+         this.options.applyGraphicsPreset(this.options.graphicsPreset().get());
+         LOGGER.info("Using optional rendering extensions: {}", String.join(", ", RenderSystem.getDevice().getEnabledExtensions()));
+-        this.mainRenderTarget = new MainTarget(this.window.getWidth(), this.window.getHeight());
++        this.mainRenderTarget = net.neoforged.neoforge.client.ClientHooks.instantiateMainTarget(this.window.getWidth(), this.window.getHeight());
+         this.resourceManager = new ReloadableResourceManager(PackType.CLIENT_RESOURCES);
++        net.neoforged.neoforge.client.loading.ClientModLoader.finish(this.resourcePackRepository, this.resourceManager);
++        //Move client bootstrap to after mod loading so that events can be fired for it.
++        ClientBootstrap.bootstrap();
+         this.resourcePackRepository.reload();
+         this.options.loadSelectedResourcePacks(this.resourcePackRepository);
+         this.languageManager = new LanguageManager(this.options.languageCode, languageData -> {
+++++ END HUNK
+
+++++ REJECTED HUNK: 18
+@@ -1302,7 +1329,9 @@
+                 .clearColorAndDepthTextures(mainRenderTarget.getColorTexture(), 0, mainRenderTarget.getDepthTexture(), 1.0);
+             profiler.push("gameRenderer");
+             if (!this.noRender) {
++                net.neoforged.neoforge.client.ClientHooks.fireRenderFramePre(this.deltaTracker);
+                 this.gameRenderer.render(this.deltaTracker, advanceGameTime);
++                net.neoforged.neoforge.client.ClientHooks.fireRenderFramePost(this.deltaTracker);
+             }
+ 
+             profiler.popPush("blit");
+++++ END HUNK

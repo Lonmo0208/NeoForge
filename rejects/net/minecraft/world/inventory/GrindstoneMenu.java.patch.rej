@@ -1,0 +1,18 @@
+++++ REJECTED HUNK: 2
+@@ -48,13 +49,13 @@
+         this.addSlot(new Slot(this.repairSlots, 0, 49, 19) {
+             @Override
+             public boolean mayPlace(ItemStack itemStack) {
+-                return itemStack.isDamageableItem() || EnchantmentHelper.hasAnyEnchantments(itemStack);
++                return itemStack.isDamageableItem() || EnchantmentHelper.hasAnyEnchantments(itemStack) || itemStack.canGrindstoneRepair();
+             }
+         });
+         this.addSlot(new Slot(this.repairSlots, 1, 49, 40) {
+             @Override
+             public boolean mayPlace(ItemStack itemStack) {
+-                return itemStack.isDamageableItem() || EnchantmentHelper.hasAnyEnchantments(itemStack);
++                return itemStack.isDamageableItem() || EnchantmentHelper.hasAnyEnchantments(itemStack) || itemStack.canGrindstoneRepair();
+             }
+         });
+         this.addSlot(new Slot(this.resultSlots, 2, 129, 34) {
+++++ END HUNK

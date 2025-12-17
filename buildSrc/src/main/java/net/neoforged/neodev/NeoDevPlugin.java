@@ -612,8 +612,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.getDestinationDirectory().set(minecraftArtifactsDir);
             task.getArchiveFileName().set("minecraft-resources.jar");
             task.from(project.zipTree(createSources.flatMap(CreateMinecraftArtifacts::getSourcesArtifact)));
-            // TODO: we are manually excluding the signing info, maybe NFRT should handle it?
-            task.exclude("**/*.java", "META-INF/*.RSA", "META-INF/*.SF");
+            task.exclude("**/*.java");
         });
 
         return new DecompilationSetup(createSources, vanillaResources);
