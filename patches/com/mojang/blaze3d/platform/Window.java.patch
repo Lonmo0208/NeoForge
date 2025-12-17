@@ -1,24 +1,22 @@
 --- a/com/mojang/blaze3d/platform/Window.java
 +++ b/com/mojang/blaze3d/platform/Window.java
-@@ -99,6 +_,10 @@
-         Monitor initialMonitor = this.screenManager.getMonitor(GLFW.glfwGetPrimaryMonitor());
-         this.windowedWidth = this.width = Math.max(displayData.width(), 1);
-         this.windowedHeight = this.height = Math.max(displayData.height(), 1);
+@@ -109,6 +_,16 @@
+             debugOptions
+         );
+         this.handle = windowAndDevice.window();
++        // Neo: If the window was taken over from EarlyLoadingScreen, inherit a potentially resized window size
 +        var earlyLoadingScreen = net.neoforged.fml.loading.EarlyLoadingScreenController.current();
 +        if (earlyLoadingScreen != null) {
-+            this.handle = takeOverWindow(earlyLoadingScreen, title);
-+        } else {
-         WindowAndDevice windowAndDevice = this.initializeBackend(
-             backends,
-             this.width,
-@@ -121,6 +_,7 @@
-             this.windowedX = this.x = actualX[0];
-             this.windowedY = this.y = actualY[0];
-         }
++            var width = new int[1];
++            var height = new int[1];
++            GLFW.glfwGetWindowSize(this.handle, width, height);
++            // The window height and width can be 0 if minimized
++            this.width = this.windowedWidth = Math.max(width[0], 1);
++            this.height = this.windowedHeight = Math.max(height[0], 1);
 +        }
- 
-         this.setMode();
-         this.refreshFramebufferSize();
+         RenderSystem.initRenderer(windowAndDevice.device());
+         if (initialMonitor != null) {
+             VideoMode mode = initialMonitor.getPreferredVidMode(this.fullscreen ? this.preferredFullscreenVideoMode : Optional.empty());
 @@ -239,8 +_,10 @@
      }
  
@@ -31,31 +29,3 @@
          LOGGER.error("########## GL ERROR ##########");
          LOGGER.error("@ {}", this.errorSection);
          LOGGER.error("{}: {}", errorCode, errorString);
-@@ -546,5 +_,27 @@
-         private WindowInitFailed(String message) {
-             super(message);
-         }
-+    }
-+
-+    // Neo take over window and its properties from early display
-+    private long takeOverWindow(net.neoforged.fml.loading.EarlyLoadingScreenController earlyLoadingScreen, String title) {
-+        long window = earlyLoadingScreen.takeOverGlfwWindow();
-+
-+        GLFW.glfwSetWindowTitle(window, title);
-+
-+        var x = new int[1];
-+        var y = new int[1];
-+        GLFW.glfwGetWindowPos(window, x, y);
-+        this.x = this.windowedX = x[0];
-+        this.y = this.windowedY = y[0];
-+
-+        var width = new int[1];
-+        var height = new int[1];
-+        GLFW.glfwGetWindowSize(window, width, height);
-+        // The window height and width can be 0 if minimized
-+        this.width = this.windowedWidth = Math.max(width[0], 1);
-+        this.height = this.windowedHeight = Math.max(height[0], 1);
-+
-+        return window;
-     }
- }

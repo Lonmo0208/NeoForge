@@ -1,5 +1,6 @@
-++++ REJECTED HUNK: 1
-@@ -71,6 +71,15 @@
+--- a/com/mojang/blaze3d/vertex/VertexFormatElement.java
++++ b/com/mojang/blaze3d/vertex/VertexFormatElement.java
+@@ -71,6 +_,15 @@
          return ELEMENTS.stream().filter(element -> (mask & element.mask()) != 0);
      }
  
@@ -12,7 +13,6 @@
 +        throw new IllegalStateException("VertexFormatElement count limit exceeded");
 +    }
 +
-     @OnlyIn(Dist.CLIENT)
      public static enum Type {
          FLOAT(4, "Float"),
-++++ END HUNK
+         UBYTE(1, "Unsigned Byte"),
