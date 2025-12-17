@@ -71,10 +71,11 @@
      public static CreativeModeTab.Builder builder(CreativeModeTab.Row row, int column) {
          return new CreativeModeTab.Builder(row, column);
      }
-@@ -101,6 +_,7 @@
+@@ -100,7 +_,7 @@
+ 
      public void buildContents(CreativeModeTab.ItemDisplayParameters parameters) {
          CreativeModeTab.ItemDisplayBuilder displayList = new CreativeModeTab.ItemDisplayBuilder(this, parameters.enabledFeatures);
-         this.displayItemsGenerator.accept(parameters, displayList);
+-        this.displayItemsGenerator.accept(parameters, displayList);
 +        net.neoforged.neoforge.event.EventHooks.onCreativeModeTabBuildContents(this, this.displayItemsGenerator, parameters, displayList);
          this.displayItems = displayList.tabContents;
          this.displayItemsSearchTab = displayList.searchTabContents;

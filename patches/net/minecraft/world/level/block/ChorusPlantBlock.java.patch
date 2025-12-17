@@ -5,7 +5,7 @@
          BlockState west = level.getBlockState(pos.west());
          Block block = defaultState.getBlock();
 -        return defaultState.trySetValue(DOWN, down.is(block) || down.is(Blocks.CHORUS_FLOWER) || down.is(Blocks.END_STONE))
-+        var soilDecision = defaultState.canSustainPlant(level, pos.below(), Direction.UP, defaultState);
++        var soilDecision = down.canSustainPlant(level, pos.below(), Direction.UP, defaultState);
 +        return defaultState.trySetValue(DOWN, down.is(block) || down.is(Blocks.CHORUS_FLOWER) || down.is(Blocks.END_STONE) || soilDecision.isTrue())
              .trySetValue(UP, up.is(block) || up.is(Blocks.CHORUS_FLOWER))
              .trySetValue(NORTH, north.is(block) || north.is(Blocks.CHORUS_FLOWER))
