@@ -7,7 +7,7 @@
 -            this.depthTexture = device.createTexture(() -> "UI " + this.getTextureLabel() + " depth texture", 9, TextureFormat.DEPTH32, width, height, 1, 1);
 +            // Neo: copy stencil setting from main target
 +            TextureFormat depthFormat = net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getDepthTexture().getFormat();
-+            this.depthTexture = device.createTexture(() -> "UI " + this.getTextureLabel() + " depth texture", 8, depthFormat, width, height, 1, 1);
++            this.depthTexture = device.createTexture(() -> "UI " + this.getTextureLabel() + " depth texture", 9, depthFormat, width, height, 1, 1);
              this.depthTextureView = device.createTextureView(this.depthTexture);
          }
  
