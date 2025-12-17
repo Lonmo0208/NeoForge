@@ -33,7 +33,7 @@ public class NeoDevBasePlugin implements Plugin<Project> {
         tasks.register("setup", Sync.class, task -> {
             task.setGroup(NeoDevPlugin.GROUP);
             task.setDescription("Replaces the contents of the base project sources with the unpatched, decompiled Minecraft source code.");
-            task.from(project.zipTree(createSources.flatMap(CreateMinecraftArtifacts::getSourcesArtifact)));
+            task.from(project.zipTree(createSources.flatMap(CreateMinecraftArtifacts::getGameSourcesArtifact)));
             task.into(project.file("src/main/java/"));
             task.include("**/*.java");
         });

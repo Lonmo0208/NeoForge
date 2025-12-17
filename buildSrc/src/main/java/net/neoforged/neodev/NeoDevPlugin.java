@@ -80,7 +80,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.setGroup(INTERNAL_GROUP);
             task.getDestinationDirectory().set(neoDevBuildDir.map(d -> d.dir("artifacts")));
             task.getArchiveFileName().set("base-sources-only.jar");
-            task.from(project.zipTree(decompilationSetup.createArtifacts().flatMap(CreateMinecraftArtifacts::getSourcesArtifact)));
+            task.from(project.zipTree(decompilationSetup.createArtifacts().flatMap(CreateMinecraftArtifacts::getGameSourcesArtifact)));
             task.include("**/*.java");
         });
 
@@ -318,7 +318,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.getNeoForgeVersion().set(neoForgeVersion);
             task.getRawNeoFormVersion().set(rawNeoFormVersion);
             task.setLibraries(configurations.launcherProfileClasspath);
-            task.setMinecraftLibraries(configurations.neoFormClasspath);
+            task.setMinecraftLibraries(configurations.minecraftClientClasspath);
             task.getRepositoryURLs().set(installerRepositoryUrls);
             task.getLauncherProfile().set(neoDevBuildDir.map(dir -> dir.file("launcher-profile.json")));
         });
@@ -602,7 +602,7 @@ public class NeoDevPlugin implements Plugin<Project> {
         var minecraftArtifactsDir = neoDevBuildDir.map(dir -> dir.dir("artifacts"));
         var createSources = tasks.register("createSourceArtifacts", CreateMinecraftArtifacts.class, task -> {
             task.setGroup(INTERNAL_GROUP);
-            task.getSourcesArtifact().set(minecraftArtifactsDir.map(dir -> dir.file("base-sources.jar")));
+            task.getGameSourcesArtifact().set(minecraftArtifactsDir.map(dir -> dir.file("base-sources.jar")));
             task.getNeoFormArtifact().set(mcAndNeoFormVersion.map(version -> "net.neoforged:neoform:" + version + "@zip"));
         });
 
@@ -610,7 +610,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.setGroup(INTERNAL_GROUP);
             task.getDestinationDirectory().set(minecraftArtifactsDir);
             task.getArchiveFileName().set("minecraft-resources.jar");
-            task.from(project.zipTree(createSources.flatMap(CreateMinecraftArtifacts::getSourcesArtifact)));
+            task.from(project.zipTree(createSources.flatMap(CreateMinecraftArtifacts::getGameSourcesArtifact)));
             task.exclude("**/*.java");
         });
 
@@ -718,6 +718,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.getNeoForgeVersion().set(neoForgeVersion);
             task.getInstallationDir().set(installClient.flatMap(InstallProductionClient::getInstallationDir));
             task.getOriginalClientJar().set(originalClientJar);
+            task.getJavaRuntimeVersion().set(project.getProviders().gradleProperty("java_version").map(Integer::parseInt));
         };
         project.getTasks().register("runProductionClient", RunProductionClient.class, task -> {
             task.setGroup(GROUP);
@@ -745,12 +746,14 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.setGroup(GROUP);
             task.setDescription("Runs the production server installed by installProductionServer.");
             task.getInstallationDir().set(installServer.flatMap(InstallProductionServer::getInstallationDir));
+            task.getJavaRuntimeVersion().set(project.getProviders().gradleProperty("java_version").map(Integer::parseInt));
         });
 
         project.getTasks().register("testProductionServer", TestProductionServer.class, task -> {
             task.setGroup(GROUP);
             task.setDescription("Tests the production server installed by installProductionServer.");
             task.getInstallationDir().set(installServer.flatMap(InstallProductionServer::getInstallationDir));
+            task.getJavaRuntimeVersion().set(project.getProviders().gradleProperty("java_version").map(Integer::parseInt));
         });
     }
 }
