@@ -1,21 +1,5 @@
 --- a/com/mojang/blaze3d/pipeline/RenderPipeline.java
 +++ b/com/mojang/blaze3d/pipeline/RenderPipeline.java
-@@ -9,6 +_,7 @@
- import java.util.ArrayList;
- import java.util.Collections;
- import java.util.List;
-+import java.util.Objects;
- import java.util.Optional;
- import java.util.Map.Entry;
- import net.minecraft.SharedConstants;
-@@ -16,6 +_,7 @@
- import net.minecraft.resources.Identifier;
- import net.neoforged.api.distmarker.Dist;
- import net.neoforged.api.distmarker.OnlyIn;
-+import net.neoforged.neoforge.client.stencil.StencilTest;
- import org.jspecify.annotations.Nullable;
- 
- @OnlyIn(Dist.CLIENT)
 @@ -40,7 +_,10 @@
      private final float depthBiasConstant;
      private final int sortKey;
@@ -171,7 +155,7 @@
              );
          }
  
-@@ -488,30 +_,202 @@
+@@ -488,7 +_,8 @@
                      this.vertexFormatMode.get(),
                      this.depthBiasScaleFactor,
                      this.depthBiasConstant,
@@ -181,87 +165,22 @@
                  );
              }
          }
-     }
- 
--    public record Snippet(
--        Optional<Identifier> vertexShader,
--        Optional<Identifier> fragmentShader,
--        Optional<ShaderDefines> shaderDefines,
--        Optional<List<String>> samplers,
--        Optional<List<RenderPipeline.UniformDescription>> uniforms,
--        Optional<BlendFunction> blendFunction,
--        Optional<DepthTestFunction> depthTestFunction,
--        Optional<PolygonMode> polygonMode,
--        Optional<Boolean> cull,
--        Optional<Boolean> writeColor,
--        Optional<Boolean> writeAlpha,
--        Optional<Boolean> writeDepth,
--        Optional<LogicOp> colorLogic,
--        Optional<VertexFormat> vertexFormat,
+@@ -509,8 +_,30 @@
+         Optional<Boolean> writeDepth,
+         Optional<LogicOp> colorLogic,
+         Optional<VertexFormat> vertexFormat,
 -        Optional<VertexFormat.Mode> vertexFormatMode
--    ) {
--    }
-+    public static final class Snippet {
-+        private final Optional<Identifier> vertexShader;
-+        private final Optional<Identifier> fragmentShader;
-+        private final Optional<ShaderDefines> shaderDefines;
-+        private final Optional<List<String>> samplers;
-+        private final Optional<List<UniformDescription>> uniforms;
-+        private final Optional<BlendFunction> blendFunction;
-+        private final Optional<DepthTestFunction> depthTestFunction;
-+        private final Optional<PolygonMode> polygonMode;
-+        private final Optional<Boolean> cull;
-+        private final Optional<Boolean> writeColor;
-+        private final Optional<Boolean> writeAlpha;
-+        private final Optional<Boolean> writeDepth;
-+        private final Optional<LogicOp> colorLogic;
-+        private final Optional<VertexFormat> vertexFormat;
-+        private final Optional<VertexFormat.Mode> vertexFormatMode;
-+        private final Optional<StencilTest> stencilTest;
-+
-+        public Snippet(
-+                Optional<Identifier> vertexShader,
-+                Optional<Identifier> fragmentShader,
-+                Optional<ShaderDefines> shaderDefines,
-+                Optional<List<String>> samplers,
-+                Optional<List<UniformDescription>> uniforms,
-+                Optional<BlendFunction> blendFunction,
-+                Optional<DepthTestFunction> depthTestFunction,
-+                Optional<PolygonMode> polygonMode,
-+                Optional<Boolean> cull,
-+                Optional<Boolean> writeColor,
-+                Optional<Boolean> writeAlpha,
-+                Optional<Boolean> writeDepth,
-+                Optional<LogicOp> colorLogic,
-+                Optional<VertexFormat> vertexFormat,
-+                Optional<VertexFormat.Mode> vertexFormatMode,
-+                Optional<StencilTest> stencilTest
-+        ) {
-+            this.vertexShader = vertexShader;
-+            this.fragmentShader = fragmentShader;
-+            this.shaderDefines = shaderDefines;
-+            this.samplers = samplers;
-+            this.uniforms = uniforms;
-+            this.blendFunction = blendFunction;
-+            this.depthTestFunction = depthTestFunction;
-+            this.polygonMode = polygonMode;
-+            this.cull = cull;
-+            this.writeColor = writeColor;
-+            this.writeAlpha = writeAlpha;
-+            this.writeDepth = writeDepth;
-+            this.colorLogic = colorLogic;
-+            this.vertexFormat = vertexFormat;
-+            this.vertexFormatMode = vertexFormatMode;
-+            this.stencilTest = stencilTest;
-+        }
-+
++        Optional<VertexFormat.Mode> vertexFormatMode,
++        Optional<net.neoforged.neoforge.client.stencil.StencilTest> stencilTest
+     ) {
 +        /** @deprecated Neo: use {@link #Snippet(Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional, Optional)} instead */
++        @Deprecated
 +        public Snippet(
 +                Optional<Identifier> vertexShader,
 +                Optional<Identifier> fragmentShader,
 +                Optional<ShaderDefines> shaderDefines,
 +                Optional<List<String>> samplers,
-+                Optional<List<UniformDescription>> uniforms,
++                Optional<List<RenderPipeline.UniformDescription>> uniforms,
 +                Optional<BlendFunction> blendFunction,
 +                Optional<DepthTestFunction> depthTestFunction,
 +                Optional<PolygonMode> polygonMode,
@@ -275,121 +194,6 @@
 +        ) {
 +            this(vertexShader, fragmentShader, shaderDefines, samplers, uniforms, blendFunction, depthTestFunction, polygonMode, cull, writeColor, writeAlpha, writeDepth, colorLogic, vertexFormat, vertexFormatMode, Optional.empty());
 +        }
-+
-+        public Optional<Identifier> vertexShader() {
-+            return vertexShader;
-+        }
-+
-+        public Optional<Identifier> fragmentShader() {
-+            return fragmentShader;
-+        }
-+
-+        public Optional<ShaderDefines> shaderDefines() {
-+            return shaderDefines;
-+        }
-+
-+        public Optional<List<String>> samplers() {
-+            return samplers;
-+        }
-+
-+        public Optional<List<UniformDescription>> uniforms() {
-+            return uniforms;
-+        }
-+
-+        public Optional<BlendFunction> blendFunction() {
-+            return blendFunction;
-+        }
-+
-+        public Optional<DepthTestFunction> depthTestFunction() {
-+            return depthTestFunction;
-+        }
-+
-+        public Optional<PolygonMode> polygonMode() {
-+            return polygonMode;
-+        }
-+
-+        public Optional<Boolean> cull() {
-+            return cull;
-+        }
-+
-+        public Optional<Boolean> writeColor() {
-+            return writeColor;
-+        }
-+
-+        public Optional<Boolean> writeAlpha() {
-+            return writeAlpha;
-+        }
-+
-+        public Optional<Boolean> writeDepth() {
-+            return writeDepth;
-+        }
-+
-+        public Optional<LogicOp> colorLogic() {
-+            return colorLogic;
-+        }
-+
-+        public Optional<VertexFormat> vertexFormat() {
-+            return vertexFormat;
-+        }
-+
-+        public Optional<VertexFormat.Mode> vertexFormatMode() {
-+            return vertexFormatMode;
-+        }
-+
-+        public Optional<StencilTest> stencilTest() {
-+            return stencilTest;
-+        }
-+
-+        @Override
-+        public boolean equals(Object obj) {
-+            if (obj == this) return true;
-+            if (obj == null || obj.getClass() != this.getClass()) return false;
-+            var that = (Snippet) obj;
-+            return Objects.equals(this.vertexShader, that.vertexShader) &&
-+                    Objects.equals(this.fragmentShader, that.fragmentShader) &&
-+                    Objects.equals(this.shaderDefines, that.shaderDefines) &&
-+                    Objects.equals(this.samplers, that.samplers) &&
-+                    Objects.equals(this.uniforms, that.uniforms) &&
-+                    Objects.equals(this.blendFunction, that.blendFunction) &&
-+                    Objects.equals(this.depthTestFunction, that.depthTestFunction) &&
-+                    Objects.equals(this.polygonMode, that.polygonMode) &&
-+                    Objects.equals(this.cull, that.cull) &&
-+                    Objects.equals(this.writeColor, that.writeColor) &&
-+                    Objects.equals(this.writeAlpha, that.writeAlpha) &&
-+                    Objects.equals(this.writeDepth, that.writeDepth) &&
-+                    Objects.equals(this.colorLogic, that.colorLogic) &&
-+                    Objects.equals(this.vertexFormat, that.vertexFormat) &&
-+                    Objects.equals(this.vertexFormatMode, that.vertexFormatMode) &&
-+                    Objects.equals(this.stencilTest, that.stencilTest);
-+        }
-+
-+        @Override
-+        public int hashCode() {
-+            return Objects.hash(vertexShader, fragmentShader, shaderDefines, samplers, uniforms, blendFunction, depthTestFunction, polygonMode, cull, writeColor, writeAlpha, writeDepth, colorLogic, vertexFormat, vertexFormatMode, stencilTest);
-+        }
-+
-+        @Override
-+        public String toString() {
-+            return "Snippet[" +
-+                    "vertexShader=" + vertexShader + ", " +
-+                    "fragmentShader=" + fragmentShader + ", " +
-+                    "shaderDefines=" + shaderDefines + ", " +
-+                    "samplers=" + samplers + ", " +
-+                    "uniforms=" + uniforms + ", " +
-+                    "blendFunction=" + blendFunction + ", " +
-+                    "depthTestFunction=" + depthTestFunction + ", " +
-+                    "polygonMode=" + polygonMode + ", " +
-+                    "cull=" + cull + ", " +
-+                    "writeColor=" + writeColor + ", " +
-+                    "writeAlpha=" + writeAlpha + ", " +
-+                    "writeDepth=" + writeDepth + ", " +
-+                    "colorLogic=" + colorLogic + ", " +
-+                    "vertexFormat=" + vertexFormat + ", " +
-+                    "vertexFormatMode=" + vertexFormatMode + ", " +
-+                    "stencilTest=" + stencilTest + ']';
-+        }
-+
-+        }
+     }
  
      public record UniformDescription(String name, UniformType type, @Nullable TextureFormat textureFormat) {
-         public UniformDescription(String name, UniformType type) {
