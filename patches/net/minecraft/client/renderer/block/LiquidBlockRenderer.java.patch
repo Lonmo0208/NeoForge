@@ -73,19 +73,19 @@
 -                this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, u01, v01, topLightCoords);
 -                this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, u10, v10, topLightCoords);
 -                this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, u11, v11, topLightCoords);
-+                this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, alpha, u00, v00, topColor);
-+                this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, alpha, u01, v01, topColor);
-+                this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, alpha, u10, v10, topColor);
-+                this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, alpha, u11, v11, topColor);
++                this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, alpha, u00, v00, topLightCoords);
++                this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, alpha, u01, v01, topLightCoords);
++                this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, alpha, u10, v10, topLightCoords);
++                this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, alpha, u11, v11, topLightCoords);
                  if (fluidState.shouldRenderBackwardUpFace(level, pos.above())) {
 -                    this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, u00, v00, topLightCoords);
 -                    this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, u11, v11, topLightCoords);
 -                    this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, u10, v10, topLightCoords);
 -                    this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, u01, v01, topLightCoords);
-+                    this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, alpha, u00, v00, topColor);
-+                    this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, alpha, u11, v11, topColor);
-+                    this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, alpha, u10, v10, topColor);
-+                    this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, alpha, u01, v01, topColor);
++                    this.vertex(builder, x + 0.0F, y + heightNorthWest, z + 0.0F, topRed, topGreen, topBlue, alpha, u00, v00, topLightCoords);
++                    this.vertex(builder, x + 1.0F, y + heightNorthEast, z + 0.0F, topRed, topGreen, topBlue, alpha, u11, v11, topLightCoords);
++                    this.vertex(builder, x + 1.0F, y + heightSouthEast, z + 1.0F, topRed, topGreen, topBlue, alpha, u10, v10, topLightCoords);
++                    this.vertex(builder, x + 0.0F, y + heightSouthWest, z + 1.0F, topRed, topGreen, topBlue, alpha, u01, v01, topLightCoords);
                  }
              }
  
@@ -97,10 +97,10 @@
 -                this.vertex(builder, x, y + bottomOffs, z, belowRed, belowGreen, belowBlue, u0, v0, belowLightCoords);
 -                this.vertex(builder, x + 1.0F, y + bottomOffs, z, belowRed, belowGreen, belowBlue, u1, v0, belowLightCoords);
 -                this.vertex(builder, x + 1.0F, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, u1, v1, belowLightCoords);
-+                this.vertex(builder, x, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, alpha, u0, v1, belowColor);
-+                this.vertex(builder, x, y + bottomOffs, z, belowRed, belowGreen, belowBlue, alpha, u0, v0, belowColor);
-+                this.vertex(builder, x + 1.0F, y + bottomOffs, z, belowRed, belowGreen, belowBlue, alpha, u1, v0, belowColor);
-+                this.vertex(builder, x + 1.0F, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, alpha, u1, v1, belowColor);
++                this.vertex(builder, x, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, alpha, u0, v1, belowLightCoords);
++                this.vertex(builder, x, y + bottomOffs, z, belowRed, belowGreen, belowBlue, alpha, u0, v0, belowLightCoords);
++                this.vertex(builder, x + 1.0F, y + bottomOffs, z, belowRed, belowGreen, belowBlue, alpha, u1, v0, belowLightCoords);
++                this.vertex(builder, x + 1.0F, y + bottomOffs, z + 1.0F, belowRed, belowGreen, belowBlue, alpha, u1, v1, belowLightCoords);
              }
  
              int sideLightCoords = this.getLightCoords(level, pos);
@@ -126,19 +126,19 @@
 -                    this.vertex(builder, x1, y + hh1, z1, red, green, blue, u1, v02, sideLightCoords);
 -                    this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, u1, v1, sideLightCoords);
 -                    this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, u0, v1, sideLightCoords);
-+                    this.vertex(builder, x0, y + hh0, z0, red, green, blue, alpha, u0, v01x, sideColor);
-+                    this.vertex(builder, x1, y + hh1, z1, red, green, blue, alpha, u1, v02, sideColor);
-+                    this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, alpha, u1, v1, sideColor);
-+                    this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, alpha, u0, v1, sideColor);
++                    this.vertex(builder, x0, y + hh0, z0, red, green, blue, alpha, u0, v01x, sideLightCoords);
++                    this.vertex(builder, x1, y + hh1, z1, red, green, blue, alpha, u1, v02, sideLightCoords);
++                    this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, alpha, u1, v1, sideLightCoords);
++                    this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, alpha, u0, v1, sideLightCoords);
                      if (sprite != this.waterOverlay) {
 -                        this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, u0, v1, sideLightCoords);
 -                        this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, u1, v1, sideLightCoords);
 -                        this.vertex(builder, x1, y + hh1, z1, red, green, blue, u1, v02, sideLightCoords);
 -                        this.vertex(builder, x0, y + hh0, z0, red, green, blue, u0, v01x, sideLightCoords);
-+                        this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, alpha, u0, v1, sideColor);
-+                        this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, alpha, u1, v1, sideColor);
-+                        this.vertex(builder, x1, y + hh1, z1, red, green, blue, alpha, u1, v02, sideColor);
-+                        this.vertex(builder, x0, y + hh0, z0, red, green, blue, alpha, u0, v01x, sideColor);
++                        this.vertex(builder, x0, y + bottomOffs, z0, red, green, blue, alpha, u0, v1, sideLightCoords);
++                        this.vertex(builder, x1, y + bottomOffs, z1, red, green, blue, alpha, u1, v1, sideLightCoords);
++                        this.vertex(builder, x1, y + hh1, z1, red, green, blue, alpha, u1, v02, sideLightCoords);
++                        this.vertex(builder, x0, y + hh0, z0, red, green, blue, alpha, u0, v01x, sideLightCoords);
                      }
                  }
              }

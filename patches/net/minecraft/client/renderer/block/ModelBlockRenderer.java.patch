@@ -129,7 +129,7 @@
  
                          if (shouldRenderFace) {
 +                            if (!ao) {
-+                                int light = scratch.cache.getLightColor(state, level, scratch.scratchPos.setWithOffset(pos, direction));
++                                int light = scratch.cache.getLightCoords(state, level, scratch.scratchPos.setWithOffset(pos, direction));
 +                                this.renderModelFaceFlat(
 +                                        level, state, pos, light, overlayCoords, false, poseStack, builder, culledQuads, scratch
 +                                );
@@ -209,7 +209,7 @@
          ModelBlockRenderer.CommonRenderStorage shapeState
      ) {
          for (BakedQuad quad : quads) {
-+            renderModelQuadFlat(level, state, pos, lightColor, overlayCoords, checkLight, poseStack, builder, quad, shapeState);
++            renderModelQuadFlat(level, state, pos, lightCoords, overlayCoords, checkLight, poseStack, builder, quad, shapeState);
 +        }
 +    }
 +
@@ -217,7 +217,7 @@
 +        BlockAndTintGetter level,
 +        BlockState state,
 +        BlockPos pos,
-+        int lightColor,
++        int lightCoords,
 +        int overlayCoords,
 +        boolean checkLight,
 +        PoseStack poseStack,
