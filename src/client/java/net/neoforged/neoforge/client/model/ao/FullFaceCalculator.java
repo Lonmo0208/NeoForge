@@ -5,10 +5,10 @@
 
 package net.neoforged.neoforge.client.model.ao;
 
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -230,14 +230,14 @@ class FullFaceCalculator {
             //   which means that a natural 0 value will not get ignored in the blending.
             // - It treats all 4 lightmaps equally.
 
-            int sideBlockA = LightTexture.blockWithFraction(sideLightmapA);
-            int sideBlockB = LightTexture.blockWithFraction(sideLightmapB);
-            int cornerBlock = LightTexture.blockWithFraction(cornerLightmap);
-            int insideBlock = LightTexture.blockWithFraction(insideLightmap);
-            int sideSkyA = LightTexture.skyWithFraction(sideLightmapA);
-            int sideSkyB = LightTexture.skyWithFraction(sideLightmapB);
-            int cornerSky = LightTexture.skyWithFraction(cornerLightmap);
-            int insideSky = LightTexture.skyWithFraction(insideLightmap);
+            int sideBlockA = LightCoordsUtil.smoothBlock(sideLightmapA);
+            int sideBlockB = LightCoordsUtil.smoothBlock(sideLightmapB);
+            int cornerBlock = LightCoordsUtil.smoothBlock(cornerLightmap);
+            int insideBlock = LightCoordsUtil.smoothBlock(insideLightmap);
+            int sideSkyA = LightCoordsUtil.smoothSky(sideLightmapA);
+            int sideSkyB = LightCoordsUtil.smoothSky(sideLightmapB);
+            int cornerSky = LightCoordsUtil.smoothSky(cornerLightmap);
+            int insideSky = LightCoordsUtil.smoothSky(insideLightmap);
 
             // Compute per-component minimum light, only including values from clear positions
             int minBlock = 0x10000;
@@ -265,10 +265,10 @@ class FullFaceCalculator {
             minSky &= 0xFFFF;
 
             // Increase all components of non-clear blocks to the minimum light value
-            sideLightmapA = LightTexture.packWithFraction(Math.max(minBlock, sideBlockA), Math.max(minSky, sideSkyA));
-            sideLightmapB = LightTexture.packWithFraction(Math.max(minBlock, sideBlockB), Math.max(minSky, sideSkyB));
-            cornerLightmap = LightTexture.packWithFraction(Math.max(minBlock, cornerBlock), Math.max(minSky, cornerSky));
-            insideLightmap = LightTexture.packWithFraction(Math.max(minBlock, insideBlock), Math.max(minSky, insideSky));
+            sideLightmapA = LightCoordsUtil.smoothPack(Math.max(minBlock, sideBlockA), Math.max(minSky, sideSkyA));
+            sideLightmapB = LightCoordsUtil.smoothPack(Math.max(minBlock, sideBlockB), Math.max(minSky, sideSkyB));
+            cornerLightmap = LightCoordsUtil.smoothPack(Math.max(minBlock, cornerBlock), Math.max(minSky, cornerSky));
+            insideLightmap = LightCoordsUtil.smoothPack(Math.max(minBlock, insideBlock), Math.max(minSky, insideSky));
         }
 
         return sideLightmapA + sideLightmapB + cornerLightmap + insideLightmap >> 2 & 0xFF00FF;
