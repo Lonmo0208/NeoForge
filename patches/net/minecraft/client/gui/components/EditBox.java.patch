@@ -1,21 +1,10 @@
 --- a/net/minecraft/client/gui/components/EditBox.java
 +++ b/net/minecraft/client/gui/components/EditBox.java
-@@ -3,7 +_,10 @@
- import com.mojang.blaze3d.platform.cursor.CursorTypes;
- import java.util.ArrayList;
- import java.util.List;
-+import java.util.Objects;
- import java.util.function.Consumer;
-+import java.util.function.Predicate;
-+
- import net.minecraft.ChatFormatting;
- import net.minecraft.client.Minecraft;
- import net.minecraft.client.gui.Font;
 @@ -61,6 +_,7 @@
      private long focusedTime = Util.getMillis();
      private int textX;
      private int textY;
-+    private Predicate<String> filter = _ -> true; // Neo: Add back text input filtering
++    private java.util.function.Predicate<String> filter = _ -> true; // Neo: Add back text input filtering
  
      public EditBox(Font font, int width, int height, Component narration) {
          this(font, 0, 0, width, height, narration);
@@ -36,7 +25,7 @@
 +     * Sets a filter on the edit box that will only allow strings that pass the given predicate to be
 +     * inserted.
 +     */
-+    public void setFilter(Predicate<String> filter) {
++    public void setFilter(java.util.function.Predicate<String> filter) {
 +        this.filter = filter;
 +    }
 +

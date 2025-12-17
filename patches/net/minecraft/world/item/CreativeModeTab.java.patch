@@ -1,13 +1,5 @@
 --- a/net/minecraft/world/item/CreativeModeTab.java
 +++ b/net/minecraft/world/item/CreativeModeTab.java
-@@ -4,6 +_,7 @@
- import java.util.Set;
- import java.util.function.Supplier;
- import net.minecraft.core.HolderLookup;
-+import net.minecraft.core.registries.BuiltInRegistries;
- import net.minecraft.network.chat.Component;
- import net.minecraft.resources.Identifier;
- import net.minecraft.world.flag.FeatureFlagSet;
 @@ -11,6 +_,8 @@
  import org.jspecify.annotations.Nullable;
  
