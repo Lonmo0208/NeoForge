@@ -46,7 +46,7 @@
 -                            this.enchantSlots.setItem(0, enchantmentItem);
 -                        }
 +                        // Neo: Allow items to transform themselves when enchanted, instead of relying on hardcoded transformations for Items.BOOK
-+                        enchantmentItem = itemStack.transmuteCopy(Items.ENCHANTED_BOOK);
++                        enchantmentItem = itemStack.getItem().applyEnchantments(itemStack, newEnchantment);
 +                        this.enchantSlots.setItem(0, enchantmentItem);
 +                        net.neoforged.neoforge.common.CommonHooks.onPlayerEnchantItem(player, enchantmentItem, newEnchantment);
  
