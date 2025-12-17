@@ -379,7 +379,7 @@ public class NeoForgeAdvancementProvider extends AdvancementProvider {
         }
 
         public boolean clearTypeIfMatches(EntityType<?> type) {
-            if (entityType.isPresent() && entityType.get().matches(type)) {
+            if (entityType.isPresent() && entityType.get().matches(type.builtInRegistryHolder())) {
                 entityType = Optional.empty();
                 return true;
             }
