@@ -33,8 +33,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractContainerWidget;
+import net.minecraft.client.gui.components.AbstractScrollArea;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -1272,7 +1274,7 @@ public final class ConfigurationScreen extends OptionsSubScreen {
             protected final boolean isLast;
 
             public ListLabelWidget(final int x, final int y, final int width, final int height, final Component labelText, final int idx) {
-                super(x, y, width, height, labelText);
+                super(x, y, width, height, labelText, AbstractScrollArea.defaultSettings(font.lineHeight));
                 this.idx = idx;
                 this.isFirst = idx == 0;
                 this.isLast = idx + 1 == cfgList.size();
