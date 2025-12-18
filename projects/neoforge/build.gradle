@@ -482,18 +482,6 @@ javadoc {
     source += sourceSets.client.allSource
 }
 
-processResources {
-    inputs.property("version", project.version)
-    final version = project.version
-    filesMatching("META-INF/neoforge.mods.toml") {
-        expand([
-                "global": [
-                        "neoForgeVersion": version
-                ]
-        ])
-    }
-}
-
 artifacts {
     modDevBundle(userdevJar) {
         setClassifier("userdev") // Legacy

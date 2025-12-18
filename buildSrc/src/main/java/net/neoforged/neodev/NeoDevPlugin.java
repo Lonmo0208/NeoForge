@@ -43,6 +43,7 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.Zip;
+import org.gradle.language.jvm.tasks.ProcessResources;
 
 public class NeoDevPlugin implements Plugin<Project> {
     static final String GROUP = "neoforge development";
@@ -258,11 +259,11 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.into(project.getRootProject().file("patches"));
         });
 
-        // Even the jar built only for local usage in other tasks needs the MANIFEST.MF used to tell FML it's the
-        // NeoForge resource jar.
-        tasks.named("jar", Jar.class).configure(task -> {
-            task.getManifest().attributes(Map.of("FML-System-Mods", "neoforge"));
-        });
+        var binaryPatchOutputs = configureBinaryPatchCreation(
+                project,
+                configurations,
+                createCleanArtifacts,
+                neoDevBuildDir);
 
         // Universal jar = the jar that contains NeoForge classes
         // TODO: signing?
@@ -270,45 +271,19 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.setGroup(INTERNAL_GROUP);
             task.getArchiveClassifier().set("universal");
 
-            task.from(project.zipTree(
-                    joinedJar.flatMap(AbstractArchiveTask::getArchiveFile)));
+            task.from(project.zipTree(joinedJar.flatMap(AbstractArchiveTask::getArchiveFile)));
             task.exclude("net/minecraft/**");
             task.exclude("com/**");
             task.exclude("mcp/**");
-
-            task.manifest(manifest -> {
-                manifest.attributes(Map.of("FML-System-Mods", "neoforge"));
-                // These attributes are used from NeoForgeVersion.java to find the NF version without command line arguments.
-                manifest.attributes(
-                        Map.of(
-                                "Specification-Title", "NeoForge",
-                                "Specification-Vendor", "NeoForge",
-                                "Specification-Version", project.getVersion().toString().substring(0, project.getVersion().toString().lastIndexOf(".")),
-                                "Implementation-Title", project.getGroup(),
-                                "Implementation-Version", project.getVersion(),
-                                "Implementation-Vendor", "NeoForged"),
-                        "net/neoforged/neoforge/internal/versions/neoforge/");
-                manifest.attributes(
-                        Map.of(
-                                "Specification-Title", "Minecraft",
-                                "Specification-Vendor", "Mojang",
-                                "Specification-Version", minecraftVersion,
-                                "Implementation-Title", "MCP",
-                                "Implementation-Version", mcAndNeoFormVersion,
-                                "Implementation-Vendor", "NeoForged"),
-                        "net/neoforged/neoforge/versions/neoform/");
+            task.from(binaryPatchOutputs, spec -> {
+                spec.into("net/neoforged/neoforge/common/");
+                spec.rename(s -> "patches.lzma");
             });
         });
 
         var jarJarTask = JarJar.registerWithConfiguration(project, "jarJar");
         jarJarTask.configure(task -> task.setGroup(INTERNAL_GROUP));
         universalJar.configure(task -> task.from(jarJarTask));
-
-        var binaryPatchOutputs = configureBinaryPatchCreation(
-                project,
-                configurations,
-                createCleanArtifacts,
-                neoDevBuildDir);
 
         var installerRepositoryUrls = getInstallerRepositoryUrls(project);
         // Launcher profile = the version.json file used by the Minecraft launcher.
@@ -520,11 +495,23 @@ public class NeoDevPlugin implements Plugin<Project> {
             Provider<Directory> neoDevBuildDir) {
         var tasks = project.getTasks();
 
+        var extraResourcesDir = project.getLayout().getBuildDirectory().dir("generated/extra-minecraft-resources");
+        var generateAdditionalMinecraftJarResources = tasks.register("generateMinecraftModsToml", ProcessResources.class, task -> {
+            var minecraftVersion = project.getProviders().gradleProperty("minecraft_version").get();
+            task.getInputs().property("minecraft_version", minecraftVersion);
+            task.setGroup(INTERNAL_GROUP);
+            task.from(new File(project.getRootDir(), "src/main/templates/minecraft.neoforge.mods.toml"), spec -> {
+                spec.rename("(.*)", "META-INF/neoforge.mods.toml");
+                spec.expand(Map.of("minecraft_version", minecraftVersion));
+            });
+            task.into(extraResourcesDir);
+        });
+
         var clientBaseJar = setupBinaryPatchBaseJar(project, neoDevBuildDir, BinaryPatchBaseType.CLIENT, neoDevConfigurations, createCleanArtifacts);
         var serverBaseJar = setupBinaryPatchBaseJar(project, neoDevBuildDir, BinaryPatchBaseType.SERVER, neoDevConfigurations, createCleanArtifacts);
         var joinedBaseJar = setupBinaryPatchBaseJar(project, neoDevBuildDir, BinaryPatchBaseType.JOINED, neoDevConfigurations, createCleanArtifacts);
-        var clientModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.CLIENT);
-        var serverModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.SERVER);
+        var clientModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.CLIENT, generateAdditionalMinecraftJarResources.map(r -> r.getDestinationDir()));
+        var serverModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.SERVER, generateAdditionalMinecraftJarResources.map(r -> r.getDestinationDir()));
 
         var binpatcherConfig = neoDevConfigurations.getExecutableTool(Tools.BINPATCHER);
         var generatePatchBundles = tasks.register("generatePatchBundle", GenerateBinaryPatches.class, task -> {
@@ -540,6 +527,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             // Since we're filtering by *.class, the modified jar for client and joined is identical. They differ in manifest only.
             task.getModifiedJoinedJar().set(clientModifiedJar);
             task.getInclude().add("**/*.class");
+            task.getInclude().add("META-INF/neoforge.mods.toml");
 
             task.getOutputFile().set(neoDevBuildDir.map(dir -> dir.file("patches.lzma")));
         });
@@ -664,7 +652,8 @@ public class NeoDevPlugin implements Plugin<Project> {
     private static Provider<RegularFile> setupBinaryPatchModifiedJar(
             Project project,
             Provider<Directory> neoDevBuildDir,
-            BinaryPatchBaseType type) {
+            BinaryPatchBaseType type,
+            Provider<File> extraResourcesDir) {
         var tasks = project.getTasks();
 
         var binpatchesDir = neoDevBuildDir.map(dir -> dir.dir("artifacts/binpatches"));
@@ -688,6 +677,7 @@ public class NeoDevPlugin implements Plugin<Project> {
                     spec.exclude("net/neoforged/**");
                 });
             }
+            task.from(extraResourcesDir);
         });
 
         return modifiedJar.flatMap(AbstractArchiveTask::getArchiveFile);
