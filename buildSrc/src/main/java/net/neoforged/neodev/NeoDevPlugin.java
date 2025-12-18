@@ -259,6 +259,12 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.into(project.getRootProject().file("patches"));
         });
 
+        // Even the jar built only for local usage in other tasks needs the MANIFEST.MF used to tell FML it's the
+        // NeoForge resource jar.
+        tasks.named("jar", Jar.class).configure(task -> {
+            task.getManifest().attributes(Map.of("FML-System-Mods", "neoforge"));
+        });
+
         var binaryPatchOutputs = configureBinaryPatchCreation(
                 project,
                 configurations,
@@ -270,6 +276,9 @@ public class NeoDevPlugin implements Plugin<Project> {
         var universalJar = tasks.register("universalJar", Jar.class, task -> {
             task.setGroup(INTERNAL_GROUP);
             task.getArchiveClassifier().set("universal");
+            task.manifest(manifest -> {
+                manifest.attributes(Map.of("FML-System-Mods", "neoforge"));
+            });
 
             task.from(project.zipTree(joinedJar.flatMap(AbstractArchiveTask::getArchiveFile)));
             task.exclude("net/minecraft/**");
