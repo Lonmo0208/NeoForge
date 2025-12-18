@@ -37,6 +37,7 @@ import org.gradle.api.plugins.BasePluginExtension;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskProvider;
@@ -212,6 +213,17 @@ public class NeoDevPlugin implements Plugin<Project> {
          * OTHER TASKS
          */
 
+        var generateAdditionalMinecraftJarResources = tasks.register("generateMinecraftModsToml", ProcessResources.class, task -> {
+            task.getInputs().property("minecraft_version", minecraftVersion);
+            task.setGroup(INTERNAL_GROUP);
+            task.from(new File(project.getRootDir(), "src/main/templates/minecraft.neoforge.mods.toml"), spec -> {
+                spec.rename("(.*)", "META-INF/neoforge.mods.toml");
+                spec.expand(Map.of("minecraft_version", minecraftVersion));
+            });
+            task.into(neoDevBuildDir.map(d -> d.dir("additional-minecraft-resources")).get());
+        });
+        var additionalMinecraftResourcesDir = project.getLayout().dir(generateAdditionalMinecraftJarResources.map(Copy::getDestinationDir));
+
         // Task to create a jar with both common and client classes.
         // We cannot add the client classes to the default `jar` task because it might be used
         // as a dependency for the compilation of the client classes, leading to a circular dependency.
@@ -245,11 +257,16 @@ public class NeoDevPlugin implements Plugin<Project> {
         });
 
         // Generate source patches that are based on the production environment (without separate interface injection)
-        var genProductionPatches = tasks.register("generateProductionSourcePatches", GenerateSourcePatches.class, task -> {
+        var genProductionSourcePatches = tasks.register("generateProductionSourcePatches", GenerateSourcePatches.class, task -> {
             task.setGroup(INTERNAL_GROUP);
             task.getOriginalJar().set(applyAt.flatMap(TransformSources::getOutputJar));
             task.getModifiedSources().set(mergeSources.flatMap(AbstractArchiveTask::getArchiveFile));
             task.getPatchesFolder().set(neoDevBuildDir.map(dir -> dir.dir("production-source-patches")));
+        });
+        var genProductionResourcePatches = tasks.register("generateProductionResourcePatches", GenerateResourcePatches.class, task -> {
+            task.setGroup(INTERNAL_GROUP);
+            task.getAdditionalResourcesDir().set(additionalMinecraftResourcesDir);
+            task.getPatchesFolder().set(neoDevBuildDir.map(dir -> dir.dir("production-resource-patches")));
         });
 
         // Update the patch/ folder with the current patches.
@@ -269,7 +286,8 @@ public class NeoDevPlugin implements Plugin<Project> {
                 project,
                 configurations,
                 createCleanArtifacts,
-                neoDevBuildDir);
+                neoDevBuildDir,
+                additionalMinecraftResourcesDir);
 
         // Universal jar = the jar that contains NeoForge classes
         // TODO: signing?
@@ -426,7 +444,10 @@ public class NeoDevPlugin implements Plugin<Project> {
             task.from(binaryPatchOutputs, spec -> {
                 spec.rename(s -> "patches.lzma");
             });
-            task.from(genProductionPatches.flatMap(GenerateSourcePatches::getPatchesFolder), spec -> {
+            task.from(genProductionSourcePatches.flatMap(GenerateSourcePatches::getPatchesFolder), spec -> {
+                spec.into("patches/");
+            });
+            task.from(genProductionResourcePatches.flatMap(GenerateResourcePatches::getPatchesFolder), spec -> {
                 spec.into("patches/");
             });
         });
@@ -501,26 +522,15 @@ public class NeoDevPlugin implements Plugin<Project> {
             Project project,
             NeoDevConfigurations neoDevConfigurations,
             TaskProvider<CreateCleanArtifacts> createCleanArtifacts,
-            Provider<Directory> neoDevBuildDir) {
+            Provider<Directory> neoDevBuildDir,
+            Provider<Directory> additionalMinecraftResources) {
         var tasks = project.getTasks();
-
-        var extraResourcesDir = project.getLayout().getBuildDirectory().dir("generated/extra-minecraft-resources");
-        var generateAdditionalMinecraftJarResources = tasks.register("generateMinecraftModsToml", ProcessResources.class, task -> {
-            var minecraftVersion = project.getProviders().gradleProperty("minecraft_version").get();
-            task.getInputs().property("minecraft_version", minecraftVersion);
-            task.setGroup(INTERNAL_GROUP);
-            task.from(new File(project.getRootDir(), "src/main/templates/minecraft.neoforge.mods.toml"), spec -> {
-                spec.rename("(.*)", "META-INF/neoforge.mods.toml");
-                spec.expand(Map.of("minecraft_version", minecraftVersion));
-            });
-            task.into(extraResourcesDir);
-        });
 
         var clientBaseJar = setupBinaryPatchBaseJar(project, neoDevBuildDir, BinaryPatchBaseType.CLIENT, neoDevConfigurations, createCleanArtifacts);
         var serverBaseJar = setupBinaryPatchBaseJar(project, neoDevBuildDir, BinaryPatchBaseType.SERVER, neoDevConfigurations, createCleanArtifacts);
         var joinedBaseJar = setupBinaryPatchBaseJar(project, neoDevBuildDir, BinaryPatchBaseType.JOINED, neoDevConfigurations, createCleanArtifacts);
-        var clientModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.CLIENT, generateAdditionalMinecraftJarResources.map(r -> r.getDestinationDir()));
-        var serverModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.SERVER, generateAdditionalMinecraftJarResources.map(r -> r.getDestinationDir()));
+        var clientModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.CLIENT, additionalMinecraftResources);
+        var serverModifiedJar = setupBinaryPatchModifiedJar(project, neoDevBuildDir, BinaryPatchBaseType.SERVER, additionalMinecraftResources);
 
         var binpatcherConfig = neoDevConfigurations.getExecutableTool(Tools.BINPATCHER);
         var generatePatchBundles = tasks.register("generatePatchBundle", GenerateBinaryPatches.class, task -> {
@@ -662,7 +672,7 @@ public class NeoDevPlugin implements Plugin<Project> {
             Project project,
             Provider<Directory> neoDevBuildDir,
             BinaryPatchBaseType type,
-            Provider<File> extraResourcesDir) {
+            Provider<Directory> extraResourcesDir) {
         var tasks = project.getTasks();
 
         var binpatchesDir = neoDevBuildDir.map(dir -> dir.dir("artifacts/binpatches"));
