@@ -735,7 +735,7 @@ public class ClientHooks {
         List<Either<FormattedText, TooltipComponent>> elements = textElements.stream()
                 .map((Function<FormattedText, Either<FormattedText, TooltipComponent>>) Either::left)
                 .collect(Collectors.toCollection(ArrayList::new));
-        itemComponent.ifPresent(c -> elements.add(1, Either.right(c)));
+        itemComponent.ifPresent(c -> elements.add(elements.isEmpty() ? 0 : 1, Either.right(c)));
         return gatherTooltipComponentsFromElements(stack, elements, mouseX, screenWidth, screenHeight, fallbackFont);
     }
 
