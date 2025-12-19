@@ -10,12 +10,19 @@ plugins {
     id 'neoforge.versioning'
 }
 
-ext.isPreReleaseVersion = project.minecraft_version.contains('w') || project.minecraft_version.contains('-')
-
-if (isPreReleaseVersion) {
-    project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.${project.minecraft_version}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
+// Handle manually tagged releases
+String gitTag = gradleutils.gitInfo['tag']
+if (gitTag && gitTag.startsWith('release/')) {
+    project.version = gitTag.substring('release/'.length())
+    ext.isPreReleaseVersion = false
 } else {
-    project.version = gradleutils.version.toString()
+    ext.isPreReleaseVersion = project.minecraft_version.contains('-')
+
+    if (isPreReleaseVersion) {
+        project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.${project.minecraft_version}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
+    } else {
+        project.version = gradleutils.version.toString()
+    }
 }
 
 // Print version, generally useful to know - also appears on CI
