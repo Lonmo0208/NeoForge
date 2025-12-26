@@ -9,6 +9,14 @@
              submitNodeCollector.submitNameTag(
                  poseStack, state.nameTagAttachment, 0, state.nameTag, !state.isDiscrete, state.lightCoords, state.distanceToCameraSq, camera
              );
+@@ -146,6 +_,7 @@
+         S state = this.createRenderState();
+         this.extractRenderState(entity, state, partialTicks);
+         this.finalizeRenderState(entity, state);
++        net.neoforged.neoforge.client.renderstate.RenderStateExtensions.onUpdateEntityRenderState(this, entity, state);
+         return state;
+     }
+ 
 @@ -155,6 +_,7 @@
          state.y = Mth.lerp((double)partialTicks, entity.yOld, entity.getY());
          state.z = Mth.lerp((double)partialTicks, entity.zOld, entity.getZ());
