@@ -22,6 +22,7 @@ import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeBuilder;
@@ -33,8 +34,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -175,7 +176,10 @@ public class IngredientTests {
                     protected void buildRecipes() {
                         this.shapeless(RecipeCategory.MISC, Items.ACACIA_BOAT)
                                 .requires(new TestEnabledIngredient(
-                                        DataComponentIngredient.of(true, DataComponents.DAMAGE, 4, Items.DIAMOND_PICKAXE),
+                                        DataComponentIngredient.of(DataComponentPatch.builder()
+                                                .set(DataComponents.DAMAGE, 4)
+                                                .remove(DataComponents.CUSTOM_DATA)
+                                                .build(), Items.DIAMOND_PICKAXE),
                                         test.framework(), test.id()).toVanilla())
                                 .requires(Items.ACACIA_PLANKS)
                                 .unlockedBy("has_pick", has(Items.DIAMOND_PICKAXE))
@@ -239,12 +243,12 @@ public class IngredientTests {
     }
 
     static class CompressedShapelessRecipe extends ShapelessRecipe {
-        public CompressedShapelessRecipe(String group, CraftingBookCategory category, ItemStack result, List<SizedIngredient> ingredients) {
+        public CompressedShapelessRecipe(String group, CraftingBookCategory category, ItemStackTemplate result, List<SizedIngredient> ingredients) {
             super(group, category, result, decompressList(ingredients));
         }
 
         public CompressedShapelessRecipe(ShapelessRecipe uncompressed) {
-            this(uncompressed.group(), uncompressed.category(), uncompressed.assemble(null, null), compressIngredients(shapelessRecipeIngredients(uncompressed)));
+            this(uncompressed.group(), uncompressed.category(), uncompressed.result(), compressIngredients(shapelessRecipeIngredients(uncompressed)));
         }
 
         private static NonNullList<Ingredient> decompressList(List<SizedIngredient> ingredients) {
@@ -277,8 +281,8 @@ public class IngredientTests {
         private static final MapCodec<CompressedShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(
                 p_337958_ -> p_337958_.group(
                         Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::group),
-                        CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(o -> o.category()),
-                        ItemStack.CODEC.fieldOf("result").forGetter(o -> o.assemble(null, null)),
+                        CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
+                        ItemStackTemplate.CODEC.fieldOf("result").forGetter(ShapelessRecipe::result),
                         SizedIngredient.NESTED_CODEC
                                 .listOf()
                                 .fieldOf("ingredients")
@@ -310,15 +314,20 @@ public class IngredientTests {
 
     static class CompressedShapelessRecipeBuilder implements RecipeBuilder {
         private final RecipeCategory category;
-        private final ItemStack result;
+        private final ItemStackTemplate result;
         private final List<Ingredient> ingredients = new ArrayList<>();
         private final Map<String, Criterion<?>> criteria = new LinkedHashMap<>();
         @org.jspecify.annotations.Nullable
         private String group;
 
-        private CompressedShapelessRecipeBuilder(RecipeCategory category, ItemStack result) {
+        private CompressedShapelessRecipeBuilder(RecipeCategory category, ItemStackTemplate result) {
             this.category = category;
             this.result = result;
+        }
+
+        @Override
+        public ResourceKey<Recipe<?>> defaultId() {
+            return RecipeBuilder.getDefaultRecipeId(this.result);
         }
 
         public static CompressedShapelessRecipeBuilder compressedShapeless(RecipeCategory category, ItemLike item) {
@@ -326,7 +335,7 @@ public class IngredientTests {
         }
 
         public static CompressedShapelessRecipeBuilder compressedShapeless(RecipeCategory category, ItemLike item, int count) {
-            return new CompressedShapelessRecipeBuilder(category, item.asItem().getDefaultInstance().copyWithCount(count));
+            return new CompressedShapelessRecipeBuilder(category, new ItemStackTemplate(item.asItem(), count));
         }
 
         public CompressedShapelessRecipeBuilder requires(Ingredient ingredient, int count) {
@@ -345,11 +354,6 @@ public class IngredientTests {
         public CompressedShapelessRecipeBuilder group(@Nullable String group) {
             this.group = group;
             return this;
-        }
-
-        @Override
-        public Item getResult() {
-            return this.result.getItem();
         }
 
         @Override
