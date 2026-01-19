@@ -1,11 +1,6 @@
 --- a/net/minecraft/core/component/DataComponentInitializers.java
 +++ b/net/minecraft/core/component/DataComponentInitializers.java
-@@ -64,10 +_,26 @@
-     ) {
-         final List<DataComponentInitializers.BakedEntry<T>> entries = new ArrayList<>();
-         final ResourceKey<? extends Registry<T>> registryKey = elementBuilders.registryKey;
-+
-         HolderLookup.RegistryLookup<T> registry = context.lookupOrThrow(registryKey);
+@@ -68,6 +_,21 @@
          Set<Holder.Reference<T>> elementsWithComponents = Sets.newIdentityHashSet();
          elementBuilders.builders.forEach((elementKey, elementBuilder) -> {
              Holder.Reference<T> element = registry.getOrThrow((ResourceKey<T>)elementKey);
