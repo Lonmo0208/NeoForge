@@ -27,14 +27,3 @@
      public ItemStackTemplate(Holder<Item> item, int count, DataComponentPatch components) {
          if (count != 0 && !item.is(Items.AIR.builtInRegistryHolder())) {
              this.item = item;
-@@ -95,5 +_,10 @@
-     @Override
-     public <T> @Nullable T get(DataComponentType<? extends T> type) {
-         return this.components.get(this.item.components(), type);
-+    }
-+
-+    @Override
-+    public ItemStackTemplate toTemplate() {
-+        return this;
-     }
- }
