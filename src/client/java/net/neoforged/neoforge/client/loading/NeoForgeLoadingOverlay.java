@@ -98,7 +98,7 @@ public class NeoForgeLoadingOverlay extends LoadingOverlay {
         public ExternalTexture(GpuTexture texture) {
             this.texture = texture;
             this.sampler = RenderSystem.getSamplerCache()
-                    .getSampler(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.LINEAR, FilterMode.LINEAR, false);
+                    .getSampler(AddressMode.REPEAT, AddressMode.REPEAT, FilterMode.NEAREST, FilterMode.NEAREST, false);
             var gpuDevice = RenderSystem.getDevice();
             // ValidationGpuDevice.createTextureView is expecting a ValidationGpuTexture instance, but the previous reach around created a GlTexture instance instead so validation must be reached around again
             if (gpuDevice instanceof ValidationGpuDevice validationGpuDevice) {
