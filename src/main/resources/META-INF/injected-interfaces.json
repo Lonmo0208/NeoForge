@@ -21,7 +21,7 @@
     "net/neoforged/neoforge/client/extensions/IFontExtension"
   ],
   "net/minecraft/client/gui/GuiGraphicsExtractor": [
-    "net/neoforged/neoforge/client/extensions/IGuiGraphicsExtension"
+    "net/neoforged/neoforge/client/extensions/GuiGraphicsExtractorExtension"
   ],
   "net/minecraft/client/renderer/OrderedSubmitNodeCollector": [
     "net/neoforged/neoforge/client/extensions/OrderedSubmitNodeCollectorExtension"
