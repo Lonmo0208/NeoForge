@@ -8,9 +8,11 @@ package net.neoforged.neoforge.event;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.Event;
@@ -45,11 +47,11 @@ import org.jetbrains.annotations.ApiStatus;
  */
 public final class ModifyDefaultComponentsEvent extends Event implements IModBusEvent {
     private final Map<Item, Consumer<DataComponentMap.Builder>> modifiersByItem;
-    private final List<Pair<Predicate<? super Item>, Consumer<DataComponentMap.Builder>>> modifiersByPredicate;
+    private final List<Pair<BiPredicate<? super Item, Set<DataComponentType<?>>>, Consumer<DataComponentMap.Builder>>> modifiersByPredicate;
 
     @ApiStatus.Internal
     public ModifyDefaultComponentsEvent(Map<Item, Consumer<DataComponentMap.Builder>> modifiersByItem,
-            List<Pair<Predicate<? super Item>, Consumer<DataComponentMap.Builder>>> modifiersByPredicate) {
+            List<Pair<BiPredicate<? super Item, Set<DataComponentType<?>>>, Consumer<DataComponentMap.Builder>>> modifiersByPredicate) {
         this.modifiersByItem = modifiersByItem;
         this.modifiersByPredicate = modifiersByPredicate;
     }
@@ -65,16 +67,17 @@ public final class ModifyDefaultComponentsEvent extends Event implements IModBus
     }
 
     /**
-     * Patches the default components of all items matching the given {@code predicate}.
+     * Patches the default components of all items matching the given {@code bipredicate}
+     * based on item and/or its currently applied default components.
      * <p>
      * If this method is used to modify components based on the item's current default components, the
      * event listener should use the {@link EventPriority#LOWEST lowest priority} so that {@linkplain #modify(ItemLike, Consumer) other mods' modifications} are
      * already applied.
      *
-     * @param predicate the item filter
-     * @param patch     the patch to apply
+     * @param bipredicate the item and its current default components filter
+     * @param patch       the patch to apply
      */
-    public void modifyMatching(Predicate<? super Item> predicate, Consumer<DataComponentMap.Builder> patch) {
-        modifiersByPredicate.add(Pair.of(predicate, patch));
+    public void modifyMatching(BiPredicate<? super Item, Set<DataComponentType<?>>> bipredicate, Consumer<DataComponentMap.Builder> patch) {
+        modifiersByPredicate.add(Pair.of(bipredicate, patch));
     }
 }
