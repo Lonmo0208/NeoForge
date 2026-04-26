@@ -1,0 +1,42 @@
+--- a/net/minecraft/world/entity/player/Player.java
++++ b/net/minecraft/world/entity/player/Player.java
+@@ -171,6 +172,10 @@
+     private Optional<GlobalPos> lastDeathLocation = Optional.empty();
+     public @Nullable FishingHook fishing;
+     protected float hurtDir;
++    private final java.util.Collection<MutableComponent> prefixes = new java.util.LinkedList<>();
++    private final java.util.Collection<MutableComponent> suffixes = new java.util.LinkedList<>();
++    @Nullable
++    private Pose forcedPose = null;
+ 
+     public Player(Level level, GameProfile gameProfile) {
+         super(EntityType.PLAYER, level);
+@@ -577,10 +590,18 @@
+     }
+ 
+     public @Nullable ItemEntity drop(ItemStack itemStack, boolean thrownFromHand) {
+-        return this.drop(itemStack, false, thrownFromHand);
++        return net.neoforged.neoforge.common.CommonHooks.onPlayerTossEvent(this, itemStack, false, thrownFromHand);
+     }
+ 
++    /**
++     * @deprecated Neo: {@link #getDestroySpeed(BlockState, BlockPos)} instead
++     */
++    @Deprecated
+     public float getDestroySpeed(BlockState state) {
++        return getDestroySpeed(state, null);
++    }
++
++    public float getDestroySpeed(BlockState state, @Nullable BlockPos pos) {
+         float speed = this.inventory.getSelectedItem().getDestroySpeed(state);
+         if (speed > 1.0F) {
+             speed += (float)this.getAttributeValue(Attributes.MINING_EFFICIENCY);
+@@ -816,6 +849,8 @@
+ 
+             return InteractionResult.PASS;
+         } else {
++            InteractionResult cancelResult = net.neoforged.neoforge.common.CommonHooks.onInteractEntity(this, entity, hand);
++            if (cancelResult != null) return cancelResult;
+             ItemStack itemStack = this.getItemInHand(hand);
+             ItemStack itemStackClone = itemStack.copy();
+             InteractionResult interact = entity.interact(this, hand, location);

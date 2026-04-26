@@ -1,0 +1,17 @@
+--- a/net/minecraft/client/multiplayer/MultiPlayerGameMode.java
++++ b/net/minecraft/client/multiplayer/MultiPlayerGameMode.java
+@@ -128,11 +136,12 @@
+                 } else if (oldState.isAir()) {
+                     return false;
+                 } else {
++                    BlockState removedBlockState =
+                     oldBlock.playerWillDestroy(level, pos, oldState, this.minecraft.player);
+                     FluidState fluidState = level.getFluidState(pos);
+-                    boolean changed = level.setBlock(pos, fluidState.createLegacyBlock(), 11);
++                    boolean changed = oldState.onDestroyedByPlayer(level, pos, minecraft.player, minecraft.player.getMainHandItem().copy(), false, fluidState);
+                     if (changed) {
+-                        oldBlock.destroy(level, pos, oldState);
++                        oldBlock.destroy(level, pos, removedBlockState);
+                     }
+ 
+                     if (SharedConstants.DEBUG_BLOCK_BREAK) {

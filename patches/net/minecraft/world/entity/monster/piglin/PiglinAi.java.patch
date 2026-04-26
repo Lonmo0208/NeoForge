@@ -26,7 +26,7 @@
 +        return !isAdmiringDisabled(body) && !isAdmiringItem(body) && body.isAdult() && playerHeldItemStack.isPiglinCurrency();
      }
  
-     protected static void wasHurtBy(ServerLevel level, Piglin body, LivingEntity attacker) {
+     protected static void wasHurtBy(ServerLevel level, Piglin body, Entity attacker) {
 @@ -652,7 +_,7 @@
  
      public static boolean isWearingSafeArmor(LivingEntity livingEntity) {

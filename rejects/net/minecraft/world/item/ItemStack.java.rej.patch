@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/item/ItemStack.java
++++ b/net/minecraft/world/item/ItemStack.java
+@@ -1085,11 +1183,14 @@
+         }
+     }
+ 
++    /** @deprecated Forge: Use {@linkplain net.neoforged.neoforge.common.extensions.IItemStackExtension#onDestroyed(ItemEntity, net.minecraft.world.damagesource.DamageSource) damage source sensitive version} */
++    @Deprecated
+     public void onDestroyed(ItemEntity itemEntity) {
+         this.getItem().onDestroyed(itemEntity);
+     }
+ 
+     public boolean canBeHurtBy(DamageSource source) {
++        if (!getItem().canBeHurtBy(this, source)) return false;
+         DamageResistant damageResistant = this.get(DataComponents.DAMAGE_RESISTANT);
+         return damageResistant == null || !damageResistant.isResistantTo(source);
+     }

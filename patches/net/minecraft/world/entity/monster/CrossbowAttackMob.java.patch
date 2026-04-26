@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/monster/CrossbowAttackMob.java
 +++ b/net/minecraft/world/entity/monster/CrossbowAttackMob.java
-@@ -16,7 +_,7 @@
+@@ -17,7 +_,7 @@
      void onCrossbowAttackPerformed();
  
      default void performCrossbowAttack(LivingEntity body, float crossbowPower) {

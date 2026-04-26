@@ -1,6 +1,6 @@
 --- a/net/minecraft/core/dispenser/BoatDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/BoatDispenseItemBehavior.java
-@@ -29,11 +_,17 @@
+@@ -28,11 +_,17 @@
          double spawnY = center.y() + direction.getStepY() * 1.125F;
          double spawnZ = center.z() + direction.getStepZ() * justOutsideDispenser;
          BlockPos frontPos = source.pos().relative(direction);
@@ -20,7 +20,7 @@
                  return this.defaultDispenseItemBehavior.dispense(source, dispensed);
              }
  
-@@ -50,6 +_,10 @@
+@@ -49,6 +_,10 @@
          }
  
          return dispensed;

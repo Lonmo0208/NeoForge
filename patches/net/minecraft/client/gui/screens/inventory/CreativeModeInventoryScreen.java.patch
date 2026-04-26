@@ -265,7 +265,7 @@
      @OnlyIn(Dist.CLIENT)
      private static class CustomCreativeSlot extends Slot {
          public CustomCreativeSlot(Container container, int slot, int x, int y) {
-@@ -1050,6 +_,22 @@
+@@ -1049,6 +_,22 @@
          @Override
          public boolean mayPickup(Player player) {
              return this.target.mayPickup(player);

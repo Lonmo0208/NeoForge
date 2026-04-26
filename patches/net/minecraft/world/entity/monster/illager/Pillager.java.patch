@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/monster/illager/Pillager.java
 +++ b/net/minecraft/world/entity/monster/illager/Pillager.java
-@@ -97,7 +_,7 @@
+@@ -98,7 +_,7 @@
  
      @Override
      public boolean canUseNonMeleeWeapon(ItemStack item) {
@@ -9,7 +9,7 @@
      }
  
      public boolean isChargingCrossbow() {
-@@ -129,7 +_,7 @@
+@@ -130,7 +_,7 @@
      public AbstractIllager.IllagerArmPose getArmPose() {
          if (this.isChargingCrossbow()) {
              return AbstractIllager.IllagerArmPose.CROSSBOW_CHARGE;

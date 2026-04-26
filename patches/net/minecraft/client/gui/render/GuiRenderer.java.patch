@@ -9,7 +9,7 @@
 +    private final Set<PictureInPictureRenderState> pictureInPictureRenderStatesScratch = new it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<>();
      private @Nullable GuiItemAtlas itemAtlas;
      private int cachedGuiScale;
-     private final CubeMap cubeMap = new CubeMap(Identifier.withDefaultNamespace("textures/gui/title/background/panorama"));
+     private final CubeMap cubeMap = new CubeMap(Identifier.withDefaultNamespace("textures/gui/title/background/af/panorama"));
 @@ -118,19 +_,13 @@
          MultiBufferSource.BufferSource bufferSource,
          SubmitNodeCollector submitNodeCollector,

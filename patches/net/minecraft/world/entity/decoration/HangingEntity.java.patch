@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/decoration/HangingEntity.java
 +++ b/net/minecraft/world/entity/decoration/HangingEntity.java
-@@ -83,7 +_,7 @@
+@@ -80,7 +_,7 @@
          if (this.hasLevelCollision(this.getPopBox())) {
              return false;
          } else {

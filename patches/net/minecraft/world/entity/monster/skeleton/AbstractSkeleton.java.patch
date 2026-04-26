@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/monster/skeleton/AbstractSkeleton.java
 +++ b/net/minecraft/world/entity/monster/skeleton/AbstractSkeleton.java
-@@ -138,8 +_,8 @@
+@@ -140,8 +_,8 @@
          if (this.level() != null && !this.level().isClientSide()) {
              this.goalSelector.removeGoal(this.meleeGoal);
              this.goalSelector.removeGoal(this.bowGoal);
@@ -11,10 +11,10 @@
                  int minAttackInterval = this.getHardAttackInterval();
                  if (this.level().getDifficulty() != Difficulty.HARD) {
                      minAttackInterval = this.getAttackInterval();
-@@ -163,9 +_,11 @@
+@@ -165,9 +_,11 @@
  
      @Override
-     public void performRangedAttack(LivingEntity target, float power) {
+     public void performRangedAttack(Entity target, float power) {
 -        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
 +        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
          ItemStack projectile = this.getProjectile(bowItem);
@@ -24,7 +24,7 @@
          double xd = target.getX() - this.getX();
          double yd = target.getY(0.3333333333333333) - arrow.getY();
          double zd = target.getZ() - this.getZ();
-@@ -185,7 +_,7 @@
+@@ -188,7 +_,7 @@
  
      @Override
      public boolean canUseNonMeleeWeapon(ItemStack item) {

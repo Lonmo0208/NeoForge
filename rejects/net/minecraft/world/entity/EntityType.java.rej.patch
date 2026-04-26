@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/entity/EntityType.java
++++ b/net/minecraft/world/entity/EntityType.java
+@@ -1637,6 +1689,10 @@
+         );
+         private final DependantName<EntityType<?>, String> descriptionId = id -> Util.makeDescriptionId("entity", id.identifier());
+         private boolean allowedInPeaceful = true;
++        private java.util.function.Predicate<EntityType<?>> velocityUpdateSupplier = EntityType::defaultTrackDeltasSupplier;
++        private java.util.function.ToIntFunction<EntityType<?>> trackingRangeSupplier = EntityType::defaultTrackingRangeSupplier;
++        private java.util.function.ToIntFunction<EntityType<?>> updateIntervalSupplier = EntityType::defaultUpdateIntervalSupplier;
++        private boolean onlyOpCanSetNbt = false;
+ 
+         private Builder(EntityType.EntityFactory<T> factory, MobCategory category) {
+             this.factory = factory;

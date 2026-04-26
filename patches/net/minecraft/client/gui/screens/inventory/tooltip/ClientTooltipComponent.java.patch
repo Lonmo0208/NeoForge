@@ -1,9 +1,9 @@
 --- a/net/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent.java
 +++ b/net/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent.java
-@@ -18,7 +_,11 @@
-         return (ClientTooltipComponent)(switch (component) {
+@@ -20,7 +_,11 @@
              case BundleTooltip bundleTooltip -> new ClientBundleTooltip(bundleTooltip.contents());
              case ClientActivePlayersTooltip.ActivePlayersTooltip activePlayersTooltip -> new ClientActivePlayersTooltip(activePlayersTooltip);
+             case RecipeTooltip recipeTooltip -> new ClientRecipeTooltip(recipeTooltip.ingredients());
 -            default -> throw new IllegalArgumentException("Unknown TooltipComponent");
 +            default -> {
 +                ClientTooltipComponent result = net.neoforged.neoforge.client.gui.ClientTooltipComponentManager.createClientTooltipComponent(component);

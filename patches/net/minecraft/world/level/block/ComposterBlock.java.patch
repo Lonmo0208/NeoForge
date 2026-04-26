@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/ComposterBlock.java
 +++ b/net/minecraft/world/level/block/ComposterBlock.java
-@@ -47,6 +_,8 @@
+@@ -48,6 +_,8 @@
      public static final int MIN_LEVEL = 0;
      public static final int MAX_LEVEL = 7;
      public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_COMPOSTER;
@@ -9,7 +9,7 @@
      public static final Object2FloatMap<ItemLike> COMPOSTABLES = new Object2FloatOpenHashMap<>();
      private static final int HOLE_WIDTH = 12;
      private static final VoxelShape[] SHAPES = Util.make(
-@@ -242,6 +_,15 @@
+@@ -243,6 +_,15 @@
          if (state.getValue(LEVEL) == 7) {
              level.scheduleTick(pos, state.getBlock(), 20);
          }
@@ -25,7 +25,7 @@
      }
  
      @Override
-@@ -249,7 +_,7 @@
+@@ -250,7 +_,7 @@
          ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult
      ) {
          int fillLevel = state.getValue(LEVEL);
@@ -34,7 +34,7 @@
              if (fillLevel < 7 && !level.isClientSide()) {
                  BlockState newState = addItem(player, state, level, pos, itemStack);
                  level.levelEvent(1500, pos, state != newState ? 1 : 0);
-@@ -276,7 +_,7 @@
+@@ -277,7 +_,7 @@
  
      public static BlockState insertItem(Entity sourceEntity, BlockState state, ServerLevel level, ItemStack itemStack, BlockPos pos) {
          int fillLevel = state.getValue(LEVEL);
@@ -43,7 +43,7 @@
              BlockState newState = addItem(sourceEntity, state, level, pos, itemStack);
              itemStack.shrink(1);
              return newState;
-@@ -307,7 +_,7 @@
+@@ -312,7 +_,7 @@
  
      private static BlockState addItem(@Nullable Entity sourceEntity, BlockState state, LevelAccessor level, BlockPos pos, ItemStack itemStack) {
          int fillLevel = state.getValue(LEVEL);
@@ -52,7 +52,7 @@
          if ((fillLevel != 0 || !(chance > 0.0F)) && !(level.getRandom().nextDouble() < chance)) {
              return state;
          } else {
-@@ -407,7 +_,7 @@
+@@ -412,7 +_,7 @@
  
          @Override
          public boolean canPlaceItemThroughFace(int slot, ItemStack itemStack, @Nullable Direction direction) {
@@ -61,7 +61,7 @@
          }
  
          @Override
-@@ -465,5 +_,11 @@
+@@ -470,5 +_,11 @@
              ComposterBlock.empty(null, this.state, this.level, this.pos);
              this.changed = true;
          }

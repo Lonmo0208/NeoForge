@@ -1,0 +1,78 @@
+--- a/net/minecraft/server/level/ServerPlayer.java
++++ b/net/minecraft/server/level/ServerPlayer.java
+@@ -2019,6 +2131,75 @@
+         return entity;
+     }
+ 
++    /**
++     * Returns the language last reported by the player as their local language.
++     * Defaults to en_us if the value is unknown.
++     */
++    public String getLanguage() {
++        return this.language;
++    }
++
++    private Component tabListHeader = Component.empty();
++    private Component tabListFooter = Component.empty();
++
++    public Component getTabListHeader() {
++        return this.tabListHeader;
++    }
++
++    /**
++     * Set the tab list header while preserving the footer.
++     *
++     * @param header the new header, or {@link Component#empty()} to clear
++     */
++    public void setTabListHeader(final Component header) {
++        this.setTabListHeaderFooter(header, this.tabListFooter);
++    }
++
++    public Component getTabListFooter() {
++        return this.tabListFooter;
++    }
++
++    /**
++     * Set the tab list footer while preserving the header.
++     *
++     * @param footer the new footer, or {@link Component#empty()} to clear
++     */
++    public void setTabListFooter(final Component footer) {
++        this.setTabListHeaderFooter(this.tabListHeader, footer);
++    }
++
++    /**
++     * Set the tab list header and footer at once.
++     *
++     * @param header the new header, or {@link Component#empty()} to clear
++     * @param footer the new footer, or {@link Component#empty()} to clear
++     */
++    public void setTabListHeaderFooter(final Component header, final Component footer) {
++        if (java.util.Objects.equals(header, this.tabListHeader)
++                && java.util.Objects.equals(footer, this.tabListFooter)) {
++            return;
++        }
++
++        this.tabListHeader = java.util.Objects.requireNonNull(header, "header");
++        this.tabListFooter = java.util.Objects.requireNonNull(footer, "footer");
++
++        this.connection.send(new net.minecraft.network.protocol.game.ClientboundTabListPacket(header, footer));
++    }
++
++    // We need this as tablistDisplayname may be null even if the event was fired.
++    private boolean hasTabListName = false;
++    private Component tabListDisplayName = null;
++    /**
++     * Force the name displayed in the tab list to refresh, by firing {@link net.neoforged.neoforge.event.entity.player.PlayerEvent.TabListNameFormat}.
++     */
++    public void refreshTabListName() {
++        Component oldName = this.tabListDisplayName;
++        this.tabListDisplayName = net.neoforged.neoforge.event.EventHooks.getPlayerTabListDisplayName(this);
++        if (!java.util.Objects.equals(oldName, this.tabListDisplayName)) {
++            this.server.getPlayerList().broadcastAll(new net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket(net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, this));
++        }
++    }
++
+     public TextFilter getTextFilter() {
+         return this.textFilter;
+     }

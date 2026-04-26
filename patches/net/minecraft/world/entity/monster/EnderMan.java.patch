@@ -3,7 +3,7 @@
 @@ -121,7 +_,6 @@
  
      @Override
-     public void setTarget(@Nullable LivingEntity target) {
+     public void setTarget(@Nullable Entity target) {
 -        super.setTarget(target);
          AttributeInstance movementSpeed = this.getAttribute(Attributes.MOVEMENT_SPEED);
          if (target == null) {

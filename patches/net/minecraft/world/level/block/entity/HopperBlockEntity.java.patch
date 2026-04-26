@@ -88,7 +88,7 @@
              boolean isBlocked = hopper.isGridAligned()
                  && blockState.isCollisionShapeFullBlock(level, blockPos)
 @@ -354,6 +_,8 @@
-         return level.getEntitiesOfClass(ItemEntity.class, aabb, EntitySelector.ENTITY_STILL_ALIVE);
+         return level.getEntitiesOfClass(LivingBlock.class, aabb, EntitySelector.ENTITY_STILL_ALIVE);
      }
  
 +    /** @deprecated Use IItemHandler capability instead. To preserve Container-specific interactions, use {@link #getContainerOrHandlerAt} and handle both cases. */

@@ -1,6 +1,6 @@
 --- a/net/minecraft/core/dispenser/EquipmentDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/EquipmentDispenseItemBehavior.java
-@@ -25,6 +_,8 @@
+@@ -24,6 +_,8 @@
          } else {
              LivingEntity target = entities.getFirst();
              EquipmentSlot slot = target.getEquipmentSlotForItem(dispensed);

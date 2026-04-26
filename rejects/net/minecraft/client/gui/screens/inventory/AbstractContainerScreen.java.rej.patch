@@ -1,0 +1,50 @@
+--- a/net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.java
+@@ -593,34 +608,40 @@
+ 
+     @Override
+     public boolean keyPressed(KeyEvent event) {
++        var key = com.mojang.blaze3d.platform.InputConstants.getKey(event);
+         if (super.keyPressed(event)) {
+             return true;
+-        } else if (this.minecraft.options.keyInventory.matches(event)) {
++        } else if (this.minecraft.options.keyInventory.isActiveAndMatches(key)) {
+             this.onClose();
+             return true;
+         } else {
+-            this.checkHotbarKeyPressed(event);
++            boolean handled = this.checkHotbarKeyPressed(event); // Forge MC-146650: Needs to return true when the key is handled
+             if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
+-                if (this.minecraft.options.keyPickItem.matches(event)) {
++                if (this.minecraft.options.keyPickItem.isActiveAndMatches(key)) {
+                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 0, ContainerInput.CLONE);
+-                } else if (this.minecraft.options.keyDrop.matches(event)) {
++                    handled = true;
++                } else if (this.minecraft.options.keyDrop.isActiveAndMatches(key)) {
+                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, event.hasControlDown() ? 1 : 0, ContainerInput.THROW);
++                    handled = true;
+                 }
++            } else if (this.minecraft.options.keyDrop.isActiveAndMatches(key)) {
++                handled = true; // Forge MC-146650: Emulate MC bug, so we don't drop from hotbar when pressing drop without hovering over a item.
+             }
+ 
+-            return false;
++            return handled;
+         }
+     }
+ 
+     protected boolean checkHotbarKeyPressed(KeyEvent event) {
++        var key = com.mojang.blaze3d.platform.InputConstants.getKey(event);
+         if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
+-            if (this.minecraft.options.keySwapOffhand.matches(event)) {
++            if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(key)) {
+                 this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ContainerInput.SWAP);
+                 return true;
+             }
+ 
+             for (int i = 0; i < 9; i++) {
+-                if (this.minecraft.options.keyHotbarSlots[i].matches(event)) {
++                if (this.minecraft.options.keyHotbarSlots[i].isActiveAndMatches(key)) {
+                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ContainerInput.SWAP);
+                     return true;
+                 }

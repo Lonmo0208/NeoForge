@@ -9,7 +9,7 @@
          }
      }
  
-@@ -349,7 +_,7 @@
+@@ -350,7 +_,7 @@
  
      @Override
      public boolean canUseNonMeleeWeapon(ItemStack item) {
@@ -18,7 +18,7 @@
      }
  
      protected void holdInMainHand(ItemStack itemStack) {
-@@ -357,7 +_,7 @@
+@@ -358,7 +_,7 @@
      }
  
      protected void holdInOffHand(ItemStack itemStack) {
@@ -27,7 +27,7 @@
              this.setItemSlot(EquipmentSlot.OFFHAND, itemStack);
              this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
          } else {
-@@ -367,7 +_,7 @@
+@@ -368,7 +_,7 @@
  
      @Override
      public boolean wantsToPickUp(ServerLevel level, ItemStack itemStack) {

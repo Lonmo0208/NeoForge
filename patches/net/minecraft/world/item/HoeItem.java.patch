@@ -10,7 +10,7 @@
 +     * or override {@link net.neoforged.neoforge.common.extensions.IBlockExtension#getToolModifiedState(BlockState, UseOnContext, net.neoforged.neoforge.common.ItemAbility, boolean)}.
 +     */
 +    @Deprecated
-     protected static final Map<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> TILLABLES = Maps.newHashMap(
+     public static final Map<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> TILLABLES = Maps.newHashMap(
          ImmutableMap.of(
              Blocks.GRASS_BLOCK,
 @@ -44,7 +_,8 @@

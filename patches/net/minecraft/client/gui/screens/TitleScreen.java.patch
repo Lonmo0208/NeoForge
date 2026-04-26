@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/gui/screens/TitleScreen.java
 +++ b/net/minecraft/client/gui/screens/TitleScreen.java
-@@ -104,11 +_,17 @@
+@@ -103,11 +_,17 @@
          int copyrightWidth = this.font.width(COPYRIGHT_TEXT);
          int copyrightX = this.width - copyrightWidth - 2;
          int spacing = 24;
@@ -19,7 +19,7 @@
          }
  
          topPos = this.createTestWorldButton(topPos, 24);
-@@ -158,7 +_,7 @@
+@@ -157,7 +_,7 @@
                  Button.builder(
                          Component.literal("Create Test World"), button -> CreateWorldScreen.testWorld(this.minecraft, () -> this.minecraft.setScreen(this))
                      )
@@ -28,7 +28,7 @@
                      .build()
              );
          }
-@@ -297,6 +_,7 @@
+@@ -296,6 +_,7 @@
          this.extractPanorama(graphics, a);
          super.extractRenderState(graphics, mouseX, mouseY, a);
          this.logoRenderer.extractRenderState(graphics, this.width, this.logoRenderer.keepLogoThroughFade() ? 1.0F : widgetFade);
@@ -36,7 +36,7 @@
          if (this.splash != null && !this.minecraft.options.hideSplashTexts().get()) {
              this.splash.extractRenderState(graphics, this.width, this.font, widgetFade);
          }
-@@ -310,7 +_,13 @@
+@@ -309,7 +_,13 @@
              versionString = versionString + I18n.get("menu.modded");
          }
  

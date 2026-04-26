@@ -1,9 +1,9 @@
 --- a/net/minecraft/world/entity/monster/illager/Illusioner.java
 +++ b/net/minecraft/world/entity/monster/illager/Illusioner.java
-@@ -175,9 +_,11 @@
+@@ -178,9 +_,11 @@
  
      @Override
-     public void performRangedAttack(LivingEntity target, float power) {
+     public void performRangedAttack(Entity target, float power) {
 -        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
 +        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
          ItemStack projectile = this.getProjectile(bowItem);

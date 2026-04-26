@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/level/ServerPlayer.java
 +++ b/net/minecraft/server/level/ServerPlayer.java
-@@ -322,6 +_,10 @@
+@@ -324,6 +_,10 @@
          }
  
          private void broadcastDataValue(AbstractContainerMenu container, int id, int value) {
@@ -11,7 +11,7 @@
              ServerPlayer.this.connection.send(new ClientboundContainerSetDataPacket(container.containerId, id, value));
          }
  
-@@ -379,6 +_,8 @@
+@@ -381,6 +_,8 @@
      private Set<DebugSubscription<?>> requestedDebugSubscriptions = Set.of();
      private int containerCounter;
      public boolean wonGame;
@@ -20,7 +20,7 @@
  
      public ServerPlayer(MinecraftServer server, ServerLevel level, GameProfile gameProfile, ClientInformation clientInformation) {
          super(level, gameProfile);
-@@ -676,7 +_,26 @@
+@@ -681,7 +_,26 @@
                  }
  
                  if (!this.isSleeping()) {
@@ -48,7 +48,7 @@
                  }
              }
  
-@@ -731,6 +_,11 @@
+@@ -736,6 +_,11 @@
                  this.connection.send(new ClientboundSetExperiencePacket(this.experienceProgress, this.totalExperience, this.experienceLevel));
              }
  
@@ -60,7 +60,7 @@
              if (this.tickCount % 20 == 0) {
                  CriteriaTriggers.LOCATION.trigger(this);
              }
-@@ -744,7 +_,7 @@
+@@ -749,7 +_,7 @@
  
      private void synchronizeSpecialItemUpdates(ItemStack itemStack) {
          MapId mapId = itemStack.get(DataComponents.MAP_ID);
@@ -69,7 +69,7 @@
          if (data != null) {
              Packet<?> packet = data.getUpdatePacket(mapId, this);
              if (packet != null) {
-@@ -891,6 +_,7 @@
+@@ -896,6 +_,7 @@
      @Override
      public void die(DamageSource source) {
          this.gameEvent(GameEvent.ENTITY_DIE);
@@ -77,7 +77,7 @@
          boolean showDeathMessage = this.level().getGameRules().get(GameRules.SHOW_DEATH_MESSAGES);
          if (showDeathMessage) {
              Component deathMessage = this.getCombatTracker().getDeathMessage();
-@@ -1074,7 +_,7 @@
+@@ -1079,7 +_,7 @@
              return BedBlock.findStandUpPosition(EntityType.PLAYER, level, pos, blockState.getValue(BedBlock.FACING), yaw)
                  .map(p -> ServerPlayer.RespawnPosAngle.of(p, pos, 0.0F));
          } else if (!forced) {
@@ -86,7 +86,7 @@
          } else {
              boolean freeBottom = block.isPossibleToRespawnInThis(blockState);
              BlockState topState = level.getBlockState(pos.above());
-@@ -1096,6 +_,7 @@
+@@ -1101,6 +_,7 @@
      }
  
      public @Nullable ServerPlayer teleport(TeleportTransition transition) {
@@ -94,7 +94,7 @@
          if (this.isRemoved()) {
              return null;
          } else {
-@@ -1123,7 +_,7 @@
+@@ -1128,7 +_,7 @@
                  PlayerList playerList = this.server.getPlayerList();
                  playerList.sendPlayerPermissionLevel(this);
                  oldLevel.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
@@ -103,7 +103,7 @@
                  ProfilerFiller profiler = Profiler.get();
                  profiler.push("moving");
                  if (lastDimension == Level.OVERWORLD && newLevel.dimension() == Level.NETHER) {
-@@ -1143,11 +_,15 @@
+@@ -1148,11 +_,15 @@
                  playerList.sendLevelInfo(this, newLevel);
                  playerList.sendAllPlayerInfo(this);
                  playerList.sendActivePlayerEffects(this);
@@ -119,7 +119,7 @@
                  return this;
              }
          }
-@@ -1189,8 +_,19 @@
+@@ -1194,8 +_,19 @@
  
      @Override
      public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos pos) {
@@ -140,7 +140,7 @@
              BedRule rule = this.level().environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, pos);
              boolean canSleep = rule.canSleep(this.level());
              boolean canSetSpawn = rule.canSetSpawn(this.level());
-@@ -1232,6 +_,23 @@
+@@ -1237,6 +_,23 @@
                          }
                      }
  
@@ -164,7 +164,7 @@
                      Either<Player.BedSleepingProblem, Unit> result = super.startSleepInBed(pos).ifRight(unit -> {
                          this.awardStat(Stats.SLEEP_IN_BED);
                          CriteriaTriggers.SLEPT_IN_BED.trigger(this);
-@@ -1244,8 +_,6 @@
+@@ -1249,8 +_,6 @@
                      return result;
                  }
              }
@@ -173,7 +173,7 @@
          }
      }
  
-@@ -1256,6 +_,7 @@
+@@ -1261,6 +_,7 @@
      }
  
      private boolean bedInRange(BlockPos pos, Direction direction) {
@@ -181,7 +181,7 @@
          return this.isReachableBedBlock(pos) || this.isReachableBedBlock(pos.relative(direction.getOpposite()));
      }
  
-@@ -1339,11 +_,19 @@
+@@ -1344,11 +_,19 @@
  
      @Override
      public OptionalInt openMenu(@Nullable MenuProvider provider) {
@@ -201,7 +201,7 @@
              }
  
              this.nextContainerCounter();
-@@ -1355,9 +_,31 @@
+@@ -1360,9 +_,31 @@
  
                  return OptionalInt.empty();
              } else {
@@ -233,7 +233,7 @@
                  return OptionalInt.of(this.containerCounter);
              }
          }
-@@ -1379,6 +_,7 @@
+@@ -1384,6 +_,7 @@
          this.connection.send(new ClientboundMountScreenOpenPacket(this.containerCounter, inventoryColumns, horse.getId()));
          this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.getInventory(), container, horse, inventoryColumns);
          this.initMenu(this.containerMenu);
@@ -241,7 +241,7 @@
      }
  
      @Override
-@@ -1420,6 +_,7 @@
+@@ -1425,6 +_,7 @@
      public void doCloseContainer() {
          this.containerMenu.removed(this);
          this.inventoryMenu.transferState(this.containerMenu);
@@ -249,7 +249,7 @@
          this.containerMenu = this.inventoryMenu;
      }
  
-@@ -1637,6 +_,15 @@
+@@ -1644,6 +_,15 @@
          this.setShoulderEntityRight(oldPlayer.getShoulderEntityRight());
          this.setLastDeathLocation(oldPlayer.getLastDeathLocation());
          this.waypointIcon().copyFrom(oldPlayer.waypointIcon());
@@ -265,7 +265,7 @@
      }
  
      private void transferInventoryXpAndScore(Player oldPlayer) {
-@@ -1739,6 +_,8 @@
+@@ -1746,6 +_,8 @@
  
      public boolean setGameMode(GameType mode) {
          boolean wasSpectator = this.isSpectator();
@@ -274,7 +274,7 @@
          if (!this.gameMode.changeGameModeForPlayer(mode)) {
              return false;
          } else {
-@@ -1922,6 +_,7 @@
+@@ -1929,6 +_,7 @@
      public void setCamera(@Nullable Entity newCamera) {
          Entity oldCamera = this.getCamera();
          this.camera = (Entity)(newCamera == null ? this : newCamera);
@@ -282,7 +282,7 @@
          if (oldCamera != this.camera) {
              if (this.camera.level() instanceof ServerLevel level) {
                  this.teleportTo(level, this.camera.getX(), this.camera.getY(), this.camera.getZ(), Set.of(), this.getYRot(), this.getXRot(), false);
-@@ -1948,7 +_,11 @@
+@@ -1955,7 +_,11 @@
      }
  
      public @Nullable Component getTabListDisplayName() {
@@ -295,7 +295,7 @@
      }
  
      public int getTabListOrder() {
-@@ -1982,6 +_,7 @@
+@@ -1989,6 +_,7 @@
      }
  
      public void setRespawnPosition(ServerPlayer.@Nullable RespawnConfig respawnConfig, boolean showMessage) {
@@ -303,83 +303,7 @@
          if (showMessage && respawnConfig != null && !respawnConfig.isSamePosition(this.respawnConfig)) {
              this.sendSystemMessage(SPAWN_SET_MESSAGE);
          }
-@@ -2019,6 +_,75 @@
-         return entity;
-     }
- 
-+    /**
-+     * Returns the language last reported by the player as their local language.
-+     * Defaults to en_us if the value is unknown.
-+     */
-+    public String getLanguage() {
-+        return this.language;
-+    }
-+
-+    private Component tabListHeader = Component.empty();
-+    private Component tabListFooter = Component.empty();
-+
-+    public Component getTabListHeader() {
-+        return this.tabListHeader;
-+    }
-+
-+    /**
-+     * Set the tab list header while preserving the footer.
-+     *
-+     * @param header the new header, or {@link Component#empty()} to clear
-+     */
-+    public void setTabListHeader(final Component header) {
-+        this.setTabListHeaderFooter(header, this.tabListFooter);
-+    }
-+
-+    public Component getTabListFooter() {
-+        return this.tabListFooter;
-+    }
-+
-+    /**
-+     * Set the tab list footer while preserving the header.
-+     *
-+     * @param footer the new footer, or {@link Component#empty()} to clear
-+     */
-+    public void setTabListFooter(final Component footer) {
-+        this.setTabListHeaderFooter(this.tabListHeader, footer);
-+    }
-+
-+    /**
-+     * Set the tab list header and footer at once.
-+     *
-+     * @param header the new header, or {@link Component#empty()} to clear
-+     * @param footer the new footer, or {@link Component#empty()} to clear
-+     */
-+    public void setTabListHeaderFooter(final Component header, final Component footer) {
-+        if (java.util.Objects.equals(header, this.tabListHeader)
-+                && java.util.Objects.equals(footer, this.tabListFooter)) {
-+            return;
-+        }
-+
-+        this.tabListHeader = java.util.Objects.requireNonNull(header, "header");
-+        this.tabListFooter = java.util.Objects.requireNonNull(footer, "footer");
-+
-+        this.connection.send(new net.minecraft.network.protocol.game.ClientboundTabListPacket(header, footer));
-+    }
-+
-+    // We need this as tablistDisplayname may be null even if the event was fired.
-+    private boolean hasTabListName = false;
-+    private Component tabListDisplayName = null;
-+    /**
-+     * Force the name displayed in the tab list to refresh, by firing {@link net.neoforged.neoforge.event.entity.player.PlayerEvent.TabListNameFormat}.
-+     */
-+    public void refreshTabListName() {
-+        Component oldName = this.tabListDisplayName;
-+        this.tabListDisplayName = net.neoforged.neoforge.event.EventHooks.getPlayerTabListDisplayName(this);
-+        if (!java.util.Objects.equals(oldName, this.tabListDisplayName)) {
-+            this.server.getPlayerList().broadcastAll(new net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket(net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, this));
-+        }
-+    }
-+
-     public TextFilter getTextFilter() {
-         return this.textFilter;
-     }
-@@ -2033,6 +_,7 @@
+@@ -2035,6 +_,7 @@
      }
  
      private GameType calculateGameModeForNewPlayer(@Nullable GameType loadedGameType) {
@@ -387,7 +311,7 @@
          GameType forcedGameType = this.server.getForcedGameType();
          if (forcedGameType != null) {
              return forcedGameType;
-@@ -2069,6 +_,8 @@
+@@ -2071,6 +_,8 @@
  
      public void drop(boolean all) {
          Inventory inventory = this.getInventory();
@@ -396,11 +320,11 @@
          ItemStack removed = inventory.removeFromSelected(all);
          this.containerMenu
              .findSlot(inventory, inventory.getSelectedSlot())
-@@ -2077,7 +_,7 @@
+@@ -2079,7 +_,7 @@
              this.stopUsingItem();
          }
  
--        this.drop(removed, false, true);
+-        this.drop(removed, true);
 +        net.neoforged.neoforge.common.CommonHooks.onPlayerTossEvent(this, removed, false, true);
      }
  

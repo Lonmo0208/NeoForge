@@ -1,6 +1,6 @@
 --- a/net/minecraft/core/dispenser/MinecartDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/MinecartDispenseItemBehavior.java
-@@ -34,7 +_,7 @@
+@@ -33,7 +_,7 @@
          BlockState blockFront = level.getBlockState(front);
          double yOffset;
          if (blockFront.is(BlockTags.RAILS)) {
@@ -9,7 +9,7 @@
                  yOffset = 0.6;
              } else {
                  yOffset = 0.1;
-@@ -49,7 +_,7 @@
+@@ -48,7 +_,7 @@
                  return this.defaultDispenseItemBehavior.dispense(source, dispensed);
              }
  
@@ -18,7 +18,7 @@
                  yOffset = -0.4;
              } else {
                  yOffset = -0.9;
-@@ -68,8 +_,8 @@
+@@ -67,8 +_,8 @@
          return dispensed;
      }
  

@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/feature/BlockFeatureRenderer.java
 +++ b/net/minecraft/client/renderer/feature/BlockFeatureRenderer.java
-@@ -47,6 +_,7 @@
+@@ -48,6 +_,7 @@
      ) {
          this.renderMovingBlockSubmits(nodeCollection, bufferSource, blockStateModelSet, optionsState, false);
          this.renderBlockModelSubmits(nodeCollection, bufferSource, outlineBufferSource, false);
@@ -8,7 +8,7 @@
      }
  
      public void renderTranslucent(
-@@ -59,6 +_,7 @@
+@@ -60,6 +_,7 @@
      ) {
          this.renderMovingBlockSubmits(nodeCollection, bufferSource, blockStateModelSet, optionsState, true);
          this.renderBlockModelSubmits(nodeCollection, bufferSource, outlineBufferSource, true);
@@ -16,7 +16,7 @@
          this.renderBreakingBlockModelSubmits(nodeCollection, crumblingBufferSource);
      }
  
-@@ -81,7 +_,7 @@
+@@ -82,7 +_,7 @@
              MovingBlockRenderState movingBlockRenderState = submit.movingBlockRenderState();
              BlockState blockState = movingBlockRenderState.blockState;
              BlockStateModel model = blockStateModelSet.get(blockState);
@@ -25,7 +25,7 @@
                  poseStack.setIdentity();
                  poseStack.mulPose(submit.pose());
                  BlockQuadOutput blockOutput = ModelBlockRenderer.forceOpaque(cutoutLeaves, blockState) ? solidOutput : output;
-@@ -150,7 +_,7 @@
+@@ -151,7 +_,7 @@
              this.random.setSeed(submit.seed());
  
              try {
