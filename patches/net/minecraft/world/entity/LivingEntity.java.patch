@@ -284,15 +284,6 @@
          if (!this.isRemoved() && !this.dead) {
              Entity sourceEntity = source.getEntity();
              LivingEntity killer = this.getKillCredit();
-@@ -1473,7 +_,7 @@
-             boolean var6 = false;
-             if (killer instanceof WitherBoss) {
-                 BlockPos pos = this.blockPosition();
--                if (serverLevel.getGameRules().get(GameRules.MOB_GRIEFING)) {
-+                if (net.neoforged.neoforge.event.EventHooks.canEntityGrief(serverLevel, killer))
-                     BlockState state = Blocks.WITHER_ROSE.defaultBlockState();
-                     if (this.level().getBlockState(pos).isAir() && state.canSurvive(this.level(), pos)) {
-                         this.level().setBlock(pos, state, 3);
 @@ -1489,6 +_,7 @@
      }
  
