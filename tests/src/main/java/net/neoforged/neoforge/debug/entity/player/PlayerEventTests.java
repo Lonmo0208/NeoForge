@@ -26,6 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -149,7 +150,11 @@ public class PlayerEventTests {
             // Spawn a player at the centre of the test
             final GameTestPlayer player = helper.makeTickingMockServerPlayerInLevel(GameType.SURVIVAL)
                     .moveToCentre();
-            helper.spawnItem(Items.MELON_SEEDS, 1, 2, 1);
+            var livingBlock = new LivingBlock(EntityType.LIVING_BLOCK, helper.getLevel());
+            livingBlock.setItemStack(new ItemStack(Items.MELON_SEEDS));
+            var absPos = helper.absolutePos(new BlockPos(1, 2, 1));
+            livingBlock.setPos(absPos.getX(), absPos.getY(), absPos.getZ());
+            helper.getLevel().addFreshEntity(livingBlock);
 
             helper.startSequence()
                     // Wait until the player picked up the seeds

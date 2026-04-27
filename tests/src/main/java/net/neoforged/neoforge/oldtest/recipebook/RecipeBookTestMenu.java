@@ -29,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager.ServerDisplayInfo;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -284,7 +285,7 @@ public class RecipeBookTestMenu extends RecipeBookMenu {
     }
 
     @Override
-    public PostPlaceAction handlePlacement(boolean useMaxItems, boolean allowDroppingItemsToClear, RecipeHolder<?> rawHolder, ServerLevel serverLevel, Inventory inventory) {
+    public PostPlaceAction handlePlacement(boolean useMaxItems, boolean allowDroppingItemsToClear, RecipeHolder<?> rawHolder, ServerLevel serverLevel, Inventory inventory, ServerDisplayInfo serverDisplayInfo) {
         placingRecipe = true;
         RecipeHolder<RecipeBookTestRecipe> recipeHolder = (RecipeHolder<RecipeBookTestRecipe>) rawHolder;
         try {

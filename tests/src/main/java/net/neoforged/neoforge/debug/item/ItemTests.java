@@ -20,6 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseSource;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -80,7 +81,12 @@ public class ItemTests {
                 .withLang("Cow bucket");
         test.framework().modEventBus().addListener((final FMLCommonSetupEvent event) -> {
             DispenserBlock.registerBehavior(cowBucket, new DefaultDispenseItemBehavior() {
-                private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
+                private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior() {
+                    @Override
+                    public ItemStack execute(BlockSource source, ItemStack stack) {
+                        return super.execute((DispenseSource) source, stack);
+                    }
+                };
 
                 @Override
                 public ItemStack execute(BlockSource p_302435_, ItemStack p_123562_) {

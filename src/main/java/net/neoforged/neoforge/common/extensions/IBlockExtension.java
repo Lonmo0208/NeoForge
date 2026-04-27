@@ -238,7 +238,8 @@ public interface IBlockExtension {
     default boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack toolStack, boolean willHarvest, FluidState fluid) {
         if (level.isClientSide()) {
             // On the client, vanilla calls Level#setBlock, per MultiPlayerGameMode#destroyBlock
-            return level.setBlock(pos, fluid.createLegacyBlock(), 11);
+            FluidState fluidState = fluid != null ? fluid : level.getFluidState(pos);
+            return level.setBlock(pos, fluidState.createLegacyBlock(), 11);
         } else {
             // On the server, vanilla calls Level#removeBlock, per ServerPlayerGameMode#destroyBlock
             return level.removeBlock(pos, false);

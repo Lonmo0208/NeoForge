@@ -37,7 +37,7 @@
 +                    BlockState removedBlockState =
                      oldBlock.playerWillDestroy(level, pos, oldState, this.minecraft.player);
                      oldBlock.destroy(level, pos, oldState);
-+                    boolean changed = oldState.onDestroyedByPlayer(level, pos, minecraft.player, minecraft.player.getMainHandItem().copy(), false, null);
++                    boolean changed = oldState.onDestroyedByPlayer(level, pos, minecraft.player, minecraft.player.getMainHandItem().copy(), false, level.getFluidState(pos));
 +                    if (changed) {
 +                        oldBlock.destroy(level, pos, removedBlockState);
 +                    }

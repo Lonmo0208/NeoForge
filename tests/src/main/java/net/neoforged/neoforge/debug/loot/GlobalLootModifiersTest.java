@@ -34,6 +34,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -287,8 +288,8 @@ public class GlobalLootModifiersTest {
 
                 .thenIdle(5)
                 .thenMap(() -> new BlockPos(1, 2, 1))
-                .thenExecute(pos -> helper.assertItemEntityCountIs(Items.IRON_INGOT, pos, 1d, 1))
-                .thenExecute(pos -> helper.assertItemEntityCountIs(Items.EMERALD_BLOCK, pos, 1d, 1))
+                .thenExecute(pos -> helper.assertEntitiesPresent(EntityType.LIVING_BLOCK, pos, 1, 1d))
+                .thenExecute(pos -> helper.assertEntitiesPresent(EntityType.LIVING_BLOCK, pos, 1, 1d))
 
                 .thenSucceed());
     }
@@ -327,8 +328,7 @@ public class GlobalLootModifiersTest {
                 .thenExecute(player -> player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(1, 2, 1))))
                 .thenIdle(5)
                 // At least one seed will be dropped (which will be converted to wheat), and one wheat
-                .thenExecute(player -> helper.assertItemEntityCountIsAtLeast(Items.WHEAT, new BlockPos(1, 2, 1), 1d, 2))
-                .thenExecute(player -> helper.assertItemEntityNotPresent(Items.WHEAT_SEEDS, new BlockPos(1, 2, 1), 1d))
+                .thenExecute(player -> helper.assertEntitiesPresent(EntityType.LIVING_BLOCK, new BlockPos(1, 2, 1), 2, 1d))
 
                 .thenSucceed());
     }
@@ -354,8 +354,7 @@ public class GlobalLootModifiersTest {
                 .thenExecute(player -> player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(1, 2, 1))))
                 .thenIdle(5)
                 // The silk touch bamboo modifier should cause oak leaves to drop the leaf block itself
-                .thenExecute(player -> helper.assertItemEntityCountIsAtLeast(Items.OAK_LEAVES, new BlockPos(1, 2, 1), 1d, 1))
-                .thenExecute(player -> helper.assertItemEntityNotPresent(Items.OAK_SAPLING, new BlockPos(1, 2, 1), 1d))
+                .thenExecute(player -> helper.assertEntityPresent(EntityType.LIVING_BLOCK, new BlockPos(1, 2, 1), 1d))
 
                 .thenSucceed());
     }

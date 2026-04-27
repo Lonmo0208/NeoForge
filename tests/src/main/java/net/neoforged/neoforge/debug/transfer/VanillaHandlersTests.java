@@ -378,7 +378,7 @@ public class VanillaHandlersTests {
     public static void playerInventoryDropWhileDropping(DynamicTest test) {
         // When dropping a carrot, drop a golden carrot in front of all fake players
         test.eventListeners().forge().addListener((ItemTossEvent event) -> {
-            if (event.getEntity().getItem().is(Items.CARROT)) {
+            if (event.getEntity().getItemStack().is(Items.CARROT)) {
                 try (var tx = Transaction.openRoot()) {
                     PlayerInventoryWrapper.of(event.getPlayer()).drop(ItemResource.of(Items.GOLDEN_CARROT), 1, false, false, tx);
                     tx.commit();
@@ -398,7 +398,7 @@ public class VanillaHandlersTests {
             }
 
             // 2 carrots and 2 golden carrots
-            helper.assertEntitiesPresent(EntityType.ITEM, 4);
+            helper.assertEntitiesPresent(EntityType.LIVING_BLOCK, 4);
             helper.succeed();
         });
     }

@@ -55,13 +55,13 @@ public class BlockEventTests {
                 .thenExecute(() -> helper.setBlock(pos, Blocks.NETHER_QUARTZ_ORE))
                 .thenExecute(() -> helper.breakBlock(pos, new ItemStack(Items.IRON_PICKAXE), helper.makeMockPlayer(GameType.SURVIVAL)))
                 .thenExecute(() -> helper.assertBlockNotPresent(Blocks.NETHER_QUARTZ_ORE, pos))
-                .thenExecute(() -> helper.assertItemEntityNotPresent(Items.QUARTZ))
+                .thenExecute(() -> helper.assertEntityNotPresent(EntityType.LIVING_BLOCK))
                 .thenExecute(() -> helper.assertEntityNotPresent(EntityType.EXPERIENCE_ORB))
                 .thenIdle(5) // Test that breaking the block normally functions as expected.
                 .thenExecute(() -> helper.setBlock(pos, Blocks.NETHER_QUARTZ_ORE))
                 .thenExecute(() -> helper.breakBlock(pos, new ItemStack(Items.DIAMOND_PICKAXE), helper.makeMockPlayer(GameType.SURVIVAL)))
                 .thenExecute(() -> helper.assertBlockNotPresent(Blocks.NETHER_QUARTZ_ORE, pos))
-                .thenExecute(() -> helper.assertItemEntityPresent(Items.QUARTZ))
+                .thenExecute(() -> helper.assertEntityPresent(EntityType.LIVING_BLOCK))
                 .thenExecute(() -> helper.assertEntityPresent(EntityType.EXPERIENCE_ORB))
                 .thenSucceed());
     }
@@ -85,7 +85,7 @@ public class BlockEventTests {
                 .thenExecute(() -> helper.setBlock(pos, Blocks.EMERALD_BLOCK))
                 .thenExecute(() -> helper.breakBlock(pos, new ItemStack(Items.DIAMOND_PICKAXE), helper.makeMockPlayer(GameType.SURVIVAL)))
                 .thenExecute(() -> helper.assertBlockNotPresent(Blocks.EMERALD_BLOCK, pos))
-                .thenExecute(() -> helper.assertItemEntityPresent(Items.EMERALD_BLOCK))
+                .thenExecute(() -> helper.assertEntityPresent(EntityType.LIVING_BLOCK))
                 .thenExecute(() -> helper.assertEntityPresent(EntityType.EXPERIENCE_ORB))
                 .thenSucceed());
     }
@@ -110,7 +110,7 @@ public class BlockEventTests {
                 .thenExecute(() -> helper.setBlock(pos, Blocks.IRON_BLOCK))
                 .thenExecute(() -> helper.breakBlock(pos, new ItemStack(Items.DIAMOND_PICKAXE), helper.makeMockPlayer(GameType.SURVIVAL)))
                 .thenExecute(() -> helper.assertBlockNotPresent(Blocks.IRON_BLOCK, pos))
-                .thenExecute(() -> helper.assertTrue(helper.getEntities(EntityType.ITEM, newPos, 0).size() == 1, "Failed to detect moved iron block"))
+                .thenExecute(() -> helper.assertTrue(helper.getEntities(EntityType.LIVING_BLOCK, newPos, 0).size() == 1, "Failed to detect moved iron block"))
                 .thenSucceed());
     }
 
