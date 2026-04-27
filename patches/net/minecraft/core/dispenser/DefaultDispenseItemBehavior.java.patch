@@ -1,0 +1,18 @@
+--- a/net/minecraft/core/dispenser/DefaultDispenseItemBehavior.java
++++ b/net/minecraft/core/dispenser/DefaultDispenseItemBehavior.java
+@@ -9,7 +_,7 @@
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.DispenserBlock;
+ 
+-public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
++public abstract class DefaultDispenseItemBehavior implements DispenseItemBehavior {
+     private static final int DEFAULT_ACCURACY = 6;
+ 
+     @Override
+@@ -76,4 +_,6 @@
+             playDefaultAnimation(source.level(), source.pos(), direction);
+         }
+     }
++
++    public abstract ItemStack execute(BlockSource source, ItemStack stack);
+ }

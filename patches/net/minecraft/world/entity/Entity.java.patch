@@ -1,5 +1,19 @@
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
+@@ -114,13 +_,11 @@
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.Blocks;
+-import net.minecraft.world.level.block.FenceGateBlock;
+ import net.minecraft.world.level.block.HoneyBlock;
+ import net.minecraft.world.level.block.Mirror;
+ import net.minecraft.world.level.block.Portal;
+ import net.minecraft.world.level.block.RenderShape;
+ import net.minecraft.world.level.block.Rotation;
+-import net.minecraft.world.level.block.SoundType;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.border.WorldBorder;
+ import net.minecraft.world.level.entity.EntityAccess;
 @@ -160,6 +_,7 @@
  import org.slf4j.Logger;
  
@@ -234,27 +248,22 @@
      }
  
      public void checkDespawn() {
-@@ -3879,6 +_,90 @@
+@@ -3879,6 +_,85 @@
  
      public boolean mayInteract(ServerLevel level, BlockPos pos) {
          return true;
 +    }
 +
-+    /**
-+     * Neo: Short-lived holder of dropped item entities. Used mainly for Neo hooks and event logic.
-+     * <p>
-+     * When not null, records all item entities from {@link #spawnAtLocation(ItemStack, float)} and {@link net.minecraft.server.level.ServerPlayer#drop(ItemStack, boolean, boolean)} instead of adding them to the world.
-+     */
-+    private java.util.@Nullable Collection<ItemEntity> captureDrops = null;
++    private java.util.@Nullable Collection<LivingBlock> captureDrops = null;
 +
 +    @Override
-+    public java.util.@Nullable Collection<ItemEntity> captureDrops() {
++    public @Nullable Collection<LivingBlock> captureDrops() {
 +        return captureDrops;
 +    }
 +
 +    @Override
-+    public java.util.@Nullable Collection<ItemEntity> captureDrops(java.util.@Nullable Collection<ItemEntity> value) {
-+        java.util.Collection<ItemEntity> ret = captureDrops;
++    public java.util.@Nullable Collection<LivingBlock> captureDrops(java.util.@Nullable Collection<LivingBlock> value) {
++        java.util.Collection<LivingBlock> ret = captureDrops;
 +        this.captureDrops = value;
 +        return ret;
 +    }

@@ -1,6 +1,22 @@
 --- a/net/minecraft/world/entity/EntityType.java
 +++ b/net/minecraft/world/entity/EntityType.java
-@@ -1242,6 +_,11 @@
+@@ -7,6 +_,7 @@
+ import java.util.Set;
+ import java.util.function.Consumer;
+ import java.util.function.Supplier;
++import java.util.function.ToIntFunction;
+ import java.util.stream.Stream;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+@@ -1224,7 +_,6 @@
+             .updateInterval(5)
+     );
+     private static final Set<EntityType<?>> OP_ONLY_CUSTOM_DATA = Set.of(FALLING_BLOCK, COMMAND_BLOCK_MINECART, SPAWNER_MINECART);
+-    private final Class<? super T> entityClass;
+     private final EntityType.EntityFactory<T> factory;
+     private final MobCategory category;
+     private final ImmutableSet<Block> immuneTo;
+@@ -1242,6 +_,12 @@
      private final FeatureFlagSet requiredFeatures;
      private final boolean allowedInPeaceful;
  
@@ -8,14 +24,24 @@
 +    private final java.util.function.ToIntFunction<EntityType<?>> trackingRangeSupplier;
 +    private final java.util.function.ToIntFunction<EntityType<?>> updateIntervalSupplier;
 +    private final boolean onlyOpCanSetNbt;
++    private EntityType<Entity> entityClass;
 +
      private static <T extends Entity> EntityType<T> register(ResourceKey<EntityType<?>> id, EntityType.Builder<T> builder) {
          return Registry.register(BuiltInRegistries.ENTITY_TYPE, id, builder.build(id));
      }
-@@ -1281,6 +_,30 @@
+@@ -1263,7 +_,6 @@
+     }
+ 
+     public EntityType(
+-        Class<? super T> entityClass,
+         EntityType.EntityFactory<T> factory,
+         MobCategory category,
+         boolean serialize,
+@@ -1280,7 +_,30 @@
+         FeatureFlagSet requiredFeatures,
          boolean allowedInPeaceful
      ) {
-         this.entityClass = entityClass;
+-        this.entityClass = entityClass;
 +        this(factory, category, serialize, summon, fireImmune, canSpawnFarFromPlayer, immuneTo, dimensions, spawnDimensionsScale, clientTrackingRange, updateInterval, descriptionId, lootTable, requiredFeatures, allowedInPeaceful, EntityType::defaultTrackDeltasSupplier, EntityType::defaultTrackingRangeSupplier, EntityType::defaultUpdateIntervalSupplier, false);
 +    }
 +
@@ -116,7 +142,7 @@
  
          private Builder(Class<? super T> entityClass, EntityType.EntityFactory<T> factory, MobCategory category) {
              this.entityClass = entityClass;
-@@ -1784,6 +_,26 @@
+@@ -1784,13 +_,32 @@
              return this;
          }
  
@@ -143,6 +169,14 @@
          public EntityType<T> build(ResourceKey<EntityType<?>> name) {
              if (this.serialize) {
                  Util.fetchChoiceType(References.ENTITY_TREE, name.identifier().toString());
+             }
+ 
+-            return new EntityType<>(
+-                this.entityClass,
++            return new EntityType<T>(
+                 this.factory,
+                 this.category,
+                 this.serialize,
 @@ -1805,7 +_,11 @@
                  this.descriptionId.get(name),
                  this.lootTable.get(name),

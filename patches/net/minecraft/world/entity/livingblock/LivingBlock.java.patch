@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/entity/livingblock/LivingBlock.java
++++ b/net/minecraft/world/entity/livingblock/LivingBlock.java
+@@ -1039,7 +_,17 @@
+             int dmg = Mth.floor((fallDistance + 1.0E-6) * damageModifier);
+             if (dmg > 0) {
+                 this.playSound(state.getSoundType().getFallSound(), 1.0F, 1.0F);
+-                LivingEntity.playBlockFallSoundForEntity(this);
++                if (!this.isSilent()) {
++                    int xx = Mth.floor(this.getX());
++                    int yy = Mth.floor(this.getY() - 0.2F);
++                    int zz = Mth.floor(this.getZ());
++                    var pos = new BlockPos(xx, yy, zz);
++                    BlockState fallState = this.level().getBlockState(pos);
++                    if (!fallState.isAir()) {
++                        var soundType = fallState.getSoundType(this.level(), pos, this);
++                        this.playSound(soundType.getFallSound(), soundType.getVolume() * 0.5F, soundType.getPitch() * 0.75F);
++                    }
++                }
+                 this.hurt(damageSource, dmg);
+                 return true;
+             } else {

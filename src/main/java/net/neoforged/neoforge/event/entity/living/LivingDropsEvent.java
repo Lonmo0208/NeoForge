@@ -8,7 +8,7 @@ package net.neoforged.neoforge.event.entity.living;
 import java.util.Collection;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.NeoForge;
@@ -18,11 +18,11 @@ import net.neoforged.neoforge.common.NeoForge;
  * This event is fired whenever an Entity dies and drops items in
  * {@link LivingEntity#die(DamageSource)}.<br>
  * <br>
- * This event is fired via the {@link CommonHooks#onLivingDrops(LivingEntity, DamageSource, Collection, int, boolean)} .<br>
+ * This event is fired via the  .<br>
  * <br>
  * {@link #source} contains the DamageSource that caused the drop to occur.<br>
  * {@link #drops} contains the ArrayList of EntityItems that will be dropped.<br>
- * {@link #lootingLevel} contains the amount of loot that will be dropped.<br>
+ *  contains the amount of loot that will be dropped.<br>
  * {@link #recentlyHit} determines whether the Entity doing the drop has recently been damaged.<br>
  * <br>
  * This event is {@link ICancellableEvent}.<br>
@@ -32,10 +32,10 @@ import net.neoforged.neoforge.common.NeoForge;
  **/
 public class LivingDropsEvent extends LivingEvent implements ICancellableEvent {
     private final DamageSource source;
-    private final Collection<ItemEntity> drops;
+    private final Collection<LivingBlock> drops;
     private final boolean recentlyHit;
 
-    public LivingDropsEvent(LivingEntity entity, DamageSource source, Collection<ItemEntity> drops, boolean recentlyHit) {
+    public LivingDropsEvent(LivingEntity entity, DamageSource source, Collection<LivingBlock> drops, boolean recentlyHit) {
         super(entity);
         this.source = source;
         this.drops = drops;
@@ -46,7 +46,7 @@ public class LivingDropsEvent extends LivingEvent implements ICancellableEvent {
         return source;
     }
 
-    public Collection<ItemEntity> getDrops() {
+    public Collection<LivingBlock> getDrops() {
         return drops;
     }
 

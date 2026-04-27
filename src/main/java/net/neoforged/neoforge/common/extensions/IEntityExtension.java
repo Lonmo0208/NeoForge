@@ -16,7 +16,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,10 +35,9 @@ public interface IEntityExtension {
         return (Entity) this;
     }
 
-    @Nullable
-    Collection<ItemEntity> captureDrops();
+    @Nullable Collection<LivingBlock> captureDrops();
 
-    Collection<ItemEntity> captureDrops(@Nullable Collection<ItemEntity> captureDrops);
+    Collection<LivingBlock> captureDrops(@Nullable Collection<LivingBlock> captureDrops);
 
     /**
      * Returns a NBTTagCompound that can be used to store custom data for this entity.

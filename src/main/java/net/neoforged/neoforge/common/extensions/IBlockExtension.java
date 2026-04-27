@@ -22,7 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
@@ -97,7 +97,7 @@ public interface IBlockExtension {
      * <p>
      * Note that entities may reduce slipperiness by a certain factor of their own;
      * for {@link LivingEntity}, this is {@code .91}.
-     * {@link ItemEntity} uses {@code .98}, and
+     * {@link LivingBlock} uses {@code .98}, and
      * {@link FishingHook} uses {@code .92}.
      *
      * @param state  state of the block

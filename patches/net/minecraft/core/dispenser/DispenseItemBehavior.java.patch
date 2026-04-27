@@ -1,6 +1,68 @@
 --- a/net/minecraft/core/dispenser/DispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/DispenseItemBehavior.java
-@@ -147,7 +_,7 @@
+@@ -14,6 +_,7 @@
+ import net.minecraft.tags.BlockTags;
+ import net.minecraft.tags.FluidTags;
+ import net.minecraft.util.RandomSource;
++import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.entity.EntitySelector;
+ import net.minecraft.world.entity.EntitySpawnReason;
+ import net.minecraft.world.entity.EntityType;
+@@ -30,6 +_,7 @@
+ import net.minecraft.world.item.Items;
+ import net.minecraft.world.item.alchemy.PotionContents;
+ import net.minecraft.world.item.alchemy.Potions;
++import net.minecraft.world.item.context.UseOnContext;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.LevelAccessor;
+ import net.minecraft.world.level.block.BaseFireBlock;
+@@ -54,6 +_,8 @@
+ import net.minecraft.world.level.gameevent.GameEvent;
+ import net.minecraft.world.level.gamerules.GameRules;
+ import net.minecraft.world.phys.AABB;
++import net.minecraft.world.phys.BlockHitResult;
++import net.neoforged.neoforge.common.ItemAbilities;
+ import org.slf4j.Logger;
+ 
+ public interface DispenseItemBehavior {
+@@ -94,6 +_,11 @@
+ 
+                     return dispensed;
+                 }
++
++                @Override
++                public ItemStack execute(BlockSource source, ItemStack stack) {
++                    return this.execute((DispenseSource) source, stack);
++                }
+             }
+         );
+         DispenserBlock.registerBehavior(
+@@ -117,6 +_,11 @@
+ 
+                     return super.execute(source, dispensed);
+                 }
++
++                @Override
++                public ItemStack execute(BlockSource source, ItemStack stack) {
++                    return this.execute((DispenseSource) source, stack);
++                }
+             }
+         );
+         DispenserBlock.registerBehavior(Items.OAK_BOAT, new BoatDispenseItemBehavior(EntityType.OAK_BOAT));
+@@ -140,20 +_,30 @@
+         DispenserBlock.registerBehavior(Items.PALE_OAK_CHEST_BOAT, new BoatDispenseItemBehavior(EntityType.PALE_OAK_CHEST_BOAT));
+         DispenserBlock.registerBehavior(Items.BAMBOO_CHEST_RAFT, new BoatDispenseItemBehavior(EntityType.BAMBOO_CHEST_RAFT));
+         DispenseItemBehavior filledBucketBehavior = new DefaultDispenseItemBehavior() {
+-            private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
++            private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior() {
++                @Override
++                public ItemStack execute(BlockSource source, ItemStack stack) {
++                    return super.execute((DispenseSource) source, stack);
++                }
++            };
+ 
+             @Override
+             public ItemStack execute(DispenseSource source, ItemStack dispensed) {
                  DispensibleContainerItem bucket = (DispensibleContainerItem)dispensed.getItem();
                  BlockPos target = source.pos().relative(source.direction());
                  Level level = source.level();
@@ -9,6 +71,29 @@
                      bucket.checkExtraContent(null, level, dispensed, target);
                      return this.consumeWithRemainder(source, dispensed, new ItemStack(Items.BUCKET));
                  } else {
+                     return this.defaultDispenseItemBehavior.dispense(source, dispensed);
+                 }
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         };
+         DispenserBlock.registerBehavior(Items.LAVA_BUCKET, filledBucketBehavior);
+         DispenserBlock.registerBehavior(Items.WATER_BUCKET, filledBucketBehavior);
+@@ -183,6 +_,11 @@
+                     return super.execute(source, dispensed);
+                 }
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         DispenserBlock.registerBehavior(Items.FLINT_AND_STEEL, new OptionalDispenseItemBehavior() {
+             @Override
 @@ -195,11 +_,12 @@
                  if (BaseFireBlock.canBePlacedAt(level, targetPos, facing)) {
                      level.setBlockAndUpdate(targetPos, BaseFireBlock.getState(level, targetPos));
@@ -20,9 +105,140 @@
                      level.gameEvent(null, GameEvent.BLOCK_CHANGE, targetPos);
 -                } else if (target.getBlock() instanceof TntBlock) {
 -                    if (TntBlock.prime(level, targetPos)) {
-+                } else if (target.isFlammable(level, targetPos, source.state().getValue(DispenserBlock.FACING).getOpposite())) {
-+                    if (target.onCaughtFire(level, targetPos, source.state().getValue(DispenserBlock.FACING).getOpposite(), null)) {
++                } else if (target.isFlammable(level, targetPos, source.direction().getOpposite())) {
++                    if (target.onCaughtFire(level, targetPos, source.direction().getOpposite(), null)) {
 +                        if (target.getBlock() instanceof TntBlock)
                          level.removeBlock(targetPos, false);
                      } else {
                          this.setSuccess(false);
+@@ -214,6 +_,11 @@
+ 
+                 return dispensed;
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         DispenserBlock.registerBehavior(Items.BONE_MEAL, new OptionalDispenseItemBehavior() {
+             @Override
+@@ -229,6 +_,11 @@
+ 
+                 return dispensed;
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         DispenserBlock.registerBehavior(Blocks.TNT, new OptionalDispenseItemBehavior() {
+             @Override
+@@ -248,6 +_,11 @@
+                     return dispensed;
+                 }
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         DispenserBlock.registerBehavior(
+             Items.WITHER_SKELETON_SKULL,
+@@ -277,6 +_,11 @@
+ 
+                     return dispensed;
+                 }
++
++                @Override
++                public ItemStack execute(BlockSource source, ItemStack stack) {
++                    return this.execute((DispenseSource) source, stack);
++                }
+             }
+         );
+         DispenserBlock.registerBehavior(Blocks.CARVED_PUMPKIN, new OptionalDispenseItemBehavior() {
+@@ -299,6 +_,11 @@
+ 
+                 return dispensed;
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         ShulkerBoxDispenseBehavior shulkerBoxDispenseBehavior = new ShulkerBoxDispenseBehavior();
+         DispenserBlock.registerBehavior(Items.SHULKER_BOX, shulkerBoxDispenseBehavior);
+@@ -345,6 +_,11 @@
+                         return super.execute(source, dispensed);
+                     }
+                 }
++
++                @Override
++                public ItemStack execute(BlockSource source, ItemStack stack) {
++                    return this.execute((DispenseSource) source, stack);
++                }
+             }
+         );
+         DispenserBlock.registerBehavior(Items.GLOWSTONE, new OptionalDispenseItemBehavior() {
+@@ -368,6 +_,11 @@
+                     return super.execute(source, dispensed);
+                 }
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         DispenserBlock.registerBehavior(Items.SHEARS, new ShearsDispenseItemBehavior());
+         DispenserBlock.registerBehavior(Items.BRUSH, new OptionalDispenseItemBehavior() {
+@@ -391,6 +_,11 @@
+                     return dispensed;
+                 }
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         DispenserBlock.registerBehavior(Items.HONEYCOMB, new OptionalDispenseItemBehavior() {
+             @Override
+@@ -409,11 +_,21 @@
+                     return super.execute(source, dispensed);
+                 }
+             }
++
++            @Override
++            public ItemStack execute(BlockSource source, ItemStack stack) {
++                return this.execute((DispenseSource) source, stack);
++            }
+         });
+         DispenserBlock.registerBehavior(
+             Items.POTION,
+             new DefaultDispenseItemBehavior() {
+-                private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
++                private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior() {
++                    @Override
++                    public ItemStack execute(BlockSource source, ItemStack stack) {
++                        return super.execute((DispenseSource) source, stack);
++                    }
++                };
+ 
+                 @Override
+                 public ItemStack execute(DispenseSource source, ItemStack dispensed) {
+@@ -451,6 +_,11 @@
+                             return this.consumeWithRemainder(source, dispensed, new ItemStack(Items.GLASS_BOTTLE));
+                         }
+                     }
++                }
++
++                @Override
++                public ItemStack execute(BlockSource source, ItemStack stack) {
++                    return this.execute((DispenseSource) source, stack);
+                 }
+             }
+         );

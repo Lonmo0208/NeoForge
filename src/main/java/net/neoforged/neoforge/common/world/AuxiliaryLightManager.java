@@ -6,6 +6,8 @@
 package net.neoforged.neoforge.common.world;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
@@ -28,4 +30,6 @@ public interface AuxiliaryLightManager {
      * {@return the light value at the given position or 0 if none is present}
      */
     int getLightAt(BlockPos pos);
+
+    Packet<?> sendLightDataTo(ClientboundLevelChunkWithLightPacket clientboundLevelChunkWithLightPacket);
 }

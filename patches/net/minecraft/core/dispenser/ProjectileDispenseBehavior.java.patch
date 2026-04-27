@@ -1,0 +1,14 @@
+--- a/net/minecraft/core/dispenser/ProjectileDispenseBehavior.java
++++ b/net/minecraft/core/dispenser/ProjectileDispenseBehavior.java
+@@ -41,6 +_,11 @@
+     }
+ 
+     @Override
++    public ItemStack execute(BlockSource source, ItemStack stack) {
++        return this.execute((DispenseSource) source, stack);
++    }
++
++    @Override
+     protected void playSound(DispenseSource source) {
+         source.level().levelEvent(this.dispenseConfig.overrideDispenseEvent().orElse(1002), source.pos(), 0);
+     }

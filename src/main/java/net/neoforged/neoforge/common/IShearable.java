@@ -18,7 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.animal.cow.MushroomCow;
 import net.minecraft.world.entity.animal.golem.SnowGolem;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.monster.skeleton.Bogged;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -67,9 +67,9 @@ public interface IShearable {
     default List<ItemStack> onSheared(@Nullable Player player, ItemStack item, Level level, BlockPos pos) {
         if (this instanceof LivingEntity entity && this instanceof Shearable shearable) {
             if (level instanceof ServerLevel serverLevel) {
-                Collection<ItemEntity> previous = entity.captureDrops(new ArrayList<>());
+                Collection<LivingBlock> previous = entity.captureDrops(new ArrayList<>());
                 shearable.shear(serverLevel, player == null ? SoundSource.BLOCKS : SoundSource.PLAYERS, item);
-                return entity.captureDrops(previous).stream().map(ItemEntity::getItem).toList();
+                return entity.captureDrops(previous).stream().map(LivingBlock::getItemStack).toList();
             }
         }
         return Collections.emptyList();
@@ -94,13 +94,10 @@ public interface IShearable {
         } else if (this instanceof MushroomCow cow) {
             // We patch Mooshrooms from using addFreshEntity to spawnAtLocation to spawnAtLocation to capture the drops.
             // In case a mod is also capturing drops, we also replicate that logic here.
-            ItemEntity itemEntity = cow.spawnAtLocation(level, drop, cow.getBbHeight());
-            if (itemEntity != null) {
-                itemEntity.setNoPickUpDelay();
-            }
+            LivingBlock itemEntity = (LivingBlock) cow.spawnAtLocation(level, drop, cow.getBbHeight());
         } else if (this instanceof Entity entity) {
             // Everything else uses the "default" rules invented by Sheep#shear, which uses a y-offset of 1 and these random delta movement values.
-            ItemEntity itemEntity = entity.spawnAtLocation(level, drop, 1);
+            LivingBlock itemEntity = (LivingBlock) entity.spawnAtLocation(level, drop, 1);
             if (itemEntity != null) {
                 RandomSource rand = entity.getRandom();
                 Vec3 newDelta = itemEntity.getDeltaMovement().add(
@@ -110,8 +107,7 @@ public interface IShearable {
                 itemEntity.setDeltaMovement(newDelta);
             }
         } else {
-            // If we aren't an entity, fallback to spawning the item at the given position.
-            level.addFreshEntity(new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), drop));
+            Block.popResource(level, pos, drop);
         }
     }
 }

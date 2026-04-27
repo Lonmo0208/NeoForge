@@ -66,7 +66,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Player.BedSleepingProblem;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -526,26 +526,26 @@ public class EventHooks {
         return event;
     }
 
-    public static int onItemExpire(ItemEntity entity) {
+    public static int onItemExpire(LivingBlock entity) {
         ItemExpireEvent event = new ItemExpireEvent(entity);
         NeoForge.EVENT_BUS.post(event);
         return event.getExtraLife();
     }
 
     /**
-     * Called in {@link ItemEntity#playerTouch(Player)} before any other processing occurs.
+     * Called in {@link LivingBlock#playerTouch(Player)} before any other processing occurs.
      * <p>
      * Fires {@link ItemEntityPickupEvent.Pre} and returns the event.
      * 
      * @param itemEntity The item entity that a player collided with
      * @param player     The player that collided with the item entity
      */
-    public static ItemEntityPickupEvent.Pre fireItemPickupPre(ItemEntity itemEntity, Player player) {
+    public static ItemEntityPickupEvent.Pre fireItemPickupPre(LivingBlock itemEntity, Player player) {
         return NeoForge.EVENT_BUS.post(new ItemEntityPickupEvent.Pre(player, itemEntity));
     }
 
     /**
-     * Called in {@link ItemEntity#playerTouch(Player)} after an item was successfully picked up.
+     * Called in {@link LivingBlock#playerTouch(Player)} after an item was successfully picked up.
      * <p>
      * Fires {@link ItemEntityPickupEvent.Post}.
      * 
@@ -553,7 +553,7 @@ public class EventHooks {
      * @param player     The player that collided with the item entity
      * @param copy       A copy of the item entity's item stack before the pickup
      */
-    public static void fireItemPickupPost(ItemEntity itemEntity, Player player, ItemStack copy) {
+    public static void fireItemPickupPost(LivingBlock itemEntity, Player player, ItemStack copy) {
         NeoForge.EVENT_BUS.post(new ItemEntityPickupEvent.Post(player, itemEntity, copy));
     }
 
@@ -694,7 +694,7 @@ public class EventHooks {
     /**
      * Fires the {@link LootTableLoadEvent} for non-empty loot tables and returns the table if the event was not
      * canceled and the table was not set to {@link LootTable#EMPTY} in the event. Otherwise returns {@code null}
-     * which maps to an empty {@link Optional} in {@link LootDataType#deserialize(Identifier, DynamicOps, Object)}
+     * which maps to an empty {@link Optional} in
      */
     @Nullable
     @ApiStatus.Internal
@@ -709,7 +709,7 @@ public class EventHooks {
 
     /**
      * Checks if a fluid is allowed to create a fluid source. This fires the {@link CreateFluidSourceEvent}.
-     * By default, a fluid can create a source if it returns true to {@link IFluidStateExtension#canConvertToSource(Level, BlockPos)}
+     * By default, a fluid can create a source if it returns true to
      */
     public static boolean canCreateFluidSource(ServerLevel level, BlockPos pos, BlockState state) {
         return NeoForge.EVENT_BUS.post(new CreateFluidSourceEvent(level, pos, state)).canConvert();

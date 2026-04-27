@@ -1,5 +1,21 @@
 --- a/net/minecraft/world/level/chunk/LevelChunk.java
 +++ b/net/minecraft/world/level/chunk/LevelChunk.java
+@@ -63,6 +_,7 @@
+ import net.minecraft.world.level.storage.TagValueInput;
+ import net.minecraft.world.ticks.LevelChunkTicks;
+ import net.minecraft.world.ticks.TickContainerAccess;
++import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
+ import org.jspecify.annotations.Nullable;
+ import org.slf4j.Logger;
+ 
+@@ -98,6 +_,7 @@
+     private final LevelChunkTicks<Fluid> fluidTicks;
+     private final List<LivingBlock> livingLightBlocks = new ArrayList<>();
+     private LevelChunk.UnsavedListener unsavedListener = chunkPos -> {};
++    private AuxiliaryLightManager auxLightManager;
+ 
+     public LevelChunk(Level level, ChunkPos pos) {
+         this(level, pos, UpgradeData.EMPTY, new LevelChunkTicks<>(), new LevelChunkTicks<>(), 0L, null, null, null);
 @@ -158,6 +_,7 @@
          this.setAllStarts(protoChunk.getAllStarts());
          this.setAllReferences(protoChunk.getAllReferences());
@@ -95,6 +111,21 @@
                  }
              });
          }
+@@ -559,6 +_,14 @@
+         return this.level;
+     }
+ 
++    @Override
++    public net.neoforged.neoforge.common.world.AuxiliaryLightManager getAuxLightManager(net.minecraft.world.level.ChunkPos pos) {
++        if (this.auxLightManager == null) {
++            this.auxLightManager = new net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager(this);
++        }
++        return this.auxLightManager;
++    }
++
+     public Map<BlockPos, BlockEntity> getBlockEntities() {
+         return this.blockEntities;
+     }
 @@ -678,6 +_,7 @@
      }
  

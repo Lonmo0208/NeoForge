@@ -1,0 +1,10 @@
+--- a/net/minecraft/client/renderer/entity/state/LivingBlockRenderState.java
++++ b/net/minecraft/client/renderer/entity/state/LivingBlockRenderState.java
+@@ -17,6 +_,7 @@
+     public final BlockModelRenderState blockModel = new BlockModelRenderState();
+     public BlockState blockState = Blocks.AIR.defaultBlockState();
+     public final Quaternionf rotation = new Quaternionf();
++    public boolean shouldBob;
+     public boolean hasRotation;
+     public boolean hasRedOverlay;
+     public float deathTime;

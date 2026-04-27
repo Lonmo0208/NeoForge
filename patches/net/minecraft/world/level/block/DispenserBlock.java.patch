@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/level/block/DispenserBlock.java
++++ b/net/minecraft/world/level/block/DispenserBlock.java
+@@ -50,7 +_,12 @@
+     public static final MapCodec<DispenserBlock> CODEC = simpleCodec(DispenserBlock::new);
+     public static final EnumProperty<Direction> FACING = DirectionalBlock.FACING;
+     public static final BooleanProperty TRIGGERED = BlockStateProperties.TRIGGERED;
+-    private static final DefaultDispenseItemBehavior DEFAULT_BEHAVIOR = new DefaultDispenseItemBehavior();
++    private static final DefaultDispenseItemBehavior DEFAULT_BEHAVIOR = new DefaultDispenseItemBehavior() {
++        @Override
++        public ItemStack execute(BlockSource source, ItemStack stack) {
++            return this.execute((DispenseSource) source, stack);
++        }
++    };
+     public static final Map<Item, DispenseItemBehavior> DISPENSER_REGISTRY = new IdentityHashMap<>();
+     private static final int TRIGGER_DURATION = 4;
+ 

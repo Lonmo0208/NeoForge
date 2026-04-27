@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/item/ProjectileWeaponItem.java
 +++ b/net/minecraft/world/item/ProjectileWeaponItem.java
+@@ -10,6 +_,7 @@
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
++import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.entity.projectile.Projectile;
+ import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 @@ -24,12 +_,42 @@
          super(properties);
      }
@@ -43,12 +51,29 @@
      public static ItemStack getHeldProjectile(LivingEntity entity, Predicate<ItemStack> valid) {
          if (valid.test(entity.getItemInHand(InteractionHand.OFF_HAND))) {
              return entity.getItemInHand(InteractionHand.OFF_HAND);
-@@ -97,7 +_,7 @@
+@@ -40,6 +_,14 @@
+ 
+     public abstract int getDefaultProjectileRange();
+ 
++    public AbstractArrow customArrow(AbstractArrow arrow, ItemStack projectile, ItemStack weapon) {
++        return arrow;
++    }
++
++    public ItemStack getDefaultCreativeAmmo(Player player, ItemStack weapon) {
++        return ItemStack.EMPTY;
++    }
++
+     protected void shoot(
+         ServerLevel level,
+         LivingEntity shooter,
+@@ -97,8 +_,9 @@
              arrowx.setCritArrow(true);
          }
  
 -        return arrowx;
 +        return customArrow(arrowx, projectile, weapon);
      }
++
  
      protected static List<ItemStack> draw(ItemStack weapon, ItemStack projectile, LivingEntity shooter) {
+         if (projectile.isEmpty()) {

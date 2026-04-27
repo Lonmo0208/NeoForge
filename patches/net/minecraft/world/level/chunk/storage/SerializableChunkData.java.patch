@@ -66,12 +66,15 @@
              );
          }
      }
-@@ -263,6 +_,9 @@
+@@ -263,6 +_,12 @@
                  postLoadChunk(level, this.entities, this.blockEntities),
                  BlendingData.unpack(this.blendingData)
              );
 +            if (this.auxLightData != null) {
-+                ((LevelChunk) chunk).getAuxLightManager(chunkPos).deserializeNBT(this.auxLightData);
++                var auxLightManager = ((LevelChunk) chunk).getAuxLightManager(chunkPos);
++                if (auxLightManager instanceof net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager manager) {
++                    manager.deserializeNBT(this.auxLightData);
++                }
 +            }
          } else {
              ProtoChunkTicks<Block> blockTicks = ProtoChunkTicks.load(this.packedTicks.blocks());
@@ -87,7 +90,7 @@
          if (chunkType == ChunkType.LEVELCHUNK) {
              return new ImposterProtoChunk((LevelChunk)chunk, false);
          } else {
-@@ -387,6 +_,18 @@
+@@ -387,6 +_,21 @@
              CompoundTag structureData = packStructureData(
                  StructurePieceSerializationContext.fromLevel(level), pos, chunk.getAllStarts(), chunk.getAllReferences()
              );
@@ -100,7 +103,10 @@
 +            }
 +            ListTag auxLightData = null;
 +            if (chunk instanceof LevelChunk levelChunk) {
-+                auxLightData = levelChunk.getAuxLightManager(pos).serializeNBT();
++                var auxLightManager = levelChunk.getAuxLightManager(pos);
++                if (auxLightManager instanceof net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager manager) {
++                    auxLightData = manager.serializeNBT();
++                }
 +            }
 +
              return new SerializableChunkData(

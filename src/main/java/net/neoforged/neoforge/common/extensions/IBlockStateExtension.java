@@ -17,7 +17,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
@@ -47,6 +46,7 @@ import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.enums.BubbleColumnDirection;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import net.neoforged.neoforge.event.EventHooks;
+import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
 public interface IBlockStateExtension {
@@ -279,7 +279,7 @@ public interface IBlockStateExtension {
      * @param pos    The position of the block in the level
      * @param entity The entity falling onto the block
      */
-    default void playFallSound(Level level, BlockPos pos, LivingEntity entity) {
+    default void playFallSound(Level level, BlockPos pos, @UnknownNullability LivingEntity entity) {
         self().getBlock().playFallSound(self(), level, pos, entity);
     }
 

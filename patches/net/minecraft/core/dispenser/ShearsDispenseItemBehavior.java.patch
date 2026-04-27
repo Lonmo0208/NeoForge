@@ -9,6 +9,18 @@
              if (this.isSuccess()) {
                  dispensed.hurtAndBreak(1, level, null, item -> {});
              }
+@@ -30,6 +_,11 @@
+         return dispensed;
+     }
+ 
++    @Override
++    public ItemStack execute(BlockSource source, ItemStack stack) {
++        return this.execute((DispenseSource) source, stack);
++    }
++
+     private static boolean tryShearBeehive(ServerLevel level, ItemStack tool, BlockPos pos) {
+         BlockState state = level.getBlockState(pos);
+         if (state.is(BlockTags.BEEHIVES, s -> s.hasProperty(BeehiveBlock.HONEY_LEVEL) && s.getBlock() instanceof BeehiveBlock)) {
 @@ -52,8 +_,9 @@
                  return true;
              }

@@ -5,16 +5,16 @@
 
 package net.neoforged.neoforge.event.entity.item;
 
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 
 /**
- * Event that is fired when an {@link ItemEntity}'s age has reached its maximum
- * lifespan. Adding extra life time will prevent the {@link ItemEntity} from being
+ * Event that is fired when an {@link LivingBlock}'s age has reached its maximum
+ * lifespan. Adding extra life time will prevent the {@link LivingBlock} from being
  * flagged as dead, thus staying its removal from the world.
  * <p>
  * Note that using this event, you can ony extend the lifespan up to {@link Short#MAX_VALUE} - 1 ticks (27.5 minutes).
- * To extend an item's lifespan above that, use either {@link ItemEntity#setExtendedLifetime()}
- * or {@link ItemEntity#setUnlimitedLifetime}.
+ * To extend an item's lifespan above that, use either {@link LivingBlock#setExtendedLifetime()}
+ * or {@link LivingBlock#setUnlimitedLifetime}.
  * <p>
  * This event will only be fired server-side.
  */
@@ -22,11 +22,11 @@ public class ItemExpireEvent extends ItemEvent {
     private int extraLife = 0;
 
     /**
-     * Creates a new event for an expiring {@link ItemEntity}.
+     * Creates a new event for an expiring {@link LivingBlock}.
      * 
-     * @param itemEntity The {@link ItemEntity} being deleted.
+     * @param itemEntity The {@link LivingBlock} being deleted.
      */
-    public ItemExpireEvent(ItemEntity itemEntity) {
+    public ItemExpireEvent(LivingBlock itemEntity) {
         super(itemEntity);
     }
 
@@ -34,7 +34,7 @@ public class ItemExpireEvent extends ItemEvent {
      * Query the amount of extra time that will be added.
      * <p>
      * Note that this is the event result. If you need data from the entity, query it directly.
-     * {@link ItemEntity#lifespan} is the entities maximum lifespan and also its current age.
+     * {@link LivingBlock#lifespan} is the entities maximum lifespan and also its current age.
      * 
      * @return Extra time to be added in ticks.
      */

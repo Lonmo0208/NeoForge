@@ -1,5 +1,18 @@
 --- a/net/minecraft/core/dispenser/EquipmentDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/EquipmentDispenseItemBehavior.java
+@@ -16,6 +_,12 @@
+         return dispenseEquipment(source, dispensed) ? dispensed : super.execute(source, dispensed);
+     }
+ 
++    @Override
++    public ItemStack execute(BlockSource source, ItemStack stack) {
++        return this.execute((DispenseSource) source, stack);
++    }
++
++
+     public static boolean dispenseEquipment(DispenseSource source, ItemStack dispensed) {
+         BlockPos pos = source.pos().relative(source.direction());
+         List<LivingEntity> entities = source.level().getEntitiesOfClass(LivingEntity.class, new AABB(pos), entity -> entity.canEquipWithDispenser(dispensed));
 @@ -24,6 +_,8 @@
          } else {
              LivingEntity target = entities.getFirst();

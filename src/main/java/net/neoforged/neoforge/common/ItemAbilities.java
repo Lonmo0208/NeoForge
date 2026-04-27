@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IBlockExtension;
@@ -58,7 +57,7 @@ public class ItemAbilities {
      * This action is exposed by shears and corresponds to a harvest action that is triggered with a right click on a block that supports such behaviour.
      * Example: Right click with shears on a beehive with honey level 5 to harvest it.
      * 
-     * @see CommonHooks#tryDispenseShearsHarvestBlock(BlockSource, ItemStack, ServerLevel, BlockPos)
+     * @see CommonHooks#tryDispenseShearsHarvestBlock(net.minecraft.core.dispenser.DispenseSource, ItemStack, ServerLevel, BlockPos)
      */
     public static final ItemAbility SHEARS_HARVEST = ItemAbility.get("shears_harvest");
 

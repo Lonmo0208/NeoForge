@@ -1,6 +1,29 @@
 --- a/net/minecraft/core/dispenser/MinecartDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/MinecartDispenseItemBehavior.java
-@@ -33,7 +_,7 @@
+@@ -14,7 +_,12 @@
+ import net.minecraft.world.phys.Vec3;
+ 
+ public class MinecartDispenseItemBehavior extends DefaultDispenseItemBehavior {
+-    private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
++    private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior() {
++        @Override
++        public ItemStack execute(BlockSource source, ItemStack stack) {
++            return null;
++        }
++    };
+     private final EntityType<? extends AbstractMinecart> entityType;
+ 
+     public MinecartDispenseItemBehavior(EntityType<? extends AbstractMinecart> entityType) {
+@@ -22,7 +_,7 @@
+     }
+ 
+     @Override
+-    public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++    public ItemStack execute(BlockSource source, ItemStack stack) {
+         Direction direction = source.direction();
+         ServerLevel level = source.level();
+         Vec3 center = source.center();
+@@ -33,22 +_,22 @@
          BlockState blockFront = level.getBlockState(front);
          double yOffset;
          if (blockFront.is(BlockTags.RAILS)) {
@@ -9,8 +32,17 @@
                  yOffset = 0.6;
              } else {
                  yOffset = 0.1;
-@@ -48,7 +_,7 @@
-                 return this.defaultDispenseItemBehavior.dispense(source, dispensed);
+             }
+         } else {
+             if (!blockFront.isAir()) {
+-                return this.defaultDispenseItemBehavior.dispense(source, dispensed);
++                return this.defaultDispenseItemBehavior.dispense(source, stack);
+             }
+ 
+             BlockState blockBelow = level.getBlockState(front.below());
+             if (!blockBelow.is(BlockTags.RAILS)) {
+-                return this.defaultDispenseItemBehavior.dispense(source, dispensed);
++                return this.defaultDispenseItemBehavior.dispense(source, stack);
              }
  
 -            if (direction != Direction.DOWN && getRailShape(blockBelow).isSlope()) {
@@ -18,8 +50,21 @@
                  yOffset = -0.4;
              } else {
                  yOffset = -0.9;
-@@ -67,8 +_,8 @@
-         return dispensed;
+@@ -57,18 +_,18 @@
+ 
+         Vec3 spawnPos = new Vec3(spawnX, spawnY + yOffset, spawnZ);
+         AbstractMinecart minecart = AbstractMinecart.createMinecart(
+-            level, spawnPos.x, spawnPos.y, spawnPos.z, this.entityType, EntitySpawnReason.DISPENSER, dispensed, null
++            level, spawnPos.x, spawnPos.y, spawnPos.z, this.entityType, EntitySpawnReason.DISPENSER, stack, null
+         );
+         if (minecart != null) {
+             level.addFreshEntity(minecart);
+-            dispensed.shrink(1);
++            stack.shrink(1);
+         }
+ 
+-        return dispensed;
++        return stack;
      }
  
 -    private static RailShape getRailShape(BlockState blockFront) {

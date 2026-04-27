@@ -48,7 +48,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attribute.Sentiment;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
@@ -421,7 +421,7 @@ public class NeoForgeMod {
             .temperature(0)
             .viscosity(0)) {
         @Override
-        public void setItemMovement(ItemEntity entity) {
+        public void setItemMovement(LivingBlock entity) {
             if (!entity.isNoGravity()) entity.setDeltaMovement(entity.getDeltaMovement().add(0.0D, -0.04D, 0.0D));
         }
     });
@@ -479,7 +479,7 @@ public class NeoForgeMod {
         }
 
         @Override
-        public void setItemMovement(ItemEntity entity) {
+        public void setItemMovement(LivingBlock entity) {
             Vec3 vec3 = entity.getDeltaMovement();
             entity.setDeltaMovement(vec3.x * (double) 0.95F, vec3.y + (double) (vec3.y < (double) 0.06F ? 5.0E-4F : 0.0F), vec3.z * (double) 0.95F);
         }

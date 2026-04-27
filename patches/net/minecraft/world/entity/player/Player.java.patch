@@ -1,6 +1,12 @@
 --- a/net/minecraft/world/entity/player/Player.java
 +++ b/net/minecraft/world/entity/player/Player.java
-@@ -134,6 +_,7 @@
+@@ -129,11 +_,13 @@
+ import net.minecraft.world.phys.Vec3;
+ import net.minecraft.world.scores.PlayerTeam;
+ import net.minecraft.world.scores.Team;
++import net.neoforged.neoforge.event.EventHooks;
+ import org.joml.Quaternionf;
+ import org.joml.Vector3f;
  import org.jspecify.annotations.Nullable;
  
  public abstract class Player extends Avatar implements ContainerUser, net.neoforged.neoforge.common.extensions.IPlayerExtension {
@@ -8,6 +14,17 @@
      public static final int MAX_HEALTH = 20;
      public static final int SLEEP_DURATION = 100;
      public static final int WAKE_UP_DURATION = 10;
+@@ -195,6 +_,10 @@
+         Items.HIGHLIGHT_ACTION
+     );
+ 
++    private final Collection<MutableComponent> prefixes = new ArrayList<>();
++    private final Collection<MutableComponent> suffixes = new ArrayList<>();
++    private @Nullable Pose forcedPose = null;
++
+     public Player(Level level, GameProfile gameProfile) {
+         super(EntityType.PLAYER, level);
+         this.setUUID(gameProfile.id());
 @@ -265,7 +_,8 @@
              .add(Attributes.MINING_EFFICIENCY)
              .add(Attributes.SWEEPING_DAMAGE_RATIO)

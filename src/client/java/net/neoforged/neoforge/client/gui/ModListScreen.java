@@ -388,7 +388,7 @@ public class ModListScreen extends Screen {
         Pair<Identifier, Size2i> logoData;
 
         if (selectedMod.getModId().equals(Identifier.DEFAULT_NAMESPACE)) {
-            logoData = Pair.of(LogoRenderer.MINECRAFT_LOGO, new Size2i(LogoRenderer.LOGO_TEXTURE_WIDTH, LogoRenderer.LOGO_TEXTURE_HEIGHT));
+            logoData = Pair.of(LogoRenderer.HERDCRAFT_LOGO, new Size2i(LogoRenderer.LOGO_WIDTH, LogoRenderer.LOGO_HEIGHT));
         } else {
             logoData = selectedMod.getLogoFile().map(logoFile -> {
                 TextureManager tm = this.minecraft.getTextureManager();

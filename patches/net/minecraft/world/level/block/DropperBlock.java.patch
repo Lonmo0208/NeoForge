@@ -1,5 +1,27 @@
 --- a/net/minecraft/world/level/block/DropperBlock.java
 +++ b/net/minecraft/world/level/block/DropperBlock.java
+@@ -7,6 +_,7 @@
+ import net.minecraft.core.dispenser.BlockSource;
+ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+ import net.minecraft.core.dispenser.DispenseItemBehavior;
++import net.minecraft.core.dispenser.DispenseSource;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.Container;
+ import net.minecraft.world.item.ItemStack;
+@@ -23,7 +_,12 @@
+ public class DropperBlock extends DispenserBlock {
+     private static final Logger LOGGER = LogUtils.getLogger();
+     public static final MapCodec<DropperBlock> CODEC = simpleCodec(DropperBlock::new);
+-    public static final DispenseItemBehavior DISPENSE_BEHAVIOUR = new DefaultDispenseItemBehavior();
++    public static final DispenseItemBehavior DISPENSE_BEHAVIOUR = new DefaultDispenseItemBehavior() {
++        @Override
++        public ItemStack execute(BlockSource source, ItemStack stack) {
++            return this.execute((DispenseSource) source, stack);
++        }
++    };
+ 
+     @Override
+     public MapCodec<DropperBlock> codec() {
 @@ -58,12 +_,16 @@
                  ItemStack itemStack = blockEntity.getItem(slot);
                  if (!itemStack.isEmpty()) {

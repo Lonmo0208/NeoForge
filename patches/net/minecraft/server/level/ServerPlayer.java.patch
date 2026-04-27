@@ -11,12 +11,16 @@
              ServerPlayer.this.connection.send(new ClientboundContainerSetDataPacket(container.containerId, id, value));
          }
  
-@@ -381,6 +_,8 @@
+@@ -381,6 +_,12 @@
      private Set<DebugSubscription<?>> requestedDebugSubscriptions = Set.of();
      private int containerCounter;
      public boolean wonGame;
 +    // Neo: Used to track partial TIME_SINCE_REST increases for dimensions in which clocks move at different speeds. No need to persist, at most Phantoms will spawn one tick too early for each save/load cycle.
 +    private float partialTimeSinceRestTick;
++    private Object tabListHeader;
++    private Object tabListFooter;
++    private boolean hasTabListName;
++    private Component tabListDisplayName;
  
      public ServerPlayer(MinecraftServer server, ServerLevel level, GameProfile gameProfile, ClientInformation clientInformation) {
          super(level, gameProfile);
@@ -303,6 +307,22 @@
          if (showMessage && respawnConfig != null && !respawnConfig.isSamePosition(this.respawnConfig)) {
              this.sendSystemMessage(SPAWN_SET_MESSAGE);
          }
+@@ -2012,15 +_,6 @@
+         this.chunkTrackingView = chunkTrackingView;
+     }
+ 
+-    @Override
+-    public void drop(ItemStack itemStack, boolean thrownFromHand) {
+-        super.drop(itemStack, thrownFromHand);
+-        if (thrownFromHand && !itemStack.isEmpty()) {
+-            this.awardStat(Stats.ITEM_DROPPED.get(itemStack.getItem()), itemStack.getCount());
+-            this.awardStat(Stats.DROP);
+-        }
+-    }
+-
+     public TextFilter getTextFilter() {
+         return this.textFilter;
+     }
 @@ -2035,6 +_,7 @@
      }
  

@@ -1,5 +1,29 @@
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -86,7 +_,6 @@
+ import net.minecraft.world.entity.ai.attributes.Attributes;
+ import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
+ import net.minecraft.world.entity.animal.FlyingAnimal;
+-import net.minecraft.world.entity.animal.wolf.Wolf;
+ import net.minecraft.world.entity.boss.wither.WitherBoss;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.entity.player.Player;
+@@ -115,7 +_,6 @@
+ import net.minecraft.world.level.block.HoneyBlock;
+ import net.minecraft.world.level.block.LadderBlock;
+ import net.minecraft.world.level.block.PowderSnowBlock;
+-import net.minecraft.world.level.block.SoundType;
+ import net.minecraft.world.level.block.TrapDoorBlock;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.gameevent.GameEvent;
+@@ -138,6 +_,7 @@
+ import net.minecraft.world.waypoints.Waypoint;
+ import net.minecraft.world.waypoints.WaypointTransmitter;
+ import org.jetbrains.annotations.Contract;
++import org.jetbrains.annotations.UnknownNullability;
+ import org.jspecify.annotations.Nullable;
+ import org.slf4j.Logger;
+ 
 @@ -196,14 +_,20 @@
      private static final int CURRENT_IMPULSE_CONTEXT_RESET_GRACE_TIME_TICKS = 40;
      private static final int DEFAULT_CURRENT_IMPULSE_CONTEXT_RESET_GRACE_TIME = 0;
@@ -297,7 +321,7 @@
          this.dropEquipment(level);
          this.dropExperience(level, source.getEntity());
 +
-+        Collection<ItemEntity> drops = captureDrops(null);
++        Collection<LivingBlock> drops = captureDrops(null);
 +        if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, source, drops, lastHurtByPlayerMemoryTime > 0))
 +            drops.forEach(e -> level().addFreshEntity(e));
      }
@@ -360,17 +384,23 @@
          boolean damaged = super.causeFallDamage(effectiveFallDistance, damageModifier, damageSource);
          int dmg = this.calculateFallDamage(effectiveFallDistance, damageModifier);
          if (dmg > 0) {
-@@ -1830,10 +_,10 @@
+@@ -1825,15 +_,15 @@
+         playBlockFallSoundForEntity(this);
+     }
+ 
+-    public static void playBlockFallSoundForEntity(Entity entity) {
++    public static void playBlockFallSoundForEntity(LivingEntity entity) {
+         if (!entity.isSilent()) {
              int xx = Mth.floor(entity.getX());
              int yy = Mth.floor(entity.getY() - 0.2F);
              int zz = Mth.floor(entity.getZ());
 -            BlockState state = entity.level().getBlockState(new BlockPos(xx, yy, zz));
 +            var pos = new BlockPos(xx, yy, zz);
-+            BlockState state = this.level().getBlockState(pos);
++            BlockState state = entity.level().getBlockState(pos);
              if (!state.isAir()) {
 -                SoundType soundType = state.getSoundType();
 -                entity.playSound(soundType.getFallSound(), soundType.getVolume() * 0.5F, soundType.getPitch() * 0.75F);
-+                state.playFallSound(this.level(), pos, this);
++                state.playFallSound(entity.level(), pos, entity);
              }
          }
      }

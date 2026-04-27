@@ -10,7 +10,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
 public class BlockDropsEvent extends BlockEvent implements ICancellableEvent {
     @Nullable
     private final BlockEntity blockEntity;
-    private final List<ItemEntity> drops;
+    private final List<LivingBlock> drops;
     @Nullable
     private final Entity breaker;
     private final ItemStack tool;
@@ -43,11 +43,11 @@ public class BlockDropsEvent extends BlockEvent implements ICancellableEvent {
      * @param pos         The position of the broken block
      * @param state       The state of the broken block
      * @param blockEntity The block entity of the broken block, if available
-     * @param drops       The list of drops from {@link Block#getDrops}
+     * @param drops       The list of drops from
      * @param breaker     The entity who broke the block, if any
      * @param tool        The tool used to break the block. May be empty
      */
-    public BlockDropsEvent(ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, List<ItemEntity> drops, @Nullable Entity breaker, ItemStack tool) {
+    public BlockDropsEvent(ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, List<LivingBlock> drops, @Nullable Entity breaker, ItemStack tool) {
         super(level, pos, state);
         this.blockEntity = blockEntity;
         this.drops = drops;
@@ -65,7 +65,7 @@ public class BlockDropsEvent extends BlockEvent implements ICancellableEvent {
      * @return A mutable list of item entities.
      * @apiNote Prefer using {@link LootModifier}s to add additional loot drops.
      */
-    public List<ItemEntity> getDrops() {
+    public List<LivingBlock> getDrops() {
         return this.drops;
     }
 
@@ -93,7 +93,7 @@ public class BlockDropsEvent extends BlockEvent implements ICancellableEvent {
     }
 
     /**
-     * Cancels this event, preventing any drops from being spawned and preventing {@link Block#spawnAfterBreak} from being called.
+     * Cancels this event, preventing any drops from being spawned and preventing  from being called.
      * <p>
      * Also prevents experience from being spawned.
      */

@@ -44,7 +44,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -202,11 +202,11 @@ public class ExtendedGameTestHelper extends GameTestHelper {
 
     public void assertItemEntityCountIsAtLeast(Item item, BlockPos pos, double range, int lowerLimit) {
         final BlockPos blockpos = this.absolutePos(pos);
-        final List<ItemEntity> list = this.getLevel().getEntities(EntityType.ITEM, new AABB(blockpos).inflate(range), Entity::isAlive);
+        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
         int count = 0;
 
-        for (final ItemEntity itementity : list) {
-            ItemStack itemstack = itementity.getItem();
+        for (final LivingBlock itementity : list) {
+            ItemStack itemstack = itementity.getItemStack();
             if (itemstack.is(item)) {
                 count += itemstack.getCount();
             }

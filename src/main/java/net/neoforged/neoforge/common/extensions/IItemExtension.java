@@ -30,7 +30,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -47,6 +47,7 @@ import net.minecraft.world.item.enchantment.Enchantment.EnchantmentDefinition;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.CommonHooks;
@@ -235,7 +236,7 @@ public interface IItemExtension {
      * @param entity The entity Item
      * @return Return true to skip any further update code.
      */
-    default boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
+    default boolean onEntityItemUpdate(ItemStack stack, LivingBlock entity) {
         return false;
     }
 
@@ -564,7 +565,7 @@ public interface IItemExtension {
      * @param itemEntity   The item entity that was destroyed.
      * @param damageSource Damage source that caused the item entity to "die".
      */
-    default void onDestroyed(ItemEntity itemEntity, DamageSource damageSource) {
+    default void onDestroyed(LivingBlock itemEntity, DamageSource damageSource) {
         self().onDestroyed(itemEntity);
     }
 

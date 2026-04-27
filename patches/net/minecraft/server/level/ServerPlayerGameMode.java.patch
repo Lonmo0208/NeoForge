@@ -110,12 +110,18 @@
              int oldCount = itemStack.getCount();
              int oldDamage = itemStack.getDamageValue();
              InteractionResult result = itemStack.use(level, player, hand);
-@@ -371,8 +_,8 @@
+@@ -371,8 +_,14 @@
                  }
              }
  
 -            if (!itemStack.isEmpty() && !player.getCooldowns().isOnCooldown(itemStack)) {
 -                UseOnContext context = new UseOnContext(player, hand, hitResult);
++            var event = net.neoforged.neoforge.common.CommonHooks.onRightClickBlock(player, hand, pos, hitResult);
++            if (event.isCanceled()) {
++                return event.getCancellationResult();
++            }
++            UseOnContext context = new UseOnContext(player, hand, hitResult);
++
 +            if (event.getUseItem().isTrue() || (!itemStack.isEmpty() && !player.getCooldowns().isOnCooldown(itemStack))) {
 +                if (event.getUseItem().isFalse()) return InteractionResult.PASS;
                  InteractionResult success;

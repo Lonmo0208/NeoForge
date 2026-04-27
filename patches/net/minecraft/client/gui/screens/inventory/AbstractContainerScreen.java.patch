@@ -87,15 +87,6 @@
                                  this.quickCraftingType = 2;
                              }
                          }
-@@ -425,6 +_,8 @@
-                         this.quickdropTime = time;
-                     }
-                 }
-+            } else if (this.minecraft.options.keyDrop.isActiveAndMatches(key)) {
-+                handled = true; // Forge MC-146650: Emulate MC bug, so we don't drop from hotbar when pressing drop without hovering over a item.
-             }
- 
-             return true;
 @@ -438,10 +_,13 @@
  
      @Override

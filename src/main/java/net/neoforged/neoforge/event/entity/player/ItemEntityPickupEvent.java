@@ -6,22 +6,22 @@
 package net.neoforged.neoforge.event.entity.player;
 
 import net.minecraft.util.TriState;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.Event;
 
 /**
- * Parent class of the two events that fire when a {@link Player} collides with an {@link ItemEntity}.
+ * Parent class of the two events that fire when a {@link Player} collides with an {@link LivingBlock}.
  * 
  * @see ItemEntityPickupEvent.Pre
  * @see ItemEntityPickupEvent.Post
  */
 public abstract class ItemEntityPickupEvent extends Event {
     private final Player player;
-    private final ItemEntity item;
+    private final LivingBlock item;
 
-    public ItemEntityPickupEvent(Player player, ItemEntity item) {
+    public ItemEntityPickupEvent(Player player, LivingBlock item) {
         this.player = player;
         this.item = item;
     }
@@ -34,19 +34,19 @@ public abstract class ItemEntityPickupEvent extends Event {
     }
 
     /**
-     * Returns the {@link ItemEntity} that was collided with.
+     * Returns the {@link LivingBlock} that was collided with.
      * <p>
      * Changes to this item entity will impact further processing by the game and other event handlers.
      * <p>
-     * Modification of the stored stack {@link ItemEntity#getItem()} is legal, but consumers of this event
-     * must not call {@link ItemEntity#setItem(ItemStack)}, as it will incur undefined behavior.
+     * Modification of the stored stack {@link LivingBlock#getItemStack()} is legal, but consumers of this event
+     * must not call {@link LivingBlock#setItemStack(ItemStack)}, as it will incur undefined behavior.
      */
-    public ItemEntity getItemEntity() {
+    public LivingBlock getItemEntity() {
         return item;
     }
 
     /**
-     * This event is fired when a player collides with an {@link ItemEntity} on the ground.
+     * This event is fired when a player collides with an {@link LivingBlock} on the ground.
      * It can be used to determine if the item may be picked up by the player.
      * <p>
      * If the pickup is successful (either by force or by default rules) {@link ItemEntityPickupEvent.Post} will be fired.
@@ -56,14 +56,14 @@ public abstract class ItemEntityPickupEvent extends Event {
     public static class Pre extends ItemEntityPickupEvent {
         private TriState canPickup = TriState.DEFAULT;
 
-        public Pre(Player player, ItemEntity item) {
+        public Pre(Player player, LivingBlock item) {
             super(player, item);
         }
 
         /**
          * Changes if the player may pickup the item. Setting {@link TriState#TRUE} or {@link TriState#FALSE} will allow/deny the pickup respectively.
          * <p>
-         * The default rules require that {@link ItemEntity#pickupDelay} is zero, and that {@link ItemEntity#target} matches (or is null).
+         * The default rules require that  is zero, and that  matches (or is null).
          * 
          * @param state The new pickup state.
          */
@@ -82,19 +82,19 @@ public abstract class ItemEntityPickupEvent extends Event {
     }
 
     /**
-     * This event is fired when an {@link ItemEntity} on the ground has been picked up by the player
+     * This event is fired when an {@link LivingBlock} on the ground has been picked up by the player
      * and after the item is added to the player's inventory.
      * <p>
      * This event only fires if part of the item was picked up by the player.
      * <p>
-     * If the {@linkplain ItemEntity#getItem() remaining item stack} is empty, the item entity will be discarded.
+     * If the {@linkplain LivingBlock#getItemStack()}  remaining item stack} is empty, the item entity will be discarded.
      * <p>
      * This event is only fired on the logical server.
      */
     public static class Post extends ItemEntityPickupEvent {
         private final ItemStack originalStack;
 
-        public Post(Player player, ItemEntity item, ItemStack originalStack) {
+        public Post(Player player, LivingBlock item, ItemStack originalStack) {
             super(player, item);
             this.originalStack = originalStack;
         }
@@ -108,10 +108,10 @@ public abstract class ItemEntityPickupEvent extends Event {
         }
 
         /**
-         * Returns a live reference to the remaining stack held by the {@link ItemEntity}.
+         * Returns a live reference to the remaining stack held by the {@link LivingBlock}.
          */
         public ItemStack getCurrentStack() {
-            return this.getItemEntity().getItem();
+            return this.getItemEntity().getItemStack();
         }
     }
 }

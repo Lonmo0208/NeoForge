@@ -6,7 +6,7 @@
                  .orElse(null);
 +            var event = net.neoforged.neoforge.event.EventHooks.fireBlockGrowFeature(level, random, pos, featureHolder);
 +            featureHolder = event.getFeature();
-+            if (event.isCanceled()) return false;
++            if (event.isCanceled()) return TreeGrower.GrowthResult.NONE;
              if (featureHolder != null) {
                  for (int dx = 0; dx >= -1; dx--) {
                      for (int dz = 0; dz >= -1; dz--) {

@@ -40,7 +40,7 @@ public final class DispenseFluidContainer extends DefaultDispenseItemBehavior {
 
         var resourceHandler = itemAccess.getCapability(Capabilities.Fluid.ITEM);
         if (resourceHandler == null) {
-            return super.execute(source, stack);
+            return stack;
         }
 
         Direction dispenserFacing = source.state().getValue(DispenserBlock.FACING);
@@ -56,7 +56,7 @@ public final class DispenseFluidContainer extends DefaultDispenseItemBehavior {
             stack0.grow(1);
             return this.consumeWithRemainder(source, stack, stack1);
         } else {
-            return super.execute(source, stack);
+            return stack;
         }
     }
 }

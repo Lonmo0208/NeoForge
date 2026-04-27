@@ -59,6 +59,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DispenseSource;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -106,7 +107,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -230,6 +231,7 @@ import org.apache.logging.log4j.MarkerManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
@@ -376,7 +378,7 @@ public class CommonHooks {
         return NeoForge.EVENT_BUS.post(new LivingDeathEvent(entity, src)).isCanceled();
     }
 
-    public static boolean onLivingDrops(LivingEntity entity, DamageSource source, Collection<ItemEntity> drops, boolean recentlyHit) {
+    public static boolean onLivingDrops(LivingEntity entity, DamageSource source, Collection<LivingBlock> drops, boolean recentlyHit) {
         return NeoForge.EVENT_BUS.post(new LivingDropsEvent(entity, source, drops, recentlyHit)).isCanceled();
     }
 
@@ -422,10 +424,13 @@ public class CommonHooks {
     }
 
     @Nullable
-    public static ItemEntity onPlayerTossEvent(Player player, ItemStack item, boolean dropAround, boolean includeName) {
-        player.captureDrops(Lists.newArrayList());
-        ItemEntity ret = player.drop(item, dropAround, includeName);
+    public static LivingBlock onPlayerTossEvent(Player player, ItemStack item, boolean dropAround, boolean includeName) {
+        java.util.List<LivingBlock> drops = Lists.newArrayList();
+        player.captureDrops(drops);
+        player.drop(item, dropAround);
         player.captureDrops(null);
+
+        LivingBlock ret = drops.isEmpty() ? null : drops.get(0);
 
         if (ret == null)
             return null;
@@ -549,11 +554,11 @@ public class CommonHooks {
      * @param breaker     The entity who broke the block, or null if unknown
      * @param tool        The tool used when breaking the block; may be empty
      */
-    public static void handleBlockDrops(ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, List<ItemEntity> drops, @Nullable Entity breaker, ItemStack tool) {
+    public static void handleBlockDrops(ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, List<LivingBlock> drops, @Nullable Entity breaker, ItemStack tool) {
         BlockDropsEvent event = new BlockDropsEvent(level, pos, state, blockEntity, drops, breaker, tool);
         NeoForge.EVENT_BUS.post(event);
         if (!event.isCanceled()) {
-            for (ItemEntity entity : event.getDrops()) {
+            for (LivingBlock entity : event.getDrops()) {
                 level.addFreshEntity(entity);
             }
             // Always pass false for the dropXP (last) param to spawnAfterBreak since we handle XP.
@@ -1621,6 +1626,17 @@ public class CommonHooks {
         return new UseOnContext(source.level(), null, InteractionHand.MAIN_HAND, stack, hitResult);
     }
 
+    public static UseOnContext dispenseUseOnContext(DispenseSource source, ItemStack stack) {
+        Direction facing = source.direction();
+        BlockPos pos = source.pos().relative(facing);
+        Direction blockFace = facing.getOpposite();
+        BlockHitResult hitResult = new BlockHitResult(new Vec3(
+                pos.getX() + 0.5 + blockFace.getStepX() * 0.5,
+                pos.getY() + 0.5 + blockFace.getStepY() * 0.5,
+                pos.getZ() + 0.5 + blockFace.getStepZ() * 0.5), blockFace, pos, false);
+        return new UseOnContext(source.level(), null, InteractionHand.MAIN_HAND, stack, hitResult);
+    }
+
     /**
      * Attempts to modify target block using {@link ItemAbilities#SHEARS_HARVEST} in {@link ShearsDispenseItemBehavior},
      * consistent with vanilla beehive harvest behavior (also controlled by {@link ItemAbilities#SHEARS_HARVEST}).
@@ -1631,8 +1647,8 @@ public class CommonHooks {
      * Mods may subscribe to {@link BlockEvent.BlockToolModificationEvent}
      * to override vanilla beehive harvest behavior by setting a non-null {@link BlockState} result.
      */
-    public static boolean tryDispenseShearsHarvestBlock(BlockSource source, ItemStack stack, ServerLevel level, BlockPos pos) {
-        BlockState blockstate = source.state().getToolModifiedState(dispenseUseOnContext(source, stack), ItemAbilities.SHEARS_HARVEST, false);
+    public static boolean tryDispenseShearsHarvestBlock(@UnknownNullability DispenseSource source, ItemStack stack, ServerLevel level, BlockPos pos) {
+        BlockState blockstate = source.level().getBlockState(source.pos()).getToolModifiedState(dispenseUseOnContext(source, stack), ItemAbilities.SHEARS_HARVEST, false);
         if (blockstate == null)
             return false;
         level.setBlock(pos, blockstate, 3);

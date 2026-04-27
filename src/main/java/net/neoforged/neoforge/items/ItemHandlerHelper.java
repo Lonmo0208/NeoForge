@@ -8,7 +8,8 @@ package net.neoforged.neoforge.items;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -138,8 +139,9 @@ public class ItemHandlerHelper {
 
         // drop remaining itemstack into the level
         if (!remainder.isEmpty() && !level.isClientSide()) {
-            ItemEntity entityitem = new ItemEntity(level, player.getX(), player.getY() + 0.5, player.getZ(), remainder);
-            entityitem.setPickUpDelay(40);
+            LivingBlock entityitem = new LivingBlock(EntityType.LIVING_BLOCK, level);
+            entityitem.setPos(player.getX(), player.getY() + 0.5, player.getZ());
+            entityitem.setItemStack(remainder);
             entityitem.setDeltaMovement(entityitem.getDeltaMovement().multiply(0, 1, 0));
 
             level.addFreshEntity(entityitem);

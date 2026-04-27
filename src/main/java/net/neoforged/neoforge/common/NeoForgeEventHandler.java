@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
@@ -57,8 +57,8 @@ public class NeoForgeEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onEntityJoinWorld(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity.getClass().equals(ItemEntity.class)) {
-            ItemStack stack = ((ItemEntity) entity).getItem();
+        if (entity.getClass().equals(LivingBlock.class)) {
+            ItemStack stack = ((LivingBlock) entity).getItemStack();
             Item item = stack.getItem();
             if (item.hasCustomEntity(stack)) {
                 Entity newEntity = item.createEntity(event.getLevel(), entity, stack);
