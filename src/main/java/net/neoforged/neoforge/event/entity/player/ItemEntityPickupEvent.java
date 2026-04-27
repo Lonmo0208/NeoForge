@@ -63,7 +63,7 @@ public abstract class ItemEntityPickupEvent extends Event {
         /**
          * Changes if the player may pickup the item. Setting {@link TriState#TRUE} or {@link TriState#FALSE} will allow/deny the pickup respectively.
          * <p>
-         * The default rules require that  is zero, and that  matches (or is null).
+         * The default rules require that is zero, and that matches (or is null).
          * 
          * @param state The new pickup state.
          */
@@ -87,7 +87,7 @@ public abstract class ItemEntityPickupEvent extends Event {
      * <p>
      * This event only fires if part of the item was picked up by the player.
      * <p>
-     * If the {@linkplain LivingBlock#getItemStack()}  remaining item stack} is empty, the item entity will be discarded.
+     * If the {@linkplain LivingBlock#getItemStack()} remaining item stack} is empty, the item entity will be discarded.
      * <p>
      * This event is only fired on the logical server.
      */

@@ -1,13 +1,5 @@
 --- a/net/minecraft/world/item/ProjectileWeaponItem.java
 +++ b/net/minecraft/world/item/ProjectileWeaponItem.java
-@@ -10,6 +_,7 @@
- import net.minecraft.world.InteractionHand;
- import net.minecraft.world.entity.Entity;
- import net.minecraft.world.entity.LivingEntity;
-+import net.minecraft.world.entity.player.Player;
- import net.minecraft.world.entity.projectile.Projectile;
- import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
- import net.minecraft.world.item.enchantment.EnchantmentHelper;
 @@ -24,12 +_,42 @@
          super(properties);
      }
@@ -59,7 +51,7 @@
 +        return arrow;
 +    }
 +
-+    public ItemStack getDefaultCreativeAmmo(Player player, ItemStack weapon) {
++    public ItemStack getDefaultCreativeAmmo(net.minecraft.world.entity.player.Player player, ItemStack weapon) {
 +        return ItemStack.EMPTY;
 +    }
 +

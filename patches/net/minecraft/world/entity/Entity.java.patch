@@ -1,27 +1,31 @@
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -114,13 +_,11 @@
- import net.minecraft.world.level.Level;
- import net.minecraft.world.level.block.Block;
- import net.minecraft.world.level.block.Blocks;
--import net.minecraft.world.level.block.FenceGateBlock;
- import net.minecraft.world.level.block.HoneyBlock;
- import net.minecraft.world.level.block.Mirror;
- import net.minecraft.world.level.block.Portal;
- import net.minecraft.world.level.block.RenderShape;
- import net.minecraft.world.level.block.Rotation;
--import net.minecraft.world.level.block.SoundType;
- import net.minecraft.world.level.block.state.BlockState;
- import net.minecraft.world.level.border.WorldBorder;
- import net.minecraft.world.level.entity.EntityAccess;
-@@ -160,6 +_,7 @@
+@@ -160,15 +_,16 @@
  import org.slf4j.Logger;
  
  public abstract class Entity
-+    extends net.neoforged.neoforge.attachment.AttachmentHolder
-     implements Nameable,
-     EntityAccess,
-     ScoreHolder,
+-    implements Nameable,
+-    EntityAccess,
+-    ScoreHolder,
+-    SyncedDataHolder,
+-    DataComponentGetter,
+-    ItemOwner,
+-    SlotProvider,
+-    DebugValueSource,
+-    TypedInstance<EntityType<?>>, net.neoforged.neoforge.common.extensions.IEntityExtension {
++        extends net.neoforged.neoforge.attachment.AttachmentHolder
++        implements Nameable,
++        EntityAccess,
++        ScoreHolder,
++        SyncedDataHolder,
++        DataComponentGetter,
++        ItemOwner,
++        SlotProvider,
++        DebugValueSource,
++        TypedInstance<EntityType<?>>, net.neoforged.neoforge.common.extensions.IEntityExtension {
+     private static final Logger LOGGER = LogUtils.getLogger();
+     public static final String TAG_ID = "id";
+     public static final String TAG_UUID = "UUID";
 @@ -206,6 +_,7 @@
      private static final int MAX_BLOCK_ITERATIONS_ALONG_TRAVEL_PER_TICK = 16;
      private static final double MAX_MOVEMENT_RESETTING_TRACE_DISTANCE = 8.0;
@@ -30,6 +34,15 @@
      private final EntityType<?> type;
      private boolean requiresPrecisePosition;
      private int id = ENTITY_COUNTER.incrementAndGet();
+@@ -263,7 +_,7 @@
+     protected static final int FLAG_FALL_FLYING = 7;
+     private static final EntityDataAccessor<Integer> DATA_AIR_SUPPLY_ID = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.INT);
+     private static final EntityDataAccessor<Optional<Component>> DATA_CUSTOM_NAME = SynchedEntityData.defineId(
+-        Entity.class, EntityDataSerializers.OPTIONAL_COMPONENT
++            Entity.class, EntityDataSerializers.OPTIONAL_COMPONENT
+     );
+     private static final EntityDataAccessor<Boolean> DATA_CUSTOM_NAME_VISIBLE = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
+     private static final EntityDataAccessor<Boolean> DATA_SILENT = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
 @@ -330,7 +_,10 @@
          this.defineSynchedData(entityDataBuilder);
          this.entityData = entityDataBuilder.build();
@@ -50,17 +63,229 @@
          }
  
          this.checkBelowWorld();
-@@ -1013,9 +_,7 @@
+@@ -619,11 +_,11 @@
+     public void lavaHurt() {
+         if (!this.fireImmune()) {
+             if (this.level() instanceof ServerLevel serverLevel
+-                && this.hurtServer(serverLevel, this.damageSources().lava(), 4.0F)
+-                && this.shouldPlayLavaHurtSound()
+-                && !this.isSilent()) {
++                    && this.hurtServer(serverLevel, this.damageSources().lava(), 4.0F)
++                    && this.shouldPlayLavaHurtSound()
++                    && !this.isSilent()) {
+                 serverLevel.playSound(
+-                    null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_BURN, this.getSoundSource(), 0.4F, 2.0F + this.random.nextFloat() * 0.4F
++                        null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_BURN, this.getSoundSource(), 0.4F, 2.0F + this.random.nextFloat() * 0.4F
+                 );
+             }
+         }
+@@ -748,7 +_,7 @@
+                     double checkDistance = Math.min(movement.length(), 8.0);
+                     Vec3 checkTo = this.position().add(movement.normalize().scale(checkDistance));
+                     BlockHitResult hitResult = this.level()
+-                        .clip(new ClipContext(this.position(), checkTo, ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this));
++                            .clip(new ClipContext(this.position(), checkTo, ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this));
+                     if (hitResult.getType() != HitResult.Type.MISS) {
+                         this.resetFallDistance();
+                     }
+@@ -824,11 +_,11 @@
+         if (this.moveDist > this.nextStep && !supportingState.isAir()) {
+             boolean onlyEffectStateEmittions = supportingPos.equals(effectPos);
+             boolean producedSideEffects = this.vibrationAndSoundEffectsFromBlock(
+-                effectPos, effectState, emission.emitsSounds() && this.normalStepSounds(), onlyEffectStateEmittions && this.normalStepSounds(), clippedMovement
++                    effectPos, effectState, emission.emitsSounds() && this.normalStepSounds(), onlyEffectStateEmittions && this.normalStepSounds(), clippedMovement
+             );
+             if (!onlyEffectStateEmittions) {
+                 producedSideEffects |= this.vibrationAndSoundEffectsFromBlock(
+-                    supportingPos, supportingState, false, emission.emitsEvents() && this.normalStepSounds(), clippedMovement
++                        supportingPos, supportingState, false, emission.emitsEvents() && this.normalStepSounds(), clippedMovement
+                 );
+             }
+ 
+@@ -963,16 +_,16 @@
+     protected void playEntityOnFireExtinguishedSound() {
+         if (!this.level.isClientSide()) {
+             this.level()
+-                .playSound(
+-                    null,
+-                    this.getX(),
+-                    this.getY(),
+-                    this.getZ(),
+-                    SoundEvents.GENERIC_EXTINGUISH_FIRE,
+-                    this.getSoundSource(),
+-                    0.7F,
+-                    1.6F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F
+-                );
++                    .playSound(
++                            null,
++                            this.getX(),
++                            this.getY(),
++                            this.getZ(),
++                            SoundEvents.GENERIC_EXTINGUISH_FIRE,
++                            this.getSoundSource(),
++                            0.7F,
++                            1.6F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F
++                    );
+         }
+     }
+ 
+@@ -1013,11 +_,9 @@
                  return getOnPos;
              } else {
                  BlockState belowState = this.level().getBlockState(getOnPos);
 -                return (!(offset <= 0.5) || !belowState.is(BlockTags.FENCES))
 -                        && !belowState.is(BlockTags.WALLS)
 -                        && !(belowState.getBlock() instanceof FenceGateBlock)
+-                    ? getOnPos.atY(Mth.floor(this.position.y - offset))
+-                    : getOnPos;
 +                return (!(offset <= 0.5) || !belowState.collisionExtendsVertically(this.level(), getOnPos, this))
-                     ? getOnPos.atY(Mth.floor(this.position.y - offset))
-                     : getOnPos;
++                        ? getOnPos.atY(Mth.floor(this.position.y - offset))
++                        : getOnPos;
              }
+         } else {
+             int xTruncated = Mth.floor(this.position.x);
+@@ -1038,8 +_,8 @@
+         float speedFactorHere = state.getBlock().getSpeedFactor();
+         if (!state.is(Blocks.WATER) && !state.is(Blocks.BUBBLE_COLUMN)) {
+             return speedFactorHere == 1.0
+-                ? this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor()
+-                : speedFactorHere;
++                    ? this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor()
++                    : speedFactorHere;
+         } else {
+             return speedFactorHere;
+         }
+@@ -1237,69 +_,69 @@
+     }
+ 
+     private int checkInsideBlocks(
+-        Vec3 from, Vec3 to, InsideBlockEffectApplier.StepBasedCollector effectCollector, LongSet visitedBlocks, int maxMovementIterations
++            Vec3 from, Vec3 to, InsideBlockEffectApplier.StepBasedCollector effectCollector, LongSet visitedBlocks, int maxMovementIterations
+     ) {
+         AABB deflatedBoundingBoxAtTarget = this.makeBoundingBox(to).deflate(1.0E-5F);
+         boolean movedFar = from.distanceToSqr(to) > Mth.square(0.9999900000002526);
+         boolean debugEntityBlockIntersections = this.level instanceof ServerLevel serverLevel
+-            && serverLevel.getServer().debugSubscribers().hasAnySubscriberFor(DebugSubscriptions.ENTITY_BLOCK_INTERSECTIONS);
++                && serverLevel.getServer().debugSubscribers().hasAnySubscriberFor(DebugSubscriptions.ENTITY_BLOCK_INTERSECTIONS);
+         AtomicInteger iterations = new AtomicInteger();
+         BlockGetter.forEachBlockIntersectedBetween(
+-            from,
+-            to,
+-            deflatedBoundingBoxAtTarget,
+-            (blockIntersection, iteration) -> {
+-                if (!this.isAlive()) {
+-                    return false;
+-                } else if (iteration >= maxMovementIterations) {
+-                    return false;
+-                } else {
+-                    iterations.set(iteration);
+-                    BlockState state = this.level().getBlockState(blockIntersection);
+-                    if (state.isAir()) {
+-                        if (debugEntityBlockIntersections) {
+-                            this.debugBlockIntersection((ServerLevel)this.level(), blockIntersection.immutable(), false, false);
+-                        }
+-
+-                        return true;
++                from,
++                to,
++                deflatedBoundingBoxAtTarget,
++                (blockIntersection, iteration) -> {
++                    if (!this.isAlive()) {
++                        return false;
++                    } else if (iteration >= maxMovementIterations) {
++                        return false;
+                     } else {
+-                        VoxelShape intersectShape = state.getEntityInsideCollisionShape(this.level(), blockIntersection, this);
+-                        boolean insideBlock = intersectShape == Shapes.block()
+-                            || this.collidedWithShapeMovingFrom(from, to, intersectShape.move(new Vec3(blockIntersection)).toAabbs());
+-                        boolean insideFluid = this.collidedWithFluid(state.getFluidState(), blockIntersection, from, to);
+-                        if ((insideBlock || insideFluid) && visitedBlocks.add(blockIntersection.asLong())) {
+-                            if (insideBlock) {
+-                                try {
+-                                    boolean isPrecise = movedFar || deflatedBoundingBoxAtTarget.intersects(blockIntersection);
+-                                    effectCollector.advanceStep(iteration);
+-                                    state.entityInside(this.level(), blockIntersection, this, effectCollector, isPrecise);
+-                                    this.onInsideBlock(state);
+-                                } catch (Throwable var20) {
+-                                    CrashReport report = CrashReport.forThrowable(var20, "Colliding entity with block");
+-                                    CrashReportCategory category = report.addCategory("Block being collided with");
+-                                    CrashReportCategory.populateBlockDetails(category, this.level(), blockIntersection, state);
+-                                    CrashReportCategory entityCategory = report.addCategory("Entity being checked for collision");
+-                                    this.fillCrashReportCategory(entityCategory);
+-                                    throw new ReportedException(report);
+-                                }
+-                            }
+-
+-                            if (insideFluid) {
+-                                effectCollector.advanceStep(iteration);
+-                                state.getFluidState().entityInside(this.level(), blockIntersection, this, effectCollector);
+-                            }
+-
++                        iterations.set(iteration);
++                        BlockState state = this.level().getBlockState(blockIntersection);
++                        if (state.isAir()) {
+                             if (debugEntityBlockIntersections) {
+-                                this.debugBlockIntersection((ServerLevel)this.level(), blockIntersection.immutable(), insideBlock, insideFluid);
++                                this.debugBlockIntersection((ServerLevel)this.level(), blockIntersection.immutable(), false, false);
+                             }
+ 
+                             return true;
+                         } else {
+-                            return true;
++                            VoxelShape intersectShape = state.getEntityInsideCollisionShape(this.level(), blockIntersection, this);
++                            boolean insideBlock = intersectShape == Shapes.block()
++                                    || this.collidedWithShapeMovingFrom(from, to, intersectShape.move(new Vec3(blockIntersection)).toAabbs());
++                            boolean insideFluid = this.collidedWithFluid(state.getFluidState(), blockIntersection, from, to);
++                            if ((insideBlock || insideFluid) && visitedBlocks.add(blockIntersection.asLong())) {
++                                if (insideBlock) {
++                                    try {
++                                        boolean isPrecise = movedFar || deflatedBoundingBoxAtTarget.intersects(blockIntersection);
++                                        effectCollector.advanceStep(iteration);
++                                        state.entityInside(this.level(), blockIntersection, this, effectCollector, isPrecise);
++                                        this.onInsideBlock(state);
++                                    } catch (Throwable var20) {
++                                        CrashReport report = CrashReport.forThrowable(var20, "Colliding entity with block");
++                                        CrashReportCategory category = report.addCategory("Block being collided with");
++                                        CrashReportCategory.populateBlockDetails(category, this.level(), blockIntersection, state);
++                                        CrashReportCategory entityCategory = report.addCategory("Entity being checked for collision");
++                                        this.fillCrashReportCategory(entityCategory);
++                                        throw new ReportedException(report);
++                                    }
++                                }
++
++                                if (insideFluid) {
++                                    effectCollector.advanceStep(iteration);
++                                    state.getFluidState().entityInside(this.level(), blockIntersection, this, effectCollector);
++                                }
++
++                                if (debugEntityBlockIntersections) {
++                                    this.debugBlockIntersection((ServerLevel)this.level(), blockIntersection.immutable(), insideBlock, insideFluid);
++                                }
++
++                                return true;
++                            } else {
++                                return true;
++                            }
+                         }
+                     }
+                 }
+-            }
+         );
+         return iterations.get() + 1;
+     }
+@@ -1358,9 +_,9 @@
+         float volumeModifier = entity == this ? 0.35F : 0.4F;
+         Vec3 deltaMovement = entity.getDeltaMovement();
+         float speed = Math.min(
+-            1.0F,
+-            (float)Math.sqrt(deltaMovement.x * deltaMovement.x * 0.2F + deltaMovement.y * deltaMovement.y + deltaMovement.z * deltaMovement.z * 0.2F)
+-                * volumeModifier
++                1.0F,
++                (float)Math.sqrt(deltaMovement.x * deltaMovement.x * 0.2F + deltaMovement.y * deltaMovement.y + deltaMovement.z * deltaMovement.z * 0.2F)
++                        * volumeModifier
+         );
+         this.playSwimSound(speed);
+     }
 @@ -1371,20 +_,20 @@
          return !aboveState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !aboveState.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? affectingPos : abovePos;
      }
@@ -91,23 +316,109 @@
      }
  
      private boolean shouldPlayAmethystStepSound(BlockState affectingState) {
-@@ -1638,6 +_,7 @@
+@@ -1480,13 +_,13 @@
+             if (this.fallDistance > 0.0) {
+                 onState.getBlock().fallOn(this.level(), onState, pos, this, this.fallDistance);
+                 this.level()
+-                    .gameEvent(
+-                        GameEvent.HIT_GROUND,
+-                        this.position,
+-                        GameEvent.Context.of(
+-                            this, this.mainSupportingBlockPos.<BlockState>map(blockPos -> this.level().getBlockState(blockPos)).orElse(onState)
+-                        )
+-                    );
++                        .gameEvent(
++                                GameEvent.HIT_GROUND,
++                                this.position,
++                                GameEvent.Context.of(
++                                        this, this.mainSupportingBlockPos.<BlockState>map(blockPos -> this.level().getBlockState(blockPos)).orElse(onState)
++                                )
++                        );
+             }
+ 
+             this.resetFallDistance();
+@@ -1558,7 +_,7 @@
+             this.setSwimming(this.isSprinting() && this.isInWater() && !this.isPassenger());
+         } else {
+             this.setSwimming(
+-                this.isSprinting() && this.isUnderWater() && !this.isPassenger() && this.level().getFluidState(this.blockPosition).is(FluidTags.WATER)
++                    this.isSprinting() && this.isUnderWater() && !this.isPassenger() && this.level().getFluidState(this.blockPosition).is(FluidTags.WATER)
+             );
+         }
+     }
+@@ -1594,7 +_,7 @@
+         float volumeModifier = entity == this ? 0.2F : 0.9F;
+         Vec3 movement = entity.getDeltaMovement();
+         float speed = Math.min(
+-            1.0F, (float)Math.sqrt(movement.x * movement.x * 0.2F + movement.y * movement.y + movement.z * movement.z * 0.2F) * volumeModifier
++                1.0F, (float)Math.sqrt(movement.x * movement.x * 0.2F + movement.y * movement.y + movement.z * movement.z * 0.2F) * volumeModifier
+         );
+         if (speed < 0.25F) {
+             this.playSound(this.getSwimSplashSound(), speed, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+@@ -1608,9 +_,9 @@
+             double xo = (this.random.nextDouble() * 2.0 - 1.0) * this.dimensions.width();
+             double zo = (this.random.nextDouble() * 2.0 - 1.0) * this.dimensions.width();
+             this.level()
+-                .addParticle(
+-                    ParticleTypes.BUBBLE, this.getX() + xo, yt + 1.0F, this.getZ() + zo, movement.x, movement.y - this.random.nextDouble() * 0.2F, movement.z
+-                );
++                    .addParticle(
++                            ParticleTypes.BUBBLE, this.getX() + xo, yt + 1.0F, this.getZ() + zo, movement.x, movement.y - this.random.nextDouble() * 0.2F, movement.z
++                    );
+         }
+ 
+         for (int i = 0; i < 1.0F + this.dimensions.width() * 20.0F; i++) {
+@@ -1638,22 +_,23 @@
      protected void spawnSprintParticle() {
          BlockPos pos = this.getOnPosLegacy();
          BlockState blockState = this.level().getBlockState(pos);
-+        if(!blockState.addRunningEffects(level, pos, this))
-         if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
-             Vec3 movement = this.getDeltaMovement();
-             BlockPos entityPosition = this.blockPosition();
-@@ -1652,7 +_,7 @@
-             }
- 
-             this.level()
+-        if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
+-            Vec3 movement = this.getDeltaMovement();
+-            BlockPos entityPosition = this.blockPosition();
+-            double x = this.getX() + (this.random.nextDouble() - 0.5) * this.dimensions.width();
+-            double z = this.getZ() + (this.random.nextDouble() - 0.5) * this.dimensions.width();
+-            if (entityPosition.getX() != pos.getX()) {
+-                x = Mth.clamp(x, (double)pos.getX(), pos.getX() + 1.0);
+-            }
+-
+-            if (entityPosition.getZ() != pos.getZ()) {
+-                z = Mth.clamp(z, (double)pos.getZ(), pos.getZ() + 1.0);
+-            }
+-
+-            this.level()
 -                .addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), x, this.getY() + 0.1, z, movement.x * -4.0, 1.5, movement.z * -4.0);
-+                .addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState, pos), x, this.getY() + 0.1, z, movement.x * -4.0, 1.5, movement.z * -4.0);
-         }
+-        }
++        if(!blockState.addRunningEffects(level, pos, this))
++            if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
++                Vec3 movement = this.getDeltaMovement();
++                BlockPos entityPosition = this.blockPosition();
++                double x = this.getX() + (this.random.nextDouble() - 0.5) * this.dimensions.width();
++                double z = this.getZ() + (this.random.nextDouble() - 0.5) * this.dimensions.width();
++                if (entityPosition.getX() != pos.getX()) {
++                    x = Mth.clamp(x, (double)pos.getX(), pos.getX() + 1.0);
++                }
++
++                if (entityPosition.getZ() != pos.getZ()) {
++                    z = Mth.clamp(z, (double)pos.getZ(), pos.getZ() + 1.0);
++                }
++
++                this.level()
++                        .addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState, pos), x, this.getY() + 0.1, z, movement.x * -4.0, 1.5, movement.z * -4.0);
++            }
      }
  
+     public boolean isEyeInFluid(TagKey<Fluid> type) {
+@@ -1684,8 +_,8 @@
+     @Deprecated
+     public float getLightLevelDependentMagicValue() {
+         return this.level().hasChunkAt(this.getBlockX(), this.getBlockZ())
+-            ? this.level().getLightLevelDependentMagicValue(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ()))
+-            : 0.0F;
++                ? this.level().getLightLevelDependentMagicValue(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ()))
++                : 0.0F;
+     }
+ 
+     public void absSnapTo(double x, double y, double z, float yRot, float xRot) {
 @@ -2037,6 +_,11 @@
                  output.store("data", CustomData.CODEC, this.customData);
              }
@@ -120,6 +431,15 @@
              this.addAdditionalSaveData(output);
              if (this.isVehicle()) {
                  ValueOutput.ValueOutputList passengersList = output.childrenList("Passengers");
+@@ -2066,7 +_,7 @@
+             Vec3 motion = input.read("Motion", Vec3.CODEC).orElse(Vec3.ZERO);
+             Vec2 rotation = input.read("Rotation", Vec2.CODEC).orElse(Vec2.ZERO);
+             this.setDeltaMovement(
+-                Math.abs(motion.x) > 10.0 ? 0.0 : motion.x, Math.abs(motion.y) > 10.0 ? 0.0 : motion.y, Math.abs(motion.z) > 10.0 ? 0.0 : motion.z
++                    Math.abs(motion.x) > 10.0 ? 0.0 : motion.x, Math.abs(motion.y) > 10.0 ? 0.0 : motion.y, Math.abs(motion.z) > 10.0 ? 0.0 : motion.z
+             );
+             this.needsSync = true;
+             double maxHorizontalPosition = 3.0000512E7;
 @@ -2099,6 +_,8 @@
                  this.setTicksFrozen(input.getIntOr("TicksFrozen", 0));
                  this.hasVisualFire = input.getBooleanOr("HasVisualFire", false);
@@ -129,7 +449,56 @@
                  this.tags.clear();
                  input.read("Tags", TAG_LIST_CODEC).ifPresent(this.tags::addAll);
                  this.readAdditionalSaveData(input);
-@@ -2200,11 +_,11 @@
+@@ -2143,8 +_,8 @@
+ 
+     public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemStack itemStack, Vec3 offset) {
+         return (Collection<LivingBlock>)(itemStack.isEmpty()
+-            ? List.of()
+-            : LivingBlock.createStack(this.level(), BlockPos.containing(this.position().add(offset)), this, itemStack));
++                ? List.of()
++                : LivingBlock.createStack(this.level(), BlockPos.containing(this.position().add(offset)), this, itemStack));
+     }
+ 
+     public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemStack itemStack, float offset) {
+@@ -2162,24 +_,24 @@
+             float checkWidth = this.dimensions.width() * 0.8F;
+             AABB eyeBb = AABB.ofSize(this.getEyePosition(), checkWidth, 1.0E-6, checkWidth);
+             return BlockPos.betweenClosedStream(eyeBb)
+-                .anyMatch(
+-                    pos -> {
+-                        BlockState state = this.level().getBlockState(pos);
+-                        return !state.isAir()
+-                            && state.isSuffocating(this.level(), pos)
+-                            && Shapes.joinIsNotEmpty(state.getCollisionShape(this.level(), pos).move(pos), Shapes.create(eyeBb), BooleanOp.AND);
+-                    }
+-                );
++                    .anyMatch(
++                            pos -> {
++                                BlockState state = this.level().getBlockState(pos);
++                                return !state.isAir()
++                                        && state.isSuffocating(this.level(), pos)
++                                        && Shapes.joinIsNotEmpty(state.getCollisionShape(this.level(), pos).move(pos), Shapes.create(eyeBb), BooleanOp.AND);
++                            }
++                    );
+         }
+     }
+ 
+     public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
+         if (!this.level().isClientSide()
+-            && player.isSecondaryUseActive()
+-            && this instanceof Leashable leashable
+-            && leashable.canBeLeashed()
+-            && this.isAlive()
+-            && !(this instanceof LivingEntity le && le.isBaby())) {
++                && player.isSecondaryUseActive()
++                && this instanceof Leashable leashable
++                && leashable.canBeLeashed()
++                && this.isAlive()
++                && !(this instanceof LivingEntity le && le.isBaby())) {
+             List<Leashable> mobsToLeash = Leashable.leashableInArea(this, l -> l.getLeashHolder() == player);
+             if (!mobsToLeash.isEmpty()) {
+                 boolean anyLeashed = false;
+@@ -2200,14 +_,14 @@
          }
  
          ItemStack heldItem = player.getItemInHand(hand);
@@ -139,10 +508,27 @@
              return InteractionResult.SUCCESS;
          } else if (this instanceof Mob target
 -            && heldItem.is(Items.SHEARS)
-+            && heldItem.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHEARS_REMOVE_ARMOR)
-             && target.canShearEquipment(player)
-             && !player.isSecondaryUseActive()
-             && this.attemptToShearEquipment(player, hand, heldItem, target)) {
+-            && target.canShearEquipment(player)
+-            && !player.isSecondaryUseActive()
+-            && this.attemptToShearEquipment(player, hand, heldItem, target)) {
++                && heldItem.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHEARS_REMOVE_ARMOR)
++                && target.canShearEquipment(player)
++                && !player.isSecondaryUseActive()
++                && this.attemptToShearEquipment(player, hand, heldItem, target)) {
+             return InteractionResult.SUCCESS;
+         } else {
+             if (this.isAlive() && this instanceof Leashable leashablex) {
+@@ -2277,8 +_,8 @@
+             ItemStack itemStack = target.getItemBySlot(slot);
+             Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+             if (equippable != null
+-                && equippable.canBeSheared()
+-                && (!EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || player.isCreative())) {
++                    && equippable.canBeSheared()
++                    && (!EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || player.isCreative())) {
+                 heldItem.hurtAndBreak(1, player, hand.asEquipmentSlot());
+                 Vec3 equipmentSpawnOffset = this.dimensions.attachments().getAverage(EntityAttachment.PASSENGER);
+                 target.setItemSlotAndDropWhenKilled(slot, ItemStack.EMPTY);
 @@ -2306,7 +_,11 @@
  
      public void rideTick() {
@@ -160,10 +546,21 @@
                  }
              }
  
-+        if (!net.neoforged.neoforge.event.EventHooks.canMountEntity(this, entityToRide, true)) return false;
++            if (!net.neoforged.neoforge.event.EventHooks.canMountEntity(this, entityToRide, true)) return false;
              if (force || this.canRide(entityToRide) && entityToRide.canAddPassenger(this)) {
                  if (this.isPassenger()) {
                      this.stopRiding();
+@@ -2377,8 +_,8 @@
+                 if (sendEventAndTriggers) {
+                     this.level().gameEvent(this, GameEvent.ENTITY_MOUNT, this.vehicle.position);
+                     entityToRide.getIndirectPassengersStream()
+-                        .filter(e -> e instanceof ServerPlayer)
+-                        .forEach(player -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)player));
++                            .filter(e -> e instanceof ServerPlayer)
++                            .forEach(player -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)player));
+                 }
+ 
+                 return true;
 @@ -2401,6 +_,7 @@
      public void removeVehicle() {
          if (this.vehicle != null) {
@@ -181,6 +578,15 @@
      protected boolean couldAcceptPassenger() {
          return true;
      }
+@@ -2475,7 +_,7 @@
+         InterpolationHandler interpolationHandler = this.getInterpolation();
+         if (interpolationHandler != null) {
+             interpolationHandler.interpolateTo(
+-                position.orElse(interpolationHandler.position()), yRot.orElse(interpolationHandler.yRot()), xRot.orElse(interpolationHandler.xRot())
++                    position.orElse(interpolationHandler.position()), yRot.orElse(interpolationHandler.yRot()), xRot.orElse(interpolationHandler.xRot())
+             );
+         } else {
+             position.ifPresent(this::setPos);
 @@ -2763,7 +_,7 @@
              this.igniteForSeconds(8.0F);
          }
@@ -190,6 +596,19 @@
      }
  
      public void onAboveBubbleColumn(boolean dragDown, BlockPos pos) {
+@@ -2789,10 +_,10 @@
+ 
+             for (int i = 0; i < 2; i++) {
+                 serverLevel.sendParticles(
+-                    ParticleTypes.SPLASH, pos.getX() + random.nextDouble(), pos.getY() + 1, pos.getZ() + random.nextDouble(), 1, 0.0, 0.0, 0.0, 1.0
++                        ParticleTypes.SPLASH, pos.getX() + random.nextDouble(), pos.getY() + 1, pos.getZ() + random.nextDouble(), 1, 0.0, 0.0, 0.0, 1.0
+                 );
+                 serverLevel.sendParticles(
+-                    ParticleTypes.BUBBLE, pos.getX() + random.nextDouble(), pos.getY() + 1, pos.getZ() + random.nextDouble(), 1, 0.0, 0.01, 0.0, 0.2
++                        ParticleTypes.BUBBLE, pos.getX() + random.nextDouble(), pos.getY() + 1, pos.getZ() + random.nextDouble(), 1, 0.0, 0.01, 0.0, 0.2
+                 );
+             }
+         }
 @@ -2882,7 +_,7 @@
      }
  
@@ -199,15 +618,43 @@
      }
  
      public boolean is(Entity other) {
-@@ -2937,10 +_,11 @@
+@@ -2911,7 +_,7 @@
+     public String toString() {
+         String levelId = this.level() == null ? "~NULL~" : this.level().toString();
+         return this.removalReason != null
+-            ? String.format(
++                ? String.format(
+                 Locale.ROOT,
+                 "%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f, removed=%s]",
+                 this.getClass().getSimpleName(),
+@@ -2922,8 +_,8 @@
+                 this.getY(),
+                 this.getZ(),
+                 this.removalReason
+-            )
+-            : String.format(
++        )
++                : String.format(
+                 Locale.ROOT,
+                 "%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f]",
+                 this.getClass().getSimpleName(),
+@@ -2933,14 +_,15 @@
+                 this.getX(),
+                 this.getY(),
+                 this.getZ()
+-            );
++        );
      }
  
      protected final boolean isInvulnerableToBase(DamageSource source) {
 -        return this.isRemoved()
+-            || this.invulnerable && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.isCreativePlayer()
+-            || source.is(DamageTypeTags.IS_FIRE) && this.fireImmune()
+-            || source.is(DamageTypeTags.IS_FALL) && this.is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
 +        boolean isVanillaInvulnerable = this.isRemoved()
-             || this.invulnerable && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.isCreativePlayer()
-             || source.is(DamageTypeTags.IS_FIRE) && this.fireImmune()
-             || source.is(DamageTypeTags.IS_FALL) && this.is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
++                || this.invulnerable && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.isCreativePlayer()
++                || source.is(DamageTypeTags.IS_FIRE) && this.fireImmune()
++                || source.is(DamageTypeTags.IS_FALL) && this.is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
 +        return net.neoforged.neoforge.common.CommonHooks.isEntityInvulnerableTo(this, source, isVanillaInvulnerable);
      }
  
@@ -220,6 +667,45 @@
          if (this.level() instanceof ServerLevel serverLevel && !this.isRemoved()) {
              ServerLevel newLevel = transition.newLevel();
              boolean otherDimension = newLevel.dimension() != serverLevel.dimension();
+@@ -3047,11 +_,11 @@
+         float passengerXRot = transition.xRot() + (transition.relatives().contains(Relative.X_ROT) ? 0.0F : passenger.getXRot() - this.getXRot());
+         Vec3 passengerOffset = passenger.position().subtract(this.position());
+         Vec3 passengerPos = transition.position()
+-            .add(
+-                transition.relatives().contains(Relative.X) ? 0.0 : passengerOffset.x(),
+-                transition.relatives().contains(Relative.Y) ? 0.0 : passengerOffset.y(),
+-                transition.relatives().contains(Relative.Z) ? 0.0 : passengerOffset.z()
+-            );
++                .add(
++                        transition.relatives().contains(Relative.X) ? 0.0 : passengerOffset.x(),
++                        transition.relatives().contains(Relative.Y) ? 0.0 : passengerOffset.y(),
++                        transition.relatives().contains(Relative.Z) ? 0.0 : passengerOffset.z()
++                );
+         return transition.withPosition(passengerPos).withRotation(passengerYRot, passengerXRot).transitionAsPassenger();
+     }
+ 
+@@ -3062,9 +_,9 @@
+             if (passenger instanceof ServerPlayer player) {
+                 if (controller != null && player.getId() == controller.getId()) {
+                     player.connection
+-                        .send(
+-                            ClientboundTeleportEntityPacket.teleport(this.getId(), PositionMoveRotation.of(transition), transition.relatives(), this.onGround)
+-                        );
++                            .send(
++                                    ClientboundTeleportEntityPacket.teleport(this.getId(), PositionMoveRotation.of(transition), transition.relatives(), this.onGround)
++                            );
+                 } else {
+                     player.connection.send(ClientboundTeleportEntityPacket.teleport(this.getId(), PositionMoveRotation.of(this), Set.of(), this.onGround));
+                 }
+@@ -3158,7 +_,7 @@
+         category.setDetail("Entity Name", () -> this.getPlainTextName());
+         category.setDetail("Entity's Exact location", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", this.getX(), this.getY(), this.getZ()));
+         category.setDetail(
+-            "Entity's Block location", CrashReportCategory.formatLocation(this.level(), Mth.floor(this.getX()), Mth.floor(this.getY()), Mth.floor(this.getZ()))
++                "Entity's Block location", CrashReportCategory.formatLocation(this.level(), Mth.floor(this.getX()), Mth.floor(this.getY()), Mth.floor(this.getZ()))
+         );
+         Vec3 movement = this.getDeltaMovement();
+         category.setDetail("Entity's Momentum", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", movement.x, movement.y, movement.z));
 @@ -3189,6 +_,7 @@
          return this.stringUUID;
      }
@@ -228,7 +714,25 @@
      public boolean isPushedByFluid() {
          return true;
      }
-@@ -3298,6 +_,8 @@
+@@ -3204,7 +_,7 @@
+     @Override
+     public Component getDisplayName() {
+         return PlayerTeam.formatNameForTeam(this.getTeam(), this.getName())
+-            .withStyle(s -> s.withHoverEvent(this.createHoverEvent()).withInsertion(this.getStringUUID()));
++                .withStyle(s -> s.withHoverEvent(this.createHoverEvent()).withInsertion(this.getStringUUID()));
+     }
+ 
+     public void setCustomName(@Nullable Component name) {
+@@ -3243,7 +_,7 @@
+ 
+     public boolean teleportTo(ServerLevel level, double x, double y, double z, Set<Relative> relatives, float newYRot, float newXRot, boolean resetCamera) {
+         Entity newEntity = this.teleport(
+-            new TeleportTransition(level, new Vec3(x, y, z), Vec3.ZERO, newYRot, newXRot, relatives, TeleportTransition.DO_NOTHING)
++                new TeleportTransition(level, new Vec3(x, y, z), Vec3.ZERO, newYRot, newXRot, relatives, TeleportTransition.DO_NOTHING)
+         );
+         return newEntity != null;
+     }
+@@ -3298,16 +_,18 @@
          EntityDimensions oldDim = this.dimensions;
          Pose pose = this.getPose();
          EntityDimensions newDim = this.getDimensions(pose);
@@ -237,6 +741,64 @@
          this.dimensions = newDim;
          this.eyeHeight = newDim.eyeHeight();
          this.reapplyPosition();
+         boolean isSmall = newDim.width() <= 4.0F && newDim.height() <= 4.0F;
+         if (!this.level.isClientSide()
+-            && !this.firstTick
+-            && !this.noPhysics
+-            && isSmall
+-            && (newDim.width() > oldDim.width() || newDim.height() > oldDim.height())
+-            && !(this instanceof Player)) {
++                && !this.firstTick
++                && !this.noPhysics
++                && isSmall
++                && (newDim.width() > oldDim.width() || newDim.height() > oldDim.height())
++                && !(this instanceof Player)) {
+             this.fudgePositionAfterSizeChange(oldDim);
+         }
+     }
+@@ -3319,7 +_,7 @@
+         double heightDelta = Math.max(0.0F, newDimensions.height() - previousDimensions.height()) + 1.0E-6;
+         VoxelShape allowedCenters = Shapes.create(AABB.ofSize(oldCenter, widthDelta, heightDelta, widthDelta));
+         Optional<Vec3> freePosition = this.level
+-            .findFreePosition(this, allowedCenters, oldCenter, newDimensions.width(), newDimensions.height(), newDimensions.width());
++                .findFreePosition(this, allowedCenters, oldCenter, newDimensions.width(), newDimensions.height(), newDimensions.width());
+         if (freePosition.isPresent()) {
+             this.setPos(freePosition.get().add(0.0, -newDimensions.height() / 2.0, 0.0));
+             return true;
+@@ -3327,7 +_,7 @@
+             if (newDimensions.width() > previousDimensions.width() && newDimensions.height() > previousDimensions.height()) {
+                 VoxelShape allowedCentersIgnoringY = Shapes.create(AABB.ofSize(oldCenter, widthDelta, 1.0E-6, widthDelta));
+                 Optional<Vec3> freePositionIgnoreVertical = this.level
+-                    .findFreePosition(this, allowedCentersIgnoringY, oldCenter, newDimensions.width(), previousDimensions.height(), newDimensions.width());
++                        .findFreePosition(this, allowedCentersIgnoringY, oldCenter, newDimensions.width(), previousDimensions.height(), newDimensions.width());
+                 if (freePositionIgnoreVertical.isPresent()) {
+                     this.setPos(freePositionIgnoreVertical.get().add(0.0, -previousDimensions.height() / 2.0 + 1.0E-6, 0.0));
+                     return true;
+@@ -3546,15 +_,15 @@
+ 
+     public CommandSourceStack createCommandSourceStackForNameResolution(ServerLevel level) {
+         return new CommandSourceStack(
+-            CommandSource.NULL,
+-            this.position(),
+-            this.getRotationVector(),
+-            level,
+-            PermissionSet.NO_PERMISSIONS,
+-            this.getPlainTextName(),
+-            this.getDisplayName(),
+-            level.getServer(),
+-            this
++                CommandSource.NULL,
++                this.position(),
++                this.getRotationVector(),
++                level,
++                PermissionSet.NO_PERMISSIONS,
++                this.getPlainTextName(),
++                this.getDisplayName(),
++                level.getServer(),
++                this
+         );
+     }
+ 
 @@ -3739,6 +_,10 @@
                  }
              }
@@ -248,12 +810,10 @@
      }
  
      public void checkDespawn() {
-@@ -3879,6 +_,85 @@
- 
-     public boolean mayInteract(ServerLevel level, BlockPos pos) {
+@@ -3881,6 +_,85 @@
          return true;
-+    }
-+
+     }
+ 
 +    private java.util.@Nullable Collection<LivingBlock> captureDrops = null;
 +
 +    @Override
@@ -282,9 +842,9 @@
 +    @Override
 +    public boolean canTrample(ServerLevel level, BlockState state, BlockPos pos, double fallDistance) {
 +        return level.getRandom().nextFloat() < fallDistance - 0.5F
-+             && this instanceof LivingEntity
-+             && (this instanceof Player || net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, this))
-+             && this.getBbWidth() * this.getBbWidth() * this.getBbHeight() > 0.512F;
++                && this instanceof LivingEntity
++                && (this instanceof Player || net.neoforged.neoforge.event.EventHooks.canEntityGrief(level, this))
++                && this.getBbWidth() * this.getBbWidth() * this.getBbHeight() > 0.512F;
 +    }
 +
 +    /**
@@ -331,6 +891,19 @@
 +    @Nullable
 +    public final <T> T getCapability(net.neoforged.neoforge.capabilities.EntityCapability<T, @org.jspecify.annotations.Nullable Void> capability) {
 +        return capability.getCapability(this, null);
++    }
++
+     public boolean isFlyingVehicle() {
+         return false;
+     }
+@@ -3948,8 +_,8 @@
+             return castComponentValue((DataComponentType<T>)type, this.getCustomName());
+         } else {
+             return type == DataComponents.CUSTOM_DATA
+-                ? castComponentValue((DataComponentType<T>)type, this.customData)
+-                : this.typeHolder().components().get(type);
++                    ? castComponentValue((DataComponentType<T>)type, this.customData)
++                    : this.typeHolder().components().get(type);
+         }
      }
  
-     public boolean isFlyingVehicle() {

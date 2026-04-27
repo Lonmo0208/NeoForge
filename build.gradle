@@ -22,7 +22,10 @@ if (fixedProjectVersion == null) {
         final preReleaseSuffix = project.minecraft_version.split("-", 2)[1]
         project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.0+${preReleaseSuffix}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
     } else {
-        project.version = gradleutils.version.toString()
+        def fullVersion = gradleutils.version.toString()
+        def suffixIndex = fullVersion.lastIndexOf('.')
+        def suffix = suffixIndex > 0 ? fullVersion.substring(suffixIndex) : ".1-beta"
+        project.version = project.neoforge_snapshot_next_stable + suffix
     }
 } else {
     project.version = fixedProjectVersion

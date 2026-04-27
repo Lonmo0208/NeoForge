@@ -10,7 +10,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.neoforged.bus.api.ICancellableEvent;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.NeoForge;
 
 /**
@@ -18,11 +17,11 @@ import net.neoforged.neoforge.common.NeoForge;
  * This event is fired whenever an Entity dies and drops items in
  * {@link LivingEntity#die(DamageSource)}.<br>
  * <br>
- * This event is fired via the  .<br>
+ * This event is fired via the .<br>
  * <br>
  * {@link #source} contains the DamageSource that caused the drop to occur.<br>
  * {@link #drops} contains the ArrayList of EntityItems that will be dropped.<br>
- *  contains the amount of loot that will be dropped.<br>
+ * contains the amount of loot that will be dropped.<br>
  * {@link #recentlyHit} determines whether the Entity doing the drop has recently been damaged.<br>
  * <br>
  * This event is {@link ICancellableEvent}.<br>

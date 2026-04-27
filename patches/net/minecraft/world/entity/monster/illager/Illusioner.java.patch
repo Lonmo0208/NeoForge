@@ -1,14 +1,33 @@
 --- a/net/minecraft/world/entity/monster/illager/Illusioner.java
 +++ b/net/minecraft/world/entity/monster/illager/Illusioner.java
-@@ -37,6 +_,7 @@
- import net.minecraft.world.entity.projectile.ProjectileUtil;
- import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
- import net.minecraft.world.entity.raid.Raider;
-+import net.minecraft.world.item.BowItem;
- import net.minecraft.world.item.ItemStack;
- import net.minecraft.world.item.Items;
- import net.minecraft.world.level.Level;
-@@ -178,9 +_,11 @@
+@@ -87,7 +_,7 @@
+ 
+     @Override
+     public SpawnGroupData finalizeSpawn(
+-        ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData groupData
++            ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData groupData
+     ) {
+         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+         return super.finalizeSpawn(level, difficulty, spawnReason, groupData);
+@@ -110,7 +_,7 @@
+                 for (int i = 0; i < 4; i++) {
+                     this.clientSideIllusionOffsets[0][i] = this.clientSideIllusionOffsets[1][i];
+                     this.clientSideIllusionOffsets[1][i] = new Vec3(
+-                        (-6.0F + this.random.nextInt(13)) * 0.5, Math.max(0, this.random.nextInt(6) - 4), (-6.0F + this.random.nextInt(13)) * 0.5
++                            (-6.0F + this.random.nextInt(13)) * 0.5, Math.max(0, this.random.nextInt(6) - 4), (-6.0F + this.random.nextInt(13)) * 0.5
+                     );
+                 }
+ 
+@@ -119,7 +_,7 @@
+                 }
+ 
+                 this.level()
+-                    .playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0F, 1.0F, false);
++                        .playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0F, 1.0F, false);
+             } else if (this.hurtTime == this.hurtDuration - 1) {
+                 this.clientSideIllusionTicks = 3;
+ 
+@@ -178,16 +_,18 @@
  
      @Override
      public void performRangedAttack(Entity target, float power) {
@@ -21,3 +40,22 @@
          double xd = target.getX() - this.getX();
          double yd = target.getY(0.3333333333333333) - arrow.getY();
          double zd = target.getZ() - this.getZ();
+         double distanceToTarget = Math.sqrt(xd * xd + zd * zd);
+         if (this.level() instanceof ServerLevel serverLevel) {
+             Projectile.spawnProjectileUsingShoot(
+-                arrow, serverLevel, projectile, xd, yd + distanceToTarget * 0.2F, zd, 1.6F, 14 - serverLevel.getDifficulty().getId() * 4
++                    arrow, serverLevel, projectile, xd, yd + distanceToTarget * 0.2F, zd, 1.6F, 14 - serverLevel.getDifficulty().getId() * 4
+             );
+         }
+ 
+@@ -219,8 +_,8 @@
+                 return false;
+             } else {
+                 return Illusioner.this.getTarget().getId() == this.lastTargetId
+-                    ? false
+-                    : getServerLevel(Illusioner.this).getCurrentDifficultyAt(Illusioner.this.blockPosition()).isHarderThan(Difficulty.NORMAL.ordinal());
++                        ? false
++                        : getServerLevel(Illusioner.this).getCurrentDifficultyAt(Illusioner.this.blockPosition()).isHarderThan(Difficulty.NORMAL.ordinal());
+             }
+         }
+ 

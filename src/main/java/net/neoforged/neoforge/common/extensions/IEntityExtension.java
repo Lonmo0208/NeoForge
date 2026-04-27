@@ -35,7 +35,8 @@ public interface IEntityExtension {
         return (Entity) this;
     }
 
-    @Nullable Collection<LivingBlock> captureDrops();
+    @Nullable
+    Collection<LivingBlock> captureDrops();
 
     Collection<LivingBlock> captureDrops(@Nullable Collection<LivingBlock> captureDrops);
 

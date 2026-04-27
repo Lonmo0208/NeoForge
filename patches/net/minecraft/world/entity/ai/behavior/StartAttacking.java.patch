@@ -1,19 +1,11 @@
 --- a/net/minecraft/world/entity/ai/behavior/StartAttacking.java
 +++ b/net/minecraft/world/entity/ai/behavior/StartAttacking.java
-@@ -3,6 +_,7 @@
- import java.util.Optional;
- import net.minecraft.server.level.ServerLevel;
- import net.minecraft.world.entity.Entity;
-+import net.minecraft.world.entity.LivingEntity;
- import net.minecraft.world.entity.Mob;
- import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
- import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 @@ -25,11 +_,15 @@
                          if (target.isEmpty()) {
                              return false;
                          } else {
 -                            Entity targetEntity = target.get();
-+                            LivingEntity targetEntity = (LivingEntity)target.get();
++                            net.minecraft.world.entity.LivingEntity targetEntity = (net.minecraft.world.entity.LivingEntity)target.get();
                              if (!body.canAttack(targetEntity)) {
                                  return false;
                              } else {

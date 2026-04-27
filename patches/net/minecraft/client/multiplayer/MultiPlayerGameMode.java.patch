@@ -1,20 +1,12 @@
 --- a/net/minecraft/client/multiplayer/MultiPlayerGameMode.java
 +++ b/net/minecraft/client/multiplayer/MultiPlayerGameMode.java
-@@ -67,6 +_,7 @@
- import net.minecraft.world.phys.Vec3;
- import net.neoforged.api.distmarker.Dist;
- import net.neoforged.api.distmarker.OnlyIn;
-+import net.neoforged.neoforge.common.CommonHooks;
- import org.apache.commons.lang3.mutable.MutableObject;
- import org.jspecify.annotations.Nullable;
- import org.slf4j.Logger;
 @@ -116,12 +_,20 @@
      }
  
      public boolean destroyBlock(BlockPos pos) {
 +        // Neo: Fire the BlockBreakEvent. Unlike the server path, ignoring ItemStack#canDestroyBlock is done below because the vanilla code checks things in a different order here.
 +        BlockState state = this.minecraft.level.getBlockState(pos);
-+        var event = CommonHooks.fireBlockBreak(this.minecraft.level, this.localPlayerMode, this.minecraft.player, pos, state);
++        var event = net.neoforged.neoforge.common.CommonHooks.fireBlockBreak(this.minecraft.level, this.localPlayerMode, this.minecraft.player, pos, state);
 +        if (event.isCanceled()) {
 +            return false;
 +        }

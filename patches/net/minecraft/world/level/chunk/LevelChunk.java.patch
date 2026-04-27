@@ -1,18 +1,10 @@
 --- a/net/minecraft/world/level/chunk/LevelChunk.java
 +++ b/net/minecraft/world/level/chunk/LevelChunk.java
-@@ -63,6 +_,7 @@
- import net.minecraft.world.level.storage.TagValueInput;
- import net.minecraft.world.ticks.LevelChunkTicks;
- import net.minecraft.world.ticks.TickContainerAccess;
-+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
- import org.jspecify.annotations.Nullable;
- import org.slf4j.Logger;
- 
 @@ -98,6 +_,7 @@
      private final LevelChunkTicks<Fluid> fluidTicks;
      private final List<LivingBlock> livingLightBlocks = new ArrayList<>();
      private LevelChunk.UnsavedListener unsavedListener = chunkPos -> {};
-+    private AuxiliaryLightManager auxLightManager;
++    private net.neoforged.neoforge.common.world.AuxiliaryLightManager auxLightManager;
  
      public LevelChunk(Level level, ChunkPos pos) {
          this(level, pos, UpgradeData.EMPTY, new LevelChunkTicks<>(), new LevelChunkTicks<>(), 0L, null, null, null);

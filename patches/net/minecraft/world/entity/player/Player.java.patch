@@ -1,12 +1,6 @@
 --- a/net/minecraft/world/entity/player/Player.java
 +++ b/net/minecraft/world/entity/player/Player.java
-@@ -129,11 +_,13 @@
- import net.minecraft.world.phys.Vec3;
- import net.minecraft.world.scores.PlayerTeam;
- import net.minecraft.world.scores.Team;
-+import net.neoforged.neoforge.event.EventHooks;
- import org.joml.Quaternionf;
- import org.joml.Vector3f;
+@@ -134,6 +_,7 @@
  import org.jspecify.annotations.Nullable;
  
  public abstract class Player extends Avatar implements ContainerUser, net.neoforged.neoforge.common.extensions.IPlayerExtension {

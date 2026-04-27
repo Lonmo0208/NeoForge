@@ -13,7 +13,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.ICancellableEvent;
@@ -93,7 +92,7 @@ public class BlockDropsEvent extends BlockEvent implements ICancellableEvent {
     }
 
     /**
-     * Cancels this event, preventing any drops from being spawned and preventing  from being called.
+     * Cancels this event, preventing any drops from being spawned and preventing from being called.
      * <p>
      * Also prevents experience from being spawned.
      */
