@@ -26,7 +26,6 @@ import net.neoforged.neoforge.event.VanillaGameEvent;
 import net.neoforged.neoforge.event.level.AlterGroundEvent;
 import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
 import net.neoforged.testframework.DynamicTest;
-import net.neoforged.testframework.Test;
 import net.neoforged.testframework.annotation.ForEachTest;
 import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.gametest.EmptyTemplate;
@@ -78,7 +77,7 @@ public class LevelEventTests {
         test.onGameTest(helper -> helper.startSequence(helper::makeMockPlayer)
                 .thenWaitUntil(player -> helper.boneMealUntilGrown(7, 1, 7, player))
                 .thenExecute(player -> {
-                    if (test.status().result() == Test.Result.PASSED) {
+                    if (test.status().result().passed()) {
                         boolean hasRedstone = helper.blocksBetween(0, 0, 0, 16, 1, 16)
                                 .anyMatch(pos -> helper.getLevel().getBlockState(pos).is(Blocks.REDSTONE_BLOCK));
                         if (hasRedstone) {
