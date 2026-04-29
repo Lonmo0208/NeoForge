@@ -223,8 +223,6 @@ public class GlobalLootModifiersTest {
         }
     }
 
-
-
     @GameTest
     @EmptyTemplate(floor = true)
     @TestHolder(description = "Tests if the silk touch bamboo GLM works, by breaking leaves with bamboo and verifying the leaf block is dropped")

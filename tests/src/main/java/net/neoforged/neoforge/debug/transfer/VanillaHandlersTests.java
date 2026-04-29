@@ -371,8 +371,6 @@ public class VanillaHandlersTests {
         helper.succeed();
     }
 
-
-
     @GameTest
     @EmptyTemplate
     @TestHolder(description = "Tests that shulker boxes cannot be inserted into other shulker boxes.")

@@ -7,7 +7,6 @@ package net.neoforged.neoforge.debug;
 
 import java.util.function.Consumer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
