@@ -27,6 +27,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.TriState;
@@ -45,9 +46,11 @@ public class GameTestPlayer extends ServerPlayer implements GameTestListener {
     @Override
     public void snapTo(double x, double y, double z) {
         super.snapTo(x, y, z);
-        this.level().getChunkSource().move(this); //We need to move the player to the correct chunk
-        this.connection.chunkSender.sendNextChunks(this); //And send the chunks to the player
-        this.connection.chunkSender.onChunkBatchReceivedByClient(64f); //Also mark them as received.
+        if (this.level().getChunkSource() instanceof ServerChunkCache serverChunkCache) {
+            serverChunkCache.move(this);
+        }
+        this.connection.chunkSender.sendNextChunks(this);
+        this.connection.chunkSender.onChunkBatchReceivedByClient(64f);
     }
 
     public GameTestPlayer moveToCorner() {

@@ -67,7 +67,7 @@
      }
  
      public void preRemoveSideEffects(BlockPos pos, BlockState state) {
-@@ -272,6 +_,48 @@
+@@ -272,6 +_,67 @@
  
      public BlockEntityType<?> getType() {
          return this.type;
@@ -105,6 +105,25 @@
 +        attachmentTypesToSync.add(type);
 +        // Schedule the BE for syncing
 +        serverLevel.getChunkSource().blockChanged(worldPosition);
++        // Immediately sync attachment data to players tracking this chunk,
++        // similar to entity and chunk sync. Since syncBlockEntityUpdates clears
++        // attachmentTypesToSync, the scheduled ChunkHolder broadcast will be a no-op.
++        var chunk = serverLevel.getChunkAt(worldPosition);
++        var chunkPos = chunk.getPos();
++        var trackedPlayers = serverLevel.getChunkSource().chunkMap.getPlayers(chunkPos, false);
++        if (trackedPlayers.isEmpty() && !serverLevel.players().isEmpty()) {
++            var allPlayers = new java.util.ArrayList<net.minecraft.server.level.ServerPlayer>(serverLevel.players().size());
++            for (var player : serverLevel.players()) {
++                if (player.chunkPosition().equals(chunkPos)) {
++                    allPlayers.add(player);
++                }
++            }
++            if (!allPlayers.isEmpty()) {
++                net.neoforged.neoforge.attachment.AttachmentSync.syncBlockEntityUpdates(this, allPlayers);
++            }
++        } else if (!trackedPlayers.isEmpty()) {
++            net.neoforged.neoforge.attachment.AttachmentSync.syncBlockEntityUpdates(this, trackedPlayers);
++        }
 +    }
 +
 +    @Nullable

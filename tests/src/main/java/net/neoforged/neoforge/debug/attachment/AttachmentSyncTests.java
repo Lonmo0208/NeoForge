@@ -143,10 +143,12 @@ public class AttachmentSyncTests {
             var feetPos = helper.relativePos(player.blockPosition()).below(1);
 
             player.clearOutboundPackets();
+            player.connection.resumeFlushing();
 
             helper.startSequence()
                     // Test that players receive updates for changes to their own data
                     .thenExecute(() -> {
+                        player.connection.resumeFlushing();
                         var testValue = helper.randomInt();
                         player.setData(intAttachment, testValue);
 
@@ -161,6 +163,7 @@ public class AttachmentSyncTests {
                     })
                     // Test that players receive updates for changes to the chunk they're in
                     .thenExecute(() -> {
+                        player.connection.resumeFlushing();
                         var chunk = helper.getLevel().getChunkAt(player.blockPosition());
                         var testValue = helper.randomInt();
                         chunk.setData(intAttachment, testValue);
@@ -176,16 +179,12 @@ public class AttachmentSyncTests {
                     })
                     // Test that players receive updates for changes to block entities in tracked chunks
                     .thenExecute(() -> {
+                        player.connection.resumeFlushing();
                         var testValue = 12345;
                         helper.setBlock(feetPos, Blocks.FURNACE);
                         var be = helper.getBlockEntity(feetPos, FurnaceBlockEntity.class);
                         be.setData(intAttachment, testValue);
-                    })
-                    // Wait for the BE to get synced
-                    .thenIdle(1)
-                    // Resume flushing after idling else packets won't get sent immediately
-                    .thenExecute(() -> player.connection.resumeFlushing())
-                    .thenExecute(() -> {
+
                         var payload = player.requireOutboundPayload(SyncAttachmentsPayload.class);
                         helper.expectTarget(payload, new SyncAttachmentsPayload.BlockEntityTarget(helper.absolutePos(feetPos)));
 
@@ -198,6 +197,7 @@ public class AttachmentSyncTests {
                     .thenMap(() -> helper.spawnWithNoFreeWill(EntityType.PIG, helper.relativePos(player.blockPosition())))
                     // Test that players receive updates for entities in tracked chunks
                     .thenExecute(entity -> {
+                        player.connection.resumeFlushing();
                         var testValue = helper.randomInt();
                         entity.setData(intAttachment, testValue);
 
@@ -214,8 +214,6 @@ public class AttachmentSyncTests {
                     .thenMap(entity -> Pair.of(entity, helper.makeTickingMockServerPlayerInCorner(GameType.CREATIVE)))
                     // Wait 1 tick to let the player tick so that it starts tracking the other entities
                     .thenIdle(1)
-                    // Resume flushing after idling else packets won't get sent immediately
-                    .thenExecute(pair -> player.connection.resumeFlushing())
                     .thenExecute(pair -> {
                         var entity = pair.getFirst();
                         var newPlayer = pair.getSecond();
@@ -234,6 +232,7 @@ public class AttachmentSyncTests {
                     .thenMap(Pair::getFirst)
                     // Test that removing data causes players to receive packets
                     .thenExecute(entity -> {
+                        player.connection.resumeFlushing();
                         entity.removeData(intAttachment);
 
                         var payload = player.requireOutboundPayload(SyncAttachmentsPayload.class);
@@ -248,6 +247,7 @@ public class AttachmentSyncTests {
                     })
                     // Test that manual syncs send the packets to players that track the entity
                     .thenExecute(entity -> {
+                        player.connection.resumeFlushing();
                         var attachment = entity.getData(mutableIntAttachment);
                         var holder = helper.holder();
                         var payload = player.requireOutboundPayload(SyncAttachmentsPayload.class);
@@ -262,6 +262,7 @@ public class AttachmentSyncTests {
                                 player.getOutboundPayloads(SyncAttachmentsPayload.class).count() == 0,
                                 "Expected player to receive no sync payloads for mutable attachment having its inner value updated");
 
+                        player.connection.resumeFlushing();
                         entity.syncData(mutableIntAttachment);
 
                         payload = player.requireOutboundPayload(SyncAttachmentsPayload.class);
@@ -272,6 +273,7 @@ public class AttachmentSyncTests {
                     })
                     // Test that values are not synced if the sync predicate returns false
                     .thenExecute(entity -> {
+                        player.connection.resumeFlushing();
                         player.setData(blacklistedPlayer, true);
                         entity.setData(mutableIntAttachment, new MutableInt(4));
                         helper.assertTrue(

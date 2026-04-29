@@ -6,6 +6,7 @@
 package net.neoforged.neoforge.debug.entity;
 
 import io.netty.buffer.Unpooled;
+import java.util.function.Supplier;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -21,6 +22,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -55,7 +58,9 @@ public class EntityDataSerializerTest {
     @EmptyTemplate(floor = true)
     @TestHolder(description = "Tests if custom EntityDataSerializers are properly handled")
     static void customEntityDataSerializer(final DynamicTest test, final RegistrationHelper reg) {
+        Supplier<AttributeSupplier.Builder> attr = () -> AttributeSupplier.builder().add(Attributes.MAX_HEALTH, 1);
         var testEntity = reg.entityTypes().registerEntityType("serializer_test_entity", TestEntity::new, MobCategory.CREATURE, builder -> builder.sized(1, 1))
+                .withAttributes(attr)
                 .withRenderer(() -> TestEntityRenderer::new);
 
         test.onGameTest(helper -> {

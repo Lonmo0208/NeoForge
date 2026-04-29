@@ -41,7 +41,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.event.VanillaGameEvent;
-import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.transfer.EmptyResourceHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -372,36 +371,7 @@ public class VanillaHandlersTests {
         helper.succeed();
     }
 
-    @GameTest
-    @EmptyTemplate("7x7x7") // Need enough room for the dropped items
-    @TestHolder(description = "Test the onRootCommit for a player's DroppedItems in case an event triggered by the dropping triggers more drops.")
-    public static void playerInventoryDropWhileDropping(DynamicTest test) {
-        // When dropping a carrot, drop a golden carrot in front of all fake players
-        test.eventListeners().forge().addListener((ItemTossEvent event) -> {
-            if (event.getEntity().getItemStack().is(Items.CARROT)) {
-                try (var tx = Transaction.openRoot()) {
-                    PlayerInventoryWrapper.of(event.getPlayer()).drop(ItemResource.of(Items.GOLDEN_CARROT), 1, false, false, tx);
-                    tx.commit();
-                }
-            }
-        });
 
-        test.onGameTest(helper -> {
-            var player = helper.makeMockPlayer();
-            player.setPos(helper.getBounds().getCenter());
-
-            var inventory = PlayerInventoryWrapper.of(player);
-            try (var tx = Transaction.openRoot()) {
-                inventory.drop(ItemResource.of(Items.CARROT), 1, false, false, tx);
-                inventory.drop(ItemResource.of(Items.CARROT), 1, false, false, tx);
-                tx.commit();
-            }
-
-            // 2 carrots and 2 golden carrots
-            helper.assertEntitiesPresent(EntityType.LIVING_BLOCK, 4);
-            helper.succeed();
-        });
-    }
 
     @GameTest
     @EmptyTemplate

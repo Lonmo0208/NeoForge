@@ -130,7 +130,23 @@ public final class AttachmentSync {
         if (type.syncHandler == null || !(chunk.getLevel() instanceof ServerLevel serverLevel)) {
             return;
         }
-        syncUpdate(holder, type, serverLevel.getChunkSource().chunkMap.getPlayers(chunk.getPos(), false));
+        var trackedPlayers = serverLevel.getChunkSource().chunkMap.getPlayers(chunk.getPos(), false);
+        var chunkPos = chunk.getPos();
+        // Also include players that are currently in this chunk but may not be tracked by the chunkMap,
+        // such as game test mock players whose chunk tracking might not be fully set up.
+        // This mirrors the pattern used in syncEntityUpdate which also includes the relevant player.
+        if (!trackedPlayers.isEmpty() || serverLevel.players().isEmpty()) {
+            syncUpdate(holder, type, trackedPlayers);
+            return;
+        }
+        var allPlayers = new ArrayList<ServerPlayer>(trackedPlayers.size() + 1);
+        allPlayers.addAll(trackedPlayers);
+        for (var player : serverLevel.players()) {
+            if (!allPlayers.contains(player) && player.chunkPosition().equals(chunkPos)) {
+                allPlayers.add(player);
+            }
+        }
+        syncUpdate(holder, type, allPlayers);
     }
 
     public static void syncEntityUpdate(Entity entity, AttachmentType<?> type) {

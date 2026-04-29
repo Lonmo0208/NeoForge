@@ -67,7 +67,7 @@
              BlockEntity previousEntry = this.blockEntities.put(pos.immutable(), blockEntity);
              if (previousEntry != null && previousEntry != blockEntity) {
                  previousEntry.setRemoved();
-+                auxLightManager.removeLightAt(pos);
++                getAuxLightManager(getPos()).removeLightAt(pos);
              }
          }
      }
@@ -90,7 +90,7 @@
                  }
  
                  removeThis.setRemoved();
-+                auxLightManager.removeLightAt(pos);
++                getAuxLightManager(getPos()).removeLightAt(pos);
              }
          }
  
@@ -103,7 +103,7 @@
                  }
              });
          }
-@@ -559,6 +_,14 @@
+@@ -559,6 +_,19 @@
          return this.level;
      }
  
@@ -113,6 +113,11 @@
 +            this.auxLightManager = new net.neoforged.neoforge.common.world.LevelChunkAuxiliaryLightManager(this);
 +        }
 +        return this.auxLightManager;
++    }
++
++    @Override
++    public void syncData(net.neoforged.neoforge.attachment.AttachmentType<?> type) {
++        net.neoforged.neoforge.attachment.AttachmentSync.syncChunkUpdate(this, getAttachmentHolder(), type);
 +    }
 +
      public Map<BlockPos, BlockEntity> getBlockEntities() {

@@ -42,7 +42,7 @@
              return false;
          } else {
              BlockEntity blockEntity = this.level.getBlockEntity(pos);
-@@ -272,22 +_,17 @@
+@@ -272,34 +_,55 @@
                  return false;
              } else {
                  BlockState adjustedState = block.playerWillDestroy(this.level, pos, state, this.player);
@@ -69,15 +69,22 @@
                      if (changed && canDestroy) {
                          if (itemStack.is(Items.PUNCH_ACTION)) {
                              destroyedWith = ItemStack.EMPTY;
-@@ -296,10 +_,31 @@
-                         block.playerDestroy(this.level, this.player, pos, adjustedState, blockEntity, destroyedWith);
-                     }
+                         }
++                        Block.beginCapturingDrops();
++                        try {
++                            block.playerDestroy(this.level, this.player, pos, adjustedState, blockEntity, destroyedWith);
++                        } finally {
++                            var drops = Block.stopCapturingDrops();
++                            net.neoforged.neoforge.common.CommonHooks.handleBlockDrops(this.level, pos, adjustedState, blockEntity, drops, this.player, destroyedWith);
++                        }
++                    }
  
+-                        block.playerDestroy(this.level, this.player, pos, adjustedState, blockEntity, destroyedWith);
 +                    // Neo: Fire the PlayerDestroyItemEvent if the tool was broken at any point during the break process
 +                    if (itemStack.isEmpty() && !destroyedWith.isEmpty()) {
 +                        net.neoforged.neoforge.event.EventHooks.onPlayerDestroyItem(this.player, destroyedWith, InteractionHand.MAIN_HAND);
-+                    }
-+
+                     }
+ 
                      return true;
                  }
              }

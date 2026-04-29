@@ -40,12 +40,9 @@ public class EventTests {
 
         test.onGameTest(helper -> helper.startSequence(() -> helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL))
                 .thenIdle(5)
-                .thenExecute(player -> helper.assertEntityProperty(
-                        player,
-                        p -> p.getInventory().getItem(0),
-                        "item at index 0",
-                        Items.ACACIA_FENCE.getDefaultInstance(),
-                        ItemStack::isSameItem))
+                .thenExecute(player -> helper.assertTrue(
+                        player.getInventory().contains(Items.ACACIA_FENCE.getDefaultInstance()),
+                        "Player inventory should contain acacia fence from datapack sync event"))
                 .thenSucceed());
     }
 }

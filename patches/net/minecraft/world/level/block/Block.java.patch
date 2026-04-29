@@ -41,6 +41,26 @@
          } else if (occluder == Shapes.empty()) {
              return true;
          } else {
+@@ -411,7 +_,18 @@
+             itemStack = itemStack.copy();
+             itemStack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.from(state));
+         }
+-
++        if (capturedDrops != null) {
++            List<LivingBlock> blocks = new java.util.ArrayList<>();
++            for (int i = 0; i < itemStack.getCount(); i++) {
++                LivingBlock block = LivingBlock.create(level, itemStack.copyWithCount(1));
++                if (block != null) {
++                    block.snapTo(Vec3.atBottomCenterOf(pos));
++                    capturedDrops.add(block);
++                    blocks.add(block);
++                }
++            }
++            return blocks;
++        }
+         return LivingBlock.createStack(level, pos, null, itemStack);
+     }
+ 
 @@ -522,6 +_,7 @@
      public void handlePrecipitation(BlockState state, Level level, BlockPos pos, Biome.Precipitation precipitation) {
      }
@@ -59,14 +79,14 @@
 +     * When not null, records all item entities from {@link #popResource(Level, Supplier, ItemStack)} instead of adding them to the world.
 +     */
 +    @Nullable
-+    private static List<LivingBlock> capturedDrops = null;
++    public static List<LivingBlock> capturedDrops = null;
 +
 +    /**
 +     * Initializes {@link #capturedDrops}, starting the drop capture process.
 +     * <p>
 +     * Must only be called on the server thread.
 +     */
-+    private static void beginCapturingDrops() {
++    public static void beginCapturingDrops() {
 +        capturedDrops = new java.util.ArrayList<>();
 +    }
 +
@@ -75,7 +95,7 @@
 +     * <p>
 +     * Must only be called on the server thread.
 +     */
-+    private static List<LivingBlock> stopCapturingDrops() {
++    public static List<LivingBlock> stopCapturingDrops() {
 +        List<LivingBlock> drops = capturedDrops;
 +        capturedDrops = null;
 +        return drops;

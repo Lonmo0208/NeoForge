@@ -34,6 +34,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.permissions.PermissionSet;
@@ -221,7 +222,17 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         BlockState state = getBlockState(relativePos);
         BlockPos absolutePos = absolutePos(relativePos);
         BlockEntity blockEntity = state.hasBlockEntity() ? getLevel().getBlockEntity(absolutePos) : null;
-        Block.dropResources(state, getLevel(), absolutePos, blockEntity, breakingEntity, tool);
+        if (getLevel() instanceof ServerLevel serverLevel) {
+            Block.beginCapturingDrops();
+            try {
+                Block.dropResources(state, getLevel(), absolutePos, blockEntity, breakingEntity, tool);
+            } finally {
+                var drops = Block.stopCapturingDrops();
+                net.neoforged.neoforge.common.CommonHooks.handleBlockDrops(serverLevel, absolutePos, state, blockEntity, drops, breakingEntity, tool);
+            }
+        } else {
+            Block.dropResources(state, getLevel(), absolutePos, blockEntity, breakingEntity, tool);
+        }
         getLevel().destroyBlock(absolutePos, false);
     }
 

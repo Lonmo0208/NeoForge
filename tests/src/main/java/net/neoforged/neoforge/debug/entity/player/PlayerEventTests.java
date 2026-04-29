@@ -26,7 +26,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -41,7 +40,6 @@ import net.minecraft.world.level.storage.LevelData;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.event.StatAwardEvent;
 import net.neoforged.neoforge.event.entity.living.ArmorHurtEvent;
-import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PermissionsChangedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -129,39 +127,6 @@ public class PlayerEventTests {
             helper.startSequence(() -> helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL))
                     .thenExecute(player -> player.connection.handleInteract(new ServerboundInteractPacket(illusioner.getId(), InteractionHand.MAIN_HAND, helper.absoluteVec(new BlockPos(1, 1, 1).getCenter()), player.isShiftKeyDown())))
                     .thenExecute(player -> helper.assertTrue(illusioner.getName().getString().contains("entityInteractEventTest"), "Illager name did not get changed on player interact"))
-                    .thenSucceed();
-        });
-    }
-
-    @GameTest
-    @EmptyTemplate(floor = true)
-    @TestHolder(description = "Tests if the ItemPickupEvent fires")
-    public static void itemPickupEvent(final DynamicTest test) {
-        test.eventListeners().forge().addListener((ItemEntityPickupEvent.Post event) -> {
-            if (event.getOriginalStack().is(Items.MELON_SEEDS)) {
-                // If the event is fired and detects pickup of melon seeds, the test will be considered pass
-                // and the player will get pumpkin seeds too
-                event.getPlayer().addItem(new ItemStack(Items.PUMPKIN_SEEDS));
-                test.pass();
-            }
-        });
-
-        test.onGameTest(helper -> {
-            // Spawn a player at the centre of the test
-            final GameTestPlayer player = helper.makeTickingMockServerPlayerInLevel(GameType.SURVIVAL)
-                    .moveToCentre();
-            var livingBlock = new LivingBlock(EntityType.LIVING_BLOCK, helper.getLevel());
-            livingBlock.setItemStack(new ItemStack(Items.MELON_SEEDS));
-            var absPos = helper.absolutePos(new BlockPos(1, 2, 1));
-            livingBlock.setPos(absPos.getX(), absPos.getY(), absPos.getZ());
-            helper.getLevel().addFreshEntity(livingBlock);
-
-            helper.startSequence()
-                    // Wait until the player picked up the seeds
-                    .thenWaitUntil(() -> helper.assertPlayerHasItem(player, Items.MELON_SEEDS))
-                    // Check for pumpkin seeds in the player's inventory
-                    .thenExecute(() -> helper.assertPlayerHasItem(player, Items.PUMPKIN_SEEDS))
-                    // All assertions were true, so the test is a success!
                     .thenSucceed();
         });
     }

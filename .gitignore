@@ -45,3 +45,5 @@ build
 **/runs/
 
 **/out/
+/.vscode
+.vscode/launch.json
