@@ -1,19 +1,20 @@
 --- a/net/minecraft/world/entity/ai/behavior/StartAttacking.java
 +++ b/net/minecraft/world/entity/ai/behavior/StartAttacking.java
-@@ -25,11 +_,15 @@
-                         if (target.isEmpty()) {
+@@ -26,10 +_,16 @@
                              return false;
                          } else {
--                            Entity targetEntity = target.get();
-+                            net.minecraft.world.entity.LivingEntity targetEntity = (net.minecraft.world.entity.LivingEntity)target.get();
-                             if (!body.canAttack(targetEntity)) {
+                             Entity targetEntity = target.get();
+-                            if (!body.canAttack(targetEntity)) {
++                            if (!(targetEntity instanceof net.minecraft.world.entity.LivingEntity targetLiving)) {
++                                return false;
++                            }
++                            if (!body.canAttack(targetLiving)) {
                                  return false;
                              } else {
 -                                attackTarget.set(targetEntity);
-+                                net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(body, targetEntity, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
++                                net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(body, targetLiving, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
 +                                if (changeTargetEvent.isCanceled() || changeTargetEvent.getNewAboutToBeSetTarget() == null)
 +                                    return false;
-+
 +                                attackTarget.set(changeTargetEvent.getNewAboutToBeSetTarget());
                                  cantReachSince.erase();
                                  return true;

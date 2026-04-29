@@ -12,15 +12,19 @@
  
      protected Mob(EntityType<? extends Mob> type, Level level) {
          super(type, level);
-@@ -244,7 +_,11 @@
+@@ -244,7 +_,15 @@
      }
  
      public void setTarget(@Nullable Entity target) {
 -        this.target = this.asValidTarget(target);
 +        target = this.asValidTarget(target);
-+        net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(this, (LivingEntity) target, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
-+        if(!changeTargetEvent.isCanceled()) {
-+             this.target = changeTargetEvent.getNewAboutToBeSetTarget();
++        if (target instanceof LivingEntity livingTarget) {
++            net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(this, livingTarget, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
++            if (!changeTargetEvent.isCanceled()) {
++                this.target = changeTargetEvent.getNewAboutToBeSetTarget();
++            }
++    } else {
++            this.target = target;
 +        }
      }
  
