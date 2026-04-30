@@ -651,9 +651,6 @@
              }
  
              if (landed) {
--                this.teleportTo(xx, y, zz);
--                if (level.noCollision(this) && !level.containsAnyLiquid(this.getBoundingBox())) {
--                    ok = true;
 +                // Neo: Fire event for either item consumption or EnderMan teleport, to get the actual final position being teleported to
 +                net.neoforged.neoforge.event.entity.EntityTeleportEvent event = null;
 +                if (!consumedStack.isEmpty()) {
@@ -668,9 +665,9 @@
 +                }
 +                if (event == null || !event.isCanceled()) {
 +                    teleported = true;
-+                    this.teleportTo(xx, y, zz);
-+                    if (level.noCollision(this) && !level.containsAnyLiquid(this.getBoundingBox())) {
-+                        ok = true;
+                 this.teleportTo(xx, y, zz);
+                 if (level.noCollision(this) && !level.containsAnyLiquid(this.getBoundingBox())) {
+                     ok = true;
 +                    }
                  }
              }
