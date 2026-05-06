@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/entity/ai/behavior/BehaviorUtils.java
++++ b/net/minecraft/world/entity/ai/behavior/BehaviorUtils.java
+@@ -80,8 +_,10 @@
+     }
+ 
+     public static void throwItem(LivingEntity thrower, ItemStack item, Vec3 targetPos, Vec3 throwVelocity, float handYDistanceFromEye) {
++        if (item == null || item.isEmpty()) return;
+         double yHandPos = thrower.getEyeY() - handYDistanceFromEye;
+         LivingBlock itemEntity = LivingBlock.createAt(thrower.level(), BlockPos.containing(thrower.getX(), yHandPos, thrower.getZ()), item);
++        if (itemEntity == null) return;
+         Vec3 throwVector = targetPos.subtract(thrower.position());
+         throwVector = throwVector.normalize().multiply(throwVelocity.x, throwVelocity.y, throwVelocity.z);
+         itemEntity.setDeltaMovement(throwVector);

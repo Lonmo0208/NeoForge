@@ -1,5 +1,111 @@
 --- a/net/minecraft/world/entity/livingblock/LivingBlock.java
 +++ b/net/minecraft/world/entity/livingblock/LivingBlock.java
+@@ -201,12 +_,16 @@
+     }
+ 
+     public static @Nullable LivingBlock create(Level level, BlockState blockState) {
++        if (blockState.isAir()) return null;
+         LivingBlockType type = LivingBlockTypes.REGISTRY.get(blockState);
++        if (type == null) return null;
+         return type.create(level, blockState);
+     }
+ 
+     public static @Nullable LivingBlock create(Level level, ItemStack itemStack) {
++        if (itemStack.isEmpty()) return null;
+         LivingBlockType type = LivingBlockTypes.REGISTRY.get(itemStack);
++        if (type == null) return null;
+         return type.create(level, itemStack);
+     }
+ 
+@@ -227,17 +_,19 @@
+     }
+ 
+     private static void finalizeSpawn(Level level, BlockPos pos, @Nullable LivingBlock livingBlock) {
+-        if (livingBlock != null) {
++        if (livingBlock != null && !livingBlock.getItemStack().isEmpty()) {
+             livingBlock.snapTo(Vec3.atBottomCenterOf(pos));
+             level.addFreshEntity(livingBlock);
+         }
+     }
+ 
+     public static Collection<LivingBlock> createStack(Level level, BlockPos pos, @Nullable Entity creator, ItemStack stack) {
++        if (stack.isEmpty()) return List.of();
+         return createStack(level, pos, creator, stack, stack.count());
+     }
+ 
+     private static Collection<LivingBlock> createStack(Level level, BlockPos pos, @Nullable Entity creator, ItemStack stack, int count) {
++        if (stack.isEmpty()) return List.of();
+         List<LivingBlock> createdBlocks = new ArrayList<>();
+         BlockPos resultPos = pos;
+         if (creator instanceof ServerPlayer player) {
+@@ -410,16 +_,28 @@
+     }
+ 
+     public void setItemStack(ItemStack itemStack) {
++        if (itemStack.isEmpty()) {
++            this.discard();
++            return;
++        }
+         this.setItemStackInternal(itemStack);
+         this.onStateChanged(itemStack);
+     }
+ 
+     private void setContents(ItemStack itemStackForm, BlockState blockStateForm) {
++        if (itemStackForm.isEmpty()) {
++            this.discard();
++            return;
++        }
+         this.setItemStackInternal(itemStackForm);
+         this.blockStateCache = blockStateForm;
+     }
+ 
+     private void setItemStackInternal(ItemStack itemStack) {
++        if (itemStack.isEmpty()) {
++            this.discard();
++            return;
++        }
+         this.entityData.set(DATA_ITEM_STACK_ID, itemStack);
+         Item item = itemStack.getItem();
+         int durability = itemStack.getMaxDamage();
+@@ -470,6 +_,10 @@
+ 
+     private void onStateChanged(ItemStack itemStack) {
+         LivingBlockType type = LivingBlockTypes.REGISTRY.get(itemStack.getItem());
++        if (type == null) {
++            this.discard();
++            return;
++        }
+         if (this.type != type) {
+             this.type = type;
+             this.behaviors = type.createBehaviorsFor(this);
+@@ -505,7 +_,12 @@
+     @Override
+     protected void readAdditionalSaveData(ValueInput input) {
+         Optional<ItemStack> maybeItem = input.read("item", ItemStack.CODEC);
+-        this.setItemStack(maybeItem.orElse(ItemStack.EMPTY));
++        ItemStack stack = maybeItem.orElse(ItemStack.EMPTY);
++        if (stack.isEmpty()) {
++            this.discard();
++            return;
++        }
++        this.setItemStack(stack);
+         this.readLeashData(input);
+         this.attackTarget = EntityReference.read(input, "attack_target");
+         this.entityData.set(DATA_OWNER, Optional.ofNullable(EntityReference.read(input, "owner")));
+@@ -773,6 +_,13 @@
+ 
+     @Override
+     public void tick() {
++        if (this.getItemStack().isEmpty()) {
++            this.discard();
++            return;
++        }
++
++        if (this.isRemoved()) return;
++
+         if (this.hurtTime > 0) {
+             this.hurtTime--;
+         }
 @@ -1039,7 +_,17 @@
              int dmg = Mth.floor((fallDistance + 1.0E-6) * damageModifier);
              if (dmg > 0) {
