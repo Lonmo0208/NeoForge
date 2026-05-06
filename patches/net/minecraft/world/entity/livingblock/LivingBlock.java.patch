@@ -78,7 +78,14 @@
          if (this.type != type) {
              this.type = type;
              this.behaviors = type.createBehaviorsFor(this);
-@@ -505,7 +_,12 @@
+@@ -499,13 +_,19 @@
+ 
+     @Override
+     protected Vec3 adjustStepUpMovement(Vec3 movement) {
++        if (this.getItemStack().isEmpty() || this.isRemoved()) return movement;
+         return this.movement.adjustStepUpMovement(this, movement);
+     }
+ 
      @Override
      protected void readAdditionalSaveData(ValueInput input) {
          Optional<ItemStack> maybeItem = input.read("item", ItemStack.CODEC);
@@ -92,7 +99,7 @@
          this.readLeashData(input);
          this.attackTarget = EntityReference.read(input, "attack_target");
          this.entityData.set(DATA_OWNER, Optional.ofNullable(EntityReference.read(input, "owner")));
-@@ -773,6 +_,13 @@
+@@ -773,12 +_,20 @@
  
      @Override
      public void tick() {
@@ -106,6 +113,37 @@
          if (this.hurtTime > 0) {
              this.hurtTime--;
          }
+ 
+         if (this.isDeadOrDying()) {
+             this.tickDeath();
++            if (this.isRemoved()) return;
+         }
+ 
+         applyMovementRotation(this.rollDeltaX, this.rollDeltaZ, this.rotation);
+@@ -817,6 +_,11 @@
+             this.tickDespawn();
+         }
+ 
++        if (this.getItemStack().isEmpty() || this.isRemoved()) {
++            this.discard();
++            return;
++        }
++
+         if (!this.isDeadOrDying() && !this.isPinned()) {
+             Target target = this.getMovementTarget();
+             Vec3 targetPos = target.resolvePosition(this.level());
+@@ -829,6 +_,11 @@
+             }
+         }
+ 
++        if (this.getItemStack().isEmpty() || this.isRemoved()) {
++            this.discard();
++            return;
++        }
++
+         this.move(MoverType.SELF, this.getDeltaMovement());
+         boolean isClimbing = this.isClimbing();
+         BlockPos posBelow = this.getBlockPosBelowThatAffectsMyMovement();
 @@ -1039,7 +_,17 @@
              int dmg = Mth.floor((fallDistance + 1.0E-6) * damageModifier);
              if (dmg > 0) {
