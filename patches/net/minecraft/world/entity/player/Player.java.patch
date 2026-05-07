@@ -19,6 +19,15 @@
      public Player(Level level, GameProfile gameProfile) {
          super(EntityType.PLAYER, level);
          this.setUUID(gameProfile.id());
+@@ -229,7 +_,7 @@
+         } else if (!inActiveGroup.isEmpty()) {
+             return inActiveGroup;
+         } else {
+-            this.sendOverlayMessage(Component.literal("Selected group contains no blocks in the area"));
++            this.sendOverlayMessage(Component.translatable("player.commanded_blocks.no_blocks_in_area"));
+             return List.of();
+         }
+     }
 @@ -265,7 +_,8 @@
              .add(Attributes.MINING_EFFICIENCY)
              .add(Attributes.SWEEPING_DAMAGE_RATIO)
