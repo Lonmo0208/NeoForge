@@ -78,5 +78,6 @@
   "living_blocks.group.none": "無",
   "living_blocks.group.purple": "紫色",
   "living_blocks.group.red": "紅色",
-  "living_blocks.group.yellow": "黃色"
+  "living_blocks.group.yellow": "黃色",
+  "player.commanded_blocks.no_blocks_in_area": "所選群組在此區域不包含任何方塊"
 }
