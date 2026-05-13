@@ -1,5 +1,16 @@
 --- a/net/minecraft/world/entity/Leashable.java
 +++ b/net/minecraft/world/entity/Leashable.java
+@@ -125,6 +_,10 @@
+             entity.setLeashData(null);
+             entity.onLeashRemoved();
+             if (entity.level() instanceof ServerLevel level) {
++                if (dropLead) {
++                    entity.spawnAtLocation(level, Items.LEAD);
++                }
++
+                 if (sendPacket) {
+                     level.getChunkSource().sendToTrackingPlayers(entity, new ClientboundSetEntityLinkPacket(entity, null));
+                 }
 @@ -184,7 +_,8 @@
  
      static <E extends Entity & Leashable> float angularFriction(E entity) {

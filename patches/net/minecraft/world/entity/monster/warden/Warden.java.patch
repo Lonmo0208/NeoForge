@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/monster/warden/Warden.java
++++ b/net/minecraft/world/entity/monster/warden/Warden.java
+@@ -465,7 +_,7 @@
+     }
+ 
+     @Override
+-    public @Nullable Entity getTarget() {
++    public @Nullable LivingEntity getTarget() {
+         return this.getTargetFromBrain();
+     }
+ 
+@@ -504,7 +_,7 @@
+ 
+     public void setAttackTarget(Entity target) {
+         this.getBrain().eraseMemory(MemoryModuleType.ROAR_TARGET);
+-        this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
++        this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, (LivingEntity)target);
+         this.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+         SonicBoom.setCooldown(this, 200);
+     }

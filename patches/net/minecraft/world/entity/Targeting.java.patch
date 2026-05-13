@@ -1,0 +1,9 @@
+--- a/net/minecraft/world/entity/Targeting.java
++++ b/net/minecraft/world/entity/Targeting.java
+@@ -3,5 +_,5 @@
+ import org.jspecify.annotations.Nullable;
+ 
+ public interface Targeting {
+-    @Nullable Entity getTarget();
++    @Nullable LivingEntity getTarget();
+ }

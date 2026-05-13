@@ -1,0 +1,437 @@
+--- /dev/null
++++ b/net/minecraft/world/entity/item/ItemEntity.java
+@@ -1,0 +_,434 @@
++package net.minecraft.world.entity.item;
++
++import net.minecraft.world.entity.livingblock.LivingBlock;
++import net.minecraft.world.entity.player.Player;
++import org.jspecify.annotations.Nullable;
++
++import java.util.Optional;
++
++
++public class ItemEntity extends net.minecraft.world.entity.livingblock.LivingBlock implements net.minecraft.world.entity.TraceableEntity {
++
++    private static final float FLOAT_HEIGHT = 0.1F;
++    public static final float EYE_HEIGHT = 0.2125F;
++    private static final int LIFETIME = 6000;
++    private static final int INFINITE_PICKUP_DELAY = 32767;
++    private static final int INFINITE_LIFETIME = -32768;
++    public static final int DEFAULT_HEALTH = 5;
++    private static final short DEFAULT_AGE = 0;
++    private static final short DEFAULT_PICKUP_DELAY = 0;
++    private int age = 0;
++    private int pickupDelay = 0;
++    private int health = 5;
++    private net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.Entity> thrower;
++    private java.util.UUID target;
++    public final float bobOffs = this.random.nextFloat() * (float) Math.PI * 2.0F;
++    public int lifespan = ItemEntity.LIFETIME;
++
++    public ItemEntity(net.minecraft.world.entity.EntityType<net.minecraft.world.entity.livingblock.LivingBlock> type, net.minecraft.world.level.Level level) {
++        super(type, level);
++        this.setYRot(this.random.nextFloat() * 360.0F);
++    }
++
++    public ItemEntity(net.minecraft.world.level.Level level, double x, double y, double z, net.minecraft.world.item.ItemStack itemStack) {
++        this(net.minecraft.world.entity.EntityType.LIVING_BLOCK, level);
++        this.setPos(x, y, z);
++        this.setItem(itemStack);
++        this.setDeltaMovement(this.random.nextDouble() * 0.2 - 0.1, 0.2, this.random.nextDouble() * 0.2 - 0.1);
++        this.lifespan = (itemStack.getItem() == null ? LIFETIME : itemStack.getEntityLifespan(level));
++    }
++
++    public ItemEntity(net.minecraft.world.level.Level level, double x, double y, double z, net.minecraft.world.item.ItemStack itemStack, double deltaX, double deltaY, double deltaZ) {
++        this(net.minecraft.world.entity.EntityType.LIVING_BLOCK, level);
++        this.setPos(x, y, z);
++        this.setItem(itemStack);
++        this.setDeltaMovement(deltaX, deltaY, deltaZ);
++        this.lifespan = (itemStack.getItem() == null ? LIFETIME : itemStack.getEntityLifespan(level));
++    }
++
++    @Override
++    public boolean dampensVibrations() {
++        return this.getItem().is(net.minecraft.tags.ItemTags.DAMPENS_VIBRATIONS);
++    }
++
++    @Override
++    public @Nullable Player getOwner() {
++        return null;
++    }
++
++    @Override
++    public void restoreFrom(net.minecraft.world.entity.Entity oldEntity) {
++        super.restoreFrom(oldEntity);
++        if (oldEntity instanceof ItemEntity item) {
++            this.thrower = item.thrower;
++        }
++    }
++
++    @Override
++    protected net.minecraft.world.entity.Entity.MovementEmission getMovementEmission() {
++        return net.minecraft.world.entity.Entity.MovementEmission.NONE;
++    }
++
++    @Override
++    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder entityData) {
++        super.defineSynchedData(entityData);
++    }
++
++    @Override
++    protected double getDefaultGravity() {
++        return 0.04;
++    }
++
++    @Override
++    public void tick() {
++        if (this.getItem().isEmpty()) {
++            this.discard();
++        } else {
++            super.tick();
++            if (this.pickupDelay > 0 && this.pickupDelay != 32767) {
++                this.pickupDelay--;
++            }
++
++            this.xo = this.getX();
++            this.yo = this.getY();
++            this.zo = this.getZ();
++            net.minecraft.world.phys.Vec3 oldMovement = this.getDeltaMovement();
++            if (this.getMovementTarget() == net.minecraft.world.entity.livingblock.Target.NONE) {
++                if (this.isInWater() && this.getFluidHeight(net.minecraft.tags.FluidTags.WATER) > 0.1F) {
++                    this.setUnderwaterMovement();
++                } else if (this.isInLava() && this.getFluidHeight(net.minecraft.tags.FluidTags.LAVA) > 0.1F) {
++                    this.setUnderLavaMovement();
++                } else {
++                    this.applyGravity();
++                }
++            }
++
++            if (this.level().isClientSide()) {
++                this.noPhysics = false;
++            } else {
++                this.noPhysics = !this.level().noCollision(this, this.getBoundingBox().deflate(1.0E-7));
++                if (this.noPhysics) {
++                    this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
++                }
++            }
++
++            if (this.getMovementTarget() == net.minecraft.world.entity.livingblock.Target.NONE
++                    && this.onGround()
++                    && !(this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-5F)
++                    && (this.tickCount + this.getId()) % 4 != 0) {
++                this.applyEffectsFromBlocksForLastMovements();
++            } else {
++                this.move(net.minecraft.world.entity.MoverType.SELF, this.getDeltaMovement());
++                if (this.getMovementTarget() == net.minecraft.world.entity.livingblock.Target.NONE) {
++                    this.applyEffectsFromBlocks();
++                    float friction = 0.98F;
++                    if (this.onGround()) {
++                        net.minecraft.core.BlockPos groundPos = getBlockPosBelowThatAffectsMyMovement();
++                        friction = this.level().getBlockState(groundPos).getFriction(level(), groundPos, this) * 0.98F;
++                    }
++                    this.setDeltaMovement(this.getDeltaMovement().multiply(friction, 0.98, friction));
++                    if (this.onGround()) {
++                        net.minecraft.world.phys.Vec3 movement = this.getDeltaMovement();
++                        if (movement.y < 0.0) {
++                            this.setDeltaMovement(movement.multiply(1.0, -0.5, 1.0));
++                        }
++                    }
++                }
++            }
++
++            boolean moved = net.minecraft.util.Mth.floor(this.xo) != net.minecraft.util.Mth.floor(this.getX())
++                    || net.minecraft.util.Mth.floor(this.yo) != net.minecraft.util.Mth.floor(this.getY())
++                    || net.minecraft.util.Mth.floor(this.zo) != net.minecraft.util.Mth.floor(this.getZ());
++            int rate = moved ? 2 : 40;
++            if (this.tickCount % rate == 0 && !this.level().isClientSide() && this.isMergable()) {
++                this.mergeWithNeighbours();
++            }
++
++            if (this.age != -32768) {
++                this.age++;
++            }
++
++            this.needsSync = this.needsSync | this.updateFluidInteraction();
++            if (!this.level().isClientSide()) {
++                double value = this.getDeltaMovement().subtract(oldMovement).lengthSqr();
++                if (value > 0.01) {
++                    this.needsSync = true;
++                }
++            }
++
++            net.minecraft.world.item.ItemStack item = this.getItem();
++            if (!this.level().isClientSide() && this.age >= lifespan) {
++                this.discard();
++            }
++            if (item.isEmpty() && !this.isRemoved()) {
++                this.discard();
++            }
++        }
++    }
++
++    @Override
++    public net.minecraft.core.BlockPos getBlockPosBelowThatAffectsMyMovement() {
++        return this.getOnPos(0.999999F);
++    }
++
++    private void setUnderwaterMovement() {
++        this.setFluidMovement(0.99F);
++    }
++
++    private void setUnderLavaMovement() {
++        this.setFluidMovement(0.95F);
++    }
++
++    private void setFluidMovement(double multiplier) {
++        net.minecraft.world.phys.Vec3 movement = this.getDeltaMovement();
++        this.setDeltaMovement(movement.x * multiplier, movement.y + (movement.y < 0.06F ? 5.0E-4F : 0.0F), movement.z * multiplier);
++    }
++
++    private void mergeWithNeighbours() {
++        if (this.isMergable()) {
++            for (ItemEntity entity : this.level()
++                    .getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(0.5, 0.0, 0.5), other -> other != this && other.isMergable())) {
++                if (entity.isMergable()) {
++                    this.tryToMerge(entity);
++                    if (this.isRemoved()) {
++                        break;
++                    }
++                }
++            }
++        }
++    }
++
++    private boolean isMergable() {
++        net.minecraft.world.item.ItemStack item = this.getItem();
++        return this.isAlive() && this.pickupDelay != 32767 && this.age != -32768 && this.age < 6000 && item.getCount() < item.getMaxStackSize();
++    }
++
++    private void tryToMerge(ItemEntity other) {
++        net.minecraft.world.item.ItemStack thisItemStack = this.getItem();
++        net.minecraft.world.item.ItemStack otherItemStack = other.getItem();
++        if (java.util.Objects.equals(this.target, other.target) && areMergable(thisItemStack, otherItemStack)) {
++            if (otherItemStack.getCount() < thisItemStack.getCount()) {
++                merge(this, thisItemStack, other, otherItemStack);
++            } else {
++                merge(other, otherItemStack, this, thisItemStack);
++            }
++        }
++    }
++
++    public static boolean areMergable(net.minecraft.world.item.ItemStack thisItemStack, net.minecraft.world.item.ItemStack otherItemStack) {
++        return otherItemStack.getCount() + thisItemStack.getCount() > otherItemStack.getMaxStackSize()
++                ? false
++                : net.minecraft.world.item.ItemStack.isSameItemSameComponents(thisItemStack, otherItemStack);
++    }
++
++    public static net.minecraft.world.item.ItemStack merge(net.minecraft.world.item.ItemStack toStack, net.minecraft.world.item.ItemStack fromStack, int maxCount) {
++        int delta = Math.min(Math.min(toStack.getMaxStackSize(), maxCount) - toStack.getCount(), fromStack.getCount());
++        net.minecraft.world.item.ItemStack newToStack = toStack.copyWithCount(toStack.getCount() + delta);
++        fromStack.shrink(delta);
++        return newToStack;
++    }
++
++    private static void merge(ItemEntity toItem, net.minecraft.world.item.ItemStack toStack, net.minecraft.world.item.ItemStack fromStack) {
++        net.minecraft.world.item.ItemStack newToStack = merge(toStack, fromStack, 64);
++        toItem.setItem(newToStack);
++    }
++
++    private static void merge(ItemEntity toItem, net.minecraft.world.item.ItemStack toStack, ItemEntity fromItem, net.minecraft.world.item.ItemStack fromStack) {
++        merge(toItem, toStack, fromStack);
++        toItem.pickupDelay = Math.max(toItem.pickupDelay, fromItem.pickupDelay);
++        toItem.age = Math.min(toItem.age, fromItem.age);
++        if (fromStack.isEmpty()) {
++            fromItem.discard();
++        }
++    }
++
++    @Override
++    public boolean fireImmune() {
++        return !this.getItem().canBeHurtBy(this.damageSources().inFire()) || super.fireImmune();
++    }
++
++    @Override
++    protected boolean shouldPlayLavaHurtSound() {
++        return this.health <= 0 ? true : this.tickCount % 10 == 0;
++    }
++
++    @Override
++    public final boolean hurtClient(net.minecraft.world.damagesource.DamageSource source) {
++        return this.isInvulnerableToBase(source) ? false : this.getItem().canBeHurtBy(source);
++    }
++
++    @Override
++    public final boolean hurtServer(net.minecraft.server.level.ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float damage) {
++        if (this.isInvulnerableToBase(source)) {
++            return false;
++        } else if (!level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING) && source.getEntity() instanceof net.minecraft.world.entity.Mob) {
++            return false;
++        } else if (!this.getItem().canBeHurtBy(source)) {
++            return false;
++        } else {
++            this.markHurt();
++            this.health = (int)(this.health - damage);
++            this.gameEvent(net.minecraft.world.level.gameevent.GameEvent.ENTITY_DAMAGE, source.getEntity());
++            if (this.health <= 0) {
++                this.discard();
++            }
++
++            return true;
++        }
++    }
++
++    @Override
++    public boolean ignoreExplosion(net.minecraft.world.level.Explosion explosion) {
++        return explosion.shouldAffectBlocklikeEntities() ? super.ignoreExplosion(explosion) : true;
++    }
++
++    @Override
++    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
++        output.putShort("Health", (short)this.health);
++        output.putShort("Age", (short)this.age);
++        output.putShort("PickupDelay", (short)this.pickupDelay);
++        output.putInt("Lifespan", this.lifespan);
++        net.minecraft.world.entity.EntityReference.store(this.thrower, output, "Thrower");
++        output.storeNullable("Owner", net.minecraft.core.UUIDUtil.CODEC, this.target);
++        if (!this.getItem().isEmpty()) {
++            output.store("Item", net.minecraft.world.item.ItemStack.CODEC, this.getItem());
++        }
++    }
++
++    @Override
++    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
++        this.health = input.getShortOr("Health", (short)5);
++        this.age = input.getShortOr("Age", (short)0);
++        this.pickupDelay = input.getShortOr("PickupDelay", (short)0);
++        this.lifespan = input.getIntOr("Lifespan", ItemEntity.LIFETIME);
++        this.target = input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
++        this.thrower = net.minecraft.world.entity.EntityReference.read(input, "Thrower");
++        this.setItem(input.read("Item", net.minecraft.world.item.ItemStack.CODEC).orElse(net.minecraft.world.item.ItemStack.EMPTY));
++        if (this.getItem().isEmpty()) {
++            this.discard();
++        }
++    }
++
++    @Override
++    public void playerTouch(net.minecraft.world.entity.player.Player player) {
++        if (!this.level().isClientSide()) {
++            if (!net.minecraft.world.entity.Mob.LIVINGBLOCK_ITEMS_PICKABLE && this.thrower == null) {
++                return;
++            }
++            net.minecraft.world.item.ItemStack itemStack = this.getItem();
++            net.minecraft.world.item.Item item = itemStack.getItem();
++            int orgCount = itemStack.getCount();
++
++            if (this.pickupDelay > 0 && this.target != null && !this.target.equals(player.getUUID())) {
++                return;
++            }
++
++            if (player.getInventory().add(itemStack)) {
++                player.take(this, orgCount);
++                if (itemStack.isEmpty()) {
++                    this.discard();
++                    itemStack.setCount(orgCount);
++                }
++
++                player.awardStat(net.minecraft.stats.Stats.ITEM_PICKED_UP.get(item), orgCount);
++            }
++        }
++    }
++
++    @Override
++    public net.minecraft.network.chat.Component getName() {
++        net.minecraft.network.chat.Component name = this.getCustomName();
++        return name != null ? name : this.getItem().getItemName();
++    }
++
++    @Override
++    public boolean isAttackable() {
++        return false;
++    }
++
++    @Override
++    public net.minecraft.world.entity.Entity teleport(net.minecraft.world.level.portal.TeleportTransition transition) {
++        net.minecraft.world.entity.Entity entity = super.teleport(transition);
++        if (!this.level().isClientSide() && entity instanceof ItemEntity item) {
++            item.mergeWithNeighbours();
++        }
++
++        return entity;
++    }
++
++    public net.minecraft.world.item.ItemStack getItem() {
++        return this.getItemStack();
++    }
++
++    public void setItem(net.minecraft.world.item.ItemStack itemStack) {
++        this.setItemStack(itemStack);
++    }
++
++    public void setTarget(java.util.UUID target) {
++        this.target = target;
++    }
++
++    public java.util.UUID getTarget() {
++        return this.target;
++    }
++
++    public void setThrower(net.minecraft.world.entity.Entity thrower) {
++        this.thrower = net.minecraft.world.entity.EntityReference.of(thrower);
++    }
++
++    public int getAge() {
++        return this.age;
++    }
++
++    public void setDefaultPickUpDelay() {
++        this.pickupDelay = 10;
++    }
++
++    public void setNoPickUpDelay() {
++        this.pickupDelay = 0;
++    }
++
++    public void setNeverPickUp() {
++        this.pickupDelay = 32767;
++    }
++
++    public void setPickUpDelay(int ticks) {
++        this.pickupDelay = ticks;
++    }
++
++    public boolean hasPickUpDelay() {
++        return this.pickupDelay > 0;
++    }
++
++    public void setUnlimitedLifetime() {
++        this.age = -32768;
++    }
++
++    public void setExtendedLifetime() {
++        this.age = -6000;
++    }
++
++    public void makeFakeItem() {
++        this.setNeverPickUp();
++        this.age = getItem().getEntityLifespan(this.level()) - 1;
++    }
++
++    public static float getSpin(float ageInTicks, float bobOffset) {
++        return ageInTicks / 20.0F + bobOffset;
++    }
++
++    @Override
++    public net.minecraft.sounds.SoundSource getSoundSource() {
++        return net.minecraft.sounds.SoundSource.AMBIENT;
++    }
++
++    @Override
++    public float getVisualRotationYInDegrees() {
++        return 180.0F - getSpin(this.getAge() + 0.5F, this.bobOffs) / (float) (Math.PI * 2) * 360.0F;
++    }
++
++    @Override
++    public net.minecraft.world.entity.SlotAccess getSlot(int slot) {
++        return slot == 0 ? net.minecraft.world.entity.SlotAccess.of(this::getItem, this::setItem) : super.getSlot(slot);
++    }
++}

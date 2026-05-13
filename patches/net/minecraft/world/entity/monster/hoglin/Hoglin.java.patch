@@ -21,3 +21,12 @@
          );
      }
  
+@@ -344,7 +_,7 @@
+     }
+ 
+     @Override
+-    public @Nullable Entity getTarget() {
++    public @Nullable LivingEntity getTarget() {
+         return this.getTargetFromBrain();
+     }
+ }

@@ -1,5 +1,26 @@
 --- a/net/minecraft/world/entity/monster/Monster.java
 +++ b/net/minecraft/world/entity/monster/Monster.java
+@@ -9,11 +_,7 @@
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.damagesource.DamageSource;
+-import net.minecraft.world.entity.EntitySpawnReason;
+-import net.minecraft.world.entity.EntityType;
+-import net.minecraft.world.entity.LivingEntity;
+-import net.minecraft.world.entity.Mob;
+-import net.minecraft.world.entity.PathfinderMob;
++import net.minecraft.world.entity.*;
+ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+ import net.minecraft.world.entity.ai.attributes.Attributes;
+ import net.minecraft.world.entity.player.Player;
+@@ -27,6 +_,7 @@
+ import net.minecraft.world.level.ServerLevelAccessor;
+ import net.minecraft.world.level.dimension.DimensionType;
+ import net.minecraft.world.level.gamerules.GameRules;
++import org.jspecify.annotations.Nullable;
+ 
+ public abstract class Monster extends PathfinderMob implements Enemy {
+     protected Monster(EntityType<? extends Monster> type, Level level) {
 @@ -139,11 +_,11 @@
      @Override
      public ItemStack getProjectile(ItemStack heldWeapon) {

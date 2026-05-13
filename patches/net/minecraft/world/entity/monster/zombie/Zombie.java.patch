@@ -30,6 +30,19 @@
                  if (!this.isSilent()) {
                      level.levelEvent(null, 1026, this.blockPosition(), 0);
                  }
+@@ -286,9 +_,9 @@
+         if (!super.hurtServer(level, source, damage)) {
+             return false;
+         } else {
+-            Entity target = this.getTarget();
+-            if (target == null && source.getEntity() != null) {
+-                target = source.getEntity();
++            LivingEntity target = this.getTarget();
++            if (target == null && source.getEntity() instanceof LivingEntity livingTarget) {
++                target = livingTarget;
+             }
+ 
+             if (target != null
 @@ -426,7 +_,7 @@
      @Override
      public boolean killedEntity(ServerLevel level, LivingEntity entity, DamageSource source) {

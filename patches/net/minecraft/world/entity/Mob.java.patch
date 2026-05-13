@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/Mob.java
 +++ b/net/minecraft/world/entity/Mob.java
+@@ -128,6 +_,8 @@
+     protected PathNavigation navigation;
+     public final GoalSelector goalSelector;
+     public final GoalSelector targetSelector;
++    public static boolean HOSTILE_MOBS_ATTACK_LIVINGBLOCKS = true;
++    public static boolean LIVINGBLOCK_ITEMS_PICKABLE = false;
+     private @Nullable Entity target;
+     private final Sensing sensing;
+     private DropChances dropChances = DropChances.DEFAULT;
 @@ -139,6 +_,11 @@
      private Leashable.@Nullable LeashData leashData;
      private BlockPos homePosition = BlockPos.ZERO;
@@ -12,20 +21,53 @@
  
      protected Mob(EntityType<? extends Mob> type, Level level) {
          super(type, level);
-@@ -244,7 +_,15 @@
+@@ -223,12 +_,13 @@
      }
  
-     public void setTarget(@Nullable Entity target) {
+     @Override
+-    public @Nullable Entity getTarget() {
+-        return this.asValidTarget(this.target);
++    public @Nullable LivingEntity getTarget() {
++        Entity valid = this.asValidTarget(this.target);
++        return valid instanceof LivingEntity livingTarget ? livingTarget : null;
+     }
+ 
+-    public @Nullable Entity getTargetUnchecked() {
+-        return this.target;
++    public @Nullable LivingEntity getTargetUnchecked() {
++        return this.target instanceof LivingEntity livingTarget ? livingTarget : null;
+     }
+ 
+     protected @Nullable Entity asValidTarget(@Nullable Entity target) {
+@@ -239,12 +_,25 @@
+         }
+     }
+ 
+-    protected final @Nullable Entity getTargetFromBrain() {
+-        return this.asValidTarget(this.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null));
+-    }
+-
+-    public void setTarget(@Nullable Entity target) {
 -        this.target = this.asValidTarget(target);
-+        target = this.asValidTarget(target);
-+        if (target instanceof LivingEntity livingTarget) {
-+            net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(this, livingTarget, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
++    protected final @Nullable LivingEntity getTargetFromBrain() {
++        Entity valid = this.asValidTarget(this.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null));
++        return valid instanceof LivingEntity livingTarget ? livingTarget : null;
++    }
++
++    public void setTarget(@Nullable LivingEntity target) {
++        target = this.asValidTarget(target) instanceof LivingEntity livingTarget ? livingTarget : null;
++        if (target != null) {
++            net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(this, target, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
 +            if (!changeTargetEvent.isCanceled()) {
 +                this.target = changeTargetEvent.getNewAboutToBeSetTarget();
 +            }
-+    } else {
++        } else {
 +            this.target = target;
 +        }
++    }
++
++    public void setAttackTarget(@Nullable Entity target) {
++        this.target = target;
      }
  
      @Override

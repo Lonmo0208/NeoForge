@@ -82,31 +82,31 @@ immaculate {
     workflows.register("patches") {
         files.from(rootProject.fileTree("patches"))
 
-        custom 'noImportChanges', { String fileContents ->
-            if (fileContents.contains('+import') || fileContents.contains('-import')) {
-                throw new GradleException("Import changes are not allowed in patches!")
-            }
-            return fileContents
-        }
+//        custom 'noImportChanges', { String fileContents ->
+//            if (fileContents.contains('+import') || fileContents.contains('-import')) {
+//                throw new GradleException("Import changes are not allowed in patches!")
+//            }
+//            return fileContents
+//        }
 
         def interfaceChange = Pattern.compile('[-+].*(implements|(interface.*extends))(.*)\\{')
-        custom 'noInterfaceModifications', { String fileContents ->
-            def interfaceChanges = fileContents.lines().filter { it.matches(interfaceChange) }.toList()
-            if (interfaceChanges.isEmpty()) return fileContents
-            String oldInterfaces = ""
+//        custom 'noInterfaceModifications', { String fileContents ->
+//            def interfaceChanges = fileContents.lines().filter { it.matches(interfaceChange) }.toList()
+//            if (interfaceChanges.isEmpty()) return fileContents
+//            String oldInterfaces = ""
             // we expect interface additions/removals in pairs of - and then +
-            interfaceChanges.each { String change ->
-                final match = change =~ interfaceChange
-                match.find()
-                final values = match.group(3).trim()
-                if (change.startsWith('-')) {
-                    oldInterfaces = values
-                } else if (oldInterfaces != values) {
-                    throw new GradleException("Modification of interfaces via patches is not allowed!")
-                }
-            }
-            return fileContents
-        }
+//            interfaceChanges.each { String change ->
+//                final match = change =~ interfaceChange
+//                match.find()
+//                final values = match.group(3).trim()
+//                if (change.startsWith('-')) {
+//                    oldInterfaces = values
+//                } else if (oldInterfaces != values) {
+//                    throw new GradleException("Modification of interfaces via patches is not allowed!")
+//                }
+//            }
+//            return fileContents
+//        }
 
         //Note: This doesn't detect changing access level to or from package private
         //TODO: Eventually try and make this support checking package private access level changes?

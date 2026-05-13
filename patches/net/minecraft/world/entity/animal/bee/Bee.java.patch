@@ -1,5 +1,41 @@
 --- a/net/minecraft/world/entity/animal/bee/Bee.java
 +++ b/net/minecraft/world/entity/animal/bee/Bee.java
+@@ -130,7 +_,7 @@
+     private static final int DEFAULT_CANNOT_ENTER_HIVE_TICKS = 0;
+     private static final int DEFAULT_CROPS_GROWN_SINCE_POLLINATION = 0;
+     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+-    private @Nullable EntityReference<Entity> persistentAngerTarget;
++    private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
+     private float rollAmount;
+     private float rollAmountO;
+     private int timeSinceSting;
+@@ -406,12 +_,12 @@
+     }
+ 
+     @Override
+-    public @Nullable EntityReference<Entity> getPersistentAngerTarget() {
++    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+         return this.persistentAngerTarget;
+     }
+ 
+     @Override
+-    public void setPersistentAngerTarget(@Nullable EntityReference<Entity> persistentAngerTarget) {
++    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> persistentAngerTarget) {
+         this.persistentAngerTarget = persistentAngerTarget;
+     }
+ 
+@@ -420,6 +_,11 @@
+         this.setTimeToRemainAngry(PERSISTENT_ANGER_TIME.sample(this.random));
+     }
+ 
++    @Override
++    public void setTarget(@Nullable LivingEntity target) {
++
++    }
++
+     private boolean doesHiveHaveSpace(BlockPos hivePos) {
+         BlockEntity blockEntity = this.level().getBlockEntity(hivePos);
+         return blockEntity instanceof BeehiveBlockEntity ? !((BeehiveBlockEntity)blockEntity).isFull() : false;
 @@ -480,7 +_,7 @@
          if (this.hivePos == null) {
              return null;
@@ -9,7 +45,7 @@
          }
      }
  
-@@ -646,8 +_,18 @@
+@@ -646,11 +_,21 @@
      }
  
      @Override
@@ -20,11 +56,23 @@
 +
 +    private void jumpInLiquidInternal() {
          this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.01, 0.0));
-+    }
-+
-+    @Override
-+    public void jumpInFluid(net.neoforged.neoforge.fluids.FluidType type) {
-+        this.jumpInLiquidInternal();
      }
  
      @Override
++    public void jumpInFluid(net.neoforged.neoforge.fluids.FluidType type) {
++        this.jumpInLiquidInternal();
++    }
++
++    @Override
+     public Vec3 getLeashOffset() {
+         return new Vec3(0.0, 0.5F * this.getEyeHeight(), this.getBbWidth() * 0.2F);
+     }
+@@ -726,7 +_,7 @@
+ 
+     private static class BeeBecomeAngryTargetGoal extends NearestAttackableTargetGoal<Player> {
+         BeeBecomeAngryTargetGoal(Bee bee) {
+-            super(bee, Player.class, 10, true, false, bee::isAngryAt);
++            super(bee, Player.class, 10, true, false, (target, level) -> target instanceof LivingEntity livingTarget && bee.isAngryAt(livingTarget, level));
+         }
+ 
+         @Override

@@ -1,0 +1,58 @@
+--- a/net/minecraft/world/entity/ai/behavior/PrepareRamNearestTarget.java
++++ b/net/minecraft/world/entity/ai/behavior/PrepareRamNearestTarget.java
+@@ -14,6 +_,7 @@
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.util.Mth;
+ import net.minecraft.world.entity.Entity;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.PathfinderMob;
+ import net.minecraft.world.entity.ai.Brain;
+ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+@@ -72,7 +_,7 @@
+         Brain<?> brain = body.getBrain();
+         brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
+             .flatMap(livingEntities -> livingEntities.findClosest(entity -> this.ramTargeting.test(level, body, entity)))
+-            .ifPresent(livingEntity -> this.chooseRamPosition(body, livingEntity));
++            .ifPresent(livingEntity -> this.chooseRamPosition(body, (LivingEntity)livingEntity));
+     }
+ 
+     protected void stop(ServerLevel level, E body, long timestamp) {
+@@ -121,7 +_,7 @@
+         return Vec3.atBottomCenterOf(targetPos).add(xOffset, 0.0, zOffset);
+     }
+ 
+-    private Optional<BlockPos> calculateRammingStartPosition(PathfinderMob body, Entity ramableTarget) {
++    private Optional<BlockPos> calculateRammingStartPosition(PathfinderMob body, LivingEntity ramableTarget) {
+         BlockPos targetPos = ramableTarget.blockPosition();
+         if (!this.isWalkableBlock(body, targetPos)) {
+             return Optional.empty();
+@@ -156,7 +_,7 @@
+         return body.getNavigation().isStableDestination(targetPos) && body.getPathfindingMalus(WalkNodeEvaluator.getPathTypeStatic(body, targetPos)) == 0.0F;
+     }
+ 
+-    private void chooseRamPosition(PathfinderMob body, Entity ramableTarget) {
++    private void chooseRamPosition(PathfinderMob body, LivingEntity ramableTarget) {
+         this.reachedRamPositionTimestamp = Optional.empty();
+         this.ramCandidate = this.calculateRammingStartPosition(body, ramableTarget)
+             .map(pos -> new PrepareRamNearestTarget.RamCandidate(pos, ramableTarget.blockPosition(), ramableTarget));
+@@ -165,9 +_,9 @@
+     public static class RamCandidate {
+         private final BlockPos startPosition;
+         private final BlockPos targetPosition;
+-        private final Entity target;
++        private final LivingEntity target;
+ 
+-        public RamCandidate(BlockPos startPosition, BlockPos targetPosition, Entity target) {
++        public RamCandidate(BlockPos startPosition, BlockPos targetPosition, LivingEntity target) {
+             this.startPosition = startPosition;
+             this.targetPosition = targetPosition;
+             this.target = target;
+@@ -181,7 +_,7 @@
+             return this.targetPosition;
+         }
+ 
+-        public Entity getTarget() {
++        public LivingEntity getTarget() {
+             return this.target;
+         }
+     }

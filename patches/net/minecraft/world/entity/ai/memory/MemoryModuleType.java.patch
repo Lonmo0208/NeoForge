@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/memory/MemoryModuleType.java
++++ b/net/minecraft/world/entity/ai/memory/MemoryModuleType.java
+@@ -45,7 +_,7 @@
+     public static final MemoryModuleType<List<Player>> NEAREST_VISIBLE_ATTACKABLE_PLAYERS = register("nearest_visible_targetable_players");
+     public static final MemoryModuleType<WalkTarget> WALK_TARGET = register("walk_target");
+     public static final MemoryModuleType<PositionTracker> LOOK_TARGET = register("look_target");
+-    public static final MemoryModuleType<Entity> ATTACK_TARGET = register("attack_target");
++    public static final MemoryModuleType<LivingEntity> ATTACK_TARGET = register("attack_target");
+     public static final MemoryModuleType<Boolean> ATTACK_COOLING_DOWN = register("attack_cooling_down");
+     public static final MemoryModuleType<LivingEntity> INTERACTION_TARGET = register("interaction_target");
+     public static final MemoryModuleType<AgeableMob> BREED_TARGET = register("breed_target");

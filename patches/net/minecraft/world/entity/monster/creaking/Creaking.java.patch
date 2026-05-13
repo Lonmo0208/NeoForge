@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/monster/creaking/Creaking.java
 +++ b/net/minecraft/world/entity/monster/creaking/Creaking.java
+@@ -440,7 +_,7 @@
+     }
+ 
+     @Override
+-    public @Nullable Entity getTarget() {
++    public @Nullable LivingEntity getTarget() {
+         return this.getTargetFromBrain();
+     }
+ 
 @@ -466,7 +_,8 @@
              for (Player player : players) {
                  if (this.canAttack(player) && !this.isAlliedTo(player)) {

@@ -36,6 +36,15 @@
                  return true;
              }
          }
+@@ -743,7 +_,7 @@
+     private static void retreatFromNearestTarget(Piglin body, Entity newAvoidTarget) {
+         Brain<Piglin> brain = body.getBrain();
+         Entity nearest = BehaviorUtils.getNearestTarget(body, brain.getMemory(MemoryModuleType.AVOID_TARGET), newAvoidTarget);
+-        nearest = BehaviorUtils.getNearestTarget(body, brain.getMemory(MemoryModuleType.ATTACK_TARGET), nearest);
++        nearest = BehaviorUtils.getNearestTarget(body, brain.getMemory(MemoryModuleType.ATTACK_TARGET).map(LivingEntity.class::cast), nearest);
+         setAvoidTargetAndDontHuntForAWhile(body, nearest);
+     }
+ 
 @@ -801,7 +_,7 @@
      }
  

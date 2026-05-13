@@ -1,0 +1,68 @@
+--- a/net/minecraft/world/entity/monster/zombie/ZombifiedPiglin.java
++++ b/net/minecraft/world/entity/monster/zombie/ZombifiedPiglin.java
+@@ -11,17 +_,7 @@
+ import net.minecraft.world.Difficulty;
+ import net.minecraft.world.DifficultyInstance;
+ import net.minecraft.world.damagesource.DamageSource;
+-import net.minecraft.world.entity.Entity;
+-import net.minecraft.world.entity.EntityAttachment;
+-import net.minecraft.world.entity.EntityAttachments;
+-import net.minecraft.world.entity.EntityDimensions;
+-import net.minecraft.world.entity.EntityReference;
+-import net.minecraft.world.entity.EntitySelector;
+-import net.minecraft.world.entity.EntitySpawnReason;
+-import net.minecraft.world.entity.EntityType;
+-import net.minecraft.world.entity.EquipmentSlot;
+-import net.minecraft.world.entity.NeutralMob;
+-import net.minecraft.world.entity.Pose;
++import net.minecraft.world.entity.*;
+ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+@@ -58,7 +_,7 @@
+     private int playFirstAngerSoundIn;
+     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+     private long persistentAngerEndTime;
+-    private @Nullable EntityReference<Entity> persistentAngerTarget;
++    private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
+     private static final int ALERT_RANGE_Y = 10;
+     private static final UniformInt ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
+     private int ticksUntilNextAlert;
+@@ -74,8 +_,8 @@
+         this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0, false));
+         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
+         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
+-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt));
+-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingBlock.class, 10, true, false, this::isAngryAt));
++        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target, level) -> target instanceof LivingEntity livingTarget && this.isAngryAt(livingTarget, level)));
++        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingBlock.class, 10, true, false, (target, level) -> target instanceof LivingEntity livingTarget && this.isAngryAt(livingTarget, level)));
+         this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal<>(this, true));
+     }
+ 
+@@ -155,7 +_,7 @@
+     }
+ 
+     @Override
+-    public void setTarget(@Nullable Entity target) {
++    public void setTarget(@Nullable LivingEntity target) {
+         if (this.getTarget() == null && target != null) {
+             this.playFirstAngerSoundIn = FIRST_ANGER_SOUND_DELAY.sample(this.random);
+             this.ticksUntilNextAlert = ALERT_INTERVAL.sample(this.random);
+@@ -203,7 +_,7 @@
+     }
+ 
+     @Override
+-    public void setPersistentAngerTarget(@Nullable EntityReference<Entity> persistentAngerTarget) {
++    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> persistentAngerTarget) {
+         this.persistentAngerTarget = persistentAngerTarget;
+     }
+ 
+@@ -233,7 +_,7 @@
+     }
+ 
+     @Override
+-    public @Nullable EntityReference<Entity> getPersistentAngerTarget() {
++    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+         return this.persistentAngerTarget;
+     }
+ 

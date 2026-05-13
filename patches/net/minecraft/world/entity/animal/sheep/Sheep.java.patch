@@ -9,3 +9,12 @@
              if (this.level() instanceof ServerLevel level && this.readyForShearing()) {
                  this.shear(level, SoundSource.PLAYERS, itemStack);
                  this.gameEvent(GameEvent.SHEAR, player);
+@@ -163,7 +_,7 @@
+             tool,
+             (l, drop) -> {
+                 for (int i = 0; i < drop.getCount(); i++) {
+-                    for (LivingBlock block : this.spawnAtLocation(l, drop.copyWithCount(1), 1.0F)) {
++                    for (LivingBlock block : net.minecraft.world.entity.livingblock.LivingBlock.createStack(l, this.blockPosition(), this, drop.copyWithCount(1))) {
+                         block.setDeltaMovement(
+                             block.getDeltaMovement()
+                                 .add(

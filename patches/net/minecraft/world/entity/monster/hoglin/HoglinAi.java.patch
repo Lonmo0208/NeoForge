@@ -1,0 +1,31 @@
+--- a/net/minecraft/world/entity/monster/hoglin/HoglinAi.java
++++ b/net/minecraft/world/entity/monster/hoglin/HoglinAi.java
+@@ -148,7 +_,7 @@
+     private static void retreatFromNearestTarget(Hoglin body, Entity newAvoidTarget) {
+         Brain<Hoglin> brain = body.getBrain();
+         Entity nearest = BehaviorUtils.getNearestTarget(body, brain.getMemory(MemoryModuleType.AVOID_TARGET), newAvoidTarget);
+-        nearest = BehaviorUtils.getNearestTarget(body, brain.getMemory(MemoryModuleType.ATTACK_TARGET), nearest);
++        nearest = BehaviorUtils.getNearestTarget(body, brain.getMemory(MemoryModuleType.ATTACK_TARGET).map(LivingEntity.class::cast), nearest);
+         setAvoidTarget(body, nearest);
+     }
+ 
+@@ -209,7 +_,7 @@
+         Brain<Hoglin> brain = body.getBrain();
+         brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+         brain.eraseMemory(MemoryModuleType.BREED_TARGET);
+-        brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, 200L);
++        brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, (LivingEntity)target, 200L);
+     }
+ 
+     private static void broadcastAttackTarget(Hoglin body, Entity target) {
+@@ -218,8 +_,8 @@
+ 
+     private static void setAttackTargetIfCloserThanCurrent(Hoglin body, Entity newTarget) {
+         if (!isPacified(body)) {
+-            Optional<Entity> currentTarget = body.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
+-            Entity nearest = BehaviorUtils.getNearestTarget(body, currentTarget, newTarget);
++            Optional<LivingEntity> currentTarget = body.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
++            Entity nearest = BehaviorUtils.getNearestTarget(body, currentTarget.map(LivingEntity.class::cast), newTarget);
+             setAttackTarget(body, nearest);
+         }
+     }

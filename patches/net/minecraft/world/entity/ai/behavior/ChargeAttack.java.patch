@@ -1,0 +1,34 @@
+--- a/net/minecraft/world/entity/ai/behavior/ChargeAttack.java
++++ b/net/minecraft/world/entity/ai/behavior/ChargeAttack.java
+@@ -60,11 +_,11 @@
+ 
+     protected boolean canStillUse(ServerLevel level, Animal body, long timestamp) {
+         Brain<?> brain = body.getBrain();
+-        Optional<Entity> attackCandidate = brain.getMemory(MemoryModuleType.ATTACK_TARGET);
++        Optional<LivingEntity> attackCandidate = brain.getMemory(MemoryModuleType.ATTACK_TARGET);
+         if (attackCandidate.isEmpty()) {
+             return false;
+         } else {
+-            Entity attackTarget = attackCandidate.get();
++            LivingEntity attackTarget = attackCandidate.get();
+             if (body instanceof TamableAnimal tamedAnimal && tamedAnimal.isTame()) {
+                 return false;
+             } else if (body.position().subtract(this.startPosition).lengthSqr() >= this.maxChargeDistance * this.maxChargeDistance) {
+@@ -80,7 +_,7 @@
+     protected void start(ServerLevel level, Animal body, long timestamp) {
+         Brain<?> brain = body.getBrain();
+         this.startPosition = body.position();
+-        Entity attackCandidate = brain.getMemory(MemoryModuleType.ATTACK_TARGET).get();
++        LivingEntity attackCandidate = brain.getMemory(MemoryModuleType.ATTACK_TARGET).get();
+         Vec3 direction = attackCandidate.position().subtract(body.position()).normalize();
+         this.chargeVelocityVector = direction.scale(this.speed);
+         if (this.canStillUse(level, body, timestamp)) {
+@@ -90,7 +_,7 @@
+ 
+     protected void tick(ServerLevel level, Animal body, long timestamp) {
+         Brain<?> brain = body.getBrain();
+-        Entity attackTarget = brain.getMemory(MemoryModuleType.ATTACK_TARGET).orElseThrow();
++        LivingEntity attackTarget = brain.getMemory(MemoryModuleType.ATTACK_TARGET).orElseThrow();
+         body.lookAt(attackTarget, 360.0F, 360.0F);
+         body.setDeltaMovement(this.chargeVelocityVector);
+         List<LivingEntity> collidingEntities = new ArrayList<>(1);

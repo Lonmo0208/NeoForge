@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/entity/animal/frog/Frog.java
++++ b/net/minecraft/world/entity/animal/frog/Frog.java
+@@ -34,6 +_,7 @@
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntitySpawnReason;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.Mob;
+ import net.minecraft.world.entity.MoverType;
+ import net.minecraft.world.entity.Pose;
+@@ -324,7 +_,7 @@
+     }
+ 
+     @Override
+-    public @Nullable Entity getTarget() {
++    public @Nullable LivingEntity getTarget() {
+         return this.getTargetFromBrain();
+     }
+ 

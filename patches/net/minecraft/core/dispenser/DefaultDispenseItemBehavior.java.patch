@@ -1,18 +1,20 @@
 --- a/net/minecraft/core/dispenser/DefaultDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/DefaultDispenseItemBehavior.java
-@@ -9,7 +_,7 @@
+@@ -8,6 +_,7 @@
+ import net.minecraft.world.item.ItemStack;
  import net.minecraft.world.level.Level;
  import net.minecraft.world.level.block.DispenserBlock;
++import org.jspecify.annotations.Nullable;
  
--public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
-+public abstract class DefaultDispenseItemBehavior implements DispenseItemBehavior {
+ public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
      private static final int DEFAULT_ACCURACY = 6;
- 
-     @Override
-@@ -76,4 +_,6 @@
+@@ -75,5 +_,9 @@
+             playDefaultSound(source.level(), source.pos());
              playDefaultAnimation(source.level(), source.pos(), direction);
          }
-     }
++    }
 +
-+    public abstract ItemStack execute(BlockSource source, ItemStack stack);
++    public @Nullable ItemStack execute(BlockSource source, ItemStack stack) {
++        return null;
+     }
  }

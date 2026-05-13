@@ -11,3 +11,12 @@
          Vec3 throwVector = targetPos.subtract(thrower.position());
          throwVector = throwVector.normalize().multiply(throwVelocity.x, throwVelocity.y, throwVelocity.z);
          itemEntity.setDeltaMovement(throwVector);
+@@ -106,7 +_,7 @@
+     }
+ 
+     public static boolean isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(LivingEntity body, Entity otherTarget, double howMuchFurtherAway) {
+-        Optional<Entity> currentTarget = body.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
++        Optional<LivingEntity> currentTarget = body.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
+         if (currentTarget.isEmpty()) {
+             return false;
+         } else {

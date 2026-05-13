@@ -1,0 +1,62 @@
+--- /dev/null
++++ b/net/minecraft/client/renderer/entity/ItemEntityRenderer.java
+@@ -1,0 +_,59 @@
++package net.minecraft.client.renderer.entity;
++
++import net.neoforged.api.distmarker.Dist;
++import net.neoforged.api.distmarker.OnlyIn;
++
++@OnlyIn(Dist.CLIENT)
++public class ItemEntityRenderer extends EntityRenderer<net.minecraft.world.entity.livingblock.LivingBlock, net.minecraft.client.renderer.entity.state.LivingBlockRenderState> {
++    private static final   net.minecraft.client.renderer.block.model.BlockDisplayContext BLOCK_DISPLAY_CONTEXT = net.minecraft.client.renderer.block.model.BlockDisplayContext.create();
++    private final net.minecraft.client.renderer.item.ItemModelResolver itemModelResolver;
++    private final net.minecraft.client.renderer.block.BlockModelResolver blockModelResolver;
++
++    public ItemEntityRenderer(EntityRendererProvider.Context context) {
++        super(context);
++        this.itemModelResolver = context.getItemModelResolver();
++        this.blockModelResolver = context.getBlockModelResolver();
++        this.shadowRadius = 0.15F;
++        this.shadowStrength = 0.75F;
++    }
++
++    @Override
++    public net.minecraft.client.renderer.entity.state.LivingBlockRenderState createRenderState() {
++        return new net.minecraft.client.renderer.entity.state.LivingBlockRenderState();
++    }
++
++    @Override
++    public void extractRenderState(net.minecraft.world.entity.livingblock.LivingBlock entity, net.minecraft.client.renderer.entity.state.LivingBlockRenderState state, float partialTicks) {
++        super.extractRenderState(entity, state, partialTicks);
++        state.outlineColor = 0;
++        state.blockState = entity.getBlockState();
++        net.minecraft.world.item.ItemStack itemStack = entity.getItemStack();
++        if (!itemStack.isEmpty()) {
++            if (itemStack.getItem() instanceof net.minecraft.world.item.BlockItem && !state.blockState.isAir()) {
++                this.blockModelResolver.update(state.blockModel, state.blockState, BLOCK_DISPLAY_CONTEXT);
++            } else {
++                this.itemModelResolver.updateForNonLiving(state.item, entity.getItemStack(), net.minecraft.world.item.ItemDisplayContext.GROUND, entity);
++            }
++        } else {
++            state.item.clear();
++        }
++        state.deathTime = entity.deathTime > 0 ? entity.deathTime + partialTicks : 0.0F;
++    }
++
++    @Override
++    public void submit(net.minecraft.client.renderer.entity.state.LivingBlockRenderState state, com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector, net.minecraft.client.renderer.state.level.CameraRenderState camera) {
++        if (!state.blockState.isAir() || !state.item.isEmpty()) {
++            poseStack.pushPose();
++            int overlay = net.minecraft.client.renderer.texture.OverlayTexture.pack(0.0F, state.hasRedOverlay);
++            if (!state.blockState.isAir()) {
++                float bob = net.minecraft.util.Mth.sin(state.ageInTicks / 10.0F + 0.9F) * 0.1F + 0.1F;
++                poseStack.translate(-0.5, bob + 0.2, -0.5);
++                state.blockModel.submit(poseStack, collector, state.lightCoords, overlay, state.outlineColor);
++            } else {
++                state.item.submit(poseStack, collector, state.lightCoords, overlay, state.outlineColor);
++            }
++            poseStack.popPose();
++        }
++        super.submit(state, poseStack, collector, camera);
++    }
++}

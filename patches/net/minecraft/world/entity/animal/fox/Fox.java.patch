@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/animal/fox/Fox.java
 +++ b/net/minecraft/world/entity/animal/fox/Fox.java
+@@ -638,7 +_,7 @@
+     }
+ 
+     @Override
+-    public void setTarget(@Nullable Entity target) {
++    public void setTarget(@Nullable LivingEntity target) {
+         if (this.isDefending() && target == null) {
+             this.setDefending(false);
+         }
 @@ -706,13 +_,18 @@
  
      @Override

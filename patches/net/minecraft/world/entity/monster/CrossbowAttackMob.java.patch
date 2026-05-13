@@ -1,6 +1,12 @@
 --- a/net/minecraft/world/entity/monster/CrossbowAttackMob.java
 +++ b/net/minecraft/world/entity/monster/CrossbowAttackMob.java
-@@ -17,7 +_,7 @@
+@@ -12,12 +_,12 @@
+ public interface CrossbowAttackMob extends RangedAttackMob {
+     void setChargingCrossbow(final boolean isCharging);
+ 
+-    @Nullable Entity getTarget();
++    @Nullable LivingEntity getTarget();
+ 
      void onCrossbowAttackPerformed();
  
      default void performCrossbowAttack(LivingEntity body, float crossbowPower) {

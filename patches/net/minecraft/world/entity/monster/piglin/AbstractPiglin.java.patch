@@ -1,5 +1,15 @@
 --- a/net/minecraft/world/entity/monster/piglin/AbstractPiglin.java
 +++ b/net/minecraft/world/entity/monster/piglin/AbstractPiglin.java
+@@ -10,8 +_,8 @@
+ import net.minecraft.world.effect.MobEffectInstance;
+ import net.minecraft.world.effect.MobEffects;
+ import net.minecraft.world.entity.ConversionParams;
+-import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.ai.util.GoalUtils;
+ import net.minecraft.world.entity.monster.Monster;
+ import net.minecraft.world.level.Level;
 @@ -84,7 +_,7 @@
              this.timeInOverworld = 0;
          }
@@ -19,5 +29,14 @@
 +                net.neoforged.neoforge.event.EventHooks.onLivingConvert(this, zombified);
 +            }
          );
+     }
+ 
+@@ -116,7 +_,7 @@
+     public abstract PiglinArmPose getArmPose();
+ 
+     @Override
+-    public @Nullable Entity getTarget() {
++    public @Nullable LivingEntity getTarget() {
+         return this.getTargetFromBrain();
      }
  

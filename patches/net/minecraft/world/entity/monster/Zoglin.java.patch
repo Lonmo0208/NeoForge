@@ -1,0 +1,23 @@
+--- a/net/minecraft/world/entity/monster/Zoglin.java
++++ b/net/minecraft/world/entity/monster/Zoglin.java
+@@ -205,9 +_,9 @@
+         return wasHurt;
+     }
+ 
+-    private void setAttackTarget(Entity target) {
++    public void setAttackTarget(Entity target) {
+         this.brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+-        this.brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, 200L);
++        this.brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, (LivingEntity)target, 200L);
+     }
+ 
+     @Override
+@@ -301,7 +_,7 @@
+     }
+ 
+     @Override
+-    public @Nullable Entity getTarget() {
++    public @Nullable LivingEntity getTarget() {
+         return this.getTargetFromBrain();
+     }
+ 

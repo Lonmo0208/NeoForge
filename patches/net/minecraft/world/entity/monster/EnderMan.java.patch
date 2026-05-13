@@ -1,10 +1,30 @@
 --- a/net/minecraft/world/entity/monster/EnderMan.java
 +++ b/net/minecraft/world/entity/monster/EnderMan.java
-@@ -121,7 +_,6 @@
+@@ -82,7 +_,7 @@
+     private int targetChangeTime;
+     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+     private long persistentAngerEndTime;
+-    private @Nullable EntityReference<Entity> persistentAngerTarget;
++    private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
+ 
+     public EnderMan(EntityType<? extends EnderMan> type, Level level) {
+         super(type, level);
+@@ -99,7 +_,7 @@
+         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+         this.goalSelector.addGoal(10, new EnderMan.EndermanLeaveBlockGoal(this));
+         this.goalSelector.addGoal(11, new EnderMan.EndermanTakeBlockGoal(this));
+-        this.targetSelector.addGoal(1, new EnderMan.EndermanLookForPlayerGoal(this, this::isAngryAt));
++        this.targetSelector.addGoal(1, new EnderMan.EndermanLookForPlayerGoal(this, (target, level) -> target instanceof LivingEntity livingTarget && this.isAngryAt(livingTarget, level)));
+         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Endermite.class, true, false));
+         this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<>(this, false));
+@@ -120,8 +_,7 @@
+     }
  
      @Override
-     public void setTarget(@Nullable Entity target) {
+-    public void setTarget(@Nullable Entity target) {
 -        super.setTarget(target);
++    public void setTarget(@Nullable LivingEntity target) {
          AttributeInstance movementSpeed = this.getAttribute(Attributes.MOVEMENT_SPEED);
          if (target == null) {
              this.targetChangeTime = 0;
@@ -16,6 +36,21 @@
      }
  
      @Override
+@@ -161,12 +_,12 @@
+     }
+ 
+     @Override
+-    public void setPersistentAngerTarget(@Nullable EntityReference<Entity> persistentAngerTarget) {
++    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> persistentAngerTarget) {
+         this.persistentAngerTarget = persistentAngerTarget;
+     }
+ 
+     @Override
+-    public @Nullable EntityReference<Entity> getPersistentAngerTarget() {
++    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+         return this.persistentAngerTarget;
+     }
+ 
 @@ -207,7 +_,7 @@
      }
  
@@ -51,6 +86,15 @@
                  && belowState.isCollisionShapeFullBlock(level, below)
                  && carried.canSurvive(level, pos)
                  && level.getEntities(this.enderman, AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(pos))).isEmpty();
+@@ -491,7 +_,7 @@
+         public EndermanLookForPlayerGoal(EnderMan enderman, TargetingConditions.@Nullable Selector isAngryAt) {
+             super(enderman, Player.class, 10, false, false, isAngryAt);
+             this.enderman = enderman;
+-            this.isAngerInducing = (target, level) -> (enderman.isBeingStaredBy((Player)target) || enderman.isAngryAt(target, level))
++            this.isAngerInducing = (target, level) -> (enderman.isBeingStaredBy((Player)target) || (target instanceof LivingEntity livingTarget && enderman.isAngryAt(livingTarget, level)))
+                 && !enderman.hasIndirectPassenger(target);
+             this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
+         }
 @@ -583,7 +_,7 @@
              if (this.enderman.getCarriedBlock() != null) {
                  return false;

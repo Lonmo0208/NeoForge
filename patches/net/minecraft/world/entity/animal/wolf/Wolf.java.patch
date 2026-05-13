@@ -1,5 +1,25 @@
 --- a/net/minecraft/world/entity/animal/wolf/Wolf.java
 +++ b/net/minecraft/world/entity/animal/wolf/Wolf.java
+@@ -110,7 +_,7 @@
+     private float shakeAnim;
+     private float shakeAnimO;
+     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+-    private @Nullable EntityReference<Entity> persistentAngerTarget;
++    private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
+ 
+     public Wolf(EntityType<? extends Wolf> type, Level level) {
+         super(type, level);
+@@ -136,8 +_,8 @@
+         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+         this.targetSelector.addGoal(3, new HurtByTargetGoal(this).setAlertOthers());
+-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt));
+-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, LivingBlock.class, 10, true, false, this::isAngryAt));
++        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target, level) -> target instanceof LivingEntity livingTarget && this.isAngryAt(livingTarget, level)));
++        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, LivingBlock.class, 10, true, false, (target, level) -> target instanceof LivingEntity livingTarget && this.isAngryAt(livingTarget, level)));
+         this.targetSelector.addGoal(5, new NonTameRandomTargetGoal<>(this, Animal.class, false, PREY_SELECTOR));
+         this.targetSelector.addGoal(6, new NonTameRandomTargetGoal<>(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
+         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
 @@ -502,7 +_,7 @@
      }
  
@@ -9,3 +29,18 @@
              this.tame(player);
              this.navigation.stop();
              this.setTarget(null);
+@@ -564,12 +_,12 @@
+     }
+ 
+     @Override
+-    public @Nullable EntityReference<Entity> getPersistentAngerTarget() {
++    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+         return this.persistentAngerTarget;
+     }
+ 
+     @Override
+-    public void setPersistentAngerTarget(@Nullable EntityReference<Entity> persistentAngerTarget) {
++    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> persistentAngerTarget) {
+         this.persistentAngerTarget = persistentAngerTarget;
+     }
+ 

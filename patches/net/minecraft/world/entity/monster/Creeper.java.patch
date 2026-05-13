@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/monster/Creeper.java
++++ b/net/minecraft/world/entity/monster/Creeper.java
+@@ -151,7 +_,7 @@
+     }
+ 
+     @Override
+-    public void setTarget(@Nullable Entity target) {
++    public void setTarget(@Nullable LivingEntity target) {
+         if (!(target instanceof Goat)) {
+             super.setTarget(target);
+         }

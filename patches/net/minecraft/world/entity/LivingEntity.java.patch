@@ -37,6 +37,21 @@
  
      protected LivingEntity(EntityType<? extends LivingEntity> type, Level level) {
          super(type, level);
+@@ -306,6 +_,14 @@
+         this.hurtServer(level, this.damageSources().genericKill(), Float.MAX_VALUE);
+     }
+ 
++    public boolean canAttack(LivingEntity target) {
++        if (target instanceof Player && this.level().getDifficulty() == Difficulty.PEACEFUL) {
++            return false;
++        } else {
++            return target.canBeSeenAsEnemy();
++        }
++    }
++
+     @Override
+     protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+         entityData.define(DATA_LIVING_ENTITY_FLAGS, (byte)0);
 @@ -339,13 +_,15 @@
              .add(Attributes.MOVEMENT_EFFICIENCY)
              .add(Attributes.ATTACK_KNOCKBACK)
@@ -73,6 +88,77 @@
      public boolean canBreatheUnderwater() {
          return this.is(EntityTypeTags.CAN_BREATHE_UNDER_WATER);
      }
+@@ -781,6 +_,70 @@
+         }
+     }
+ 
++    @SuppressWarnings({"unchecked", "rawtypes"})
++    private net.minecraft.world.entity.item.ItemEntity createItemStackToDrop(ItemStack itemStack, boolean randomly, boolean thrownFromHand) {
++        if (itemStack.isEmpty()) {
++            return null;
++        } else {
++            double yHandPos = this.getEyeY() - 0.3F;
++            net.minecraft.world.entity.item.ItemEntity entity = new net.minecraft.world.entity.item.ItemEntity(this.level(), this.getX(), yHandPos, this.getZ(), itemStack);
++            entity.setPickUpDelay(40);
++            if (thrownFromHand) {
++                entity.setThrower(this);
++            }
++
++            if (randomly) {
++                float pow = this.random.nextFloat() * 0.5F;
++                float dir = this.random.nextFloat() * (float) (Math.PI * 2);
++                entity.setDeltaMovement(-Mth.sin(dir) * pow, 0.2F, Mth.cos(dir) * pow);
++            } else {
++                float pow = 0.3F;
++                float sinX = Mth.sin(this.getXRot() * (float) (Math.PI / 180.0));
++                float cosX = Mth.cos(this.getXRot() * (float) (Math.PI / 180.0));
++                float sinY = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
++                float cosY = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
++                float dir = this.random.nextFloat() * (float) (Math.PI * 2);
++                float pow2 = 0.02F * this.random.nextFloat();
++                entity.setDeltaMovement(
++                        -sinY * cosX * 0.3F + Math.cos(dir) * pow2,
++                        -sinX * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F,
++                        cosY * cosX * 0.3F + Math.sin(dir) * pow2
++                );
++            }
++
++            return entity;
++        }
++    }
++
++    @SuppressWarnings({"unchecked", "rawtypes"})
++    public net.minecraft.world.entity.item.ItemEntity drop(ItemStack itemStack, boolean randomly, boolean thrownFromHand) {
++        if (itemStack.isEmpty()) {
++            return null;
++        } else if (this.level().isClientSide()) {
++            this.swing(InteractionHand.MAIN_HAND);
++            return null;
++        } else {
++            net.minecraft.world.entity.item.ItemEntity entity = this.createItemStackToDrop(itemStack, randomly, thrownFromHand);
++            if (entity != null) {
++                java.util.Collection drops = (java.util.Collection) this.captureDrops();
++                if (drops != null) {
++                    drops.add(entity);
++                } else {
++                    this.level().addFreshEntity(entity);
++                }
++            }
++
++            return entity;
++        }
++    }
++
++    public void onItemPickup(net.minecraft.world.entity.item.ItemEntity entity) {
++        Entity thrower = entity.getOwner();
++        if (thrower instanceof ServerPlayer serverPlayer) {
++            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger(serverPlayer, entity.getItem(), this);
++        }
++    }
++
+     @Override
+     protected void readAdditionalSaveData(ValueInput input) {
+         this.internalSetAbsorptionAmount(input.getFloatOr("AbsorptionAmount", 0.0F));
 @@ -842,8 +_,10 @@
                      Holder<MobEffect> mobEffect = iterator.next();
                      MobEffectInstance effect = this.activeEffects.get(mobEffect);

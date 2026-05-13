@@ -1,0 +1,37 @@
+--- a/net/minecraft/world/entity/animal/golem/IronGolem.java
++++ b/net/minecraft/world/entity/animal/golem/IronGolem.java
+@@ -57,7 +_,7 @@
+     private int offerFlowerTick;
+     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+     private long persistentAngerEndTime;
+-    private @Nullable EntityReference<Entity> persistentAngerTarget;
++    private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
+ 
+     public IronGolem(EntityType<? extends IronGolem> type, Level level) {
+         super(type, level);
+@@ -74,8 +_,8 @@
+         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+         this.targetSelector.addGoal(1, new DefendVillageTargetGoal(this));
+         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt));
+-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingBlock.class, 10, true, false, this::isAngryAt));
++        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target, level) -> target instanceof LivingEntity livingTarget && this.isAngryAt(livingTarget, level)));
++        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingBlock.class, 10, true, false, (target, level) -> target instanceof LivingEntity livingTarget && this.isAngryAt(livingTarget, level)));
+         this.targetSelector
+             .addGoal(
+                 3,
+@@ -173,12 +_,12 @@
+     }
+ 
+     @Override
+-    public void setPersistentAngerTarget(@Nullable EntityReference<Entity> persistentAngerTarget) {
++    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> persistentAngerTarget) {
+         this.persistentAngerTarget = persistentAngerTarget;
+     }
+ 
+     @Override
+-    public @Nullable EntityReference<Entity> getPersistentAngerTarget() {
++    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+         return this.persistentAngerTarget;
+     }
+ 

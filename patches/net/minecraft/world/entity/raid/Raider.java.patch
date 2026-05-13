@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/raid/Raider.java
++++ b/net/minecraft/world/entity/raid/Raider.java
+@@ -307,7 +_,7 @@
+             if (target != null) {
+                 for (Raider entity : getServerLevel(this.mob)
+                     .getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
+-                    entity.setTarget(target);
++                    entity.setTarget((LivingEntity) target);
+                     entity.setAggressive(true);
+                 }
+ 
