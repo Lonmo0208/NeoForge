@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/net/minecraft/world/entity/item/ItemEntity.java
-@@ -1,0 +_,434 @@
+@@ -1,0 +_,433 @@
 +package net.minecraft.world.entity.item;
 +
 +import net.minecraft.world.entity.livingblock.LivingBlock;
@@ -92,11 +92,12 @@
 +                this.pickupDelay--;
 +            }
 +
-+            this.xo = this.getX();
-+            this.yo = this.getY();
-+            this.zo = this.getZ();
-+            net.minecraft.world.phys.Vec3 oldMovement = this.getDeltaMovement();
 +            if (this.getMovementTarget() == net.minecraft.world.entity.livingblock.Target.NONE) {
++                this.xo = this.getX();
++                this.yo = this.getY();
++                this.zo = this.getZ();
++                net.minecraft.world.phys.Vec3 oldMovement = this.getDeltaMovement();
++
 +                if (this.isInWater() && this.getFluidHeight(net.minecraft.tags.FluidTags.WATER) > 0.1F) {
 +                    this.setUnderwaterMovement();
 +                } else if (this.isInLava() && this.getFluidHeight(net.minecraft.tags.FluidTags.LAVA) > 0.1F) {
@@ -104,25 +105,22 @@
 +                } else {
 +                    this.applyGravity();
 +                }
-+            }
 +
-+            if (this.level().isClientSide()) {
-+                this.noPhysics = false;
-+            } else {
-+                this.noPhysics = !this.level().noCollision(this, this.getBoundingBox().deflate(1.0E-7));
-+                if (this.noPhysics) {
-+                    this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
++                if (this.level().isClientSide()) {
++                    this.noPhysics = false;
++                } else {
++                    this.noPhysics = !this.level().noCollision(this, this.getBoundingBox().deflate(1.0E-7));
++                    if (this.noPhysics) {
++                        this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
++                    }
 +                }
-+            }
 +
-+            if (this.getMovementTarget() == net.minecraft.world.entity.livingblock.Target.NONE
-+                    && this.onGround()
-+                    && !(this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-5F)
-+                    && (this.tickCount + this.getId()) % 4 != 0) {
-+                this.applyEffectsFromBlocksForLastMovements();
-+            } else {
-+                this.move(net.minecraft.world.entity.MoverType.SELF, this.getDeltaMovement());
-+                if (this.getMovementTarget() == net.minecraft.world.entity.livingblock.Target.NONE) {
++                if (this.onGround()
++                        && !(this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-5F)
++                        && (this.tickCount + this.getId()) % 4 != 0) {
++                    this.applyEffectsFromBlocksForLastMovements();
++                } else {
++                    this.move(net.minecraft.world.entity.MoverType.SELF, this.getDeltaMovement());
 +                    this.applyEffectsFromBlocks();
 +                    float friction = 0.98F;
 +                    if (this.onGround()) {
@@ -137,14 +135,21 @@
 +                        }
 +                    }
 +                }
-+            }
 +
-+            boolean moved = net.minecraft.util.Mth.floor(this.xo) != net.minecraft.util.Mth.floor(this.getX())
-+                    || net.minecraft.util.Mth.floor(this.yo) != net.minecraft.util.Mth.floor(this.getY())
-+                    || net.minecraft.util.Mth.floor(this.zo) != net.minecraft.util.Mth.floor(this.getZ());
-+            int rate = moved ? 2 : 40;
-+            if (this.tickCount % rate == 0 && !this.level().isClientSide() && this.isMergable()) {
-+                this.mergeWithNeighbours();
++                boolean moved = net.minecraft.util.Mth.floor(this.xo) != net.minecraft.util.Mth.floor(this.getX())
++                        || net.minecraft.util.Mth.floor(this.yo) != net.minecraft.util.Mth.floor(this.getY())
++                        || net.minecraft.util.Mth.floor(this.zo) != net.minecraft.util.Mth.floor(this.getZ());
++                int rate = moved ? 2 : 40;
++                if (this.tickCount % rate == 0 && !this.level().isClientSide() && this.isMergable()) {
++                    this.mergeWithNeighbours();
++                }
++
++                if (!this.level().isClientSide()) {
++                    double value = this.getDeltaMovement().subtract(oldMovement).lengthSqr();
++                    if (value > 0.01) {
++                        this.needsSync = true;
++                    }
++                }
 +            }
 +
 +            if (this.age != -32768) {
@@ -152,12 +157,6 @@
 +            }
 +
 +            this.needsSync = this.needsSync | this.updateFluidInteraction();
-+            if (!this.level().isClientSide()) {
-+                double value = this.getDeltaMovement().subtract(oldMovement).lengthSqr();
-+                if (value > 0.01) {
-+                    this.needsSync = true;
-+                }
-+            }
 +
 +            net.minecraft.world.item.ItemStack item = this.getItem();
 +            if (!this.level().isClientSide() && this.age >= lifespan) {
