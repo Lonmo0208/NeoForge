@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/monster/Guardian.java
++++ b/net/minecraft/world/entity/monster/Guardian.java
+@@ -431,7 +_,7 @@
+         }
+ 
+         @Override
+-        public boolean test(@Nullable Entity target, ServerLevel level) {
++        public boolean test(@Nullable LivingEntity target, ServerLevel level) {
+             return (target instanceof Player || target instanceof Squid || target instanceof Axolotl) && target.distanceToSqr(this.guardian) > 9.0;
+         }
+     }

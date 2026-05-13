@@ -1,0 +1,53 @@
+--- a/net/minecraft/world/level/block/ShulkerBoxBlock.java
++++ b/net/minecraft/world/level/block/ShulkerBoxBlock.java
+@@ -9,8 +_,12 @@
+ import net.minecraft.core.Direction;
+ import net.minecraft.resources.Identifier;
+ import net.minecraft.server.level.ServerLevel;
++import net.minecraft.stats.Stats;
+ import net.minecraft.world.Containers;
++import net.minecraft.world.InteractionResult;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
++import net.minecraft.world.entity.monster.Shulker;
++import net.minecraft.world.entity.monster.piglin.PiglinAi;
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.inventory.AbstractContainerMenu;
+ import net.minecraft.world.item.DyeColor;
+@@ -28,6 +_,8 @@
+ import net.minecraft.world.level.block.state.properties.EnumProperty;
+ import net.minecraft.world.level.storage.loot.LootParams;
+ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
++import net.minecraft.world.phys.AABB;
++import net.minecraft.world.phys.BlockHitResult;
+ import net.minecraft.world.phys.shapes.CollisionContext;
+ import net.minecraft.world.phys.shapes.Shapes;
+ import net.minecraft.world.phys.shapes.VoxelShape;
+@@ -72,6 +_,28 @@
+     @Override
+     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+         builder.add(FACING);
++    }
++
++    @Override
++    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
++        if (level instanceof ServerLevel serverLevel
++            && level.getBlockEntity(pos) instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity
++            && canOpen(state, level, pos, shulkerBoxBlockEntity)) {
++            player.openMenu(shulkerBoxBlockEntity);
++            player.awardStat(Stats.OPEN_SHULKER_BOX);
++            PiglinAi.angerNearbyPiglins(serverLevel, player, true);
++        }
++
++        return InteractionResult.SUCCESS;
++    }
++
++    private static boolean canOpen(BlockState state, Level level, BlockPos pos, ShulkerBoxBlockEntity blockEntity) {
++        if (!blockEntity.isClosed()) {
++            return true;
++        } else {
++            AABB lidOpenBoundingBox = Shulker.getProgressDeltaAabb(1.0F, state.getValue(FACING), 0.0F, 0.5F, pos.getBottomCenter()).deflate(1.0E-6);
++            return level.noCollision(lidOpenBoundingBox);
++        }
+     }
+ 
+     @Override

@@ -1,0 +1,26 @@
+--- a/net/minecraft/world/level/block/FurnaceBlock.java
++++ b/net/minecraft/world/level/block/FurnaceBlock.java
+@@ -7,6 +_,8 @@
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.sounds.SoundSource;
+ import net.minecraft.util.RandomSource;
++import net.minecraft.world.MenuProvider;
++import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.entity.BlockEntity;
+ import net.minecraft.world.level.block.entity.BlockEntityTicker;
+@@ -31,6 +_,14 @@
+     @Override
+     public BlockEntity newBlockEntity(BlockPos worldPosition, BlockState blockState) {
+         return new FurnaceBlockEntity(worldPosition, blockState);
++    }
++
++    @Override
++    protected void openContainer(Level level, BlockPos pos, Player player) {
++        BlockEntity blockEntity = level.getBlockEntity(pos);
++        if (blockEntity instanceof FurnaceBlockEntity) {
++            player.openMenu((MenuProvider)blockEntity);
++        }
+     }
+ 
+     @Override

@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/inventory/ShulkerBoxScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/ShulkerBoxScreen.java
+@@ -14,7 +_,7 @@
+     private static final Identifier CONTAINER_TEXTURE = Identifier.withDefaultNamespace("textures/gui/container/shulker_box.png");
+ 
+     public ShulkerBoxScreen(ShulkerBoxMenu menu, Inventory inventory, Component title) {
+-        super(menu, inventory, title, 175, 79);
++        super(menu, inventory, title, 176, 167);
+     }
+ 
+     @Override

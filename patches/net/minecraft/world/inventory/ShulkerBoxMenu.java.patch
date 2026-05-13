@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/inventory/ShulkerBoxMenu.java
++++ b/net/minecraft/world/inventory/ShulkerBoxMenu.java
+@@ -27,6 +_,8 @@
+                 this.addSlot(new ShulkerBoxSlot(container, x + y * 9, 8 + x * 18, 18 + y * 18));
+             }
+         }
++
++        this.addStandardInventorySlots(inventory, 8, 84);
+     }
+ 
+     @Override

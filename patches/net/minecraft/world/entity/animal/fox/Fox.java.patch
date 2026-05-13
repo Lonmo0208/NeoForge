@@ -29,6 +29,15 @@
      }
  
      public static boolean isPathClear(Fox fox, Entity target) {
+@@ -827,7 +_,7 @@
+         }
+ 
+         @Override
+-        public boolean test(Entity target, ServerLevel level) {
++        public boolean test(LivingEntity target, ServerLevel level) {
+             if (target instanceof Fox) {
+                 return false;
+             } else if (target instanceof Chicken || target instanceof Rabbit || target instanceof Monster) {
 @@ -881,6 +_,17 @@
          @Override
          protected void breed() {

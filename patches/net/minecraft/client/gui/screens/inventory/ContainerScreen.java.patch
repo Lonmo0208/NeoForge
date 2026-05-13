@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/inventory/ContainerScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/ContainerScreen.java
+@@ -15,7 +_,7 @@
+     private final int containerRows;
+ 
+     public ContainerScreen(ChestMenu menu, Inventory inventory, Component title) {
+-        super(menu, inventory, title, 175, 24 + menu.getRowCount() * 18);
++        super(menu, inventory, title, 176, 114 + menu.getRowCount() * 18);
+         this.containerRows = menu.getRowCount();
+         this.inventoryLabelY = this.imageHeight - 94;
+     }

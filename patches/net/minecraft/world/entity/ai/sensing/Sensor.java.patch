@@ -1,8 +1,13 @@
 --- a/net/minecraft/world/entity/ai/sensing/Sensor.java
 +++ b/net/minecraft/world/entity/ai/sensing/Sensor.java
-@@ -68,13 +_,13 @@
+@@ -67,14 +_,22 @@
+ 
      public abstract Set<MemoryModuleType<?>> requires();
  
++    public static boolean isEntityTargetable(ServerLevel level, LivingEntity body, LivingEntity entity) {
++        return isEntityTargetable(level, (Entity)body, (Entity)entity);
++    }
++
      public static boolean isEntityTargetable(ServerLevel level, Entity body, Entity entity) {
 -        return entity instanceof LivingEntity livingEntity && livingEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, entity)
 +        return entity instanceof LivingEntity livingEntity && livingEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, livingEntity)
@@ -10,15 +15,24 @@
              : TARGET_CONDITIONS.test(level, body, entity);
      }
  
++    public static boolean isEntityAttackable(ServerLevel level, LivingEntity body, LivingEntity target) {
++        return isEntityAttackable(level, body, (Entity)target);
++    }
++
      public static boolean isEntityAttackable(ServerLevel level, LivingEntity body, Entity target) {
 -        return body.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, target)
 +        return target instanceof LivingEntity livingTarget && body.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, livingTarget)
              ? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(level, body, target)
              : ATTACK_TARGET_CONDITIONS.test(level, body, target);
      }
-@@ -84,7 +_,7 @@
+@@ -83,8 +_,12 @@
+         return rememberPositives(ticks, (level, target) -> isEntityAttackable(level, body, target));
      }
  
++    public static boolean isEntityAttackableIgnoringLineOfSight(ServerLevel level, LivingEntity body, LivingEntity target) {
++        return isEntityAttackableIgnoringLineOfSight(level, body, (Entity)target);
++    }
++
      public static boolean isEntityAttackableIgnoringLineOfSight(ServerLevel level, LivingEntity body, Entity target) {
 -        return body.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, target)
 +        return target instanceof LivingEntity livingTarget && body.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, livingTarget)

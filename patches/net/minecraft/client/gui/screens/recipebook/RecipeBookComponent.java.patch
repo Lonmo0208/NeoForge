@@ -1,5 +1,37 @@
 --- a/net/minecraft/client/gui/screens/recipebook/RecipeBookComponent.java
 +++ b/net/minecraft/client/gui/screens/recipebook/RecipeBookComponent.java
+@@ -113,7 +_,7 @@
+ 
+     private void initVisuals() {
+         boolean isFiltering = this.isFiltering();
+-        this.xOffset = 0;
++        this.xOffset = this.widthTooNarrow ? 0 : 86;
+         int xo = this.getXOrigin();
+         int yo = this.getYOrigin();
+         this.stackedContents.clear();
+@@ -156,7 +_,7 @@
+     }
+ 
+     private int getXOrigin() {
+-        return (this.width - 147) / 2;
++        return (this.width - 147) / 2 - this.xOffset;
+     }
+ 
+     protected abstract WidgetSprites getFilterButtonTextures();
+@@ -181,12 +_,7 @@
+     }
+ 
+     private boolean isVisibleAccordingToBookData() {
+-        boolean open = this.book.isOpen(this.menu.getRecipeBookType());
+-        if (!open) {
+-            this.book.setOpen(this.menu.getRecipeBookType(), true);
+-        }
+-
+-        return true;
++        return this.book.isOpen(this.menu.getRecipeBookType());
+     }
+ 
+     protected void setVisible(boolean visible) {
 @@ -255,7 +_,7 @@
  
          for (RecipeBookTabButton tabButton : this.tabButtons) {

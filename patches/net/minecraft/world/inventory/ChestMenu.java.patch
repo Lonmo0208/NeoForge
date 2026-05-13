@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/inventory/ChestMenu.java
++++ b/net/minecraft/world/inventory/ChestMenu.java
+@@ -54,6 +_,8 @@
+         container.startOpen(inventory.player);
+         int chestGridTop = 18;
+         this.addChestGrid(container, 8, 18);
++        int inventoryTop = 18 + this.containerRows * 18 + 13;
++        this.addStandardInventorySlots(inventory, 8, inventoryTop);
+     }
+ 
+     private void addChestGrid(Container container, int left, int top) {

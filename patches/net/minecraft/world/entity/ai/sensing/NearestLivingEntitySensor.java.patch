@@ -1,0 +1,30 @@
+--- a/net/minecraft/world/entity/ai/sensing/NearestLivingEntitySensor.java
++++ b/net/minecraft/world/entity/ai/sensing/NearestLivingEntitySensor.java
+@@ -5,7 +_,6 @@
+ import java.util.Comparator;
+ import java.util.List;
+ import java.util.Set;
+-import java.util.stream.Stream;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
+@@ -13,7 +_,6 @@
+ import net.minecraft.world.entity.ai.attributes.Attributes;
+ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+ import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
+-import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.phys.AABB;
+ 
+ public class NearestLivingEntitySensor<T extends LivingEntity> extends Sensor<T> {
+@@ -21,10 +_,8 @@
+         double followRange = body.getAttributeValue(Attributes.FOLLOW_RANGE);
+         AABB boundingBox = body.getBoundingBox().inflate(followRange, followRange, followRange);
+         List<LivingEntity> livingEntities = level.getEntitiesOfClass(LivingEntity.class, boundingBox, mob -> mob != body && mob.isAlive());
+-        List<LivingBlock> livingBlocks = level.getEntitiesOfClass(LivingBlock.class, boundingBox, Entity::isAlive);
+-        List<Entity> entities = new ArrayList<>(Stream.concat(livingEntities.stream(), livingBlocks.stream()).map(converted -> (Entity)converted).toList());
+         livingEntities.sort(Comparator.comparingDouble(body::distanceToSqr));
+-        entities.sort(Comparator.comparingDouble(body::distanceToSqr));
++        List<Entity> entities = new ArrayList<>(livingEntities);
+         Brain<?> brain = body.getBrain();
+         brain.setMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES, entities);
+         brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, new NearestVisibleLivingEntities(level, body, entities));

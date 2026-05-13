@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/inventory/HopperScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/HopperScreen.java
+@@ -14,7 +_,7 @@
+     private static final Identifier HOPPER_LOCATION = Identifier.withDefaultNamespace("textures/gui/container/hopper.png");
+ 
+     public HopperScreen(HopperMenu menu, Inventory inventory, Component title) {
+-        super(menu, inventory, title, 175, 133);
++        super(menu, inventory, title, 176, 133);
+         this.inventoryLabelY = this.imageHeight - 94;
+     }
+ 

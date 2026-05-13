@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/inventory/RecipeBookMenu.java
++++ b/net/minecraft/world/inventory/RecipeBookMenu.java
+@@ -11,14 +_,16 @@
+         super(menuType, containerId);
+     }
+ 
+-    public abstract RecipeBookMenu.PostPlaceAction handlePlacement(
++    public RecipeBookMenu.PostPlaceAction handlePlacement(
+         boolean useMaxItems,
+         boolean allowDroppingItemsToClear,
+         RecipeHolder<?> recipe,
+         ServerLevel level,
+         Inventory inventory,
+         RecipeManager.ServerDisplayInfo displayInfo
+-    );
++    ) {
++        return PostPlaceAction.NOTHING;
++    }
+ 
+     public abstract void fillCraftSlotsStackedContents(StackedItemContents stackedContents);
+ 

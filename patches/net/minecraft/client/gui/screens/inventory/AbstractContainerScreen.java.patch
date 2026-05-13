@@ -1,5 +1,26 @@
 --- a/net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.java
 +++ b/net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.java
+@@ -37,8 +_,9 @@
+     protected static final int BACKGROUND_TEXTURE_HEIGHT = 256;
+     private static final float SNAPBACK_SPEED = 100.0F;
+     private static final int QUICKDROP_DELAY = 500;
+-    protected static final int DEFAULT_IMAGE_WIDTH = 175;
+-    protected static final int DEFAULT_IMAGE_HEIGHT = 78;
++    public static final Identifier INVENTORY_LOCATION = Identifier.withDefaultNamespace("textures/gui/container/inventory.png");
++    protected static final int DEFAULT_IMAGE_WIDTH = 176;
++    protected static final int DEFAULT_IMAGE_HEIGHT = 166;
+     protected final int imageWidth;
+     protected final int imageHeight;
+     protected int titleLabelX;
+@@ -69,7 +_,7 @@
+     private ItemStack lastQuickMoved = ItemStack.EMPTY;
+ 
+     public AbstractContainerScreen(T menu, Inventory inventory, Component title) {
+-        this(menu, inventory, title, 175, 78);
++        this(menu, inventory, title, 176, 166);
+     }
+ 
+     public AbstractContainerScreen(T menu, Inventory inventory, Component title, int imageWidth, int imageHeight) {
 @@ -122,6 +_,7 @@
              this.onStopHovering(previouslyHoveredSlot);
          }
@@ -17,7 +38,7 @@
                  );
              }
          }
-@@ -215,7 +_,8 @@
+@@ -215,11 +_,13 @@
  
      private void extractFloatingItem(GuiGraphicsExtractor graphics, ItemStack carried, int x, int y, @Nullable String itemCount) {
          graphics.item(carried, x, y);
@@ -27,6 +48,11 @@
      }
  
      protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
+         graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, -12566464, false);
++        graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, -12566464, false);
+     }
+ 
+     protected void extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY) {
 @@ -267,6 +_,13 @@
                  graphics.fill(x, y, x + 16, y + 16, -2130706433);
              }

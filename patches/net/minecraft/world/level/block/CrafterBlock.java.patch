@@ -1,5 +1,48 @@
 --- a/net/minecraft/world/level/block/CrafterBlock.java
 +++ b/net/minecraft/world/level/block/CrafterBlock.java
+@@ -1,6 +_,8 @@
+ package net.minecraft.world.level.block;
+ 
+ import com.mojang.serialization.MapCodec;
++
++import java.util.List;
+ import java.util.Optional;
+ import net.minecraft.advancements.CriteriaTriggers;
+ import net.minecraft.core.BlockPos;
+@@ -12,7 +_,9 @@
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.Container;
+ import net.minecraft.world.Containers;
++import net.minecraft.world.InteractionResult;
+ import net.minecraft.world.entity.LivingEntity;
++import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.context.BlockPlaceContext;
+ import net.minecraft.world.item.crafting.CraftingInput;
+@@ -33,6 +_,7 @@
+ import net.minecraft.world.level.block.state.properties.EnumProperty;
+ import net.minecraft.world.level.redstone.Orientation;
+ import net.minecraft.world.phys.AABB;
++import net.minecraft.world.phys.BlockHitResult;
+ import net.minecraft.world.phys.Vec3;
+ import org.jspecify.annotations.Nullable;
+ 
+@@ -126,6 +_,15 @@
+     }
+ 
+     @Override
++    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
++        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CrafterBlockEntity crafter) {
++            player.openMenu(crafter);
++        }
++
++        return InteractionResult.SUCCESS;
++    }
++
++    @Override
+     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+         Containers.updateNeighboursAfterDestroy(state, level, pos);
+     }
 @@ -170,7 +_,8 @@
  
      private void dispenseItem(ServerLevel level, BlockPos pos, CrafterBlockEntity blockEntity, ItemStack results, BlockState blockState, RecipeHolder<?> recipe) {

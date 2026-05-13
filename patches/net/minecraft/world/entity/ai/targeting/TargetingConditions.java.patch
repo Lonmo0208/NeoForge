@@ -1,0 +1,30 @@
+--- a/net/minecraft/world/entity/ai/targeting/TargetingConditions.java
++++ b/net/minecraft/world/entity/ai/targeting/TargetingConditions.java
+@@ -62,6 +_,10 @@
+         return this;
+     }
+ 
++    public <T extends LivingEntity> boolean test(ServerLevel level, @Nullable LivingEntity targeter, T target) {
++        return this.test(level, (Entity)targeter, (Entity)target);
++    }
++
+     public <T extends Entity & Targetable> boolean test(ServerLevel level, @Nullable Entity targeter, Entity target) {
+         if (!(targeter instanceof LivingEntity livingEntity && target instanceof Targetable)) {
+             return false;
+@@ -69,7 +_,7 @@
+             return false;
+         } else if (!((Targetable)target).canBeSeenByAnyone()) {
+             return false;
+-        } else if (this.selector != null && !this.selector.test(target, level)) {
++        } else if (this.selector != null && target instanceof LivingEntity livingTarget && !this.selector.test(livingTarget, level)) {
+             return false;
+         } else {
+             if (livingEntity == null) {
+@@ -101,6 +_,6 @@
+ 
+     @FunctionalInterface
+     public interface Selector {
+-        boolean test(Entity target, ServerLevel level);
++        boolean test(LivingEntity target, ServerLevel level);
+     }
+ }

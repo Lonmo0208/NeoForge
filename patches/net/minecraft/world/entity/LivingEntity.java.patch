@@ -399,6 +399,36 @@
          }
      }
  
+@@ -1533,8 +_,28 @@
+         }
+     }
+ 
++    protected void spawnDeathLootDrop(ServerLevel level, ItemStack itemStack) {
++        if (itemStack.isEmpty()) {
++            return;
++        }
++        for (int i = 0; i < itemStack.getCount(); i++) {
++            ItemStack single = itemStack.copyWithCount(1);
++            LivingBlock livingBlockItem = LivingBlock.create(level, single);
++            if (livingBlockItem != null) {
++                livingBlockItem.snapTo(new Vec3(this.getX(), this.getY() + 0.5, this.getZ()));
++                if (captureDrops() != null) {
++                    captureDrops().add(livingBlockItem);
++                } else {
++                    level.addFreshEntity(livingBlockItem);
++                }
++            } else {
++                this.spawnAtLocation(level, single);
++            }
++        }
++    }
++
+     public void dropFromLootTable(ServerLevel level, DamageSource source, boolean playerKilled, ResourceKey<LootTable> lootTable) {
+-        this.dropFromLootTable(level, source, playerKilled, lootTable, itemStack -> this.spawnAtLocation(level, itemStack));
++        this.dropFromLootTable(level, source, playerKilled, lootTable, itemStack -> this.spawnDeathLootDrop(level, itemStack));
+     }
+ 
+     public void dropFromLootTable(
 @@ -1609,6 +_,11 @@
  
      @Override

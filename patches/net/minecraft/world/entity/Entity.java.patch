@@ -457,38 +457,42 @@
                  this.tags.clear();
                  input.read("Tags", TAG_LIST_CODEC).ifPresent(this.tags::addAll);
                  this.readAdditionalSaveData(input);
-@@ -2142,9 +_,28 @@
+@@ -2133,21 +_,28 @@
+ 
+     protected abstract void addAdditionalSaveData(ValueOutput output);
+ 
+-    public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemLike resource) {
++    public @Nullable ItemEntity spawnAtLocation(ServerLevel level, ItemLike resource) {
+         return this.spawnAtLocation(level, new ItemStack(resource), 0.0F);
      }
  
-     public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemStack itemStack, Vec3 offset) {
+-    public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemStack itemStack) {
++    public @Nullable ItemEntity spawnAtLocation(ServerLevel level, ItemStack itemStack) {
+         return this.spawnAtLocation(level, itemStack, 0.0F);
+     }
+ 
+-    public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemStack itemStack, Vec3 offset) {
 -        return (Collection<LivingBlock>)(itemStack.isEmpty()
 -            ? List.of()
 -            : LivingBlock.createStack(this.level(), BlockPos.containing(this.position().add(offset)), this, itemStack));
++    public @Nullable ItemEntity spawnAtLocation(ServerLevel level, ItemStack itemStack, Vec3 offset) {
 +        if (itemStack.isEmpty()) {
-+            return List.of();
++            return null;
 +        } else {
-+            List<LivingBlock> list = new ArrayList<>();
-+            BlockPos blockPos = BlockPos.containing(this.position().add(offset));
-+            for (int i = 0; i < itemStack.getCount(); i++) {
-+                ItemStack single = itemStack.copyWithCount(1);
-+                LivingBlock livingBlock = LivingBlock.create(level, single);
-+                if (livingBlock == null) {
-+                    livingBlock = new ItemEntity(level, this.getX() + offset.x, this.getY() + offset.y, this.getZ() + offset.z, single);
-+                    ((ItemEntity)livingBlock).setDefaultPickUpDelay();
-+                }
-+                livingBlock.snapTo(Vec3.atBottomCenterOf(blockPos));
-+                if (captureDrops() != null) {
-+                    captureDrops().add(livingBlock);
-+                } else {
-+                    level.addFreshEntity(livingBlock);
-+                }
-+                list.add(livingBlock);
-+            }
-+            return list;
++            ItemEntity entity = new ItemEntity(level, this.getX() + offset.x, this.getY() + offset.y, this.getZ() + offset.z, itemStack);
++            entity.setDefaultPickUpDelay();
++            if (captureDrops() != null) captureDrops().add(entity);
++            else
++            level.addFreshEntity(entity);
++            return entity;
 +        }
      }
  
-     public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemStack itemStack, float offset) {
+-    public Collection<LivingBlock> spawnAtLocation(ServerLevel level, ItemStack itemStack, float offset) {
++    public @Nullable ItemEntity spawnAtLocation(ServerLevel level, ItemStack itemStack, float offset) {
+         return this.spawnAtLocation(level, itemStack, new Vec3(0.0, offset, 0.0));
+     }
+ 
 @@ -2162,24 +_,24 @@
              float checkWidth = this.dimensions.width() * 0.8F;
              AABB eyeBb = AABB.ofSize(this.getEyePosition(), checkWidth, 1.0E-6, checkWidth);

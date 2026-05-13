@@ -1,5 +1,14 @@
 --- a/net/minecraft/client/gui/screens/inventory/MerchantScreen.java
 +++ b/net/minecraft/client/gui/screens/inventory/MerchantScreen.java
+@@ -58,7 +_,7 @@
+     private boolean isDragging;
+ 
+     public MerchantScreen(MerchantMenu menu, Inventory inventory, Component title) {
+-        super(menu, inventory, title, 276, 78);
++        super(menu, inventory, title, 276, 166);
+         this.inventoryLabelX = 107;
+     }
+ 
 @@ -234,7 +_,11 @@
              graphics.itemDecorations(this.font, costA, sellItem1X, decorHeight);
          } else {

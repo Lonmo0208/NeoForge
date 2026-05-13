@@ -1,0 +1,31 @@
+--- a/net/minecraft/client/gui/screens/inventory/AbstractRecipeBookScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/AbstractRecipeBookScreen.java
+@@ -57,6 +_,8 @@
+     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+         if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
+             this.extractBackground(graphics, mouseX, mouseY, a);
++        } else {
++            super.extractContents(graphics, mouseX, mouseY, a);
+         }
+ 
+         graphics.nextStratum();
+@@ -85,10 +_,6 @@
+     }
+ 
+     @Override
+-    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+-    }
+-
+-    @Override
+     protected void extractSlots(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+         super.extractSlots(graphics, mouseX, mouseY);
+     }
+@@ -135,6 +_,8 @@
+ 
+     @Override
+     protected void slotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput) {
++        super.slotClicked(slot, slotId, buttonNum, containerInput);
++        this.recipeBookComponent.slotClicked(slot);
+     }
+ 
+     @Override
