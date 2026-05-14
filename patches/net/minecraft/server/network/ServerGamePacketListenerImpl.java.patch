@@ -96,6 +96,15 @@
              ServerLevel level = this.player.level();
              InteractionHand hand = packet.getHand();
              ItemStack itemStack = this.player.getItemInHand(hand);
+@@ -1493,7 +_,7 @@
+     @Override
+     public void handleSetCarriedItem(ServerboundSetCarriedItemPacket packet) {
+         PacketUtils.ensureRunningOnSameThread(packet, this, this.player.level());
+-        if (packet.getSlot() >= 0 && packet.getSlot() < Inventory.getSelectionSize() - 1) {
++        if (packet.getSlot() >= 0 && packet.getSlot() < Inventory.getSelectionSize()) {
+             if (this.player.getInventory().getSelectedSlot() != packet.getSlot() && this.player.getUsedItemHand() == InteractionHand.MAIN_HAND) {
+                 this.player.stopUsingItem();
+             }
 @@ -1519,8 +_,9 @@
                  }
  

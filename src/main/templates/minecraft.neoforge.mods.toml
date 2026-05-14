@@ -2,7 +2,7 @@ modLoader="minecraft"
 license="Minecraft EULA"
 [[mods]]
 modId="minecraft"
-version="${minecraft_version}"
+version="26.1.2"
 displayName="Minecraft"
 authors="Mojang Studios"
 description=""

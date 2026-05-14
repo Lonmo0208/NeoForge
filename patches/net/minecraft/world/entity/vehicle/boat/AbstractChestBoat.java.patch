@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/entity/vehicle/boat/AbstractChestBoat.java
++++ b/net/minecraft/world/entity/vehicle/boat/AbstractChestBoat.java
+@@ -96,6 +_,7 @@
+ 
+     @Override
+     public void openCustomInventoryScreen(Player player) {
++        player.openMenu(this);
+         if (player.level() instanceof ServerLevel level) {
+             this.gameEvent(GameEvent.CONTAINER_OPEN, player);
+             PiglinAi.angerNearbyPiglins(level, player, true);

@@ -1,5 +1,13 @@
 --- a/net/minecraft/client/Minecraft.java
 +++ b/net/minecraft/client/Minecraft.java
+@@ -245,6 +_,7 @@
+ import net.minecraft.world.attribute.EnvironmentAttributes;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.player.Inventory;
+ import net.minecraft.world.entity.player.ChatVisiblity;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemStack;
 @@ -431,7 +_,6 @@
              }
          }, Util.nonCriticalIoPool());
@@ -367,6 +375,15 @@
      }
  
      private boolean isLevelRunningNormally() {
+@@ -1948,7 +_,7 @@
+             this.gameRenderer.togglePostEffect();
+         }
+ 
+-        for (int i = 0; i < 8; i++) {
++        for (int i = 0; i < Inventory.getSelectionSize(); i++) {
+             boolean savePressed = this.options.keySaveHotbarActivator.isDown();
+             boolean loadPressed = this.options.keyLoadHotbarActivator.isDown();
+             if (this.options.keyHotbarSlots[i].consumeClick()) {
 @@ -2134,6 +_,7 @@
      }
  

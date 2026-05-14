@@ -14,3 +14,11 @@
      public static final Map<Item, DispenseItemBehavior> DISPENSER_REGISTRY = new IdentityHashMap<>();
      private static final int TRIGGER_DURATION = 4;
  
+@@ -75,6 +_,7 @@
+     @Override
+     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof DispenserBlockEntity dispenser) {
++            player.openMenu(dispenser);
+             player.awardStat(dispenser instanceof DropperBlockEntity ? Stats.INSPECT_DROPPER : Stats.INSPECT_DISPENSER);
+         }
+ 

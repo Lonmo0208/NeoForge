@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/player/inventory/Hotbar.java
++++ b/net/minecraft/client/player/inventory/Hotbar.java
+@@ -24,7 +_,7 @@
+ @OnlyIn(Dist.CLIENT)
+ public class Hotbar {
+     private static final Logger LOGGER = LogUtils.getLogger();
+-    private static final int SIZE = Inventory.getSelectionSize() - 1;
++    private static final int SIZE = Inventory.getSelectionSize();
+     public static final Codec<Hotbar> CODEC = Codec.PASSTHROUGH.listOf().validate(list -> Util.fixedSize(list, SIZE)).xmap(Hotbar::new, hotbar -> hotbar.items);
+     private static final DynamicOps<Tag> DEFAULT_OPS = NbtOps.INSTANCE;
+     private static final Dynamic<?> EMPTY_STACK = new Dynamic<>(DEFAULT_OPS, ItemStack.OPTIONAL_CODEC.encodeStart(DEFAULT_OPS, ItemStack.EMPTY).getOrThrow());

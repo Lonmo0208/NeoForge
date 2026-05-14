@@ -80,6 +80,15 @@
                      if (this.minecraft.player.isSpectator()) {
                          if (this.minecraft.gui.getSpectatorGui().isMenuActive()) {
                              this.minecraft.gui.getSpectatorGui().onMouseScrolled(-wheel);
+@@ -221,7 +_,7 @@
+                     } else {
+                         Inventory inventory = this.minecraft.player.getInventory();
+                         inventory.setSelectedSlot(
+-                            ScrollWheelHandler.getNextScrollWheelSelection(wheel, inventory.getSelectedSlot(), Inventory.getSelectionSize() - 1)
++                            ScrollWheelHandler.getNextScrollWheelSelection(wheel, inventory.getSelectedSlot(), Inventory.getSelectionSize())
+                         );
+                     }
+                 }
 @@ -317,7 +_,12 @@
                      double dy = getScaledYPos(window, this.accumulatedDY);
  

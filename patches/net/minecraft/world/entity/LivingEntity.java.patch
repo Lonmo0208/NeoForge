@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -92,7 +_,6 @@
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.entity.projectile.Projectile;
+ import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+-import net.minecraft.world.item.ActionItem;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.ItemInstance;
+ import net.minecraft.world.item.ItemStack;
 @@ -196,14 +_,20 @@
      private static final int CURRENT_IMPULSE_CONTEXT_RESET_GRACE_TIME_TICKS = 40;
      private static final int DEFAULT_CURRENT_IMPULSE_CONTEXT_RESET_GRACE_TIME = 0;
@@ -88,6 +96,15 @@
      public boolean canBreatheUnderwater() {
          return this.is(EntityTypeTags.CAN_BREATHE_UNDER_WATER);
      }
+@@ -757,7 +_,7 @@
+     }
+ 
+     public void drop(ItemStack itemStack, boolean thrownFromHand) {
+-        if (!itemStack.isEmpty() && !(itemStack.getItem() instanceof ActionItem)) {
++        if (!itemStack.isEmpty()) {
+             if (this.level().isClientSide()) {
+                 this.swing(InteractionHand.MAIN_HAND);
+             } else {
 @@ -781,6 +_,70 @@
          }
      }

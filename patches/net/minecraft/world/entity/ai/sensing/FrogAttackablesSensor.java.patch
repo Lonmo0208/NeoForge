@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/ai/sensing/FrogAttackablesSensor.java
++++ b/net/minecraft/world/entity/ai/sensing/FrogAttackablesSensor.java
+@@ -15,7 +_,7 @@
+     public static final float TARGET_DETECTION_DISTANCE = 10.0F;
+ 
+     @Override
+-    protected boolean isMatchingEntity(ServerLevel level, LivingEntity body, Entity mob) {
++    protected boolean isMatchingEntity(ServerLevel level, LivingEntity body, LivingEntity mob) {
+         return Sensor.isEntityAttackable(level, body, mob) && Frog.canEat(mob) && !this.isUnreachableAttackTarget(body, mob)
+             ? mob.closerThan(body, 10.0)
+             : false;

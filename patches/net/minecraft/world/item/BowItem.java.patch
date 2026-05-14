@@ -9,6 +9,15 @@
                  float pow = getPowerForTime(timeHeld);
                  if (pow < 0.1) {
                      return false;
+@@ -61,7 +_,7 @@
+ 
+     @Override
+     protected void shootProjectile(
+-        LivingEntity shooter, Projectile projectileEntity, int index, float power, float uncertainty, float angle, @Nullable Entity targetOverrride
++        LivingEntity shooter, Projectile projectileEntity, int index, float power, float uncertainty, float angle, @Nullable LivingEntity targetOverride
+     ) {
+         projectileEntity.shootFromRotation(shooter, shooter.getXRot(), shooter.getYRot() + angle, 0.0F, power, uncertainty);
+     }
 @@ -90,6 +_,10 @@
      public InteractionResult use(Level level, Player player, InteractionHand hand) {
          ItemStack itemStack = player.getItemInHand(hand);

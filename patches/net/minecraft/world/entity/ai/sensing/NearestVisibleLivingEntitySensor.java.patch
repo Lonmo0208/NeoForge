@@ -1,0 +1,24 @@
+--- a/net/minecraft/world/entity/ai/sensing/NearestVisibleLivingEntitySensor.java
++++ b/net/minecraft/world/entity/ai/sensing/NearestVisibleLivingEntitySensor.java
+@@ -9,7 +_,7 @@
+ import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
+ 
+ public abstract class NearestVisibleLivingEntitySensor extends Sensor<LivingEntity> {
+-    protected abstract boolean isMatchingEntity(final ServerLevel level, LivingEntity body, Entity mob);
++    protected abstract boolean isMatchingEntity(final ServerLevel level, LivingEntity body, LivingEntity mob);
+ 
+     protected abstract MemoryModuleType<Entity> getMemoryToSet();
+ 
+@@ -23,7 +_,11 @@
+     }
+ 
+     private Optional<Entity> getNearestEntity(ServerLevel level, LivingEntity body) {
+-        return this.getVisibleEntities(body).flatMap(livingEntities -> livingEntities.findClosest(mob -> this.isMatchingEntity(level, body, mob)));
++        return this.getVisibleEntities(body).flatMap(
++            livingEntities -> livingEntities.findClosest(
++                mob -> mob instanceof LivingEntity livingMob && this.isMatchingEntity(level, body, livingMob)
++            )
++        );
+     }
+ 
+     protected Optional<NearestVisibleLivingEntities> getVisibleEntities(LivingEntity body) {

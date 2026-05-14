@@ -33,6 +33,23 @@
              this.refreshSearchResults();
          } else {
              this.menu.items.addAll(displayList);
+@@ -301,7 +_,15 @@
+                     }
+                 } else if (this.menu != null) {
+                     ItemStack oldItemStack = slot == null ? ItemStack.EMPTY : this.menu.getSlot(slot.index).getItem();
+-                    this.menu.clicked(slot == null ? slotId : slot.index, buttonNum, containerInput, this.minecraft.player);
++                    if (slot != null && slot.container == this.minecraft.player.getInventory()) {
++                        int invMenuSlot = slot.getContainerSlot() + 36;
++                        this.minecraft.player.inventoryMenu.clicked(invMenuSlot, buttonNum, containerInput, this.minecraft.player);
++                        this.minecraft.gameMode.handleCreativeModeItemAdd(this.minecraft.player.inventoryMenu.getSlot(invMenuSlot).getItem(), invMenuSlot);
++                        this.minecraft.player.inventoryMenu.broadcastChanges();
++                    } else {
++                        this.menu.clicked(slot == null ? slotId : slot.index, buttonNum, containerInput, this.minecraft.player);
++                    }
++
+                     if (AbstractContainerMenu.getQuickcraftHeader(buttonNum) == 2) {
+                         for (int i = 0; i < 9; i++) {
+                             this.minecraft.gameMode.handleCreativeModeItemAdd(this.menu.getSlot(45 + i).getItem(), 36 + i);
 @@ -330,6 +_,34 @@
      protected void init() {
          if (this.minecraft.player.hasInfiniteMaterials()) {
@@ -265,6 +282,14 @@
      @OnlyIn(Dist.CLIENT)
      private static class CustomCreativeSlot extends Slot {
          public CustomCreativeSlot(Container container, int slot, int x, int y) {
+@@ -901,6 +_,7 @@
+                 }
+             }
+ 
++            this.addInventoryHotbarSlots(inventory, 9, 112);
+             this.scrollTo(0.0F);
+         }
+ 
 @@ -1049,6 +_,22 @@
          @Override
          public boolean mayPickup(Player player) {

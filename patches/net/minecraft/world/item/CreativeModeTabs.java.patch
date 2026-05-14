@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/item/CreativeModeTabs.java
++++ b/net/minecraft/world/item/CreativeModeTabs.java
+@@ -1492,6 +_,14 @@
+                         toolsAndUtilities.accept(Items.MUSIC_DISC_PIGSTEP);
+                         toolsAndUtilities.accept(Items.MUSIC_DISC_TEARS);
+                         toolsAndUtilities.accept(Items.MUSIC_DISC_LAVA_CHICKEN);
++                        toolsAndUtilities.accept(Items.PUNCH_ACTION);
++                        toolsAndUtilities.accept(Items.FOLLOW_ACTION);
++                        toolsAndUtilities.accept(Items.CRAFTING_ACTION);
++                        toolsAndUtilities.accept(Items.MOVE_ACTION);
++                        toolsAndUtilities.accept(Items.ATTACK_ACTION);
++                        toolsAndUtilities.accept(Items.BUILD_ACTION);
++                        toolsAndUtilities.accept(Items.GROUP_ACTION);
++                        toolsAndUtilities.accept(Items.HIGHLIGHT_ACTION);
+                     }
+                 )
+                 .build()

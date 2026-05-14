@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/level/block/AnvilBlock.java
++++ b/net/minecraft/world/level/block/AnvilBlock.java
+@@ -57,6 +_,11 @@
+     @Override
+     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+         if (!level.isClientSide()) {
++            MenuProvider menuProvider = this.getMenuProvider(state, level, pos);
++            if (menuProvider != null) {
++                player.openMenu(menuProvider);
++            }
++
+             player.awardStat(Stats.INTERACT_WITH_ANVIL);
+         }
+ 

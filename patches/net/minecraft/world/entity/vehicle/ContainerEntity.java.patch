@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/vehicle/ContainerEntity.java
 +++ b/net/minecraft/world/entity/vehicle/ContainerEntity.java
+@@ -87,6 +_,7 @@
+     }
+ 
+     default InteractionResult interactWithContainerVehicle(Player player) {
++        player.openMenu(this);
+         return InteractionResult.SUCCESS;
+     }
+ 
 @@ -100,6 +_,9 @@
  
              this.setContainerLootTable(null);

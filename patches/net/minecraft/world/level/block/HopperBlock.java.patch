@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/level/block/HopperBlock.java
++++ b/net/minecraft/world/level/block/HopperBlock.java
+@@ -105,6 +_,7 @@
+     @Override
+     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof HopperBlockEntity hopper) {
++            player.openMenu(hopper);
+             player.awardStat(Stats.INSPECT_HOPPER);
+         }
+ 

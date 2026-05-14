@@ -58,6 +58,24 @@
      protected void shoot(
          ServerLevel level,
          LivingEntity shooter,
+@@ -49,7 +_,7 @@
+         float power,
+         float uncertainty,
+         boolean isCrit,
+-        @Nullable Entity targetOverride
++        @Nullable LivingEntity targetOverride
+     ) {
+         float maxAngle = EnchantmentHelper.processProjectileSpread(level, weapon, shooter, 0.0F);
+         float angleStep = projectiles.size() == 1 ? 0.0F : 2.0F * maxAngle / (projectiles.size() - 1);
+@@ -87,7 +_,7 @@
+         final float power,
+         final float uncertainty,
+         final float angle,
+-        final @Nullable Entity targetOverrride
++        final @Nullable LivingEntity targetOverride
+     );
+ 
+     protected Projectile createProjectile(Level level, LivingEntity shooter, ItemStack weapon, ItemStack projectile, boolean isCrit) {
 @@ -97,8 +_,9 @@
              arrowx.setCritArrow(true);
          }
