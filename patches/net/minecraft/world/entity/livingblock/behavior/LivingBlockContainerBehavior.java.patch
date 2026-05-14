@@ -1,0 +1,32 @@
+--- a/net/minecraft/world/entity/livingblock/behavior/LivingBlockContainerBehavior.java
++++ b/net/minecraft/world/entity/livingblock/behavior/LivingBlockContainerBehavior.java
+@@ -16,6 +_,7 @@
+ import net.minecraft.world.ItemStackWithSlot;
+ import net.minecraft.world.SimpleContainer;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.level.entity.EntityTypeTest;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.entity.livingblock.LivingBlockGroup;
+ import net.minecraft.world.item.ItemStack;
+@@ -88,18 +_,18 @@
+             if (first.isPresent()) {
+                 ItemStack itemStack = first.get();
+                 entities = level.getEntities(
+-                    EntityType.LIVING_BLOCK,
++                    EntityTypeTest.forClass(LivingBlock.class),
+                     entity.getBoundingBox().inflate(1.0),
+                     block -> block.getGroup() == LivingBlockGroup.NONE && !block.isSelected() && itemStack.is(block.getItemStack().getItem())
+                 );
+             } else {
+                 entities = level.getEntities(
+-                    EntityType.LIVING_BLOCK, entity.getBoundingBox().inflate(1.0), block -> block.getGroup() == LivingBlockGroup.NONE && !block.isSelected()
++                    EntityTypeTest.forClass(LivingBlock.class), entity.getBoundingBox().inflate(1.0), block -> block.getGroup() == LivingBlockGroup.NONE && !block.isSelected()
+                 );
+             }
+         } else {
+             entities = level.getEntities(
+-                EntityType.LIVING_BLOCK, entity.getBoundingBox().inflate(1.0), block -> block.getGroup() == LivingBlockGroup.NONE && !block.isSelected()
++                EntityTypeTest.forClass(LivingBlock.class), entity.getBoundingBox().inflate(1.0), block -> block.getGroup() == LivingBlockGroup.NONE && !block.isSelected()
+             );
+         }
+ 

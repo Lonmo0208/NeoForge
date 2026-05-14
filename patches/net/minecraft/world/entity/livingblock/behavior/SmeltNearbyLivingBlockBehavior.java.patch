@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/entity/livingblock/behavior/SmeltNearbyLivingBlockBehavior.java
++++ b/net/minecraft/world/entity/livingblock/behavior/SmeltNearbyLivingBlockBehavior.java
+@@ -8,6 +_,7 @@
+ import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.sounds.SoundEvents;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.level.entity.EntityTypeTest;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+@@ -40,7 +_,7 @@
+         } else {
+             Vec3 var4 = entity.position();
+             this.smeltingTarget = level.getNearestEntity(
+-                EntityType.LIVING_BLOCK, var4.x(), var4.y(), var4.z(), AABB.around(var4, this.SMELT_RADIUS), e -> this.getRecipe(e).isPresent()
++                EntityTypeTest.forClass(LivingBlock.class), var4.x(), var4.y(), var4.z(), AABB.around(var4, this.SMELT_RADIUS), e -> this.getRecipe(e).isPresent()
+             );
+             return this.smeltingTarget != null && this.smeltingTarget.position().closerThan(entity.position(), this.SMELT_RADIUS);
+         }

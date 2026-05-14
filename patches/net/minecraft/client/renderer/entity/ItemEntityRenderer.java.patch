@@ -1,12 +1,8 @@
 --- /dev/null
 +++ b/net/minecraft/client/renderer/entity/ItemEntityRenderer.java
-@@ -1,0 +_,59 @@
+@@ -1,0 +_,55 @@
 +package net.minecraft.client.renderer.entity;
 +
-+import net.neoforged.api.distmarker.Dist;
-+import net.neoforged.api.distmarker.OnlyIn;
-+
-+@OnlyIn(Dist.CLIENT)
 +public class ItemEntityRenderer extends EntityRenderer<net.minecraft.world.entity.livingblock.LivingBlock, net.minecraft.client.renderer.entity.state.LivingBlockRenderState> {
 +    private static final   net.minecraft.client.renderer.block.model.BlockDisplayContext BLOCK_DISPLAY_CONTEXT = net.minecraft.client.renderer.block.model.BlockDisplayContext.create();
 +    private final net.minecraft.client.renderer.item.ItemModelResolver itemModelResolver;

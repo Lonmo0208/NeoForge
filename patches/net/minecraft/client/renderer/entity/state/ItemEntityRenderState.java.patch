@@ -1,12 +1,8 @@
 --- /dev/null
 +++ b/net/minecraft/client/renderer/entity/state/ItemEntityRenderState.java
-@@ -1,0 +_,10 @@
+@@ -1,0 +_,6 @@
 +package net.minecraft.client.renderer.entity.state;
 +
-+import net.neoforged.api.distmarker.Dist;
-+import net.neoforged.api.distmarker.OnlyIn;
-+
-+@OnlyIn(Dist.CLIENT)
 +public class ItemEntityRenderState extends ItemClusterRenderState {
 +    public float bobOffset;
 +    public boolean shouldBob = true;

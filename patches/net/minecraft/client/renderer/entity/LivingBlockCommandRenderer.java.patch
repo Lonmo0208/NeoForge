@@ -1,0 +1,10 @@
+--- a/net/minecraft/client/renderer/entity/LivingBlockCommandRenderer.java
++++ b/net/minecraft/client/renderer/entity/LivingBlockCommandRenderer.java
+@@ -14,6 +_,7 @@
+ import net.minecraft.world.entity.LivingBlockCommand;
+ import net.neoforged.api.distmarker.Dist;
+ import net.neoforged.api.distmarker.OnlyIn;
++import net.minecraft.client.renderer.entity.ItemEntityRenderer;
+ 
+ @OnlyIn(Dist.CLIENT)
+ public class LivingBlockCommandRenderer extends EntityRenderer<LivingBlockCommand, LivingBlockCommandRenderState> {

@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/player/Player.java
 +++ b/net/minecraft/world/entity/player/Player.java
+@@ -67,6 +_,7 @@
+ import net.minecraft.world.entity.EntityEquipment;
+ import net.minecraft.world.entity.EntityReference;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.level.entity.EntityTypeTest;
+ import net.minecraft.world.entity.EquipmentSlot;
+ import net.minecraft.world.entity.HumanoidArm;
+ import net.minecraft.world.entity.LivingEntity;
 @@ -134,6 +_,7 @@
  import org.jspecify.annotations.Nullable;
  
@@ -19,6 +27,15 @@
      public Player(Level level, GameProfile gameProfile) {
          super(EntityType.PLAYER, level);
          this.setUUID(gameProfile.id());
+@@ -211,7 +_,7 @@
+ 
+     public List<LivingBlock> getCommandedBlocks() {
+         AABB commandArea = this.getBoundingBox().inflate(50.0);
+-        List<LivingBlock> commandedBlocks = this.level().getEntities(EntityType.LIVING_BLOCK, commandArea, livingBlock -> livingBlock.isOwnedBy(this));
++        List<LivingBlock> commandedBlocks = this.level().getEntities(EntityTypeTest.forClass(LivingBlock.class), commandArea, livingBlock -> livingBlock.isOwnedBy(this));
+         List<LivingBlock> inActiveGroup = new ArrayList<>();
+         LivingBlockGroup activeGroup = this.getSelectedGroup();
+         List<LivingBlock> selected = new ArrayList<>();
 @@ -229,7 +_,7 @@
          } else if (!inActiveGroup.isEmpty()) {
              return inActiveGroup;

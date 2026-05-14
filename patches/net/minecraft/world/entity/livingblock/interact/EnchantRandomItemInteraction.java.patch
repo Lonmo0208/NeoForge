@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/entity/livingblock/interact/EnchantRandomItemInteraction.java
++++ b/net/minecraft/world/entity/livingblock/interact/EnchantRandomItemInteraction.java
+@@ -6,6 +_,7 @@
+ import net.minecraft.world.InteractionResult;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.level.entity.EntityTypeTest;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.entity.livingblock.Target;
+ import net.minecraft.world.entity.livingblock.cognition.Desires;
+@@ -21,7 +_,7 @@
+             return InteractionResult.FAIL;
+         } else {
+             ServerLevel level = (ServerLevel)player.level();
+-            List<LivingBlock> entitiesNearby = level.getEntities(EntityType.LIVING_BLOCK, enchantingTableBlock.getBoundingBox().inflate(20.0), Entity::isAlive);
++            List<LivingBlock> entitiesNearby = level.getEntities(EntityTypeTest.forClass(LivingBlock.class), enchantingTableBlock.getBoundingBox().inflate(20.0), Entity::isAlive);
+             LivingBlock enchantable = entitiesNearby.stream().filter(block -> {
+                 ItemStack item = block.getItemStack();
+                 return item.isEnchantable() && !item.isEnchanted();

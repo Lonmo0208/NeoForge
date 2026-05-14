@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/EntityType.java
 +++ b/net/minecraft/world/entity/EntityType.java
-@@ -194,1037 +_,1036 @@
+@@ -194,1037 +_,1045 @@
      private static final float MAGIC_HORSE_WIDTH = 1.3964844F;
      private static final int DISPLAY_TRACKING_RANGE = 10;
      public static final EntityType<Boat> ACACIA_BOAT = register(
@@ -164,6 +164,15 @@
 -            .clientTrackingRange(10)
 -            .updateInterval(3)
 +            "living_block",
++            EntityType.Builder.of(LivingBlock.class, LivingBlock::new, MobCategory.MISC)
++                    .noLootTable()
++                    .sized(0.98F, 0.98F)
++                    .eyeHeight(0.15F)
++                    .clientTrackingRange(10)
++                    .updateInterval(3)
++    );
++    public static final EntityType<LivingBlock> ITEM = register(
++            "item",
 +            EntityType.Builder.of(LivingBlock.class, LivingBlock::new, MobCategory.MISC)
 +                    .noLootTable()
 +                    .sized(0.98F, 0.98F)

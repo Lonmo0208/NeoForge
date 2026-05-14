@@ -1,0 +1,10 @@
+--- a/net/minecraft/client/renderer/entity/EntityRenderers.java
++++ b/net/minecraft/client/renderer/entity/EntityRenderers.java
+@@ -79,6 +_,7 @@
+         register(EntityType.BLAZE, BlazeRenderer::new);
+         register(EntityType.BLOCK_DISPLAY, DisplayRenderer.BlockDisplayRenderer::new);
+         register(EntityType.LIVING_BLOCK, LivingBlockRenderer::new);
++        register(EntityType.ITEM, LivingBlockRenderer::new);
+         register(EntityType.BOGGED, BoggedRenderer::new);
+         register(EntityType.BREEZE, BreezeRenderer::new);
+         register(EntityType.BREEZE_WIND_CHARGE, WindChargeRenderer::new);

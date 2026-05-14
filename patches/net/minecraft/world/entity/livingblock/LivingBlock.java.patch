@@ -78,7 +78,7 @@
          if (this.type != type) {
              this.type = type;
              this.behaviors = type.createBehaviorsFor(this);
-@@ -499,13 +_,19 @@
+@@ -499,13 +_,22 @@
  
      @Override
      protected Vec3 adjustStepUpMovement(Vec3 movement) {
@@ -90,6 +90,9 @@
      protected void readAdditionalSaveData(ValueInput input) {
          Optional<ItemStack> maybeItem = input.read("item", ItemStack.CODEC);
 -        this.setItemStack(maybeItem.orElse(ItemStack.EMPTY));
++        if (maybeItem.isEmpty()) {
++            maybeItem = input.read("Item", ItemStack.CODEC);
++        }
 +        ItemStack stack = maybeItem.orElse(ItemStack.EMPTY);
 +        if (stack.isEmpty()) {
 +            this.discard();

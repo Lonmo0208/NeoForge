@@ -1,14 +1,7 @@
 --- /dev/null
 +++ b/net/minecraft/world/entity/item/ItemEntity.java
-@@ -1,0 +_,433 @@
+@@ -1,0 +_,426 @@
 +package net.minecraft.world.entity.item;
-+
-+import net.minecraft.world.entity.livingblock.LivingBlock;
-+import net.minecraft.world.entity.player.Player;
-+import org.jspecify.annotations.Nullable;
-+
-+import java.util.Optional;
-+
 +
 +public class ItemEntity extends net.minecraft.world.entity.livingblock.LivingBlock implements net.minecraft.world.entity.TraceableEntity {
 +
@@ -55,7 +48,7 @@
 +    }
 +
 +    @Override
-+    public @Nullable Player getOwner() {
++    public net.minecraft.world.entity.player.Player getOwner() {
 +        return null;
 +    }
 +
@@ -68,8 +61,8 @@
 +    }
 +
 +    @Override
-+    protected net.minecraft.world.entity.Entity.MovementEmission getMovementEmission() {
-+        return net.minecraft.world.entity.Entity.MovementEmission.NONE;
++    protected MovementEmission getMovementEmission() {
++        return MovementEmission.NONE;
 +    }
 +
 +    @Override
@@ -269,7 +262,7 @@
 +            return false;
 +        } else {
 +            this.markHurt();
-+            this.health = (int)(this.health - damage);
++            this.health = (int) (this.health - damage);
 +            this.gameEvent(net.minecraft.world.level.gameevent.GameEvent.ENTITY_DAMAGE, source.getEntity());
 +            if (this.health <= 0) {
 +                this.discard();
@@ -286,9 +279,9 @@
 +
 +    @Override
 +    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
-+        output.putShort("Health", (short)this.health);
-+        output.putShort("Age", (short)this.age);
-+        output.putShort("PickupDelay", (short)this.pickupDelay);
++        output.putShort("Health", (short) this.health);
++        output.putShort("Age", (short) this.age);
++        output.putShort("PickupDelay", (short) this.pickupDelay);
 +        output.putInt("Lifespan", this.lifespan);
 +        net.minecraft.world.entity.EntityReference.store(this.thrower, output, "Thrower");
 +        output.storeNullable("Owner", net.minecraft.core.UUIDUtil.CODEC, this.target);
@@ -299,9 +292,9 @@
 +
 +    @Override
 +    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
-+        this.health = input.getShortOr("Health", (short)5);
-+        this.age = input.getShortOr("Age", (short)0);
-+        this.pickupDelay = input.getShortOr("PickupDelay", (short)0);
++        this.health = input.getShortOr("Health", (short) 5);
++        this.age = input.getShortOr("Age", (short) 0);
++        this.pickupDelay = input.getShortOr("PickupDelay", (short) 0);
 +        this.lifespan = input.getIntOr("Lifespan", ItemEntity.LIFETIME);
 +        this.target = input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 +        this.thrower = net.minecraft.world.entity.EntityReference.read(input, "Thrower");

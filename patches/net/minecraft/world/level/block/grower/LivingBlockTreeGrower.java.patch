@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/level/block/grower/LivingBlockTreeGrower.java
++++ b/net/minecraft/world/level/block/grower/LivingBlockTreeGrower.java
+@@ -11,6 +_,7 @@
+ import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.TreeGrowingBlock;
+ import net.minecraft.world.level.block.state.BlockState;
++import net.minecraft.world.level.entity.EntityTypeTest;
+ import net.minecraft.world.phys.AABB;
+ 
+ public final class LivingBlockTreeGrower extends TreeGrower {
+@@ -39,7 +_,7 @@
+     }
+ 
+     private List<LivingBlock> getSaplingsAround(BlockPos pos, ServerLevel serverLevel) {
+-        return serverLevel.getEntities(EntityType.LIVING_BLOCK, new AABB(pos).inflate(3.0), livingBlock -> livingBlock.getBlockState().is((Block)this.sapling));
++        return serverLevel.getEntities(EntityTypeTest.forClass(LivingBlock.class), new AABB(pos).inflate(3.0), livingBlock -> livingBlock.getBlockState().is((Block)this.sapling));
+     }
+ 
+     @Override
+@@ -48,7 +_,7 @@
+     }
+ 
+     private List<LivingBlock> getFlowersAround(BlockPos pos, ServerLevel serverLevel) {
+-        return serverLevel.getEntities(EntityType.LIVING_BLOCK, new AABB(pos).inflate(4.0), livingBlock -> livingBlock.getBlockState().is(BlockTags.FLOWERS));
++        return serverLevel.getEntities(EntityTypeTest.forClass(LivingBlock.class), new AABB(pos).inflate(4.0), livingBlock -> livingBlock.getBlockState().is(BlockTags.FLOWERS));
+     }
+ 
+     public TreeGrowingBlock sapling() {
