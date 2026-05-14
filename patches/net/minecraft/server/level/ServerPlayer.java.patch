@@ -11,7 +11,16 @@
              ServerPlayer.this.connection.send(new ClientboundContainerSetDataPacket(container.containerId, id, value));
          }
  
-@@ -381,6 +_,12 @@
+@@ -377,10 +_,21 @@
+         public void sendSystemMessage(Component message) {
+             ServerPlayer.this.sendSystemMessage(message);
+         }
++
++        @Override
++        public Optional<GameProfile> getGameProfile() {
++            return Optional.of(ServerPlayer.this.getGameProfile());
++        }
+     };
      private Set<DebugSubscription<?>> requestedDebugSubscriptions = Set.of();
      private int containerCounter;
      public boolean wonGame;
