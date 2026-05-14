@@ -58,6 +58,11 @@ abstract class SplitMergedSources extends DefaultTask {
                     sourceDist = fileEntry.getValue(sourceDistName);
                 }
 
+                if (sourceDist == null) {
+                    // Fallback: check if path indicates client-only
+                    sourceDist = entry.getName().startsWith("net/minecraft/client/") ? "client" : "common";
+                }
+
                 if ("client".equals(sourceDist)) {
                     client.putNextEntry(entry);
                     merged.transferTo(client);
