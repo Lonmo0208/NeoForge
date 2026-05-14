@@ -102,6 +102,17 @@
          public BlockState rotate(Rotation rotation) {
              return this.getBlock().rotate(this.asState(), rotation);
          }
+@@ -620,6 +_,10 @@
+             return this.destroySpeed;
+         }
+ 
++        public float getDestroySpeed(BlockGetter level, BlockPos pos) {
++            return this.getDestroySpeed();
++        }
++
+         public float getDestroyProgress(Player player, BlockGetter level, BlockPos pos) {
+             return this.getBlock().getDestroyProgress(this.asState(), player, level, pos);
+         }
 @@ -629,6 +_,8 @@
          }
  

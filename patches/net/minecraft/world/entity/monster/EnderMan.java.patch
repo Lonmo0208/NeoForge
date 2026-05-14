@@ -60,6 +60,15 @@
      }
  
      @Override
+@@ -400,7 +_,7 @@
+ 
+     private static class EndermanFreezeWhenLookedAt extends Goal {
+         private final EnderMan enderman;
+-        private @Nullable Entity target;
++        private @Nullable LivingEntity target;
+ 
+         public EndermanFreezeWhenLookedAt(EnderMan enderman) {
+             this.enderman = enderman;
 @@ -441,7 +_,7 @@
              if (this.enderman.getCarriedBlock() == null) {
                  return false;

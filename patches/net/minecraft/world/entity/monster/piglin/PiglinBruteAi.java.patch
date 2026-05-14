@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/entity/monster/piglin/PiglinBruteAi.java
++++ b/net/minecraft/world/entity/monster/piglin/PiglinBruteAi.java
+@@ -128,7 +_,7 @@
+     }
+ 
+     private static Optional<? extends Entity> findNearestValidAttackTarget(ServerLevel level, AbstractPiglin body) {
+-        Optional<Entity> angryAt = BehaviorUtils.getLivingEntityFromUUIDMemory(body, MemoryModuleType.ANGRY_AT);
++        Optional<LivingEntity> angryAt = BehaviorUtils.getLivingEntityFromUUIDMemory(body, MemoryModuleType.ANGRY_AT);
+         if (angryAt.isPresent() && Sensor.isEntityAttackableIgnoringLineOfSight(level, body, angryAt.get())) {
+             return angryAt;
+         } else {
+@@ -137,7 +_,7 @@
+         }
+     }
+ 
+-    protected static void wasHurtBy(ServerLevel level, PiglinBrute body, Entity attacker) {
++    protected static void wasHurtBy(ServerLevel level, PiglinBrute body, LivingEntity attacker) {
+         if (!(attacker instanceof AbstractPiglin)) {
+             PiglinAi.maybeRetaliate(level, body, attacker);
+         }

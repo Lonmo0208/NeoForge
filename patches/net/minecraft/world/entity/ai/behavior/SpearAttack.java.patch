@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/entity/ai/behavior/SpearAttack.java
++++ b/net/minecraft/world/entity/ai/behavior/SpearAttack.java
+@@ -6,6 +_,7 @@
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.entity.Entity;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.Mob;
+ import net.minecraft.world.entity.PathfinderMob;
+ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+@@ -29,7 +_,7 @@
+         this.targetInRangeRadiusSq = targetInRangeRadius * targetInRangeRadius;
+     }
+ 
+-    private @Nullable Entity getTarget(PathfinderMob mob) {
++    private @Nullable LivingEntity getTarget(PathfinderMob mob) {
+         return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+     }
+ 

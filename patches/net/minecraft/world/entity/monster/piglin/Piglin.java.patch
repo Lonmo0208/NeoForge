@@ -9,6 +9,18 @@
          }
      }
  
+@@ -335,9 +_,8 @@
+     @Override
+     public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+         boolean wasHurt = super.hurtServer(level, source, damage);
+-        Entity attacker = source.getEntity();
+-        if (wasHurt && (attacker instanceof LivingEntity || attacker instanceof LivingBlock)) {
+-            PiglinAi.wasHurtBy(level, this, attacker);
++        if (wasHurt && source.getEntity() instanceof LivingEntity livingEntity) {
++            PiglinAi.wasHurtBy(level, this, livingEntity);
+         }
+ 
+         return wasHurt;
 @@ -350,7 +_,7 @@
  
      @Override

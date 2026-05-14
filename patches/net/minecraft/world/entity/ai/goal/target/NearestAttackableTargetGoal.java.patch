@@ -8,15 +8,13 @@
  import net.minecraft.world.entity.Mob;
  import net.minecraft.world.entity.Targetable;
  import net.minecraft.world.entity.ai.goal.Goal;
-@@ -73,7 +_,11 @@
+@@ -73,7 +_,9 @@
  
      @Override
      public void start() {
 -        this.mob.setTarget(this.target);
 +        if (this.target instanceof LivingEntity livingTarget) {
 +            this.mob.setTarget(livingTarget);
-+        } else if (Mob.HOSTILE_MOBS_ATTACK_LIVINGBLOCKS) {
-+            this.mob.setAttackTarget(this.target);
 +        }
          super.start();
      }

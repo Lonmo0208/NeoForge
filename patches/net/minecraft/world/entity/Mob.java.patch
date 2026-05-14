@@ -1,14 +1,16 @@
 --- a/net/minecraft/world/entity/Mob.java
 +++ b/net/minecraft/world/entity/Mob.java
-@@ -128,6 +_,8 @@
+@@ -128,7 +_,9 @@
      protected PathNavigation navigation;
      public final GoalSelector goalSelector;
      public final GoalSelector targetSelector;
+-    private @Nullable Entity target;
 +    public static boolean HOSTILE_MOBS_ATTACK_LIVINGBLOCKS = true;
 +    public static boolean LIVINGBLOCK_ITEMS_PICKABLE = false;
-     private @Nullable Entity target;
++    private @Nullable LivingEntity target;
      private final Sensing sensing;
      private DropChances dropChances = DropChances.DEFAULT;
+     private boolean canPickUpLoot = false;
 @@ -139,6 +_,11 @@
      private Leashable.@Nullable LeashData leashData;
      private BlockPos homePosition = BlockPos.ZERO;
@@ -21,24 +23,32 @@
  
      protected Mob(EntityType<? extends Mob> type, Level level) {
          super(type, level);
-@@ -223,12 +_,13 @@
+@@ -223,15 +_,16 @@
      }
  
      @Override
 -    public @Nullable Entity getTarget() {
 -        return this.asValidTarget(this.target);
+-    }
+-
+-    public @Nullable Entity getTargetUnchecked() {
+-        return this.target;
+-    }
+-
+-    protected @Nullable Entity asValidTarget(@Nullable Entity target) {
 +    public @Nullable LivingEntity getTarget() {
 +        Entity valid = this.asValidTarget(this.target);
 +        return valid instanceof LivingEntity livingTarget ? livingTarget : null;
-     }
- 
--    public @Nullable Entity getTargetUnchecked() {
--        return this.target;
++    }
++
 +    public @Nullable LivingEntity getTargetUnchecked() {
 +        return this.target instanceof LivingEntity livingTarget ? livingTarget : null;
-     }
- 
-     protected @Nullable Entity asValidTarget(@Nullable Entity target) {
++    }
++
++    protected @Nullable LivingEntity asValidTarget(@Nullable LivingEntity target) {
+         if (target instanceof Player player && (player.isCreative() || player.isSpectator())) {
+             return null;
+         } else {
 @@ -239,12 +_,25 @@
          }
      }
@@ -55,7 +65,7 @@
 +    }
 +
 +    public void setTarget(@Nullable LivingEntity target) {
-+        target = this.asValidTarget(target) instanceof LivingEntity livingTarget ? livingTarget : null;
++        target = this.asValidTarget(target);
 +        if (target != null) {
 +            net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.neoforged.neoforge.common.CommonHooks.onLivingChangeTarget(this, target, net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
 +            if (!changeTargetEvent.isCanceled()) {
@@ -66,7 +76,7 @@
 +        }
 +    }
 +
-+    public void setAttackTarget(@Nullable Entity target) {
++    public void setAttackTarget(@Nullable LivingEntity target) {
 +        this.target = target;
      }
  

@@ -1,5 +1,44 @@
 --- a/net/minecraft/world/entity/monster/hoglin/Hoglin.java
 +++ b/net/minecraft/world/entity/monster/hoglin/Hoglin.java
+@@ -33,7 +_,6 @@
+ import net.minecraft.world.entity.ai.attributes.Attributes;
+ import net.minecraft.world.entity.ai.sensing.SensorType;
+ import net.minecraft.world.entity.animal.Animal;
+-import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.entity.monster.Enemy;
+ import net.minecraft.world.entity.monster.Monster;
+ import net.minecraft.world.entity.player.Player;
+@@ -94,14 +_,14 @@
+ 
+     @Override
+     public boolean doHurtTarget(ServerLevel level, Entity target) {
+-        if (!(target instanceof LivingEntity) && !(target instanceof LivingBlock)) {
+-            return false;
+-        } else {
++        if (target instanceof LivingEntity livingEntity) {
+             this.attackAnimationRemainingTicks = 10;
+             this.level().broadcastEntityEvent(this, (byte)4);
+             this.makeSound(SoundEvents.HOGLIN_ATTACK);
+-            HoglinAi.onHitTarget(this, target);
+-            return HoglinBase.hurtAndThrowTarget(level, this, target);
++            HoglinAi.onHitTarget(this, livingEntity);
++            return HoglinBase.hurtAndThrowTarget(level, this, livingEntity);
++        } else {
++            return false;
+         }
+     }
+ 
+@@ -115,8 +_,8 @@
+     @Override
+     public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+         boolean wasHurt = super.hurtServer(level, source, damage);
+-        if (wasHurt && source.getEntity() != null) {
+-            HoglinAi.wasHurtBy(level, this, source.getEntity());
++        if (wasHurt && source.getEntity() instanceof LivingEntity sourceEntity) {
++            HoglinAi.wasHurtBy(level, this, sourceEntity);
+         }
+ 
+         return wasHurt;
 @@ -141,7 +_,7 @@
          HoglinAi.updateActivity(this);
          if (this.isConverting()) {

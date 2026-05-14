@@ -27,3 +27,12 @@
              this.crossbowState = CrossbowAttack.CrossbowState.CHARGING;
              body.setChargingCrossbow(true);
          } else if (this.crossbowState == CrossbowAttack.CrossbowState.CHARGING) {
+@@ -83,7 +_,7 @@
+         body.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(target, true));
+     }
+ 
+-    private static Entity getAttackTarget(LivingEntity body) {
++    private static LivingEntity getAttackTarget(LivingEntity body) {
+         return body.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
+     }
+ 

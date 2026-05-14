@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/livingblock/LivingBlockTypes.java
++++ b/net/minecraft/world/entity/livingblock/LivingBlockTypes.java
+@@ -52,6 +_,7 @@
+ import net.minecraft.world.entity.livingblock.behavior.UseItemOnConditionBehavior;
+ import net.minecraft.world.entity.livingblock.cognition.Desires;
+ import net.minecraft.world.entity.livingblock.hurt.EmptyContentOnDeath;
++import net.minecraft.world.entity.livingblock.hurt.EnderChestDeathDrop;
+ import net.minecraft.world.entity.livingblock.hurt.PlaceBlockOnDeath;
+ import net.minecraft.world.entity.livingblock.hurt.PrimeTnt;
+ import net.minecraft.world.entity.livingblock.interact.CraftingMenuInteraction;
+@@ -61,6 +_,7 @@
+ import net.minecraft.world.entity.livingblock.interact.FlipLeverInteraction;
+ import net.minecraft.world.entity.livingblock.interact.LeashToPlayer;
+ import net.minecraft.world.entity.livingblock.interact.OpenContainerInteraction;
++import net.minecraft.world.entity.livingblock.interact.OpenEnderChestInteraction;
+ import net.minecraft.world.entity.livingblock.interact.SleepOnBedInteraction;
+ import net.minecraft.world.entity.livingblock.interact.SummonVehicleInteraction;
+ import net.minecraft.world.entity.livingblock.interact.TeleportPlayerRandomly;
+@@ -618,8 +_,8 @@
+                 Blocks.ENDER_CHEST,
+                 LivingBlockType.builder()
+                     .apply(CONTAINER)
+-                    .behavior(LivingBlockContainerBehavior.containerBlockEntity(27, SoundEvents.ENDERMAN_AMBIENT, SoundEvents.ENDERMAN_TELEPORT))
+-                    .onInteract(OpenContainerInteraction::new)
++                    .onInteract(OpenEnderChestInteraction::new)
++                    .onHurt(EnderChestDeathDrop::new)
+             )
+             .register(
+                 List.of(

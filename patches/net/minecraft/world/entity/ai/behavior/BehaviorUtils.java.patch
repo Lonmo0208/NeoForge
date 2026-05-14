@@ -20,3 +20,29 @@
          if (currentTarget.isEmpty()) {
              return false;
          } else {
+@@ -123,19 +_,21 @@
+             : brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains(target);
+     }
+ 
+-    public static Entity getNearestTarget(LivingEntity body, Optional<Entity> target1, Entity target2) {
++    public static LivingEntity getNearestTarget(LivingEntity body, Optional<LivingEntity> target1, LivingEntity target2) {
+         return target1.isEmpty() ? target2 : getTargetNearestMe(body, target1.get(), target2);
+     }
+ 
+-    public static Entity getTargetNearestMe(LivingEntity body, Entity target1, Entity target2) {
++    public static LivingEntity getTargetNearestMe(LivingEntity body, LivingEntity target1, LivingEntity target2) {
+         Vec3 pos1 = target1.position();
+         Vec3 pos2 = target2.position();
+         return body.distanceToSqr(pos1) < body.distanceToSqr(pos2) ? target1 : target2;
+     }
+ 
+-    public static Optional<Entity> getLivingEntityFromUUIDMemory(LivingEntity body, MemoryModuleType<UUID> memoryType) {
++    public static Optional<LivingEntity> getLivingEntityFromUUIDMemory(LivingEntity body, MemoryModuleType<UUID> memoryType) {
+         Optional<UUID> uuidMemory = body.getBrain().getMemory(memoryType);
+-        return uuidMemory.map(uuid -> body.level().getEntity(uuid));
++        return uuidMemory.<Entity>map(uuid -> body.level().getEntity(uuid)).map(
++            entity -> entity instanceof LivingEntity livingEntity ? livingEntity : null
++        );
+     }
+ 
+     public static @Nullable Vec3 getRandomSwimmablePos(PathfinderMob body, int maxHorizontalDistance, int maxVerticalDistance) {

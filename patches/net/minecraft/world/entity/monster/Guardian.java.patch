@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/monster/Guardian.java
 +++ b/net/minecraft/world/entity/monster/Guardian.java
+@@ -118,7 +_,7 @@
+         return this.entityData.get(DATA_ID_ATTACK_TARGET) != 0;
+     }
+ 
+-    public @Nullable Entity getActiveAttackTarget() {
++    public @Nullable LivingEntity getActiveAttackTarget() {
+         if (!this.hasActiveAttackTarget()) {
+             return null;
+         } else if (this.level().isClientSide()) {
 @@ -431,7 +_,7 @@
          }
  

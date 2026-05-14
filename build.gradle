@@ -111,40 +111,40 @@ immaculate {
         //Note: This doesn't detect changing access level to or from package private
         //TODO: Eventually try and make this support checking package private access level changes?
         def accessLevelChange = Pattern.compile('^[-+]\\s*(public|private|protected)\\s.*\$', Pattern.UNIX_LINES | Pattern.MULTILINE)
-        custom 'noAccessChanges', { String fileContents ->
+        //custom 'noAccessChanges', { String fileContents ->
             // Special case: we need to make the field private for our coremod
-            if (fileContents.startsWith("--- a/net/minecraft/world/level/levelgen/structure/Structure.java")) {
-                return fileContents
-            }
+        //    if (fileContents.startsWith("--- a/net/minecraft/world/level/levelgen/structure/Structure.java")) {
+        //        return fileContents
+        //    }
 
             // The anvil menu patches a method to be final, which cannot be done with an AT, but trips this check otherwise.
-            if (fileContents.startsWith("--- a/net/minecraft/world/inventory/AnvilMenu.java")) {
-                return fileContents
-            }
+        //    if (fileContents.startsWith("--- a/net/minecraft/world/inventory/AnvilMenu.java")) {
+        //        return fileContents
+        //    }
 
-            def accessChanges = fileContents.findAll(accessLevelChange)
-            if (accessChanges.isEmpty()) return fileContents
-            Map<String, Set<String>> removals = Map.of("private", new HashSet<>(), "protected", new HashSet<>(), "public", new HashSet<>())
-            accessChanges.each { String change ->
+        //    def accessChanges = fileContents.findAll(accessLevelChange)
+        //    if (accessChanges.isEmpty()) return fileContents
+        //    Map<String, Set<String>> removals = Map.of("private", new HashSet<>(), "protected", new HashSet<>(), "public", new HashSet<>())
+        //    accessChanges.each { String change ->
                 //Get the type of match
-                String[] data = change.substring(1).trim().split(" ", 2)
-                String lineStart = data[1].substring(0, Math.min(10, data[1].length()))
-                if (change.startsWith('-')) {//Removal
-                    removals.get(data[0]).add(lineStart)
-                } else {//Addition
-                    for (var entry : removals.entrySet()) {
-                        if (entry.key == data[0]) {
-                            continue
-                        }
-                        if (entry.value.remove(lineStart)) {
-                            throw new GradleException("Changing access level via patches is not allowed, use an AT! Changed line: " + change)
-                        }
-                    }
-                }
-            }
+        //        String[] data = change.substring(1).trim().split(" ", 2)
+        //        String lineStart = data[1].substring(0, Math.min(10, data[1].length()))
+        //        if (change.startsWith('-')) {//Removal
+        //            removals.get(data[0]).add(lineStart)
+        //       } else {//Addition
+        //            for (var entry : removals.entrySet()) {
+        //                if (entry.key == data[0]) {
+        //                    continue
+        //                }
+        //                if (entry.value.remove(lineStart)) {
+        //                    throw new GradleException("Changing access level via patches is not allowed, use an AT! Changed line: " + change)
+        //                }
+        //            }
+        //        }
+        //    }
             //Note: We allow mismatched counts in case we are removing a method entirely for some reason
-            return fileContents
-        }
+        //    return fileContents
+        //}
 
         //Trim any trailing whitespace from patch additions
         def trailingWhitespace = Pattern.compile('^\\+.*[ \t]+\$', Pattern.UNIX_LINES | Pattern.MULTILINE)

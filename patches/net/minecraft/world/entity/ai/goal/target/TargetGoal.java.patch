@@ -8,16 +8,23 @@
  import net.minecraft.world.entity.Mob;
  import net.minecraft.world.entity.ai.attributes.Attributes;
  import net.minecraft.world.entity.ai.goal.Goal;
-@@ -62,7 +_,11 @@
+@@ -62,7 +_,9 @@
                          }
                      }
  
 -                    this.mob.setTarget(target);
 +                    if (target instanceof LivingEntity livingTarget) {
 +                        this.mob.setTarget(livingTarget);
-+                    } else if (Mob.HOSTILE_MOBS_ATTACK_LIVINGBLOCKS) {
-+                        this.mob.setAttackTarget(target);
 +                    }
                      return true;
                  }
              }
+@@ -86,7 +_,7 @@
+         this.targetMob = null;
+     }
+ 
+-    protected boolean canAttack(@Nullable Entity target, TargetingConditions targetConditions) {
++    protected boolean canAttack(@Nullable LivingEntity target, TargetingConditions targetConditions) {
+         if (target == null) {
+             return false;
+         } else if (!targetConditions.test(getServerLevel(this.mob), this.mob, target)) {

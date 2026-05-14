@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/entity/animal/nautilus/NautilusAi.java
++++ b/net/minecraft/world/entity/animal/nautilus/NautilusAi.java
+@@ -15,6 +_,7 @@
+ import net.minecraft.util.valueproviders.UniformInt;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.ai.ActivityData;
+ import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
+ import net.minecraft.world.entity.ai.behavior.AnimalPanic;
+@@ -114,7 +_,7 @@
+ 
+     protected static Optional<? extends Entity> findNearestValidAttackTarget(ServerLevel level, AbstractNautilus body) {
+         if (!BehaviorUtils.isBreeding(body) && body.isInWater() && !body.isBaby() && !body.isTame()) {
+-            Optional<Entity> angryAt = BehaviorUtils.getLivingEntityFromUUIDMemory(body, MemoryModuleType.ANGRY_AT)
++            Optional<LivingEntity> angryAt = BehaviorUtils.getLivingEntityFromUUIDMemory(body, MemoryModuleType.ANGRY_AT)
+                 .filter(entity -> entity.isInWater() && Sensor.isEntityAttackableIgnoringLineOfSight(level, body, entity));
+             if (angryAt.isPresent()) {
+                 return angryAt;

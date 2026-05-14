@@ -124,6 +124,26 @@
              );
          }
      }
+@@ -586,9 +_,16 @@
+     }
+ 
+     public InteractionResult interactLivingEntity(Player player, Targetable target, InteractionHand hand) {
+-        Equippable equippable = this.get(DataComponents.EQUIPPABLE);
+-        if (equippable != null && equippable.equipOnInteract() && target instanceof LivingEntity livingEntity) {
+-            InteractionResult result = equippable.equipOnTarget(player, livingEntity, this);
++        if (target instanceof LivingEntity livingEntity) {
++            Equippable equippable = this.get(DataComponents.EQUIPPABLE);
++            if (equippable != null && equippable.equipOnInteract()) {
++                InteractionResult result = equippable.equipOnTarget(player, livingEntity, this);
++                if (result != InteractionResult.PASS) {
++                    return result;
++                }
++            }
++
++            InteractionResult result = this.getItem().interactLivingEntity(this, player, livingEntity, hand);
+             if (result != InteractionResult.PASS) {
+                 return result;
+             }
 @@ -637,6 +_,16 @@
          }
      }

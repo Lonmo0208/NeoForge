@@ -1,0 +1,19 @@
+--- a/net/minecraft/world/entity/ai/behavior/SpearApproach.java
++++ b/net/minecraft/world/entity/ai/behavior/SpearApproach.java
+@@ -4,6 +_,7 @@
+ import net.minecraft.core.component.DataComponents;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.entity.Entity;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.Mob;
+ import net.minecraft.world.entity.PathfinderMob;
+ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+@@ -34,7 +_,7 @@
+         super.start(level, body, timestamp);
+     }
+ 
+-    private @Nullable Entity getTarget(PathfinderMob mob) {
++    private @Nullable LivingEntity getTarget(PathfinderMob mob) {
+         return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+     }
+ 

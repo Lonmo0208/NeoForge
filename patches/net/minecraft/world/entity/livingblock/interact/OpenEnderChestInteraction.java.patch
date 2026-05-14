@@ -1,0 +1,42 @@
+--- /dev/null
++++ b/net/minecraft/world/entity/livingblock/interact/OpenEnderChestInteraction.java
+@@ -1,0 +_,39 @@
++package net.minecraft.world.entity.livingblock.interact;
++
++import net.minecraft.network.chat.Component;
++import net.minecraft.server.level.ServerLevel;
++import net.minecraft.server.level.ServerPlayer;
++import net.minecraft.sounds.SoundEvents;
++import net.minecraft.sounds.SoundSource;
++import net.minecraft.stats.Stats;
++import net.minecraft.world.InteractionHand;
++import net.minecraft.world.InteractionResult;
++import net.minecraft.world.SimpleMenuProvider;
++import net.minecraft.world.entity.livingblock.LivingBlock;
++import net.minecraft.world.entity.monster.piglin.PiglinAi;
++import net.minecraft.world.entity.player.Player;
++import net.minecraft.world.inventory.ChestMenu;
++import net.minecraft.world.level.Level;
++import net.minecraft.world.phys.Vec3;
++
++public class OpenEnderChestInteraction implements OnInteract {
++    private static final Component CONTAINER_TITLE = Component.translatable("container.enderchest");
++
++    @Override
++    public InteractionResult apply(Player player, InteractionHand hand, Vec3 location, LivingBlock entity) {
++        if (player instanceof ServerPlayer serverPlayer) {
++            serverPlayer.openMenu(new SimpleMenuProvider(
++                (containerId, inventory, p) -> ChestMenu.threeRows(containerId, inventory, serverPlayer.getEnderChestInventory()),
++                CONTAINER_TITLE
++            ));
++            serverPlayer.awardStat(Stats.OPEN_ENDERCHEST);
++            Level level = serverPlayer.level();
++            if (level instanceof ServerLevel serverLevel) {
++                serverLevel.playSound(null, entity.getOnPos(), SoundEvents.ENDERMAN_AMBIENT, SoundSource.BLOCKS, 1.0F, 1.0F);
++                PiglinAi.angerNearbyPiglins(serverLevel, serverPlayer, true);
++            }
++        }
++
++        return InteractionResult.SUCCESS;
++    }
++}
