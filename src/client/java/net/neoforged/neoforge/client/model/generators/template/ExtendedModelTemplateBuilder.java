@@ -35,6 +35,7 @@ public class ExtendedModelTemplateBuilder {
     @Nullable
     CustomLoaderBuilder customLoader = null;
     final RootTransformsBuilder rootTransforms = new RootTransformsBuilder();
+    final Map<String, Boolean> partVisibilities = new HashMap<>();
     @Nullable
     Boolean ambientOcclusion = null; // UnbakedModel.DEFAULT_AMBIENT_OCCLUSION
     UnbakedModel.@Nullable GuiLight guiLight = null;
@@ -53,6 +54,7 @@ public class ExtendedModelTemplateBuilder {
             builder.ambientOcclusion = ext.ambientOcclusion;
             builder.guiLight = ext.guiLight;
             builder.itemLayerFaceData.putAll(ext.itemLayerFaceData);
+            builder.partVisibilities.putAll(ext.partVisibilities);
         }
         return builder;
     }
@@ -194,6 +196,23 @@ public class ExtendedModelTemplateBuilder {
         Preconditions.checkArgument(ItemModelGenerator.LAYERS.contains(layer), "Invalid item layer key %s", layer);
         Preconditions.checkState(requiredSlots.stream().anyMatch(slot -> slot.getId().equals(layer)), "Item layer key %s must be declared as a required texture slot");
         this.itemLayerFaceData.put(layer, faceData);
+        return this;
+    }
+
+    /// Replace all the stored visibilities with a copy of the supplied map.
+    ///
+    /// Existing values are cleared.
+    public ExtendedModelTemplateBuilder partVisibilities(Map<String, Boolean> newVisibilities) {
+        this.partVisibilities.clear();
+        this.partVisibilities.putAll(newVisibilities);
+        return this;
+    }
+
+    /// Set a model part's visibility.
+    ///
+    /// Unless overriding a parent model's part visibility, setting an entry to true is not necessary.
+    public ExtendedModelTemplateBuilder partVisibility(String part, boolean visible) {
+        partVisibilities.put(part, visible);
         return this;
     }
 
