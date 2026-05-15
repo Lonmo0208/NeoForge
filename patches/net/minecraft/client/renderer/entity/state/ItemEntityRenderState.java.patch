@@ -7,7 +7,7 @@
 +import net.neoforged.api.distmarker.OnlyIn;
 +
 +@OnlyIn(Dist.CLIENT)
-+public class ItemEntityRenderState extends ItemClusterRenderState {
++public class ItemEntityRenderState extends LivingBlockRenderState {
 +    public float bobOffset;
-+    public boolean shouldBob = true;
++    public boolean shouldBob;
 +}

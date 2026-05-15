@@ -27,12 +27,19 @@
      public Player(Level level, GameProfile gameProfile) {
          super(EntityType.PLAYER, level);
          this.setUUID(gameProfile.id());
-@@ -211,7 +_,7 @@
+@@ -211,7 +_,14 @@
  
      public List<LivingBlock> getCommandedBlocks() {
          AABB commandArea = this.getBoundingBox().inflate(50.0);
 -        List<LivingBlock> commandedBlocks = this.level().getEntities(EntityType.LIVING_BLOCK, commandArea, livingBlock -> livingBlock.isOwnedBy(this));
-+        List<LivingBlock> commandedBlocks = this.level().getEntities(EntityTypeTest.forClass(LivingBlock.class), commandArea, livingBlock -> livingBlock.isOwnedBy(this));
++        List<LivingBlock> commandedBlocks = this.level().getEntities(EntityTypeTest.forClass(LivingBlock.class), commandArea, livingBlock -> {
++            if (livingBlock instanceof net.minecraft.world.entity.item.ItemEntity) {
++                var ref = livingBlock.getEntityData().get(net.minecraft.world.entity.livingblock.LivingBlock.DATA_OWNER);
++                var ownerUUID = ref.map(EntityReference::getUUID).orElse(null);
++                return ownerUUID != null && ownerUUID.equals(this.getUUID());
++            }
++            return livingBlock.isOwnedBy(this);
++        });
          List<LivingBlock> inActiveGroup = new ArrayList<>();
          LivingBlockGroup activeGroup = this.getSelectedGroup();
          List<LivingBlock> selected = new ArrayList<>();
@@ -462,11 +469,10 @@
      }
  
      @Override
-@@ -2254,5 +_,41 @@
-         public static final Player.BedSleepingProblem OBSTRUCTED = new Player.BedSleepingProblem(Component.translatable("block.minecraft.bed.obstructed"));
+@@ -2255,4 +_,41 @@
          public static final Player.BedSleepingProblem OTHER_PROBLEM = new Player.BedSleepingProblem(null);
          public static final Player.BedSleepingProblem NOT_SAFE = new Player.BedSleepingProblem(Component.translatable("block.minecraft.bed.not_safe"));
-+    }
+     }
 +
 +    // Neo: Getters for the Player's name prefixes and suffixes
 +    public Collection<MutableComponent> getPrefixes() {
@@ -502,5 +508,6 @@
 +    @Nullable
 +    public Pose getForcedPose() {
 +        return this.forcedPose;
-     }
++    }
  }
++

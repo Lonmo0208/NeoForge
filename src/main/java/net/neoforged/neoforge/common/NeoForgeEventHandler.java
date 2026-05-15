@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -58,11 +59,14 @@ public class NeoForgeEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onEntityJoinWorld(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity.getClass().equals(LivingBlock.class)) {
-            ItemStack stack = ((LivingBlock) entity).getItemStack();
+        if (entity instanceof LivingBlock livingBlock && !(entity instanceof ItemEntity)) {
+            ItemStack stack = livingBlock.getItemStack().copy();
             Item item = stack.getItem();
             if (item.hasCustomEntity(stack)) {
-                Entity newEntity = item.createEntity(event.getLevel(), entity, stack);
+                ItemEntity tempEntity = new ItemEntity(
+                        entity.level(), entity.getX(), entity.getY(), entity.getZ(), stack);
+                tempEntity.setDeltaMovement(entity.getDeltaMovement());
+                Entity newEntity = item.createEntity(event.getLevel(), tempEntity, stack);
                 if (newEntity != null) {
                     entity.discard();
                     event.setCanceled(true);

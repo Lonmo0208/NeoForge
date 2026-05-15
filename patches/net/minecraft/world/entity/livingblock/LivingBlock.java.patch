@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/livingblock/LivingBlock.java
 +++ b/net/minecraft/world/entity/livingblock/LivingBlock.java
+@@ -94,7 +_,7 @@
+     private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_COMMANDER = SynchedEntityData.defineId(
+         LivingBlock.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE
+     );
+-    private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_OWNER = SynchedEntityData.defineId(
++    public static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_OWNER = SynchedEntityData.defineId(
+         LivingBlock.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE
+     );
+     private static final EntityDataAccessor<Boolean> DATA_PLAYER_INTERACTED = SynchedEntityData.defineId(LivingBlock.class, EntityDataSerializers.BOOLEAN);
 @@ -201,12 +_,16 @@
      }
  
