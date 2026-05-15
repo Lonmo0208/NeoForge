@@ -1,35 +1,9 @@
 --- a/net/minecraft/world/level/storage/loot/functions/EnchantedCountIncreaseFunction.java
 +++ b/net/minecraft/world/level/storage/loot/functions/EnchantedCountIncreaseFunction.java
-@@ -27,15 +_,15 @@
- public class EnchantedCountIncreaseFunction extends LootItemConditionalFunction {
-     public static final int NO_LIMIT = 0;
-     public static final MapCodec<EnchantedCountIncreaseFunction> MAP_CODEC = RecordCodecBuilder.mapCodec(
--        i -> commonFields(i)
--            .and(
--                i.group(
--                    Enchantment.CODEC.fieldOf("enchantment").forGetter(f -> f.enchantment),
--                    NumberProviders.CODEC.fieldOf("count").forGetter(f -> f.count),
--                    Codec.INT.optionalFieldOf("limit", 0).forGetter(f -> f.limit)
--                )
--            )
--            .apply(i, EnchantedCountIncreaseFunction::new)
-+            i -> commonFields(i)
-+                    .and(
-+                            i.group(
-+                                    Enchantment.CODEC.fieldOf("enchantment").forGetter(f -> f.enchantment),
-+                                    NumberProviders.CODEC.fieldOf("count").forGetter(f -> f.count),
-+                                    Codec.INT.optionalFieldOf("limit", 0).forGetter(f -> f.limit)
-+                            )
-+                    )
-+                    .apply(i, EnchantedCountIncreaseFunction::new)
-     );
-     private final Holder<Enchantment> enchantment;
-     private final NumberProvider count;
-@@ -80,6 +_,10 @@
+@@ -80,6 +_,9 @@
          }
  
          if (killerEntity instanceof LivingEntity entity) {
-+
 +            // Neo: Allow mods to modify the enchantment level for loot calculations with relevant context.
 +            level = net.neoforged.neoforge.event.EventHooks.getEntityLootEnchantmentLevel(this.enchantment, level, context);
 +
