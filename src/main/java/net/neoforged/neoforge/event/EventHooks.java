@@ -7,6 +7,7 @@ package net.neoforged.neoforge.event;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.DynamicOps;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -108,6 +109,7 @@ import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction;
@@ -119,6 +121,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.extensions.IFluidStateExtension;
 import net.neoforged.neoforge.common.extensions.IOwnedSpawner;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.common.util.ClockAdjustment;
@@ -207,7 +210,7 @@ public class EventHooks {
 
     public static boolean onBlockPlace(@Nullable Entity entity, BlockSnapshot blockSnapshot, Direction direction) {
         BlockState placedAgainst = blockSnapshot.getLevel().getBlockState(blockSnapshot.getPos().relative(direction.getOpposite()));
-        EntityPlaceEvent event = new BlockEvent.EntityPlaceEvent(blockSnapshot, placedAgainst, entity);
+        EntityPlaceEvent event = new EntityPlaceEvent(blockSnapshot, placedAgainst, entity);
         return NeoForge.EVENT_BUS.post(event).isCanceled();
     }
 
@@ -235,7 +238,7 @@ public class EventHooks {
 
     /**
      * Internal, should only be called via {@link SpawnPlacements#checkSpawnRules}.
-     * 
+     *
      * @see SpawnPlacementCheck
      */
     @ApiStatus.Internal
@@ -247,7 +250,7 @@ public class EventHooks {
     /**
      * Checks if the current position of the passed mob is valid for spawning, by firing {@link PositionCheck}.<br>
      * The default check is to perform the logical and of {@link Mob#checkSpawnRules} and {@link Mob#checkSpawnObstruction}.<br>
-     * 
+     *
      * @param mob       The mob being spawned.
      * @param level     The level the mob will be added to, if successful.
      * @param spawnType The spawn type of the spawn.
@@ -265,7 +268,7 @@ public class EventHooks {
 
     /**
      * Specialized variant of {@link #checkSpawnPosition} for spawners, as they have slightly different checks, and pass through the {@link BaseSpawner} to the event.
-     * 
+     *
      * @see #checkSpawnPosition(Mob, ServerLevelAccessor, EntitySpawnReason)
      * @implNote See in-line comments about custom spawn rules.
      */
@@ -288,7 +291,7 @@ public class EventHooks {
      * When interfacing with this event, write all code as normal, and replace the call to {@link Mob#finalizeSpawn} with a call to this method.<p>
      * As an example, the following code block:
      * <code>
-     * 
+     *
      * <pre>
      * var zombie = new Zombie(level);
      * zombie.finalizeSpawn(level, difficulty, spawnType, spawnData);
@@ -297,11 +300,11 @@ public class EventHooks {
      *     // Do stuff with your new zombie
      * }
      * </pre>
-     * 
+     *
      * </code>
      * Would become:
      * <code>
-     * 
+     *
      * <pre>
      * var zombie = new Zombie(level);
      * EventHooks.finalizeMobSpawn(zombie, level, difficulty, spawnType, spawnData);
@@ -310,22 +313,22 @@ public class EventHooks {
      *     // Do stuff with your new zombie
      * }
      * </pre>
-     * 
+     *
      * </code>
      * The only code that changes is the {@link Mob#finalizeSpawn} call.
-     * 
+     *
      * @param mob        The mob whose spawn is being finalized
      * @param level      The level the mob will be spawned in
      * @param difficulty The local difficulty at the position of the mob
      * @param spawnType  The type of spawn that is occuring
      * @param spawnData  Optional spawn data relevant to the mob being spawned
      * @return The SpawnGroupData from the finalize, or null if it was canceled. The return value of this method has no bearing on if the entity will be spawned
-     * 
+     *
      * @see FinalizeSpawnEvent
      * @see Mob#finalizeSpawn(ServerLevelAccessor, DifficultyInstance, EntitySpawnReason, SpawnGroupData)
-     * 
+     *
      * @apiNote Callers do not need to check if the entity's spawn was cancelled, as the spawn will be blocked by Forge.
-     * 
+     *
      * @implNote Changes to the signature of this method must be reflected in the method redirector coremod.
      */
     @Nullable
@@ -347,7 +350,7 @@ public class EventHooks {
      * This method is separate since mob spawners perform special finalizeSpawn handling when NBT data is present, but we still want to fire the event.
      * <p>
      * This overload is also the only way to pass through an {@link IOwnedSpawner} instance.
-     * 
+     *
      * @param mob        The mob whose spawn is being finalized
      * @param level      The level the mob will be spawned in
      * @param difficulty The local difficulty at the position of the mob
@@ -373,7 +376,7 @@ public class EventHooks {
     /**
      * Called from {@link PhantomSpawner#tick} just before the spawn conditions for phantoms are evaluated.
      * Fires the {@link PlayerSpawnPhantomsEvent} and returns the event.
-     * 
+     *
      * @param player The player for whom a spawn attempt is being made
      * @param level  The level of the player
      * @param pos    The block position of the player
@@ -387,7 +390,7 @@ public class EventHooks {
 
     /**
      * Fires {@link MobDespawnEvent} and returns true if the default logic should be ignored.
-     * 
+     *
      * @param mob The entity being despawned.
      * @return True if the event result is not {@link MobDespawnEvent.Result#DEFAULT}, and the vanilla logic should be ignored.
      */
@@ -422,9 +425,9 @@ public class EventHooks {
      * Fires {@link SpawnClusterSizeEvent} and returns the size as a result of the event.
      * <p>
      * Called in {@link NaturalSpawner#spawnCategoryForPosition} where {@link Mob#getMaxSpawnClusterSize()} would normally be called.
-     * 
+     *
      * @param entity The entity whose max spawn cluster size is being queried.
-     * 
+     *
      * @return The new spawn cluster size.
      */
     public static int getMaxSpawnClusterSize(Mob entity) {
@@ -511,7 +514,7 @@ public class EventHooks {
 
     /**
      * Called when bone meal (or equivalent) is used on a block. Fires the {@link BonemealEvent} and returns the event.
-     * 
+     *
      * @param player The player who used the item, if any
      * @param level  The level
      * @param pos    The position of the target block
@@ -545,7 +548,7 @@ public class EventHooks {
      * Called in {@link LivingBlock#playerTouch(Player)} before any other processing occurs.
      * <p>
      * Fires {@link ItemEntityPickupEvent.Pre} and returns the event.
-     * 
+     *
      * @param itemEntity The item entity that a player collided with
      * @param player     The player that collided with the item entity
      */
@@ -557,7 +560,7 @@ public class EventHooks {
      * Called in {@link LivingBlock#playerTouch(Player)} after an item was successfully picked up.
      * <p>
      * Fires {@link ItemEntityPickupEvent.Post}.
-     * 
+     *
      * @param itemEntity The item entity that a player collided with
      * @param player     The player that collided with the item entity
      * @param copy       A copy of the item entity's item stack before the pickup
@@ -675,7 +678,7 @@ public class EventHooks {
 
     /**
      * Checks if a sleeping entity can continue sleeping with the given sleeping problem.
-     * 
+     *
      * @return true if the entity may continue sleeping
      */
     public static boolean canEntityContinueSleeping(LivingEntity sleeper, @Nullable BedSleepingProblem problem) {
@@ -703,7 +706,7 @@ public class EventHooks {
     /**
      * Fires the {@link LootTableLoadEvent} for non-empty loot tables and returns the table if the event was not
      * canceled and the table was not set to {@link LootTable#EMPTY} in the event. Otherwise returns {@code null}
-     * which maps to an empty {@link Optional} in
+     * which maps to an empty {@link Optional} in {@link LootDataType#deserialize(Identifier, DynamicOps, Object)}
      */
     @Nullable
     @ApiStatus.Internal
@@ -718,7 +721,7 @@ public class EventHooks {
 
     /**
      * Checks if a fluid is allowed to create a fluid source. This fires the {@link CreateFluidSourceEvent}.
-     * By default, a fluid can create a source if it returns true to
+     * By default, a fluid can create a source if it returns true to {@link IFluidStateExtension#canConvertToSource(Level, BlockPos)}
      */
     public static boolean canCreateFluidSource(ServerLevel level, BlockPos pos, BlockState state) {
         return NeoForge.EVENT_BUS.post(new CreateFluidSourceEvent(level, pos, state)).canConvert();
@@ -744,7 +747,7 @@ public class EventHooks {
      * <p>
      * If an entity is provided, this method fires {@link EntityMobGriefingEvent}.
      * If an entity is not provided, this method returns the value of {@link GameRules#MOB_GRIEFING}.
-     * 
+     *
      * @param level  The level of the action
      * @param entity The entity performing the action, or null if unknown.
      * @return
@@ -758,7 +761,7 @@ public class EventHooks {
 
     /**
      * Fires the {@link BlockGrowFeatureEvent} and returns the event object.
-     * 
+     *
      * @param level  The level the feature will be grown in
      * @param rand   The random source
      * @param pos    The position the feature will be grown at
@@ -770,7 +773,7 @@ public class EventHooks {
 
     /**
      * Fires the {@link AlterGroundEvent} and retrieves the resulting {@link StateProvider}.
-     * 
+     *
      * @param ctx       The tree decoration context for the current alteration.
      * @param positions The list of positions that are considered roots.
      * @param provider  The original {@link BlockStateProvider} from the {@link AlterGroundDecorator}.
@@ -821,11 +824,11 @@ public class EventHooks {
 
     /**
      * Fires the {@link AddServerReloadListenersEvent} and returns the sorted list of reload listeners.
-     * 
+     *
      * @param serverResources The just-created {@link ReloadableServerResources} instance.
      * @param registryAccess  The registry access from the {@link ReloadableServerRegistries.LoadResult}.
      * @return The sorted list of reload listeners.
-     * 
+     *
      * @throws IllegalArgumentException if {@link ReloadListenerSort#sort(SortedReloadListenerEvent)} detects a cycle.
      */
     public static List<PreparableReloadListener> onResourceReload(
@@ -917,7 +920,7 @@ public class EventHooks {
     /**
      * Called by {@link PlayerList#respawn(ServerPlayer, boolean)} before creating the new {@link ServerPlayer}
      * to fire the {@link PlayerRespawnPositionEvent}
-     * 
+     *
      * @param player          The old {@link ServerPlayer} that is being respawned
      * @param respawnLevel    The default level the player will respawn into
      * @param respawnAngle    The angle the player will face when they respawn
@@ -931,7 +934,7 @@ public class EventHooks {
 
     /**
      * Called by {@link PlayerList#respawn(ServerPlayer, boolean)} after creating and initializing the new {@link ServerPlayer}.
-     * 
+     *
      * @param player       The new player instance created by the respawn process
      * @param fromEndFight Whether the player is respawning because they jumped through the End return portal
      */
@@ -949,7 +952,7 @@ public class EventHooks {
 
     /**
      * Fires {@link EntityTickEvent.Pre}. Called from the head of {@link LivingEntity#tick()}.
-     * 
+     *
      * @param entity The entity being ticked
      * @return The event
      */
@@ -959,7 +962,7 @@ public class EventHooks {
 
     /**
      * Fires {@link EntityTickEvent.Post}. Called from the tail of {@link LivingEntity#tick()}.
-     * 
+     *
      * @param entity The entity being ticked
      */
     public static void fireEntityTickPost(Entity entity) {
@@ -968,7 +971,7 @@ public class EventHooks {
 
     /**
      * Fires {@link PlayerTickEvent.Pre}. Called from the head of {@link Player#tick()}.
-     * 
+     *
      * @param player The player being ticked
      */
     public static void firePlayerTickPre(Player player) {
@@ -977,7 +980,7 @@ public class EventHooks {
 
     /**
      * Fires {@link PlayerTickEvent.Post}. Called from the tail of {@link Player#tick()}.
-     * 
+     *
      * @param player The player being ticked
      */
     public static void firePlayerTickPost(Player player) {
@@ -986,7 +989,7 @@ public class EventHooks {
 
     /**
      * Fires {@link LevelTickEvent.Pre}. Called from {@link Minecraft#tick()} and {@link MinecraftServer#tickChildren(BooleanSupplier)} just before the try block for level tick is entered.
-     * 
+     *
      * @param level    The level being ticked
      * @param haveTime The time supplier, indicating if there is remaining time to do work in the current tick.
      */
@@ -996,7 +999,7 @@ public class EventHooks {
 
     /**
      * Fires {@link LevelTickEvent.Post}. Called from {@link Minecraft#tick()} and {@link MinecraftServer#tickChildren(BooleanSupplier)} just after the try block for level tick is exited.
-     * 
+     *
      * @param level    The level being ticked
      * @param haveTime The time supplier, indicating if there is remaining time to do work in the current tick.
      */
@@ -1006,7 +1009,7 @@ public class EventHooks {
 
     /**
      * Fires {@link ServerTickEvent.Pre}. Called from the head of {@link MinecraftServer#tickServer(BooleanSupplier)}.
-     * 
+     *
      * @param haveTime The time supplier, indicating if there is remaining time to do work in the current tick.
      * @param server   The current server
      */
@@ -1016,7 +1019,7 @@ public class EventHooks {
 
     /**
      * Fires {@link ServerTickEvent.Post}. Called from the tail of {@link MinecraftServer#tickServer(BooleanSupplier)}.
-     * 
+     *
      * @param haveTime The time supplier, indicating if there is remaining time to do work in the current tick.
      * @param server   The current server
      */
@@ -1061,7 +1064,7 @@ public class EventHooks {
 
     /**
      * Fires {@link GetEnchantmentLevelEvent} and for a single enchantment, returning the (possibly event-modified) level.
-     * 
+     *
      * @param level The original level of the enchantment as provided by the Item.
      * @param stack The stack being queried against.
      * @param ench  The enchantment being queried for.
@@ -1082,7 +1085,7 @@ public class EventHooks {
 
     /**
      * Fires {@link GetEnchantmentLevelEvent} and for all enchantments, returning the (possibly event-modified) enchantment map.
-     * 
+     *
      * @param enchantments The original enchantment map as provided by the Item.
      * @param stack        The stack being queried against.
      * @return The new enchantment map.
@@ -1136,7 +1139,7 @@ public class EventHooks {
 
     /**
      * Fires the mob split event. Returns the event for cancellation checking.
-     * 
+     *
      * @param parent   The parent mob, which is in the process of being removed.
      * @param children All child mobs that would have normally spawned.
      * @return The event object.
@@ -1149,7 +1152,7 @@ public class EventHooks {
 
     /**
      * Fires the {@link ModifyCustomSpawnersEvent}. Returns the custom spawners list.
-     * 
+     *
      * @param serverLevel    The server level.
      * @param customSpawners The original custom spawners.
      * @return The new custom spawners list.
@@ -1168,7 +1171,7 @@ public class EventHooks {
      * Called from {@link ApplyBonusCount} and {@link BonusLevelTableCondition} when blocks rely on enchantments for evaluating loot bonuses.
      * <p>
      * If the necessary context is present, this method will fire the {@link EnchantedBlockLootEvent} and return the event-modified level. Otherwise it returns the original level.
-     * 
+     *
      * @param tool      The tool, from {@link LootContextParams#TOOL}.
      * @param ench      The enchantment being queried.
      * @param enchLevel The original enchantment level, determined from the item (or possibly {@link GetEnchantmentLevelEvent}).
@@ -1190,7 +1193,7 @@ public class EventHooks {
      * and {@link EnchantmentEffectComponents#EQUIPMENT_DROPS} when entity loot processing relies on enchantments for evaluating loot bonuses.
      * <p>
      * If the necessary context is present, this method will fire the {@link EnchantedEntityLootEvent} and return the event-modified level. Otherwise it returns the original level.
-     * 
+     *
      * @param ench      The enchantment being queried.
      * @param enchLevel The original enchantment level. How it gets determined depends on the particular call site. Generally it's the attacker's effective enchantment level.
      * @param ctx       The loot context for the current entity loot evaluation.
