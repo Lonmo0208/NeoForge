@@ -1,0 +1,24 @@
+--- a/net/minecraft/network/protocol/game/ServerboundPickItemFromBlockPacket.java
++++ b/net/minecraft/network/protocol/game/ServerboundPickItemFromBlockPacket.java
+@@ -6,18 +_,19 @@
+ import net.minecraft.network.protocol.PacketType;
+ import net.minecraft.world.phys.BlockHitResult;
+ 
+-public record ServerboundPickItemFromBlockPacket(BlockHitResult hitResult, boolean includeData) implements Packet<ServerGamePacketListener> {
++public record ServerboundPickItemFromBlockPacket(BlockHitResult hitResult, boolean includeData, boolean pickToInventory) implements Packet<ServerGamePacketListener> {
+     public static final StreamCodec<FriendlyByteBuf, ServerboundPickItemFromBlockPacket> STREAM_CODEC = Packet.codec(
+         ServerboundPickItemFromBlockPacket::write, ServerboundPickItemFromBlockPacket::new
+     );
+ 
+     private ServerboundPickItemFromBlockPacket(FriendlyByteBuf input) {
+-        this(input.readBlockHitResult(), input.readBoolean());
++        this(input.readBlockHitResult(), input.readBoolean(), input.readBoolean());
+     }
+ 
+     private void write(FriendlyByteBuf output) {
+         output.writeBlockHitResult(this.hitResult);
+         output.writeBoolean(this.includeData);
++        output.writeBoolean(this.pickToInventory);
+     }
+ 
+     @Override

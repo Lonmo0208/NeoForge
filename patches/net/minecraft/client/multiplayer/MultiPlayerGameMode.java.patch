@@ -180,3 +180,14 @@
          return (InteractionResult)(this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : player.interactOn(entity, hand, location));
      }
  
+@@ -577,8 +_,8 @@
+         return this.destroyProgress > 0.0F ? (int)(this.destroyProgress * 10.0F) : -1;
+     }
+ 
+-    public void handlePickItemFromBlock(BlockHitResult hitResult, boolean includeData) {
+-        this.connection.send(new ServerboundPickItemFromBlockPacket(hitResult, includeData));
++    public void handlePickItemFromBlock(BlockHitResult hitResult, boolean includeData, boolean pickToInventory) {
++        this.connection.send(new ServerboundPickItemFromBlockPacket(hitResult, includeData, pickToInventory));
+     }
+ 
+     public void handlePickItemFromEntity(Entity entity, boolean includeData) {

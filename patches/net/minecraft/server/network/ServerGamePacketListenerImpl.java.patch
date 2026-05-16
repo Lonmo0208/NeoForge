@@ -46,7 +46,7 @@
      private boolean noBlocksAround(Entity entity) {
          return entity.level()
              .getBlockStates(entity.getBoundingBox().inflate(0.0625).expandTowards(0.0, -0.55, 0.0))
-@@ -701,7 +_,7 @@
+@@ -701,13 +_,15 @@
              if (level.isLoaded(pos)) {
                  BlockState blockState = level.getBlockState(pos);
                  boolean includeData = this.player.hasInfiniteMaterials() && packet.includeData();
@@ -55,6 +55,15 @@
                  if (!itemStack.isEmpty()) {
                      if (includeData) {
                          addBlockDataToItem(blockState, level, pos, itemStack);
+                     }
+ 
+-                    if (this.player.hasInfiniteMaterials()) {
++                    if (packet.pickToInventory()) {
++                        this.tryPickItem(itemStack);
++                    } else if (this.player.hasInfiniteMaterials()) {
+                         Block.popResource(level, pos.relative(packet.hitResult().getDirection(), 1), itemStack, blockState);
+                     }
+                 }
 @@ -1160,7 +_,7 @@
                                          && !playerStandsOnSomething
                                          && !this.player.isSpectator()

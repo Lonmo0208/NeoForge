@@ -425,14 +425,20 @@
              this.updateLevelInEngines(null);
              this.player = null;
          } finally {
-@@ -2368,6 +_,7 @@
+@@ -2368,10 +_,12 @@
  
      private void pickBlockOrEntity() {
          if (this.hitResult != null && this.hitResult.getType() != HitResult.Type.MISS) {
 +            if (net.neoforged.neoforge.client.ClientHooks.onClickInput(2, this.options.keyPickItem, InteractionHand.MAIN_HAND).isCanceled()) return;
              boolean includeData = this.hasControlDown();
++            boolean pickToInventory = this.hasShiftDown();
              switch (this.hitResult) {
                  case BlockHitResult blockHitResult:
+-                    this.gameMode.handlePickItemFromBlock(blockHitResult, includeData);
++                    this.gameMode.handlePickItemFromBlock(blockHitResult, includeData, pickToInventory);
+                     break;
+                 case EntityHitResult entityHitResult:
+                     this.gameMode.handlePickItemFromEntity(entityHitResult.getEntity(), includeData);
 @@ -2434,7 +_,14 @@
          systemReport.setDetail("Backend API", RenderSystem::getApiDescription);
          systemReport.setDetail("Window size", () -> minecraft != null ? minecraft.window.getWidth() + "x" + minecraft.window.getHeight() : "<not initialized>");
