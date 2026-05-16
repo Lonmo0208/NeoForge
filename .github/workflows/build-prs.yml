@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew :neoforge:setup -PvalidateAccessTransformers
 
       - name: Build with Gradle
-        run: ./gradlew assemble checkFormatting
+        run: ./gradlew assemble checkFormatting -x :neoforge:createChangelog
 
       - name: Run JCC
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'port/') && ! startsWith(github.ref_name, 'port/') && ! startsWith(github.event.pull_request.base.ref, 'port/') }}
@@ -49,8 +49,17 @@ jobs:
 
       - name: Upload JCC
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'port/') && ! startsWith(github.ref_name, 'port/') && ! startsWith(github.event.pull_request.base.ref, 'port/') }}
-        uses: neoforged/action-jar-compatibility/upload@v1
+        uses: Lonmo0208/action-jar-compatibility/upload@v1
 
       - name: Publish artifacts
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: neoforged/action-pr-publishing/upload@v1
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          mkdir -p projects/neoforge/build
+          touch projects/neoforge/build/changelog.txt
+          ./gradlew publishAllPublicationsTo -x :neoforge:createChangelog
+        
+      - name: Upload maven directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-publish
+          path: ./repo
