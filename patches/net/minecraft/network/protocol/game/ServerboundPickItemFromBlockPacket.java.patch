@@ -1,8 +1,16 @@
 --- a/net/minecraft/network/protocol/game/ServerboundPickItemFromBlockPacket.java
 +++ b/net/minecraft/network/protocol/game/ServerboundPickItemFromBlockPacket.java
-@@ -6,18 +_,19 @@
+@@ -1,23 +_,31 @@
+ package net.minecraft.network.protocol.game;
+ 
++import net.minecraft.core.BlockPos;
++import net.minecraft.core.Direction;
+ import net.minecraft.network.FriendlyByteBuf;
+ import net.minecraft.network.codec.StreamCodec;
+ import net.minecraft.network.protocol.Packet;
  import net.minecraft.network.protocol.PacketType;
  import net.minecraft.world.phys.BlockHitResult;
++import net.minecraft.world.phys.Vec3;
  
 -public record ServerboundPickItemFromBlockPacket(BlockHitResult hitResult, boolean includeData) implements Packet<ServerGamePacketListener> {
 +public record ServerboundPickItemFromBlockPacket(BlockHitResult hitResult, boolean includeData, boolean pickToInventory) implements Packet<ServerGamePacketListener> {
@@ -10,6 +18,10 @@
          ServerboundPickItemFromBlockPacket::write, ServerboundPickItemFromBlockPacket::new
      );
  
++    public ServerboundPickItemFromBlockPacket(BlockPos pos, boolean includeData) {
++        this(new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false), includeData, false);
++    }
++
      private ServerboundPickItemFromBlockPacket(FriendlyByteBuf input) {
 -        this(input.readBlockHitResult(), input.readBoolean());
 +        this(input.readBlockHitResult(), input.readBoolean(), input.readBoolean());

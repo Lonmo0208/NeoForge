@@ -1,5 +1,14 @@
 --- a/net/minecraft/client/gui/screens/advancements/AdvancementTabType.java
 +++ b/net/minecraft/client/gui/screens/advancements/AdvancementTabType.java
+@@ -8,7 +_,7 @@
+ import net.neoforged.api.distmarker.OnlyIn;
+ 
+ @OnlyIn(Dist.CLIENT)
+-enum AdvancementTabType {
++public enum AdvancementTabType {
+     ABOVE(
+         new AdvancementTabType.Sprites(
+             Identifier.withDefaultNamespace("advancements/tab_above_left_selected"),
 @@ -72,6 +_,7 @@
  
      private final AdvancementTabType.Sprites selectedSprites;

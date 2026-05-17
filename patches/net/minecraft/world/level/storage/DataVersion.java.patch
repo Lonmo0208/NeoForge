@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/level/storage/DataVersion.java
++++ b/net/minecraft/world/level/storage/DataVersion.java
+@@ -10,6 +_,6 @@
+     }
+ 
+     public boolean isCompatible(DataVersion other) {
+-        return SharedConstants.DEBUG_OPEN_INCOMPATIBLE_WORLDS ? true : this.series().equals(other.series());
++        return SharedConstants.DEBUG_OPEN_INCOMPATIBLE_WORLDS ? true : this.series().equals(other.series()) || this.series().equals(MAIN_SERIES) || other.series().equals(MAIN_SERIES);
+     }
+ }
