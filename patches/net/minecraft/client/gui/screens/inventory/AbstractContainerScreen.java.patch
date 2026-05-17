@@ -113,6 +113,18 @@
                                  this.quickCraftingType = 2;
                              }
                          }
+@@ -388,6 +_,11 @@
+ 
+     private void checkHotbarMouseClicked(MouseButtonEvent event) {
+         if (this.hoveredSlot != null && this.menu.getCarried().isEmpty()) {
++            if (this.minecraft.options.keySwapOffhand.matchesMouse(event)) {
++                this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ContainerInput.SWAP);
++                return;
++            }
++
+             for (int i = 0; i < 9; i++) {
+                 if (this.minecraft.options.keyHotbarSlots[i].matchesMouse(event)) {
+                     this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, i, ContainerInput.SWAP);
 @@ -438,10 +_,13 @@
  
      @Override
@@ -145,7 +157,7 @@
                      this.slotClicked(slot, slotId, event.button(), ContainerInput.CLONE);
                  } else {
                      boolean quickKey = slotId != -999 && event.hasShiftDown();
-@@ -586,29 +_,36 @@
+@@ -586,29 +_,40 @@
  
      @Override
      public boolean keyPressed(KeyEvent event) {
@@ -181,6 +193,10 @@
      protected boolean checkHotbarKeyPressed(KeyEvent event) {
 +        var key = com.mojang.blaze3d.platform.InputConstants.getKey(event);
          if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null) {
++            if (this.minecraft.options.keySwapOffhand.isActiveAndMatches(key)) {
++                this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ContainerInput.SWAP);
++                return true;
++            }
 +
              for (int i = 0; i < 9; i++) {
 -                if (this.minecraft.options.keyHotbarSlots[i].matches(event)) {
