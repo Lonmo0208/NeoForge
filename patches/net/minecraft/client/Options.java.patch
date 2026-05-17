@@ -1,5 +1,21 @@
 --- a/net/minecraft/client/Options.java
 +++ b/net/minecraft/client/Options.java
+@@ -613,6 +_,7 @@
+     public final KeyMapping keySprint = new ToggleKeyMapping("key.sprint", 341, KeyMapping.Category.MOVEMENT, this.toggleSprint::get, true);
+     public final KeyMapping keyInventory = new KeyMapping("key.inventory", 69, KeyMapping.Category.INVENTORY);
+     public final KeyMapping keyDrop = new KeyMapping("key.drop", 81, KeyMapping.Category.INVENTORY);
++    public final KeyMapping keySwapOffhand = new KeyMapping("key.swapOffhand", 70, KeyMapping.Category.INVENTORY);
+     public final KeyMapping keyUse = new ToggleKeyMapping("key.use", InputConstants.Type.MOUSE, 1, KeyMapping.Category.GAMEPLAY, this.toggleUse::get, false);
+     public final KeyMapping keyAttack = new ToggleKeyMapping(
+         "key.attack", InputConstants.Type.MOUSE, 0, KeyMapping.Category.GAMEPLAY, this.toggleAttack::get, true
+@@ -709,6 +_,7 @@
+                 this.keyShift,
+                 this.keySprint,
+                 this.keyDrop,
++                this.keySwapOffhand,
+                 this.keyInventory,
+                 this.keyChat,
+                 this.keyPlayerList,
 @@ -1027,7 +_,7 @@
          this.incompatibleResourcePacks.clear();
  

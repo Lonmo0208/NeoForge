@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/gui/screens/inventory/AbstractMountInventoryScreen.java
++++ b/net/minecraft/client/gui/screens/inventory/AbstractMountInventoryScreen.java
+@@ -19,7 +_,7 @@
+     protected final LivingEntity mount;
+ 
+     public AbstractMountInventoryScreen(T menu, Inventory inventory, Component title, int inventoryColumns, LivingEntity mount) {
+-        super(menu, inventory, title);
++        super(menu, inventory, title, 176, 166);
+         this.inventoryColumns = inventoryColumns;
+         this.mount = mount;
+     }
