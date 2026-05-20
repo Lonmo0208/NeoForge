@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/entity/EntityEquipment.java
++++ b/net/minecraft/world/entity/EntityEquipment.java
+@@ -61,7 +_,7 @@
+ 
+     public void dropAll(LivingEntity dropper) {
+         for (ItemStack item : this.items.values()) {
+-            dropper.drop(item, false);
++            dropper.spawnLivingBlockFromDrop(item, false);
+         }
+ 
+         this.clear();

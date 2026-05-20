@@ -79,5 +79,6 @@
   "living_blocks.group.purple": "紫色",
   "living_blocks.group.red": "红色",
   "living_blocks.group.yellow": "黄色",
-  "player.commanded_blocks.no_blocks_in_area": "所选群组在该区域不包含任何方块"
+  "player.commanded_blocks.no_blocks_in_area": "所选群组在该区域不包含任何方块",
+  "gamerule.minecraft.pick_up_item": "允许玩家潜行时，右键拾取活化方块，中键复制活化方块"
 }

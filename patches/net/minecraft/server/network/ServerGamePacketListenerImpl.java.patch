@@ -1,5 +1,13 @@
 --- a/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+@@ -165,6 +_,7 @@
+ import net.minecraft.world.entity.EquipmentSlot;
+ import net.minecraft.world.entity.ExperienceOrb;
+ import net.minecraft.world.entity.HasCustomInventoryScreen;
++import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.MoverType;
+ import net.minecraft.world.entity.PlayerRideableJumping;
 @@ -493,18 +_,21 @@
  
                  if (fail && level.noCollision(vehicle, oldAABB) || this.isEntityCollidingWithAnythingNew(level, vehicle, oldAABB, targetX, targetY, targetZ)) {
@@ -64,6 +72,28 @@
                          Block.popResource(level, pos.relative(packet.hitResult().getDirection(), 1), itemStack, blockState);
                      }
                  }
+@@ -734,6 +_,21 @@
+         PacketUtils.ensureRunningOnSameThread(packet, this, level);
+         Entity entity = level.getEntityOrPart(packet.id());
+         if (entity != null && this.player.isWithinEntityInteractionRange(entity, 3.0)) {
++            if (level.getGameRules().get(GameRules.PICK_UP_ITEM) && this.player.isSecondaryUseActive() && (entity instanceof ItemEntity || entity instanceof net.minecraft.world.entity.livingblock.LivingBlock)) {
++                ItemStack pickStack;
++                if (entity instanceof ItemEntity item) {
++                    pickStack = item.getItem().copyWithCount(1);
++                } else {
++                    pickStack = ((net.minecraft.world.entity.livingblock.LivingBlock) entity).getItemStack().copyWithCount(1);
++                }
++
++                if (!pickStack.isEmpty()) {
++                    this.player.getInventory().add(pickStack);
++                }
++
++                return;
++            }
++
+             ItemStack itemStack = entity.getPickResult();
+             if (itemStack != null && !itemStack.isEmpty()) {
+                 this.tryPickItem(itemStack);
 @@ -1160,7 +_,7 @@
                                          && !playerStandsOnSomething
                                          && !this.player.isSpectator()

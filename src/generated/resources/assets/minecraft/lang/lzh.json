@@ -79,5 +79,6 @@
   "living_blocks.group.purple": "紫",
   "living_blocks.group.red": "赤",
   "living_blocks.group.yellow": "黃",
-  "player.commanded_blocks.no_blocks_in_area": "所选之阵，此域无块"
+  "player.commanded_blocks.no_blocks_in_area": "所选之阵，此域无块",
+  "gamerule.minecraft.pick_up_item": "蹲行時，按右鍵拾活化之塊，按中鍵複製之"
 }

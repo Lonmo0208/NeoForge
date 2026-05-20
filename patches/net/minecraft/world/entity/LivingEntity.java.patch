@@ -1,6 +1,11 @@
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
-@@ -92,7 +_,6 @@
+@@ -88,11 +_,11 @@
+ import net.minecraft.world.entity.animal.FlyingAnimal;
+ import net.minecraft.world.entity.animal.wolf.Wolf;
+ import net.minecraft.world.entity.boss.wither.WitherBoss;
++import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
  import net.minecraft.world.entity.player.Player;
  import net.minecraft.world.entity.projectile.Projectile;
  import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -96,11 +101,13 @@
      public boolean canBreatheUnderwater() {
          return this.is(EntityTypeTags.CAN_BREATHE_UNDER_WATER);
      }
-@@ -757,7 +_,7 @@
+@@ -756,8 +_,8 @@
+         }
      }
  
-     public void drop(ItemStack itemStack, boolean thrownFromHand) {
+-    public void drop(ItemStack itemStack, boolean thrownFromHand) {
 -        if (!itemStack.isEmpty() && !(itemStack.getItem() instanceof ActionItem)) {
++    public void spawnLivingBlockFromDrop(ItemStack itemStack, boolean thrownFromHand) {
 +        if (!itemStack.isEmpty()) {
              if (this.level().isClientSide()) {
                  this.swing(InteractionHand.MAIN_HAND);
@@ -578,7 +585,7 @@
          if (!this.swinging || this.swingTime >= this.getCurrentSwingDuration() / 2 || this.swingTime < 0) {
              this.swingTime = -1;
              this.swinging = true;
-@@ -2136,8 +_,10 @@
+@@ -2136,8 +_,18 @@
  
      private void swapHandItems() {
          ItemStack tmp = this.getItemBySlot(EquipmentSlot.OFFHAND);
@@ -588,6 +595,14 @@
 +        if (event.isCanceled()) return;
 +        this.setItemSlot(EquipmentSlot.OFFHAND, event.getItemSwappedToOffHand());
 +        this.setItemSlot(EquipmentSlot.MAINHAND, event.getItemSwappedToMainHand());
++    }
++
++    public @Nullable ItemEntity setItemThrower(ItemStack stack, boolean flag1, boolean flag2) {
++        if (stack.isEmpty()) return null;
++        net.minecraft.world.entity.item.ItemEntity entity = new net.minecraft.world.entity.item.ItemEntity(this.level(), this.getX(), this.getEyeY() - 0.3, this.getZ(), stack);
++        if (flag2) entity.setThrower(this);
++        if (!this.level().isClientSide()) this.level().addFreshEntity(entity);
++        return entity;
      }
  
      @Override

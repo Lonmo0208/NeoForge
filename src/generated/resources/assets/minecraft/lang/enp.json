@@ -69,5 +69,6 @@
   "living_blocks.group.purple": "Purple",
   "living_blocks.group.red": "Red",
   "living_blocks.group.yellow": "Yellow",
-  "player.commanded_blocks.no_blocks_in_area": "Selected group contains no blocks in the area"
+  "player.commanded_blocks.no_blocks_in_area": "Selected group contains no blocks in the area",
+  "gamerule.minecraft.pick_up_item": "Allows ye to be pickin' up and copyin' dropped loot with right-click or middle-click while sneakin', arrr!"
 }

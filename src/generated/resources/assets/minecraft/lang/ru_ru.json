@@ -79,5 +79,6 @@
   "living_blocks.group.purple": "Фиолетовая",
   "living_blocks.group.red": "Красная",
   "living_blocks.group.yellow": "Жёлтая",
-  "player.commanded_blocks.no_blocks_in_area": "Выбранная группа не содержит блоков в этой области"
+  "player.commanded_blocks.no_blocks_in_area": "Выбранная группа не содержит блоков в этой области",
+  "gamerule.minecraft.pick_up_item": "Позволяет подбирать и копировать выброшенные предметы правым или средним кликом во время крадучись"
 }

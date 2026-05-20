@@ -433,7 +433,7 @@ public class CommonHooks {
     public static LivingBlock onPlayerTossEvent(Player player, ItemStack item, boolean dropAround, boolean includeName) {
         java.util.List<LivingBlock> drops = Lists.newArrayList();
         player.captureDrops(drops);
-        player.drop(item, dropAround);
+        player.spawnLivingBlockFromDrop(item, dropAround);
         player.captureDrops(null);
 
         LivingBlock ret = drops.isEmpty() ? null : drops.get(0);
@@ -562,13 +562,18 @@ public class CommonHooks {
      */
     public static void handleBlockDrops(ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, List<LivingBlock> drops, @Nullable Entity breaker, ItemStack tool) {
         BlockDropsEvent event = new BlockDropsEvent(level, pos, state, blockEntity, drops, breaker, tool);
-        NeoForge.EVENT_BUS.post(event);
+        try {
+            NeoForge.EVENT_BUS.post(event);
+        } catch (Exception e) {
+            LOGGER.error("Caught exception from BlockDropsEvent listener", e);
+        }
         if (!event.isCanceled()) {
-            for (LivingBlock entity : event.getDrops()) {
-                level.addFreshEntity(entity);
+            for (LivingBlock entity : drops) {
+                if (entity.isAlive()) {
+                    level.addFreshEntity(entity);
+                }
             }
-            // Always pass false for the dropXP (last) param to spawnAfterBreak since we handle XP.
-            state.spawnAfterBreak((ServerLevel) level, pos, tool, false);
+            state.spawnAfterBreak(level, pos, tool, false);
             if (event.getDroppedExperience() > 0) {
                 state.getBlock().popExperience(level, pos, event.getDroppedExperience());
             }

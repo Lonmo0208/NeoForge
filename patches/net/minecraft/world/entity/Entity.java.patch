@@ -42,6 +42,15 @@
      private final EntityType<?> type;
      private boolean requiresPrecisePosition;
      private int id = ENTITY_COUNTER.incrementAndGet();
+@@ -213,7 +_,7 @@
+     private ImmutableList<Entity> passengers = ImmutableList.of();
+     protected int boardingCooldown;
+     private @Nullable Entity vehicle;
+-    private Level level;
++    public Level level;
+     public double xo;
+     public double yo;
+     public double zo;
 @@ -263,7 +_,7 @@
      protected static final int FLAG_FALL_FLYING = 7;
      private static final EntityDataAccessor<Integer> DATA_AIR_SUPPLY_ID = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.INT);

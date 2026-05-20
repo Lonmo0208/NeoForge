@@ -79,5 +79,6 @@
   "living_blocks.group.purple": "紫色",
   "living_blocks.group.red": "赤色",
   "living_blocks.group.yellow": "黄色",
-  "player.commanded_blocks.no_blocks_in_area": "選択したグループにはこのエリアにブロックがありません"
+  "player.commanded_blocks.no_blocks_in_area": "選択したグループにはこのエリアにブロックがありません",
+  "gamerule.minecraft.pick_up_item": "スニーク中に右クリックまたは中クリックでドロップしたアイテムを拾得・複製できるようにする"
 }

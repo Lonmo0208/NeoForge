@@ -79,5 +79,6 @@
   "living_blocks.group.purple": "보라색",
   "living_blocks.group.red": "빨간색",
   "living_blocks.group.yellow": "노란색",
-  "player.commanded_blocks.no_blocks_in_area": "선택한 그룹에 이 지역에 블록이 없습니다"
+  "player.commanded_blocks.no_blocks_in_area": "선택한 그룹에 이 지역에 블록이 없습니다",
+  "gamerule.minecraft.pick_up_item": "웅크린 상태에서 우클릭 또는 중간 클릭으로 드롭된 아이템을 줍거나 복제할 수 있도록 허용"
 }

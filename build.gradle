@@ -23,8 +23,8 @@ if (fixedProjectVersion == null) {
         project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.0+${preReleaseSuffix}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
     } else {
         def fullVersion = gradleutils.version.toString()
-        def suffixIndex = fullVersion.lastIndexOf('.')
-        def suffix = suffixIndex > 0 ? fullVersion.substring(suffixIndex) : ".1-beta"
+        def suffixIndex = fullVersion.lastIndexOf('2.')
+        def suffix = suffixIndex > 3 ? fullVersion.substring(suffixIndex) : ".2"
         project.version = project.neoforge_snapshot_next_stable + suffix
     }
 } else {

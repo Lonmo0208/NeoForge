@@ -1,9 +1,10 @@
 --- a/net/minecraft/world/entity/player/Player.java
 +++ b/net/minecraft/world/entity/player/Player.java
-@@ -67,6 +_,7 @@
+@@ -67,6 +_,8 @@
  import net.minecraft.world.entity.EntityEquipment;
  import net.minecraft.world.entity.EntityReference;
  import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.item.ItemEntity;
 +import net.minecraft.world.level.entity.EntityTypeTest;
  import net.minecraft.world.entity.EquipmentSlot;
  import net.minecraft.world.entity.HumanoidArm;
@@ -98,6 +99,18 @@
          if (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SWIMMING)) {
              Pose desiredPose = this.getDesiredPose();
              Pose actualPose;
+@@ -569,6 +_,11 @@
+         return 20;
+     }
+ 
++    public ItemEntity drop(net.minecraft.world.item.ItemStack itemStack, boolean thrownFromHand) {
++        this.spawnLivingBlockFromDrop(itemStack, thrownFromHand);
++        return null;
++    }
++
+     @Override
+     public void handleEntityEvent(byte id) {
+         if (id == 9) {
 @@ -705,6 +_,7 @@
  
      @Override
@@ -182,10 +195,25 @@
          }
      }
  
-@@ -992,6 +_,8 @@
+@@ -992,6 +_,23 @@
          if (this.isSpectator()) {
              return InteractionResult.PASS;
          } else {
++            if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().get(GameRules.PICK_UP_ITEM) && this.isSecondaryUseActive() && !(entity instanceof net.minecraft.world.entity.decoration.ArmorStand)) {
++                java.util.Optional<ItemStack> pickStack = entity instanceof ItemEntity item
++                    ? java.util.Optional.of(item.getItem())
++                    : entity instanceof LivingBlock block ? java.util.Optional.of(block.getItemStack()) : java.util.Optional.empty();
++                if (pickStack.isPresent()) {
++                    ItemStack stack = pickStack.get();
++                    if (this.getInventory().add(stack)) {
++                        this.take(entity, entity instanceof ItemEntity itemEntity ? itemEntity.getItem().getCount() : stack.getCount());
++                        this.playSound(net.minecraft.sounds.SoundEvents.ITEM_PICKUP, 0.2F, (this.random.nextFloat() - this.random.nextFloat()) * 1.4F + 2.0F);
++                        entity.discard();
++                        return InteractionResult.SUCCESS;
++                    }
++                }
++            }
++
 +            InteractionResult cancelResult = net.neoforged.neoforge.common.CommonHooks.onInteractEntity(this, entity, hand);
 +            if (cancelResult != null) return cancelResult;
              ItemStack itemStack = this.getItemInHand(hand);
