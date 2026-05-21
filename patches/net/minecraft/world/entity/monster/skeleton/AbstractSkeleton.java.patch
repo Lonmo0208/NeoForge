@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/monster/skeleton/AbstractSkeleton.java
 +++ b/net/minecraft/world/entity/monster/skeleton/AbstractSkeleton.java
+@@ -13,6 +_,7 @@
+ import net.minecraft.world.DifficultyInstance;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntitySpawnReason;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.EntityType;
+ import net.minecraft.world.entity.EquipmentSlot;
+ import net.minecraft.world.entity.PathfinderMob;
 @@ -140,8 +_,8 @@
          if (this.level() != null && !this.level().isClientSide()) {
              this.goalSelector.removeGoal(this.meleeGoal);
@@ -24,7 +32,17 @@
          double xd = target.getX() - this.getX();
          double yd = target.getY(0.3333333333333333) - arrow.getY();
          double zd = target.getZ() - this.getZ();
-@@ -188,7 +_,7 @@
+@@ -182,13 +_,17 @@
+         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+     }
+ 
++    public void performRangedAttack(LivingEntity target, float power) {
++        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
++    }
++
+     protected AbstractArrow getArrow(ItemStack projectile, float power, @Nullable ItemStack firingWeapon) {
+         return ProjectileUtil.getMobArrow(this, projectile, power, firingWeapon);
+     }
  
      @Override
      public boolean canUseNonMeleeWeapon(ItemStack item) {

@@ -21,8 +21,14 @@
          }
  
          return wasHurt;
-@@ -350,7 +_,7 @@
+@@ -348,9 +_,13 @@
+         this.performCrossbowAttack(this, 1.6F);
+     }
  
++    public void performRangedAttack(LivingEntity target, float power) {
++        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
++    }
++
      @Override
      public boolean canUseNonMeleeWeapon(ItemStack item) {
 -        return item.getItem() == Items.CROSSBOW || item.has(DataComponents.KINETIC_WEAPON);

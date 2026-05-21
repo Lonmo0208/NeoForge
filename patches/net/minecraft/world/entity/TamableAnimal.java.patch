@@ -9,6 +9,17 @@
      }
  
      public boolean isInSittingPose() {
+@@ -183,6 +_,10 @@
+         return entity == this.getOwner();
+     }
+ 
++    public boolean isOwnedBy(LivingEntity entity) {
++        return isOwnedBy((Entity) entity);
++    }
++
+     public boolean wantsToAttack(LivingEntity target, LivingEntity owner) {
+         return true;
+     }
 @@ -222,13 +_,16 @@
  
      @Override

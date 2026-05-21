@@ -29,6 +29,17 @@
      public static boolean canDestroy(BlockState state) {
          return !state.isAir() && !state.is(BlockTags.WITHER_IMMUNE);
      }
+@@ -448,6 +_,10 @@
+         this.performRangedAttack(0, target);
+     }
+ 
++    public void performRangedAttack(LivingEntity target, float power) {
++        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
++    }
++
+     @Override
+     public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+         if (this.isInvulnerableTo(level, source)) {
 @@ -489,6 +_,7 @@
  
      @Override

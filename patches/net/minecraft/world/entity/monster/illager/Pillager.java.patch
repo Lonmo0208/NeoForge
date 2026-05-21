@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/monster/illager/Pillager.java
 +++ b/net/minecraft/world/entity/monster/illager/Pillager.java
+@@ -17,6 +_,7 @@
+ import net.minecraft.world.damagesource.DamageSource;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntitySpawnReason;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.EntityType;
+ import net.minecraft.world.entity.EquipmentSlot;
+ import net.minecraft.world.entity.Mob;
 @@ -98,7 +_,7 @@
  
      @Override
@@ -18,3 +26,14 @@
              return AbstractIllager.IllagerArmPose.CROSSBOW_HOLD;
          } else {
              return this.isAggressive() ? AbstractIllager.IllagerArmPose.ATTACKING : AbstractIllager.IllagerArmPose.NEUTRAL;
+@@ -200,6 +_,10 @@
+     @Override
+     public void performRangedAttack(Entity target, float power) {
+         this.performCrossbowAttack(this, 1.6F);
++    }
++
++    public void performRangedAttack(LivingEntity target, float power) {
++        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
+     }
+ 
+     @Override

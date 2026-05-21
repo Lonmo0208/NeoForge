@@ -20,6 +20,18 @@
          this.targetSelector
              .addGoal(
                  3,
+@@ -144,6 +_,11 @@
+     }
+ 
+     @Override
++    public boolean canAttack(LivingEntity target) {
++        return this.canAttack((Entity) target);
++    }
++
++    @Override
+     protected void addAdditionalSaveData(ValueOutput output) {
+         super.addAdditionalSaveData(output);
+         output.putBoolean("PlayerCreated", this.isPlayerCreated());
 @@ -173,12 +_,12 @@
      }
  

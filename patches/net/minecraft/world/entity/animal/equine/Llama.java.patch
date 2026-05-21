@@ -1,0 +1,21 @@
+--- a/net/minecraft/world/entity/animal/equine/Llama.java
++++ b/net/minecraft/world/entity/animal/equine/Llama.java
+@@ -27,6 +_,7 @@
+ import net.minecraft.world.entity.AgeableMob;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntityAttachment;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.EntityAttachments;
+ import net.minecraft.world.entity.EntityDimensions;
+ import net.minecraft.world.entity.EntitySpawnReason;
+@@ -435,6 +_,10 @@
+     @Override
+     public void performRangedAttack(Entity target, float power) {
+         this.spit(target);
++    }
++
++    public void performRangedAttack(LivingEntity target, float power) {
++        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
+     }
+ 
+     @Override

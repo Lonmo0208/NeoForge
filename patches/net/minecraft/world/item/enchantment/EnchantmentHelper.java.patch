@@ -40,7 +40,7 @@
      }
  
 -    private static void runIterationOnItem(ItemStack piece, EquipmentSlot slot, Entity owner, EnchantmentHelper.EnchantmentInSlotVisitor method) {
-+    public static void runIterationOnItem(ItemStack piece, EquipmentSlot slot, Entity owner, EnchantmentHelper.EnchantmentInSlotVisitor method) {
++    public static void runIterationOnItem(ItemStack piece, EquipmentSlot slot, LivingEntity owner, EnchantmentHelper.EnchantmentInSlotVisitor method) {
          if (!piece.isEmpty()) {
              ItemEnchantments itemEnchantments = piece.get(DataComponents.ENCHANTMENTS);
 +
@@ -55,10 +55,24 @@
      }
  
 -    private static void runIterationOnEquipment(Entity owner, EnchantmentHelper.EnchantmentInSlotVisitor method) {
-+    public static void runIterationOnEquipment(Entity owner, EnchantmentHelper.EnchantmentInSlotVisitor method) {
++    public static void runIterationOnEquipment(LivingEntity owner, EnchantmentHelper.EnchantmentInSlotVisitor method) {
          for (EquipmentSlot slot : EquipmentSlot.VALUES) {
              runIterationOnItem(owner.getItemBySlot(slot), slot, owner, method);
          }
+@@ -231,11 +_,11 @@
+ 
+         if (source != null) {
+             Entity item = damageSource.getEntity();
+-            if (item instanceof Entity) {
++            if (item instanceof LivingEntity livingAttacker) {
+                 runIterationOnItem(
+                     source,
+                     EquipmentSlot.MAINHAND,
+-                    item,
++                    livingAttacker,
+                     (enchantment, level, itemx) -> enchantment.value()
+                         .doPostAttack(serverLevel, level, itemx, EnchantmentTarget.ATTACKER, victim, damageSource)
+                 );
 @@ -283,6 +_,10 @@
          return bestLevel;
      }
@@ -70,6 +84,19 @@
      public static int processProjectileCount(ServerLevel serverLevel, ItemStack weapon, Entity shooter, int count) {
          MutableFloat modifiedCount = new MutableFloat(count);
          runIterationOnItem(weapon, (enchantment, level) -> enchantment.value().modifyProjectileCount(serverLevel, level, weapon, shooter, modifiedCount));
+@@ -328,10 +_,11 @@
+     }
+ 
+     public static float processEquipmentDropChance(ServerLevel serverLevel, Entity entity, DamageSource killingBlow, float chance) {
++        if (!(entity instanceof LivingEntity livingEntity)) return chance;
+         MutableFloat modifiedChance = new MutableFloat(chance);
+         RandomSource random = entity.getRandom();
+         runIterationOnEquipment(
+-            entity,
++            livingEntity,
+             (enchantment, level, item) -> {
+                 LootContext context = Enchantment.damageContext(serverLevel, level, entity, killingBlow);
+                 enchantment.value()
 @@ -341,7 +_,12 @@
                              if (filteredEffect.enchanted() == EnchantmentTarget.VICTIM
                                  && filteredEffect.affected() == EnchantmentTarget.VICTIM

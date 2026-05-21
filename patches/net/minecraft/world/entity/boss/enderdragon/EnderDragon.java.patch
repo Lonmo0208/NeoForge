@@ -84,3 +84,15 @@
          EnderDragonPart[] subEntities = this.getSubEntities();
  
          for (int i = 0; i < subEntities.length; i++) {
+@@ -873,6 +_,11 @@
+     @Override
+     public boolean canAttack(Entity target) {
+         return target instanceof Targetable targetable ? targetable.canBeSeenAsEnemy() : false;
++    }
++
++    @Override
++    public boolean canAttack(LivingEntity target) {
++        return this.canAttack((Entity) target);
+     }
+ 
+     @Override

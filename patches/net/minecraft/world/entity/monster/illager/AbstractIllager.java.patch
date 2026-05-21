@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/entity/monster/illager/AbstractIllager.java
++++ b/net/minecraft/world/entity/monster/illager/AbstractIllager.java
+@@ -4,6 +_,7 @@
+ import net.minecraft.tags.EntityTypeTags;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
+ import net.minecraft.world.entity.npc.villager.AbstractVillager;
+ import net.minecraft.world.entity.raid.Raider;
+@@ -26,6 +_,11 @@
+     @Override
+     public boolean canAttack(Entity target) {
+         return target instanceof AbstractVillager villager && villager.isBaby() ? false : super.canAttack(target);
++    }
++
++    @Override
++    public boolean canAttack(LivingEntity target) {
++        return this.canAttack((Entity) target);
+     }
+ 
+     @Override
