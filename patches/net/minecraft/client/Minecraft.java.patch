@@ -286,6 +286,18 @@
                      this.player.swing(InteractionHand.MAIN_HAND);
                      return true;
                  } else {
+@@ -1705,9 +_,11 @@
+                                 }
+ 
+                                 this.player.resetAttackStrengthTicker();
++                                net.neoforged.neoforge.common.CommonHooks.onEmptyLeftClick(this.player);
+                             }
+                     }
+ 
++                    if (inputEvent.shouldSwingHand())
+                     this.player.swing(InteractionHand.MAIN_HAND);
+                     return endAttack;
+                 }
 @@ -1724,6 +_,11 @@
                  }
  
@@ -400,14 +412,14 @@
      }
  
      public void clearDownloadedResourcePacks() {
-@@ -2251,6 +_,7 @@
+@@ -2250,6 +_,7 @@
+         try {
              this.setScreenAndShow(screen);
              this.gui.onDisconnected();
-             this.level = null;
 +            if (this.level != null) net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.LevelEvent.Unload(this.level));
+             this.level = null;
              this.updateLevelInEngines(null);
              this.player = null;
-         } finally {
 @@ -2368,6 +_,7 @@
  
      private void pickBlockOrEntity() {

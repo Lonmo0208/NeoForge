@@ -60,7 +60,6 @@ public class NeoDevPlugin implements Plugin<Project> {
 
         var rawNeoFormVersion = project.getProviders().gradleProperty("neoform_version");
         var minecraftVersion = project.getProviders().gradleProperty("minecraft_version");
-        var copyMinecraftVersion = project.getProviders().gradleProperty("copy_minecraft_version");
         var neoForgeVersion = project.provider(() -> project.getVersion().toString());
         var mcAndNeoFormVersion = minecraftVersion.zip(rawNeoFormVersion, (mc, nf) -> mc + "-" + nf);
 
@@ -216,12 +215,10 @@ public class NeoDevPlugin implements Plugin<Project> {
 
         var generateAdditionalMinecraftJarResources = tasks.register("generateMinecraftModsToml", ProcessResources.class, task -> {
             task.getInputs().property("minecraft_version", minecraftVersion.get());
-            task.getInputs().property("copy_minecraft_version", copyMinecraftVersion.get());
             task.setGroup(INTERNAL_GROUP);
             task.from(new File(project.getRootDir(), "src/main/templates/minecraft.neoforge.mods.toml"), spec -> {
                 spec.rename("(.*)", "META-INF/neoforge.mods.toml");
-                spec.expand(Map.of("minecraft_version", minecraftVersion.get(),
-                        "copy_minecraft_version", copyMinecraftVersion.get()));
+                spec.expand(Map.of("minecraft_version", minecraftVersion.get()));
             });
             task.into(neoDevBuildDir.map(d -> d.dir("additional-minecraft-resources")).get());
         });
@@ -580,7 +577,6 @@ public class NeoDevPlugin implements Plugin<Project> {
 
         var rawNeoFormVersion = project.getProviders().gradleProperty("neoform_version");
         var minecraftVersion = project.getProviders().gradleProperty("minecraft_version");
-        var copyMinecraftVersion = project.getProviders().gradleProperty("copy_minecraft_version");
         var mcAndNeoFormVersion = minecraftVersion.zip(rawNeoFormVersion, (mc, nf) -> mc + "-" + nf);
 
         // NeoForm data + tools to run it
