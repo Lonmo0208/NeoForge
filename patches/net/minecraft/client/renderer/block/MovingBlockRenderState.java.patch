@@ -8,3 +8,14 @@
  
      @Override
      public CardinalLighting cardinalLighting() {
+@@ -62,5 +_,10 @@
+     @Override
+     public int getMinY() {
+         return (int)this.pos.y();
++    }
++
++    @Override
++    public net.neoforged.neoforge.model.data.ModelData getModelData(BlockPos pos) {
++        return pos.equals(this.pos) ? this.modelData : net.neoforged.neoforge.model.data.ModelData.EMPTY;
+     }
+ }
