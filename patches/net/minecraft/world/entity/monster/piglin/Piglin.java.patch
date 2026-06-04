@@ -9,7 +9,7 @@
          }
      }
  
-@@ -335,9 +_,8 @@
+@@ -335,22 +_,21 @@
      @Override
      public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
          boolean wasHurt = super.hurtServer(level, source, damage);
@@ -21,14 +21,14 @@
          }
  
          return wasHurt;
-@@ -348,9 +_,13 @@
+     }
+ 
+     @Override
+-    public void performRangedAttack(Entity target, float power) {
++    public void performRangedAttack(LivingEntity target, float power) {
          this.performCrossbowAttack(this, 1.6F);
      }
  
-+    public void performRangedAttack(LivingEntity target, float power) {
-+        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
-+    }
-+
      @Override
      public boolean canUseNonMeleeWeapon(ItemStack item) {
 -        return item.getItem() == Items.CROSSBOW || item.has(DataComponents.KINETIC_WEAPON);

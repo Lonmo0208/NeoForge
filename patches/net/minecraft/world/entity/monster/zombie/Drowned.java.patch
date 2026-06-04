@@ -8,14 +8,12 @@
  import net.minecraft.world.entity.EntityAttachments;
  import net.minecraft.world.entity.EntityDimensions;
  import net.minecraft.world.entity.EntitySpawnReason;
-@@ -293,6 +_,10 @@
-         }
- 
-         this.playSound(SoundEvents.DROWNED_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-+    }
-+
-+    public void performRangedAttack(LivingEntity target, float power) {
-+        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
+@@ -278,7 +_,7 @@
      }
  
      @Override
+-    public void performRangedAttack(Entity target, float power) {
++    public void performRangedAttack(LivingEntity target, float power) {
+         ItemStack mainHandItem = this.getMainHandItem();
+         ItemStack tridentItemStack = mainHandItem.is(Items.TRIDENT) ? mainHandItem : new ItemStack(Items.TRIDENT);
+         ThrownTrident trident = new ThrownTrident(this.level(), this, tridentItemStack);

@@ -27,6 +27,17 @@
              this.crossbowState = CrossbowAttack.CrossbowState.CHARGING;
              body.setChargingCrossbow(true);
          } else if (this.crossbowState == CrossbowAttack.CrossbowState.CHARGING) {
+@@ -74,7 +_,9 @@
+                 this.crossbowState = CrossbowAttack.CrossbowState.READY_TO_ATTACK;
+             }
+         } else if (this.crossbowState == CrossbowAttack.CrossbowState.READY_TO_ATTACK) {
+-            body.performRangedAttack(target, 1.0F);
++            if (target instanceof LivingEntity livingTarget) {
++                body.performRangedAttack(livingTarget, 1.0F);
++            }
+             this.crossbowState = CrossbowAttack.CrossbowState.UNCHARGED;
+         }
+     }
 @@ -83,7 +_,7 @@
          body.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(target, true));
      }

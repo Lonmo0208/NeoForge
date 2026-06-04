@@ -17,14 +17,16 @@
                  return;
              }
  
-@@ -133,10 +_,14 @@
-         this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+@@ -115,7 +_,7 @@
      }
  
+     @Override
+-    public void performRangedAttack(Entity target, float power) {
 +    public void performRangedAttack(LivingEntity target, float power) {
-+        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
-+    }
-+
+         double xd = target.getX() - this.getX();
+         double yd = target.getEyeY() - 1.1F;
+         double zd = target.getZ() - this.getZ();
+@@ -136,7 +_,7 @@
      @Override
      protected InteractionResult mobInteract(Player player, InteractionHand hand) {
          ItemStack itemStack = player.getItemInHand(hand);

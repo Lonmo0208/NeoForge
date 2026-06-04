@@ -389,7 +389,12 @@ public class CommonHooks {
     }
 
     public static boolean onLivingDrops(LivingEntity entity, DamageSource source, Collection<LivingBlock> drops, boolean recentlyHit) {
-        return NeoForge.EVENT_BUS.post(new LivingDropsEvent(entity, source, drops, recentlyHit)).isCanceled();
+        try {
+            return NeoForge.EVENT_BUS.post(new LivingDropsEvent(entity, source, drops, recentlyHit)).isCanceled();
+        } catch (Exception e) {
+            LOGGER.error("Caught exception from LivingDropsEvent listener", e);
+            return false;
+        }
     }
 
     public static LivingFallEvent onLivingFall(LivingEntity entity, double distance, float damageMultiplier) {

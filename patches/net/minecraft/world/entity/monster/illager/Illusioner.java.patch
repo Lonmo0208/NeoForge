@@ -27,11 +27,13 @@
              } else if (this.hurtTime == this.hurtDuration - 1) {
                  this.clientSideIllusionTicks = 3;
  
-@@ -178,22 +_,28 @@
+@@ -177,17 +_,19 @@
+     }
  
      @Override
-     public void performRangedAttack(Entity target, float power) {
+-    public void performRangedAttack(Entity target, float power) {
 -        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
++    public void performRangedAttack(LivingEntity target, float power) {
 +        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
          ItemStack projectile = this.getProjectile(bowItem);
          AbstractArrow arrow = ProjectileUtil.getMobArrow(this, projectile, power, bowItem);
@@ -48,16 +50,6 @@
              );
          }
  
-         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-     }
- 
-+    public void performRangedAttack(LivingEntity target, float power) {
-+        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
-+    }
-+
-     @Override
-     public AbstractIllager.IllagerArmPose getArmPose() {
-         if (this.isCastingSpell()) {
 @@ -219,8 +_,8 @@
                  return false;
              } else {

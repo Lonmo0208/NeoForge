@@ -173,6 +173,17 @@
                  if (this.level() instanceof ServerLevel serverLevel) {
                      serverLevel.addFreshEntity(newMob);
                  }
+@@ -1342,6 +_,10 @@
+         }
+     }
+ 
++    public boolean isWithinMeleeAttackRange(LivingEntity target) {
++        return this.isWithinMeleeAttackRange((Entity) target);
++    }
++
+     protected AABB getAttackBoundingBox(double horizontalExpansion) {
+         Entity vehicle = this.getVehicle();
+         AABB aabb;
 @@ -1388,14 +_,24 @@
      }
  

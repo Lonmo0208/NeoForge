@@ -133,6 +133,16 @@ public abstract class LivingDamageEvent extends LivingEvent {
             return this.inflictedDamage;
         }
 
+        /**
+         * {@return the amount of damage inflicted to the entity, after all modifications}
+         * 
+         * @deprecated Use {@link #getInflictedDamage()} instead. This method is kept for backward compatibility with mods compiled against 26.1.2.
+         */
+        @Deprecated
+        public float getNewDamage() {
+            return this.inflictedDamage;
+        }
+
         /** {@return the amount of health this entity lost during this sequence} */
         public float getHealthDamage() {
             return this.healthDamage;

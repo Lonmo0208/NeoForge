@@ -15,14 +15,29 @@
              damage *= 0.15F;
          }
  
-@@ -270,6 +_,10 @@
-                     );
-             }
-         }
-+    }
-+
-+    public void performRangedAttack(LivingEntity target, float power) {
-+        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
+@@ -223,7 +_,7 @@
      }
  
      @Override
+-    public void performRangedAttack(Entity target, float power) {
++    public void performRangedAttack(LivingEntity target, float power) {
+         if (!this.isDrinkingPotion()) {
+             Vec3 targetMovement = target.getDeltaMovement();
+             double xd = target.getX() + targetMovement.x - this.getX();
+@@ -239,12 +_,12 @@
+                 }
+ 
+                 this.setTarget(null);
+-            } else if (target instanceof LivingEntity livingEntity) {
+-                if (dist >= 8.0 && !livingEntity.hasEffect(MobEffects.SLOWNESS)) {
++            } else {
++                if (dist >= 8.0 && !target.hasEffect(MobEffects.SLOWNESS)) {
+                     potion = Potions.SLOWNESS;
+-                } else if (livingEntity.getHealth() >= 8.0F && !livingEntity.hasEffect(MobEffects.POISON)) {
++                } else if (target.getHealth() >= 8.0F && !target.hasEffect(MobEffects.POISON)) {
+                     potion = Potions.POISON;
+-                } else if (dist <= 3.0 && !livingEntity.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
++                } else if (dist <= 3.0 && !target.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
+                     potion = Potions.WEAKNESS;
+                 }
+             }

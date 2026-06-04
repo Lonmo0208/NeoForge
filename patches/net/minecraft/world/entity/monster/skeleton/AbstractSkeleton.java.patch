@@ -19,11 +19,13 @@
                  int minAttackInterval = this.getHardAttackInterval();
                  if (this.level().getDifficulty() != Difficulty.HARD) {
                      minAttackInterval = this.getAttackInterval();
-@@ -165,9 +_,11 @@
+@@ -164,18 +_,19 @@
+     }
  
      @Override
-     public void performRangedAttack(Entity target, float power) {
+-    public void performRangedAttack(Entity target, float power) {
 -        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
++    public void performRangedAttack(LivingEntity target, float power) {
 +        ItemStack bowItem = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
          ItemStack projectile = this.getProjectile(bowItem);
          AbstractArrow arrow = this.getArrow(projectile, power, bowItem);
@@ -32,17 +34,16 @@
          double xd = target.getX() - this.getX();
          double yd = target.getY(0.3333333333333333) - arrow.getY();
          double zd = target.getZ() - this.getZ();
-@@ -182,13 +_,17 @@
-         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-     }
+         double distanceToTarget = Math.sqrt(xd * xd + zd * zd);
+         if (this.level() instanceof ServerLevel serverLevel) {
+-            float gravityCompensationFactor = target instanceof LivingBlock ? 0.1F : 0.2F;
+             Projectile.spawnProjectileUsingShoot(
+-                arrow, serverLevel, projectile, xd, yd + distanceToTarget * gravityCompensationFactor, zd, 1.6F, 14 - serverLevel.getDifficulty().getId() * 4
++                arrow, serverLevel, projectile, xd, yd + distanceToTarget * 0.2, zd, 1.6F, 14 - serverLevel.getDifficulty().getId() * 4
+             );
+         }
  
-+    public void performRangedAttack(LivingEntity target, float power) {
-+        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
-+    }
-+
-     protected AbstractArrow getArrow(ItemStack projectile, float power, @Nullable ItemStack firingWeapon) {
-         return ProjectileUtil.getMobArrow(this, projectile, power, firingWeapon);
-     }
+@@ -188,7 +_,7 @@
  
      @Override
      public boolean canUseNonMeleeWeapon(ItemStack item) {

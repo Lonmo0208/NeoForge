@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/ai/goal/RangedCrossbowAttackGoal.java
 +++ b/net/minecraft/world/entity/ai/goal/RangedCrossbowAttackGoal.java
+@@ -5,6 +_,7 @@
+ import net.minecraft.util.TimeUtil;
+ import net.minecraft.util.valueproviders.UniformInt;
+ import net.minecraft.world.entity.Entity;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.monster.CrossbowAttackMob;
+ import net.minecraft.world.entity.monster.Monster;
+ import net.minecraft.world.entity.monster.RangedAttackMob;
 @@ -14,7 +_,7 @@
  import net.minecraft.world.item.Items;
  import net.minecraft.world.item.component.ChargedProjectiles;
@@ -38,3 +46,14 @@
                      this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.CHARGING;
                      this.mob.setChargingCrossbow(true);
                  }
+@@ -122,7 +_,9 @@
+                     this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.READY_TO_ATTACK;
+                 }
+             } else if (this.crossbowState == RangedCrossbowAttackGoal.CrossbowState.READY_TO_ATTACK && hasLineOfSight) {
+-                this.mob.performRangedAttack(target, 1.0F);
++                if (target instanceof LivingEntity livingTarget) {
++                    this.mob.performRangedAttack(livingTarget, 1.0F);
++                }
+                 this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.UNCHARGED;
+             }
+         }

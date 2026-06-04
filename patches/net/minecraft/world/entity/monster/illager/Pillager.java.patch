@@ -26,14 +26,12 @@
              return AbstractIllager.IllagerArmPose.CROSSBOW_HOLD;
          } else {
              return this.isAggressive() ? AbstractIllager.IllagerArmPose.ATTACKING : AbstractIllager.IllagerArmPose.NEUTRAL;
-@@ -200,6 +_,10 @@
-     @Override
-     public void performRangedAttack(Entity target, float power) {
-         this.performCrossbowAttack(this, 1.6F);
-+    }
-+
-+    public void performRangedAttack(LivingEntity target, float power) {
-+        this.performRangedAttack((net.minecraft.world.entity.Entity) target, power);
+@@ -198,7 +_,7 @@
      }
  
      @Override
+-    public void performRangedAttack(Entity target, float power) {
++    public void performRangedAttack(LivingEntity target, float power) {
+         this.performCrossbowAttack(this, 1.6F);
+     }
+ 

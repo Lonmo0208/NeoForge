@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/ai/goal/RangedBowAttackGoal.java
 +++ b/net/minecraft/world/entity/ai/goal/RangedBowAttackGoal.java
+@@ -2,6 +_,7 @@
+ 
+ import java.util.EnumSet;
+ import net.minecraft.world.entity.Entity;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.Mob;
+ import net.minecraft.world.entity.monster.Monster;
+ import net.minecraft.world.entity.monster.RangedAttackMob;
 @@ -9,7 +_,7 @@
  import net.minecraft.world.item.BowItem;
  import net.minecraft.world.item.Items;
@@ -29,7 +37,15 @@
      }
  
      @Override
-@@ -132,7 +_,7 @@
+@@ -127,12 +_,14 @@
+                     int pullTime = this.mob.getTicksUsingItem();
+                     if (pullTime >= 20) {
+                         this.mob.stopUsingItem();
+-                        this.mob.performRangedAttack(target, BowItem.getPowerForTime(pullTime));
++                        if (target instanceof LivingEntity livingTarget) {
++                            this.mob.performRangedAttack(livingTarget, BowItem.getPowerForTime(pullTime));
++                        }
+                         this.attackTime = this.attackIntervalMin;
                      }
                  }
              } else if (--this.attackTime <= 0 && this.seeTime >= -60) {
