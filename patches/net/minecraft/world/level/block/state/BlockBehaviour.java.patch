@@ -19,7 +19,12 @@
          }
      }
  
-@@ -343,8 +_,8 @@
+@@ -339,12 +_,12 @@
+     }
+ 
+     protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+-        float destroySpeed = state.getDestroySpeed();
++        float destroySpeed = state.getDestroySpeed(level, pos);
          if (destroySpeed == -1.0F) {
              return 0.0F;
          } else {

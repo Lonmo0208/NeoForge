@@ -47,3 +47,4 @@ build
 **/out/
 /.vscode
 .vscode/launch.json
+/temp_animal_pen

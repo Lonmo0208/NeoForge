@@ -37,6 +37,21 @@
                      if (SharedConstants.DEBUG_BLOCK_BREAK) {
                          LOGGER.error("client broke {} {} -> {}", pos, oldState, level.getBlockState(pos));
                      }
+@@ -163,10 +_,10 @@
+         if (this.minecraft.player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof ActionItem action && !(action instanceof PunchAction)) {
+             if (!this.isActioning && action.actionOnBlock(this.minecraft.player, pos, direction)) {
+                 this.isActioning = true;
+-                this.startPrediction(
+-                    this.minecraft.level,
+-                    sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.COMMAND_POS, pos, direction, sequence)
+-                );
++                try (BlockStatePredictionHandler prediction = this.minecraft.level.getBlockStatePredictionHandler().startPredicting()) {
++                    int sequence = prediction.currentSequence();
++                    this.connection.send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.COMMAND_POS, pos, direction, sequence));
++                }
+             }
+ 
+             return true;
 @@ -183,6 +_,7 @@
                  }
  

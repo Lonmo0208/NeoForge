@@ -1,5 +1,13 @@
 --- a/net/minecraft/server/level/ServerPlayer.java
 +++ b/net/minecraft/server/level/ServerPlayer.java
+@@ -139,6 +_,7 @@
+ import net.minecraft.world.entity.animal.nautilus.AbstractNautilus;
+ import net.minecraft.world.entity.animal.parrot.Parrot;
+ import net.minecraft.world.entity.animal.pig.Pig;
++import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.entity.livingblock.LivingBlockGroup;
+ import net.minecraft.world.entity.monster.Monster;
 @@ -324,6 +_,10 @@
          }
  
@@ -358,3 +366,14 @@
      }
  
      @Override
+@@ -2103,8 +_,8 @@
+     }
+ 
+     @Override
+-    public void onItemPickup(LivingBlock entity) {
+-        super.onItemPickup(entity);
++    public void onItemPickup(ItemEntity entity) {
++        super.onItemPickup((LivingBlock) entity);
+         Entity thrower = entity.getCommander();
+         if (thrower != null) {
+             CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.trigger(this, entity.getItemStack(), thrower);

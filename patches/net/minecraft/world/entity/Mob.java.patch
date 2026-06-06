@@ -1,5 +1,21 @@
 --- a/net/minecraft/world/entity/Mob.java
 +++ b/net/minecraft/world/entity/Mob.java
+@@ -5,6 +_,7 @@
+ import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+ import java.util.ArrayList;
+ import java.util.HashSet;
++import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Objects;
+@@ -56,6 +_,7 @@
+ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+ import net.minecraft.world.entity.ai.navigation.PathNavigation;
+ import net.minecraft.world.entity.ai.sensing.Sensing;
++import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.entity.monster.Enemy;
+ import net.minecraft.world.entity.player.Player;
 @@ -128,7 +_,9 @@
      protected PathNavigation navigation;
      public final GoalSelector goalSelector;
@@ -119,15 +135,49 @@
      }
  
      @Override
-@@ -459,7 +_,7 @@
+@@ -459,16 +_,27 @@
              && this.canPickUpLoot()
              && this.isAlive()
              && !this.dead
 -            && serverLevel.getGameRules().get(GameRules.MOB_GRIEFING)) {
 +            && net.neoforged.neoforge.event.EventHooks.canEntityGrief(serverLevel, this)) {
              Vec3i pickupReach = this.getPickupReach();
++            Iterator<LivingBlock> iterator = this.level()
++                .getEntitiesOfClass(LivingBlock.class, this.getBoundingBox().inflate(pickupReach.getX(), pickupReach.getY(), pickupReach.getZ()))
++                .iterator();
++            while (iterator.hasNext()) {
++                ItemEntity itemEntity = null;
++                LivingBlock entity = iterator.next();
++                if (entity instanceof ItemEntity ie) {
++                    itemEntity = ie;
++                }
  
-             for (LivingBlock entity : this.level()
+-            for (LivingBlock entity : this.level()
+-                .getEntitiesOfClass(LivingBlock.class, this.getBoundingBox().inflate(pickupReach.getX(), pickupReach.getY(), pickupReach.getZ()))) {
+                 if (!entity.isRemoved()
+                     && !entity.isDeadOrDying()
+                     && !entity.getItemStack().isEmpty()
+                     && this.wantsToPickUp(serverLevel, entity.getItemStack())) {
+-                    this.pickUpItem(serverLevel, entity);
++                    if (itemEntity != null) {
++                        this.pickUpItem(serverLevel, itemEntity);
++                    } else {
++                        this.pickUpItem(serverLevel, entity);
++                    }
+                 }
+             }
+         }
+@@ -529,6 +_,10 @@
+         }
+     }
+ 
++    protected void pickUpItem(ServerLevel level, ItemEntity entity) {
++        this.pickUpItem(level, (LivingBlock) entity);
++    }
++
+     public ItemStack equipItemIfPossible(ServerLevel level, ItemStack itemStack) {
+         EquipmentSlot slot = this.getEquipmentSlotForItem(itemStack);
+         if (!this.isEquippableInSlot(itemStack, slot)) {
 @@ -617,6 +_,8 @@
      private double getApproximateAttributeWith(ItemStack itemStack, Holder<Attribute> attribute, EquipmentSlot slot) {
          double baseValue = this.getAttributes().hasAttribute(attribute) ? this.getAttributeBaseValue(attribute) : 0.0;
