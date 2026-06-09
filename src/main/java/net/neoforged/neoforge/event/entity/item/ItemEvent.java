@@ -5,6 +5,7 @@
 
 package net.neoforged.neoforge.event.entity.item;
 
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.neoforged.neoforge.event.entity.EntityEvent;
 
@@ -25,6 +26,20 @@ public abstract class ItemEvent extends EntityEvent {
     public ItemEvent(LivingBlock itemEntity) {
         super(itemEntity);
         this.itemEntity = itemEntity;
+    }
+
+    /**
+     * Creates a new event for an {@link ItemEntity}.
+     * <p>
+     * This overload exists for binary compatibility with mods compiled against
+     * versions where the parameter type was {@link ItemEntity}. In 26w14a,
+     * {@link ItemEntity} extends {@link LivingBlock}, so this safely delegates
+     * to the primary constructor.
+     *
+     * @param itemEntity The ItemEntity for this event
+     */
+    public ItemEvent(ItemEntity itemEntity) {
+        this((LivingBlock) itemEntity);
     }
 
     /**

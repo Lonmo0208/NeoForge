@@ -1,0 +1,25 @@
+--- a/net/minecraft/client/gui/components/debug/DebugEntryVersion.java
++++ b/net/minecraft/client/gui/components/debug/DebugEntryVersion.java
+@@ -1,12 +_,12 @@
+ package net.minecraft.client.gui.components.debug;
+ 
+-import net.minecraft.SharedConstants;
+ import net.minecraft.client.ClientBrandRetriever;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.chunk.LevelChunk;
+ import net.neoforged.api.distmarker.Dist;
+ import net.neoforged.api.distmarker.OnlyIn;
++import net.minecraft.SharedConstants;
+ import org.jspecify.annotations.Nullable;
+ 
+ @OnlyIn(Dist.CLIENT)
+@@ -15,7 +_,7 @@
+     public void display(DebugScreenDisplayer displayer, @Nullable Level level, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
+         displayer.addPriorityLine(
+             "Minecraft "
+-                + SharedConstants.getCurrentVersion().name()
++                + SharedConstants.DISPLAY_NAME
+                 + " ("
+                 + Minecraft.getInstance().getLaunchedVersion()
+                 + "/"

@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/level/storage/LevelVersion.java
++++ b/net/minecraft/world/level/storage/LevelVersion.java
+@@ -27,7 +_,7 @@
+             ? new LevelVersion(
+                 levelDataVersion,
+                 lastPlayed,
+-                version.get("Name").asString(SharedConstants.getCurrentVersion().name()),
++                version.get("Name").asString(SharedConstants.DISPLAY_NAME),
+                 version.get("Id").asInt(SharedConstants.getCurrentVersion().dataVersion().version()),
+                 version.get("Series").asString("main"),
+                 version.get("Snapshot").asBoolean(!SharedConstants.getCurrentVersion().stable())

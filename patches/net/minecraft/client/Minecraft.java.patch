@@ -130,7 +130,7 @@
          return nextStep;
      }
  
-@@ -814,7 +_,7 @@
+@@ -814,11 +_,11 @@
      private String createTitle() {
          StringBuilder builder = new StringBuilder("Minecraft");
          if (checkModStatus().shouldReportAsModified()) {
@@ -139,6 +139,11 @@
          }
  
          builder.append(" ");
+-        builder.append(SharedConstants.getCurrentVersion().name());
++        builder.append(SharedConstants.DISPLAY_NAME);
+         ClientPacketListener connection = this.getConnection();
+         if (connection != null && connection.getConnection().isConnected()) {
+             builder.append(" - ");
 @@ -850,7 +_,7 @@
      }
  

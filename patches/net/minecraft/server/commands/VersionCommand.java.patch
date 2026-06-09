@@ -1,0 +1,35 @@
+--- a/net/minecraft/server/commands/VersionCommand.java
++++ b/net/minecraft/server/commands/VersionCommand.java
+@@ -3,7 +_,6 @@
+ import com.mojang.brigadier.CommandDispatcher;
+ import java.util.function.Consumer;
+ import net.minecraft.SharedConstants;
+-import net.minecraft.WorldVersion;
+ import net.minecraft.commands.CommandSourceStack;
+ import net.minecraft.commands.Commands;
+ import net.minecraft.network.chat.Component;
+@@ -26,15 +_,14 @@
+     }
+ 
+     public static void dumpVersion(Consumer<Component> output) {
+-        WorldVersion version = SharedConstants.getCurrentVersion();
+-        output.accept(Component.translatable("commands.version.id", version.id()));
+-        output.accept(Component.translatable("commands.version.name", version.name()));
+-        output.accept(Component.translatable("commands.version.data", version.dataVersion().version()));
+-        output.accept(Component.translatable("commands.version.series", version.dataVersion().series()));
+-        output.accept(Component.translatable("commands.version.protocol", version.protocolVersion(), "0x" + Integer.toHexString(version.protocolVersion())));
+-        output.accept(Component.translatable("commands.version.build_time", Component.translationArg(version.buildTime())));
+-        output.accept(Component.translatable("commands.version.pack.resource", version.packVersion(PackType.CLIENT_RESOURCES).toString()));
+-        output.accept(Component.translatable("commands.version.pack.data", version.packVersion(PackType.SERVER_DATA).toString()));
+-        output.accept(version.stable() ? STABLE : UNSTABLE);
++        output.accept(Component.translatable("commands.version.id", SharedConstants.getCurrentVersion().id()));
++        output.accept(Component.translatable("commands.version.name", SharedConstants.DISPLAY_NAME));
++        output.accept(Component.translatable("commands.version.data", SharedConstants.getCurrentVersion().dataVersion().version()));
++        output.accept(Component.translatable("commands.version.series", SharedConstants.getCurrentVersion().dataVersion().series()));
++        output.accept(Component.translatable("commands.version.protocol", SharedConstants.getCurrentVersion().protocolVersion(), "0x" + Integer.toHexString(SharedConstants.getCurrentVersion().protocolVersion())));
++        output.accept(Component.translatable("commands.version.build_time", Component.translationArg(SharedConstants.getCurrentVersion().buildTime())));
++        output.accept(Component.translatable("commands.version.pack.resource", SharedConstants.getCurrentVersion().packVersion(PackType.CLIENT_RESOURCES).toString()));
++        output.accept(Component.translatable("commands.version.pack.data", SharedConstants.getCurrentVersion().packVersion(PackType.SERVER_DATA).toString()));
++        output.accept(SharedConstants.getCurrentVersion().stable() ? STABLE : UNSTABLE);
+     }
+ }

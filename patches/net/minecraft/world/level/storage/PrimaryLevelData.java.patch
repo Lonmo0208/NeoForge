@@ -49,6 +49,24 @@
      }
  
      public static void writeLastPlayed(CompoundTag tag) {
+@@ -151,7 +_,7 @@
+ 
+     public static void writeVersionTag(CompoundTag tag) {
+         CompoundTag worldVersion = new CompoundTag();
+-        worldVersion.putString("Name", SharedConstants.getCurrentVersion().name());
++        worldVersion.putString("Name", SharedConstants.DISPLAY_NAME);
+         worldVersion.putInt("Id", SharedConstants.getCurrentVersion().dataVersion().version());
+         worldVersion.putBoolean("Snapshot", !SharedConstants.getCurrentVersion().stable());
+         worldVersion.putString("Series", SharedConstants.getCurrentVersion().dataVersion().series());
+@@ -160,7 +_,7 @@
+ 
+     public static Dynamic<?> writeVersionTag(Dynamic<?> tag) {
+         Dynamic<?> worldVersion = tag.emptyMap()
+-            .set("Name", tag.createString(SharedConstants.getCurrentVersion().name()))
++            .set("Name", tag.createString(SharedConstants.DISPLAY_NAME))
+             .set("Id", tag.createInt(SharedConstants.getCurrentVersion().dataVersion().version()))
+             .set("Snapshot", tag.createBoolean(!SharedConstants.getCurrentVersion().stable()))
+             .set("Series", tag.createString(SharedConstants.getCurrentVersion().dataVersion().series()));
 @@ -320,10 +_,58 @@
          return this.settings.copy();
      }

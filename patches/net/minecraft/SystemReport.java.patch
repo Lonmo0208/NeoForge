@@ -1,0 +1,11 @@
+--- a/net/minecraft/SystemReport.java
++++ b/net/minecraft/SystemReport.java
+@@ -43,7 +_,7 @@
+     private final Map<String, String> entries = Maps.newLinkedHashMap();
+ 
+     public SystemReport() {
+-        this.setDetail("Minecraft Version", SharedConstants.getCurrentVersion().name());
++        this.setDetail("Minecraft Version", SharedConstants.DISPLAY_NAME);
+         this.setDetail("Minecraft Version ID", SharedConstants.getCurrentVersion().id());
+         this.setDetail("Operating System", OPERATING_SYSTEM);
+         this.setDetail("Java Version", JAVA_VERSION);

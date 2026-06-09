@@ -1,6 +1,22 @@
 --- a/net/minecraft/world/level/chunk/ChunkGenerator.java
 +++ b/net/minecraft/world/level/chunk/ChunkGenerator.java
-@@ -94,9 +_,14 @@
+@@ -4,6 +_,7 @@
+ import com.mojang.datafixers.util.Pair;
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.MapCodec;
++import com.mojang.logging.LogUtils;
+ import it.unimi.dsi.fastutil.ints.IntArraySet;
+ import it.unimi.dsi.fastutil.ints.IntSet;
+ import it.unimi.dsi.fastutil.longs.LongSet;
+@@ -80,6 +_,7 @@
+ import org.jspecify.annotations.Nullable;
+ 
+ public abstract class ChunkGenerator {
++    private static final org.slf4j.Logger LOGGER = LogUtils.getLogger();
+     public static final Codec<ChunkGenerator> CODEC = BuiltInRegistries.CHUNK_GENERATOR
+         .byNameCodec()
+         .dispatchStable(ChunkGenerator::codec, Function.identity());
+@@ -94,11 +_,16 @@
      public ChunkGenerator(BiomeSource biomeSource, Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter) {
          this.biomeSource = biomeSource;
          this.generationSettingsGetter = generationSettingsGetter;
@@ -8,11 +24,54 @@
 +        this.featuresPerStep = net.neoforged.neoforge.common.util.Lazy.of(
              () -> FeatureSorter.buildFeaturesPerStep(List.copyOf(biomeSource.possibleBiomes()), b -> generationSettingsGetter.apply(b).features(), true)
          );
-+    }
-+
+     }
+ 
 +    @org.jetbrains.annotations.ApiStatus.Internal
 +    public void refreshFeaturesPerStep() {
 +        ((net.neoforged.neoforge.common.util.Lazy<?>) this.featuresPerStep).invalidate();
-     }
- 
++    }
++
      public void validate() {
+         this.featuresPerStep.get();
+     }
+@@ -571,20 +_,26 @@
+         int references = fetchReferences(structureManager, centerChunk, sectionPos, structure);
+         HolderSet<Biome> biomeAllowedForStructure = structure.biomes();
+         Predicate<Holder<Biome>> biomePredicate = biomeAllowedForStructure::contains;
+-        StructureStart start = structure.generate(
+-            selected.structure(),
+-            level,
+-            registryAccess,
+-            this,
+-            this.biomeSource,
+-            randomState,
+-            structureTemplateManager,
+-            seed,
+-            sourceChunkPos,
+-            references,
+-            centerChunk,
+-            biomePredicate
+-        );
++        StructureStart start;
++        try {
++            start = structure.generate(
++                selected.structure(),
++                level,
++                registryAccess,
++                this,
++                this.biomeSource,
++                randomState,
++                structureTemplateManager,
++                seed,
++                sourceChunkPos,
++                references,
++                centerChunk,
++                biomePredicate
++            );
++        } catch (Throwable e) {
++            LOGGER.warn("Failed to generate structure '{}' at chunk {}: {}. Skipping.", selected.structure(), sourceChunkPos, e.getMessage());
++            return false;
++        }
+         if (start.isValid()) {
+             structureManager.setStartForStructure(sectionPos, structure, start, centerChunk);
+             return true;

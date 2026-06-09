@@ -1,5 +1,42 @@
 --- a/net/minecraft/core/Holder.java
 +++ b/net/minecraft/core/Holder.java
+@@ -1,6 +_,7 @@
+ package net.minecraft.core;
+ 
+ import com.mojang.datafixers.util.Either;
++import com.mojang.logging.LogUtils;
+ import java.util.Collection;
+ import java.util.Objects;
+ import java.util.Optional;
+@@ -12,6 +_,7 @@
+ import net.minecraft.resources.ResourceKey;
+ import net.minecraft.tags.TagKey;
+ import org.jspecify.annotations.Nullable;
++import org.slf4j.Logger;
+ 
+ public interface Holder<T> extends net.neoforged.neoforge.common.extensions.IHolderExtension<T> {
+     T value();
+@@ -128,6 +_,7 @@
+     }
+ 
+     public static class Reference<T> implements Holder<T> {
++        private static final Logger LOGGER = LogUtils.getLogger();
+         private final HolderOwner<T> owner;
+         private @Nullable Set<TagKey<T>> tags;
+         private @Nullable DataComponentMap components;
+@@ -160,9 +_,10 @@
+         }
+ 
+         @Override
+-        public T value() {
++        public @Nullable T value() {
+             if (this.value == null) {
+-                throw new IllegalStateException("Trying to access unbound value '" + this.key + "' from registry " + this.owner);
++                LOGGER.warn("Trying to access unbound value '{}' from registry {}. Returning null.", this.key, this.owner);
++                return null;
+             } else {
+                 return this.value;
+             }
 @@ -247,6 +_,14 @@
              }
          }

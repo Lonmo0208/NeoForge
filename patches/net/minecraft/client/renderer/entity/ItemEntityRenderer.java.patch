@@ -1,18 +1,22 @@
 --- /dev/null
 +++ b/net/minecraft/client/renderer/entity/ItemEntityRenderer.java
-@@ -1,0 +_,34 @@
+@@ -1,0 +_,53 @@
 +package net.minecraft.client.renderer.entity;
 +
 +import com.mojang.blaze3d.vertex.PoseStack;
 +import net.minecraft.client.renderer.SubmitNodeCollector;
++import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
 +import net.minecraft.client.renderer.entity.state.LivingBlockRenderState;
 +import net.minecraft.client.renderer.state.level.CameraRenderState;
++import net.minecraft.util.RandomSource;
++import net.minecraft.world.entity.item.ItemEntity;
 +import net.minecraft.world.entity.livingblock.LivingBlock;
 +import net.neoforged.api.distmarker.Dist;
 +import net.neoforged.api.distmarker.OnlyIn;
 +
 +@OnlyIn(Dist.CLIENT)
 +public class ItemEntityRenderer extends LivingBlockRenderer<LivingBlock> {
++    private final RandomSource random = RandomSource.create();
 +
 +    public ItemEntityRenderer(EntityRendererProvider.Context context) {
 +        super(context);
@@ -25,13 +29,28 @@
 +        return super.createRenderState();
 +    }
 +
++    // Neo: bridge for mod compatibility (itemphysic, etc.)
++    public ItemEntityRenderState createItemEntityRenderState() {
++        return (ItemEntityRenderState) this.createRenderState();
++    }
++
 +    @Override
 +    public void extractRenderState(LivingBlock entity, LivingBlockRenderState state, float partialTicks) {
 +        super.extractRenderState(entity, state, partialTicks);
 +    }
 +
++    // Neo: bridge for mod compatibility (itemphysic, etc.)
++    public void extractRenderState(ItemEntity entity, ItemEntityRenderState state, float partialTicks) {
++        this.extractRenderState((LivingBlock) entity, (LivingBlockRenderState) state, partialTicks);
++    }
++
 +    @Override
 +    public void submit(LivingBlockRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 +        super.submit(state, poseStack, collector, camera);
++    }
++
++    // Neo: bridge for mod compatibility (itemphysic, etc.)
++    public void submit(ItemEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
++        this.submit((LivingBlockRenderState) state, poseStack, collector, camera);
 +    }
 +}

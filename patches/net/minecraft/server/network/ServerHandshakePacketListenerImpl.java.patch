@@ -1,0 +1,14 @@
+--- a/net/minecraft/server/network/ServerHandshakePacketListenerImpl.java
++++ b/net/minecraft/server/network/ServerHandshakePacketListenerImpl.java
+@@ -57,9 +_,9 @@
+         if (packet.protocolVersion() != SharedConstants.getCurrentVersion().protocolVersion()) {
+             Component reason;
+             if (packet.protocolVersion() < 754) {
+-                reason = Component.translatable("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().name());
++                reason = Component.translatable("multiplayer.disconnect.outdated_client", SharedConstants.DISPLAY_NAME);
+             } else {
+-                reason = Component.translatable("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().name());
++                reason = Component.translatable("multiplayer.disconnect.incompatible", SharedConstants.DISPLAY_NAME);
+             }
+ 
+             this.connection.send(new ClientboundLoginDisconnectPacket(reason));

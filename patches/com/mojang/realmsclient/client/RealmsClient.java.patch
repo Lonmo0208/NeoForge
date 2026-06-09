@@ -1,0 +1,27 @@
+--- a/com/mojang/realmsclient/client/RealmsClient.java
++++ b/com/mojang/realmsclient/client/RealmsClient.java
+@@ -30,6 +_,7 @@
+ import com.mojang.realmsclient.dto.RegionSelectionPreference;
+ import com.mojang.realmsclient.dto.RegionSelectionPreferenceDto;
+ import com.mojang.realmsclient.dto.Subscription;
++import net.minecraft.SharedConstants;
+ import com.mojang.realmsclient.dto.UploadInfo;
+ import com.mojang.realmsclient.dto.WorldDownload;
+ import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
+@@ -47,7 +_,6 @@
+ import java.util.UUID;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.stream.Collectors;
+-import net.minecraft.SharedConstants;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.util.LenientJsonParser;
+ import net.minecraft.util.Util;
+@@ -498,7 +_,7 @@
+     private String execute(Request<?> request) throws RealmsServiceException {
+         request.cookie("sid", this.sessionId);
+         request.cookie("user", this.username);
+-        request.cookie("version", SharedConstants.getCurrentVersion().name());
++        request.cookie("version", SharedConstants.DISPLAY_NAME);
+         request.addSnapshotHeader(RealmsMainScreen.isSnapshot());
+ 
+         try {

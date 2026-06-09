@@ -16,6 +16,15 @@
                  BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
  
                  String line;
+@@ -226,7 +_,7 @@
+         consoleThread.setDaemon(true);
+         consoleThread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
+         consoleThread.start();
+-        LOGGER.info("Starting minecraft server version {}", SharedConstants.getCurrentVersion().name());
++        LOGGER.info("Starting minecraft server version {}", SharedConstants.DISPLAY_NAME);
+         if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L) {
+             LOGGER.warn("To start the server with more ram, launch it as \"java -Xmx1024M -Xms1024M -jar minecraft_server.jar\"");
+         }
 @@ -284,11 +_,13 @@
              this.tickTimeLogger = new RemoteSampleLogger(TpsDebugDimensions.values().length, this.debugSubscribers(), RemoteDebugSampleType.TICK_TIME);
              long levelNanoTime = Util.getNanos();

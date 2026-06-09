@@ -1,0 +1,17 @@
+--- a/net/minecraft/client/gui/components/LogoRenderer.java
++++ b/net/minecraft/client/gui/components/LogoRenderer.java
+@@ -9,7 +_,14 @@
+ 
+ @OnlyIn(Dist.CLIENT)
+ public class LogoRenderer {
++    // Neo: Custom herdcraft branding
+     public static final Identifier HERDCRAFT_LOGO = Identifier.withDefaultNamespace("textures/gui/title/herdcraft.png");
++    // Neo: Backward compatibility fields for mods referencing the original LogoRenderer fields
++    public static final Identifier MINECRAFT_LOGO = Identifier.withDefaultNamespace("textures/gui/title/herdcraft.png");
++    public static final Identifier EASTER_EGG_LOGO = Identifier.withDefaultNamespace("textures/gui/title/herdraft.png");
++    public static final Identifier MINECRAFT_EDITION = Identifier.withDefaultNamespace("textures/gui/title/edition.png");
++    public static final int MINECRAFT_LOGO_WIDTH = 256;
++    public static final int MINECRAFT_LOGO_HEIGHT = 44;
+     public static final int LOGO_WIDTH = 358;
+     public static final int LOGO_HEIGHT = 105;
+     public static final int DEFAULT_HEIGHT_OFFSET = 1;

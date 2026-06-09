@@ -1,11 +1,23 @@
 --- a/net/minecraft/core/MappedRegistry.java
 +++ b/net/minecraft/core/MappedRegistry.java
-@@ -30,7 +_,7 @@
+@@ -3,6 +_,7 @@
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.Iterators;
+ import com.google.common.collect.ImmutableMap.Builder;
++import com.mojang.logging.LogUtils;
+ import com.mojang.serialization.Lifecycle;
+ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+ import it.unimi.dsi.fastutil.objects.ObjectList;
+@@ -28,9 +_,11 @@
+ import net.minecraft.tags.TagLoader;
+ import net.minecraft.util.RandomSource;
  import net.minecraft.util.Util;
++import org.slf4j.Logger;
  import org.jspecify.annotations.Nullable;
  
 -public class MappedRegistry<T> implements WritableRegistry<T> {
 +public class MappedRegistry<T> extends net.neoforged.neoforge.registries.BaseMappedRegistry<T> implements WritableRegistry<T> {
++    private static final Logger LOGGER = LogUtils.getLogger();
      private final ResourceKey<? extends Registry<T>> key;
      private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<>(256);
      private final Reference2IntMap<T> toId = Util.make(new Reference2IntOpenHashMap<>(), t -> t.defaultReturnValue(-1));
@@ -121,24 +133,69 @@
              List<Identifier> unboundEntries = this.byKey
                  .entrySet()
                  .stream()
-@@ -291,11 +_,15 @@
-                         throw new IllegalStateException("Some intrusive holders were not registered: " + this.unregisteredIntrusiveHolders.values());
-                     }
+@@ -284,34 +_,38 @@
+                 .sorted()
+                 .toList();
+             if (!unboundEntries.isEmpty()) {
+-                throw new IllegalStateException("Unbound values in registry " + this.key() + ": " + unboundEntries);
+-            } else {
+-                if (this.unregisteredIntrusiveHolders != null) {
+-                    if (!this.unregisteredIntrusiveHolders.isEmpty()) {
+-                        throw new IllegalStateException("Some intrusive holders were not registered: " + this.unregisteredIntrusiveHolders.values());
+-                    }
++                LOGGER.warn("Unbound values in registry {}: {}. The game will attempt to continue, but some features may not work correctly.", this.key(), unboundEntries);
++            }
  
 -                    this.unregisteredIntrusiveHolders = null;
-+                    // Neo: We freeze/unfreeze vanilla registries more than once, so we need to keep the unregistered intrusive holders map around.
-+                    // this.unregisteredIntrusiveHolders = null;
++            if (this.unregisteredIntrusiveHolders != null) {
++                if (!this.unregisteredIntrusiveHolders.isEmpty()) {
++                    throw new IllegalStateException("Some intrusive holders were not registered: " + this.unregisteredIntrusiveHolders.values());
                  }
-+                this.bakeCallbacks.forEach(bakeCallback -> bakeCallback.onBake(this));
  
-                 if (this.allTags.isBound()) {
+-                if (this.allTags.isBound()) {
 -                    throw new IllegalStateException("Tags already present before freezing");
-+                    // Neo: we freeze/unfreeze the registry to apply snapshots and tags need to be preserved in those cases
-+                    //throw new IllegalStateException("Tags already present before freezing");
-+                    return this;
++                // Neo: We freeze/unfreeze vanilla registries more than once, so we need to keep the unregistered intrusive holders map around.
++                // this.unregisteredIntrusiveHolders = null;
++            }
++            this.bakeCallbacks.forEach(bakeCallback -> bakeCallback.onBake(this));
++
++            if (this.allTags.isBound()) {
++                // Neo: we freeze/unfreeze the registry to apply snapshots and tags need to be preserved in those cases
++                //throw new IllegalStateException("Tags already present before freezing");
++                return this;
++            } else {
++                List<Identifier> unboundTags = this.frozenTags
++                    .entrySet()
++                    .stream()
++                    .filter(e -> !e.getValue().isBound())
++                    .map(e -> e.getKey().location())
++                    .sorted()
++                    .toList();
++                if (!unboundTags.isEmpty()) {
++                    throw new IllegalStateException("Unbound tags in registry " + this.key() + ": " + unboundTags);
                  } else {
-                     List<Identifier> unboundTags = this.frozenTags
-                         .entrySet()
+-                    List<Identifier> unboundTags = this.frozenTags
+-                        .entrySet()
+-                        .stream()
+-                        .filter(e -> !e.getValue().isBound())
+-                        .map(e -> e.getKey().location())
+-                        .sorted()
+-                        .toList();
+-                    if (!unboundTags.isEmpty()) {
+-                        throw new IllegalStateException("Unbound tags in registry " + this.key() + ": " + unboundTags);
+-                    } else {
+-                        this.componentLookup = new DataComponentLookup<>(this.byId);
+-                        this.allTags = MappedRegistry.TagSet.fromMap(this.frozenTags);
+-                        this.refreshTagsInHolders();
+-                        return this;
+-                    }
++                    this.componentLookup = new DataComponentLookup<>(this.byId);
++                    this.allTags = MappedRegistry.TagSet.fromMap(this.frozenTags);
++                    this.refreshTagsInHolders();
++                    return this;
+                 }
+             }
+         }
 @@ -452,6 +_,12 @@
                      return patchedHolder;
                  }

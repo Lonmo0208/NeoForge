@@ -24,7 +24,7 @@
              }
          );
          DispenserBlock.registerBehavior(Items.OAK_BOAT, new BoatDispenseItemBehavior(EntityType.OAK_BOAT));
-@@ -140,20 +_,30 @@
+@@ -140,19 +_,40 @@
          DispenserBlock.registerBehavior(Items.PALE_OAK_CHEST_BOAT, new BoatDispenseItemBehavior(EntityType.PALE_OAK_CHEST_BOAT));
          DispenserBlock.registerBehavior(Items.BAMBOO_CHEST_RAFT, new BoatDispenseItemBehavior(EntityType.BAMBOO_CHEST_RAFT));
          DispenseItemBehavior filledBucketBehavior = new DefaultDispenseItemBehavior() {
@@ -36,8 +36,10 @@
 +                }
 +            };
  
++            // Neo: real logic in BlockSource version for mixin compatibility
              @Override
-             public ItemStack execute(DispenseSource source, ItemStack dispensed) {
+-            public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++            public ItemStack execute(BlockSource source, ItemStack dispensed) {
                  DispensibleContainerItem bucket = (DispensibleContainerItem)dispensed.getItem();
                  BlockPos target = source.pos().relative(source.direction());
                  Level level = source.level();
@@ -46,29 +48,71 @@
                      bucket.checkExtraContent(null, level, dispensed, target);
                      return this.consumeWithRemainder(source, dispensed, new ItemStack(Items.BUCKET));
                  } else {
-                     return this.defaultDispenseItemBehavior.dispense(source, dispensed);
+-                    return this.defaultDispenseItemBehavior.dispense(source, dispensed);
++                    return this.defaultDispenseItemBehavior.dispense((DispenseSource) source, dispensed);
                  }
-             }
++            }
 +
 +            @Override
-+            public ItemStack execute(BlockSource source, ItemStack stack) {
-+                return this.execute((DispenseSource) source, stack);
++            public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++                return this.execute((BlockSource) source, dispensed);
 +            }
++
++            @Override
++            public ItemStack consumeWithRemainder(DispenseSource source, ItemStack stack, ItemStack remainer) {
++                return super.consumeWithRemainder(source, stack, remainer);
++            }
++
++            // Neo: bridge for BlockSource variant (not an override)
++            public ItemStack consumeWithRemainder(BlockSource source, ItemStack stack, ItemStack remainer) {
++                return this.consumeWithRemainder((DispenseSource) source, stack, remainer);
+             }
          };
          DispenserBlock.registerBehavior(Items.LAVA_BUCKET, filledBucketBehavior);
-         DispenserBlock.registerBehavior(Items.WATER_BUCKET, filledBucketBehavior);
-@@ -183,6 +_,11 @@
-                     return super.execute(source, dispensed);
+@@ -165,23 +_,40 @@
+         DispenserBlock.registerBehavior(Items.AXOLOTL_BUCKET, filledBucketBehavior);
+         DispenserBlock.registerBehavior(Items.TADPOLE_BUCKET, filledBucketBehavior);
+         DispenserBlock.registerBehavior(Items.BUCKET, new DefaultDispenseItemBehavior() {
++            // Neo: real logic in BlockSource version for mixin compatibility
+             @Override
+-            public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++            public ItemStack execute(BlockSource source, ItemStack dispensed) {
+                 LevelAccessor level = source.level();
+                 BlockPos target = source.pos().relative(source.direction());
+                 BlockState blockState = level.getBlockState(target);
+                 if (blockState.getBlock() instanceof BucketPickup bucket) {
+                     ItemStack pickup = bucket.pickupBlock(null, level, target, blockState);
+                     if (pickup.isEmpty()) {
+-                        return super.execute(source, dispensed);
++                        return super.execute((DispenseSource) source, dispensed);
+                     } else {
+                         level.gameEvent(null, GameEvent.FLUID_PICKUP, target);
+                         Item targetType = pickup.getItem();
+                         return this.consumeWithRemainder(source, dispensed, new ItemStack(targetType));
+                     }
+                 } else {
+-                    return super.execute(source, dispensed);
++                    return super.execute((DispenseSource) source, dispensed);
                  }
-             }
++            }
 +
 +            @Override
-+            public ItemStack execute(BlockSource source, ItemStack stack) {
-+                return this.execute((DispenseSource) source, stack);
++            public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++                return this.execute((BlockSource) source, dispensed);
 +            }
++
++            // Neo: Bridge for mod compatibility
++            @Override
++            public ItemStack consumeWithRemainder(DispenseSource source, ItemStack stack, ItemStack remainer) {
++                return super.consumeWithRemainder(source, stack, remainer);
++            }
++
++            // Neo: bridge for BlockSource variant (not an override)
++            public ItemStack consumeWithRemainder(BlockSource source, ItemStack stack, ItemStack remainer) {
++                return this.consumeWithRemainder((DispenseSource) source, stack, remainer);
+             }
          });
          DispenserBlock.registerBehavior(Items.FLINT_AND_STEEL, new OptionalDispenseItemBehavior() {
-             @Override
 @@ -195,11 +_,12 @@
                  if (BaseFireBlock.canBePlacedAt(level, targetPos, facing)) {
                      level.setBlockAndUpdate(targetPos, BaseFireBlock.getState(level, targetPos));
@@ -146,18 +190,50 @@
          });
          ShulkerBoxDispenseBehavior shulkerBoxDispenseBehavior = new ShulkerBoxDispenseBehavior();
          DispenserBlock.registerBehavior(Items.SHULKER_BOX, shulkerBoxDispenseBehavior);
-@@ -345,6 +_,11 @@
-                         return super.execute(source, dispensed);
-                     }
+@@ -321,13 +_,15 @@
+         DispenserBlock.registerBehavior(
+             Items.GLASS_BOTTLE,
+             new OptionalDispenseItemBehavior() {
+-                private ItemStack takeLiquid(DispenseSource source, ItemStack dispensed, ItemStack filledItemStack) {
++                // Neo: take BlockSource for call from execute(BlockSource, ...)
++                private ItemStack takeLiquid(BlockSource source, ItemStack dispensed, ItemStack filledItemStack) {
+                     source.level().gameEvent(null, GameEvent.FLUID_PICKUP, source.pos());
+                     return this.consumeWithRemainder(source, dispensed, filledItemStack);
                  }
+ 
++                // Neo: real logic in BlockSource version for mixin compatibility
+                 @Override
+-                public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++                public ItemStack execute(BlockSource source, ItemStack dispensed) {
+                     this.setSuccess(false);
+                     ServerLevel level = source.level();
+                     BlockPos target = source.pos().relative(source.direction());
+@@ -342,8 +_,24 @@
+                         this.setSuccess(true);
+                         return this.takeLiquid(source, dispensed, PotionContents.createItemStack(Items.POTION, Potions.WATER));
+                     } else {
+-                        return super.execute(source, dispensed);
++                        return super.execute((DispenseSource) source, dispensed);
+                     }
++                }
 +
 +                @Override
-+                public ItemStack execute(BlockSource source, ItemStack stack) {
-+                    return this.execute((DispenseSource) source, stack);
++                public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++                    return this.execute((BlockSource) source, dispensed);
 +                }
++
++                // Neo: Bridge for mod compatibility
++                @Override
++                public ItemStack consumeWithRemainder(DispenseSource source, ItemStack stack, ItemStack remainer) {
++                    return super.consumeWithRemainder(source, stack, remainer);
++                }
++
++                // Neo: bridge for BlockSource variant (not an override)
++                public ItemStack consumeWithRemainder(BlockSource source, ItemStack stack, ItemStack remainer) {
++                    return this.consumeWithRemainder((DispenseSource) source, stack, remainer);
+                 }
              }
          );
-         DispenserBlock.registerBehavior(Items.GLOWSTONE, new OptionalDispenseItemBehavior() {
 @@ -368,6 +_,11 @@
                      return super.execute(source, dispensed);
                  }
@@ -182,7 +258,7 @@
          });
          DispenserBlock.registerBehavior(Items.HONEYCOMB, new OptionalDispenseItemBehavior() {
              @Override
-@@ -409,11 +_,21 @@
+@@ -409,23 +_,34 @@
                      return super.execute(source, dispensed);
                  }
              }
@@ -203,17 +279,44 @@
 +                    }
 +                };
  
++                // Neo: real logic in BlockSource version for mixin compatibility
                  @Override
-                 public ItemStack execute(DispenseSource source, ItemStack dispensed) {
-@@ -451,6 +_,11 @@
+-                public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++                public ItemStack execute(BlockSource source, ItemStack dispensed) {
+                     PotionContents potion = dispensed.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+                     if (!potion.is(Potions.WATER)) {
+-                        return this.defaultDispenseItemBehavior.dispense(source, dispensed);
++                        return this.defaultDispenseItemBehavior.dispense((DispenseSource) source, dispensed);
+                     } else {
+                         ServerLevel level = source.level();
+                         BlockPos pos = source.pos();
+                         BlockPos target = source.pos().relative(source.direction());
+                         if (!level.getBlockState(target).is(BlockTags.CONVERTABLE_TO_MUD)) {
+-                            return this.defaultDispenseItemBehavior.dispense(source, dispensed);
++                            return this.defaultDispenseItemBehavior.dispense((DispenseSource) source, dispensed);
+                         } else {
+                             if (!level.isClientSide()) {
+                                 RandomSource random = level.getRandom();
+@@ -451,6 +_,22 @@
                              return this.consumeWithRemainder(source, dispensed, new ItemStack(Items.GLASS_BOTTLE));
                          }
                      }
 +                }
 +
 +                @Override
-+                public ItemStack execute(BlockSource source, ItemStack stack) {
-+                    return this.execute((DispenseSource) source, stack);
++                public ItemStack execute(DispenseSource source, ItemStack dispensed) {
++                    return this.execute((BlockSource) source, dispensed);
++                }
++
++                // Neo: Bridge for mod compatibility
++                @Override
++                public ItemStack consumeWithRemainder(DispenseSource source, ItemStack stack, ItemStack remainer) {
++                    return super.consumeWithRemainder(source, stack, remainer);
++                }
++
++                // Neo: bridge for BlockSource variant (not an override)
++                public ItemStack consumeWithRemainder(BlockSource source, ItemStack stack, ItemStack remainer) {
++                    return this.consumeWithRemainder((DispenseSource) source, stack, remainer);
                  }
              }
          );

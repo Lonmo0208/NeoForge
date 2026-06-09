@@ -1,18 +1,22 @@
 --- a/net/minecraft/DetectedVersion.java
 +++ b/net/minecraft/DetectedVersion.java
-@@ -19,6 +_,19 @@
+@@ -19,6 +_,23 @@
      private static final Logger LOGGER = LogUtils.getLogger();
      public static final WorldVersion BUILT_IN = createBuiltIn(UUID.randomUUID().toString().replaceAll("-", ""), "Development Version");
  
 +    /**
-+     * Converts a snapshot version string (e.g. "26w14a") to a numeric representation (e.g. "26.14.0")
-+     * for use as the internal id(). The name() method returns the original snapshot string for display.
++     * Converts a snapshot version string (e.g. "26w14a") to a purely numeric version string
++     * (e.g. "26.1.14") for use as the internal id(). The snapshot's week number is used as
++     * the patch version. This ensures mods like VersionResolver that use Integer.parseInt on
++     * version components don't crash on non-numeric snapshot identifiers.
++     * The name() method returns "26.1.2" for mod compatibility, while in-game displays use
++     * DISPLAY_NAME ("26w14a").
 +     */
 +    private static String snapshotToNumeric(String version) {
 +        if (version != null && version.matches("\\d+w\\d+[a-z]")) {
 +            String year = version.replaceAll("w\\d+[a-z].*", "");
-+            String week = version.replaceAll("\\d+w", "").replaceAll("[a-z].*", "");
-+            return year + "." + week + ".0";
++            String weekNum = version.replaceAll(".*w(\\d+).*", "$1");
++            return year + ".1." + weekNum;
 +        }
 +        return version;
 +    }
@@ -29,8 +33,8 @@
          return new WorldVersion.Simple(
 -            GsonHelper.getAsString(root, "id"),
 -            GsonHelper.getAsString(root, "name"),
-+            snapshotToNumeric(rawId),  // id() → "26.14.0" (internal identifier, must be numeric)
-+            rawName,                    // name() → "26w14a" (display name for F3, window title, etc.)
++            snapshotToNumeric(rawId),
++            "26.1.2 Comp " + rawName,
              new DataVersion(GsonHelper.getAsInt(root, "world_version"), GsonHelper.getAsString(root, "series_id", "main")),
              GsonHelper.getAsInt(root, "protocol_version"),
              PackFormat.of(GsonHelper.getAsInt(packVersion, "resource_major"), GsonHelper.getAsInt(packVersion, "resource_minor")),

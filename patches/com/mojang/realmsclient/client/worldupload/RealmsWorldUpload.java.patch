@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/client/worldupload/RealmsWorldUpload.java
++++ b/com/mojang/realmsclient/client/worldupload/RealmsWorldUpload.java
+@@ -59,7 +_,7 @@
+                             this.realmsSlot.slotId,
+                             uploadInfo,
+                             this.user,
+-                            SharedConstants.getCurrentVersion().name(),
++                            SharedConstants.DISPLAY_NAME,
+                             this.realmsSlot.options.version,
+                             this.statusCallback.getUploadStatus()
+                         )) {

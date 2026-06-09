@@ -16,7 +16,13 @@
          OptionSpec<String> versionOption = parser.accepts("version").withRequiredArg().required();
          OptionSpec<Integer> widthOption = parser.accepts("width").withRequiredArg().ofType(Integer.class).defaultsTo(854);
          OptionSpec<Integer> heightOption = parser.accepts("height").withRequiredArg().ofType(Integer.class).defaultsTo(480);
-@@ -114,10 +_,12 @@
+@@ -109,15 +_,17 @@
+             GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS, totalTimePreClassLoadTimer);
+             GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS, preWindowPreClassLoadTimer);
+             SharedConstants.tryDetectVersion();
+-            TracyClient.reportAppInfo("Minecraft Java Edition " + SharedConstants.getCurrentVersion().name());
++            TracyClient.reportAppInfo("Minecraft Java Edition " + SharedConstants.DISPLAY_NAME);
+             CompletableFuture<?> dataFixerOptimization = DataFixers.optimize(DataFixTypes.TYPES_FOR_LEVEL_LIST);
              CrashReport.preload();
              logger = LogUtils.getLogger();
              stage = "Bootstrap";

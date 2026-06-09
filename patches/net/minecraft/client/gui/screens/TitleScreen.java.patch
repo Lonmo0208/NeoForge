@@ -28,13 +28,19 @@
                      .build()
              );
          }
-@@ -296,6 +_,7 @@
+@@ -296,11 +_,12 @@
          this.extractPanorama(graphics, a);
          super.extractRenderState(graphics, mouseX, mouseY, a);
          this.logoRenderer.extractRenderState(graphics, this.width, this.logoRenderer.keepLogoThroughFade() ? 1.0F : widgetFade);
 +        net.neoforged.neoforge.client.ClientHooks.renderMainMenu(this, graphics, this.font, this.width, this.height, ARGB.as8BitChannel(widgetFade));
          if (this.splash != null && !this.minecraft.options.hideSplashTexts().get()) {
              this.splash.extractRenderState(graphics, this.width, this.font, widgetFade);
+         }
+ 
+-        String versionString = "Minecraft " + SharedConstants.getCurrentVersion().name();
++        String versionString = "Minecraft " + SharedConstants.DISPLAY_NAME;
+         if (this.minecraft.isDemo()) {
+             versionString = versionString + " Demo";
          }
 @@ -309,7 +_,13 @@
              versionString = versionString + I18n.get("menu.modded");

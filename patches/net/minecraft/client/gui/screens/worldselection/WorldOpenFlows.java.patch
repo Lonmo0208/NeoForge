@@ -1,5 +1,15 @@
 --- a/net/minecraft/client/gui/screens/worldselection/WorldOpenFlows.java
 +++ b/net/minecraft/client/gui/screens/worldselection/WorldOpenFlows.java
+@@ -16,8 +_,8 @@
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.CrashReport;
+ import net.minecraft.CrashReportCategory;
+-import net.minecraft.ReportedException;
+ import net.minecraft.SharedConstants;
++import net.minecraft.ReportedException;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.gui.components.toasts.SystemToast;
+ import net.minecraft.client.gui.screens.AlertScreen;
 @@ -255,7 +_,9 @@
              backupWarning = Component.translatable("selectWorld.backupWarning.customized");
          } else {
@@ -19,6 +29,15 @@
          } catch (NbtException | ReportedNbtException | IOException var10) {
              this.minecraft.setScreen(new RecoverWorldDataScreen(this.minecraft, success -> {
                  if (success) {
+@@ -362,7 +_,7 @@
+                     backupQuestion.withColor(-2142128);
+                 }
+ 
+-                Component backupWarning = Component.translatable(warningKey, summary.getWorldVersionName(), SharedConstants.getCurrentVersion().name());
++                Component backupWarning = Component.translatable(warningKey, summary.getWorldVersionName(), SharedConstants.DISPLAY_NAME);
+                 this.minecraft.setScreen(new BackupConfirmScreen(() -> {
+                     worldAccess.safeClose();
+                     onCancel.run();
 @@ -518,11 +_,20 @@
          WorldData data = worldDataAndGenSettings.data();
          boolean oldCustomized = worldDataAndGenSettings.genSettings().options().isOldCustomizedWorld();

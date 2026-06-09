@@ -1,0 +1,38 @@
+--- a/com/mojang/realmsclient/RealmsMainScreen.java
++++ b/com/mojang/realmsclient/RealmsMainScreen.java
+@@ -562,7 +_,7 @@
+     public void extractRenderState(GuiGraphicsExtractor graphics, int xm, int ym, float a) {
+         super.extractRenderState(graphics, xm, ym, a);
+         if (isSnapshot()) {
+-            graphics.text(this.font, "Minecraft " + SharedConstants.getCurrentVersion().name(), 2, this.height - 10, -1);
++            graphics.text(this.font, "Minecraft " + SharedConstants.DISPLAY_NAME, 2, this.height - 10, -1);
+         }
+ 
+         if (this.trialsAvailable && this.addRealmButton.active) {
+@@ -614,7 +_,7 @@
+                         Component.translatable(
+                             "mco.compatibility.downgrade.description",
+                             Component.literal(server.activeVersion).withColor(-171),
+-                            Component.literal(SharedConstants.getCurrentVersion().name()).withColor(-171)
++                            Component.literal(SharedConstants.DISPLAY_NAME).withColor(-171)
+                         ),
+                         Component.translatable("mco.compatibility.downgrade")
+                     );
+@@ -630,7 +_,7 @@
+                                     Component.translatable(
+                                         "mco.compatibility.incompatible.series.popup.message",
+                                         Component.literal(server.activeVersion).withColor(-171),
+-                                        Component.literal(SharedConstants.getCurrentVersion().name()).withColor(-171)
++                                        Component.literal(SharedConstants.DISPLAY_NAME).withColor(-171)
+                                     )
+                                 )
+                                 .addButton(CommonComponents.GUI_BACK, PopupScreen::onClose)
+@@ -660,7 +_,7 @@
+         Component title = Component.translatable("mco.compatibility.upgrade.title").withColor(-171);
+         Component confirmButton = Component.translatable("mco.compatibility.upgrade");
+         Component serverVersion = Component.literal(server.activeVersion).withColor(-171);
+-        Component clientVersion = Component.literal(SharedConstants.getCurrentVersion().name()).withColor(-171);
++        Component clientVersion = Component.literal(SharedConstants.DISPLAY_NAME).withColor(-171);
+         Component message = isSelfOwnedServer(server)
+             ? Component.translatable("mco.compatibility.upgrade.description", serverVersion, clientVersion)
+             : Component.translatable("mco.compatibility.upgrade.friend.description", serverVersion, clientVersion);

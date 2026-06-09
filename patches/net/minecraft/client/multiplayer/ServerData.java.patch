@@ -1,6 +1,14 @@
 --- a/net/minecraft/client/multiplayer/ServerData.java
 +++ b/net/minecraft/client/multiplayer/ServerData.java
-@@ -36,6 +_,7 @@
+@@ -29,13 +_,14 @@
+     public ServerStatus.@Nullable Players players;
+     public long ping;
+     public int protocol = SharedConstants.getCurrentVersion().protocolVersion();
+-    public Component version = Component.literal(SharedConstants.getCurrentVersion().name());
++    public Component version = Component.literal(SharedConstants.DISPLAY_NAME);
+     public List<Component> playerList = Collections.emptyList();
+     private ServerData.ServerPackStatus packStatus = ServerData.ServerPackStatus.PROMPT;
+     private byte @Nullable [] iconBytes;
      private ServerData.Type type;
      private int acceptedCodeOfConduct;
      private ServerData.State state = ServerData.State.INITIAL;

@@ -1,5 +1,14 @@
 --- a/net/minecraft/resources/RegistryLoadTask.java
 +++ b/net/minecraft/resources/RegistryLoadTask.java
+@@ -1,6 +_,8 @@
+ package net.minecraft.resources;
+ 
++import com.google.gson.JsonArray;
+ import com.google.gson.JsonElement;
++import com.google.gson.JsonObject;
+ import com.mojang.datafixers.util.Either;
+ import com.mojang.serialization.DataResult;
+ import com.mojang.serialization.Decoder;
 @@ -27,6 +_,9 @@
  import net.minecraft.util.StrictJsonParser;
  
@@ -38,7 +47,39 @@
              );
              this.elementsRegistered = true;
          }
-@@ -105,7 +_,20 @@
+@@ -97,6 +_,31 @@
+         }
+     }
+ 
++    // Neo: Attempt to fix template pool JSON by replacing versioned_single_pool_element with
++    // single_pool_element when the versioned element's class fails to load (e.g. in snapshot versions).
++    // This allows template pools with a default "location" fallback to work even when the version
++    // resolver mod is incompatible with the current Minecraft version.
++    private static JsonElement tryFixVersionedPoolElements(JsonElement json) {
++        if (json instanceof JsonObject obj && obj.has("elements")) {
++            JsonArray elements = obj.getAsJsonArray("elements");
++            boolean modified = false;
++            for (int i = 0; i < elements.size(); i++) {
++                JsonObject entry = elements.get(i).getAsJsonObject();
++                if (entry.has("element")) {
++                    JsonObject inner = entry.getAsJsonObject("element");
++                    if (inner.has("element_type")
++                        && "moogs_structures:versioned_single_pool_element".equals(inner.get("element_type").getAsString())) {
++                        inner.addProperty("element_type", "minecraft:single_pool_element");
++                        inner.remove("locations");
++                        modified = true;
++                    }
++                }
++            }
++            return modified ? json : null;
++        }
++        return null;
++    }
++
+     protected record PendingRegistration<T>(ResourceKey<T> key, Either<T, Exception> value, RegistrationInfo registrationInfo) {
+         public static <T> Either<T, Exception> loadFromResource(
+             Decoder<T> elementDecoder, RegistryOps<JsonElement> ops, ResourceKey<T> elementKey, Resource thunk
+@@ -105,7 +_,36 @@
                  Either var6;
                  try (Reader reader = thunk.openAsReader()) {
                      JsonElement json = StrictJsonParser.parse(reader);
@@ -49,8 +90,21 @@
 +                    java.util.Optional<T> candidate;
 +                    try {
 +                        candidate = conditionalDecoder.parse(ops, json).getOrThrow();
-+                    } catch (LinkageError e) {
++                    } catch (LinkageError | StackOverflowError e) {
 +                        // Neo: Skip registry entries whose referenced mod classes fail to load (e.g. mod using Integer.parseInt on snapshot version string)
++                        // Try to fix versioned_single_pool_element -> single_pool_element as a graceful fallback
++                        JsonElement fixedJson = tryFixVersionedPoolElements(json);
++                        if (fixedJson != null) {
++                            try {
++                                candidate = conditionalDecoder.parse(ops, fixedJson).getOrThrow();
++                            } catch (Exception retryEx) {
++                                candidate = Optional.empty();
++                            }
++                            if (candidate != null && candidate.isPresent()) {
++                                var6 = Either.left(candidate.get());
++                                return var6;
++                            }
++                        }
 +                        LOGGER.error("Skipping registry entry due to mod incompatibility: {}", e.getMessage());
 +                        var6 = Either.right(SKIPPED_ELEMENT_MARKER);
 +                        return var6;

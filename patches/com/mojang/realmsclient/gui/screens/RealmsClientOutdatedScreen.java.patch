@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/gui/screens/RealmsClientOutdatedScreen.java
++++ b/com/mojang/realmsclient/gui/screens/RealmsClientOutdatedScreen.java
+@@ -14,7 +_,7 @@
+ @OnlyIn(Dist.CLIENT)
+ public class RealmsClientOutdatedScreen extends RealmsScreen {
+     private static final Component INCOMPATIBLE_TITLE = Component.translatable("mco.client.incompatible.title").withColor(-65536);
+-    private static final Component INCOMPATIBLE_CLIENT_VERSION = Component.literal(SharedConstants.getCurrentVersion().name()).withColor(-65536);
++    private static final Component INCOMPATIBLE_CLIENT_VERSION = Component.literal(SharedConstants.DISPLAY_NAME).withColor(-65536);
+     private static final Component UNSUPPORTED_SNAPSHOT_VERSION = Component.translatable("mco.client.unsupported.snapshot.version", INCOMPATIBLE_CLIENT_VERSION);
+     private static final Component OUTDATED_STABLE_VERSION = Component.translatable("mco.client.outdated.stable.version", INCOMPATIBLE_CLIENT_VERSION);
+     private final Screen lastScreen;

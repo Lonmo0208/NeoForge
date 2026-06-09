@@ -1,0 +1,38 @@
+--- a/net/minecraft/server/commands/ItemCommands.java
++++ b/net/minecraft/server/commands/ItemCommands.java
+@@ -78,7 +_,7 @@
+                                                                         c.getSource(),
+                                                                         BlockPosArgument.getLoadedBlockPos(c, "pos"),
+                                                                         SlotArgument.getSlot(c, "slot"),
+-                                                                        ItemArgument.getItem(c, "item").createItemStack(1)
++                                                                        ItemArgument.getItem(c, "item").createItemStack(1, false)
+                                                                     )
+                                                                 )
+                                                                 .then(
+@@ -89,7 +_,7 @@
+                                                                                 BlockPosArgument.getLoadedBlockPos(c, "pos"),
+                                                                                 SlotArgument.getSlot(c, "slot"),
+                                                                                 ItemArgument.getItem(c, "item")
+-                                                                                    .createItemStack(IntegerArgumentType.getInteger(c, "count"))
++                                                                                    .createItemStack(IntegerArgumentType.getInteger(c, "count"), false)
+                                                                             )
+                                                                         )
+                                                                 )
+@@ -178,7 +_,7 @@
+                                                                         c.getSource(),
+                                                                         EntityArgument.getEntities(c, "targets"),
+                                                                         SlotArgument.getSlot(c, "slot"),
+-                                                                        ItemArgument.getItem(c, "item").createItemStack(1)
++                                                                        ItemArgument.getItem(c, "item").createItemStack(1, false)
+                                                                     )
+                                                                 )
+                                                                 .then(
+@@ -189,7 +_,7 @@
+                                                                                 EntityArgument.getEntities(c, "targets"),
+                                                                                 SlotArgument.getSlot(c, "slot"),
+                                                                                 ItemArgument.getItem(c, "item")
+-                                                                                    .createItemStack(IntegerArgumentType.getInteger(c, "count"))
++                                                                                    .createItemStack(IntegerArgumentType.getInteger(c, "count"), false)
+                                                                             )
+                                                                         )
+                                                                 )

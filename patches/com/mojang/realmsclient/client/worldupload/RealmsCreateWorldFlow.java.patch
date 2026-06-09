@@ -1,0 +1,11 @@
+--- a/com/mojang/realmsclient/client/worldupload/RealmsCreateWorldFlow.java
++++ b/com/mojang/realmsclient/client/worldupload/RealmsCreateWorldFlow.java
+@@ -55,7 +_,7 @@
+                 }
+ 
+                 RealmsWorldOptions realmsWorldOptions = RealmsWorldOptions.createFromSettings(
+-                    worldDataAndGenSettings.data().getLevelSettings(), SharedConstants.getCurrentVersion().name()
++                    worldDataAndGenSettings.data().getLevelSettings(), SharedConstants.DISPLAY_NAME
+                 );
+                 RealmsSlot realmsSlot = new RealmsSlot(
+                     slot, realmsWorldOptions, List.of(RealmsSetting.hardcoreSetting(worldDataAndGenSettings.data().isHardcore()))

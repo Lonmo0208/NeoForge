@@ -35,7 +35,7 @@ public class BrandingControl {
     private static void computeBranding() {
         if (brandings == null) {
             ImmutableList.Builder<String> brd = ImmutableList.builder();
-            brd.add("Minecraft " + SharedConstants.getCurrentVersion().name());
+            brd.add("Minecraft " + SharedConstants.DISPLAY_NAME);
             int modCount = ModList.get().size();
             brd.add(FMLTranslations.parseMessage("fml.menu.branding", BRANDING_NAME + ' ' + NeoForgeVersion.getVersion(), modCount));
             brandings = brd.build();

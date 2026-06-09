@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/commands/GiveCommand.java
++++ b/net/minecraft/server/commands/GiveCommand.java
+@@ -44,7 +_,7 @@
+     }
+ 
+     private static int giveItem(CommandSourceStack source, ItemInput input, Collection<ServerPlayer> players, int count) throws CommandSyntaxException {
+-        ItemStack prototypeItemStack = input.createItemStack(1);
++        ItemStack prototypeItemStack = input.createItemStack(1, false);
+         int maxStackSize = prototypeItemStack.getMaxStackSize();
+         int maxAllowedCount = maxStackSize * 100;
+         if (count > maxAllowedCount) {

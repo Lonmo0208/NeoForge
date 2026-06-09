@@ -1,0 +1,25 @@
+--- a/net/minecraft/commands/arguments/item/ItemInput.java
++++ b/net/minecraft/commands/arguments/item/ItemInput.java
+@@ -18,13 +_,15 @@
+         error -> Component.translatableEscape("arguments.item.malformed", error)
+     );
+ 
+-    public ItemStack createItemStack(int count) throws CommandSyntaxException {
+-        ItemStack result = new ItemStack(this.item, count, this.components);
+-        if (count > result.getMaxStackSize()) {
+-            throw ERROR_STACK_TOO_BIG.create(this.item.getRegisteredName(), result.getMaxStackSize());
+-        } else {
+-            DataResult<ItemStack> validationResult = ItemStack.validateStrict(result);
+-            return validationResult.getOrThrow(ERROR_MALFORMED_ITEM::create);
++    public ItemStack createItemStack(int count, boolean allowOversizedStacks) throws CommandSyntaxException {
++        if (!allowOversizedStacks) {
++            ItemStack result = new ItemStack(this.item, count, this.components);
++            if (count > result.getMaxStackSize()) {
++                throw ERROR_STACK_TOO_BIG.create(this.item.getRegisteredName(), result.getMaxStackSize());
++            }
+         }
++        ItemStack result = new ItemStack(this.item, count, this.components);
++        DataResult<ItemStack> validationResult = ItemStack.validateStrict(result);
++        return validationResult.getOrThrow(ERROR_MALFORMED_ITEM::create);
+     }
+ }

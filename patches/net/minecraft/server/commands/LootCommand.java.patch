@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/commands/LootCommand.java
++++ b/net/minecraft/server/commands/LootCommand.java
+@@ -79,7 +_,7 @@
+                                                             c,
+                                                             ResourceOrIdArgument.getLootTable(c, "loot_table"),
+                                                             BlockPosArgument.getLoadedBlockPos(c, "pos"),
+-                                                            ItemArgument.getItem(c, "tool").createItemStack(1),
++                                                            ItemArgument.getItem(c, "tool").createItemStack(1, false),
+                                                             output
+                                                         )
+                                                     )
+@@ -134,7 +_,7 @@
+                                         Commands.argument("tool", ItemArgument.item(context))
+                                             .executes(
+                                                 c -> dropBlockLoot(
+-                                                    c, BlockPosArgument.getLoadedBlockPos(c, "pos"), ItemArgument.getItem(c, "tool").createItemStack(1), output
++                                                    c, BlockPosArgument.getLoadedBlockPos(c, "pos"), ItemArgument.getItem(c, "tool").createItemStack(1, false), output
+                                                 )
+                                             )
+                                     )

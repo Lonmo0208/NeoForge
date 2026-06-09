@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/level/ServerEntityGetter.java
++++ b/net/minecraft/server/level/ServerEntityGetter.java
+@@ -30,7 +_,7 @@
+         return this.getNearestEntity(this.players(), targetConditions, null, x, y, z);
+     }
+ 
+-    default <T extends Entity & Targetable> @Nullable T getNearestEntity(
++    default <T extends LivingEntity> @Nullable T getNearestEntity(
+         Class<? extends T> type, TargetingConditions targetConditions, @Nullable LivingEntity source, double x, double y, double z, AABB bb
+     ) {
+         return this.getNearestEntity(this.getEntitiesOfClass(type, bb, entity -> true), targetConditions, source, x, y, z);
+@@ -126,7 +_,7 @@
+         return foundPlayers;
+     }
+ 
+-    default <T extends Entity & Targetable> List<T> getNearbyEntities(Class<T> type, TargetingConditions targetConditions, LivingEntity source, AABB bb) {
++    default <T extends LivingEntity> List<T> getNearbyEntities(Class<T> type, TargetingConditions targetConditions, LivingEntity source, AABB bb) {
+         List<T> nearby = this.getEntitiesOfClass(type, bb, entityx -> true);
+         List<T> entities = new ArrayList<>();
+ 

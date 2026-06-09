@@ -192,6 +192,15 @@
          ProfilerFiller profiler = Profiler.get();
          profiler.push("timeSync");
          this.playerList.broadcastAll(new ClientboundSetTimePacket(this.overworld().getGameTime(), Map.of()));
+@@ -1210,7 +_,7 @@
+ 
+     @Override
+     public String getServerVersion() {
+-        return SharedConstants.getCurrentVersion().name();
++        return SharedConstants.DISPLAY_NAME;
+     }
+ 
+     @Override
 @@ -1223,7 +_,7 @@
      }
  

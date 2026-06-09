@@ -1,5 +1,22 @@
 --- a/net/minecraft/world/entity/ai/sensing/Sensor.java
 +++ b/net/minecraft/world/entity/ai/sensing/Sensor.java
+@@ -47,7 +_,15 @@
+         if (--this.timeToTick <= 0L) {
+             this.timeToTick = this.scanRate;
+             this.updateTargetingConditionRanges(body);
+-            this.doTick(level, body);
++            try {
++                this.doTick(level, body);
++            } catch (AbstractMethodError error) {
++                // Neo: Backward compatibility for mods compiled against 26.1.2
++                // In 26.1.2: Sensor<E extends LivingEntity>, so doTick erased to (ServerLevel, LivingEntity)
++                // In 26w14a: Sensor<E extends Entity & Targetable>, so doTick erases to (ServerLevel, Entity)
++                // Mods compiled against 26.1.2 don't override the new abstract method → AbstractMethodError
++                // Catch it gracefully so the game doesn't crash
++            }
+         }
+     }
+ 
 @@ -67,14 +_,22 @@
  
      public abstract Set<MemoryModuleType<?>> requires();

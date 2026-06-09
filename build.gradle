@@ -19,12 +19,12 @@ if (fixedProjectVersion == null) {
         ext.isPreReleaseVersion = true
         // Match the manual snapshot release suffix (e.g. -alpha.M+snapshot-N) with M=0 and a suffixed .<timestamp>
         // Separate out the -snapshot-N or -rc-N suffix
-        final preReleaseSuffix = project.minecraft_version.split("-", 2)[1]
-        project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.0+${preReleaseSuffix}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
+        //final preReleaseSuffix = project.minecraft_version.split("-", 2)[1]
+        //project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.0+${preReleaseSuffix}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
     } else {
         def fullVersion = gradleutils.version.toString()
         def suffixIndex = fullVersion.lastIndexOf('2.')
-        def suffix = suffixIndex > 3 ? fullVersion.substring(suffixIndex) : ".3"
+        def suffix = suffixIndex > 3 ? fullVersion.substring(suffixIndex) : ".4"
         project.version = project.neoforge_snapshot_next_stable + suffix
     }
 } else {

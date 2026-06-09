@@ -1,0 +1,11 @@
+--- a/net/minecraft/util/profiling/jfr/JfrProfiler.java
++++ b/net/minecraft/util/profiling/jfr/JfrProfiler.java
+@@ -187,7 +_,7 @@
+                         self.setDumpOnExit(true);
+                         self.setToDisk(true);
+                         self.setName(
+-                            String.format(Locale.ROOT, "%s-%s-%s", environment.getDescription(), SharedConstants.getCurrentVersion().name(), startTimestamp)
++                            String.format(Locale.ROOT, "%s-%s-%s", environment.getDescription(), SharedConstants.DISPLAY_NAME, startTimestamp)
+                         );
+                     }
+                 );

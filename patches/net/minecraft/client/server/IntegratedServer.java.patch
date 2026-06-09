@@ -1,7 +1,11 @@
 --- a/net/minecraft/client/server/IntegratedServer.java
 +++ b/net/minecraft/client/server/IntegratedServer.java
-@@ -98,11 +_,13 @@
-         LOGGER.info("Starting integrated minecraft server version {}", SharedConstants.getCurrentVersion().name());
+@@ -95,14 +_,16 @@
+ 
+     @Override
+     protected boolean initServer() {
+-        LOGGER.info("Starting integrated minecraft server version {}", SharedConstants.getCurrentVersion().name());
++        LOGGER.info("Starting integrated minecraft server version {}", SharedConstants.DISPLAY_NAME);
          this.setUsesAuthentication(true);
          this.initializeKeyPair();
 +        net.neoforged.neoforge.server.ServerLifecycleHooks.handleServerAboutToStart(this);
