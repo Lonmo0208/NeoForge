@@ -215,16 +215,16 @@
 +                this.damageContainers.peek().setReduction(net.neoforged.neoforge.common.damagesource.DamageContainer.Reduction.INVULNERABILITY, this.lastHurt);
                  this.actuallyHurt(level, source, damage - this.lastHurt);
 -                this.lastHurt = damage;
-+                // Vanilla updates lastHurt to the local var `damage`, but we throw an event in actuallyHurt that might mess with the damage.
-+                // Also, since we're in the "damage while invuln is active" block, we need to make sure we don't reduce the lastHurt amount.
-+                this.lastHurt = java.lang.Math.max(this.lastHurt, this.damageContainers.peek().getInflictedDamage());
++                // lastHurt, in both blocks, needs to always be set to the value of `damage` since it is pre-reduction. Using a post reduction value invalidates iframes.
++                // Since we're in the "damage while invuln is active" block, we need to make sure we don't reduce the lastHurt amount.
++                this.lastHurt = java.lang.Math.max(this.lastHurt, damage);
 +                this.invulnerableTime = this.damageContainers.peek().getPostAttackInvulnerabilityTicks();
                  tookFullDamage = false;
              } else {
 -                this.lastHurt = damage;
 -                this.invulnerableTime = 20;
                  this.actuallyHurt(level, source, damage);
-+                this.lastHurt = this.damageContainers.peek().getInflictedDamage();
++                this.lastHurt = damage;
 +                this.invulnerableTime = this.damageContainers.peek().getPostAttackInvulnerabilityTicks();
                  this.hurtDuration = 10;
                  this.hurtTime = this.hurtDuration;
