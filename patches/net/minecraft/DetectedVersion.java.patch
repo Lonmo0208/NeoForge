@@ -1,0 +1,49 @@
+--- a/net/minecraft/DetectedVersion.java
++++ b/net/minecraft/DetectedVersion.java
+@@ -19,6 +_,19 @@
+     private static final Logger LOGGER = LogUtils.getLogger();
+     public static final WorldVersion BUILT_IN = createBuiltIn(UUID.randomUUID().toString().replaceAll("-", ""), "Development Version");
+ 
++    /**
++     * Converts a snapshot version string (e.g. "26w14a") to a numeric representation (e.g. "26.14.0")
++     * for use as the internal id(). The name() method returns the original snapshot string for display.
++     */
++    private static String snapshotToNumeric(String version) {
++        if (version != null && version.matches("\\d+w\\d+[a-z]")) {
++            String year = version.replaceAll("w\\d+[a-z].*", "");
++            String week = version.replaceAll("\\d+w", "").replaceAll("[a-z].*", "");
++            return year + "." + week + ".0";
++        }
++        return version;
++    }
++
+     public static WorldVersion createBuiltIn(String id, String name) {
+         return createBuiltIn(id, name, false);
+     }
+@@ -31,9 +_,11 @@
+ 
+     private static WorldVersion createFromJson(JsonObject root) {
+         JsonObject packVersion = GsonHelper.getAsJsonObject(root, "pack_version");
++        String rawName = GsonHelper.getAsString(root, "name");
++        String rawId = GsonHelper.getAsString(root, "id");
+         return new WorldVersion.Simple(
+-            GsonHelper.getAsString(root, "id"),
+-            GsonHelper.getAsString(root, "name"),
++            snapshotToNumeric(rawId),  // id() → "26.14.0" (internal identifier, must be numeric)
++            rawName,                    // name() → "26w14a" (display name for F3, window title, etc.)
+             new DataVersion(GsonHelper.getAsInt(root, "world_version"), GsonHelper.getAsString(root, "series_id", "main")),
+             GsonHelper.getAsInt(root, "protocol_version"),
+             PackFormat.of(GsonHelper.getAsInt(packVersion, "resource_major"), GsonHelper.getAsInt(packVersion, "resource_minor")),
+@@ -51,12 +_,10 @@
+                     LOGGER.warn("Missing version information!");
+                     return BUILT_IN;
+                 }
+-
+                 try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                     var2 = createFromJson(GsonHelper.parse(reader));
+                 }
+             }
+-
+             return var2;
+         } catch (JsonParseException | IOException var8) {
+             throw new IllegalStateException("Game version information is corrupt", var8);
