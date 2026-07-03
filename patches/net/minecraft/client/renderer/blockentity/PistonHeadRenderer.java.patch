@@ -1,12 +1,22 @@
 --- a/net/minecraft/client/renderer/blockentity/PistonHeadRenderer.java
 +++ b/net/minecraft/client/renderer/blockentity/PistonHeadRenderer.java
-@@ -91,4 +_,9 @@
+@@ -79,7 +_,7 @@
+     private static MovingBlockRenderState createMovingBlock(BlockPos pos, BlockState blockState, Holder<Biome> biome, ClientLevel level) {
+         MovingBlockRenderState movingBlockRenderState = new MovingBlockRenderState();
+         movingBlockRenderState.randomSeedPos = pos;
+-        movingBlockRenderState.pos = new Vec3(pos);
++        movingBlockRenderState.blockPos = pos;
+         movingBlockRenderState.blockState = blockState;
+         movingBlockRenderState.biome = biome;
+         movingBlockRenderState.cardinalLighting = level.cardinalLighting();
+@@ -90,5 +_,10 @@
+     @Override
      public int getViewDistance() {
          return 68;
-     }
++    }
 +
 +    @Override
 +    public net.minecraft.world.phys.AABB getRenderBoundingBox(PistonMovingBlockEntity blockEntity) {
 +        return net.minecraft.world.phys.AABB.INFINITE;
-+    }
+     }
  }

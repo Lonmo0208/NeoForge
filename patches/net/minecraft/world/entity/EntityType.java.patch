@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/EntityType.java
 +++ b/net/minecraft/world/entity/EntityType.java
+@@ -84,6 +_,7 @@
+ import net.minecraft.world.entity.decoration.Mannequin;
+ import net.minecraft.world.entity.decoration.painting.Painting;
+ import net.minecraft.world.entity.item.FallingBlockEntity;
++import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.item.PrimedTnt;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.entity.monster.Blaze;
 @@ -194,1037 +_,1045 @@
      private static final float MAGIC_HORSE_WIDTH = 1.3964844F;
      private static final int DISPLAY_TRACKING_RANGE = 10;
@@ -171,14 +179,14 @@
 +                    .clientTrackingRange(10)
 +                    .updateInterval(3)
 +    );
-+    public static final EntityType<LivingBlock> ITEM = register(
++    public static final EntityType<ItemEntity> ITEM = register(
 +            "item",
-+            EntityType.Builder.of(LivingBlock.class, LivingBlock::new, MobCategory.MISC)
++            EntityType.Builder.of(ItemEntity.class, ItemEntity::new, MobCategory.MISC)
 +                    .noLootTable()
-+                    .sized(0.98F, 0.98F)
-+                    .eyeHeight(0.15F)
-+                    .clientTrackingRange(10)
-+                    .updateInterval(3)
++                    .sized(0.25F, 0.25F)
++                    .eyeHeight(0.2125F)
++                    .clientTrackingRange(6)
++                    .updateInterval(20)
      );
      public static final EntityType<Bogged> BOGGED = register(
 -        "bogged",

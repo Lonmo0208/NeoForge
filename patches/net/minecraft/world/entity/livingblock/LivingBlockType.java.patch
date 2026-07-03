@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/livingblock/LivingBlockType.java
++++ b/net/minecraft/world/entity/livingblock/LivingBlockType.java
+@@ -6,6 +_,7 @@
+ import java.util.function.UnaryOperator;
+ import net.minecraft.world.entity.EntitySpawnReason;
+ import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.livingblock.behavior.LivingBlockBehaviorEntry;
+ import net.minecraft.world.entity.livingblock.behavior.LivingBlockBehaviorType;
+ import net.minecraft.world.entity.livingblock.hurt.OnHurt;
+@@ -64,14 +_,10 @@
+     }
+ 
+     public @Nullable LivingBlock create(Level level, ItemStack itemStack) {
+-        LivingBlock entity = EntityType.LIVING_BLOCK.create(level, EntitySpawnReason.NATURAL);
+-        if (entity == null) {
+-            return null;
+-        } else {
+-            entity.setFireImmune(this.fireImmune);
+-            entity.setItemStack(itemStack);
+-            return entity;
+-        }
++        LivingBlock entity = new ItemEntity(EntityType.LIVING_BLOCK, level);
++        entity.setFireImmune(this.fireImmune);
++        entity.setItemStack(itemStack);
++        return entity;
+     }
+ 
+     public CollisionInteraction getCollision() {

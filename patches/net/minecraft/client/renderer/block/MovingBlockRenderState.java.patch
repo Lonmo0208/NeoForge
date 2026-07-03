@@ -1,6 +1,12 @@
 --- a/net/minecraft/client/renderer/block/MovingBlockRenderState.java
 +++ b/net/minecraft/client/renderer/block/MovingBlockRenderState.java
-@@ -23,6 +_,7 @@
+@@ -18,11 +_,12 @@
+ @OnlyIn(Dist.CLIENT)
+ public class MovingBlockRenderState implements BlockAndTintGetter {
+     public BlockPos randomSeedPos = BlockPos.ZERO;
+-    public Vec3 pos = Vec3.ZERO;
++    public BlockPos blockPos = BlockPos.ZERO;
+     public BlockState blockState = Blocks.AIR.defaultBlockState();
      public @Nullable Holder<Biome> biome;
      public CardinalLighting cardinalLighting = CardinalLighting.DEFAULT;
      public LevelLightEngine lightEngine = LevelLightEngine.EMPTY;
@@ -8,14 +14,25 @@
  
      @Override
      public CardinalLighting cardinalLighting() {
-@@ -62,5 +_,10 @@
+@@ -46,7 +_,7 @@
+ 
+     @Override
+     public BlockState getBlockState(BlockPos pos) {
+-        return pos.getX() == this.pos.x() && pos.getY() == this.pos.y() && pos.getZ() == this.pos.z() ? this.blockState : Blocks.AIR.defaultBlockState();
++        return pos.equals(this.blockPos) ? this.blockState : Blocks.AIR.defaultBlockState();
+     }
+ 
+     @Override
+@@ -61,6 +_,11 @@
+ 
      @Override
      public int getMinY() {
-         return (int)this.pos.y();
+-        return (int)this.pos.y();
++        return this.blockPos.getY();
 +    }
 +
 +    @Override
 +    public net.neoforged.neoforge.model.data.ModelData getModelData(BlockPos pos) {
-+        return pos.equals(this.pos) ? this.modelData : net.neoforged.neoforge.model.data.ModelData.EMPTY;
++        return pos.equals(this.blockPos) ? this.modelData : net.neoforged.neoforge.model.data.ModelData.EMPTY;
      }
  }
