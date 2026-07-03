@@ -1,0 +1,13 @@
+--- a/net/minecraft/world/item/CommandActionItem.java
++++ b/net/minecraft/world/item/CommandActionItem.java
+@@ -68,10 +_,6 @@
+         List<LivingBlock> livingBlockEntities = serverPlayer.getCommandedBlocks();
+ 
+         for (LivingBlock livingBlock : livingBlockEntities) {
+-            if (livingBlock.isSelected() && livingBlock.getGroup() == LivingBlockGroup.NONE) {
+-                livingBlock.setOwner(null);
+-            }
+-
+             livingBlock.setCommander(serverPlayer);
+             livingBlock.setSelected(false);
+             livingBlock.removeLeash();

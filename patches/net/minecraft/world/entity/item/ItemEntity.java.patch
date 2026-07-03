@@ -1,13 +1,13 @@
 --- /dev/null
 +++ b/net/minecraft/world/entity/item/ItemEntity.java
-@@ -1,0 +_,396 @@
+@@ -1,0 +_,393 @@
 +package net.minecraft.world.entity.item;
 +
 +public class ItemEntity extends net.minecraft.world.entity.livingblock.LivingBlock implements net.minecraft.world.entity.TraceableEntity {
 +
 +    private static final float FLOAT_HEIGHT = 0.1F;
 +    public static final float EYE_HEIGHT = 0.2125F;
-+    private static final int LIFETIME = 6000;
++    private static final int LIFETIME = Integer.MAX_VALUE;
 +    private static final int INFINITE_PICKUP_DELAY = 32767;
 +    private static final int INFINITE_LIFETIME = -32768;
 +    public static final int DEFAULT_HEALTH = 5;
@@ -19,7 +19,7 @@
 +    private net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.Entity> thrower;
 +    private java.util.UUID target;
 +    public final float bobOffs = this.random.nextFloat() * (float) Math.PI * 2.0F;
-+    public int lifespan = ItemEntity.LIFETIME;
++    public int lifespan = Integer.MAX_VALUE;
 +
 +    public ItemEntity(net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.livingblock.LivingBlock> type, net.minecraft.world.level.Level level) {
 +        super(type, level);
@@ -31,7 +31,6 @@
 +        this.setPos(x, y, z);
 +        this.setItem(itemStack);
 +        this.setDeltaMovement(this.random.nextDouble() * 0.2 - 0.1, 0.2, this.random.nextDouble() * 0.2 - 0.1);
-+        this.lifespan = (itemStack.getItem() == null ? LIFETIME : itemStack.getEntityLifespan(level));
 +    }
 +
 +    public ItemEntity(net.minecraft.world.level.Level level, double x, double y, double z, net.minecraft.world.item.ItemStack itemStack, double deltaX, double deltaY, double deltaZ) {
@@ -39,7 +38,6 @@
 +        this.setPos(x, y, z);
 +        this.setItem(itemStack);
 +        this.setDeltaMovement(deltaX, deltaY, deltaZ);
-+        this.lifespan = (itemStack.getItem() == null ? LIFETIME : itemStack.getEntityLifespan(level));
 +    }
 +
 +    @Override
@@ -184,8 +182,7 @@
 +    }
 +
 +    private boolean isMergable() {
-+        net.minecraft.world.item.ItemStack item = this.getItem();
-+        return this.isAlive() && this.pickupDelay != 32767 && this.age != -32768 && this.age < 6000 && item.getCount() < item.getMaxStackSize();
++        return false;
 +    }
 +
 +    private void tryToMerge(ItemEntity other) {

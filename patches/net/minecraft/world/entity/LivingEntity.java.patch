@@ -112,10 +112,20 @@
              if (this.level().isClientSide()) {
                  this.swing(InteractionHand.MAIN_HAND);
              } else {
-@@ -781,6 +_,70 @@
-         }
-     }
- 
+@@ -775,9 +_,77 @@
+                             livingBlock.setOwner(serverPlayer);
+                             livingBlock.setSelected(true);
+                         }
++                    } else if (this instanceof ServerPlayer serverPlayer) {
++                        for (LivingBlock livingBlock : stack) {
++                            livingBlock.setOwner(serverPlayer);
++                        }
+                     }
+                 }
+             }
++        }
++    }
++
 +    @SuppressWarnings({"unchecked", "rawtypes"})
 +    private net.minecraft.world.entity.item.ItemEntity createItemStackToDrop(ItemStack itemStack, boolean randomly, boolean thrownFromHand) {
 +        if (itemStack.isEmpty()) {
@@ -177,12 +187,9 @@
 +        Entity thrower = entity.getOwner();
 +        if (thrower instanceof ServerPlayer serverPlayer) {
 +            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger(serverPlayer, entity.getItem(), this);
-+        }
-+    }
-+
-     @Override
-     protected void readAdditionalSaveData(ValueInput input) {
-         this.internalSetAbsorptionAmount(input.getFloatOr("AbsorptionAmount", 0.0F));
+         }
+     }
+ 
 @@ -842,8 +_,10 @@
                      Holder<MobEffect> mobEffect = iterator.next();
                      MobEffectInstance effect = this.activeEffects.get(mobEffect);
