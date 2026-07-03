@@ -60,6 +60,7 @@
   "entity.minecraft.living_block": "活體方塊",
   "entity.minecraft.living_block_command": "活體方塊指令",
   "entity.minecraft.punch_action": "揍",
+  "gamerule.minecraft.pick_up_item": "允許玩家潛行時，右鍵拾取活化方塊，中鍵複製活化方塊",
   "inventory.place_grid": "使用「合成」動作放置合成方格",
   "item.minecraft.attack_action": "攻擊／挖掘",
   "item.minecraft.build_action": "建造",
@@ -79,6 +80,5 @@
   "living_blocks.group.purple": "紫色",
   "living_blocks.group.red": "紅色",
   "living_blocks.group.yellow": "黃色",
-  "player.commanded_blocks.no_blocks_in_area": "所選群組在此區域不包含任何方塊",
-  "gamerule.minecraft.pick_up_item": "允許玩家潛行時，右鍵拾取活化方塊，中鍵複製活化方塊"
+  "player.commanded_blocks.no_blocks_in_area": "所選群組在此區域不包含任何方塊"
 }

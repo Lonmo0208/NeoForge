@@ -60,6 +60,7 @@
   "entity.minecraft.living_block": "살아있는 블록",
   "entity.minecraft.living_block_command": "살아있는 블록 명령",
   "entity.minecraft.punch_action": "때리기",
+  "gamerule.minecraft.pick_up_item": "웅크린 상태에서 우클릭 또는 중간 클릭으로 드롭된 아이템을 줍거나 복제할 수 있도록 허용",
   "inventory.place_grid": "제작 행동을 사용해 제작 그리드를 설치하세요",
   "item.minecraft.attack_action": "공격 / 채굴",
   "item.minecraft.build_action": "건축",
@@ -79,6 +80,5 @@
   "living_blocks.group.purple": "보라색",
   "living_blocks.group.red": "빨간색",
   "living_blocks.group.yellow": "노란색",
-  "player.commanded_blocks.no_blocks_in_area": "선택한 그룹에 이 지역에 블록이 없습니다",
-  "gamerule.minecraft.pick_up_item": "웅크린 상태에서 우클릭 또는 중간 클릭으로 드롭된 아이템을 줍거나 복제할 수 있도록 허용"
+  "player.commanded_blocks.no_blocks_in_area": "선택한 그룹에 이 지역에 블록이 없습니다"
 }

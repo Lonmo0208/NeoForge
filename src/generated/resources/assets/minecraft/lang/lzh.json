@@ -60,6 +60,7 @@
   "entity.minecraft.living_block": "活塊",
   "entity.minecraft.living_block_command": "活塊之令",
   "entity.minecraft.punch_action": "擊",
+  "gamerule.minecraft.pick_up_item": "蹲行時，按右鍵拾活化之塊，按中鍵複製之",
   "inventory.place_grid": "施「製」以辟製陣",
   "item.minecraft.attack_action": "伐掘",
   "item.minecraft.build_action": "築",
@@ -79,6 +80,5 @@
   "living_blocks.group.purple": "紫",
   "living_blocks.group.red": "赤",
   "living_blocks.group.yellow": "黃",
-  "player.commanded_blocks.no_blocks_in_area": "所选之阵，此域无块",
-  "gamerule.minecraft.pick_up_item": "蹲行時，按右鍵拾活化之塊，按中鍵複製之"
+  "player.commanded_blocks.no_blocks_in_area": "所选之阵，此域无块"
 }

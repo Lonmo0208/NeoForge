@@ -78,6 +78,17 @@ import net.neoforged.neoforge.common.data.internal.NeoForgeRecipeProvider;
 import net.neoforged.neoforge.common.data.internal.NeoForgeRegistryOrderReportProvider;
 import net.neoforged.neoforge.common.data.internal.NeoForgeStructureTagsProvider;
 import net.neoforged.neoforge.common.data.internal.VanillaSoundDefinitionsProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftEnUdLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftEnUsLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftEnpLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftHeIlLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftJaJpLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftKoKrLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftLzhLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftRuRuLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftZhCnLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftZhHkLanguageProvider;
+import net.neoforged.neoforge.common.data.internal.language.NeoForgeMinecraftZhTwLanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.DefaultDataComponentsBoundEvent;
 import net.neoforged.neoforge.internal.BrandingControl;
@@ -180,6 +191,17 @@ public class ClientNeoForgeMod {
         event.createProvider(VanillaModelProvider::new);
         event.createProvider(VanillaSoundDefinitionsProvider::new);
         event.createProvider(NeoForgeLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftEnUsLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftEnUdLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftZhCnLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftZhTwLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftZhHkLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftJaJpLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftKoKrLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftRuRuLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftEnpLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftLzhLanguageProvider::new);
+        event.createProvider(NeoForgeMinecraftHeIlLanguageProvider::new);
     }
 
     @SubscribeEvent

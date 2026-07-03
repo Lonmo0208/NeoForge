@@ -60,6 +60,7 @@
   "entity.minecraft.living_block": "Живой блок",
   "entity.minecraft.living_block_command": "Живой командный блок",
   "entity.minecraft.punch_action": "Ударить",
+  "gamerule.minecraft.pick_up_item": "Позволяет подбирать и копировать выброшенные предметы правым или средним кликом во время крадучись",
   "inventory.place_grid": "Используй действие Крафт, чтобы разместить сетку крафта",
   "item.minecraft.attack_action": "Атаковать / Копать",
   "item.minecraft.build_action": "Строить",
@@ -79,6 +80,5 @@
   "living_blocks.group.purple": "Фиолетовая",
   "living_blocks.group.red": "Красная",
   "living_blocks.group.yellow": "Жёлтая",
-  "player.commanded_blocks.no_blocks_in_area": "Выбранная группа не содержит блоков в этой области",
-  "gamerule.minecraft.pick_up_item": "Позволяет подбирать и копировать выброшенные предметы правым или средним кликом во время крадучись"
+  "player.commanded_blocks.no_blocks_in_area": "Выбранная группа не содержит блоков в этой области"
 }

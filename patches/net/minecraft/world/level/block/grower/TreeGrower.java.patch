@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/level/block/grower/TreeGrower.java
 +++ b/net/minecraft/world/level/block/grower/TreeGrower.java
+@@ -23,7 +_,7 @@
+ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+ import org.jspecify.annotations.Nullable;
+ 
+-public sealed class TreeGrower permits LivingBlockTreeGrower {
++public class TreeGrower {
+     private static final Map<String, TreeGrower> GROWERS = new Object2ObjectArrayMap<>();
+     public static final Codec<TreeGrower> CODEC = Codec.stringResolver(g -> g.name, GROWERS::get);
+     public static final TreeGrower OAK = new TreeGrower(
 @@ -131,6 +_,9 @@
                  .lookupOrThrow(Registries.CONFIGURED_FEATURE)
                  .get(megaFeatureKey)

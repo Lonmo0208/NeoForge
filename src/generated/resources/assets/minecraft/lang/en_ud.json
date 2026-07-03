@@ -60,6 +60,7 @@
   "entity.minecraft.living_block": "ʞɔoꞁᗺ ᵷuᴉʌᴉꞀ",
   "entity.minecraft.living_block_command": "puɐɯɯoƆ ʞɔoꞁᗺ ᵷuᴉʌᴉꞀ",
   "entity.minecraft.punch_action": "ɥɔunԀ",
+  "gamerule.minecraft.pick_up_item": "sʞuᴉɐǝls ǝɹᴉɥʍ ʞɔᴉꞁɔ-ǝlppᴉɯ ɹo ʞɔᴉꞁɔ-ʇɥɵɹ ɥʇᴉʍ sɯǝʇᴉ pǝddoɹd ʎuᴉdoɔ puɐ dn ƃuᴉʞɔᴉԀ sʍoꞁꞁⱯ",
   "inventory.place_grid": "pᴉɹᵷ ᵷuᴉʇɟɐɹɔ ɐ ǝɔɐꞁd oʇ uoᴉʇɔɐ ʇɟɐɹƆ ǝɥʇ ǝs∩",
   "item.minecraft.attack_action": "ǝuᴉW / ʞɔɐʇʇⱯ",
   "item.minecraft.build_action": "pꞁᴉnᗺ",
@@ -79,6 +80,5 @@
   "living_blocks.group.purple": "ǝꞁdɹnԀ",
   "living_blocks.group.red": "pǝᴚ",
   "living_blocks.group.yellow": "ʍoꞁꞁǝ⅄",
-  "player.commanded_blocks.no_blocks_in_area": "ɐǝɹɐ ǝɥʇ uᴉ sʞɔoꞁq ou suᴉɐʇuoɔ dunoɹɓ pǝʇɔǝꞁǝS",
-  "gamerule.minecraft.pick_up_item": "sʞuᴉɐǝls ǝɹᴉɥʍ ʞɔᴉꞁɔ-ǝlppᴉɯ ɹo ʞɔᴉꞁɔ-ʇɥɵɹ ɥʇᴉʍ sɯǝʇᴉ pǝddoɹp ʎuᴉdoɔ puɐ dn ƃuᴉʞɔᴉԀ sʍoꞁꞁⱯ"
+  "player.commanded_blocks.no_blocks_in_area": "ɐǝɹɐ ǝɥʇ uᴉ sʞɔoꞁq ou suᴉɐʇuoɔ dunoɹɓ pǝʇɔǝꞁǝS"
 }

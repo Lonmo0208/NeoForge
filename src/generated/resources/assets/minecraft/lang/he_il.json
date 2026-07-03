@@ -60,6 +60,7 @@
   "entity.minecraft.living_block": "בלוק חי",
   "entity.minecraft.living_block_command": "בלוק פקודה חי",
   "entity.minecraft.punch_action": "להרביץ",
+  "gamerule.minecraft.pick_up_item": "מאפשר לאסוף ולהעתיק פריטים מושלכים באמצעות לחיצה ימנית או אמצעית תוך כדי כריעה",
   "inventory.place_grid": "השתמש בפעולת יצירה כדי להציב רשת יצירה",
   "item.minecraft.attack_action": "לחצוב / לתקוף",
   "item.minecraft.build_action": "לבנות",
@@ -79,6 +80,5 @@
   "living_blocks.group.purple": "סגול",
   "living_blocks.group.red": "אדום",
   "living_blocks.group.yellow": "צהוב",
-  "player.commanded_blocks.no_blocks_in_area": "הקבוצה הנבחרת אינה מכילה בלוקים באזור זה",
-  "gamerule.minecraft.pick_up_item": "מאפשר לאסוף ולהעתיק פריטים מושלכים באמצעות לחיצה ימנית או אמצעית תוך כדי כריעה"
+  "player.commanded_blocks.no_blocks_in_area": "הקבוצה הנבחרת אינה מכילה בלוקים באזור זה"
 }

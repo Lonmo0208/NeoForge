@@ -50,6 +50,7 @@
   "entity.minecraft.living_block": "Living Clot",
   "entity.minecraft.living_block_command": "Living Clot Hest",
   "entity.minecraft.punch_action": "Hit",
+  "gamerule.minecraft.pick_up_item": "Allows ye to be pickin' up and copyin' dropped loot with right-click or middle-click while sneakin', arrr!",
   "inventory.place_grid": "Brook the Craft deed to stow a crafting layout",
   "item.minecraft.attack_action": "Strike / Delve",
   "item.minecraft.build_action": "Build",
@@ -69,6 +70,5 @@
   "living_blocks.group.purple": "Purple",
   "living_blocks.group.red": "Red",
   "living_blocks.group.yellow": "Yellow",
-  "player.commanded_blocks.no_blocks_in_area": "Selected group contains no blocks in the area",
-  "gamerule.minecraft.pick_up_item": "Allows ye to be pickin' up and copyin' dropped loot with right-click or middle-click while sneakin', arrr!"
+  "player.commanded_blocks.no_blocks_in_area": "Selected group contains no blocks in the area"
 }
