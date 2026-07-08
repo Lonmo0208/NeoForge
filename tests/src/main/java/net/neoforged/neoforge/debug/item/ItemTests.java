@@ -81,6 +81,13 @@ public class ItemTests {
                 .withLang("Cow bucket");
         test.framework().modEventBus().addListener((final FMLCommonSetupEvent event) -> {
             DispenserBlock.registerBehavior(cowBucket, new DefaultDispenseItemBehavior() {
+                private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior() {
+                    @Override
+                    public ItemStack execute(BlockSource source, ItemStack stack) {
+                        return super.execute((DispenseSource) source, stack);
+                    }
+                };
+
                 @Override
                 public ItemStack execute(DispenseSource source, ItemStack stack) {
                     DispensibleContainerItem dispensiblecontaineritem = (DispensibleContainerItem) stack.getItem();
@@ -88,9 +95,9 @@ public class ItemTests {
                     Level level = source.level();
                     if (dispensiblecontaineritem.emptyContents(null, level, blockpos, null, stack)) {
                         dispensiblecontaineritem.checkExtraContent(null, level, stack, blockpos);
-                        return new ItemStack(Items.BUCKET);
+                        return this.consumeWithRemainder(source, stack, new ItemStack(Items.BUCKET));
                     } else {
-                        return super.execute(source, stack);
+                        return this.defaultDispenseItemBehavior.dispense(source, stack);
                     }
                 }
 
