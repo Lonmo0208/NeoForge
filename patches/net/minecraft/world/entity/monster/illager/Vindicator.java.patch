@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/entity/monster/illager/Vindicator.java
++++ b/net/minecraft/world/entity/monster/illager/Vindicator.java
+@@ -213,6 +_,11 @@
+         }
+ 
+         @Override
++        public void setTarget(@Nullable LivingEntity target) {
++            super.targetMob = target;
++        }
++
++        @Override
+         public boolean canUse() {
+             return ((Vindicator)this.mob).isJohnny && super.canUse();
+         }

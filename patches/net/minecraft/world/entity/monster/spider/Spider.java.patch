@@ -1,0 +1,26 @@
+--- a/net/minecraft/world/entity/monster/spider/Spider.java
++++ b/net/minecraft/world/entity/monster/spider/Spider.java
+@@ -19,6 +_,7 @@
+ import net.minecraft.world.entity.EntityType;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.SpawnGroupData;
++import net.minecraft.world.entity.Targetable;
+ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+ import net.minecraft.world.entity.ai.attributes.Attributes;
+ import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+@@ -217,9 +_,14 @@
+         }
+     }
+ 
+-    private static class SpiderTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
++    private static class SpiderTargetGoal<T extends Entity & Targetable> extends NearestAttackableTargetGoal<T> {
+         public SpiderTargetGoal(Spider mob, Class<T> targetType) {
+             super(mob, targetType, true);
++        }
++
++        @Override
++        public void setTarget(@Nullable T target) {
++            super.target = target;
+         }
+ 
+         @Override

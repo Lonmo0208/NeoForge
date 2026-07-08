@@ -8,6 +8,23 @@
  import net.minecraft.world.entity.Mob;
  import net.minecraft.world.entity.ai.attributes.Attributes;
  import net.minecraft.world.entity.ai.goal.Goal;
+@@ -23,6 +_,16 @@
+     protected @Nullable Entity targetMob;
+     protected int unseenMemoryTicks = 60;
+ 
++    /**
++     * Bridge for mods compiled against 26.1.2, where {@link NearestAttackableTargetGoal} had
++     * a {@code setTarget(LivingEntity)} method. The generic {@code setTarget(T)} in 26w14a
++     * erases to {@code setTarget(Entity)} at bytecode level, causing {@code NoSuchMethodError}
++     * when mods call this signature at runtime.
++     */
++    public void setTarget(@Nullable LivingEntity target) {
++        this.targetMob = target;
++    }
++
+     public TargetGoal(Mob mob, boolean mustSee) {
+         this(mob, mustSee, false);
+     }
 @@ -62,7 +_,9 @@
                          }
                      }

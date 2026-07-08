@@ -29,6 +29,18 @@
      }
  
      public static boolean isPathClear(Fox fox, Entity target) {
+@@ -750,6 +_,11 @@
+         }
+ 
+         @Override
++        public void setTarget(@Nullable LivingEntity target) {
++            super.targetMob = target;
++        }
++
++        @Override
+         public boolean canUse() {
+             if (this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {
+                 return false;
 @@ -827,7 +_,7 @@
          }
  

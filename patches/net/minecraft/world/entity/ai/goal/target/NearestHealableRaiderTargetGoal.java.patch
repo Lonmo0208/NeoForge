@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/entity/ai/goal/target/NearestHealableRaiderTargetGoal.java
++++ b/net/minecraft/world/entity/ai/goal/target/NearestHealableRaiderTargetGoal.java
+@@ -1,11 +_,13 @@
+ package net.minecraft.world.entity.ai.goal.target;
+ 
++import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.LivingEntity;
++import net.minecraft.world.entity.Targetable;
+ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+ import net.minecraft.world.entity.raid.Raider;
+ import org.jspecify.annotations.Nullable;
+ 
+-public class NearestHealableRaiderTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
++public class NearestHealableRaiderTargetGoal<T extends Entity & Targetable> extends NearestAttackableTargetGoal<T> {
+     private static final int DEFAULT_COOLDOWN = 200;
+     private int cooldown = 0;
+ 
