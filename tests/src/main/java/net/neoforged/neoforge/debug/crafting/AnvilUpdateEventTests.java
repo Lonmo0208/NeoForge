@@ -170,17 +170,16 @@ public class AnvilUpdateEventTests {
 
         withAnvil(test, ctx -> {
             ctx.player.getInventory().setItem(INVENTORY_SLOT_FIRST, sampleStack().copy());
-            ctx.menu.clicked(MENU_SLOT_INV_FIRST, InputConstants.MOUSE_BUTTON_LEFT, ContainerInput.PICKUP, ctx.player);
-            ctx.menu.clicked(MENU_SLOT_LEFT, InputConstants.MOUSE_BUTTON_LEFT, ContainerInput.PICKUP, ctx.player);
+
+            moveItemsToInputs(ctx.menu, ctx.player);
             ctx.menu.setItemName(CUSTOM_NAME);
 
             ItemStack out = ctx.menu.getSlot(MENU_SLOT_RESULT).getItem();
-            if (!out.isEmpty()) {
-                ctx.helper.assertValueEqual(
-                        CUSTOM_NAME, out.getHoverName().getString(),
-                        "Unexpected output name; output is " + out.getHoverName().getString());
-                clearInputs(ctx.menu, ctx.player);
-            }
+            ctx.helper.assertValueEqual(
+                    CUSTOM_NAME, out.getHoverName().getString(),
+                    "Unexpected output name; output is " + out.getHoverName().getString());
+
+            clearInputs(ctx.menu, ctx.player);
             ctx.helper.succeed();
         });
     }

@@ -18,6 +18,9 @@ import net.minecraft.client.renderer.entity.PigRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseSource;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -32,8 +35,10 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SpawnEggItem;
@@ -46,7 +51,10 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.testframework.DynamicTest;
 import net.neoforged.testframework.annotation.ForEachTest;
@@ -71,19 +79,39 @@ public class ItemTests {
                 SoundEvents.BUCKET_EMPTY_FISH,
                 props.stacksTo(1)))
                 .withLang("Cow bucket");
+        test.framework().modEventBus().addListener((final FMLCommonSetupEvent event) -> {
+            DispenserBlock.registerBehavior(cowBucket, new DefaultDispenseItemBehavior() {
+                @Override
+                public ItemStack execute(DispenseSource source, ItemStack stack) {
+                    DispensibleContainerItem dispensiblecontaineritem = (DispensibleContainerItem) stack.getItem();
+                    BlockPos blockpos = source.pos().relative(source.direction());
+                    Level level = source.level();
+                    if (dispensiblecontaineritem.emptyContents(null, level, blockpos, null, stack)) {
+                        dispensiblecontaineritem.checkExtraContent(null, level, stack, blockpos);
+                        return new ItemStack(Items.BUCKET);
+                    } else {
+                        return super.execute(source, stack);
+                    }
+                }
+
+                @Override
+                public ItemStack execute(BlockSource source, ItemStack stack) {
+                    return this.execute((DispenseSource) source, stack);
+                }
+            });
+        });
 
         test.registerGameTestTemplate(StructureTemplateBuilder.withSize(3, 4, 3)
-                .fill(0, 0, 0, 2, 0, 2, Blocks.DIRT)
-                .fill(1, 1, 1, 1, 1, 1, Blocks.DIRT)
-                .fill(1, 2, 1, 1, 2, 1, Blocks.AIR));
+                .placeWaterConfinement(1, 1, 1, Blocks.IRON_BLOCK.defaultBlockState(), true)
+                .placeWaterConfinement(1, 2, 1, Blocks.GOLD_BLOCK.defaultBlockState(), false));
 
-        test.onGameTest(helper -> helper.startSequence(() -> helper.makeMockPlayer())
-                .thenExecute(player -> {
-                    ItemStack bucket = cowBucket.get().getDefaultInstance();
-                    ((MobBucketItem) bucket.getItem()).checkExtraContent(player, helper.getLevel(), bucket, helper.absolutePos(new BlockPos(1, 2, 1)));
-                })
+        test.onGameTest(helper -> helper.startSequence()
+                .thenExecute(() -> helper.setBlock(1, 1, 1, net.minecraft.world.level.block.Blocks.DISPENSER.defaultBlockState().setValue(net.minecraft.world.level.block.DispenserBlock.FACING, net.minecraft.core.Direction.UP)))
+                .thenExecute(() -> helper.getBlockEntity(1, 1, 1, DispenserBlockEntity.class).setItem(0, cowBucket.get().getDefaultInstance()))
+                .thenExecute(() -> helper.pulseRedstone(new net.minecraft.core.BlockPos(1, 1, 2), 3))
                 .thenIdle(5)
-                .thenExecute(() -> helper.assertEntityPresent(EntityType.COW, 1, 2, 1))
+                .thenExecute(() -> helper.assertBlockPresent(net.minecraft.world.level.block.Blocks.WATER, new net.minecraft.core.BlockPos(1, 2, 1)))
+                .thenExecute(() -> helper.assertEntityPresent(net.minecraft.world.entity.EntityType.COW, 1, 3, 1))
                 .thenExecute(() -> helper.killAllEntitiesOfClass(net.minecraft.world.entity.animal.cow.Cow.class))
                 .thenSucceed());
     }

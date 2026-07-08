@@ -77,17 +77,17 @@ public class BlockTests {
                 .thenExecute(player -> player.setItemInHand(InteractionHand.MAIN_HAND, Items.DIAMOND_SWORD.getDefaultInstance()))
                 .thenExecute(player -> player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(1, 1, 1))))
                 .thenExecute(player -> helper.assertTrue(
-                        helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().expandTowards(2, 2, 2)).stream().anyMatch(itemEntity -> itemEntity.getItemStack().is(Items.BRICK)),
+                        helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().inflate(2)).stream().anyMatch(livingBlock -> livingBlock.getItemStack().is(Items.BRICK)),
                         "Decorated Pot should had dropped Bricks"))
-                .thenExecute(player -> helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().expandTowards(2, 2, 2)).forEach(itemEntity -> itemEntity.remove(Entity.RemovalReason.DISCARDED)))
+                .thenExecute(player -> helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().inflate(2)).forEach(livingBlock -> livingBlock.remove(Entity.RemovalReason.DISCARDED)))
 
                 .thenExecute(() -> helper.setBlock(1, 1, 1, Blocks.DECORATED_POT.defaultBlockState()))
                 .thenExecute(player -> player.setItemInHand(InteractionHand.MAIN_HAND, Items.DANDELION.getDefaultInstance()))
                 .thenExecute(player -> player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(1, 1, 1))))
                 .thenExecute(player -> helper.assertTrue(
-                        helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().expandTowards(2, 2, 2)).stream().anyMatch(itemEntity -> itemEntity.getItemStack().is(Items.DECORATED_POT)),
+                        helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().inflate(2)).stream().anyMatch(livingBlock -> livingBlock.getItemStack().is(Items.DECORATED_POT)),
                         "Decorated Pot should had dropped the Decorated Pot"))
-                .thenExecute(player -> helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().expandTowards(2, 2, 2)).forEach(itemEntity -> itemEntity.remove(Entity.RemovalReason.DISCARDED)))
+                .thenExecute(player -> helper.getLevel().getEntitiesOfClass(LivingBlock.class, player.getBoundingBox().inflate(2)).forEach(livingBlock -> livingBlock.remove(Entity.RemovalReason.DISCARDED)))
 
                 .thenSucceed());
     }

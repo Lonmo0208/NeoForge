@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -39,7 +40,7 @@ public class LevelEventTests {
     @TestHolder(description = "Tests if the sapling grow tree event is fired, replacing spruce with birch")
     static void saplingGrowTreeEvent(final DynamicTest test) {
         test.eventListeners().forge().addListener((final BlockGrowFeatureEvent event) -> {
-            if (event.getFeature() != null) {
+            if (event.getFeature() != null && event.getFeature().is(TreeFeatures.SPRUCE)) {
                 event.setFeature(TreeFeatures.BIRCH_BEES_005);
             }
             test.pass();
@@ -47,14 +48,9 @@ public class LevelEventTests {
 
         test.onGameTest(helper -> helper.startSequence(helper::makeMockPlayer)
                 .thenExecute(() -> helper.setBlock(4, 1, 4, Blocks.DIRT))
-                .thenExecute(() -> helper.setBlock(4, 2, 4, Blocks.OAK_SAPLING))
+                .thenExecute(() -> helper.setBlock(4, 2, 4, Blocks.SPRUCE_SAPLING))
                 .thenWaitUntil(player -> helper.boneMealUntilGrown(4, 2, 4, player))
-                .thenExecute(() -> helper.assertTrue(
-                        helper.blocksBetween(0, 0, 0, 9, 9, 9).anyMatch(pos -> {
-                            var state = helper.getLevel().getBlockState(pos);
-                            return state.is(Blocks.BIRCH_LOG) || state.is(Blocks.OAK_LOG) || state.is(Blocks.SPRUCE_LOG);
-                        }),
-                        "Expected a tree log to have grown"))
+                .thenExecute(() -> helper.assertBlockPresent(Blocks.BIRCH_LOG, 4, 2, 4))
                 .thenSucceed());
     }
 
@@ -63,7 +59,10 @@ public class LevelEventTests {
     static void alterGroundEvent(final DynamicTest test) {
         test.registerGameTestTemplate(StructureTemplateBuilder.withSize(16, 32, 16)
                 .fill(0, 0, 0, 15, 0, 15, Blocks.GRASS_BLOCK.defaultBlockState())
-                .fill(7, 1, 7, 8, 1, 8, Blocks.SPRUCE_SAPLING.defaultBlockState()));
+                .set(7, 1, 7, Blocks.SPRUCE_SAPLING.defaultBlockState())
+                .set(8, 1, 7, Blocks.SPRUCE_SAPLING.defaultBlockState())
+                .set(7, 1, 8, Blocks.SPRUCE_SAPLING.defaultBlockState())
+                .set(8, 1, 8, Blocks.SPRUCE_SAPLING.defaultBlockState()));
 
         test.eventListeners().forge().addListener((final AlterGroundEvent event) -> {
             final AlterGroundEvent.StateProvider old = event.getStateProvider();
@@ -71,22 +70,17 @@ public class LevelEventTests {
                 final BlockState state = old.getState(level, rand, pos);
                 return state != null && state.is(Blocks.PODZOL) ? Blocks.REDSTONE_BLOCK.defaultBlockState() : state;
             });
-            test.pass();
         });
 
         test.onGameTest(helper -> helper.startSequence(helper::makeMockPlayer)
                 .thenWaitUntil(player -> helper.boneMealUntilGrown(7, 1, 7, player))
-                .thenExecute(player -> {
-                    if (test.status().result().passed()) {
-                        boolean hasRedstone = helper.blocksBetween(0, 0, 0, 16, 1, 16)
-                                .anyMatch(pos -> helper.getLevel().getBlockState(pos).is(Blocks.REDSTONE_BLOCK));
-                        if (hasRedstone) {
-                            boolean noPodzol = helper.blocksBetween(0, 0, 0, 16, 1, 16)
-                                    .noneMatch(pos -> helper.getLevel().getBlockState(pos).is(Blocks.PODZOL));
-                            helper.assertTrue(noPodzol, "Podzol was still placed!");
-                        }
-                    }
-                })
+                .thenExecute(player -> helper.assertTrue(
+                        helper.blocksBetween(0, 0, 0, 16, 1, 16).anyMatch(pos -> helper.getLevel().getBlockState(pos).is(Blocks.REDSTONE_BLOCK)),
+                        "No redstone blocks have been placed!"))
+                .thenExecute(player -> helper.assertTrue(
+                        helper.blocksBetween(0, 0, 0, 16, 1, 16)
+                                .noneMatch(pos -> helper.getLevel().getBlockState(pos).is(Blocks.PODZOL)),
+                        "Podzol was still placed!"))
                 .thenSucceed());
     }
 
@@ -100,10 +94,8 @@ public class LevelEventTests {
         test.eventListeners().forge().addListener((final VanillaGameEvent event) -> {
             if (event.getVanillaEvent().is(GameEvent.SHEAR) && event.getLevel().dimension() == Level.OVERWORLD) {
                 final var entities = event.getLevel().getEntitiesOfClass(Entity.class, new AABB(BlockPos.containing(event.getEventPosition())), e -> e instanceof Shearable);
-                if (!entities.isEmpty()) {
-                    entities.get(0).hurt(event.getLevel().damageSources().generic(), event.getCause() == null ? 1 : 3);
-                    test.pass();
-                }
+                entities.get(0).hurt(event.getLevel().damageSources().generic(), event.getCause() == null ? 1 : 3);
+                test.pass();
             }
         });
 
@@ -120,6 +112,8 @@ public class LevelEventTests {
                 .thenIdle(5)
                 .thenExecute(sheep -> Items.SHEARS.getDefaultInstance().interactLivingEntity(
                         helper.makeMockPlayer(), sheep, InteractionHand.MAIN_HAND)) // Make a player shear the sheep
+                .thenExecute(() -> helper.assertItemEntityPresent(Items.BLACK_WOOL, new BlockPos(1, 2, 1), 2)) // Make sure wool was dropped
+                .thenExecute(sheep -> helper.assertEntityProperty(sheep, Sheep::getHealth, "health", 8f - 3f)) // player did it, so hurt by 3
 
                 .thenExecuteAfter(5, sheep -> {
                     // Prepare the sheep; reset its color and its state
@@ -131,9 +125,11 @@ public class LevelEventTests {
                 // Power the dispenser
                 .thenExecute(() -> helper.setBlock(2, 1, 1, Blocks.REDSTONE_BLOCK))
                 .thenIdle(5)
+                .thenExecute(() -> helper.assertItemEntityPresent(Items.BLUE_WOOL, new BlockPos(1, 2, 1), 2)) // Make sure wool was dropped
+                .thenExecute(sheep -> helper.assertEntityProperty(sheep, Sheep::getHealth, "health", (8f - 3f) - 1f)) // dispenser did it, so hurt by 1
 
                 .thenIdle(5)
-                .thenExecute(() -> helper.killAllEntitiesOfClass(Sheep.class))
+                .thenExecute(() -> helper.killAllEntitiesOfClass(Sheep.class, LivingBlock.class))
 
                 .thenSucceed());
     }

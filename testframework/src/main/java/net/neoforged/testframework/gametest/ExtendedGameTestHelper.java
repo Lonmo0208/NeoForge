@@ -218,6 +218,91 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         }
     }
 
+    public LivingBlock spawnItem(Item item, float x, float y, float z) {
+        return spawnItem(item.getDefaultInstance(), x, y, z);
+    }
+
+    public LivingBlock spawnItem(ItemStack stack, float x, float y, float z) {
+        final Vec3 absolutePos = this.absoluteVec(new Vec3(x, y, z));
+        final BlockPos spawnBlockPos = BlockPos.containing(absolutePos);
+        final var livingBlocks = LivingBlock.createStack(this.getLevel(), spawnBlockPos, null, stack);
+        final var first = livingBlocks.stream().findFirst().orElseThrow();
+        first.snapTo(absolutePos.x, absolutePos.y, absolutePos.z, first.getYRot(), first.getXRot());
+        this.getLevel().addFreshEntity(first);
+        return first;
+    }
+
+    public LivingBlock spawnItem(Item item, BlockPos pos) {
+        return spawnItem(item, pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public void assertItemEntityPresent(Item item) {
+        assertItemEntityPresent(item, new BlockPos(0, 0, 0), 16);
+    }
+
+    public void assertItemEntityPresent(Item item, BlockPos pos, double range) {
+        final BlockPos blockpos = this.absolutePos(pos);
+        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
+        boolean found = false;
+
+        for (final LivingBlock livingBlock : list) {
+            if (livingBlock.getItemStack().is(item)) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            throw this.assertionException(pos, "Expected %s item to exist", item.getName(item.getDefaultInstance()).getString());
+        }
+    }
+
+    public void assertItemEntityNotPresent(Item item) {
+        assertItemEntityNotPresent(item, new BlockPos(0, 0, 0), 16);
+    }
+
+    public void assertItemEntityNotPresent(Item item, BlockPos pos, double range) {
+        final BlockPos blockpos = this.absolutePos(pos);
+        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
+
+        for (final LivingBlock livingBlock : list) {
+            if (livingBlock.getItemStack().is(item)) {
+                throw this.assertionException(pos, "Expected %s item to not exist", item.getName(item.getDefaultInstance()).getString());
+            }
+        }
+    }
+
+    public void assertItemEntityCountIs(Item item, BlockPos pos, double range, int expectedCount) {
+        final BlockPos blockpos = this.absolutePos(pos);
+        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
+        int count = 0;
+
+        for (final LivingBlock livingBlock : list) {
+            ItemStack itemstack = livingBlock.getItemStack();
+            if (itemstack.is(item)) {
+                count += itemstack.getCount();
+            }
+        }
+
+        if (count != expectedCount) {
+            throw this.assertionException(pos, "Expected %s %s items to exist (found %s)", expectedCount, item.getName(item.getDefaultInstance()).getString(), count);
+        }
+    }
+
+    public void assertEntitiesPresent(EntityType<?> type, int expectedCount) {
+        final var list = this.getEntities(type);
+        if (list.size() != expectedCount) {
+            throw this.assertionException("Expected %s entities of type %s (found %s)", expectedCount, type, list.size());
+        }
+    }
+
+    public void assertEntitiesPresent(EntityType<?> type, BlockPos pos, double range, int expectedCount) {
+        final var list = this.getEntities(type, pos, range);
+        if (list.size() != expectedCount) {
+            throw this.assertionException(pos, "Expected %s entities of type %s (found %s)", expectedCount, type, list.size());
+        }
+    }
+
     public void breakBlock(BlockPos relativePos, ItemStack tool, @Nullable Entity breakingEntity) {
         BlockState state = getBlockState(relativePos);
         BlockPos absolutePos = absolutePos(relativePos);
