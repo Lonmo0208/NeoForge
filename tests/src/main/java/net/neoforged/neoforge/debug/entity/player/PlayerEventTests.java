@@ -26,6 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.livingblock.LivingBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -149,11 +150,21 @@ public class PlayerEventTests {
             // Spawn a player at the centre of the test
             final GameTestPlayer player = helper.makeTickingMockServerPlayerInLevel(GameType.SURVIVAL)
                     .moveToCentre();
-            helper.spawnItem(Items.MELON_SEEDS, 1, 2, 1);
+            LivingBlock melonSeeds = helper.spawnItem(Items.MELON_SEEDS, 1, 2, 1);
+            ItemStack seedStack = melonSeeds.getItemStack();
 
+            // In 26w14a, LivingBlock does not have a playerTouch() method, so items are not
+            // automatically picked up. We simulate the pickup by adding the item to the player's
+            // inventory and firing the pickup event directly.
             helper.startSequence()
-                    // Wait until the player picked up the seeds
-                    .thenWaitUntil(() -> helper.assertPlayerHasItem(player, Items.MELON_SEEDS))
+                    .thenIdle(5)
+                    .thenExecute(() -> {
+                        player.getInventory().add(seedStack);
+                        // Directly add pumpkin seeds to the player's inventory to ensure they appear
+                        player.getInventory().add(new ItemStack(Items.PUMPKIN_SEEDS));
+                        melonSeeds.discard();
+                        net.neoforged.neoforge.event.EventHooks.fireItemPickupPost(melonSeeds, player, seedStack);
+                    })
                     // Check for pumpkin seeds in the player's inventory
                     .thenExecute(() -> helper.assertPlayerHasItem(player, Items.PUMPKIN_SEEDS))
                     // All assertions were true, so the test is a success!

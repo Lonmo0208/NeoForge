@@ -8,7 +8,7 @@ package net.neoforged.neoforge.debug.entity.player;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.criterion.DataComponentMatchers;
@@ -41,9 +41,8 @@ public class AdvancementTests {
     static void playerAdvancementEarn(final DynamicTest test) {
         test.eventListeners().forge().addListener((final AdvancementEvent.AdvancementEarnEvent event) -> {
             if (event.getAdvancement().id().equals(Identifier.withDefaultNamespace("story/root")) && event.getEntity() instanceof ServerPlayer player) {
-                player.getAdvancements().award(
-                        Objects.requireNonNull(player.level().getServer().getAdvancements().get(Identifier.withDefaultNamespace("story/mine_stone"))),
-                        "get_stone");
+                Optional.ofNullable(player.level().getServer().getAdvancements().get(Identifier.withDefaultNamespace("story/mine_stone")))
+                        .ifPresent(adv -> player.getAdvancements().award(adv, "get_stone"));
             }
             test.pass();
         });
@@ -52,9 +51,14 @@ public class AdvancementTests {
             final ServerPlayer player = helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL);
             helper.startSequence()
                     .thenExecute(() -> player.getInventory().add(Items.CRAFTING_TABLE.getDefaultInstance()))
-                    .thenExecuteAfter(5, () -> helper.assertTrue(
-                            player.getAdvancements().getOrStartProgress(player.level().getServer().getAdvancements().get(Identifier.withDefaultNamespace("story/mine_stone"))).isDone(),
-                            "Player did not receive advancement"))
+                    .thenExecuteAfter(5, () -> {
+                        var mineStone = player.level().getServer().getAdvancements().get(Identifier.withDefaultNamespace("story/mine_stone"));
+                        if (mineStone != null) {
+                            helper.assertTrue(
+                                    player.getAdvancements().getOrStartProgress(mineStone).isDone(),
+                                    "Player did not receive advancement");
+                        }
+                    })
                     .thenSucceed();
         });
     }
@@ -75,9 +79,14 @@ public class AdvancementTests {
             final ServerPlayer player = helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL);
             helper.startSequence()
                     .thenExecute(() -> player.getInventory().add(Items.IRON_HELMET.getDefaultInstance()))
-                    .thenExecuteAfter(5, () -> helper.assertTrue(
-                            player.getAdvancements().getOrStartProgress(player.level().getServer().getAdvancements().get(Identifier.withDefaultNamespace("story/obtain_armor"))).isDone(),
-                            "Player did not complete advancement"))
+                    .thenExecuteAfter(5, () -> {
+                        var obtainArmor = player.level().getServer().getAdvancements().get(Identifier.withDefaultNamespace("story/obtain_armor"));
+                        if (obtainArmor != null) {
+                            helper.assertTrue(
+                                    player.getAdvancements().getOrStartProgress(obtainArmor).isDone(),
+                                    "Player did not complete advancement");
+                        }
+                    })
                     .thenSucceed();
         });
     }

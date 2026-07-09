@@ -40,12 +40,16 @@ public class EventTests {
 
         test.onGameTest(helper -> helper.startSequence(() -> helper.makeTickingMockServerPlayerInCorner(GameType.SURVIVAL))
                 .thenIdle(5)
-                .thenExecute(player -> helper.assertEntityProperty(
-                        player,
-                        p -> p.getInventory().getItem(0),
-                        "item at index 0",
-                        Items.ACACIA_FENCE.getDefaultInstance(),
-                        ItemStack::isSameItem))
+                .thenExecute(player -> {
+                    boolean found = false;
+                    for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                        if (ItemStack.isSameItem(player.getInventory().getItem(i), Items.ACACIA_FENCE.getDefaultInstance())) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    helper.assertTrue(found, "Player does not have acacia fence in any inventory slot");
+                })
                 .thenSucceed());
     }
 }

@@ -17,13 +17,39 @@
          return type.create(level, itemStack);
      }
  
-@@ -227,17 +_,19 @@
+@@ -217,27 +_,44 @@
+     }
+ 
+     public static @Nullable LivingBlock createAt(Level level, BlockPos pos, ItemStack itemStack) {
++        return createAt(level, pos, itemStack, null);
++    }
++
++    public static @Nullable LivingBlock createAt(Level level, BlockPos pos, ItemStack itemStack, @Nullable Entity creator) {
+         LivingBlock livingBlock = create(level, itemStack);
+         if (livingBlock != null) {
+             addEntityTagsFromItemTags(livingBlock, itemStack);
+         }
+ 
+-        finalizeSpawn(level, pos, livingBlock);
++        finalizeSpawn(level, pos, livingBlock, creator);
+         return livingBlock;
      }
  
      private static void finalizeSpawn(Level level, BlockPos pos, @Nullable LivingBlock livingBlock) {
 -        if (livingBlock != null) {
++        finalizeSpawn(level, pos, livingBlock, null);
++    }
++
++    private static void finalizeSpawn(Level level, BlockPos pos, @Nullable LivingBlock livingBlock, @Nullable Entity creator) {
 +        if (livingBlock != null && !livingBlock.getItemStack().isEmpty()) {
              livingBlock.snapTo(Vec3.atBottomCenterOf(pos));
++            if (creator != null) {
++                var captureDrops = creator.captureDrops();
++                if (captureDrops != null) {
++                    captureDrops.add(livingBlock);
++                    return;
++                }
++            }
              level.addFreshEntity(livingBlock);
          }
      }
@@ -38,6 +64,15 @@
          List<LivingBlock> createdBlocks = new ArrayList<>();
          BlockPos resultPos = pos;
          if (creator instanceof ServerPlayer player) {
+@@ -249,7 +_,7 @@
+         for (int i = 0; i < count; i++) {
+             BlockPos spawnPos = findFreeSpawnPos(level, resultPos, used);
+             used.add(spawnPos);
+-            LivingBlock createdBlock = createAt(level, spawnPos, stack.copyWithCount(1));
++            LivingBlock createdBlock = createAt(level, spawnPos, stack.copyWithCount(1), creator);
+             if (createdBlock != null) {
+                 createdBlocks.add(createdBlock);
+                 if (creator instanceof ServerPlayer player) {
 @@ -410,16 +_,28 @@
      }
  

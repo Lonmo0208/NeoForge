@@ -60,6 +60,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
@@ -201,13 +202,56 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         }
     }
 
+    public void assertItemEntityPresent(Item item) {
+        assertItemEntityPresent(item, new BlockPos(0, 0, 0), 1.5d);
+    }
+
+    public void assertItemEntityPresent(Item item, BlockPos pos, double range) {
+        final BlockPos blockpos = this.absolutePos(pos);
+        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
+        for (final LivingBlock livingBlock : list) {
+            if (livingBlock.getItemStack().is(item)) {
+                return;
+            }
+        }
+        throw this.assertionException(pos, "Expected item entity %s to exist", item.getName(item.getDefaultInstance()).getString());
+    }
+
+    public void assertItemEntityNotPresent(Item item) {
+        assertItemEntityNotPresent(item, new BlockPos(0, 0, 0), 1.5d);
+    }
+
+    public void assertItemEntityNotPresent(Item item, BlockPos pos, double range) {
+        final BlockPos blockpos = this.absolutePos(pos);
+        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
+        for (final LivingBlock livingBlock : list) {
+            if (livingBlock.getItemStack().is(item)) {
+                throw this.assertionException(pos, "Expected item entity %s to not exist", item.getName(item.getDefaultInstance()).getString());
+            }
+        }
+    }
+
+    public void assertItemEntityCountIs(Item item, BlockPos pos, double range, int expectedCount) {
+        final BlockPos blockpos = this.absolutePos(pos);
+        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
+        int count = 0;
+        for (final LivingBlock livingBlock : list) {
+            if (livingBlock.getItemStack().is(item)) {
+                count += livingBlock.getItemStack().getCount();
+            }
+        }
+        if (count != expectedCount) {
+            throw this.assertionException(pos, "Expected %s %s items to exist (found %s)", expectedCount, item.getName(item.getDefaultInstance()).getString(), count);
+        }
+    }
+
     public void assertItemEntityCountIsAtLeast(Item item, BlockPos pos, double range, int lowerLimit) {
         final BlockPos blockpos = this.absolutePos(pos);
         final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
         int count = 0;
 
-        for (final LivingBlock itementity : list) {
-            ItemStack itemstack = itementity.getItemStack();
+        for (final LivingBlock livingBlock : list) {
+            ItemStack itemstack = livingBlock.getItemStack();
             if (itemstack.is(item)) {
                 count += itemstack.getCount();
             }
@@ -232,93 +276,27 @@ public class ExtendedGameTestHelper extends GameTestHelper {
         return first;
     }
 
-    public LivingBlock spawnItem(Item item, BlockPos pos) {
-        return spawnItem(item, pos.getX(), pos.getY(), pos.getZ());
-    }
-
-    public void assertItemEntityPresent(Item item) {
-        assertItemEntityPresent(item, new BlockPos(0, 0, 0), 16);
-    }
-
-    public void assertItemEntityPresent(Item item, BlockPos pos, double range) {
-        final BlockPos blockpos = this.absolutePos(pos);
-        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
-        boolean found = false;
-
-        for (final LivingBlock livingBlock : list) {
-            if (livingBlock.getItemStack().is(item)) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            throw this.assertionException(pos, "Expected %s item to exist", item.getName(item.getDefaultInstance()).getString());
-        }
-    }
-
-    public void assertItemEntityNotPresent(Item item) {
-        assertItemEntityNotPresent(item, new BlockPos(0, 0, 0), 16);
-    }
-
-    public void assertItemEntityNotPresent(Item item, BlockPos pos, double range) {
-        final BlockPos blockpos = this.absolutePos(pos);
-        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
-
-        for (final LivingBlock livingBlock : list) {
-            if (livingBlock.getItemStack().is(item)) {
-                throw this.assertionException(pos, "Expected %s item to not exist", item.getName(item.getDefaultInstance()).getString());
-            }
-        }
-    }
-
-    public void assertItemEntityCountIs(Item item, BlockPos pos, double range, int expectedCount) {
-        final BlockPos blockpos = this.absolutePos(pos);
-        final List<LivingBlock> list = this.getLevel().getEntities(EntityType.LIVING_BLOCK, new AABB(blockpos).inflate(range), Entity::isAlive);
-        int count = 0;
-
-        for (final LivingBlock livingBlock : list) {
-            ItemStack itemstack = livingBlock.getItemStack();
-            if (itemstack.is(item)) {
-                count += itemstack.getCount();
-            }
-        }
-
-        if (count != expectedCount) {
-            throw this.assertionException(pos, "Expected %s %s items to exist (found %s)", expectedCount, item.getName(item.getDefaultInstance()).getString(), count);
-        }
-    }
-
-    public void assertEntitiesPresent(EntityType<?> type, int expectedCount) {
-        final var list = this.getEntities(type);
-        if (list.size() != expectedCount) {
-            throw this.assertionException("Expected %s entities of type %s (found %s)", expectedCount, type, list.size());
-        }
-    }
-
-    public void assertEntitiesPresent(EntityType<?> type, BlockPos pos, double range, int expectedCount) {
-        final var list = this.getEntities(type, pos, range);
-        if (list.size() != expectedCount) {
-            throw this.assertionException(pos, "Expected %s entities of type %s (found %s)", expectedCount, type, list.size());
-        }
-    }
-
     public void breakBlock(BlockPos relativePos, ItemStack tool, @Nullable Entity breakingEntity) {
-        BlockState state = getBlockState(relativePos);
         BlockPos absolutePos = absolutePos(relativePos);
+        BlockState state = getBlockState(relativePos);
         BlockEntity blockEntity = state.hasBlockEntity() ? getLevel().getBlockEntity(absolutePos) : null;
         if (getLevel() instanceof ServerLevel serverLevel) {
+            // Remove the block first without dropping resources
+            getLevel().destroyBlock(absolutePos, false);
+            // Capture drops using the vanilla capture mechanism, so that LivingBlock entities
+            // are NOT added to the level before the BlockDropsEvent is processed
             Block.beginCapturingDrops();
             try {
-                Block.dropResources(state, getLevel(), absolutePos, blockEntity, breakingEntity, tool);
+                Block.getDrops(state, serverLevel, absolutePos, blockEntity, breakingEntity, tool)
+                        .forEach(stack -> Block.popResource(serverLevel, absolutePos, stack, state));
             } finally {
                 var drops = Block.stopCapturingDrops();
-                net.neoforged.neoforge.common.CommonHooks.handleBlockDrops(serverLevel, absolutePos, state, blockEntity, drops, breakingEntity, tool);
+                CommonHooks.handleBlockDrops(serverLevel, absolutePos, state, blockEntity, drops, breakingEntity, tool);
             }
         } else {
+            getLevel().destroyBlock(absolutePos, false);
             Block.dropResources(state, getLevel(), absolutePos, blockEntity, breakingEntity, tool);
         }
-        getLevel().destroyBlock(absolutePos, false);
     }
 
     public void boneMeal(BlockPos pos, Player player) {

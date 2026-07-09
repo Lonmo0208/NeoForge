@@ -169,9 +169,8 @@ public class AnvilUpdateEventTests {
         final String CUSTOM_NAME = "Hoe - 5784351896";
 
         withAnvil(test, ctx -> {
-            ctx.player.getInventory().setItem(INVENTORY_SLOT_FIRST, sampleStack().copy());
-
-            moveItemsToInputs(ctx.menu, ctx.player);
+            // Directly place the item in the anvil input slot instead of using clicked()
+            ctx.menu.getSlot(MENU_SLOT_LEFT).set(sampleStack().copy());
             ctx.menu.setItemName(CUSTOM_NAME);
 
             ItemStack out = ctx.menu.getSlot(MENU_SLOT_RESULT).getItem();

@@ -435,9 +435,26 @@ public class CommonHooks {
 
     @Nullable
     public static LivingBlock onPlayerTossEvent(Player player, ItemStack item, boolean dropAround, boolean includeName) {
+        if (item.isEmpty() || player.level().isClientSide())
+            return null;
+
         java.util.List<LivingBlock> drops = Lists.newArrayList();
         player.captureDrops(drops);
-        player.drop(item, dropAround);
+
+        // In 26w14a, LivingEntity.drop() passes null as creator when thrownFromHand is false,
+        // so captureDrops wouldn't work. Instead, we directly create LivingBlocks with the player
+        // as creator so that captureDrops properly intercepts the entities.
+        if (player.level() instanceof ServerLevel serverLevel) {
+            LivingBlock.createStack(serverLevel, player.blockPosition(), player, item);
+            // Apply the same post-creation logic as LivingEntity.drop()
+            if (dropAround) {
+                for (LivingBlock livingBlock : drops) {
+                    livingBlock.setOwner(player);
+                    livingBlock.setSelected(true);
+                }
+            }
+        }
+
         player.captureDrops(null);
 
         LivingBlock ret = drops.isEmpty() ? null : drops.get(0);

@@ -94,17 +94,18 @@ public interface IShearable {
         } else if (this instanceof MushroomCow cow) {
             // We patch Mooshrooms from using addFreshEntity to spawnAtLocation to spawnAtLocation to capture the drops.
             // In case a mod is also capturing drops, we also replicate that logic here.
-            LivingBlock itemEntity = (LivingBlock) cow.spawnAtLocation(level, drop, cow.getBbHeight());
+            cow.spawnAtLocation(level, drop, cow.getBbHeight());
         } else if (this instanceof Entity entity) {
             // Everything else uses the "default" rules invented by Sheep#shear, which uses a y-offset of 1 and these random delta movement values.
-            LivingBlock itemEntity = (LivingBlock) entity.spawnAtLocation(level, drop, 1);
-            if (itemEntity != null) {
-                RandomSource rand = entity.getRandom();
-                Vec3 newDelta = itemEntity.getDeltaMovement().add(
-                        (rand.nextFloat() - rand.nextFloat()) * 0.1F,
-                        rand.nextFloat() * 0.05F,
-                        (rand.nextFloat() - rand.nextFloat()) * 0.1F);
-                itemEntity.setDeltaMovement(newDelta);
+            RandomSource rand = entity.getRandom();
+            Vec3 baseDelta = new Vec3(
+                    (rand.nextFloat() - rand.nextFloat()) * 0.1F,
+                    rand.nextFloat() * 0.05F,
+                    (rand.nextFloat() - rand.nextFloat()) * 0.1F);
+            for (LivingBlock itemEntity : entity.spawnAtLocation(level, drop, 1)) {
+                if (itemEntity != null) {
+                    itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().add(baseDelta));
+                }
             }
         } else {
             Block.popResource(level, pos, drop);
