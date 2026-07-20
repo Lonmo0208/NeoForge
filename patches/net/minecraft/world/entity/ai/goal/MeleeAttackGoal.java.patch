@@ -1,0 +1,52 @@
+--- a/net/minecraft/world/entity/ai/goal/MeleeAttackGoal.java
++++ b/net/minecraft/world/entity/ai/goal/MeleeAttackGoal.java
+@@ -4,6 +_,7 @@
+ import net.minecraft.world.InteractionHand;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntitySelector;
++import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.PathfinderMob;
+ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.level.pathfinder.Path;
+@@ -118,7 +_,8 @@
+             }
+ 
+             this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
+-            this.checkAndPerformAttack(target);
++            Entity attackTarget = target;
++            this.checkAndPerformAttack(attackTarget);
+         }
+     }
+ 
+@@ -130,6 +_,15 @@
+         }
+     }
+ 
++    /**
++     * Bridge for mods compiled against 26.1.2, where the parameter was
++     * {@code LivingEntity} instead of {@code Entity}.
++     */
++    protected void checkAndPerformAttack(LivingEntity target) {
++        Entity e = target;
++        this.checkAndPerformAttack(e);
++    }
++
+     protected void resetAttackCooldown() {
+         this.ticksUntilNextAttack = this.adjustedTickDelay(20);
+     }
+@@ -140,6 +_,15 @@
+ 
+     protected boolean canPerformAttack(Entity target) {
+         return this.isTimeToAttack() && this.mob.isWithinMeleeAttackRange(target) && this.mob.getSensing().hasLineOfSight(target);
++    }
++
++    /**
++     * Bridge for mods compiled against 26.1.2, where the parameter was
++     * {@code LivingEntity} instead of {@code Entity}.
++     */
++    protected boolean canPerformAttack(LivingEntity target) {
++        Entity e = target;
++        return this.canPerformAttack(e);
+     }
+ 
+     protected int getTicksUntilNextAttack() {

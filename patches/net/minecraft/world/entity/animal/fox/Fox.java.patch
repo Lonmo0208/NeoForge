@@ -77,3 +77,16 @@
                  BlockState state = Fox.this.level().getBlockState(this.blockPos);
                  if (state.is(Blocks.SWEET_BERRY_BUSH)) {
                      this.pickSweetBerries(state);
+@@ -1106,6 +_,12 @@
+                 this.mob.doHurtTarget(getServerLevel(this.mob), target);
+                 Fox.this.playSound(SoundEvents.FOX_BITE, 1.0F, 1.0F);
+             }
++        }
++
++        @Override
++        protected boolean canPerformAttack(LivingEntity target) {
++            Entity e = target;
++            return super.canPerformAttack(e);
+         }
+ 
+         @Override

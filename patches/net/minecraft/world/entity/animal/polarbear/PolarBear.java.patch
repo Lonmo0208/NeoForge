@@ -35,3 +35,16 @@
          return this.persistentAngerTarget;
      }
  
+@@ -326,6 +_,12 @@
+                 this.resetAttackCooldown();
+                 PolarBear.this.setStanding(false);
+             }
++        }
++
++        @Override
++        protected boolean canPerformAttack(LivingEntity target) {
++            Entity e = target;
++            return super.canPerformAttack(e);
+         }
+ 
+         @Override
