@@ -97,6 +97,22 @@
      }
  
      @Override
+@@ -252,6 +_,15 @@
+         return !target.is(EntityType.GHAST) && super.canAttack(target);
+     }
+ 
++    /**
++     * Bridge for mods compiled against 26.1.2, where the parameter was
++     * {@code LivingEntity} instead of {@code Entity}.
++     */
++    @Override
++    public boolean canAttack(LivingEntity target) {
++        return this.canAttack((Entity) target);
++    }
++
+     public boolean canUseNonMeleeWeapon(ItemStack item) {
+         return false;
+     }
 @@ -340,6 +_,12 @@
          if (!this.level().isClientSide() && this.tickCount % 5 == 0) {
              this.updateControlFlags();

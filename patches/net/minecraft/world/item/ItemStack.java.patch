@@ -144,6 +144,23 @@
              if (result != InteractionResult.PASS) {
                  return result;
              }
+@@ -597,6 +_,16 @@
+         return this.getItem().interactLivingEntity(this, player, target, hand);
+     }
+ 
++    /**
++     * Bridge for mods compiled against 26.1.2, where the second parameter was
++     * {@code LivingEntity} instead of {@code Targetable}. In 26w14a, the parameter
++     * was widened to {@code Targetable} to support {@link LivingBlock} interactions.
++     * This bridge prevents {@code NoSuchMethodError} at runtime.
++     */
++    public InteractionResult interactLivingEntity(Player player, LivingEntity target, InteractionHand hand) {
++        return this.interactLivingEntity(player, (Targetable) target, hand);
++    }
++
+     public ItemStack copy() {
+         if (this.isEmpty()) {
+             return EMPTY;
 @@ -637,6 +_,16 @@
          }
      }
