@@ -20,5 +20,11 @@ public class NeoForgeCoreMod implements ClassProcessorProvider {
                 "potted", "getPotted")));
 
         collector.add(new MethodRedirector());
+
+        collector.add(new net.neoforged.neoforge.coremods.compat.FixAnvilCraftMixin());
+        // This runs before mixin to add a LivingEntity-returning bridge to ServerLevel and fix
+        // AvoidEntityGoal's INVOKEVIRTUAL descriptor, so that AnvilCraft's MixinExtras expression
+        // matching can find the target method with the correct return type.
+        collector.add(new net.neoforged.neoforge.coremods.compat.AvoidEntityGoalCompatProcessor());
     }
 }

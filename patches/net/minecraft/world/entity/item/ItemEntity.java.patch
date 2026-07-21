@@ -1,7 +1,10 @@
 --- /dev/null
 +++ b/net/minecraft/world/entity/item/ItemEntity.java
-@@ -1,0 +_,393 @@
+@@ -1,0 +_,401 @@
 +package net.minecraft.world.entity.item;
++
++import net.minecraft.server.level.ServerLevel;
++import net.minecraft.world.damagesource.DamageSource;
 +
 +public class ItemEntity extends net.minecraft.world.entity.livingblock.LivingBlock implements net.minecraft.world.entity.TraceableEntity {
 +
@@ -232,6 +235,11 @@
 +    @Override
 +    protected boolean shouldPlayLavaHurtSound() {
 +        return this.health <= 0 ? true : this.tickCount % 10 == 0;
++    }
++
++    @Override
++    public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
++        return super.hurtServer(level, source, damage);
 +    }
 +
 +    @Override

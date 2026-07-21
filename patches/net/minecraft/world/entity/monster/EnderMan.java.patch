@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/monster/EnderMan.java
 +++ b/net/minecraft/world/entity/monster/EnderMan.java
+@@ -55,7 +_,6 @@
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.gameevent.GameEvent;
+-import net.minecraft.world.level.gamerules.GameRules;
+ import net.minecraft.world.level.pathfinder.PathType;
+ import net.minecraft.world.level.storage.ValueInput;
+ import net.minecraft.world.level.storage.ValueOutput;
 @@ -82,7 +_,7 @@
      private int targetChangeTime;
      private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
@@ -104,6 +112,15 @@
                  && !enderman.hasIndirectPassenger(target);
              this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
          }
+@@ -553,7 +_,7 @@
+                 }
+             } else {
+                 if (this.target != null && !this.enderman.isPassenger()) {
+-                    if (this.enderman.isBeingStaredBy(this.target)) {
++                    if (this.enderman.isBeingStaredBy((Player) this.target)) {
+                         if (this.target.distanceToSqr(this.enderman) < 16.0) {
+                             this.enderman.teleport();
+                         }
 @@ -583,7 +_,7 @@
              if (this.enderman.getCarriedBlock() != null) {
                  return false;

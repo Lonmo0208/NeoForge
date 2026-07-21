@@ -8,7 +8,32 @@
  import net.minecraft.world.entity.Mob;
  import net.minecraft.world.entity.Targetable;
  import net.minecraft.world.entity.ai.goal.Goal;
-@@ -73,7 +_,9 @@
+@@ -16,7 +_,7 @@
+     private static final int DEFAULT_RANDOM_INTERVAL = 10;
+     protected final Class<T> targetType;
+     protected final int randomInterval;
+-    protected @Nullable T target;
++    protected @Nullable LivingEntity target;
+     protected final TargetingConditions targetConditions;
+ 
+     public NearestAttackableTargetGoal(Mob mob, Class<T> targetType, boolean mustSee) {
+@@ -58,7 +_,7 @@
+     protected void findTarget() {
+         ServerLevel level = getServerLevel(this.mob);
+         if (this.targetType != Player.class && this.targetType != ServerPlayer.class) {
+-            this.target = level.getNearestEntity(
++            this.target = (LivingEntity) level.getNearestEntity(
+                 this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance()), entity -> true),
+                 this.getTargetConditions(),
+                 this.mob,
+@@ -67,18 +_,20 @@
+                 this.mob.getZ()
+             );
+         } else {
+-            this.target = (T)level.getNearestPlayer(this.getTargetConditions(), this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
++            this.target = level.getNearestPlayer(this.getTargetConditions(), this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+         }
+     }
  
      @Override
      public void start() {
@@ -19,3 +44,9 @@
          super.start();
      }
  
+     public void setTarget(@Nullable T target) {
+-        this.target = target;
++        this.target = (LivingEntity) target;
+     }
+ 
+     private TargetingConditions getTargetConditions() {

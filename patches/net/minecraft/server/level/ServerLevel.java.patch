@@ -1,5 +1,14 @@
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
+@@ -92,6 +_,8 @@
+ import net.minecraft.world.entity.LightningBolt;
+ import net.minecraft.world.entity.LivingEntity;
+ import net.minecraft.world.entity.Mob;
++import net.minecraft.world.entity.Targetable;
++import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+ import net.minecraft.world.entity.MobCategory;
+ import net.minecraft.world.entity.ReputationEventHandler;
+ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 @@ -219,11 +_,17 @@
      private boolean handlingTick;
      private final List<CustomSpawner> customSpawners;
@@ -272,7 +281,7 @@
                      ServerLevel.this.dragonParts.put(subEntity.getId(), subEntity);
                  }
              }
-@@ -1941,25 +_,62 @@
+@@ -1941,25 +_,70 @@
                  if (ServerLevel.this.isUpdatingNavigations) {
                      String message = "onTrackingStart called during navigation iteration";
                      Util.logAndPauseIfInIde(
@@ -336,5 +345,13 @@
 +    @org.jetbrains.annotations.ApiStatus.Internal
 +    public void cleanCapabilityListenerReferences() {
 +        capListenerHolder.clean();
++    }
++
++    // Neo: override for explicit dispatch through the interface
++    @Override
++    public <T extends Entity & Targetable> @Nullable T getNearestEntity(
++        List<? extends T> entities, TargetingConditions targetConditions, @Nullable LivingEntity source, double x, double y, double z
++    ) {
++        return ServerEntityGetter.super.getNearestEntity(entities, targetConditions, source, x, y, z);
      }
  }
