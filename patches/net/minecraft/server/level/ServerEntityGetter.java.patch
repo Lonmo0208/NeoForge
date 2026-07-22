@@ -9,6 +9,15 @@
          Class<? extends T> type, TargetingConditions targetConditions, @Nullable LivingEntity source, double x, double y, double z, AABB bb
      ) {
          return this.getNearestEntity(this.getEntitiesOfClass(type, bb, entity -> true), targetConditions, source, x, y, z);
+@@ -95,7 +_,7 @@
+         return nearestEntity;
+     }
+ 
+-    default <T extends Entity & Targetable> @Nullable T getNearestEntity(
++    default <T extends LivingEntity> @Nullable T getNearestEntity(
+         List<? extends T> entities, TargetingConditions targetConditions, @Nullable LivingEntity source, double x, double y, double z
+     ) {
+         double best = -1.0;
 @@ -126,7 +_,7 @@
          return foundPlayers;
      }

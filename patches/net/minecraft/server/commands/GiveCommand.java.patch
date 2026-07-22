@@ -1,5 +1,13 @@
 --- a/net/minecraft/server/commands/GiveCommand.java
 +++ b/net/minecraft/server/commands/GiveCommand.java
+@@ -12,6 +_,7 @@
+ import net.minecraft.commands.arguments.item.ItemInput;
+ import net.minecraft.network.chat.Component;
+ import net.minecraft.server.level.ServerPlayer;
++import net.minecraft.world.entity.item.ItemEntity;
+ import net.minecraft.world.entity.livingblock.LivingBlock;
+ import net.minecraft.world.item.ItemStack;
+ 
 @@ -44,7 +_,7 @@
      }
  
@@ -9,3 +17,17 @@
          int maxStackSize = prototypeItemStack.getMaxStackSize();
          int maxAllowedCount = maxStackSize * 100;
          if (count > maxAllowedCount) {
+@@ -53,6 +_,13 @@
+         } else {
+             for (ServerPlayer player : players) {
+                 for (int i = 0; i < count; i++) {
++                    // Bridge: player.drop() call for AnvilCraft GiveCommandMixin compatibility.
++                    // The mixin wraps this call at ordinal 0. The resulting ItemEntity is made
++                    // fake (unpickable) so the actual item is given via LivingBlock.createStack().
++                    ItemEntity drop = player.drop(prototypeItemStack.copy(), false);
++                    if (drop != null) {
++                        drop.makeFakeItem();
++                    }
+                     LivingBlock.createStack(player.level(), player.blockPosition(), player, prototypeItemStack);
+                 }
+             }

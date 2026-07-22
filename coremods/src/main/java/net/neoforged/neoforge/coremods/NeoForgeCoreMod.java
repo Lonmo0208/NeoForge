@@ -20,5 +20,7 @@ public class NeoForgeCoreMod implements ClassProcessorProvider {
                 "potted", "getPotted")));
 
         collector.add(new MethodRedirector());
+
+        collector.add(new net.neoforged.neoforge.coremods.compat.FixAnvilCraftMixin());
     }
 }

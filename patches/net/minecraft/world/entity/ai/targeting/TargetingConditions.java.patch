@@ -1,27 +1,66 @@
 --- a/net/minecraft/world/entity/ai/targeting/TargetingConditions.java
 +++ b/net/minecraft/world/entity/ai/targeting/TargetingConditions.java
-@@ -62,6 +_,10 @@
+@@ -62,35 +_,35 @@
          return this;
      }
  
+-    public <T extends Entity & Targetable> boolean test(ServerLevel level, @Nullable Entity targeter, Entity target) {
+-        if (!(targeter instanceof LivingEntity livingEntity && target instanceof Targetable)) {
+-            return false;
+-        } else if (livingEntity == target) {
+-            return false;
+-        } else if (!((Targetable)target).canBeSeenByAnyone()) {
++    // Main method: 26.1.2-compatible signature with LivingEntity parameters.
++    // The 26.1.2 body is valid because LivingEntity implements Targetable in 26w14a.
 +    public <T extends LivingEntity> boolean test(ServerLevel level, @Nullable LivingEntity targeter, T target) {
-+        return this.test(level, (Entity)targeter, (Entity)target);
-+    }
-+
-     public <T extends Entity & Targetable> boolean test(ServerLevel level, @Nullable Entity targeter, Entity target) {
-         if (!(targeter instanceof LivingEntity livingEntity && target instanceof Targetable)) {
++        if (targeter == target) {
++            return false;
++        } else if (!target.canBeSeenByAnyone()) {
              return false;
-@@ -69,7 +_,7 @@
-             return false;
-         } else if (!((Targetable)target).canBeSeenByAnyone()) {
-             return false;
--        } else if (this.selector != null && !this.selector.test(target, level)) {
-+        } else if (this.selector != null && target instanceof LivingEntity livingTarget && !this.selector.test(livingTarget, level)) {
+         } else if (this.selector != null && !this.selector.test(target, level)) {
              return false;
          } else {
-             if (livingEntity == null) {
-@@ -101,6 +_,6 @@
+-            if (livingEntity == null) {
+-                if (this.isCombat && (!((Targetable)target).canBeSeenAsEnemy() || level.getDifficulty() == Difficulty.PEACEFUL)) {
++            if (targeter == null) {
++                if (this.isCombat && (!target.canBeSeenAsEnemy() || level.getDifficulty() == Difficulty.PEACEFUL)) {
+                     return false;
+                 }
+             } else {
+-                if (this.isCombat && (!livingEntity.canAttack(target) || livingEntity.isAlliedTo(target))) {
++                if (this.isCombat && (!targeter.canAttack(target) || targeter.isAlliedTo(target))) {
+                     return false;
+                 }
  
+                 if (this.range > 0.0) {
+-                    double modifier = this.testInvisible ? ((Targetable)target).getVisibilityPercent(livingEntity) : 1.0;
++                    double modifier = this.testInvisible ? target.getVisibilityPercent(targeter) : 1.0;
+                     double visibilityDistance = Math.max(this.range * modifier, 2.0);
+-                    double distanceToSqr = livingEntity.distanceToSqr(target.getX(), target.getY(), target.getZ());
++                    double distanceToSqr = targeter.distanceToSqr(target.getX(), target.getY(), target.getZ());
+                     if (distanceToSqr > visibilityDistance * visibilityDistance) {
+                         return false;
+                     }
+                 }
+ 
+-                if (this.checkLineOfSight && livingEntity instanceof Mob mob && !mob.getSensing().hasLineOfSight(target)) {
++                if (this.checkLineOfSight && targeter instanceof Mob mob && !mob.getSensing().hasLineOfSight(target)) {
+                     return false;
+                 }
+             }
+@@ -99,8 +_,17 @@
+         }
+     }
+ 
++    // Bridge for 26w14a compatibility: Entity/Targetable parameters.
++    public <T extends Entity & Targetable> boolean test(ServerLevel level, @Nullable Entity targeter, Entity target) {
++        LivingEntity lt = targeter instanceof LivingEntity ? (LivingEntity) targeter : null;
++        if (target instanceof LivingEntity le) {
++            return this.test(level, lt, le);
++        }
++        return false;
++    }
++
      @FunctionalInterface
      public interface Selector {
 -        boolean test(Entity target, ServerLevel level);

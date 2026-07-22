@@ -390,6 +390,33 @@
                      float enchantedDamage = this.getEnchantedDamage(nearby, var12, damageSource) * attackStrengthScale;
                      if (nearby.hurtServer(serverLevel, damageSource, enchantedDamage)) {
                          nearby.knockback(0.4F, Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), -Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)));
+@@ -1420,6 +_,26 @@
+         if (killingDamage.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+             return false;
+         } else {
++            // 26.1.2 compatibility: check hand for totem first
++            for (InteractionHand hand : InteractionHand.values()) {
++                ItemStack itemStack = this.getItemInHand(hand);
++                DeathProtection protection = itemStack.get(DataComponents.DEATH_PROTECTION);
++                if (protection != null && net.neoforged.neoforge.common.CommonHooks.onLivingUseTotem(this, killingDamage, itemStack, hand)) {
++                    ItemStack protectionItem = itemStack.copy();
++                    itemStack.shrink(1);
++                    if (this instanceof ServerPlayer player) {
++                        player.awardStat(Stats.ITEM_USED.get(protectionItem.getItem()));
++                        CriteriaTriggers.USED_TOTEM.trigger(player, protectionItem);
++                        protectionItem.causeUseVibration(this, GameEvent.ITEM_INTERACT_FINISH);
++                    }
++                    this.setHealth(1.0F);
++                    protection.applyEffects(protectionItem, this);
++                    this.level().broadcastEntityEvent(this, (byte)35);
++                    return true;
++                }
++            }
++
++            // 26w14a feature: check for nearby LivingBlock entities with death protection
+             List<LivingBlock> deathProtection = this.level()
+                 .getEntitiesOfClass(LivingBlock.class, this.getBoundingBox().inflate(7.0), block -> block.getItemStack().has(DataComponents.DEATH_PROTECTION));
+             if (deathProtection.isEmpty()) {
 @@ -1519,6 +_,7 @@
      }
  

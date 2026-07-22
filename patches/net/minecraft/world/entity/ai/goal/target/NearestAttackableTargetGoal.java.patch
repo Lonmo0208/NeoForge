@@ -1,6 +1,10 @@
 --- a/net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal.java
 +++ b/net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal.java
-@@ -4,6 +_,7 @@
+@@ -1,9 +_,11 @@
+ package net.minecraft.world.entity.ai.goal.target;
+ 
+ import java.util.EnumSet;
++import java.util.List;
  import net.minecraft.server.level.ServerLevel;
  import net.minecraft.server.level.ServerPlayer;
  import net.minecraft.world.entity.Entity;
@@ -8,7 +12,49 @@
  import net.minecraft.world.entity.Mob;
  import net.minecraft.world.entity.Targetable;
  import net.minecraft.world.entity.ai.goal.Goal;
-@@ -73,7 +_,9 @@
+@@ -16,7 +_,7 @@
+     private static final int DEFAULT_RANDOM_INTERVAL = 10;
+     protected final Class<T> targetType;
+     protected final int randomInterval;
+-    protected @Nullable T target;
++    protected @Nullable LivingEntity target;
+     protected final TargetingConditions targetConditions;
+ 
+     public NearestAttackableTargetGoal(Mob mob, Class<T> targetType, boolean mustSee) {
+@@ -58,27 +_,38 @@
+     protected void findTarget() {
+         ServerLevel level = getServerLevel(this.mob);
+         if (this.targetType != Player.class && this.targetType != ServerPlayer.class) {
+-            this.target = level.getNearestEntity(
+-                this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance()), entity -> true),
+-                this.getTargetConditions(),
+-                this.mob,
+-                this.mob.getX(),
+-                this.mob.getEyeY(),
+-                this.mob.getZ()
+-            );
++            // Neo: Inline getNearestEntity logic to support Entity & Targetable (e.g., LivingBlock)
++            // since getNearestEntity(List) now requires T extends LivingEntity for 26.1.2 compat
++            List<? extends T> entities = this.mob.level().getEntitiesOfClass(
++                this.targetType, this.getTargetSearchArea(this.getFollowDistance()), entity -> true);
++            TargetingConditions conditions = this.getTargetConditions();
++            double best = -1.0;
++            T result = null;
++            for (T entity : entities) {
++                if (conditions.test(level, this.mob, entity)) {
++                    double dist = entity.distanceToSqr(this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
++                    if (best == -1.0 || dist < best) {
++                        best = dist;
++                        result = entity;
++                    }
++                }
++            }
++            this.target = (LivingEntity) result;
+         } else {
+-            this.target = (T)level.getNearestPlayer(this.getTargetConditions(), this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
++            this.target = level.getNearestPlayer(this.getTargetConditions(), this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+         }
+     }
  
      @Override
      public void start() {
@@ -19,3 +65,9 @@
          super.start();
      }
  
+     public void setTarget(@Nullable T target) {
+-        this.target = target;
++        this.target = (LivingEntity) target;
+     }
+ 
+     private TargetingConditions getTargetConditions() {

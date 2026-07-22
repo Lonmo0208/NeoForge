@@ -1,20 +1,51 @@
 --- a/net/minecraft/core/dispenser/DefaultDispenseItemBehavior.java
 +++ b/net/minecraft/core/dispenser/DefaultDispenseItemBehavior.java
-@@ -8,6 +_,7 @@
- import net.minecraft.world.item.ItemStack;
- import net.minecraft.world.level.Level;
- import net.minecraft.world.level.block.DispenserBlock;
-+import org.jspecify.annotations.Nullable;
+@@ -14,18 +_,42 @@
  
- public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
-     private static final int DEFAULT_ACCURACY = 6;
-@@ -75,5 +_,9 @@
-             playDefaultSound(source.level(), source.pos());
-             playDefaultAnimation(source.level(), source.pos(), direction);
-         }
+     @Override
+     public final ItemStack dispense(DispenseSource source, ItemStack dispensed) {
+-        ItemStack result = this.execute(source, dispensed);
++        // Cast to BlockSource so that mixins targeting execute(BlockSource, ItemStack) are triggered
++        ItemStack result = this.execute((BlockSource) source, dispensed);
+         this.playSound(source);
+         this.playAnimation(source, source.direction());
+         return result;
+     }
+ 
+-    protected ItemStack execute(DispenseSource source, ItemStack dispensed) {
+-        Direction direction = source.direction();
+-        Position position = DispenserBlock.getDispensePosition(source);
+-        ItemStack itemStack = dispensed.split(1);
++    // Neo: bridge method providing a split(I) call site for mod mixins
++    // (e.g. AnvilCraft's DefaultDispenseItemBehaviorMixin) that target
++    // execute(BlockSource, ItemStack) with @At(INVOKE, target = "ItemStack.split(I)").
++    // A CoreMod (FixAnvilCraftMixin) qualifies the @Inject method reference
++    // with a full descriptor to resolve method ambiguity.
++    // The dummy stack is used to avoid modifying the actual stack before delegation.
++    // Calls neoforge$executeSplit directly instead of this.execute(DispenseSource, ...)
++    // to avoid infinite recursion when subclasses override execute(BlockSource, ...)
++    // and call super.execute(source, stack) (which resolves to this bridge).
++    public ItemStack execute(BlockSource source, ItemStack stack) {
++        stack.copy().split(1);
++        Direction direction = source.direction();
++        Position position = DispenserBlock.getDispensePosition(source);
++        return neoforge$executeSplit((DispenseSource) source, direction, position, stack);
 +    }
 +
-+    public @Nullable ItemStack execute(BlockSource source, ItemStack stack) {
-+        return null;
++    protected ItemStack execute(DispenseSource source, ItemStack stack) {
++        Direction direction = source.direction();
++        Position position = DispenserBlock.getDispensePosition(source);
++        return neoforge$executeSplit(source, direction, position, stack);
++    }
++
++    // Neo: extracted helper to keep execute(DispenseSource, ...) free of split(I) call,
++    // allowing mixins targeting execute with @At(INVOKE, target = "ItemStack.split(I)")
++    // to match only the bridge method at the concrete BlockSource type.
++    private ItemStack neoforge$executeSplit(DispenseSource source, Direction direction, Position position, ItemStack stack) {
++        ItemStack itemStack = stack.split(1);
+         spawnItem(source.level(), itemStack, 6, direction, position);
+-        return dispensed;
++        return stack;
      }
- }
+ 
+     public static void spawnItem(Level level, ItemStack itemStack, int accuracy, Direction direction, Position position) {

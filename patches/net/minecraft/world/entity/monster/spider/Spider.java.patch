@@ -20,7 +20,7 @@
 +
 +        @Override
 +        public void setTarget(@Nullable T target) {
-+            super.target = target;
++            super.target = (LivingEntity) target;
          }
  
          @Override

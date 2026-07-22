@@ -69,7 +69,7 @@
              }
          };
          DispenserBlock.registerBehavior(Items.LAVA_BUCKET, filledBucketBehavior);
-@@ -165,23 +_,40 @@
+@@ -165,8 +_,9 @@
          DispenserBlock.registerBehavior(Items.AXOLOTL_BUCKET, filledBucketBehavior);
          DispenserBlock.registerBehavior(Items.TADPOLE_BUCKET, filledBucketBehavior);
          DispenserBlock.registerBehavior(Items.BUCKET, new DefaultDispenseItemBehavior() {
@@ -80,21 +80,10 @@
                  LevelAccessor level = source.level();
                  BlockPos target = source.pos().relative(source.direction());
                  BlockState blockState = level.getBlockState(target);
-                 if (blockState.getBlock() instanceof BucketPickup bucket) {
-                     ItemStack pickup = bucket.pickupBlock(null, level, target, blockState);
-                     if (pickup.isEmpty()) {
--                        return super.execute(source, dispensed);
-+                        return super.execute((DispenseSource) source, dispensed);
-                     } else {
-                         level.gameEvent(null, GameEvent.FLUID_PICKUP, target);
-                         Item targetType = pickup.getItem();
-                         return this.consumeWithRemainder(source, dispensed, new ItemStack(targetType));
-                     }
-                 } else {
--                    return super.execute(source, dispensed);
-+                    return super.execute((DispenseSource) source, dispensed);
+@@ -183,6 +_,22 @@
+                     return super.execute(source, dispensed);
                  }
-+            }
+             }
 +
 +            @Override
 +            public ItemStack execute(DispenseSource source, ItemStack dispensed) {
@@ -110,9 +99,10 @@
 +            // Neo: bridge for BlockSource variant (not an override)
 +            public ItemStack consumeWithRemainder(BlockSource source, ItemStack stack, ItemStack remainer) {
 +                return this.consumeWithRemainder((DispenseSource) source, stack, remainer);
-             }
++            }
          });
          DispenserBlock.registerBehavior(Items.FLINT_AND_STEEL, new OptionalDispenseItemBehavior() {
+             @Override
 @@ -195,11 +_,12 @@
                  if (BaseFireBlock.canBePlacedAt(level, targetPos, facing)) {
                      level.setBlockAndUpdate(targetPos, BaseFireBlock.getState(level, targetPos));
@@ -208,14 +198,10 @@
                      this.setSuccess(false);
                      ServerLevel level = source.level();
                      BlockPos target = source.pos().relative(source.direction());
-@@ -342,8 +_,24 @@
-                         this.setSuccess(true);
-                         return this.takeLiquid(source, dispensed, PotionContents.createItemStack(Items.POTION, Potions.WATER));
-                     } else {
--                        return super.execute(source, dispensed);
-+                        return super.execute((DispenseSource) source, dispensed);
+@@ -345,6 +_,22 @@
+                         return super.execute(source, dispensed);
                      }
-+                }
+                 }
 +
 +                @Override
 +                public ItemStack execute(DispenseSource source, ItemStack dispensed) {
@@ -231,9 +217,10 @@
 +                // Neo: bridge for BlockSource variant (not an override)
 +                public ItemStack consumeWithRemainder(BlockSource source, ItemStack stack, ItemStack remainer) {
 +                    return this.consumeWithRemainder((DispenseSource) source, stack, remainer);
-                 }
++                }
              }
          );
+         DispenserBlock.registerBehavior(Items.GLOWSTONE, new OptionalDispenseItemBehavior() {
 @@ -368,6 +_,11 @@
                      return super.execute(source, dispensed);
                  }
