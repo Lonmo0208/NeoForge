@@ -1,1 +1,20 @@
-﻿                 this.mob,
+--- a/net/minecraft/world/entity/ai/goal/AvoidEntityGoal.java
++++ b/net/minecraft/world/entity/ai/goal/AvoidEntityGoal.java
+@@ -2,6 +_,8 @@
+ 
+ import java.util.EnumSet;
+ import java.util.function.Predicate;
++
++import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.world.entity.Entity;
+ import net.minecraft.world.entity.EntitySelector;
+ import net.minecraft.world.entity.LivingEntity;
+@@ -67,7 +_,7 @@
+     @Override
+     public boolean canUse() {
+         this.toAvoid = getServerLevel(this.mob)
+-            .getNearestEntity(
++            .<T>getNearestEntity(
+                 this.mob.level().getEntitiesOfClass(this.avoidClass, this.mob.getBoundingBox().inflate(this.maxDist, 3.0, this.maxDist), entity -> true),
+                 this.avoidEntityTargeting,
+                 this.mob,
