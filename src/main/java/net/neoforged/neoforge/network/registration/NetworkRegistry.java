@@ -99,7 +99,11 @@ public class NetworkRegistry {
             ModdedNetworkPayload.ID, ModdedNetworkPayload.STREAM_CODEC,
             ModdedNetworkSetupFailedPayload.ID, ModdedNetworkSetupFailedPayload.STREAM_CODEC,
             CommonVersionPayload.ID, CommonVersionPayload.STREAM_CODEC,
-            CommonRegisterPayload.ID, CommonRegisterPayload.STREAM_CODEC);
+            CommonRegisterPayload.ID, CommonRegisterPayload.STREAM_CODEC,
+            // Neo: Register legacy Dinnerbone protocol payloads to prevent decode failures
+            // when the server sends old-format register/unregister packets.
+            Identifier.fromNamespaceAndPath("legacy", "register"), MinecraftRegisterPayload.STREAM_CODEC,
+            Identifier.fromNamespaceAndPath("legacy", "unregister"), MinecraftUnregisterPayload.STREAM_CODEC);
 
     /**
      * Registry of all custom payload handlers. The initial state of this map should reflect the protocols which support custom payloads.
