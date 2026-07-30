@@ -4,7 +4,7 @@ project.gradleutils.version {
     minecraftVersion project.rootProject.minecraft_version
     versionPrefix = null // Reset version prefix, which is set by prev. line
     tags {
-        label = 'beta'
+        //label = 'beta'
         cleanMarkerLabel = 'stable'
     }
     branches {

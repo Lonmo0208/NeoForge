@@ -24,7 +24,11 @@ if (fixedProjectVersion == null) {
     } else {
         def fullVersion = gradleutils.version.toString()
         def suffixIndex = fullVersion.lastIndexOf('.')
-        def suffix = suffixIndex > 0 ? fullVersion.substring(suffixIndex) : ".1-beta"
+        def suffix = suffixIndex > 0 ? fullVersion.substring(suffixIndex) : ".1"
+        def versionOffset = project.hasProperty('neoforge_version_offset') ? Integer.parseInt(project.neoforge_version_offset) : 0
+        if (versionOffset > 0) {
+            suffix = "." + (Integer.parseInt(suffix.substring(1)) + versionOffset)
+        }
         project.version = project.neoforge_snapshot_next_stable + suffix
     }
 } else {
