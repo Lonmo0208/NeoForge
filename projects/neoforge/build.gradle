@@ -246,6 +246,12 @@ neoDev {
             if (project.hasProperty('neofobric.traceEntrypoints')) {
                 systemProperty("neofobric.traceEntrypoints", "true")
             }
+            // Diagnostic: the JVM prints every class it loads, in order. Needed to tell "this class was
+            // loaded before the Fabric mixin configs were registered" apart from "the mixin was registered
+            // and refused", which look identical in every other log.
+            if (project.hasProperty('neofobric.classLoadLog')) {
+                jvmArgument('-verbose:class')
+            }
             // A/B diagnosis: -Pneofobric.disabled=true runs NeoForge without the Fabric bridge.
             if (project.hasProperty('neofobric.disabled')) {
                 systemProperty("neofobric.disabled", "true")
@@ -261,6 +267,12 @@ neoDev {
                 systemProperty("mixin.debug.verbose", "true")
                 systemProperty("mixin.debug.export", "true")
                 systemProperty("mixin.checks", "true")
+            }
+            // Dumps the classes Mixin produced into run/<name>/.mixin.out, so a transformation can be read
+            // back with javap. Cheaper and far less invasive than the full debug switch above: it changes
+            // nothing about how the classes are built.
+            if (project.hasProperty('neofobric.mixinExport')) {
+                systemProperty("mixin.debug.export", "true")
             }
             if (project.hasProperty('neofobric.traceMixinClasses')) {
                 systemProperty("neofobric.traceMixinClasses", "true")
@@ -278,6 +290,11 @@ neoDev {
             // Prints the static predicate registry state where the failing loot table is decoded.
             if (project.hasProperty('neofobric.registryProbe')) {
                 systemProperty("neofobric.registryProbe", "true")
+            }
+            // Asks whether the vanilla component codec knows the content type a mod registered through
+            // its own @Mixin into ComponentSerialization#bootstrap (see BridgeSelfCheck#componentProbe).
+            if (project.hasProperty('neofobric.componentProbe')) {
+                systemProperty("neofobric.componentProbe", "true")
             }
             // Checks the Fabric <-> NeoForge transfer bridge against a real journalled handler and logs
             // PASS/FAIL (see FabricTransferHooks#selfTest).

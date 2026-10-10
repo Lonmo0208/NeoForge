@@ -163,9 +163,12 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         fmlProvidedModIds = readForgeModIds(modsDir);
 
         try (var files = Files.list(modsDir)) {
+            var listingStarted = System.nanoTime();
             files.filter(p -> p.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar"))
                     .sorted()
                     .forEach(path -> examineJar(path, fabricJars, 0));
+            LOGGER.info("[NeoFobric] Scanned the mods folder in {} ms: {} Fabric jar(s), {} left to FML",
+                    (System.nanoTime() - listingStarted) / 1_000_000L, fabricJars.size(), fmlProvidedJars.size());
         } catch (IOException e) {
             LOGGER.error("[NeoFobric] Failed to list the mods folder", e);
             return;
@@ -266,7 +269,8 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // are written so no handle is held on them.
         var gameContent = classpathGameContent();
         // Original jar path -> realigned copy. Only jars that actually needed a rewrite appear here.
-        var realignedJars = new java.util.HashMap<Path, Path>();
+        // Written from every patching thread at once.
+        var realignedJars = new java.util.concurrent.ConcurrentHashMap<Path, Path>();
         if (!gameContent.isEmpty()) {
             // Every copy is regenerated this pass, so the cache starts empty - which also stops a
             // removed mod from leaving a copy of itself behind forever.
@@ -279,13 +283,33 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 // Colliding accessor members are planned before any jar is written: a call site can live
                 // in a different jar than the accessor it calls.
                 var accessorRenames = MixinJarPatcher.scanAccessorCollisions(fabricPaths, resolver);
-                for (var path : fabricPaths) {
-                    var effective = MixinJarPatcher.patchJar(path, resolver, accessorRenames);
-                    if (!effective.equals(path)) {
-                        realignedJars.put(path, effective);
-                        realigned++;
+                // The patched copy of a jar depends on this whole set (the accessor plan is global), so the
+                // set is part of every jar's patch-cache key.
+                MixinJarPatcher.noteModSet(fabricPaths);
+                var patchingStarted = System.nanoTime();
+                var patchedJars = new java.util.concurrent.ConcurrentHashMap<Path, Path>();
+                // The jars are independent of each other (the accessor collisions were planned across all of
+                // them before this), and patching one is pure bytecode work on that jar, so they go through
+                // every core. One jar at a time left eleven of this machine's twelve cores idle during the
+                // longest phase of startup.
+                fabricPaths.parallelStream().forEach(path -> {
+                    var jarStarted = System.nanoTime();
+                    try {
+                        var effective = MixinJarPatcher.patchJar(path, resolver, accessorRenames);
+                        if (!effective.equals(path)) {
+                            realignedJars.put(path, effective);
+                            patchedJars.put(path, effective);
+                        }
+                        LOGGER.info("[NeoFobric] Patched {} in {} ms", path.getFileName(),
+                                (System.nanoTime() - jarStarted) / 1_000_000L);
+                    } catch (Throwable t) {
+                        LOGGER.error("[NeoFobric] Failed to patch {}", path.getFileName(), t);
                     }
-                }
+                });
+                LOGGER.info("[NeoFobric] Patched {} Fabric jar(s) in {} ms wall clock on {} threads",
+                        fabricPaths.size(), (System.nanoTime() - patchingStarted) / 1_000_000L,
+                        Runtime.getRuntime().availableProcessors());
+                realigned = patchedJars.size();
                 // A patched nested jar has to travel inside its parent as well: fabric-loader unpacks the
                 // copies it finds in the parent jar, so a nested mod whose classes were rewritten would
                 // otherwise be loaded in its original shape (that is how the platform-namespace shading

@@ -61,6 +61,7 @@ build
 # stays out. With the whole folder ignored the notes pointed at scripts nobody else could get.
 /tools/*
 !/tools/*.ps1
+!/tools/*.sh
 !/tools/mc-api-diff
 
 # NeoFobric: the diff tool writes its report here

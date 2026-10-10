@@ -83,6 +83,11 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
     private static final String SERVER_MAIN_CLASS = "net/minecraft/server/Main";
     private static final String DEDICATED_SERVER_CLASS = "net/minecraft/server/dedicated/DedicatedServer";
     private static final String NETWORK_REGISTRY_CLASS = "net/neoforged/neoforge/network/registration/NetworkRegistry";
+    /**
+     * The first game class either dist loads, and therefore where {@link #forceMixinPreparationIfPending}
+     * gets its first chance to run.
+     */
+    private static final String SHARED_CONSTANTS_CLASS = "net/minecraft/SharedConstants";
 
     /** {@code NetworkRegistry#getCodec(Identifier, ConnectionProtocol, PacketFlow)}. */
     private static final String GET_CODEC_DESC =
@@ -90,6 +95,8 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
                     + "Lnet/minecraft/network/protocol/PacketFlow;)Lnet/minecraft/network/codec/StreamCodec;";
 
     private static boolean mixinRegistrationDone;
+    /** Set once Mixin has really prepared the Fabric configs; see {@link #forceMixinPreparationIfPending}. */
+    private static volatile boolean mixinPrepared;
 
     @Override
     public ProcessorName name() {
@@ -123,7 +130,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         }
         return switch (context.type().getInternalName()) {
             case MINECRAFT_CLASS, MINECRAFT_SERVER_CLASS, CLIENT_BRAND_RETRIEVER_CLASS, SERVER_MAIN_CLASS,
-                    DEDICATED_SERVER_CLASS, NETWORK_REGISTRY_CLASS -> true;
+                    DEDICATED_SERVER_CLASS, NETWORK_REGISTRY_CLASS, SHARED_CONSTANTS_CLASS -> true;
             default -> false;
         };
     }
@@ -145,6 +152,9 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         if (Boolean.getBoolean("neofobric.noClassPatch")) {
             return ComputeFlags.NO_REWRITE;
         }
+        // The pipeline hands us game classes from here on, which is exactly when Mixin can be asked to
+        // prepare the Fabric configs - and the last moment before the game's own class loading starts.
+        forceMixinPreparationIfPending();
         var node = context.node();
         var changed = switch (node.name) {
             case MINECRAFT_CLASS -> injectClientGameInstanceHandoff(node);
@@ -405,6 +415,125 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
     }
 
     /**
+     * Pins a Fabric mixin config to {@code DEFAULT}, the environment FML's mixin service runs in.
+     *
+     * <p>Mixin decides which environment a config belongs to when it reads the file: an
+     * {@code "environment"} selector if present, and otherwise whatever {@code MixinEnvironment} happens to
+     * be current at that moment. A config is only ever selected - and therefore only ever <em>prepared</em>,
+     * the step that builds its target index - in the environment it belongs to. Our configs are registered
+     * at {@code link()} time, so an unpinned one would belong to a phase the platform has already left,
+     * {@code select()} would decline it, and nothing would prepare it until the phase came back around.
+     */
+    private static byte[] pinMixinEnvironment(byte[] content) {
+        try {
+            var text = new String(content, java.nio.charset.StandardCharsets.UTF_8);
+            var root = com.google.gson.JsonParser.parseString(text).getAsJsonObject();
+            var current = root.get("environment");
+            if (current != null && "DEFAULT".equals(current.getAsString())) {
+                return content;
+            }
+            root.addProperty("environment", "DEFAULT");
+            return root.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not pin a mixin config to the DEFAULT environment", t);
+            return content;
+        }
+    }
+
+    /**
+     * Makes Mixin select and prepare the just-registered configs, and retries until it takes.
+     *
+     * <p>Why: Mixin reads a config lazily - "Preparing {@code <config>} (N)" only happens when it next
+     * selects, and nothing selects before the platform's own mixin phase transitions. A class that is
+     * defined before its config was prepared <em>silently</em> keeps no mixins from that config: Mixin never
+     * revisits a loaded class and the miss is invisible in every log.
+     *
+     * <p>That is what cost us Create's {@code ComponentSerializationMixin}. The platform's first game class
+     * is {@code SharedConstants}, whose static initialiser pulls in the whole component codec chain;
+     * {@code ComponentSerialization} was therefore defined at 20.769 s while {@code create.mixins.json} was
+     * only prepared around 21.0 s (measured with {@code -verbose:class} plus Mixin's own log). Create's
+     * component type never came into existence, so its sequenced-assembly recipes failed to decode with
+     * {@code No matching codec found} and the world would not load - surfacing three layers away as
+     * "Failed to load level data or datapacks".
+     *
+     * <p>Neither a class load nor a phase change can trigger the select here (the platform has already mixed
+     * classes, so {@code MixinProcessor.checkSelect} stays quiet), and at {@code link()} time it is not
+     * possible either: Mixin rejects every config with "Service initialisation incomplete, launch plugin was
+     * not created" until the platform's mixin facade has run. So this is attempted from
+     * {@code processClass}, on the first game class the transformation pipeline hands over - which is after
+     * that facade, and before the class's own static initialiser drags in everything else.
+     *
+     * <p>The phase is moved to {@code DEFAULT} first (reflectively - {@code gotoPhase} is package-private,
+     * and the platform's own facade calls it the same way) so the current environment is the one every
+     * Fabric config is pinned to by {@link #pinMixinEnvironment}. Both the phase change and the select are
+     * the same operations the platform performs on its phase transitions, only earlier.
+     */
+    static void forceMixinPreparationIfPending() {
+        if (mixinPrepared || Boolean.getBoolean("neofobric.noForcedMixinPreparation")) {
+            return;
+        }
+        // Mixin reaches for a target class's bytecode *while it prepares a config*, and that request runs
+        // the whole transformation pipeline - this method included. Selecting from inside that would nest
+        // a second select into the platform's own, which prepares the same configs twice and leaves every
+        // mixin of theirs without a pending validation state (Mixin then fails them one by one, on every
+        // application, for as many classes as it is asked about).
+        if (insideMixin()) {
+            return;
+        }
+        try {
+            var environmentClass = Class.forName("org.spongepowered.asm.mixin.MixinEnvironment");
+            var phaseClass = Class.forName("org.spongepowered.asm.mixin.MixinEnvironment$Phase");
+            var gotoPhase = environmentClass.getDeclaredMethod("gotoPhase", phaseClass);
+            gotoPhase.setAccessible(true);
+            gotoPhase.invoke(null, phaseClass.getField("DEFAULT").get(null));
+
+            var environment = environmentClass.getMethod("getCurrentEnvironment").invoke(null);
+            var processorClass = Class.forName("org.spongepowered.asm.mixin.transformer.MixinProcessor");
+
+            var service = MixinService.getService();
+            var transformer = service.getClass().getMethod("getMixinTransformer").invoke(service);
+            Object processor = null;
+            for (Class<?> type = transformer.getClass(); type != null && processor == null; type = type.getSuperclass()) {
+                for (var field : type.getDeclaredFields()) {
+                    if (processorClass.isAssignableFrom(field.getType())) {
+                        field.setAccessible(true);
+                        processor = field.get(transformer);
+                        break;
+                    }
+                }
+            }
+            if (processor == null) {
+                throw new IllegalStateException("Mixin's transformer (" + transformer.getClass().getName()
+                        + ") carries no MixinProcessor");
+            }
+
+            var select = processorClass.getDeclaredMethod("select", environmentClass);
+            select.setAccessible(true);
+            select.invoke(processor, environment);
+            var pending = Mixins.getConfigs().size();
+            if (pending == 0) {
+                mixinPrepared = true;
+                LOGGER.info("[NeoFobric] Made Mixin prepare the Fabric mixin configs before the game started");
+            } else {
+                LOGGER.debug("[NeoFobric] Mixin kept {} Fabric mixin config(s) pending, will retry", pending);
+            }
+        } catch (Throwable t) {
+            // Expected on the very first attempts, before the platform's mixin facade has run.
+            LOGGER.debug("[NeoFobric] Mixin is not ready to prepare the Fabric configs yet, will retry", t);
+        }
+    }
+
+    /** {@return whether Mixin's own machinery is on this thread's stack} */
+    private static boolean insideMixin() {
+        for (var frame : new Throwable().getStackTrace()) {
+            if (frame.getClassName().startsWith("org.spongepowered.asm.mixin.")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Rewrites a Fabric mixin config: folds the dist sections into {@code "mixins"}, and makes the config
      * lenient - {@code "required": false} on the config and {@code "defaultRequire": 0} in every
      * {@code injectors} block.
@@ -428,6 +557,8 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         if (folded != null) {
             content = folded;
         }
+
+        content = pinMixinEnvironment(content);
 
         var text = new String(content, java.nio.charset.StandardCharsets.UTF_8);
 

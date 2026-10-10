@@ -1,10 +1,16 @@
 --- a/net/minecraft/network/chat/ComponentSerialization.java
 +++ b/net/minecraft/network/chat/ComponentSerialization.java
-@@ -122,6 +_,7 @@
+@@ -122,6 +_,13 @@
          contentTypes.put("selector", SelectorContents.MAP_CODEC);
          contentTypes.put("nbt", NbtContents.MAP_CODEC);
          contentTypes.put("object", ObjectContents.MAP_CODEC);
 +        contentTypes.put("neoforge:inserting", net.neoforged.neoforge.common.util.InsertingContents.MAP_CODEC);
++        // NeoFobric: Fabric mods declare their own component content types by mixing into this method, and
++        // that mixin can never apply here - the platform loads this class for its own version detection,
++        // before its mixin service can build a target index, and Mixin never revisits a loaded class (the
++        // same reason NeoForge declares inserting above with a patch rather than a mixin). The bridge finds
++        // those declarations in the mod jars and runs them against this mapper.
++        net.neoforged.fabricbridge.FabricBridgeHooks.registerFabricComponentContents(contentTypes);
      }
  
      private static class FuzzyCodec<T> extends MapCodec<T> {

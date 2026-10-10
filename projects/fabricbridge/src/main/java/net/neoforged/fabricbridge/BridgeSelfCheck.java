@@ -212,6 +212,8 @@ public final class BridgeSelfCheck {
                     progress();
                 } else if (label.endsWith(".END_SERVER_TICK")) {
                     progressServer();
+                } else if (label.endsWith(".CLIENT_STARTED")) {
+                    componentProbe("client started");
                 } else if (label.endsWith(".ALL_LOADED")) {
                     // A loot table of Twilight Forest's fails to parse with "Unknown registry key
                     // minecraft:entity_sub_predicate_type: minecraft:type_specific", which means the static
@@ -310,6 +312,9 @@ public final class BridgeSelfCheck {
             // the rest of the checks do, and it runs once (it is what the run is here to report).
             FabricTransferHooks.probeInWorldOnce();
 
+            schematicProgressProbe(instance);
+            schematicUploadDriver(instance);
+
             if (!canarySent && ticksInWorld == 20) {
                 canarySent = true;
                 canarySentAtTick = ticksInWorld;
@@ -390,8 +395,411 @@ public final class BridgeSelfCheck {
         }
     }
 
-    private static void report(Object minecraft) {
-        var silent = new ArrayList<String>();
+    /**
+     * Asks whether the vanilla component codec knows a mod's own component type, which is what a mod's
+     * {@code @Mixin} into {@code ComponentSerialization#bootstrap} registers.
+     *
+     * <p>Why this exists: Create writes a recipe's assembly steps into the result's {@code minecraft:lore} as
+     * a component whose argument is its own {@code {"ingredient": "#tag"}} type. It can encode that type
+     * either way, but decoding needs the type registered - so when the registration is missing, Create's
+     * {@code Recipe.CODEC.parse(...).getOrThrow()} throws instead of logging, and the whole world load
+     * fails with "Failed to load level data or datapacks". Nothing in the log says which of the two
+     * halves is missing, and {@code FuzzyCodec} throws away the reason as well, so this probe decodes an
+     * empty component: only a registered content type with two optional fields can accept it.
+     *
+     * <p>Enabled with {@code -Dneofobric.componentProbe=true}; silent otherwise. No registries are touched,
+     * so it can run before a world exists.
+     */
+    static void componentProbe(String where) {
+        if (!Boolean.getBoolean("neofobric.componentProbe")) {
+            return;
+        }
+        try {
+            // A config Mixin has not prepared yet is one whose mixins no already-loaded class can have
+            // received - the count is 0 when the bridge's forced preparation did its job.
+            LOGGER.info("[NeoFobric] component probe at {}: Mixin has {} config(s) still unvisited", where,
+                    org.spongepowered.asm.mixin.Mixins.getUnvisitedCount());
+            var codec = Class.forName("net.minecraft.network.chat.ComponentSerialization", false, gameLoader)
+                    .getField("CODEC").get(null);
+            var ops = Class.forName("com.mojang.serialization.JsonOps", false, gameLoader).getField("INSTANCE").get(null);
+            var parse = Class.forName("com.mojang.serialization.Codec", false, gameLoader)
+                    .getMethod("parse", Class.forName("com.mojang.serialization.DynamicOps", false, gameLoader), Object.class);
+            var jsonParser = Class.forName("com.google.gson.JsonParser", false, gameLoader)
+                    .getMethod("parseString", String.class);
+            for (var text : new String[] { "{}", "{\"text\":\"probe\"}", "{\"ingredient\":\"#create:track_nuggets\"}" }) {
+                var json = jsonParser.invoke(null, text);
+                LOGGER.info("[NeoFobric] component probe at {}: {} -> {}", where, text,
+                        describeDataResult(parse.invoke(codec, ops, json)));
+            }
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] component probe failed at {}", where, t);
+        }
+    }
+
+    private static String describeDataResult(Object result) {
+        try {
+            if ((boolean) result.getClass().getMethod("isSuccess").invoke(result)) {
+                var value = result.getClass().getMethod("result").invoke(result);
+                var contents = value instanceof java.util.Optional<?> optional && optional.isPresent()
+                        ? optional.get().getClass()
+                        : value;
+                return "ok (" + contents + ")";
+            }
+            var error = result.getClass().getMethod("error").invoke(result);
+            return "failed: " + (error instanceof java.util.Optional<?> optional ? optional.map(String::valueOf).orElse("?") : error);
+        } catch (Throwable t) {
+            return "unreadable: " + t;
+        }
+    }
+
+    /** The last line the schematic-table probe printed, so it only logs when something really changes. */
+    private static volatile String schematicProbeLast;
+
+    /**
+     * Answers where Create's schematic-table upload progress gets lost: the screen holds a rendered bar whose
+     * width follows {@code chasingProgress}, which follows the block entity's {@code uploadingProgress} - and
+     * the block entity value arrives over the platform's block-entity sync. Reading both on every tick says
+     * whether the value never arrives (sync) or arrives and is not drawn (the bar itself).
+     *
+     * <p>On by default, but silent unless a schematic table screen is open: it then prints a line whenever one
+     * of the numbers changes, and a heartbeat every five seconds, so "the screen is open and nothing moves" is
+     * visible too. Turn it off with {@code -Dneofobric.schematicProbe=false}.
+     */
+    static void schematicProgressProbe(Object minecraft) {
+        if (Boolean.getBoolean("neofobric.noSchematicProbe")) {
+            return;
+        }
+        try {
+            var screen = member(minecraft, "screen");
+            if (screen == null || !screen.getClass().getName().contains("SchematicTable")) {
+                schematicProbeLast = null;
+                schematicProbeHeartbeat = 0;
+                return;
+            }
+            var line = new StringBuilder("[NeoFobric] schematic probe:")
+                    .append(" progress=").append(member(screen, "progress"))
+                    .append(" chasing=").append(member(screen, "chasingProgress"))
+                    .append(" lastChasing=").append(member(screen, "lastChasingProgress"));
+            var menu = member(screen, "menu");
+            var holder = menu == null ? null : member(menu, "contentHolder");
+            line.append(" holder=").append(holder == null ? "null" : holder.getClass().getSimpleName());
+            if (holder != null) {
+                line.append(" isUploading=").append(member(holder, "isUploading"))
+                        .append(" uploadingProgress=").append(member(holder, "uploadingProgress"))
+                        .append(" uploadingSchematic=").append(member(holder, "uploadingSchematic"))
+                        .append(" sendUpdate=").append(member(holder, "sendUpdate"));
+                // If the screen's block entity is not the one the client level holds, no sync can ever reach
+                // the copy it reads from - which would look exactly like "the bar never fills".
+                var level = member(minecraft, "level");
+                var pos = member(holder, "worldPosition");
+                if (level != null && pos != null) {
+                    try {
+                        var fromLevel = invoke(level, "getBlockEntity", pos);
+                        line.append(" sameInstanceAsLevel=").append(fromLevel == holder);
+                    } catch (Throwable t) {
+                        line.append(" sameInstanceAsLevel=?");
+                    }
+                }
+            }
+            var text = line.toString();
+            if (!text.equals(schematicProbeLast) || ++schematicProbeHeartbeat >= 100) {
+                schematicProbeLast = text;
+                schematicProbeHeartbeat = 0;
+                LOGGER.info(text);
+            }
+        } catch (Throwable t) {
+            // A diagnostic must never be able to break a run.
+            LOGGER.debug("[NeoFobric] schematic probe failed", t);
+        }
+    }
+
+    private static int schematicProbeHeartbeat;
+    /** Set by the upload driver so the probe also reports the client-side block entity, screen or not. */
+    private static volatile Object schematicProbePos;
+
+    /**
+     * Drives one schematic upload from the server side, so the progress path can be observed without anyone
+     * clicking through the blueprint table's GUI.
+     *
+     * <p>Enabled with {@code -Dneofobric.schematicTest=true}: it puts a schematic table next to the player,
+     * feeds Create's own {@code ServerSchematicLoader} the bytes of a real schematic in the game's
+     * {@code schematics} directory, and lets the probe report what the client sees. Everything goes through
+     * Create's public API, so what it exercises is exactly what a real upload exercises - only the file
+     * chooser and the button are skipped.
+     */
+    static void schematicUploadDriver(Object minecraft) {
+        if (!Boolean.getBoolean("neofobric.schematicTest")) {
+            return;
+        }
+        try {
+            // Everything that touches a server level, a server player or an upload has to run on the server
+            // thread - doing it from the client tick (this method's own thread) is what stalled an earlier run.
+            if (schematicTestStep <= 1) {
+                var server = member(minecraft, "singleplayerServer");
+                if (server == null) {
+                    server = invoke(minecraft, "getSingleplayerServer");
+                }
+                if (server == null) {
+                    return;
+                }
+                var serverThread = server;
+                invoke(serverThread, "execute", (Runnable) () -> runSchematicTestServerSteps(serverThread));
+                return;
+            }
+            switch (schematicTestStep) {
+                case 2 -> {
+                    if (++schematicTestWait < 100) {
+                        return;
+                    }
+                    LOGGER.info("[NeoFobric] schematic test: verdict - server side {} | client side {}",
+                            schematicTestSummary(), clientBlockEntitySummary());
+                    schematicTestStep = 99;
+                }
+                default -> {
+                }
+            }
+        } catch (Throwable t) {
+            schematicTestStep = 99;
+            LOGGER.warn("[NeoFobric] schematic test driver failed", t);
+        }
+    }
+
+    private static void runSchematicTestServerSteps(Object server) {
+        if (schematicTestStep > 1) {
+            return;
+        }
+        try {
+            switch (schematicTestStep) {
+                case 0 -> {
+                    var players = invoke(server, "getPlayerList");
+                    var list = players == null ? null : invoke(players, "getPlayers");
+                    var player = list instanceof java.util.List<?> l && !l.isEmpty() ? l.get(0) : null;
+                    if (player == null) {
+                        return;
+                    }
+                    schematicTestPlayer = player;
+                    var level = invoke(player, "level");
+                    var file = schematicTestFile();
+                    if (level == null || file == null) {
+                        LOGGER.warn("[NeoFobric] schematic test: no level or no schematic file to send");
+                        schematicTestStep = 99;
+                        return;
+                    }
+                    var pos = invoke(player, "blockPosition");
+                    var posClass = Class.forName("net.minecraft.core.BlockPos", false, gameLoader);
+                    var tablePos = posClass
+                            .getConstructor(int.class, int.class, int.class)
+                            .newInstance((int) invoke(pos, "getX") + 1, (int) invoke(pos, "getY"),
+                                    (int) invoke(pos, "getZ"));
+                    // Look for a table the player already stands next to; otherwise put one there. The block
+                    // comes from the registry by name, so no mod class is named anywhere in this driver.
+                    var be = findSchematicTable(level, pos, posClass);
+                    if (be == null) {
+                        var block = Class.forName("net.minecraft.core.registries.BuiltInRegistries", false, gameLoader)
+                                .getField("BLOCK").get(null);
+                        var id = Class.forName("net.minecraft.resources.Identifier", false, gameLoader)
+                                .getMethod("parse", String.class).invoke(null, "create:schematic_table");
+                        var value = invoke(block, "getValue", id);
+                        var valueName = String.valueOf(value);
+                        if (value == null || valueName.contains("air") || valueName.contains("Air")) {
+                            LOGGER.warn("[NeoFobric] schematic test: create:schematic_table is not registered ({})",
+                                    valueName);
+                            schematicTestStep = 99;
+                            return;
+                        }
+                        var state = invoke(value, "defaultBlockState");
+                        invoke(level, "setBlockAndUpdate", tablePos, state);
+                        be = invoke(level, "getBlockEntity", tablePos);
+                    }
+                    LOGGER.info("[NeoFobric] schematic test: table at {} -> {}", tablePos,
+                            be == null ? "no block entity" : be.getClass().getName());
+                    schematicProbePos = tablePos;
+                    schematicTestBe = be;
+                    schematicTestBytes = java.nio.file.Files.readAllBytes(file);
+                    LOGGER.info("[NeoFobric] schematic test: sending {} bytes of {} as {}", schematicTestBytes.length,
+                            file.getFileName(), schematicTestName);
+                    var loader = Class.forName("com.zurrtum.create.Create", false, gameLoader)
+                            .getField("SCHEMATIC_RECEIVER").get(null);
+                    invoke(loader, "handleNewUpload", player, schematicTestName, (long) schematicTestBytes.length, tablePos);
+                    schematicTestStep = 1;
+                }
+                case 1 -> {
+                    var loader = Class.forName("com.zurrtum.create.Create", false, gameLoader)
+                            .getField("SCHEMATIC_RECEIVER").get(null);
+                    var chunkSize = 1024;
+                    while (schematicTestOffset < schematicTestBytes.length) {
+                        var end = Math.min(schematicTestOffset + chunkSize, schematicTestBytes.length);
+                        var chunk = java.util.Arrays.copyOfRange(schematicTestBytes, schematicTestOffset, end);
+                        invoke(loader, "handleWriteRequest", schematicTestPlayer, schematicTestName, chunk);
+                        schematicTestOffset = end;
+                    }
+                    LOGGER.info("[NeoFobric] schematic test: all {} bytes written; block entity now says {}",
+                            schematicTestBytes.length, schematicTestSummary());
+                    schematicTestStep = 2;
+                }
+                case 2 -> {
+                    if (++schematicTestWait < 100) {
+                        return;
+                    }
+                    LOGGER.info("[NeoFobric] schematic test: verdict - server side {} | client side {}",
+                            schematicTestSummary(), clientBlockEntitySummary());
+                    schematicTestStep = 99;
+                }
+                default -> {
+                }
+            }
+        } catch (Throwable t) {
+            schematicTestStep = 99;
+            LOGGER.warn("[NeoFobric] schematic test driver failed", t);
+        }
+    }
+
+    private static int schematicTestStep;
+    private static int schematicTestOffset;
+    private static int schematicTestWait;
+    private static Object schematicTestPlayer;
+    private static Object schematicTestBe;
+    private static byte[] schematicTestBytes = new byte[0];
+    private static final String schematicTestName = "neofobric-probe.nbt";
+
+    /** {@return the newest schematic in the game directory, or null} */
+    private static java.nio.file.Path schematicTestFile() {
+        try {
+            var dir = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve("schematics");
+            if (!java.nio.file.Files.isDirectory(dir)) {
+                return null;
+            }
+            try (var stream = java.nio.file.Files.list(dir)) {
+                return stream.filter(p -> p.getFileName().toString().endsWith(".nbt"))
+                        .min(java.util.Comparator.comparingLong(p -> -p.toFile().lastModified()))
+                        .orElse(null);
+            }
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /** {@return a schematic table block entity within a few blocks of the player, or null} */
+    private static Object findSchematicTable(Object level, Object pos, Class<?> posClass) {
+        try {
+            var x = (int) invoke(pos, "getX");
+            var y = (int) invoke(pos, "getY");
+            var z = (int) invoke(pos, "getZ");
+            var constructor = posClass.getConstructor(int.class, int.class, int.class);
+            for (var dx = -8; dx <= 8; dx++) {
+                for (var dy = -4; dy <= 4; dy++) {
+                    for (var dz = -8; dz <= 8; dz++) {
+                        var candidate = constructor.newInstance(x + dx, y + dy, z + dz);
+                        var be = invoke(level, "getBlockEntity", candidate);
+                        if (be != null && be.getClass().getName().contains("SchematicTableBlockEntity")) {
+                            LOGGER.info("[NeoFobric] schematic test: using the table already at {}", candidate);
+                            return be;
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] schematic test: no table found nearby", t);
+        }
+        return null;
+    }
+
+    private static String schematicTestSummary() {
+        var be = schematicTestBe;
+        return be == null ? "<none>"
+                : "isUploading=" + member(be, "isUploading") + " progress=" + member(be, "uploadingProgress")
+                        + " sendUpdate=" + member(be, "sendUpdate");
+    }
+
+    /**
+     * {@return what the <em>client</em> block entity at the test position says}
+     *
+     * <p>This is the value the bar on the screen is drawn from, so comparing it with the server side is the
+     * whole question: equal means the sync works and the bar's own drawing is at fault, different means the
+     * update never arrives.
+     */
+    private static String clientBlockEntitySummary() {
+        try {
+            var minecraft = Class.forName("net.minecraft.client.Minecraft", false, gameLoader)
+                    .getMethod("getInstance").invoke(null);
+            var level = member(minecraft, "level");
+            var pos = schematicProbePos;
+            if (level == null || pos == null) {
+                return "<no client level>";
+            }
+            var be = invoke(level, "getBlockEntity", pos);
+            if (be == null) {
+                return "<no block entity on the client>";
+            }
+            return "sameInstanceAsServer=" + (be == schematicTestBe)
+                    + " isUploading=" + member(be, "isUploading")
+                    + " progress=" + member(be, "uploadingProgress")
+                    + " username=" + member(be, "uploadingSchematic");
+        } catch (Throwable t) {
+            return "<unreadable: " + t + ">";
+        }
+    }
+
+    /**
+     * Calls a method by name and arguments: the first method whose parameter count matches and whose
+     * parameter types accept the arguments wins. Kept deliberately dumb - an earlier version tried to take
+     * explicit parameter types as leading arguments and got the two mixed up.
+     */
+    private static Object invoke(Object owner, String name, Object... args) throws ReflectiveOperationException {
+        if (owner == null) {
+            throw new NoSuchMethodException(name + " on null");
+        }
+        for (var type = owner.getClass(); type != null; type = type.getSuperclass()) {
+            for (var method : type.getMethods()) {
+                if (!method.getName().equals(name) || method.getParameterCount() != args.length) {
+                    continue;
+                }
+                if (!accepts(method.getParameterTypes(), args)) {
+                    continue;
+                }
+                method.setAccessible(true);
+                return method.invoke(owner, args);
+            }
+        }
+        throw new NoSuchMethodException(name + "/" + args.length);
+    }
+
+    private static boolean accepts(Class<?>[] types, Object[] args) {
+        for (var i = 0; i < types.length; i++) {
+            if (args[i] == null) {
+                if (types[i].isPrimitive()) {
+                    return false;
+                }
+                continue;
+            }
+            if (types[i].isPrimitive()) {
+                if (!(args[i] instanceof Number || args[i] instanceof Boolean)) {
+                    return false;
+                }
+                continue;
+            }
+            if (!types[i].isInstance(args[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Reads a field from an object or any of its superclasses - the Create screens keep theirs private. */
+    private static Object member(Object owner, String name) {
+        for (Class<?> type = owner.getClass(); type != null; type = type.getSuperclass()) {
+            try {
+                var field = type.getDeclaredField(name);
+                field.setAccessible(true);
+                return field.get(owner);
+            } catch (NoSuchFieldException | IllegalAccessException | RuntimeException e) {
+                // keep walking
+            }
+        }
+        return null;
+    }
+
+    private static void report(Object minecraft) {        var silent = new ArrayList<String>();
         var wired = 0;
         for (var entry : fired.entrySet()) {
             if (Boolean.TRUE.equals(entry.getValue())) {

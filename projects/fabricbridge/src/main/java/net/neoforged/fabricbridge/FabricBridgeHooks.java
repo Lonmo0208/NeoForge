@@ -1205,4 +1205,240 @@ public final class FabricBridgeHooks {
 
     private static final java.util.Set<String> REPORTED_POI_CONFLICTS =
             java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /**
+     * Registers the component content types Fabric mods declare by mixing into
+     * {@code ComponentSerialization#bootstrap}, which this environment can never apply.
+     *
+     * <p>Why a mixin into that class cannot work here: FML loads {@code ComponentSerialization} for its own
+     * version detection, before the platform's mixin service is ready to build a target index (measured with
+     * {@code -verbose:class}: {@code SharedConstants} at 19.051 s drags in the whole component codec chain,
+     * while the mixin service only accepts a config from about 20.5 s on). Mixin never revisits a class it
+     * has already seen, and the miss is silent in every log. The same limitation is why NeoForge declares its
+     * own component type ({@code neoforge:inserting}) through a source patch of that class instead of a
+     * mixin - and this is the Fabric side of it, reached from the same patch: the handlers a mod registers
+     * for that method are found in its jars and run against the mapper the platform just built.
+     *
+     * <p>Never throws: a mod whose handler cannot be replayed loses its component type (the mod's own
+     * decoding of it then fails, which is what Create's sequenced-assembly recipes did), but the game keeps
+     * running.
+     */
+    public static void registerFabricComponentContents(Object contentTypes) {
+        if (contentTypes == null || !bridgeActive() || Boolean.getBoolean("neofobric.noComponentReplay")) {
+            return;
+        }
+        try {
+            var handlers = fabricComponentHandlers();
+            if (handlers.isEmpty()) {
+                return;
+            }
+            var loader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var callbackInfo = Class.forName("org.spongepowered.asm.mixin.injection.callback.CallbackInfo", false, loader);
+            var callback = callbackInfo.getConstructor(String.class, boolean.class).newInstance("bootstrap", false);
+            for (var handler : handlers) {
+                try {
+                    // Static method: the receiver is null, and the handler's own parameters follow it.
+                    handler.invoke(null, contentTypes, callback);
+                } catch (Throwable t) {
+                    LOGGER.error("[NeoFobric] Failed to replay {} for the component types", handler, t);
+                }
+            }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("[NeoFobric] Replayed {} Fabric component content registration(s) that Mixin cannot"
+                        + " apply to ComponentSerialization; the mapper now holds {} type(s)",
+                        handlers.size(), componentTypeIds(contentTypes).size());
+            }
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not replay the Fabric component content registrations", t);
+        }
+    }
+
+    /** The bridge's own loader for the mixin classes it defines, so its classes never go through Mixin. */
+    private static volatile ClassLoader replayLoader;
+    private static volatile java.util.List<java.lang.reflect.Method> replayedHandlers;
+
+    /** {@return the type ids the mapper currently holds, for logging} */
+    private static java.util.List<String> componentTypeIds(Object contentTypes) {
+        try {
+            var values = contentTypes.getClass().getMethod("values").invoke(contentTypes);
+            return values instanceof java.util.Collection<?> collection
+                    ? collection.stream().map(value -> String.valueOf(value).split("\\[")[0].trim()).toList()
+                    : java.util.List.of(String.valueOf(values));
+        } catch (Throwable t) {
+            return java.util.List.of("<unreadable: " + t + ">");
+        }
+    }
+
+    /**
+     * {@return the {@code @Inject} handlers Fabric mods declare for
+     * {@code ComponentSerialization#bootstrap}, ready to be invoked with that method's own arguments}
+     */
+    private static java.util.List<java.lang.reflect.Method> fabricComponentHandlers() {
+        var cached = replayedHandlers;
+        if (cached != null) {
+            return cached;
+        }
+        var found = new java.util.ArrayList<java.lang.reflect.Method>();
+        var modsLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+        var client = net.neoforged.fml.loading.FMLEnvironment.getDist() == net.neoforged.api.distmarker.Dist.CLIENT;
+        for (var entry : net.neoforged.fabricbridge.discovery.FabricJarRegistry.getEntries().entrySet()) {
+            var info = entry.getValue();
+            var configs = new java.util.ArrayList<>(info.commonMixins());
+            configs.addAll(client ? info.clientMixins() : info.serverMixins());
+            try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(entry.getKey())) {
+                for (var configPath : configs) {
+                    var configBytes = jar.readFile(configPath);
+                    if (configBytes == null) {
+                        continue;
+                    }
+                    var config = com.google.gson.JsonParser
+                            .parseString(new String(configBytes, java.nio.charset.StandardCharsets.UTF_8))
+                            .getAsJsonObject();
+                    var packageName = config.has("package") ? config.get("package").getAsString() : "";
+                    for (var key : new String[] { "mixins", "client", "server" }) {
+                        if (!config.has(key) || !config.get(key).isJsonArray()) {
+                            continue;
+                        }
+                        for (var element : config.getAsJsonArray(key)) {
+                            var mixinName = element.getAsString();
+                            var classPath = (mixinName.contains(".") && !packageName.isEmpty()
+                                    ? mixinName.replace('.', '/')
+                                    : packageName.replace('.', '/') + "/" + mixinName) + ".class";
+                            var bytes = jar.readFile(classPath);
+                            if (bytes != null) {
+                                collectComponentHandlers(bytes, classPath, modsLoader, found);
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                LOGGER.debug("[NeoFobric] Could not read the mixin configs of {}", entry.getKey(), t);
+            }
+        }
+        replayedHandlers = found;
+        return found;
+    }
+
+    /**
+     * Adds every {@code @Inject} handler of {@code mixinBytes} that targets
+     * {@code ComponentSerialization#bootstrap}, defined in the bridge's own loader.
+     */
+    private static void collectComponentHandlers(byte[] mixinBytes, String classPath, ClassLoader modsLoader,
+            java.util.List<java.lang.reflect.Method> found) {
+        var node = new org.objectweb.asm.tree.ClassNode();
+        new org.objectweb.asm.ClassReader(mixinBytes).accept(node, 0);
+        if (!targetsComponentSerialization(node)) {
+            return;
+        }
+        var handlers = new java.util.ArrayList<org.objectweb.asm.tree.MethodNode>();
+        for (var method : node.methods) {
+            var inject = annotation(method.invisibleAnnotations, "Lorg/spongepowered/asm/mixin/injection/Inject;");
+            if (inject == null && (inject = annotation(method.visibleAnnotations,
+                    "Lorg/spongepowered/asm/mixin/injection/Inject;")) == null) {
+                continue;
+            }
+            var target = annotationValue(inject, "method");
+            if (target != null && target.startsWith("bootstrap(")) {
+                handlers.add(method);
+            }
+        }
+        if (handlers.isEmpty()) {
+            return;
+        }
+        try {
+            var defined = defineInReplayLoader(mixinBytes, node.name, classPath, modsLoader);
+            var mapperType = Class.forName("net.minecraft.util.ExtraCodecs$LateBoundIdMapper", false, modsLoader);
+            var callbackType = Class.forName("org.spongepowered.asm.mixin.injection.callback.CallbackInfo", false, modsLoader);
+            for (var method : handlers) {
+                // Create's handler is the shape Mixin requires for an injection into a static method: the
+                // target's own parameters followed by the CallbackInfo. Matched on the exact signature -
+                // a name-and-arity match also picks up unrelated helpers, and invoking one of those throws
+                // "wrong number of arguments" straight out of the platform's codec build.
+                try {
+                    var candidate = defined.getDeclaredMethod(method.name, mapperType, callbackType);
+                    candidate.setAccessible(true);
+                    found.add(candidate);
+                } catch (NoSuchMethodException e) {
+                    LOGGER.warn("[NeoFobric] {} does not carry the handler Mixin would call ({}), skipping it",
+                            classPath, method.name);
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not prepare the mixin handlers of {}", classPath, t);
+        }
+    }
+
+    /** {@return whether the mixin class's {@code @Mixin} names {@code ComponentSerialization}} */
+    private static boolean targetsComponentSerialization(org.objectweb.asm.tree.ClassNode node) {
+        var mixin = annotation(node.invisibleAnnotations, "Lorg/spongepowered/asm/mixin/Mixin;");
+        if (mixin == null && (mixin = annotation(node.visibleAnnotations, "Lorg/spongepowered/asm/mixin/Mixin;")) == null) {
+            return false;
+        }
+        for (var value : mixin.values) {
+            if (value instanceof java.util.List<?> list) {
+                for (var element : list) {
+                    if (element instanceof org.objectweb.asm.Type type
+                            && "net/minecraft/network/chat/ComponentSerialization".equals(type.getInternalName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static org.objectweb.asm.tree.AnnotationNode annotation(
+            java.util.List<org.objectweb.asm.tree.AnnotationNode> annotations, String descriptor) {
+        if (annotations == null) {
+            return null;
+        }
+        for (var annotation : annotations) {
+            if (descriptor.equals(annotation.desc)) {
+                return annotation;
+            }
+        }
+        return null;
+    }
+
+    private static String annotationValue(org.objectweb.asm.tree.AnnotationNode annotation, String key) {
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (key.equals(annotation.values.get(i))) {
+                var value = annotation.values.get(i + 1);
+                if (value instanceof java.util.List<?> list && list.size() == 1) {
+                    value = list.get(0);
+                }
+                return value instanceof String text ? text : null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Defines a mixin class in the bridge's own loader, whose parent is the mods loader - so the mixin's
+     * references resolve exactly as they would inside the game, while the class itself is never handed to
+     * Mixin (which refuses to have a mixin class loaded directly).
+     */
+    private static Class<?> defineInReplayLoader(byte[] bytes, String internalName, String classPath, ClassLoader modsLoader) {
+        var loader = replayLoader;
+        if (loader == null) {
+            synchronized (FabricBridgeHooks.class) {
+                if (replayLoader == null) {
+                    replayLoader = new ReplayLoader(modsLoader);
+                }
+                loader = replayLoader;
+            }
+        }
+        return ((ReplayLoader) loader).defineIfAbsent(internalName.replace('/', '.'), bytes);
+    }
+
+    private static final class ReplayLoader extends ClassLoader {
+        ReplayLoader(ClassLoader parent) {
+            super(parent);
+        }
+
+        synchronized Class<?> defineIfAbsent(String name, byte[] bytes) {
+            var existing = findLoadedClass(name);
+            return existing != null ? existing : defineClass(name, bytes, 0, bytes.length);
+        }
+    }
 }

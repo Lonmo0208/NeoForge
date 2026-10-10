@@ -270,7 +270,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
             node.fields = output.fields;
             node.methods = output.methods;
 
-            LOGGER.info("[NeoFobric] Applied the Fabric class tweaker (access widener rules) to {}",
+            LOGGER.debug("[NeoFobric] Applied the Fabric class tweaker (access widener rules) to {}",
                     node.name.replace('/', '.'));
             return true;
         } catch (Throwable t) {
@@ -375,6 +375,10 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
 
     @Override
     public ComputeFlags processClass(TransformationContext context) {
+        // Whichever of the bridge's processors sees a class first asks Mixin to prepare the Fabric configs;
+        // until that has happened, a config's target class would keep no mixins from it, silently. See
+        // FabricBootstrapProcessor#forceMixinPreparationIfPending.
+        FabricBootstrapProcessor.forceMixinPreparationIfPending();
         // Guarded: this runs before every other decision, so anything it throws would abort the whole
         // transformation for this class - which is how a missing interface injection could look like
         // "handlesClass said yes but nothing happened".
@@ -430,7 +434,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
             }
             if (unfinalised > 0) {
                 changed = true;
-                LOGGER.info("[NeoFobric] Dropped ACC_FINAL from {} method(s) of {} so the class stays overridable",
+                LOGGER.debug("[NeoFobric] Dropped ACC_FINAL from {} method(s) of {} so the class stays overridable",
                         unfinalised, node.name.replace('/', '.'));
             }
         }
@@ -479,7 +483,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 // every member is already public.
                 node.access |= Opcodes.ACC_PUBLIC;
                 changed = true;
-                LOGGER.info("[NeoFobric] Widened class {} to public (Fabric bytecode references it directly)",
+                LOGGER.debug("[NeoFobric] Widened class {} to public (Fabric bytecode references it directly)",
                         node.name.replace('/', '.'));
             }
         }

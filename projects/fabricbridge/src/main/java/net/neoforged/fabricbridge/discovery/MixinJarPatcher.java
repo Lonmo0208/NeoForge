@@ -1400,9 +1400,18 @@ public final class MixinJarPatcher {
                     }
                 }
             }
-            LOGGER.info("[NeoFobric] Appended {} missing trailing parameter(s) to @Inject handler {}#{} (target {}.{})",
-                    missing.length, node.name.replace('/', '.'), handler.name,
-                    targetClass.name.replace('/', '.'), longerTarget.name);
+            // Only worth a line when something was actually appended: the pass visits every @Inject handler
+            // in the whole mod set, and an "Appended 0" line for each of them buries the log and costs real
+            // time (these runs emit tens of thousands of log lines).
+            if (missing.length > 0) {
+                LOGGER.info("[NeoFobric] Appended {} missing trailing parameter(s) to @Inject handler {}#{} (target {}.{})",
+                        missing.length, node.name.replace('/', '.'), handler.name,
+                        targetClass.name.replace('/', '.'), longerTarget.name);
+            } else {
+                LOGGER.debug("[NeoFobric] @Inject handler {}#{} matches {}.{} as-is",
+                        node.name.replace('/', '.'), handler.name,
+                        targetClass.name.replace('/', '.'), longerTarget.name);
+            }
             changed = true;
         }
 
@@ -2146,7 +2155,7 @@ public final class MixinJarPatcher {
             // The wrapper is the last parameter by convention, and anything after it would be
             // MixinExtras sugar this rewrite does not carry along.
             if (operationIndex <= 0 || operationIndex != args.length - 1) {
-                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: the Operation is not the last parameter",
+                LOGGER.debug("[NeoFobric] Not widening @WrapOperation handler {}#{}: the Operation is not the last parameter",
                         node.name.replace('/', '.'), handler.name);
                 continue;
             }
@@ -2155,7 +2164,7 @@ public final class MixinJarPatcher {
 
             var target = annotationDescriptor(wrap);
             if (target == null) {
-                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: no target descriptor in the annotation",
+                LOGGER.debug("[NeoFobric] Not widening @WrapOperation handler {}#{}: no target descriptor in the annotation",
                         node.name.replace('/', '.'), handler.name);
                 continue;
             }
@@ -2191,7 +2200,7 @@ public final class MixinJarPatcher {
                 wrappedOwner = resolvedOwners.get(owner);
             }
             if (wrappedOwner == null) {
-                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: cannot resolve the owner of {}{}",
+                LOGGER.debug("[NeoFobric] Not widening @WrapOperation handler {}#{}: cannot resolve the owner of {}{}",
                         node.name.replace('/', '.'), handler.name, name, desc);
                 continue;
             }
@@ -2203,12 +2212,12 @@ public final class MixinJarPatcher {
                 }
             }
             if (wrapped == null) {
-                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: {} does not declare {}{}",
+                LOGGER.debug("[NeoFobric] Not widening @WrapOperation handler {}#{}: {} does not declare {}{}",
                         node.name.replace('/', '.'), handler.name, wrappedOwner.name.replace('/', '.'), name, desc);
                 continue;
             }
             if ((wrapped.access & org.objectweb.asm.Opcodes.ACC_STATIC) == 0) {
-                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: {} is an instance method",
+                LOGGER.debug("[NeoFobric] Not widening @WrapOperation handler {}#{}: {} is an instance method",
                         node.name.replace('/', '.'), handler.name, name);
                 continue;
             }
@@ -2265,7 +2274,7 @@ public final class MixinJarPatcher {
                         iinc.var -= addedSlots;
                     }
                 }
-                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: its Operation.call could not be found",
+                LOGGER.debug("[NeoFobric] Not widening @WrapOperation handler {}#{}: its Operation.call could not be found",
                         node.name.replace('/', '.'), handler.name);
                 continue;
             }
@@ -2904,6 +2913,100 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * {@return a key describing everything that decides the patched copy of a jar}
+     *
+     * <p>Used by {@link #patchJar} to keep a patched copy across runs: the mod jar itself, the game content
+     * (a platform update changes which classes have to be patched) and the bridge (a bridge update changes
+     * how). {@code null} means "cannot tell", and nothing is cached then.
+     */
+    private static String patchCacheStamp(Path jarPath, TargetResolver resolver) {
+        try {
+            return "v1/" + Files.size(jarPath) + ":" + Files.getLastModifiedTime(jarPath).toMillis()
+                    + "/" + resolver.stamp() + "/" + bridgeStamp() + "/" + modSetStamp;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /**
+     * A key for the whole set of mod jars this pass is running over.
+     *
+     * <p>Needed because one jar's patched copy does not depend on that jar alone: the accessor-collision plan
+     * is computed across all of them, so adding or removing a mod can change how the others are patched. The
+     * planner runs before the jars are patched and stores the result here.
+     */
+    private static volatile String modSetStamp = "none";
+
+    /** Records the jar set the next patching pass works on, for {@link #patchCacheStamp}. */
+    public static void noteModSet(java.util.Collection<Path> jars) {
+        var builder = new StringBuilder();
+        var names = new java.util.ArrayList<>(jars);
+        names.sort(java.util.Comparator.comparing(Path::toString));
+        for (var jar : names) {
+            try {
+                builder.append(jar.getFileName()).append(':').append(Files.size(jar)).append(';');
+            } catch (Throwable t) {
+                builder.append(jar.getFileName()).append(":?;");
+            }
+        }
+        modSetStamp = builder.toString();
+    }
+
+    private static String bridgeStamp() {
+        try {
+            var source = MixinJarPatcher.class.getProtectionDomain().getCodeSource();
+            var path = source == null || source.getLocation() == null ? null : Path.of(source.getLocation().toURI());
+            return path != null && Files.isRegularFile(path)
+                    ? Files.size(path) + ":" + Files.getLastModifiedTime(path).toMillis()
+                    : "exploded";
+        } catch (Throwable t) {
+            return "unknown";
+        }
+    }
+
+    private static Path patchCacheFile(Path jarPath) {
+        var patched = realignedPath(jarPath);
+        return patched.resolveSibling(patched.getFileName() + ".neofobric-stamp");
+    }
+
+    /** {@return the patched copy to use, or {@code null} when this jar has to be patched again} */
+    private static Path readPatchCache(Path jarPath, String stamp) {
+        if (stamp == null || Boolean.getBoolean("neofobric.noPatchCache")) {
+            return null;
+        }
+        try {
+            var file = patchCacheFile(jarPath);
+            if (!Files.isRegularFile(file)) {
+                return null;
+            }
+            var text = Files.readString(file).trim();
+            if (!text.endsWith(stamp)) {
+                return null;
+            }
+            if (text.startsWith("patched:")) {
+                var copy = realignedPath(jarPath);
+                return Files.isRegularFile(copy) ? copy : null;
+            }
+            return jarPath;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static void writePatchCache(Path jarPath, String stamp, boolean patched) {
+        if (stamp == null || Boolean.getBoolean("neofobric.noPatchCache")) {
+            return;
+        }
+        try {
+            var file = patchCacheFile(jarPath);
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, (patched ? "patched:" : "unchanged:") + stamp);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not write the patch cache entry for {}", jarPath, t);
+        }
+    }
+
+    /**
      * Resolves Mixin target classes for one discovery pass, with the classpath jars held open and
      * results memoized.
      *
@@ -2955,6 +3058,28 @@ public final class MixinJarPatcher {
             }
             return bytes;
         }
+
+        /**
+         * {@return a key for the game content this resolver worked against, for the patch cache}
+         */
+        public String stamp() {
+            var cached = contentStamp;
+            if (cached != null) {
+                return cached;
+            }
+            var builder = new StringBuilder();
+            for (var root : gameContent) {
+                try {
+                    builder.append(Files.size(root)).append(':').append(Files.getLastModifiedTime(root).toMillis()).append(',');
+                } catch (Throwable t) {
+                    builder.append("?,");
+                }
+            }
+            contentStamp = builder.toString();
+            return contentStamp;
+        }
+
+        private volatile String contentStamp;
 
         /**
          * {@return every class name the platform itself ships}
@@ -3375,6 +3500,17 @@ public final class MixinJarPatcher {
             return jarPath;
         }
         var patchedPath = realignedPath(jarPath);
+        // Patching is pure bytecode work on one jar, so its result can be kept and reused: the same mod
+        // jar, the same game content and the same bridge always produce the same patched copy. Reusing it
+        // skips the whole pass - which is the bridge's longest startup phase - and is what makes a restart
+        // as fast as the platform's own start. The stamp covers the jar itself, the game content (a
+        // platform update changes what has to be patched) and the bridge (a bridge update changes how).
+        // Delete the cache directory or pass -Dneofobric.noPatchCache=true to force a rebuild.
+        var stamp = patchCacheStamp(jarPath, resolver);
+        var cached = readPatchCache(jarPath, stamp);
+        if (cached != null) {
+            return cached;
+        }
         var entries = new ArrayList<String>();
         var patched = new HashMap<String, byte[]>();
         // Every class in this jar. Fabric reaches private Minecraft members from ordinary
@@ -3665,6 +3801,7 @@ public final class MixinJarPatcher {
             // Nothing to realign: drop a stale copy from an earlier run so the game layer goes back
             // to the untouched jar.
             deleteQuietly(patchedPath);
+            writePatchCache(jarPath, stamp, false);
             return jarPath;
         }
 
@@ -3708,6 +3845,7 @@ public final class MixinJarPatcher {
         for (var name : patched.keySet()) {
             LOGGER.info("[NeoFobric] Realigned Mixin handler(s) in {} of {}", name, jarPath.getFileName());
         }
+        writePatchCache(jarPath, stamp, true);
         return patchedPath;
     }
 

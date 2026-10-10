@@ -33,7 +33,13 @@ public interface IBlockEntityExtension {
      * @param valueInput The {@link ValueInput} to read the packet data from
      */
     default void onDataPacket(Connection net, ValueInput valueInput) {
-        self().loadWithComponents(valueInput);
+        // NeoFobric: go through handleUpdateTag rather than straight to loadWithComponents. The two defaults
+        // end in the same place, but a block entity that overrides handleUpdateTag - the shape a Fabric mod
+        // uses for its "sent to the client" read, and the one vanilla's own packet path used before the
+        // value-IO migration - now actually receives the packet. Reading with loadWithComponents bypasses the
+        // clientPacket flag, so every field a mod guards with it was silently dropped on the client: Create's
+        // schematic table kept its upload progress on the server and never showed a progress bar.
+        this.handleUpdateTag(valueInput);
     }
 
     /**
