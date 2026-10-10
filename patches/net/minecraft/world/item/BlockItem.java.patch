@@ -1,13 +1,25 @@
 --- a/net/minecraft/world/item/BlockItem.java
 +++ b/net/minecraft/world/item/BlockItem.java
-@@ -83,15 +_,22 @@
+@@ -83,15 +_,34 @@
              }
          }
  
 -        SoundType soundType = placedState.getSoundType();
 -        level.playSound(player, pos, this.getPlaceSound(placedState), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
-+        SoundType soundType = placedState.getSoundType(level, pos, placeContext.getPlayer());
-+        level.playSound(player, pos, this.getPlaceSound(placedState, level, pos, placeContext.getPlayer()), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
++        // NeoFobric: the two calls the vanilla line makes are asked as well, because a Fabric-side mixin replaces
++        // those and nothing else would hear it (one lets a block decide its own placement sound, the other
++        // substitutes the event). Their answers are used whenever the platform's level-aware lookups were not
++        // overridden - Block#rawSoundType tells the two apart - so a NeoForge block keeps the last word and, with
++        // neither kind of mod in play, both paths compute what they always did.
++        SoundType vanillaSound = placedState.getSoundType();
++        SoundEvent vanillaPlaceSound = this.getPlaceSound(placedState);
++        SoundType contextSound = placedState.getSoundType(level, pos, placeContext.getPlayer());
++        boolean platformOverrides = contextSound != Block.rawSoundType(placedState.getBlock());
++        SoundType soundType = platformOverrides ? contextSound : vanillaSound;
++        SoundEvent placeSound = platformOverrides
++                ? this.getPlaceSound(placedState, level, pos, placeContext.getPlayer())
++                : vanillaPlaceSound;
++        level.playSound(player, pos, placeSound, SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
          level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(player, placedState));
          itemStack.consume(1, player);
          return InteractionResult.SUCCESS;

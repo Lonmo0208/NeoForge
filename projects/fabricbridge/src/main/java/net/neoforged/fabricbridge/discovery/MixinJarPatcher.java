@@ -2009,16 +2009,22 @@ public final class MixinJarPatcher {
                         || !java.util.Set.of("INVOKE", "INVOKE_ASSIGN", "FIELD", "NEW").contains(kind)) {
                     continue;
                 }
-                var host = movedHost(resolver, targets, selector, anchor);
-                if (host == null || !hostTakesSugarTypes(resolver, targets, host, sugarTypes)) {
-                    continue;
-                }
-                // A handler that binds the host's own parameters needs a host that starts with them; the wrapping
-                // injectors bind the wrapped call instead, which the anchor already fixes.
-                if (!CALL_SIDE_INJECTIONS.contains(annotation.desc)
-                        && !hostStartsWithHandlerParams(resolver, targets, host, declaredHostParams(method))) {
-                    continue;
-                }
+            var host = movedHost(resolver, targets, selector, anchor);
+            if (host == null || !hostTakesSugarTypes(resolver, targets, host, sugarTypes)) {
+                continue;
+            }
+            // A host the selected method calls is a wrapper handing off to its worker. When the platform instead
+            // lifted the body out into a method of its own (Hud#updateContextualBarRenderer carries exactly what
+            // extractHotbarAndDecorations used to run), nothing calls it from there - the new host's body does
+            // the same work, which its instruction mix shows.
+            if (!CALL_SIDE_INJECTIONS.contains(annotation.desc)
+                    && !hostStartsWithHandlerParams(resolver, targets, host, declaredHostParams(method))) {
+                continue;
+            }
+            if (!hostIsCalledBySelection(resolver, targets, selector, host)
+                    && !hostIsBodyLookalike(resolver, targets, selector, host, anchor)) {
+                continue;
+            }
                 writeStringValue(annotation, "method", host);
                 moves.add(selector + " -> " + host);
                 changed = true;
@@ -2191,6 +2197,154 @@ public final class MixinJarPatcher {
         return false;
     }
 
+    /** {@return whether the selected method calls the hand-off target} */
+    private static boolean hostIsCalledBySelection(TargetResolver resolver, java.util.List<String> targets,
+            String selector, String host) {
+        var hostName = host.substring(0, host.indexOf('('));
+        var hostDesc = host.substring(host.indexOf('('));
+        for (var target : targets) {
+            var bytes = resolver.apply(target);
+            if (bytes == null) {
+                continue;
+            }
+            ClassNode targetNode;
+            try {
+                targetNode = new ClassNode();
+                new ClassReader(bytes).accept(targetNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            } catch (Throwable t) {
+                continue;
+            }
+            for (var selected : selectedMethods(targetNode, selector)) {
+                if (callsMethod(selected, hostName, hostDesc)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@return whether the hand-off target is the selected method's body, lifted into a method of its own}
+     *
+     * <p>NeoForge splits methods up as well as delegating them: {@code Hud#extractHotbarAndDecorations} still
+     * exists but no longer runs the contextual bar code, which moved verbatim into
+     * {@code updateContextualBarRenderer} and is called by the layer manager instead. Nothing connects the two
+     * by name, so the anchor does: when the call a Fabric mixin wraps is a call to a method of the very class
+     * being patched ({@code this.nextContextualInfoState()}), the host is where that self-call went.
+     *
+     * <p>Two looser readings were tried and thrown away - an opcode histogram, then a contiguous instruction
+     * run. Both matched a hundred methods that merely hold a similar snippet, and every move they made was a
+     * mod wrapping a call it was never written for. The remaining reach of the move is small on purpose: a
+     * call into another class is left where it is, since the platform is free to keep several of those.
+     */
+    private static boolean hostIsBodyLookalike(TargetResolver resolver, java.util.List<String> targets,
+            String selector, String host, String anchor) {
+        var wanted = parseAnchorMember(anchor);
+        if (wanted == null) {
+            return false;
+        }
+        for (var target : targets) {
+            if (!target.equals(wanted.owner())) {
+                continue;
+            }
+            var bytes = resolver.apply(target);
+            if (bytes == null) {
+                continue;
+            }
+            ClassNode targetNode;
+            try {
+                targetNode = new ClassNode();
+                new ClassReader(bytes).accept(targetNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            } catch (Throwable t) {
+                continue;
+            }
+            var hosts = selectedMethods(targetNode, host);
+            if (hosts.isEmpty()) {
+                continue;
+            }
+            for (var selected : selectedMethods(targetNode, selector)) {
+                var selectedBody = realInstructions(selected);
+                if (selectedBody.isEmpty()) {
+                    continue;
+                }
+                for (var candidate : hosts) {
+                    var hostBody = realInstructions(candidate);
+                    if (hostBody.size() < 6 || hostBody.size() > selectedBody.size()) {
+                        continue;
+                    }
+                    if (containsRun(selectedBody, hostBody)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /** {@return the method's instructions, without labels, frames and line markers} */
+    private static java.util.List<org.objectweb.asm.tree.AbstractInsnNode> realInstructions(
+            org.objectweb.asm.tree.MethodNode method) {
+        var out = new java.util.ArrayList<org.objectweb.asm.tree.AbstractInsnNode>();
+        if (method.instructions == null) {
+            return out;
+        }
+        for (var instruction : method.instructions) {
+            if (instruction.getOpcode() >= 0) {
+                out.add(instruction);
+            }
+        }
+        return out;
+    }
+
+    /** {@return whether {@code needle} appears as one contiguous run inside {@code haystack}} */
+    private static boolean containsRun(java.util.List<org.objectweb.asm.tree.AbstractInsnNode> haystack,
+            java.util.List<org.objectweb.asm.tree.AbstractInsnNode> needle) {
+        for (var start = 0; start + needle.size() <= haystack.size(); start++) {
+            var match = true;
+            for (var i = 0; i < needle.size() && match; i++) {
+                match = sameInstruction(haystack.get(start + i), needle.get(i));
+            }
+            if (match) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** {@return whether two instructions do the same thing, operand included} */
+    private static boolean sameInstruction(org.objectweb.asm.tree.AbstractInsnNode left,
+            org.objectweb.asm.tree.AbstractInsnNode right) {
+        if (left.getOpcode() != right.getOpcode() || left.getType() != right.getType()) {
+            return false;
+        }
+        if (left instanceof org.objectweb.asm.tree.MethodInsnNode a
+                && right instanceof org.objectweb.asm.tree.MethodInsnNode b) {
+            return a.owner.equals(b.owner) && a.name.equals(b.name) && a.desc.equals(b.desc);
+        }
+        if (left instanceof org.objectweb.asm.tree.FieldInsnNode a
+                && right instanceof org.objectweb.asm.tree.FieldInsnNode b) {
+            return a.owner.equals(b.owner) && a.name.equals(b.name) && a.desc.equals(b.desc);
+        }
+        if (left instanceof org.objectweb.asm.tree.VarInsnNode a
+                && right instanceof org.objectweb.asm.tree.VarInsnNode b) {
+            return a.var == b.var;
+        }
+        if (left instanceof org.objectweb.asm.tree.LdcInsnNode a
+                && right instanceof org.objectweb.asm.tree.LdcInsnNode b) {
+            return a.cst.equals(b.cst);
+        }
+        if (left instanceof org.objectweb.asm.tree.IntInsnNode a
+                && right instanceof org.objectweb.asm.tree.IntInsnNode b) {
+            return a.operand == b.operand;
+        }
+        if (left instanceof org.objectweb.asm.tree.TypeInsnNode a
+                && right instanceof org.objectweb.asm.tree.TypeInsnNode b) {
+            return a.desc.equals(b.desc);
+        }
+        // Branch targets are left out of the comparison: a lifted fragment keeps its shape without the labels.
+        return true;
+    }
+
     /**
      * {@return the types a handler declares for the host method's own parameters}
      *
@@ -2333,14 +2487,11 @@ public final class MixinJarPatcher {
             if (carriers.isEmpty() || carriers.size() > 1) {
                 continue;
             }
+            // Whether this host is where the work went is the caller's business: either the selected method
+            // hands off to it (a wrapper and its worker, a short overload and the long one) or its body is a
+            // piece of what the selected method used to run (NeoForge lifted it out into a method of its own).
             var host = carriers.get(0);
-            // The selected method has to hand off to it: a wrapper calling its worker, or a short overload
-            // calling the long one. A shared member that merely lives elsewhere is not a move.
-            for (var method : selected) {
-                if (callsMethod(method, host.name, host.desc)) {
-                    return host.name + host.desc;
-                }
-            }
+            return host.name + host.desc;
         }
         return null;
     }

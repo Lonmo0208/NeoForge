@@ -110,11 +110,13 @@ public class VerifyMixinAnchors {
         collectAll(jars, entries, nested);
         everything.addAll(nested);
         var resolver = new ClassPath(dirs, everything);
+        collectCallSites(resolver, entries);
 
         var ok = 0;
         var skipped = 0;
         var dead = new ArrayList<String>();
         var partial = new ArrayList<String>();
+        var unreachable = new ArrayList<String>();
         var unchecked = 0;
         var unknown = new ArrayList<String>();
         var injections = 0;
@@ -127,7 +129,9 @@ public class VerifyMixinAnchors {
                     : line.startsWith("SKIP\t") ? State.OK
                             : line.startsWith("UNCHECKED\t") ? State.UNCHECKED
                                     : line.startsWith("UNKNOWN\t") ? State.UNKNOWN
-                                            : line.startsWith("PARTIAL\t") ? State.PARTIAL : State.DEAD;
+                                            : line.startsWith("PARTIAL\t") ? State.PARTIAL
+                                                    : line.startsWith("UNREACHABLE\t") ? State.UNREACHABLE
+                                                            : State.DEAD;
             var detail = line.substring(line.indexOf('\t') + 1);
             injections++;
             switch (verdict) {
@@ -141,14 +145,16 @@ public class VerifyMixinAnchors {
                 case UNCHECKED -> unchecked++;
                 case UNKNOWN -> unknown.add(detail);
                 case PARTIAL -> partial.add(detail);
+                case UNREACHABLE -> unreachable.add(detail);
                 default -> dead.add(detail);
             }
         }
 
         System.out.println();
         System.out.println("==== " + injections + " injection(s): " + ok + " ok, " + skipped
-                + " in untouched libraries, " + dead.size() + " dead, " + partial.size() + " partial, "
-                + unchecked + " unchecked, " + unknown.size() + " unknown target class");
+                + " in untouched libraries, " + dead.size() + " dead, " + unreachable.size() + " unreachable, "
+                + partial.size() + " partial, " + unchecked + " unchecked, " + unknown.size()
+                + " unknown target class");
         System.out.println("---- per jar (dead / partial / total)");
         perJar.entrySet().stream()
                 .sorted(Comparator.comparingInt((Map.Entry<String, int[]> e) -> -e.getValue()[1]))
@@ -157,6 +163,10 @@ public class VerifyMixinAnchors {
         if (!dead.isEmpty()) {
             System.out.println("---- DEAD (the anchor is gone; Mixin skips these silently in production)");
             dead.forEach(d -> System.out.println("  " + d));
+        }
+        if (!unreachable.isEmpty()) {
+            System.out.println("---- UNREACHABLE (anchored, but nothing calls the method the injection lives in)");
+            unreachable.forEach(d -> System.out.println("  " + d));
         }
         if (!partial.isEmpty()) {
             System.out.println("---- PARTIAL (a name-only selector; the anchor is missing in some overloads)");
@@ -215,6 +225,7 @@ public class VerifyMixinAnchors {
                             case UNCHECKED -> "UNCHECKED\t" + detail;
                             case UNKNOWN -> "UNKNOWN\t" + detail;
                             case PARTIAL -> "PARTIAL\t" + detail;
+                            case UNREACHABLE -> "UNREACHABLE\t" + detail;
                             default -> "DEAD\t" + detail;
                         };
                         lines.add(line);
@@ -244,7 +255,7 @@ public class VerifyMixinAnchors {
         return out;
     }
 
-    enum State { OK, UNCHECKED, UNKNOWN, DEAD, PARTIAL }
+    enum State { OK, UNCHECKED, UNKNOWN, DEAD, PARTIAL, UNREACHABLE }
 
     record Verdict(State state, String detail) {
     }
@@ -615,13 +626,153 @@ public class VerifyMixinAnchors {
         return new Anchor(value, owner, name, desc, ordinal, sliceFrom, sliceTo, unmodelled);
     }
 
+    /**
+     * {@return whether anything in the scanned classes calls {@code owner.name+desc}}
+     *
+     * <p>An injection can be perfectly anchored and still do nothing: the platform is free to leave the method
+     * it injects into uncalled (NeoForge moved the vanilla tooltip body into its own handler class and left
+     * {@code ItemStack#addDetailsToTooltipComponents} unreferenced). Only non-public methods are judged - a
+     * public one may be called from code outside the scanned set.
+     */
+    static boolean isCalled(String owner, String name, String desc) {
+        if (CALL_SITES == null) {
+            return true;
+        }
+        if (CALL_SITES.contains(owner + "." + name + desc)) {
+            return true;
+        }
+        // Virtual dispatch: a call made through a supertype still lands on this override, and a call made
+        // through a subtype reaches the inherited body. Both count as reachable.
+        for (var relative : HIERARCHY.getOrDefault(owner, java.util.Set.of())) {
+            if (CALL_SITES.contains(relative + "." + name + desc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static java.util.Set<String> CALL_SITES;
+
+    /** Class -> its ancestors and descendants, so an override counts as called through any of them. */
+    private static final Map<String, java.util.Set<String>> HIERARCHY = new HashMap<>();
+
+    /** Collects every call site the verification can see: the scanned jars and the whole game class tree. */
+    static void collectCallSites(ClassPath classpath, Map<Path, List<ClassEntry>> entries) {
+        var sites = new java.util.HashSet<String>();
+        for (var perJar : entries.values()) {
+            for (var entry : perJar) {
+                addCallSites(entry.node(), sites);
+            }
+        }
+        for (var root : classpath.dirs) {
+            try (var stream = Files.walk(root)) {
+                for (var file : stream.filter(f -> f.toString().endsWith(".class")).toList()) {
+                    try (var in = Files.newInputStream(file)) {
+                        var node = new ClassNode();
+                        new ClassReader(in).accept(node, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+                        addCallSites(node, sites);
+                    } catch (Throwable t) {
+                        // an unreadable class contributes no call sites
+                    }
+                }
+            } catch (IOException e) {
+                // an unreadable tree contributes no call sites
+            }
+        }
+        CALL_SITES = sites;
+        buildHierarchy(classpath, entries);
+    }
+
+    /** Links every class to its parents and children, so an inherited method can be attributed. */
+    private static void buildHierarchy(ClassPath classpath, Map<Path, List<ClassEntry>> entries) {
+        var parents = new HashMap<String, java.util.Set<String>>();
+        var children = new HashMap<String, java.util.Set<String>>();
+        for (var perJar : entries.values()) {
+            for (var entry : perJar) {
+                link(entry.node(), parents, children);
+            }
+        }
+        for (var root : classpath.dirs) {
+            try (var stream = Files.walk(root)) {
+                for (var file : stream.filter(f -> f.toString().endsWith(".class")).toList()) {
+                    try (var in = Files.newInputStream(file)) {
+                        var node = new ClassNode();
+                        new ClassReader(in).accept(node, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+                        link(node, parents, children);
+                    } catch (Throwable t) {
+                        // an unreadable class links nothing
+                    }
+                }
+            } catch (IOException e) {
+                // an unreadable tree links nothing
+            }
+        }
+        for (var name : parents.keySet()) {
+            var relatives = new java.util.HashSet<String>();
+            walk(name, parents, relatives);
+            walk(name, children, relatives);
+            HIERARCHY.put(name, relatives);
+        }
+    }
+
+    private static void link(ClassNode node, Map<String, java.util.Set<String>> parents,
+            Map<String, java.util.Set<String>> children) {
+        var direct = new java.util.ArrayList<String>();
+        if (node.superName != null) {
+            direct.add(node.superName);
+        }
+        if (node.interfaces != null) {
+            direct.addAll(node.interfaces);
+        }
+        for (var parent : direct) {
+            parents.computeIfAbsent(node.name, key -> new java.util.HashSet<>()).add(parent);
+            children.computeIfAbsent(parent, key -> new java.util.HashSet<>()).add(node.name);
+        }
+        parents.computeIfAbsent(node.name, key -> new java.util.HashSet<>());
+        children.computeIfAbsent(node.name, key -> new java.util.HashSet<>());
+    }
+
+    private static void walk(String name, Map<String, java.util.Set<String>> edges, java.util.Set<String> into) {
+        for (var next : edges.getOrDefault(name, java.util.Set.of())) {
+            if (into.add(next)) {
+                walk(next, edges, into);
+            }
+        }
+    }
+
+    private static void addCallSites(ClassNode node, java.util.Set<String> sites) {
+        for (var method : node.methods) {
+            if (method.instructions == null) {
+                continue;
+            }
+            for (var instruction : method.instructions) {
+                if (instruction instanceof MethodInsnNode call) {
+                    sites.add(call.owner + "." + call.name + call.desc);
+                } else if (instruction instanceof InvokeDynamicInsnNode indy) {
+                    var handles = new java.util.ArrayList<Handle>();
+                    if (indy.bsm != null) {
+                        handles.add(indy.bsm);
+                    }
+                    for (var argument : indy.bsmArgs) {
+                        if (argument instanceof Handle handle) {
+                            handles.add(handle);
+                        }
+                    }
+                    for (var handle : handles) {
+                        sites.add(handle.getOwner() + "." + handle.getName() + handle.getDesc());
+                    }
+                }
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- verification
 
     static Verdict verify(ClassPath game, List<String> targets, Injection injection) {
         var where = injection.mixinClassName() + "#" + injection.handler() + " [" + injection.kind() + " "
                 + (injection.anchor() == null ? "at exit" : injection.anchor().memberSpec()) + "]";
-        var anyTargetKnown = false;
         var anyLibrary = false;
+        var anyTargetKnown = false;
         var deadReasons = new ArrayList<String>();
         var partial = new ArrayList<String>();
 
@@ -682,6 +833,33 @@ public class VerifyMixinAnchors {
                 return new Verdict(State.OK, "SKIP " + where + " -> " + targets.get(0) + " (untouched library)");
             }
             return new Verdict(State.UNKNOWN, where + " -> " + targets);
+        }
+        // Anchored - but is anything still calling the method the injection lives in? A private method the
+        // platform left behind reads as OK here and does nothing at runtime.
+        var unreachable = new ArrayList<String>();
+        for (var target : targets) {
+            var node = game.find(target);
+            if (node == null) {
+                continue;
+            }
+            for (var selector : injection.selectors()) {
+                for (var method : node.methods) {
+                    if (!method.name.equals(selector.name())
+                            || (selector.desc() != null && !matchesDescriptor(method.desc, selector.desc()))) {
+                        continue;
+                    }
+                    // <clinit> is invoked by the JVM and lambdas through their bootstrap, neither of which is a
+                    // call instruction; a public method may be called from outside the scanned set.
+                    if (method.name.startsWith("<clinit>") || (method.access & Opcodes.ACC_PUBLIC) != 0
+                            || isCalled(target, method.name, method.desc)) {
+                        continue;
+                    }
+                    unreachable.add(shortName(target) + "." + method.name + method.desc);
+                }
+            }
+        }
+        if (!unreachable.isEmpty()) {
+            return new Verdict(State.UNREACHABLE, where + " -> nothing calls " + unreachable);
         }
         return new Verdict(State.OK, where);
     }
