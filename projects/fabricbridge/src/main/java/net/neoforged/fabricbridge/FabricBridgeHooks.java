@@ -154,8 +154,74 @@ public final class FabricBridgeHooks {
         }
 
         deferredRegistryFreeze = null;
+        dropUnregisteredIntrusiveHolders();
         freezeAction.run();
         LOGGER.info("[NeoFobric] Registries frozen after the Fabric client entrypoints");
+    }
+
+    /**
+     * Drops the intrusive holders a Fabric mod built but never registered, before the registry window
+     * closes.
+     *
+     * <p>Minecraft's registries with intrusive-holder support ({@code BuiltInRegistries.BLOCK},
+     * {@code ITEM}, {@code BLOCK_ENTITY_TYPE}, {@code ENTITY_TYPE}, {@code FLUID}) remember every value
+     * whose constructor asked for a built-in holder, and {@code MappedRegistry#freeze} refuses to close
+     * a registry that still has one - the safety net for a NeoForge mod that forgot to register a value.
+     *
+     * <p>A Fabric entrypoint that fails halfway (the bridge isolates such failures on purpose, see
+     * {@code FabricBridge.invokeEntrypoints}) can leave holders behind exactly like that, and then the
+     * safety net turns an already-reported entrypoint error into a fatal crash for the whole game.
+     * Twilight Forest does it: its client entrypoint dies on a payload it cannot register yet, and the
+     * block entity types built before that never reach the registry. Dropping the leftovers keeps the
+     * consequence where the bridge already put it - one skipped entrypoint - instead of killing the
+     * game at startup.
+     */
+    private static void dropUnregisteredIntrusiveHolders() {
+        try {
+            // Minecraft lives in the game layer, not in this class's own loader.
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var registries = Class.forName("net.minecraft.core.registries.BuiltInRegistries", false, gameLoader)
+                    .getField("REGISTRY")
+                    .get(null);
+            var registryClass = Class.forName("net.minecraft.core.Registry", false, gameLoader);
+            var dropped = new java.util.ArrayList<String>();
+            for (var registry : (Iterable<?>) (registries instanceof Iterable<?> iterable ? iterable : java.util.List.of())) {
+                if (!registryClass.isInstance(registry)) {
+                    continue;
+                }
+                var field = findField(registry.getClass(), "unregisteredIntrusiveHolders");
+                if (field == null) {
+                    continue;
+                }
+                field.setAccessible(true);
+                if (!(field.get(registry) instanceof java.util.Map<?, ?> holders) || holders.isEmpty()) {
+                    continue;
+                }
+                // Only the values are needed for the report; the keys are the holders themselves.
+                for (var value : holders.values()) {
+                    dropped.add(String.valueOf(value));
+                }
+                ((java.util.Map<?, ?>) holders).clear();
+            }
+            if (!dropped.isEmpty()) {
+                LOGGER.warn("[NeoFobric] Dropped {} unregistered intrusive holder(s) left behind by a Fabric"
+                        + " entrypoint - those values are not in their registry: {}", dropped.size(), dropped);
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not check the intrusive holders before freezing", t);
+        }
+    }
+
+    /** {@return the named field on {@code type} or any of its superclasses, or null} */
+    private static java.lang.reflect.Field findField(Class<?> type, String name) {
+        for (var current = type; current != null; current = current.getSuperclass()) {
+            try {
+                return current.getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+                // keep walking up the hierarchy
+            }
+        }
+        return null;
     }
 
     /**

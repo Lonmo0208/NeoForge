@@ -306,12 +306,26 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
 
         var client = FMLEnvironment.getDist() == Dist.CLIENT;
         var registered = 0;
+        // A config path can be declared by more than one jar: Fabric API's own modules ship them, and
+        // Sodium, Iris and friends bundle copies of the very same modules. Only the first copy may be
+        // registered - the composite module takes the first jar's classes, so registering a second (often
+        // older) copy of the config would leave Mixin owning a package with a list that does not match the
+        // classes loaded from it. An accessor declared only in the first copy then cannot be applied, and
+        // loading it dies with "Illegal classload request for accessor mixin ... The mixin is missing from
+        // <config>.mixins.json which owns package ...". Twilight Forest goes through Fabric API's atlas
+        // registry and hits exactly that when Sodium's bundled Fabric API differs from the standalone one.
+        var registeredConfigPaths = new java.util.HashSet<String>();
         // Iterate the registry directly: all Fabric jars live in one composite game library,
         // so the loading mod list does not carry one entry per Fabric mod.
         for (var entry : net.neoforged.fabricbridge.discovery.FabricJarRegistry.getEntries().entrySet()) {
             var info = entry.getValue();
 
             for (var configPath : info.mixinConfigsFor(client)) {
+                if (!registeredConfigPaths.add(configPath)) {
+                    LOGGER.info("[NeoFobric] Ignoring the duplicate of mixin config {} from {} - another jar provides"
+                            + " it, and that one's classes are the ones in the game layer", configPath, info.modId());
+                    continue;
+                }
                 // A/B diagnosis: -Dneofobric.skipMixinConfigs=<substring> skips matching configs.
                 // -Dneofobric.onlyMixinConfigs=<substring> registers ONLY matching configs.
                 var skip = System.getProperty("neofobric.skipMixinConfigs");

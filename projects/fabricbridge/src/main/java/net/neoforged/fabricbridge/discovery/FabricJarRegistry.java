@@ -27,6 +27,9 @@ public final class FabricJarRegistry {
     public static final String FABRIC_MOD_JSON = "fabric.mod.json";
 
     private static final Map<Path, FabricModInfo> FABRIC_JARS = new ConcurrentHashMap<>();
+
+    /** Registration order of {@link #FABRIC_JARS}, which is also the composite module's content order. */
+    private static final java.util.List<Path> REGISTRATION_ORDER = new java.util.concurrent.CopyOnWriteArrayList<>();
     /**
      * Fabric jar paths that are part of the FML game content layer (either a jar in the mods
      * folder or a nested jar extracted to the bridge cache). fabric-loader's own classpath
@@ -71,7 +74,9 @@ public final class FabricJarRegistry {
     }
 
     public static void register(Path path, FabricModInfo info) {
-        FABRIC_JARS.put(path, info);
+        if (FABRIC_JARS.put(path, info) == null) {
+            REGISTRATION_ORDER.add(path);
+        }
     }
 
     public static FabricModInfo get(Path path) {
@@ -94,6 +99,17 @@ public final class FabricJarRegistry {
      * { all registered Fabric mods as an unmodifiable snapshot of path to metadata}
      */
     public static java.util.SequencedMap<Path, FabricModInfo> getEntries() {
-        return java.util.Collections.unmodifiableSequencedMap(new java.util.LinkedHashMap<>(FABRIC_JARS));
+        // A ConcurrentHashMap has no order, but the composite module resolves duplicate entries by the order
+        // its contents were registered in, and everything that has to agree with the classes it serves -
+        // the mixin configs in particular - has to see the jars in that same order.
+        var ordered = new java.util.LinkedHashMap<Path, FabricModInfo>();
+        for (var path : REGISTRATION_ORDER) {
+            var info = FABRIC_JARS.get(path);
+            if (info != null) {
+                ordered.put(path, info);
+            }
+        }
+        FABRIC_JARS.forEach(ordered::putIfAbsent);
+        return java.util.Collections.unmodifiableSequencedMap(ordered);
     }
 }

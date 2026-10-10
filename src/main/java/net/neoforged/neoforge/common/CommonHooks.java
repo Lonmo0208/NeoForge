@@ -1218,10 +1218,29 @@ public class CommonHooks {
         // does not go through EntityAttributeCreationEvent - it writes into the vanilla map itself (its mixin
         // swaps DefaultAttributes' immutable field for a mutable copy) - and this pass runs a second time after
         // the Fabric entrypoints. Without the rebase the events below would combine onto NeoForge's own, older
-        // copy and a Fabric mod's replacement would never be seen ("Pig does not have test attribute"). Running
-        // the creation event again right after restores whatever NeoForge mods had defined.
+        // copy and a Fabric mod's replacement would never be seen ("Pig does not have test attribute").
         FORGE_ATTRIBUTES.putAll(DefaultAttributes.vanillaSuppliers());
         ModLoader.postEvent(new EntityAttributeCreationEvent(FORGE_ATTRIBUTES));
+        applyAttributeModifications();
+    }
+
+    /**
+     * NeoFobric: the attribute pass the Fabric entrypoints leave for later - the rebase, and only the
+     * modification event after it.
+     *
+     * <p>Two things happen between the two passes: Fabric's default attribute registry writes into the vanilla
+     * map (so the rebase above finds its per-entity replacements), and a NeoForge mod may have registered its
+     * attributes through {@code EntityAttributeCreationEvent} already - that event refuses a second entry for the
+     * same entity ("Duplicate DefaultAttributes entry", which is how bagus_lib's mob died on the second pass), and
+     * its entries are still in the map because the rebase only adds vanilla keys. Re-applying the modification
+     * event instead re-layers what mods asked for on top of the rebased values, which is idempotent.
+     */
+    public static void rebaseAttributesAfterFabricEntrypoints() {
+        FORGE_ATTRIBUTES.putAll(DefaultAttributes.vanillaSuppliers());
+        applyAttributeModifications();
+    }
+
+    private static void applyAttributeModifications() {
         Map<EntityType<? extends LivingEntity>, AttributeSupplier.Builder> finalMap = new HashMap<>();
         ModLoader.postEvent(new EntityAttributeModificationEvent(finalMap));
 

@@ -60,10 +60,11 @@ public abstract class CommonModLoader {
             // mutable copy - its mixin does that at the tail of DefaultAttributes' static initialiser - and
             // writes there. DefaultAttributes#getSupplier reads NeoForge's own map first, and that map was
             // filled by the attribute pass above, before any of this ran, so every attribute a Fabric mod
-            // registered stayed invisible ("Pig does not have test attribute"). Repeating the pass copies
-            // them over, exactly as if they had gone through the event. It is safe to repeat: the handlers
-            // only put into or combine with the existing suppliers.
-            net.neoforged.neoforge.common.CommonHooks.modifyAttributes();
+            // registered stayed invisible ("Pig does not have test attribute"). Rebasing copies them over, and
+            // re-applying the modification event re-layers what NeoForge mods asked for on top. The creation
+            // event is deliberately not repeated - it refuses a second entry for the same entity, which is how
+            // a NeoForge mod's mob (bagus_lib's) died here.
+            net.neoforged.neoforge.common.CommonHooks.rebaseAttributesAfterFabricEntrypoints();
             // NeoFobric: the Fabric client entrypoints are the one part of Fabric mod initialisation that
             // cannot run here - they need the game instance, and their insertion point sits inside the
             // Minecraft constructor - yet Fabric mods do register content from them (particle types are

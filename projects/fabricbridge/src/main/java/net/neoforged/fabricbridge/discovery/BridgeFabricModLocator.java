@@ -61,6 +61,40 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      */
     private static final String GAME_CONTENT_MARKER = "net/minecraft/server/MinecraftServer.class";
 
+    /** A plain mod id, as both loaders spell them. */
+    private static final java.util.regex.Pattern MOD_ID = java.util.regex.Pattern.compile("[a-z0-9_.-]+");
+
+    /** The mod ids the NeoForge mods in the mods folder provide, for the current discovery pass. */
+    private static volatile java.util.Set<String> fmlProvidedModIds = java.util.Set.of();
+
+    /** The Fabric jars skipped because an FML mod provides the same id; claimed in {@code findCandidates}. */
+    private static final java.util.List<Path> fmlProvidedJars = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    /**
+     * {@return the mod ids every NeoForge mod in the folder provides}
+     *
+     * <p>Read before the Fabric jars are examined, because a Fabric jar can only be skipped once it is known
+     * that the platform provides the same mod.
+     */
+    private static java.util.Set<String> readForgeModIds(Path modsDir) {
+        var ids = new java.util.HashSet<String>();
+        try (var jars = Files.list(modsDir)) {
+            for (var jarPath : (Iterable<Path>) jars::iterator) {
+                if (Files.isRegularFile(jarPath)
+                        && jarPath.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar")) {
+                    for (var mod : readForgeModsDotToml(jarPath)) {
+                        if (!mod[0].isEmpty()) {
+                            ids.add(mod[0]);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.debug("[NeoFobric] Could not list the mods folder to collect NeoForge mod ids", e);
+        }
+        return ids;
+    }
+
     /**
      * Marker for entries that only carry the client half of the Minecraft classes. In dev the main
      * and client sourcesets are compiled into separate folders, and only the common one contains
@@ -121,6 +155,13 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // extracted from their parents).
         var fabricJars = new LinkedHashMap<Path, FabricModInfo>();
 
+        // NeoFobric: mod ids the NeoForge mods in this folder provide. A Fabric jar that provides one of them
+        // is skipped (see examineJar) - keeping both builds puts the same packages into the FML module layer
+        // and into the Fabric one, and the JDK refuses to resolve that (Sodium and Iris both died with
+        // "Modules neofobric.fabric.mods and sodium export package net.caffeinemc.mods.sodium.api.util").
+        fmlProvidedJars.clear();
+        fmlProvidedModIds = readForgeModIds(modsDir);
+
         try (var files = Files.list(modsDir)) {
             files.filter(p -> p.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar"))
                     .sorted()
@@ -130,12 +171,17 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             return;
         }
 
-        if (fabricJars.isEmpty()) {
+        if (fabricJars.isEmpty() && fmlProvidedJars.isEmpty()) {
             return;
         }
 
-        // Claim every Fabric jar so no other locator (mods folder, game locator, ...) picks it up.
+        // Claim every Fabric jar so no other locator (mods folder, game locator, ...) picks it up. The jars
+        // skipped for an FML counterpart are claimed too: FML would otherwise report the Fabric metadata it
+        // cannot use as a broken file.
         for (var path : fabricJars.keySet()) {
+            context.addLocated(path);
+        }
+        for (var path : fmlProvidedJars) {
             context.addLocated(path);
         }
 
@@ -530,10 +576,22 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             }
             info = FabricModJsonParser.parse(metadata);
             if (info == null) {
+                LOGGER.warn("[NeoFobric] {} carries a fabric.mod.json that could not be parsed - the jar is ignored", path.getFileName());
                 return;
             }
         } catch (Exception e) {
-            LOGGER.debug("[NeoFobric] Failed to read {} while checking for Fabric metadata", path, e);
+            LOGGER.warn("[NeoFobric] Could not read {} while checking for Fabric metadata - the jar is ignored", path, e);
+            return;
+        }
+
+        if (fmlProvidedModIds.contains(info.modId())) {
+            // NeoFobric: both loaders ship this mod, so only one build may be loaded. The Fabric one is the one
+            // to go: FML's dependencies and mixin gating are written against the NeoForge build, and skipping it
+            // here is what keeps the two module layers from exporting the same packages (Sodium).
+            LOGGER.info("[NeoFobric] Skipping {} - the NeoForge mod {} provides the same mod id, and its build is the one loaded",
+                    path.getFileName(), info.modId());
+            FabricJarRegistry.markForeignModPath(path);
+            fmlProvidedJars.add(path);
             return;
         }
 
@@ -598,6 +656,16 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                     if (id.isEmpty() || blocked.contains(id) || claimed.contains(id)) {
                         continue;
                     }
+                    // NeoFobric: an id that is still not a plain mod id (an unparsed annotation, a stray
+                    // character) is skipped instead of being used as a file name - one malformed mods.toml must
+                    // not take the whole locator down, which is exactly what happened: an id of
+                    // `"bagus_lib" #mandatory` threw InvalidPathException out of the discovery pass and the
+                    // game never started.
+                    if (!MOD_ID.matcher(id).matches()) {
+                        LOGGER.warn("[NeoFobric] Ignoring the mod id '{}' in {} - it is not a plain mod id",
+                                id, jarPath.getFileName());
+                        continue;
+                    }
                     var version = sanitizeFabricVersion(mod[1]);
                     var name = mod[2].isEmpty() ? id : mod[2];
                     var target = view.resolve("neofobric-platform-" + id + ".jar");
@@ -612,7 +680,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                     exposed.add(id + " " + version);
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             LOGGER.error("[NeoFobric] Failed to expose the NeoForge mods in {} to fabric-loader", modsDir, e);
             return;
         }
@@ -668,7 +736,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                     continue;
                 }
                 var key = line.substring(0, eq).strip();
-                var value = unquoteToml(line.substring(eq + 1).strip());
+                var value = tomlValue(line.substring(eq + 1).strip());
                 switch (key) {
                     case "modId" -> id = value;
                     case "version" -> version = value;
@@ -683,6 +751,30 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             LOGGER.debug("[NeoFobric] Could not read neoforge.mods.toml of {}", jarPath, e);
         }
         return mods;
+    }
+
+    /**
+     * {@return the value of one TOML assignment in a mods.toml, comment and all}
+     *
+     * <p>NeoForge's MDK template writes its entries with a trailing annotation - {@code modId = "bagus_lib"
+     * #mandatory} - and a plain unquote hands back {@code "bagus_lib" #mandatory} (quotes and comment included),
+     * which then went on to become a file name. The comment is cut first, then the quotes.
+     */
+    private static String tomlValue(String value) {
+        var inSingle = false;
+        var inDouble = false;
+        for (var i = 0; i < value.length(); i++) {
+            var c = value.charAt(i);
+            if (c == '\'' && !inDouble) {
+                inSingle = !inSingle;
+            } else if (c == '"' && !inSingle) {
+                inDouble = !inDouble;
+            } else if (c == '#' && !inSingle && !inDouble) {
+                value = value.substring(0, i);
+                break;
+            }
+        }
+        return unquoteToml(value.strip());
     }
 
     private static String unquoteToml(String value) {
@@ -783,6 +875,20 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         }
 
         var platform = new java.util.LinkedHashSet<String>();
+        // NeoFobric: the platform's own namespaces are platform content no matter where their classes
+        // happen to live. In an installed client NeoForge and FML sit in the "neoforge"/"fml"/"cpw.mods"
+        // modules of the transforming layer, so the classpath probe below finds nothing there, and a
+        // Fabric jar carrying a copy of those classes (ForgeConfigAPIPort ships the config API) then
+        // shares the package with the platform module and the whole layer is refused:
+        //   Modules neofobric.fabric.mods and neoforge export package net.neoforged.neoforge.client.gui
+        // Only these two namespaces are taken as given: the platform really does provide them on every
+        // NeoForge install, unlike "net.minecraftforge.*" (the pre-1.20.5 Forge namespace), which only
+        // ForgeConfigAPIPort provides and which must therefore stay with the Fabric jar that ships it.
+        for (var packageName : fabricPackages) {
+            if (isPlatformNamespace(packageName)) {
+                platform.add(packageName);
+            }
+        }
         for (var root : systemClasspathRoots()) {
             try {
                 if (Files.isDirectory(root)) {
@@ -809,6 +915,17 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             }
         }
         return platform;
+    }
+
+    /**
+     * {@return whether {@code packageName} belongs to the platform (FML, NeoForge, the boot launcher)}
+     * Those namespaces are provided by the game layer on every NeoForge install, so a Fabric jar that
+     * ships them must not merge them into the composite module - see
+     * {@link #platformProvidedPackages}.
+     */
+    private static boolean isPlatformNamespace(String packageName) {
+        return packageName.equals("net.neoforged") || packageName.startsWith("net.neoforged.")
+                || packageName.equals("cpw.mods") || packageName.startsWith("cpw.mods.");
     }
 
     /**

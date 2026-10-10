@@ -59,14 +59,26 @@ public final class MixinHandlerDescriptorFixer {
      * Injector annotations whose handlers take the target's parameters as leading arguments.
      * {@code @WrapMethod}/{@code @ModifyReturnValue}/{@code @ModifyReceiver} are excluded: the first
      * two do not receive the target's parameters, the third receives the receiver only.
+     *
+     * <p>The "value first" injectors are excluded as well: {@code @ModifyVariable}, {@code @ModifyArg},
+     * {@code @ModifyArgs} and {@code @ModifyConstant} hand the modified value (or the argument array /
+     * the constant) in as the <em>first</em> parameter, with the target's own parameters following it.
+     * A handler like Twilight Forest's {@code (float, ServerLevel, DamageSource)} therefore looks like a
+     * permutation of {@code hurtServer(ServerLevel, DamageSource, float)} and used to be reordered into
+     * exactly that order - after which Mixin's handling of the modified variable no longer matched the
+     * generated local-capture helper, and the woven class died in verification:
+     * <pre>
+     * java.lang.VerifyError: Bad local variable type
+     *   at net/minecraft/world/entity/LivingEntity.localvar$bac000$twilightforest$tf$modifyIncomingDamage(...)
+     * </pre>
+     * Their parameter lists follow the injector's own convention, in which the permutation heuristic the
+     * fixer uses cannot tell the value parameter apart from a target parameter of the same type, so they
+     * are left untouched. A genuine drift in one of them then stays a (lenient, logged) injection
+     * failure instead of a hard verification error.
      */
     private static final Set<String> POSITIONAL_INJECTORS = Set.of(
             "Lorg/spongepowered/asm/mixin/injection/Inject;",
-            "Lorg/spongepowered/asm/mixin/injection/ModifyVariable;",
             "Lorg/spongepowered/asm/mixin/injection/Redirect;",
-            "Lorg/spongepowered/asm/mixin/injection/ModifyArg;",
-            "Lorg/spongepowered/asm/mixin/injection/ModifyArgs;",
-            "Lorg/spongepowered/asm/mixin/injection/ModifyConstant;",
             "Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;",
             "Lcom/llamalad7/mixinextras/injector/ModifyExpressionValue;");
 

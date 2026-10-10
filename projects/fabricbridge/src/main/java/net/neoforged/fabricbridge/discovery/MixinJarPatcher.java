@@ -1107,6 +1107,114 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * Makes a Fabric mod's own resource scan see the jar it was loaded from.
+     *
+     * <p>Mods scan their own package through {@code ClassLoader.getResources} - Twilight Forest's bean
+     * context looks for its {@code @Component} classes that way. The loader in this environment answers for
+     * class files but returns nothing for package directories, so such a scan comes up empty (Twilight
+     * Forest logs "Found 0 @Component classes" and then dies on the null its entrypoint got back).
+     *
+     * <p>{@code FabricResourceHooks} asks the loader first and only falls back to the caller's own jar when
+     * the loader had nothing, so nothing that works today changes; the fallback URL is the directory entry
+     * the scan opens its file system on.
+     *
+     * @param jarPath the jar the patched class comes from, which is what the fallback enumerates
+     * @return the class bytes with the call redirected, or the original when it does not contain it
+     */
+    private static byte[] redirectFabricModResourceLookup(byte[] classBytes, java.nio.file.Path jarPath) {
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                        && call.getOpcode() == Opcodes.INVOKEVIRTUAL
+                        && "java/lang/ClassLoader".equals(call.owner)
+                        && "getResources".equals(call.name)
+                        && "(Ljava/lang/String;)Ljava/util/Enumeration;".equals(call.desc)) {
+                    // The receiver and the name are already on the stack; the jar path goes on top of them.
+                    method.instructions.insertBefore(call, new org.objectweb.asm.tree.LdcInsnNode(jarPath.toString()));
+                    call.setOpcode(Opcodes.INVOKESTATIC);
+                    call.owner = "net/neoforged/neoforge/common/FabricResourceHooks";
+                    call.name = "fabricModResources";
+                    call.desc = "(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)Ljava/util/Enumeration;";
+                    call.itf = false;
+                    changed = true;
+                }
+            }
+        }
+
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed the resource lookups in {} at FabricResourceHooks", jarPath.getFileName());
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
+     * Points ForgeConfigAPIPort's config registration at a helper that can serve it on NeoForge.
+     *
+     * <p>ForgeConfigAPIPort's Fabric build ships its own copy of {@code net.neoforged.fml.config}, and its
+     * {@code ConfigTracker#registerConfig} takes the <em>mod id</em> as its third parameter. On NeoForge that
+     * copy is shadowed by the platform's classes - the two cannot both be in the layer - and the platform's
+     * overload takes a {@code ModContainer} instead, so the call dies with {@code NoSuchMethodError} inside
+     * the calling mod's entrypoint. Twilight Forest registers its configs that way, and its aborted
+     * entrypoint is what leaves the game without its content and, later, without a working resource reload.
+     *
+     * <p>{@code FabricConfigHooks} registers the config with a synthetic container for the Fabric mod id, so
+     * the config is tracked and loaded exactly like a NeoForge mod's. The receiver is already on the stack
+     * when the call is made, so the static helper takes it as its first argument and the call keeps its shape.
+     *
+     * @return the class bytes with the call redirected, or the original when it does not contain it
+     */
+    private static byte[] redirectFabricModConfigRegistration(byte[] classBytes, String entryName) {
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof org.objectweb.asm.tree.MethodInsnNode call)
+                        || !"net/neoforged/fml/config/ConfigTracker".equals(call.owner)
+                        || !"registerConfig".equals(call.name)) {
+                    continue;
+                }
+                var takesModId = call.desc.startsWith("(Lnet/neoforged/fml/config/ModConfig$Type;Lnet/neoforged/fml/config/IConfigSpec;Ljava/lang/String;");
+                if (!takesModId) {
+                    continue;
+                }
+                call.setOpcode(Opcodes.INVOKESTATIC);
+                call.owner = "net/neoforged/neoforge/common/FabricConfigHooks";
+                call.name = "registerFabricModConfig";
+                call.desc = "(Lnet/neoforged/fml/config/ConfigTracker;" + call.desc.substring(1);
+                call.itf = false;
+                changed = true;
+            }
+        }
+
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed ForgeConfigAPIPort's config registration at FabricConfigHooks");
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
      * Points Fabric API's tooltip-order scan at the method NeoForge moved the list into.
      *
      * <p>{@code VanillaTooltipProviderOrder} reads the {@code DataComponents} field references out of
@@ -2327,6 +2435,16 @@ public final class MixinJarPatcher {
                 var tagParseRedirected = redirectFabricTagFileParse(versionMoved, entry.getName());
                 if (tagParseRedirected != null) {
                     versionMoved = tagParseRedirected;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var configRegistrationRedirected = redirectFabricModConfigRegistration(versionMoved, entry.getName());
+                if (configRegistrationRedirected != null) {
+                    versionMoved = configRegistrationRedirected;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var resourceLookupRedirected = redirectFabricModResourceLookup(versionMoved, jarPath);
+                if (resourceLookupRedirected != null) {
+                    versionMoved = resourceLookupRedirected;
                     patched.put(entry.getName(), versionMoved);
                 }
                 allClasses.add(versionMoved);

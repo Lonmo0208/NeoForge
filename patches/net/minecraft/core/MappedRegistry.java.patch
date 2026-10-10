@@ -142,6 +142,25 @@
          }
  
          List<Identifier> unboundTags = this.frozenTags
+@@ -314,7 +_,17 @@
+         }
+ 
+         this.componentLookup = new DataComponentLookup<>(this.byId);
+-        this.allTags = MappedRegistry.TagSet.fromMap(this.frozenTags);
++        // NeoFobric: tags bound by a data-pack reload (TagLoader -> prepareTagReload -> PendingTags#apply)
++        // live in allTags only; frozenTags holds the ones created through the registry API. NeoForge
++        // freezes a registry again whenever it applies a registry snapshot, and rebuilding the tag set
++        // from frozenTags alone dropped every data-pack tag at that moment - the configuration-phase
++        // parse of network registries then died with "Missing tag: 'minecraft:infiniburn_overworld' in
++        // 'minecraft:block'". Keep what is bound: the union, with the currently bound sets winning.
++        Map<TagKey<T>, HolderSet.Named<T>> keptTags = new java.util.HashMap<>(this.frozenTags);
++        if (this.allTags.isBound()) {
++            this.allTags.forEach((key, values) -> keptTags.put(key, values));
++        }
++        this.allTags = MappedRegistry.TagSet.fromMap(keptTags);
+         this.refreshTagsInHolders();
+         return this;
+     }
 @@ -443,6 +_,12 @@
                  return patchedHolder;
              }
