@@ -47,6 +47,28 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 .addAll(interfaces);
     }
 
+    /**
+     * Game enums a Fabric mod extends through Mixin's enum extension.
+     *
+     * <p>FML refuses that feature on any class implementing {@code IExtensibleEnum} - the enum NeoForge made
+     * extensible itself, so that mods use its registration API instead. A Fabric mod cannot know about that API,
+     * and with the interface left in place its mixin is rejected during config preparation, which takes the whole
+     * game down before the main menu (IllagerInvasion's raid types were the case that surfaced this). The bridge
+     * therefore drops the marker from exactly the classes a Fabric enum extension targets, detected from the
+     * mixin itself rather than from a list of mods, and Mixin's own extension then applies as it does on Fabric.
+     */
+    private static final java.util.Set<String> ENUM_EXTENSION_TARGETS = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    private static final String I_EXTENSIBLE_ENUM = "net/neoforged/fml/common/asm/enumextension/IExtensibleEnum";
+
+    /** Marks a game enum that some Fabric mixin extends, so the marker interface can step aside. */
+    public static void registerEnumExtensionTarget(String targetInternalName) {
+        if (ENUM_EXTENSION_TARGETS.add(targetInternalName)) {
+            LOGGER.info("[NeoFobric] {} is enum-extended by a Fabric mixin; the platform's IExtensibleEnum marker will be dropped from it",
+                    targetInternalName.replace('/', '.'));
+        }
+    }
+
     private static final String FABRIC_RESOURCE_INTERFACE = "net/fabricmc/fabric/api/resource/v1/FabricResource";
 
     private static final String FABRIC_CHANNELED_ADDON =
@@ -347,6 +369,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 || FABRIC_ITEM_STACK.equals(name)
                 || WIDEN_PRIVATE_MEMBERS.containsKey(name)
                 || InjectedInterfaceSource.get().containsKey(name)
+                || ENUM_EXTENSION_TARGETS.contains(name)
                 || isFabricClassTweakerTarget(name);
     }
 
@@ -374,12 +397,20 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 && !FABRIC_ITEM_STACK.equals(context.node().name)
                 && !WIDEN_PRIVATE_MEMBERS.containsKey(context.node().name)
                 && !InjectedInterfaceSource.get().containsKey(context.node().name)
+                && !ENUM_EXTENSION_TARGETS.contains(context.node().name)
                 && !isFabricClassTweakerTarget(context.node().name)) {
             return ComputeFlags.NO_REWRITE;
         }
 
         var node = context.node();
         var changed = false;
+        // A Fabric enum extension cannot apply while the platform's marker sits on the class - FML rejects the
+        // mixin for it - and a Fabric mod has no way to know about the platform API that marker stands for.
+        if (ENUM_EXTENSION_TARGETS.contains(node.name) && node.interfaces.remove(I_EXTENSIBLE_ENUM)) {
+            changed = true;
+            LOGGER.info("[NeoFobric] Dropped the IExtensibleEnum marker from {} so the Fabric enum extension applies",
+                    node.name.replace('/', '.'));
+        }
         // First: a mod's access widener can widen or un-final anything, and the rest of this method
         // (and Mixin, which runs later) should see the tweaked class.
         if (isFabricClassTweakerTarget(node.name)) {

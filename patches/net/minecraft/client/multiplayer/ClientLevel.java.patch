@@ -174,22 +174,32 @@
              this.difficulty = difficulty;
          }
  
-@@ -1240,6 +_,9 @@
+@@ -1240,6 +_,15 @@
                      ClientLevel.this.dragonParts.addAll(Arrays.asList(dragon.getSubEntities()));
                      break;
                  default:
 +                    if (entity.isMultipartEntity()) {
-+                        ClientLevel.this.dragonParts.addAll(Arrays.asList(entity.getParts()));
++                        // NeoFobric: same as the server's tracking hook - a Fabric mod's multipart entity declares
++                        // the vanilla Entity[] getParts(), so the platform call would land on the null default.
++                        for (var subEntity : net.neoforged.fabricbridge.FabricBridgeHooks.entityParts(entity)) {
++                            if (subEntity instanceof net.neoforged.neoforge.entity.PartEntity<?> part) {
++                                ClientLevel.this.dragonParts.add(part);
++                            }
++                        }
 +                    }
              }
          }
  
-@@ -1253,10 +_,26 @@
+@@ -1253,10 +_,30 @@
                      ClientLevel.this.dragonParts.removeAll(Arrays.asList(dragon.getSubEntities()));
                      break;
                  default:
 +                    if (entity.isMultipartEntity()) {
-+                        ClientLevel.this.dragonParts.removeAll(Arrays.asList(entity.getParts()));
++                        for (var subEntity : net.neoforged.fabricbridge.FabricBridgeHooks.entityParts(entity)) {
++                            if (subEntity instanceof net.neoforged.neoforge.entity.PartEntity<?> part) {
++                                ClientLevel.this.dragonParts.remove(part);
++                            }
++                        }
 +                    }
              }
 +

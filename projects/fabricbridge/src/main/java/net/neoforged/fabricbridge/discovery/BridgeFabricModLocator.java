@@ -195,6 +195,13 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // so the Fabric duplicate is shadowed (and reported) instead of being merged.
         var platformPackages = platformProvidedPackages(fabricJars.keySet());
 
+        // A package more than one Fabric jar provides is resolved class by class from the last jar that has it,
+        // so a jar bundling an older copy of a module overwrites the newer one piecemeal. That is how fabric-api's
+        // ScreenEvents lost afterForeground: the recipe-book mixin was fabric-api's 5.2.1 while the class it calls
+        // came from the 5.0.3 copy ModMenu bundles. The newest provider of each duplicated package keeps it, and
+        // the older copies are hidden by the same per-jar filter that shadows platform packages.
+        var duplicatePackages = duplicateFabricPackages(fabricJars);
+
         // Merge all Fabric content into one JPMS module to avoid split-package conflicts.
         // contentsList stays index-aligned with fabricPaths, so the realigning pass below can swap
         // individual entries for their rewritten copies.
@@ -207,9 +214,13 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 var content = JarContents.ofPath(path);
                 fabricPaths.add(path);
                 contentsList.add(content);
-                contentFilters.add(platformPackages.isEmpty()
+                var duplicatesHere = duplicatePackages.get(path);
+                var shadowed = duplicatesHere == null ? platformPackages
+                        : platformPackages.isEmpty() ? duplicatesHere
+                                : union(duplicatesHere, platformPackages);
+                contentFilters.add(shadowed.isEmpty()
                         ? null
-                        : platformShadowFilter(path, platformPackages, shadowedPackages));
+                        : platformShadowFilter(path, shadowed, shadowedPackages));
             } catch (Exception e) {
                 LOGGER.error("[NeoFobric] Failed to open Fabric mod jar {}", path, e);
                 // Un-claim so the file is reported by the regular discovery pipeline instead.
@@ -926,6 +937,106 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
     private static boolean isPlatformNamespace(String packageName) {
         return packageName.equals("net.neoforged") || packageName.startsWith("net.neoforged.")
                 || packageName.equals("cpw.mods") || packageName.startsWith("cpw.mods.");
+    }
+
+    /**
+     * {@return the packages to hide per jar, because the same Fabric mod is present in a newer version elsewhere}
+     * The composite resolves a class from the last jar that carries it, so two copies of one module overwrite each
+     * other piecemeal - a mixin from the newer copy calling into the older one's API, which is where
+     * {@code NoSuchMethodError}s like fabric-api's {@code ScreenEvents.afterForeground} come from. Mods that
+     * bundle Fabric API modules are the usual source of the second copy.
+     *
+     * <p>The rule is per mod, never per package: a module's packages have to come from one place, or its own
+     * classes end up split across two jars and fail to initialise (that is how the first attempt broke
+     * fabric-resource-loader). The copy with the highest version keeps all of its packages, the others lose
+     * all of theirs.
+     */
+    private static java.util.Map<Path, java.util.Set<String>> duplicateFabricPackages(Map<Path, FabricModInfo> fabricJars) {
+        var copies = new java.util.HashMap<String, java.util.List<Map.Entry<Path, FabricModInfo>>>();
+        for (var entry : fabricJars.entrySet()) {
+            copies.computeIfAbsent(entry.getValue().modId(), key -> new java.util.ArrayList<>()).add(entry);
+        }
+
+        var hidden = new java.util.HashMap<Path, java.util.Set<String>>();
+        for (var modCopies : copies.entrySet()) {
+            if (modCopies.getValue().size() < 2) {
+                continue;
+            }
+            var winner = modCopies.getValue().getFirst();
+            for (var candidate : modCopies.getValue()) {
+                if (compareModuleVersions(candidate.getValue().version(), winner.getValue().version()) > 0) {
+                    winner = candidate;
+                }
+            }
+            for (var candidate : modCopies.getValue()) {
+                if (candidate.getKey().equals(winner.getKey())) {
+                    continue;
+                }
+                var packages = packageNamesOf(candidate.getKey());
+                if (packages.isEmpty()) {
+                    continue;
+                }
+                hidden.computeIfAbsent(candidate.getKey(), key -> new java.util.LinkedHashSet<>()).addAll(packages);
+                LOGGER.info("[NeoFobric] Hid the older copy of Fabric mod {} ({}) from {} - {} {} keeps its {} package(s)",
+                        modCopies.getKey(), candidate.getValue().version(), candidate.getKey().getFileName(),
+                        winner.getValue().modId(), winner.getValue().version(), packages.size());
+            }
+        }
+        return hidden;
+    }
+
+    /** {@return every package the jar provides} */
+    private static java.util.Set<String> packageNamesOf(Path jar) {
+        var packages = new java.util.LinkedHashSet<String>();
+        try (var contents = JarContents.ofPath(jar)) {
+            contents.visitContent((relativePath, resource) -> {
+                var packageName = packageOfEntry(relativePath);
+                if (packageName != null) {
+                    packages.add(packageName);
+                }
+            });
+        } catch (Exception e) {
+            LOGGER.debug("[NeoFobric] Failed to index the packages of {}", jar, e);
+        }
+        return packages;
+    }
+
+    /** {@return the union of two package sets} */
+    private static java.util.Set<String> union(java.util.Set<String> first, java.util.Set<String> second) {
+        var union = new java.util.LinkedHashSet<String>(first);
+        union.addAll(second);
+        return union;
+    }
+
+    /**
+     * {@return how two Fabric module versions compare} Versions carry a build suffix after {@code +} that never
+     * takes part in the ordering, and are otherwise dotted numbers; anything that does not parse compares as
+     * text, so an unusual version can only order wrongly, never throw.
+     */
+    private static int compareModuleVersions(String first, String second) {
+        var left = stripBuildSuffix(first);
+        var right = stripBuildSuffix(second);
+        var leftParts = left.split("\\.");
+        var rightParts = right.split("\\.");
+        for (var i = 0; i < Math.max(leftParts.length, rightParts.length); i++) {
+            var leftPart = i < leftParts.length ? leftParts[i] : "0";
+            var rightPart = i < rightParts.length ? rightParts[i] : "0";
+            int comparison;
+            try {
+                comparison = Integer.compare(Integer.parseInt(leftPart.trim()), Integer.parseInt(rightPart.trim()));
+            } catch (NumberFormatException notNumeric) {
+                comparison = leftPart.compareTo(rightPart);
+            }
+            if (comparison != 0) {
+                return comparison;
+            }
+        }
+        return left.compareTo(right);
+    }
+
+    private static String stripBuildSuffix(String version) {
+        var plus = version.indexOf('+');
+        return plus < 0 ? version : version.substring(0, plus);
     }
 
     /**

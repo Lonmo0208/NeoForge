@@ -261,18 +261,26 @@
      }
  
      public @Nullable EnderDragonFight getDragonFight() {
-@@ -1907,8 +_,8 @@
+@@ -1907,9 +_,15 @@
                  ServerLevel.this.navigatingMobs.add(mob);
              }
  
 -            if (entity instanceof EnderDragon dragon) {
 -                for (EnderDragonPart subEntity : dragon.getSubEntities()) {
+-                    ServerLevel.this.dragonParts.put(subEntity.getId(), subEntity);
 +            if (entity.isMultipartEntity()) {
-+                for(net.neoforged.neoforge.entity.PartEntity<?> subEntity : entity.getParts()) {
-                     ServerLevel.this.dragonParts.put(subEntity.getId(), subEntity);
++                // NeoFobric: a Fabric mod's multipart entity overrides the vanilla Entity[] getParts(), which
++                // cannot override the platform's PartEntity[] one - the platform call would read the interface
++                // default, null, and crash. The bridge finds whichever shape the entity actually declares and
++                // returns its entries; only the ones the platform's type accepts are tracked.
++                for (var subEntity : net.neoforged.fabricbridge.FabricBridgeHooks.entityParts(entity)) {
++                    if (subEntity instanceof net.neoforged.neoforge.entity.PartEntity<?> part) {
++                        ServerLevel.this.dragonParts.put(part.getId(), part);
++                    }
                  }
              }
-@@ -1928,25 +_,62 @@
+ 
+@@ -1928,25 +_,64 @@
                  if (ServerLevel.this.isUpdatingNavigations) {
                      String message = "onTrackingStart called during navigation iteration";
                      Util.logAndPauseIfInIde(
@@ -286,9 +294,12 @@
  
 -            if (entity instanceof EnderDragon dragon) {
 -                for (EnderDragonPart subEntity : dragon.getSubEntities()) {
+-                    ServerLevel.this.dragonParts.remove(subEntity.getId());
 +            if (entity.isMultipartEntity()) {
-+                for(net.neoforged.neoforge.entity.PartEntity<?> subEntity : entity.getParts()) {
-                     ServerLevel.this.dragonParts.remove(subEntity.getId());
++                for (var subEntity : net.neoforged.fabricbridge.FabricBridgeHooks.entityParts(entity)) {
++                    if (subEntity instanceof net.neoforged.neoforge.entity.PartEntity<?> part) {
++                        ServerLevel.this.dragonParts.remove(part.getId());
++                    }
                  }
              }
  

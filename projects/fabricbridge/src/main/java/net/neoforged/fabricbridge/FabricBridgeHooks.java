@@ -1142,4 +1142,47 @@ public final class FabricBridgeHooks {
             return null;
         }
     }
+
+    /**
+     * {@return the parts an entity reports, safe to iterate} The platform's {@code Entity#getParts()} returns
+     * {@code PartEntity[]}, and NeoForge's own tracking code walks that array whenever
+     * {@code isMultipartEntity()} says yes. A Fabric mod's multipart entity overrides the <em>vanilla</em> shape
+     * of that method, {@code Entity[]} - which cannot override the platform's, and so is never the method the
+     * platform call lands on: it gets the interface default, {@code null}, and reads {@code null.length} into a
+     * crash. Twilight Forest's boss spawner walks straight into that on every boss it spawns.
+     *
+     * <p>So this asks the entity's own class for the vanilla-shaped method by descriptor and returns whatever it
+     * holds, as objects; the caller keeps only the parts the platform's type actually accepts. An entity with
+     * neither shape, or a throwing one, yields an empty array - the tracking code then registers nothing, which
+     * is what a Fabric multipart entity got before this existed, minus the crash.
+     */
+    public static Object[] entityParts(Object entity) {
+        if (!bridgeActive() || entity == null) {
+            return EMPTY_PARTS;
+        }
+        try {
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var entityClass = Class.forName("net.minecraft.world.entity.Entity", false, gameLoader);
+            for (var type = entity.getClass(); type != null; type = type.getSuperclass()) {
+                try {
+                    var method = type.getDeclaredMethod("getParts");
+                    var parts = method.invoke(entity);
+                    if (parts == null) {
+                        continue;
+                    }
+                    if (parts instanceof Object[] array) {
+                        return array;
+                    }
+                } catch (NoSuchMethodException notHere) {
+                    // keep walking up
+                }
+            }
+            return EMPTY_PARTS;
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not read the parts of {}", entity, t);
+            return EMPTY_PARTS;
+        }
+    }
+
+    private static final Object[] EMPTY_PARTS = new Object[0];
 }

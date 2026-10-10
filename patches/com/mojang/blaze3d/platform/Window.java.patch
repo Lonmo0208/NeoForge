@@ -17,10 +17,17 @@
          this.backend = backend;
          if (initialMonitor != null) {
              VideoMode mode = initialMonitor.getPreferredVidMode(this.fullscreen ? this.preferredFullscreenVideoMode : Optional.empty());
-@@ -132,6 +_,11 @@
+@@ -132,6 +_,18 @@
          try (GLFWErrorScope var9 = new GLFWErrorScope(glfwErrors)) {
              backend.setWindowHints();
              GLFW.glfwWindowHint(131076, 0);
++            // NeoFobric: ask the driver for a debug context when asked to. A GL error reported through KHR_debug
++            // carries only "no detailed debug message due to a non-debug context" otherwise, which is exactly the
++            // kind of unactionable report this switch exists to replace. Opt in with
++            // -Dneofobric.glDebugContext=true; 139271 is GLFW_OPENGL_DEBUG_CONTEXT.
++            if (Boolean.getBoolean("neofobric.glDebugContext")) {
++                GLFW.glfwWindowHint(139271, GLFW.GLFW_TRUE);
++            }
 +            var earlyLoadingScreen = net.neoforged.fml.loading.EarlyLoadingScreenController.current();
 +            if (earlyLoadingScreen != null) {
 +                windowHandle = earlyLoadingScreen.takeOverGlfwWindow();

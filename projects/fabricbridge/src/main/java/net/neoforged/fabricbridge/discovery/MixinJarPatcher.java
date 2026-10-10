@@ -660,27 +660,6 @@ public final class MixinJarPatcher {
     }
 
     /**
-     * Mixin injector handlers whose {@code @At(value = "RETURN", ordinal = N)} selector points past
-     * the end of a target method NeoForge patched into a different shape.
-     *
-     * <p>Vanilla's {@code KeyboardHandler.keyPress} has six RETURNs and Create's
-     * {@code KeyboardHandlerMixin} injects at the sixth (ordinal 5) - the method's final return.
-     * NeoForge's own patch restructured that method down to three RETURNs, so the ordinal is out of
-     * range and the injection is silently skipped (the bridge relaxes requires): key <em>presses</em>
-     * still reach Create - its press handler uses {@code @At("TAIL")} - but key <em>releases</em> never
-     * do, which leaves every hold-and-release interaction dead. The schematic tool menu is exactly
-     * that: the key opens the menu on press and the release is what focuses/commits the selection, so
-     * with the release handler missing the whole blueprint key set looks unresponsive.
-     *
-     * <p>Retargeting the selector to {@code TAIL} is the exact vanilla placement: TAIL injects before
-     * the method's last RETURN, and the ordinal-5 return <em>was</em> the last RETURN in vanilla. The
-     * table is explicit because "which return the ordinal meant" is not derivable from the patched
-     * class - a middle-return ordinal would need a different anchor.
-     */
-    private static final Map<String, java.util.Set<String>> STALE_RETURN_ORDINAL_HANDLERS = Map.of(
-            "com/zurrtum/create/client/mixin/KeyboardHandlerMixin", java.util.Set.of("onKeyReleased"));
-
-    /**
      * Replaces the whole-list swap in fabric-registry-sync's {@code WorldLoaderMixin} with a merge.
      *
      * <p>The mixin's handler returns Fabric's own registry list, ignoring the list it was handed - on a
@@ -732,16 +711,26 @@ public final class MixinJarPatcher {
     }
 
     /**
-     * Rewrites {@code @At(value = "RETURN", ordinal = N)} to {@code @At("TAIL")} on the handlers named
-     * by {@link #STALE_RETURN_ORDINAL_HANDLERS}.
+    /**
+     * Lifts a stale {@code @At(value = "RETURN", ordinal = N)} onto {@code @At("TAIL")} whenever the target
+     * method does not have that many returns any more.
+     *
+     * <p>A handler asking for the sixth return of a method this tree only gives three is dead weight: the
+     * injection point does not exist, so the handler never runs and whatever it was written to do silently
+     * never happens. That is how Create's key-release handler left the schematic key set unresponsive - key
+     * presses still arrived (that handler uses {@code @At("TAIL")}) while the release, which focuses and
+     * commits the selection, never did. NeoForge restructuring such a method is what makes the ordinal stale,
+     * and {@code TAIL} is the placement it meant: TAIL injects before the final RETURN, and an ordinal that
+     * used to be the last return can only have been that.
+     *
+     * <p>The rule fires only when the ordinal is out of range for <em>every</em> method the annotation names
+     * in <em>every</em> class the mixin targets. As long as it lands somewhere, the anchor means something
+     * and moving it would change behaviour - and when the target class is not part of the game (a mixin into
+     * its own mod's classes) nothing is decided at all. No class or handler is named here: the evidence is
+     * the patched target's return count.
      */
-    private static byte[] retargetStaleReturnOrdinals(byte[] classBytes, String entryName) {
+    private static byte[] retargetStaleReturnOrdinals(byte[] classBytes, String entryName, TargetResolver resolver) {
         if (!entryName.endsWith(".class")) {
-            return null;
-        }
-        var internalName = entryName.substring(0, entryName.length() - ".class".length());
-        var handlers = STALE_RETURN_ORDINAL_HANDLERS.get(internalName);
-        if (handlers == null) {
             return null;
         }
         ClassNode node;
@@ -752,55 +741,231 @@ public final class MixinJarPatcher {
             return null;
         }
 
+        var targets = mixinTargets(node);
+        if (targets.isEmpty()) {
+            return null;
+        }
+
         var changed = false;
         for (var method : node.methods) {
-            if (!handlers.contains(method.name)) {
-                continue;
-            }
-            for (var annotations : java.util.Arrays.asList(method.visibleAnnotations, method.invisibleAnnotations)) {
-                if (annotations == null) {
+            for (var annotation : allAnnotationsOf(method)) {
+                var selectors = readStringValues(annotation, "method");
+                if (selectors.isEmpty()) {
                     continue;
                 }
-                for (var annotation : annotations) {
-                    if (annotation.values == null) {
+                for (var at : atAnnotationsOf(annotation)) {
+                    if (!"RETURN".equals(readStringValue(at, "value"))) {
                         continue;
                     }
-                    for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
-                        if (!"at".equals(annotation.values.get(i))) {
-                            continue;
-                        }
-                        var atValue = annotation.values.get(i + 1);
-                        var atNodes = atValue instanceof java.util.List<?> list
-                                ? list.stream().filter(org.objectweb.asm.tree.AnnotationNode.class::isInstance)
-                                        .map(org.objectweb.asm.tree.AnnotationNode.class::cast).toList()
-                                : atValue instanceof org.objectweb.asm.tree.AnnotationNode single ? java.util.List.of(single) : java.util.List.<org.objectweb.asm.tree.AnnotationNode>of();
-                        for (var at : atNodes) {
-                            if (at.values == null) {
-                                continue;
+                    var ordinal = readIntValue(at, "ordinal");
+                    if (ordinal == null || !ordinalIsPastEveryReturn(resolver, targets, selectors, ordinal)) {
+                        continue;
+                    }
+                    writeStringValue(at, "value", "TAIL");
+                    removeValue(at, "ordinal");
+                    LOGGER.info("[NeoFobric] Lifted @At(RETURN, ordinal) onto @At(TAIL) on {}#{} - the ordinal points past every return the target has",
+                            entryName.replace('/', '.'), method.name);
+                    changed = true;
+                }
+            }
+        }
+        return changed ? writeClass(node) : null;
+    }
+
+    /** {@return the internal names the mixin's {@code @Mixin} annotation targets} */
+    /**
+     * Notes the game enums a Fabric jar extends through Mixin's enum extension, so the class tweaker processor can
+     * take the platform's {@code IExtensibleEnum} marker off them before Mixin prepares their config - FML refuses
+     * an enum extension on a class carrying that marker, and it refuses it while preparing configs, which takes the
+     * game down before the main menu.
+     *
+     * <p>Nothing is rewritten here. A mixin that is itself an enum is the feature's shape, and the target has to be
+     * part of the game for the platform marker to be there in the first place.
+     */
+    private static void noteFabricEnumExtensions(byte[] classBytes, String entryName, TargetResolver resolver) {
+        if (!entryName.endsWith(".class")) {
+            return;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return;
+        }
+        if (!"java/lang/Enum".equals(node.superName)) {
+            return;
+        }
+        for (var target : mixinTargets(node)) {
+            if (resolver.apply(target).length > 0) {
+                net.neoforged.fabricbridge.transform.NeoFobricClassTweakerProcessor.registerEnumExtensionTarget(target);
+            }
+        }
+    }
+
+    private static java.util.List<String> mixinTargets(ClassNode node) {
+        var targets = new java.util.ArrayList<String>();
+        for (var annotations : java.util.Arrays.asList(node.visibleAnnotations, node.invisibleAnnotations)) {
+            if (annotations == null) {
+                continue;
+            }
+            for (var annotation : annotations) {
+                if (annotation.values == null || !"Lorg/spongepowered/asm/mixin/Mixin;".equals(annotation.desc)) {
+                    continue;
+                }
+                for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+                    var name = String.valueOf(annotation.values.get(i));
+                    var value = annotation.values.get(i + 1);
+                    if (!(value instanceof java.util.List<?> list)) {
+                        continue;
+                    }
+                    if ("value".equals(name)) {
+                        for (var entry : list) {
+                            if (entry instanceof org.objectweb.asm.Type type) {
+                                targets.add(type.getInternalName());
                             }
-                            for (var j = 0; j + 1 < at.values.size(); j += 2) {
-                                if (!"value".equals(at.values.get(j)) || !"RETURN".equals(at.values.get(j + 1))) {
-                                    continue;
-                                }
-                                at.values.set(j + 1, "TAIL");
-                                for (var k = 0; k + 1 < at.values.size(); k += 2) {
-                                    if ("ordinal".equals(at.values.get(k))) {
-                                        at.values.remove(k);
-                                        at.values.remove(k);
-                                        break;
-                                    }
-                                }
-                                LOGGER.info("[NeoFobric] Retargeted @At(RETURN, ordinal) to @At(TAIL) on {}#{} - NeoForge's patch changed the target's return count",
-                                        internalName.replace('/', '.'), method.name);
-                                changed = true;
-                                break;
+                        }
+                    } else if ("targets".equals(name)) {
+                        for (var entry : list) {
+                            if (entry instanceof String text) {
+                                targets.add(text.replace('.', '/'));
                             }
                         }
                     }
                 }
             }
         }
-        return changed ? writeClass(node) : null;
+        return targets;
+    }
+
+    /** {@return the {@code at} entries of an injection annotation, single form or list} */
+    private static java.util.List<AnnotationNode> atAnnotationsOf(AnnotationNode annotation) {
+        if (annotation.values == null) {
+            return java.util.List.of();
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (!"at".equals(annotation.values.get(i))) {
+                continue;
+            }
+            var value = annotation.values.get(i + 1);
+            if (value instanceof java.util.List<?> list) {
+                var nodes = new java.util.ArrayList<AnnotationNode>();
+                for (var entry : list) {
+                    if (entry instanceof AnnotationNode at) {
+                        nodes.add(at);
+                    }
+                }
+                return nodes;
+            }
+            if (value instanceof AnnotationNode single) {
+                return java.util.List.of(single);
+            }
+        }
+        return java.util.List.of();
+    }
+
+    /** {@return every string a named annotation element holds, flat form or single-element list} */
+    private static java.util.List<String> readStringValues(AnnotationNode annotation, String name) {
+        var single = readStringValue(annotation, name);
+        if (single != null) {
+            return java.util.List.of(single);
+        }
+        if (annotation.values == null) {
+            return java.util.List.of();
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (name.equals(annotation.values.get(i)) && annotation.values.get(i + 1) instanceof java.util.List<?> list) {
+                var values = new java.util.ArrayList<String>();
+                for (var entry : list) {
+                    if (entry instanceof String text) {
+                        values.add(text);
+                    }
+                }
+                return values;
+            }
+        }
+        return java.util.List.of();
+    }
+
+    /** {@return the int a named annotation element holds, or null} */
+    private static Integer readIntValue(AnnotationNode annotation, String name) {
+        if (annotation.values == null) {
+            return null;
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (name.equals(annotation.values.get(i)) && annotation.values.get(i + 1) instanceof Integer value) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    /** Drops a named annotation element. */
+    private static void removeValue(AnnotationNode annotation, String name) {
+        if (annotation.values == null) {
+            return;
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (name.equals(annotation.values.get(i))) {
+                annotation.values.remove(i);
+                annotation.values.remove(i);
+                return;
+            }
+        }
+    }
+
+    /**
+     * {@return whether the ordinal points past the returns of every method the selectors name, in every
+     * target class the resolver can find} An unresolvable target, or a selector that matches nothing in a
+     * class, answers {@code false}: the rule only ever fires on evidence.
+     */
+    private static boolean ordinalIsPastEveryReturn(TargetResolver resolver, java.util.List<String> targets,
+            java.util.List<String> selectors, int ordinal) {
+        var decided = false;
+        for (var targetInternalName : targets) {
+            var bytes = resolver.apply(targetInternalName);
+            if (bytes.length == 0) {
+                continue;
+            }
+            ClassNode target;
+            try {
+                target = new ClassNode();
+                new ClassReader(bytes).accept(target, 0);
+            } catch (Throwable t) {
+                return false;
+            }
+            for (var selector : selectors) {
+                var bracket = selector.indexOf('(');
+                var name = bracket < 0 ? selector : selector.substring(0, bracket);
+                var descriptor = bracket < 0 ? null : selector.substring(bracket);
+                var matched = 0;
+                for (var method : target.methods) {
+                    if (!method.name.equals(name) || (descriptor != null && !method.desc.equals(descriptor))) {
+                        continue;
+                    }
+                    matched++;
+                    if (ordinal < returnCount(method)) {
+                        return false;
+                    }
+                }
+                if (matched > 0) {
+                    decided = true;
+                }
+            }
+        }
+        return decided;
+    }
+
+    /** {@return the number of RETURN-family instructions in the method} */
+    private static int returnCount(MethodNode method) {
+        var count = 0;
+        for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+            var opcode = insn.getOpcode();
+            if (opcode >= org.objectweb.asm.Opcodes.IRETURN && opcode <= org.objectweb.asm.Opcodes.RETURN) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static boolean hasTrailingSugar(MethodNode handler, int cirIndex) {
@@ -3098,10 +3263,11 @@ public final class MixinJarPatcher {
                 // them away whenever a later pass also happened to fire on the same class.
                 var realigned = realignMixinTargets(versionMoved, entry.getName());
                 var source = realigned != null ? realigned : versionMoved;
-                var retargeted = retargetStaleReturnOrdinals(source, entry.getName());
+                var retargeted = retargetStaleReturnOrdinals(source, entry.getName(), resolver);
                 if (retargeted != null) {
                     source = retargeted;
                 }
+                noteFabricEnumExtensions(source, entry.getName(), resolver);
                 var mergedList = mergeRegistryListSwap(source, entry.getName());
                 if (mergedList != null) {
                     source = mergedList;
