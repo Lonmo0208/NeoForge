@@ -284,6 +284,210 @@ public final class MixinJarPatcher {
     private static final String CREATIVE_TAB_SCREEN_OWNER =
             "net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen";
 
+    /** Fabric's transfer transactions, which this bridge moves onto the NeoForge transaction stack. */
+    private static final String FABRIC_TRANSFER_TRANSACTION_CLASS =
+            "net/fabricmc/fabric/api/transfer/v1/transaction/Transaction.class";
+
+    /** Fabric's transaction entry point -> the hook that answers it instead. */
+    private static final Map<String, String> FABRIC_TRANSFER_TRANSACTION_BRIDGES = Map.of(
+            "openOuter()Lnet/fabricmc/fabric/api/transfer/v1/transaction/Transaction;", "openOuter",
+            "getLifecycle()Lnet/fabricmc/fabric/api/transfer/v1/transaction/Transaction$Lifecycle;", "lifecycle",
+            "getCurrentUnsafe()Lnet/fabricmc/fabric/api/transfer/v1/transaction/TransactionContext;", "currentUnsafe",
+            "openNested(Lnet/fabricmc/fabric/api/transfer/v1/transaction/TransactionContext;)Lnet/fabricmc/fabric/api/transfer/v1/transaction/Transaction;",
+            "openNested");
+
+    private static final String FABRIC_TRANSFER_HOOKS = "net/neoforged/fabricbridge/FabricTransferHooks";
+
+    /**
+     * Fabric's transfer API runs its transactions on a thread-local stack of its own, while NeoForge runs
+     * them on {@code net.neoforged.neoforge.transfer.transaction.Transaction}. Two stacks cannot both be
+     * right: a Fabric storage rolls back through its transaction's close callbacks and a NeoForge handler
+     * through its journals, so a transfer that touches both and then aborts would apply on one side and
+     * not the other - duplicating or losing items. The four static entry points of Fabric's
+     * {@code Transaction} are therefore rewritten to the bridge's hooks, which hand out Fabric-shaped
+     * contexts over NeoForge transactions; everything else in Fabric's transfer API goes through those
+     * entry points too ({@code StorageUtil}'s simulate helpers included), so one stack serves both APIs.
+     *
+     * <p>Nothing else in the Fabric API touches Fabric's own manager: its implementation classes are
+     * referenced from this entry point alone, which is what makes the swap complete.
+     *
+     * @return the class bytes with the entry points routed to the bridge, or null when this is not that class
+     */
+    private static byte[] bridgeFabricTransferTransactions(byte[] classBytes, String entryName) {
+        if (!FABRIC_TRANSFER_TRANSACTION_CLASS.equals(entryName)) {
+            return null;
+        }
+        try {
+            var node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+            var changed = false;
+            for (var method : node.methods) {
+                var hook = FABRIC_TRANSFER_TRANSACTION_BRIDGES.get(method.name + method.desc);
+                if (hook == null) {
+                    continue;
+                }
+                var argumentTypes = Type.getArgumentTypes(method.desc);
+                var returnType = Type.getReturnType(method.desc);
+
+                method.instructions.clear();
+                method.tryCatchBlocks.clear();
+                method.localVariables = null;
+                method.visibleLocalVariableAnnotations = null;
+                method.invisibleLocalVariableAnnotations = null;
+
+                var stack = 0;
+                for (var i = 0; i < argumentTypes.length; i++) {
+                    method.instructions.add(new VarInsnNode(argumentTypes[i].getOpcode(Opcodes.ILOAD), i));
+                    stack += argumentTypes[i].getSize();
+                }
+                // The hooks answer in Object so the bridge can compile without the game and Fabric API on
+                // its classpath; the verifier needs the cast back to Fabric's type spelled out.
+                method.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, FABRIC_TRANSFER_HOOKS, hook,
+                        "(" + "Ljava/lang/Object;".repeat(argumentTypes.length) + ")Ljava/lang/Object;", false));
+                method.instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, returnType.getInternalName()));
+                method.instructions.add(new InsnNode(returnType.getOpcode(Opcodes.IRETURN)));
+                method.maxStack = Math.max(stack + 1, returnType.getSize());
+                method.maxLocals = java.util.Arrays.stream(argumentTypes).mapToInt(Type::getSize).sum();
+                changed = true;
+            }
+            if (!changed) {
+                return null;
+            }
+            LOGGER.info("[NeoFobric] Moved Fabric's transfer transactions onto the NeoForge transaction stack in {}",
+                    entryName);
+            return writeClass(node);
+        } catch (Exception e) {
+            LOGGER.warn("[NeoFobric] Failed to bridge Fabric's transfer transactions in {}", entryName, e);
+            return null;
+        }
+    }
+
+    /** Where a shaded platform-namespace class of a Fabric jar is moved to. */
+    private static final String SHADED_PREFIX = "neofobric/shaded/";
+
+    /**
+     * {@return the platform-namespace classes of this jar that have to be shaded, and the name each gets}
+     *
+     * <p>Some Fabric mods ship their own copy of a {@code net.neoforged} (or old {@code cpw.mods}) class,
+     * because they either provide a NeoForge API to Fabric or extend one beyond what this NeoForge has.
+     * Those classes cannot stay where they are: the platform owns that namespace, and
+     * {@code platformProvidedPackages} hides the copies so the two module layers do not export the same
+     * package. For a library that <em>back-ports</em> an API the platform does not have - ForgeConfigAPIPort
+     * carries the config API, Fuzs' data extensions carry a whole Fabric port of the data map subsystem -
+     * hiding the copy means nobody provides the API at all.
+     *
+     * <p>So the copies are shaded out of the platform's namespace instead, together with every reference to
+     * them (see {@link #remapPlatformNamespaceReferences}), which leaves a self-consistent implementation
+     * for the Fabric layer while the platform keeps its own.
+     *
+     * <p>Only classes the platform does not have at all qualify. That is the back-port case - the library
+     * carries an API this NeoForge never got - and it is also the safe line to draw: a jar that ships its
+     * own copy of a class the platform <em>does</em> have is reimplementing that API for Fabric, which is
+     * what ForgeConfigAPIPort does, and those copies have to keep being shadowed by the platform (with the
+     * bridge redirecting the call sites it needs) or the two forks end up half-used and neither works.
+     */
+    private static java.util.Map<String, String> platformNamespaceShadingPlan(java.util.zip.ZipFile zip,
+            TargetResolver resolver) {
+        var plan = new java.util.LinkedHashMap<String, String>();
+        var it = zip.entries();
+        while (it.hasMoreElements()) {
+            var entry = it.nextElement();
+            var name = entry.getName();
+            if (entry.isDirectory() || !name.endsWith(".class")) {
+                continue;
+            }
+            var internalName = name.substring(0, name.length() - ".class".length());
+            if (!internalName.startsWith("net/neoforged/") && !internalName.startsWith("cpw/mods/")) {
+                continue;
+            }
+            if (!resolver.platformClassNames().contains(internalName)) {
+                plan.put(internalName, SHADED_PREFIX + internalName);
+                continue;
+            }
+            // The platform does have this class, but the jar's copy may declare more than it - that is how
+            // these libraries add their own accessors beside NeoForge's (Fuzs' data extensions extend the
+            // registry interfaces with their own data map getters). Their mixins and their code are written
+            // against the enhanced copy, so it has to be shaded too; a plain duplicate stays shadowed by the
+            // platform, which is what keeps ForgeConfigAPIPort's reimplementation lined up with the redirects.
+            try {
+                var platformBytes = resolver.platformClassBytes(internalName);
+                if (platformBytes != null && platformBytes.length > 0
+                        && extendsBeyondPlatform(platformBytes, zip.getInputStream(entry).readAllBytes())) {
+                    plan.put(internalName, SHADED_PREFIX + internalName);
+                }
+            } catch (Throwable t) {
+                LOGGER.debug("[NeoFobric] Could not compare {} with the platform's copy", internalName, t);
+            }
+        }
+        return plan;
+    }
+
+    /** {@return whether the jar's copy of a class declares anything the platform's copy does not} */
+    private static boolean extendsBeyondPlatform(byte[] platformBytes, byte[] jarBytes) {
+        var platform = new ClassNode();
+        new ClassReader(platformBytes).accept(platform, ClassReader.SKIP_CODE);
+        var jar = new ClassNode();
+        new ClassReader(jarBytes).accept(jar, ClassReader.SKIP_CODE);
+        for (var method : jar.methods) {
+            if (!declaresMethod(platform.methods, method.name, method.desc)) {
+                return true;
+            }
+        }
+        for (var field : jar.fields) {
+            if (!declaresField(platform.fields, field.name, field.desc)) {
+                return true;
+            }
+        }
+        if (jar.superName != null && !jar.superName.equals(platform.superName)) {
+            return true;
+        }
+        for (var iface : jar.interfaces) {
+            if (!platform.interfaces.contains(iface)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean declaresMethod(java.util.List<MethodNode> methods, String name, String desc) {
+        for (var method : methods) {
+            if (method.name.equals(name) && method.desc.equals(desc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean declaresField(java.util.List<org.objectweb.asm.tree.FieldNode> fields, String name, String desc) {
+        for (var field : fields) {
+            if (field.name.equals(name) && field.desc.equals(desc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static byte[] remapPlatformNamespaceReferences(byte[] classBytes, java.util.Map<String, String> shading) {
+        if (shading.isEmpty()) {
+            return null;
+        }
+        try {
+            var reader = new ClassReader(classBytes);
+            var writer = new ClassWriter(0);
+            reader.accept(new org.objectweb.asm.commons.ClassRemapper(writer, new org.objectweb.asm.commons.Remapper() {
+                @Override
+                public String map(String internalName) {
+                    var shaded = shading.get(internalName);
+                    return shaded != null ? shaded : internalName;
+                }
+            }), 0);
+            return writer.toByteArray();
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Failed to shade the platform-namespace classes of a Fabric jar", t);
+            return null;
+        }
+    }
+
     /**
      * @param bytes the class bytes
      * @param entryName the jar entry path
@@ -797,7 +1001,8 @@ public final class MixinJarPatcher {
             return;
         }
         for (var target : mixinTargets(node)) {
-            if (resolver.apply(target).length > 0) {
+            var targetClass = resolver.apply(target);
+            if (targetClass != null && targetClass.length > 0) {
                 net.neoforged.fabricbridge.transform.NeoFobricClassTweakerProcessor.registerEnumExtensionTarget(target);
             }
         }
@@ -924,7 +1129,7 @@ public final class MixinJarPatcher {
         var decided = false;
         for (var targetInternalName : targets) {
             var bytes = resolver.apply(targetInternalName);
-            if (bytes.length == 0) {
+            if (bytes == null || bytes.length == 0) {
                 continue;
             }
             ClassNode target;
@@ -2687,7 +2892,8 @@ public final class MixinJarPatcher {
      * the copies stay invisible to it. Nested jars already live in the bridge cache directory where
      * nothing scans them, so their copies stay next to them.
      */
-    private static Path realignedPath(Path jarPath) {
+    /** The patched copy of a jar lives in the mods folder own cache directory, so the loader never mistakes it for a mod. */
+    static Path realignedPath(Path jarPath) {
         var fileName = jarPath.getFileName().toString();
         var parent = jarPath.toAbsolutePath().normalize().getParent();
         var modsDir = FMLPaths.MODSDIR.get().toAbsolutePath().normalize();
@@ -2748,6 +2954,54 @@ public final class MixinJarPatcher {
                 memo.put(internalName, bytes);
             }
             return bytes;
+        }
+
+        /**
+         * {@return every class name the platform itself ships}
+         *
+         * <p>Unlike {@link #apply}, which answers "can this class be resolved from the game content", this is
+         * an exact inventory: the shading pass uses it to tell a class the platform really has (which stays
+         * the platform's) from one only mods carry.
+         */
+        public java.util.Set<String> platformClassNames() {
+            var known = platformClasses;
+            if (known != null) {
+                return known;
+            }
+            var names = new java.util.HashSet<String>();
+            for (var root : gameContent) {
+                try {
+                    if (Files.isDirectory(root)) {
+                        try (var walk = Files.walk(root)) {
+                            walk.filter(Files::isRegularFile).forEach(file -> {
+                                var relative = root.relativize(file).toString().replace('\\', '/');
+                                if (relative.endsWith(".class")) {
+                                    names.add(relative.substring(0, relative.length() - ".class".length()));
+                                }
+                            });
+                        }
+                    } else if (Files.isRegularFile(root)) {
+                        try (var contents = JarContents.ofPath(root)) {
+                            contents.visitContent((relativePath, resource) -> {
+                                if (relativePath.endsWith(".class")) {
+                                    names.add(relativePath.substring(0, relativePath.length() - ".class".length()));
+                                }
+                            });
+                        }
+                    }
+                } catch (Throwable t) {
+                    LOGGER.debug("[NeoFobric] Failed to index the classes of {}", root, t);
+                }
+            }
+            platformClasses = names;
+            return names;
+        }
+
+        private volatile java.util.Set<String> platformClasses;
+
+        /** {@return the platform's own bytes for a class, ignoring the mod jars} */
+        public byte[] platformClassBytes(String internalName) {
+            return load(internalName);
         }
 
         private byte[] load(String internalName) {
@@ -3130,6 +3384,25 @@ public final class MixinJarPatcher {
         // Mixin classes only, for the rewrites below.
         var mixinClasses = new ArrayList<byte[]>();
         try (var zip = new ZipFile(jarPath.toFile())) {
+            // Classes of this jar that live in a platform namespace and have to be shaded out of it, because
+            // the platform either has no such API at all or a smaller version of it (see the method).
+            // Off by default: the pass shades correctly, but for a jar that is nested inside another mod
+            // (Fuzs' data extensions ride inside IllagerInvasion) fabric-loader still unpacks and loads the
+            // copy from the parent jar, so the shaded classes never reach the classpath and the mod keeps
+            // failing on exactly the class this was meant to provide. Finishing that needs the patched nested
+            // jar written back into its parent's realigned copy; until then the feature stays behind this
+            // switch so it cannot change the behaviour of packs that work.
+            var platformShading = Boolean.getBoolean("neofobric.shadePlatformCopies")
+                    ? platformNamespaceShadingPlan(zip, resolver)
+                    : java.util.Map.<String, String>of();
+            if (!platformShading.isEmpty()) {
+                LOGGER.info("[NeoFobric] Shading {} platform-namespace class(es) of {} - the platform does not provide "
+                        + "those (or provides less), so the jar's own copies are kept under {}: {}",
+                        platformShading.size(), jarPath.getFileName(), SHADED_PREFIX,
+                        platformShading.keySet().stream().limit(4).map(n -> n + " -> " + SHADED_PREFIX + n)
+                                .collect(java.util.stream.Collectors.joining(", "))
+                                + (platformShading.size() > 4 ? ", ..." : ""));
+            }
             var it = zip.entries();
             while (it.hasMoreElements()) {
                 var entry = it.nextElement();
@@ -3172,10 +3445,44 @@ public final class MixinJarPatcher {
                         LOGGER.info("[NeoFobric] Injected BridgeCreatePartialModelMixin into {}", jarPath.getFileName());
                     }
                 }
+                if (!platformShading.isEmpty() && !entry.getName().endsWith(".class")) {
+                    // Text entries name the shaded classes too: a Fabric class tweaker injects the missing
+                    // interface into the game's own lookup class by name, and it is read after this pass, so
+                    // it has to move with them or the tweaker asks for a class that is gone.
+                    var textBytes = zip.getInputStream(entry).readAllBytes();
+                    var text = new String(textBytes, java.nio.charset.StandardCharsets.UTF_8);
+                    var rewritten = text;
+                    for (var moved : platformShading.entrySet()) {
+                        rewritten = rewritten.replace(moved.getKey(), moved.getValue())
+                                .replace(moved.getKey().replace('/', '.'), moved.getValue().replace('/', '.'));
+                    }
+                    if (!rewritten.equals(text)) {
+                        patched.put(entry.getName(), rewritten.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        LOGGER.info("[NeoFobric] Moved the shaded classes in {}", entry.getName());
+                    }
+                }
                 if (!entry.getName().endsWith(".class")) {
                     continue;
                 }
                 var bytes = zip.getInputStream(entry).readAllBytes();
+                if (!platformShading.isEmpty()) {
+                    var shadedBytes = remapPlatformNamespaceReferences(bytes, platformShading);
+                    if (shadedBytes != null) {
+                        var entryInternalName = entry.getName().substring(0, entry.getName().length() - ".class".length());
+                        var shadedName = platformShading.get(entryInternalName);
+                        if (shadedName != null) {
+                            // This class moves: it is a plain implementation class, so no later pass needs to
+                            // see it. The writer walks `entries`, so the new name has to be registered and the
+                            // old one dropped, or the shaded class never reaches the jar.
+                            patched.put(shadedName + ".class", shadedBytes);
+                            entries.add(shadedName + ".class");
+                            entries.remove(entry.getName());
+                            continue;
+                        }
+                        patched.put(entry.getName(), shadedBytes);
+                        bytes = shadedBytes;
+                    }
+                }
                 var versionMoved = renameFabricVersionChannel(bytes, entry.getName());
                 if (versionMoved != bytes) {
                     patched.put(entry.getName(), versionMoved);
@@ -3242,6 +3549,15 @@ public final class MixinJarPatcher {
                     if (bridgedPages != null) {
                         plain = bridgedPages;
                         patched.put(entry.getName(), plain);
+                    }
+                    // A/B diagnostic: -Dneofobric.noTransferBridge=true leaves Fabric's transfer transactions
+                    // on Fabric's own stack, so a failure can be attributed to this step or ruled out.
+                    if (!Boolean.getBoolean("neofobric.noTransferBridge")) {
+                        var bridgedTransactions = bridgeFabricTransferTransactions(plain, entry.getName());
+                        if (bridgedTransactions != null) {
+                            plain = bridgedTransactions;
+                            patched.put(entry.getName(), plain);
+                        }
                     }
                     if (!accessorRenames.isEmpty()) {
                         var withCalls = rewriteAccessorCallSites(plain, accessorRenames, entry.getName());

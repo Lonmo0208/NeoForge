@@ -153,6 +153,9 @@ public final class FabricBridge {
             // The mod initializers are the stage that registers payloads and channel receivers, so this is
             // the first moment the networking inventory can say anything (see its javadoc).
             BridgeSelfCheck.logNetworkingInventory();
+            // Every Fabric storage the mod set registers exists by now, so the NeoForge capabilities can be
+            // offered to Fabric's lookups from here on (see FabricTransferHooks).
+            FabricTransferHooks.install();
         }
     }
 

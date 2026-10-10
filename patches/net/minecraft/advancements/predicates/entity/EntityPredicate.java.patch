@@ -1,5 +1,21 @@
 --- a/net/minecraft/advancements/predicates/entity/EntityPredicate.java
 +++ b/net/minecraft/advancements/predicates/entity/EntityPredicate.java
+@@ -36,9 +_,12 @@
+ import org.jspecify.annotations.Nullable;
+ 
+ public final class EntityPredicate {
+-    private static final Codec<Map<Codec<? extends EntitySubPredicate>, EntitySubPredicate>> MAP_CODEC = Codec.dispatchedMap(
+-        BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE.byNameCodec(), c -> c
+-    );
++    // NeoForge: the pre-split shape of type_specific ("{type: minecraft:slime, size: 1}") still has to load,
++    // or datapacks written before the split lose their predicates (see LegacyTypeSpecificPredicates).
++    private static final Codec<Map<Codec<? extends EntitySubPredicate>, EntitySubPredicate>> MAP_CODEC =
++        net.neoforged.neoforge.common.LegacyTypeSpecificPredicates.legacyFallback(Codec.dispatchedMap(
++            BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE.byNameCodec(), c -> c
++        ));
+     public static final Codec<EntityPredicate> CODEC = MAP_CODEC.xmap(EntityPredicate::new, p -> p.parts);
+     public static final Codec<ContextAwarePredicate> ADVANCEMENT_CODEC = Codec.withAlternative(ContextAwarePredicate.CODEC, CODEC, EntityPredicate::wrap);
+     private static final Comparator<Entry<Codec<? extends EntitySubPredicate>, EntitySubPredicate>> PREDICATE_TYPE_ORDER = Entry.comparingByKey(
 @@ -91,6 +_,11 @@
          return entity == null ? false : this.combinedPart.matches(entity, level, position);
      }

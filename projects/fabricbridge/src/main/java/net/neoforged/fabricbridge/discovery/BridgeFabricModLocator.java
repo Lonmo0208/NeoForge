@@ -286,6 +286,11 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                         realigned++;
                     }
                 }
+                // A patched nested jar has to travel inside its parent as well: fabric-loader unpacks the
+                // copies it finds in the parent jar, so a nested mod whose classes were rewritten would
+                // otherwise be loaded in its original shape (that is how the platform-namespace shading
+                // failed to reach the classpath).
+                injectPatchedNestedJars(fabricJars, realignedJars);
             }
             if (realigned > 0) {
                 LOGGER.info("[NeoFobric] Realigned Mixin handlers in {} Fabric jar(s)", realigned);
@@ -348,7 +353,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // scans is redirected to a view that links the Fabric jars only, which leaves exactly the same
         // set discoverable there as before minus the jars that belong to FML.
         if (FabricJarRegistry.hasForeignMods()) {
-            redirectFabricModsFolder(modsDir, fabricJars);
+            redirectFabricModsFolder(modsDir, fabricJars, realignedJars);
         }
 
         // Boot fabric-loader here, not in the FML registration window: discovery has just finished and
@@ -377,7 +382,8 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      * this scan (they live in the bridge cache, not in the mods folder), and leaving that set unchanged
      * is the whole point of the redirect.
      */
-    private static void redirectFabricModsFolder(Path modsDir, Map<Path, FabricModInfo> fabricJars) {
+    private static void redirectFabricModsFolder(Path modsDir, Map<Path, FabricModInfo> fabricJars,
+            java.util.Map<Path, Path> realignedJars) {
         var view = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve(".neofobric").resolve("fabricMods");
         try {
             if (Files.isDirectory(view)) {
@@ -395,10 +401,13 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                     continue;
                 }
                 var link = view.resolve(path.getFileName().toString());
+                // Link the rewritten copy when there is one: fabric-loader unpacks nested jars from whatever it
+                // finds here, so a parent that only carries a rewritten nested jar has to be the rewritten one.
+                var source = realignedJars.getOrDefault(path, path);
                 try {
-                    Files.createLink(link, path);
+                    Files.createLink(link, source);
                 } catch (Exception linkUnavailable) {
-                    Files.copy(path, link, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(source, link, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 }
                 // fabric-loader may offer it back through addToClassPath; it is game content already.
                 FabricJarRegistry.markGameLayerPath(link);
@@ -1303,6 +1312,96 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      */
     public static Path getCacheDirectory() {
         return FMLPaths.GAMEDIR.get().resolve(".neofobric").resolve("processedMods");
+    }
+
+    /**
+     * Replaces the nested jars inside a rewritten parent jar with the copies that were rewritten too.
+     *
+     * <p>Nested jars are extracted and patched as mods of their own, but the parent jar still carries the
+     * original bytes of each one. fabric-loader reads mods from the parent (it unpacks {@code META-INF/jars}
+     * entries itself), so anything a pass changed inside a nested jar - a rewritten mixin, a shaded class -
+     * only takes effect if the same bytes are also inside the parent. A parent that needed no rewrite of its
+     * own gets a rewritten copy here for exactly that reason.
+     */
+    private static void injectPatchedNestedJars(Map<Path, FabricModInfo> fabricJars,
+            java.util.Map<Path, Path> realignedJars) {
+        var injected = 0;
+        for (var entry : fabricJars.entrySet()) {
+            var parent = entry.getKey();
+            var info = entry.getValue();
+            if (info.nestedJarPaths().isEmpty()) {
+                continue;
+            }
+            var replacements = nestedReplacements(info.modId(), info.nestedJarPaths());
+            if (replacements.isEmpty()) {
+                continue;
+            }
+            try {
+                var target = realignedJars.get(parent);
+                if (target == null) {
+                    target = MixinJarPatcher.realignedPath(parent);
+                    Files.copy(parent, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+                var replaced = replaceNestedEntries(target, replacements);
+                if (replaced > 0) {
+                    realignedJars.put(parent, target);
+                    injected += replaced;
+                    LOGGER.info("[NeoFobric] Carried {} rewritten nested jar(s) inside {}", replaced,
+                            target.getFileName());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("[NeoFobric] Could not carry the rewritten nested jars of {} along", parent, e);
+            }
+        }
+        if (injected > 0) {
+            LOGGER.info("[NeoFobric] {} rewritten nested jar(s) now travel inside their parent jars", injected);
+        }
+    }
+
+    /** {@return the nested entry name -> the rewritten copy that should replace it} */
+    private static java.util.Map<String, Path> nestedReplacements(String parentModId,
+            java.util.List<String> nestedJarPaths) {
+        var replacements = new java.util.HashMap<String, Path>();
+        for (var nested : nestedJarPaths) {
+            var patched = getCacheDirectory().resolve(parentModId)
+                    .resolve(nested.substring(nested.lastIndexOf('/') + 1) + ".neofobric-realigned.jar");
+            if (Files.isRegularFile(patched)) {
+                replacements.put(nested, patched);
+            }
+        }
+        return replacements;
+    }
+
+    /** {@return how many nested entries were replaced} */
+    private static int replaceNestedEntries(Path parentRealigned, java.util.Map<String, Path> replacements)
+            throws IOException {
+        var temporary = parentRealigned.resolveSibling(parentRealigned.getFileName() + ".repacking");
+        var replaced = 0;
+        try (var zip = new java.util.zip.ZipFile(parentRealigned.toFile());
+                var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(temporary))) {
+            var it = zip.entries();
+            while (it.hasMoreElements()) {
+                var entry = it.nextElement();
+                var patched = replacements.get(entry.getName());
+                var outEntry = new java.util.zip.ZipEntry(entry.getName());
+                if (entry.getMethod() == java.util.zip.ZipEntry.STORED && patched == null) {
+                    outEntry.setMethod(java.util.zip.ZipEntry.STORED);
+                    outEntry.setSize(entry.getSize());
+                    outEntry.setCompressedSize(entry.getSize());
+                    outEntry.setCrc(entry.getCrc());
+                }
+                out.putNextEntry(outEntry);
+                if (patched != null) {
+                    Files.copy(patched, out);
+                    replaced++;
+                } else if (!entry.isDirectory()) {
+                    zip.getInputStream(entry).transferTo(out);
+                }
+                out.closeEntry();
+            }
+        }
+        Files.move(temporary, parentRealigned, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        return replaced;
     }
 
     /**

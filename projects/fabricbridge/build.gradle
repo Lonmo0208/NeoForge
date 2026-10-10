@@ -46,7 +46,9 @@ dependencies {
     // already ships gson, so it is compile-time only here.
     compileOnly("com.google.code.gson:gson:2.10.1")
     compileOnly("net.fabricmc:sponge-mixin:${mixin_version}") { transitive = false }
-    for (var asmModule : ["org.ow2.asm:asm", "org.ow2.asm:asm-tree"]) {
+    // asm-commons carries ClassRemapper/Remapper, which the platform-namespace shading pass uses to move a
+    // Fabric jar's net.neoforged classes (and every reference to them) out of the platform's namespaces.
+    for (var asmModule : ["org.ow2.asm:asm", "org.ow2.asm:asm-tree", "org.ow2.asm:asm-commons"]) {
         compileOnly(asmModule) {
             version {
                 strictly project.asm_version

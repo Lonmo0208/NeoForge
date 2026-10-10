@@ -212,6 +212,12 @@ public final class BridgeSelfCheck {
                     progress();
                 } else if (label.endsWith(".END_SERVER_TICK")) {
                     progressServer();
+                } else if (label.endsWith(".ALL_LOADED")) {
+                    // A loot table of Twilight Forest's fails to parse with "Unknown registry key
+                    // minecraft:entity_sub_predicate_type: minecraft:type_specific", which means the static
+                    // registry was missing vanilla's own entry when the tables were decoded. This probe
+                    // answers whether it is there at that moment (see -Dneofobric.registryProbe).
+                    registryProbe("loot tables loaded");
                 }
                 return defaultValue(method.getReturnType());
             };
@@ -296,6 +302,13 @@ public final class BridgeSelfCheck {
                 return;
             }
             ticksInWorld++;
+            if (ticksInWorld == 1 || ticksInWorld == 200) {
+                registryProbe("client tick " + ticksInWorld);
+            }
+
+            // The transfer bridge's probe rides the same tick: it needs a loaded world for the same reason
+            // the rest of the checks do, and it runs once (it is what the run is here to report).
+            FabricTransferHooks.probeInWorldOnce();
 
             if (!canarySent && ticksInWorld == 20) {
                 canarySent = true;
@@ -336,6 +349,30 @@ public final class BridgeSelfCheck {
         } catch (Throwable t) {
             canarySent = false;
             LOGGER.debug("[NeoFobric] Self-check could not send the canary payload", t);
+        }
+    }
+
+    /**
+     * Prints whether a static registry holds vanilla's own entry at a given moment, for the loot table that
+     * fails to decode with {@code Unknown registry key minecraft:entity_sub_predicate_type: type_specific}.
+     * Enabled with {@code -Dneofobric.registryProbe=true}; silent otherwise.
+     */
+    static void registryProbe(String where) {
+        if (!Boolean.getBoolean("neofobric.registryProbe")) {
+            return;
+        }
+        try {
+            var registries = Class.forName("net.minecraft.core.registries.BuiltInRegistries", false, gameLoader);
+            var registry = registries.getField("ENTITY_SUB_PREDICATE_TYPE").get(null);
+            var id = Class.forName("net.minecraft.resources.Identifier", false, gameLoader)
+                    .getMethod("parse", String.class).invoke(null, "minecraft:type_specific");
+            var size = (int) registry.getClass().getMethod("size").invoke(registry);
+            var found = registry.getClass().getMethod("getOptional", id.getClass()).invoke(registry, id);
+            var present = found instanceof java.util.Optional<?> optional && optional.isPresent();
+            LOGGER.info("[NeoFobric] registry probe at {}: ENTITY_SUB_PREDICATE_TYPE size={} has type_specific={}",
+                    where, size, present);
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] registry probe failed at {}", where, t);
         }
     }
 

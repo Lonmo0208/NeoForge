@@ -265,6 +265,25 @@ neoDev {
             if (project.hasProperty('neofobric.traceMixinClasses')) {
                 systemProperty("neofobric.traceMixinClasses", "true")
             }
+            // A/B diagnostic: leave Fabric's transfer transactions on Fabric's own stack, so a failure can
+            // be attributed to the transaction transplant or ruled out.
+            if (project.hasProperty('neofobric.noTransferBridge')) {
+                systemProperty("neofobric.noTransferBridge", "true")
+            }
+            // Shades the platform-namespace classes a Fabric jar carries that this NeoForge does not have
+            // (see MixinJarPatcher#platformNamespaceShadingPlan).
+            if (project.hasProperty('neofobric.shadePlatformCopies')) {
+                systemProperty("neofobric.shadePlatformCopies", "true")
+            }
+            // Prints the static predicate registry state where the failing loot table is decoded.
+            if (project.hasProperty('neofobric.registryProbe')) {
+                systemProperty("neofobric.registryProbe", "true")
+            }
+            // Checks the Fabric <-> NeoForge transfer bridge against a real journalled handler and logs
+            // PASS/FAIL (see FabricTransferHooks#selfTest).
+            if (project.hasProperty('neofobric.transferProbe')) {
+                systemProperty("neofobric.transferProbe", "true")
+            }
             // MC's GL state validation runs in dev only (production never enables it from its very
             // definition: VALIDATION = IS_RUNNING_IN_IDE && !disable). It assumes the vanilla renderer
             // owns the pipeline and the GL state, which stops being true the moment Sodium or iris drive
