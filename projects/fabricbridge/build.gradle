@@ -67,3 +67,26 @@ tasks.withType(Javadoc.class).configureEach {
     enabled = false
 }
 
+
+// The jar patcher's passes are bytecode in, bytecode out, so their pure helpers get unit tests instead of
+// another end-to-end run: the shapes that have each been wrong once - a descriptor reader that dropped
+// primitives, a member rename that only matched whole strings, an anchor spelling that lost its owner - are
+// cheaper to pin down here than to rediscover from a client that quietly lost a feature.
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:${project.jupiter_api_version}"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.slf4j:slf4j-api:2.0.17")
+    // main sees ASM as compileOnly; the tests build their own fixtures with it.
+    for (var asmModule : ["org.ow2.asm:asm", "org.ow2.asm:asm-tree", "org.ow2.asm:asm-commons"]) {
+        testImplementation(asmModule) {
+            version {
+                strictly project.asm_version
+            }
+        }
+    }
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+}

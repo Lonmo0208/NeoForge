@@ -630,7 +630,7 @@ public final class MixinJarPatcher {
     }
 
     /** Builds the corrected descriptor by swapping the old parameter list for the new one. */
-    private static String replacementFor(String descriptor, Map<String, String> scoped) {
+    static String replacementFor(String descriptor, Map<String, String> scoped) {
         var renamed = renamedMember(descriptor);
         if (renamed != null) {
             return renamed;
@@ -654,7 +654,7 @@ public final class MixinJarPatcher {
      * <p>Matched on the tail so that {@code placeEntities(...)V} (a selector) and
      * {@code Lnet/minecraft/…/StructureTemplate;placeEntities(...)V} (a call target) both resolve.
      */
-    private static String renamedMember(String descriptor) {
+    static String renamedMember(String descriptor) {
         for (var entry : ANNOTATION_MEMBER_RENAMES.entrySet()) {
             var old = entry.getKey();
             if (descriptor.endsWith(old)) {
@@ -2043,7 +2043,7 @@ public final class MixinJarPatcher {
                 || declaresSugar(handler.invisibleParameterAnnotations);
     }
 
-    private static boolean declaresSugar(java.util.List<AnnotationNode>[] parameters) {
+    static boolean declaresSugar(java.util.List<AnnotationNode>[] parameters) {
         if (parameters == null) {
             return false;
         }
@@ -2106,7 +2106,7 @@ public final class MixinJarPatcher {
      * list that skipped them would report a handler's sugar against the wrong parameter - which is how a
      * handler reading a local slipped past the retarget check and took its whole class down.
      */
-    private static java.util.List<String> parametersFor(org.objectweb.asm.tree.MethodNode handler) {
+    static java.util.List<String> parametersFor(org.objectweb.asm.tree.MethodNode handler) {
         var out = new java.util.ArrayList<String>();
         var descriptor = handler.desc;
         var index = descriptor.indexOf('(') + 1;
@@ -2336,7 +2336,7 @@ public final class MixinJarPatcher {
     }
 
     /** {@return how many parameters a method descriptor takes} */
-    private static int countParameters(String descriptor) {
+    static int countParameters(String descriptor) {
         var open = descriptor.indexOf('(');
         var close = descriptor.indexOf(')');
         if (open < 0 || close < 0) {
@@ -2356,7 +2356,7 @@ public final class MixinJarPatcher {
     }
 
     /** {@return whether the handler's parameter at {@code index} carries MixinExtras sugar} */
-    private static boolean hasSugar(org.objectweb.asm.tree.MethodNode handler, int index) {
+    static boolean hasSugar(org.objectweb.asm.tree.MethodNode handler, int index) {
         // Collected rather than List.of(...): a handler may carry only one of the two annotation lists, and
         // List.of rejects a null element.
         var lists = new java.util.ArrayList<java.util.List<AnnotationNode>[]>();
@@ -2542,10 +2542,10 @@ public final class MixinJarPatcher {
     }
 
     /** A parsed {@code @At} target: the member it names, with the parts the annotation spelled out. */
-    private record AnchorMember(String owner, String name, String desc) {
+    record AnchorMember(String owner, String name, String desc) {
     }
 
-    private static AnchorMember parseAnchorMember(String target) {
+    static AnchorMember parseAnchorMember(String target) {
         String owner = null;
         String name;
         String desc = null;
@@ -2565,8 +2565,18 @@ public final class MixinJarPatcher {
                 name = rest;
             }
         } else if (target.contains("(")) {
+            // Mixin's other spelling, "path/to/Class.member(desc)": the dot before the member is the split.
+            // Reading the whole prefix as the member name left the owner null, so an anchor written this way
+            // was invisible to every retarget decision.
             var open = target.indexOf('(');
-            name = target.substring(0, open);
+            var head = target.substring(0, open);
+            var dot = head.lastIndexOf('.');
+            if (dot > 0) {
+                owner = head.substring(0, dot).replace('.', '/');
+                name = head.substring(dot + 1);
+            } else {
+                name = head;
+            }
             desc = target.substring(open);
         } else {
             name = target;
