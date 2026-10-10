@@ -134,6 +134,22 @@ public final class MixinJarPatcher {
      * and that one must keep pointing at the four-argument overload.
      */
     private static final Map<String, Map<String, String>> SCOPED_ANNOTATION_TARGET_REALIGNMENTS = Map.of(
+            // fabric-menu-api-v1 injects three times inside vanilla's openMenu(MenuProvider): a redirect of the
+            // closeContainer() call, an inject at the send(Packet) call that either pins the opened menu or
+            // sends Fabric's own extended-opening payload, and a redirect of the ClientboundOpenScreenPacket
+            // construction that swaps the vanilla packet for that payload. NeoForge moved the whole body into
+            // openMenu(MenuProvider, Consumer<RegistryFriendlyByteBuf>) and left the vanilla-shaped method a
+            // delegate, so the anchors were missing, the injector-pruning pass removed all three handlers, and
+            // an extended menu (bclib opens one while fixing a level) reached the client as a plain vanilla
+            // open-screen packet - whose two-argument MenuType#create the Fabric menu API rejects on purpose,
+            // disconnecting the client with "Use ExtendedMenuType.create(int, Inventory, FriendlyByteBuf)!".
+            // Pointing the selectors at the wider overload is the first half of the fix (kept here for when the
+            // widening pipeline below is repaired); the handler
+            // widening pass then appends the parameter the wider host declares and shifts the @Local sugar.
+            "net/fabricmc/fabric/mixin/menu/ServerPlayerMixin",
+            Map.of(
+                    "(Lnet/minecraft/world/MenuProvider;)",
+                    "(Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)"),
             "net/fabricmc/fabric/mixin/registry/sync/WorldLoaderMixin",
             Map.of(
                     "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;)",
@@ -1218,6 +1234,58 @@ public final class MixinJarPatcher {
         return count;
     }
 
+    /**
+     * {@return whether the sugared parameter after the callback has type arguments}
+     *
+     * <p>That is what decides whether widening may touch the handler at all: a sugar target of a plain class
+     * or an array is fully described by the erased type, so the handler can grow the host's extra parameter
+     * and have its sugar annotation index shifted along; a generic one would need the generic signature
+     * rebuilt, which the widening pass does not do - it clears the signature instead, and the sugar engine
+     * then falls back to the raw injector and rejects the sugar parameter.
+     */
+    private static boolean hasGenericTrailingSugar(MethodNode handler, int cirIndex) {
+        var args = org.objectweb.asm.Type.getArgumentTypes(handler.desc);
+        for (var i = cirIndex + 1; i < args.length; i++) {
+            if (hasSugar(handler, i) && hasTypeArguments(handler, i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** {@return whether the handler's generic signature gives the parameter at {@code index} type arguments} */
+    private static boolean hasTypeArguments(MethodNode handler, int index) {
+        if (handler.signature == null) {
+            // No signature at all: the erased types are the whole story, so sugar reads them fine.
+            return false;
+        }
+        var found = new boolean[1];
+        try {
+            new org.objectweb.asm.signature.SignatureReader(handler.signature).accept(
+                    new org.objectweb.asm.signature.SignatureVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                        private int seen = -1;
+
+                        @Override
+                        public org.objectweb.asm.signature.SignatureVisitor visitParameterType() {
+                            seen++;
+                            return this;
+                        }
+
+                        @Override
+                        public org.objectweb.asm.signature.SignatureVisitor visitTypeArgument(char wildcard) {
+                            if (this.seen == index) {
+                                found[0] = true;
+                            }
+                            return this;
+                        }
+                    });
+        } catch (Throwable t) {
+            // Unreadable signature: be conservative and leave the handler alone.
+            return true;
+        }
+        return found[0];
+    }
+
     private static boolean hasTrailingSugar(MethodNode handler, int cirIndex) {
         var sugarPrefix = "Lcom/llamalad7/mixinextras/sugar/";
         for (var lists : java.util.Arrays.asList(handler.visibleParameterAnnotations, handler.invisibleParameterAnnotations)) {
@@ -1316,12 +1384,14 @@ public final class MixinJarPatcher {
             if (prefix.length == 0) {
                 continue;
             }
-            // Handlers carrying MixinExtras sugar (@Local) after the callback are left alone: appending
-            // a parameter makes the sugar engine's wrapper machinery fail (it reads sugar generics from
-            // the handler signature and falls back to the raw injector, which then rejects the sugar
-            // parameter), and a half-processed class breaks other handlers in it. Fabric mods needing
-            // those get the value fed by the bridge's own sugar-free mixin instead
-            // (BridgeModelDiscoveryMixin, generated into fabric-model-loading-api-v1's realigned jar).
+            // Handlers whose *generic* MixinExtras sugar sits after the callback are left alone: widening them
+            // would need the handler's generic signature rebuilt (the sugar engine reads the sugar type from
+            // it, and a cleared signature makes it fall back to the raw injector, which then rejects the sugar
+            // parameter), and a half-processed class breaks other handlers in it. Fabric mods with generic
+            // sugar get the value fed by the bridge's own sugar-free mixin instead (BridgeModelDiscoveryMixin,
+            // generated into fabric-model-loading-api-v1's realigned jar). Sugar whose type is a plain class or
+            // an array needs none of that - its erasure is the whole type - so those widen like any other
+            // handler, with the sugar annotation index shifted along.
             if (hasTrailingSugar(handler, cirIndex)) {
                 continue;
             }
@@ -3224,11 +3294,13 @@ public final class MixinJarPatcher {
         handler.maxLocals += addedSlots;
         handler.desc = Type.getMethodDescriptor(Type.VOID_TYPE, newArgs);
 
-        // Target the widened constructor by descriptor: the vanilla-signature constructor still
-        // exists and would now mismatch the widened handler, which Mixin reports as an error.
+        // Point the annotation at the method the handler was widened for, by descriptor. Constructors carry
+        // "<init>" in front of theirs; a method carries its own name - writing "<init>" for a method produced
+        // a selector that matches no target at all, which Mixin then reports as a missing method.
+        var selector = ("<init>".equals(delegatee.name) ? "<init>" : delegatee.name) + delegatee.desc;
         for (var i = 0; i + 1 < inject.values.size(); i += 2) {
             if ("method".equals(inject.values.get(i))) {
-                inject.values.set(i + 1, java.util.List.of("<init>" + delegatee.desc));
+                inject.values.set(i + 1, java.util.List.of(selector));
             }
         }
     }
@@ -3379,10 +3451,17 @@ public final class MixinJarPatcher {
             // Datagen's tag provider: the argument modifier watches a body NeoForge rewrote. Datagen only.
             java.util.Map.entry("net/fabricmc/fabric/mixin/datagen/TagsProviderMixin",
                     java.util.Set.of("addReplaced")),
-            // The menu hook NeoForge moved behind a second openMenu overload: making it bind needs the
-            // handler's parameters rewritten as well (which ForgifiedFabricAPI did by hand), and pointing the
-            // annotation alone kills the server. Dropping it revives the class's closeContainer redirect, so the
-            // extended-menu half stays unimplemented and everything else in the class works.
+            // The menu hooks NeoForge's wider openMenu overload displaced. ForgifiedFabricAPI solves this
+            // shape differently - and much better than parameter realignment ever did: it makes Fabric's
+            // ExtendedMenuType speak NeoForge's own menu-extension interface (IContainerFactory), so the
+            // opening data rides NeoForge's extraDataWriter - the server-side hook writes it, and NeoForge's
+            // own client path reads it and calls the three-argument create. None of the three injections this
+            // class carries is needed on that route. The bridge half of it is a platform-side hook that fills
+            // extraDataWriter for a Fabric ExtendedMenuProvider, plus making the loaded ExtendedMenuType
+            // implement IContainerFactory; until that is written the handlers stay dropped, and an extended
+            // menu - Fabric API's name for a menu that carries opening data, which TechReborn, Create and
+            // bclib all use for their block screens - reaches the client as a vanilla open-screen packet,
+            // which disconnects it.
             java.util.Map.entry("net/fabricmc/fabric/mixin/menu/ServerPlayerMixin",
                     java.util.Set.of("fabric_storeOpenedMenu", "fabric_closeContainerScreenIfAllowed", "fabric_replaceVanillaScreenPacket")),
             // The next round of the same: the item API's client-side block breaking hook and the renderer API's
@@ -4489,6 +4568,19 @@ public final class MixinJarPatcher {
                 if (renamed != null) {
                     source = renamed;
                 }
+                // The descriptor fixer aligns each handler's leading parameters with the target method its
+                // injector annotation names; the widening passes below then append whatever else a (possibly
+                // wider) target declares. That order matters: run after the widening, the fixer re-derives the
+                // handler from the annotation and can hand back a body shifted for the wider layout under a
+                // narrower descriptor, which the JVM rejects with "VerifyError: Bad local variable type" - and
+                // which shape the target has depends on the game content the resolver is pointed at, so the
+                // very same change can pass in dev and fail in a production install.
+                var fixed = Boolean.getBoolean("neofobric.noHandlerFix")
+                        ? null
+                        : MixinHandlerDescriptorFixer.fix(source, resolver);
+                if (fixed != null) {
+                    source = fixed;
+                }
                 var extended = extendConstructorInjectorHandlers(source, entry.getName(), resolver);
                 if (extended != null) {
                     source = extended;
@@ -4501,24 +4593,20 @@ public final class MixinJarPatcher {
                 if (wrapsWidened != null) {
                     source = wrapsWidened;
                 }
-                byte[] fixed = null;
-                if (!Boolean.getBoolean("neofobric.noHandlerFix")) {
-                    fixed = MixinHandlerDescriptorFixer.fix(source, resolver);
-                }
                 // Off by default; the method itself carries the reasoning.
-                byte[] trimmed = neutralizeProvidedAccessors(fixed != null ? fixed : source, entry.getName(), resolver);
-
+                var trimmed = neutralizeProvidedAccessors(source, entry.getName(), resolver);
                 if (trimmed != null) {
-                    patched.put(entry.getName(), trimmed);
-                } else if (fixed != null) {
-                    patched.put(entry.getName(), fixed);
-                } else if (extended != null || appended != null) {
-                    patched.put(entry.getName(), source);
-                } else if (renamed != null) {
-                    patched.put(entry.getName(), renamed);
-                } else if (callSitesMoved != null) {
-                    patched.put(entry.getName(), callSitesMoved);
-                } else if (realigned != null || stripped != null || handlerStripped != null || retargeted != null || mergedList != null) {
+                    source = trimmed;
+                }
+
+                // One result, one write: every pass above feeds the next, so what they produced together is
+                // what goes into the jar. The precedence list this replaces could write an intermediate
+                // variant - the fixer's output, or any pass before the last one that fired - and silently
+                // drop the rest, which is how a class came out with a widened handler body under a narrow
+                // descriptor (and, in production, a method descriptor past the end of its constant pool).
+                if (realigned != null || retargeted != null || mergedList != null || stripped != null
+                        || handlerStripped != null || callSitesMoved != null || renamed != null || fixed != null
+                        || extended != null || appended != null || wrapsWidened != null || trimmed != null) {
                     patched.put(entry.getName(), source);
                 }
             }

@@ -157,7 +157,14 @@ final class ClientPayloadHandler {
     private static <T extends AbstractContainerMenu> void createMenuScreen(Component name, MenuType<T> menuType, int windowId, RegistryFriendlyByteBuf buf) {
         Minecraft mc = Minecraft.getInstance();
         MenuScreens.getScreenFactory(menuType).ifPresent(f -> {
-            Screen s = f.create(menuType.create(windowId, mc.player.getInventory(), buf), mc.player.getInventory(), name);
+            // NeoFobric: a Fabric extended menu is built from the extra data Fabric's own menu API encoded (see
+            // FabricBridgeHooks#createFabricExtendedMenu). The vanilla create it would take otherwise is the
+            // very call that API rejects, and taking it disconnects the client.
+            var fabricMenu = net.neoforged.fabricbridge.FabricBridgeHooks.createFabricExtendedMenu(
+                    menuType, windowId, mc.player.getInventory(), buf);
+            @SuppressWarnings("unchecked")
+            var menu = fabricMenu != null ? (T) fabricMenu : menuType.create(windowId, mc.player.getInventory(), buf);
+            Screen s = f.create(menu, mc.player.getInventory(), name);
             mc.player.containerMenu = ((MenuAccess<?>) s).getMenu();
             mc.gui.setScreen(s);
         });

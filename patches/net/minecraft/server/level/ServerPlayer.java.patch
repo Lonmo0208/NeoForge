@@ -207,7 +207,7 @@
          }
  
          this.nextContainerCounter();
-@@ -1349,9 +_,31 @@
+@@ -1349,9 +_,36 @@
  
              return OptionalInt.empty();
          } else {
@@ -215,6 +215,11 @@
 +            var extraData = net.neoforged.neoforge.common.util.FriendlyByteBufUtil.writeCustomData(
 +                    buffer -> {
 +                        provider.writeClientSideData(menu, buffer);
++                        // NeoFobric: a Fabric mod's extended menu carries its opening data here - the server
++                        // half of the marriage between Fabric's menu API and this payload (see
++                        // FabricBridgeHooks#writeFabricExtendedMenuData). Without it the menu opens as a
++                        // plain vanilla open-screen packet, which Fabric's menu API rejects on the client.
++                        net.neoforged.fabricbridge.FabricBridgeHooks.writeFabricExtendedMenuData(provider, menu, this, buffer);
 +                        if (extraDataWriter != null) {
 +                            extraDataWriter.accept(buffer);
 +                        }

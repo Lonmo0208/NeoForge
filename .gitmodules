@@ -1,0 +1,3 @@
+[submodule "fabric-loader"]
+	path = fabric-loader
+	url = https://github.com/Lonmo0208/fabric-loader.git

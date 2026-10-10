@@ -1482,4 +1482,150 @@ public final class FabricBridgeHooks {
             return existing != null ? existing : defineClass(name, bytes, 0, bytes.length);
         }
     }
+
+    // ---- Fabric's extended menus -------------------------------------------------
+    //
+    // Fabric's menu API opens a menu *with data*; NeoForge has the same idea - an AdvancedOpenScreenPayload
+    // carrying an extra-data buffer, with the menu type expected to answer IContainerFactory.
+    // ForgifiedFabricAPI marries the two and never needs Fabric's own three ServerPlayer injections (the ones
+    // NeoForge's wider openMenu overload displaced): the server writes Fabric's opening data into NeoForge's
+    // buffer, and NeoForge's own client path hands that buffer back to the menu type's three-argument create.
+    // These two hooks are that marriage; without them an extended menu reaches the client as a plain vanilla
+    // open-screen packet, whose two-argument create Fabric's menu API rejects on purpose - which disconnects
+    // the client. Every Fabric mod with a block screen (TechReborn, Create, bclib, ...) uses that API.
+
+    private static final String FABRIC_EXTENDED_MENU_PROVIDER = "net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider";
+    private static final String FABRIC_EXTENDED_MENU_TYPE = "net.fabricmc.fabric.api.menu.v1.ExtendedMenuType";
+
+    /**
+     * Writes an extended provider's opening data into the platform's extra-data buffer, when the menu is one of
+     * Fabric's extended types.
+     *
+     * <p>Called from the platform's own {@code ServerPlayer#openMenu} right where it builds that buffer.
+     * Nothing happens - not even a log line - when Fabric's menu API, or an extended menu, is not in play.
+     */
+    public static void writeFabricExtendedMenuData(Object provider, Object menu, Object player, Object buffer) {
+        try {
+            var factory = fabricExtendedProvider(provider);
+            var type = menu == null ? null : publicMethod(menu.getClass(), "getType", 0).invoke(menu);
+            if (factory == null || menu == null || buffer == null || player == null || !isFabricExtendedMenuType(type)) {
+                return;
+            }
+            LOGGER.debug(
+                    "[NeoFobric] Writing an extended menu's opening data: provider={} factory={} type={}",
+                    provider.getClass().getName(), factory.getClass().getName(), type.getClass().getName());
+            // The lookups stay on the runtime classes, and the method the class actually declares wins: the
+            // interesting ones sit in anonymous or lambda-generated classes (TechReborn's factory is a
+            // GuiType$1, an encoded codec a StreamCodec$7), whose only declaration is the override itself.
+            // publicMethod opens that one when it has to, which the module system allows because mod and game
+            // classes live in an unnamed module.
+            var data = publicMethod(factory.getClass(), "getScreenOpeningData", 1).invoke(factory, player);
+            var codec = publicMethod(type.getClass(), "getStreamCodec", 0).invoke(type);
+            publicMethod(codec.getClass(), "encode", 2).invoke(codec, buffer, data);
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not write an extended menu's opening data", t);
+        }
+    }
+
+    /** {@return the method with that name and arity, made invokable when a hidden class declares it} */
+    private static java.lang.reflect.Method publicMethod(Class<?> owner, String name, int arity) throws Exception {
+        java.lang.reflect.Method hidden = null;
+        for (var method : owner.getMethods()) {
+            if (!method.getName().equals(name) || method.getParameterCount() != arity) {
+                continue;
+            }
+            if (java.lang.reflect.Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+                return method;
+            }
+            // An anonymous or lambda implementation declares the override in a class that is not public,
+            // and that declaration is the only one getMethods finds; invoking it needs it opened, which is
+            // always allowed for a mod or game class because those live in an unnamed module.
+            if (hidden == null) {
+                hidden = method;
+            }
+        }
+        if (hidden != null && hidden.trySetAccessible()) {
+            return hidden;
+        }
+        throw new NoSuchMethodException(owner.getName() + "." + name + "/" + arity);
+    }
+
+    /**
+     * {@return the menu Fabric's extended opening data describes, or {@code null} when the type is not one}
+     *
+     * <p>Called from the platform's own advanced-open-screen handler before it falls back to the vanilla
+     * create, which for an extended type is the very call Fabric's menu API rejects.
+     */
+    public static Object createFabricExtendedMenu(Object menuType, int windowId, Object inventory, Object buffer) {
+        try {
+            if (!isFabricExtendedMenuType(menuType) || buffer == null) {
+                return null;
+            }
+            // Runtime classes only, and the method the class actually declares - the same rule as when writing.
+            var codec = publicMethod(menuType.getClass(), "getStreamCodec", 0).invoke(menuType);
+            var data = publicMethod(codec.getClass(), "decode", 1).invoke(codec, buffer);
+            return publicMethod(menuType.getClass(), "create", 3).invoke(menuType, windowId, inventory, data);
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not create an extended menu", t);
+        }
+        return null;
+    }
+
+    /** {@return the Fabric extended-provider behind a provider, looking through a vanilla SimpleMenuProvider} */
+    private static Object fabricExtendedProvider(Object provider) {
+        if (provider == null) {
+            return null;
+        }
+        if (typeImplements(provider.getClass(), FABRIC_EXTENDED_MENU_PROVIDER)) {
+            return provider;
+        }
+        // A plain MenuProvider can still hide the real factory in a SimpleMenuProvider's constructor field;
+        // the field is found by name because the bridge compiles without the game on its classpath.
+        for (var cls = provider.getClass(); cls != null; cls = cls.getSuperclass()) {
+            try {
+                var field = cls.getDeclaredField("menuConstructor");
+                field.setAccessible(true);
+                var inner = field.get(provider);
+                if (inner != null && typeImplements(inner.getClass(), FABRIC_EXTENDED_MENU_PROVIDER)) {
+                    return inner;
+                }
+            } catch (NoSuchFieldException ignored) {
+                // keep walking up
+            } catch (Throwable t) {
+                LOGGER.debug("[NeoFobric] Could not read a provider's menu factory", t);
+                break;
+            }
+        }
+        return null;
+    }
+
+    /** {@return whether the value's class, or one of its superclasses, is Fabric's extended menu type} */
+    private static boolean isFabricExtendedMenuType(Object type) {
+        if (type == null) {
+            return false;
+        }
+        for (var cls = type.getClass(); cls != null; cls = cls.getSuperclass()) {
+            if (FABRIC_EXTENDED_MENU_TYPE.equals(cls.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** {@return whether the class implements the interface, directly or through its supertypes} */
+    private static boolean typeImplements(Class<?> type, String interfaceName) {
+        if (type == null) {
+            return false;
+        }
+        if (interfaceName.equals(type.getName())) {
+            return true;
+        }
+        for (var itf : type.getInterfaces()) {
+            if (typeImplements(itf, interfaceName)) {
+                return true;
+            }
+        }
+        var superclass = type.getSuperclass();
+        return superclass != null && !superclass.equals(Object.class) && typeImplements(superclass, interfaceName);
+    }
 }
