@@ -11,14 +11,19 @@
      public ItemStack(ItemLike item, int count) {
          this(item.asItem().builtInRegistryHolder(), count);
      }
-@@ -358,6 +_,20 @@
+@@ -358,6 +_,25 @@
      }
  
      public InteractionResult useOn(UseOnContext context) {
 +        var e = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent(context, net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent.UsePhase.ITEM_AFTER_BLOCK));
 +        if (e.isCanceled()) return e.getCancellationResult();
 +        if (!context.getLevel().isClientSide()) return net.neoforged.neoforge.common.CommonHooks.onPlaceItemIntoWorld(context);
-+        return onItemUse(context, (c) -> getItem().useOn(context));
++        // NeoFabric: Fabric API fires ItemEvents.USE_ON by wrapping this very call; since NeoForge moved the call
++        // into this lambda, the bridge asks Fabric here instead (CommonHooks asks for the server-side call).
++        return onItemUse(context, (c) -> {
++            var fabricResult = net.neoforged.fabricbridge.FabricBridgeHooks.fireFabricItemUseOn(context);
++            return fabricResult != null ? (InteractionResult) fabricResult : getItem().useOn(context);
++        });
 +    }
 +
 +    @Override

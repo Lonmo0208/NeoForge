@@ -1,0 +1,31 @@
+--- a/net/minecraft/world/attribute/EnvironmentAttributeSystem.java
++++ b/net/minecraft/world/attribute/EnvironmentAttributeSystem.java
+@@ -24,6 +_,9 @@
+ import org.jspecify.annotations.Nullable;
+ 
+ public class EnvironmentAttributeSystem implements EnvironmentAttributeReader {
++    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
++    /** Attributes already reported by the dev-only positionless read that follows; see getDimensionValue. */
++    private static final java.util.Set<EnvironmentAttribute<?>> POSITIONLESS_READS = java.util.concurrent.ConcurrentHashMap.newKeySet();
+     private final Map<EnvironmentAttribute<?>, EnvironmentAttributeSystem.ValueSampler<?>> attributeSamplers = new Reference2ObjectOpenHashMap<>();
+ 
+     private EnvironmentAttributeSystem(Map<EnvironmentAttribute<?>, List<EnvironmentAttributeLayer<?>>> layersByAttribute) {
+@@ -105,8 +_,16 @@
+ 
+     @Override
+     public <Value> Value getDimensionValue(EnvironmentAttribute<Value> attribute) {
+-        if (SharedConstants.IS_RUNNING_IN_IDE && attribute.isPositional()) {
+-            throw new IllegalStateException("Position must always be provided for positional attribute " + attribute);
++        if (SharedConstants.IS_RUNNING_IN_IDE && attribute.isPositional() && POSITIONLESS_READS.add(attribute)) {
++            // NeoFabric: vanilla throws here to catch its own misuse during development, but
++            // IS_RUNNING_IN_IDE is true for every dev launch on this platform (FML sets it to
++            // !isProduction), so a third-party mod that reads the dimension-level value of a positional
++            // attribute - Twilight Forest does that for the moon phase, every client tick - crashes the
++            // client on its first tick in a world, in dev only. Read the value and say so once per
++            // attribute instead; the value is the one the caller asked for, and production never takes
++            // this branch.
++            LOGGER.warn("A positional attribute is read without a position: {} - returning its dimension value",
++                    attribute);
+         }
+ 
+         EnvironmentAttributeSystem.ValueSampler<Value> sampler = this.getValueSampler(attribute);

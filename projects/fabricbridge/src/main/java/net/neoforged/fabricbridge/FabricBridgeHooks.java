@@ -225,6 +225,139 @@ public final class FabricBridgeHooks {
     }
 
     /**
+     * Registers a blockstate model type with Fabric API's own registry, on behalf of the platform.
+     *
+     * <p>Fabric's blockstate model types live in its {@code CustomUnbakedBlockStateModel} registry, and mods
+     * reach it through that interface's static {@code register}. The platform's own dispatch is fed from the
+     * same call (the bridge points it here, see {@code MixinJarPatcher}); keeping Fabric's registry up to
+     * date as well means Fabric's own lookups - its composite models and its plugins - still see the type.
+     *
+     * <p>Reflection because this module cannot compile against Fabric API: the arguments are handed through
+     * as objects.
+     */
+    public static void registerFabricBlockStateModelType(Object id, Object codec) {
+        try {
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var api = Class.forName("net.fabricmc.fabric.api.client.model.loading.v1.CustomUnbakedBlockStateModel", false, gameLoader);
+            var register = api.getMethod("register",
+                    Class.forName("net.minecraft.resources.Identifier", false, gameLoader),
+                    Class.forName("com.mojang.serialization.MapCodec", false, gameLoader));
+            register.invoke(null, id, codec);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not register the blockstate model type {} with Fabric API", id, t);
+        }
+    }
+
+    /**
+     * Fires Fabric's item-use-on-block event and hands back whatever a listener asked for, or null when
+     * nobody overrode the item's own behaviour.
+     *
+     * <p>Fabric fires this event by wrapping the {@code Item#useOn} call that sits inside
+     * {@code ItemStack#useOn}. NeoForge spread that one call site over two places - a lambda in
+     * {@code ItemStack#useOn} for the logical client and {@code CommonHooks#onPlaceItemIntoWorld} for the
+     * logical server - so Fabric's wrap cannot find an anchor anywhere (and, failing, took the rest of its
+     * mixin with it). The platform therefore asks Fabric here, at both call sites, before running the item;
+     * the bridge removes Fabric's own wrap (see {@code MixinJarPatcher}).
+     *
+     * <p>Reflection because this module cannot compile against Fabric API: the context and the result are
+     * handed through as objects. Fabric's content layer is an automatic module, so reaching its
+     * package-private callback interface is allowed.
+     *
+     * @return the {@code InteractionResult} a listener returned, or null when none did
+     */
+    public static Object fireFabricItemUseOn(Object useOnContext) {
+        if (!bridgeActive()) {
+            return null;
+        }
+        try {
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var events = Class.forName("net.fabricmc.fabric.api.event.player.ItemEvents", false, gameLoader);
+            var event = Class.forName("net.fabricmc.fabric.api.event.Event", false, gameLoader);
+            var callback = Class.forName("net.fabricmc.fabric.api.event.player.ItemEvents$UseOnCallback", false, gameLoader);
+            var useOn = callback.getMethod("useOn", Class.forName("net.minecraft.world.item.context.UseOnContext", false, gameLoader));
+            useOn.setAccessible(true);
+            var invoker = event.getMethod("invoker").invoke(events.getField("USE_ON").get(null));
+            return useOn.invoke(invoker, useOnContext);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not fire Fabric's item use-on event", t);
+            return null;
+        }
+    }
+
+    /**
+     * Asks Fabric what sleeping direction a sleeping entity should face, and hands back the answer.
+     *
+     * <p>Fabric fires this event by wrapping the {@code BedBlock#getBedOrientation} call inside
+     * {@code LivingEntity#getBedOrientation}. NeoForge's bed support goes through
+     * {@code BlockState#isBed}/{@code BlockState#getBedDirection} instead, so that call - and with it Fabric's
+     * wrap - is gone; the platform asks here instead, and the bridge removes the wrap (see
+     * {@code MixinJarPatcher}). This is the one sleep event a Fabric bed that is not a {@code BedBlock}
+     * cannot do without.
+     *
+     * <p>Reflection because this module cannot compile against Fabric API: the arguments are handed through
+     * as objects.
+     *
+     * @return the direction Fabric decided on, which is the one passed in when nothing modified it
+     */
+    public static Object fireFabricModifySleepingDirection(Object entity, Object sleepingPos, Object sleepingDirection) {
+        if (!bridgeActive()) {
+            return sleepingDirection;
+        }
+        try {
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var events = Class.forName("net.fabricmc.fabric.api.event.entity.v1.EntitySleepEvents", false, gameLoader);
+            var event = Class.forName("net.fabricmc.fabric.api.event.Event", false, gameLoader);
+            var callback = Class.forName("net.fabricmc.fabric.api.event.entity.v1.EntitySleepEvents$ModifySleepingDirection", false, gameLoader);
+            var modify = callback.getMethod("modifySleepDirection",
+                    Class.forName("net.minecraft.world.entity.LivingEntity", false, gameLoader),
+                    Class.forName("net.minecraft.core.BlockPos", false, gameLoader),
+                    Class.forName("net.minecraft.core.Direction", false, gameLoader));
+            modify.setAccessible(true);
+            var invoker = event.getMethod("invoker").invoke(events.getField("MODIFY_SLEEPING_DIRECTION").get(null));
+            return modify.invoke(invoker, entity, sleepingPos, sleepingDirection);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not fire Fabric's sleeping direction event", t);
+            return sleepingDirection;
+        }
+    }
+
+    /**
+     * Asks Fabric whether a mod wants to take over writing a bed's occupied state, and reports its answer.
+     *
+     * <p>Fabric fires this event by redirecting the {@code Level#setBlock} call that used to mark a bed
+     * occupied; NeoForge's bed support runs through {@code BlockState#setBedOccupied} instead, so the redirect -
+     * and with it the event - is gone. The platform asks here instead, from inside that method, and stops when
+     * Fabric says the write is handled (see {@code MixinJarPatcher}, which drops Fabric's redirect).
+     *
+     * <p>Reflection because this module cannot compile against Fabric API: the arguments are handed through
+     * as objects.
+     *
+     * @return whether a mod handled the write, in which case the platform must not write the state itself
+     */
+    public static boolean fireFabricSetBedOccupationState(Object sleeper, Object bedPos, Object bedState, boolean occupied) {
+        if (!bridgeActive()) {
+            return false;
+        }
+        try {
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var events = Class.forName("net.fabricmc.fabric.api.event.entity.v1.EntitySleepEvents", false, gameLoader);
+            var event = Class.forName("net.fabricmc.fabric.api.event.Event", false, gameLoader);
+            var callback = Class.forName("net.fabricmc.fabric.api.event.entity.v1.EntitySleepEvents$SetBedOccupationState", false, gameLoader);
+            var setOccupied = callback.getMethod("setBedOccupationState",
+                    Class.forName("net.minecraft.world.entity.LivingEntity", false, gameLoader),
+                    Class.forName("net.minecraft.core.BlockPos", false, gameLoader),
+                    Class.forName("net.minecraft.world.level.block.state.BlockState", false, gameLoader),
+                    boolean.class);
+            setOccupied.setAccessible(true);
+            var invoker = event.getMethod("invoker").invoke(events.getField("SET_BED_OCCUPATION_STATE").get(null));
+            return Boolean.TRUE.equals(setOccupied.invoke(invoker, sleeper, bedPos, bedState, occupied));
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not fire Fabric's bed occupation event", t);
+            return false;
+        }
+    }
+
+    /**
      * {@return whether this class belongs to a mod that was written for Fabric}
      *
      * <p>Fabric mods live in the game content layer the bridge registers for them

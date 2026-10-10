@@ -1107,6 +1107,414 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * Points Fabric API's blockstate model type registration at the platform's dispatch.
+     *
+     * <p>A Fabric mod registers its blockstate model types with
+     * {@code CustomUnbakedBlockStateModel.register}, and Fabric's blockstates refer to them with a
+     * {@code "fabric:type"} key. NeoForge dispatches on {@code "type"} and knows only its own registry
+     * (see {@code BlockStateModelHooks.makeSingleModelCodec}), and the codec replacement Fabric ships for
+     * this - {@code BlockStateModelUnbakedMixin} - is deliberately dropped: it bypasses NeoForge's model
+     * dispatch, and without it every vanilla model fails to decode. The result was that a Fabric mod's
+     * custom-model blocks degraded to the missing model (Twilight Forest's aurora block and its giant logs
+     * and leaves among them).
+     *
+     * <p>{@code BlockStateModelHooks.registerFabricModelType} takes the same arguments, keeps Fabric's own
+     * registry in the loop, and feeds the platform's dispatch, which also learns to read the
+     * {@code "fabric:type"} key for those ids.
+     *
+     * @return the class bytes with the call redirected, or the original when it does not contain it
+     */
+    private static byte[] redirectFabricBlockStateModelTypes(byte[] classBytes) {
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                        && "net/fabricmc/fabric/api/client/model/loading/v1/CustomUnbakedBlockStateModel".equals(call.owner)
+                        && "register".equals(call.name)
+                        && "(Lnet/minecraft/resources/Identifier;Lcom/mojang/serialization/MapCodec;)V".equals(call.desc)) {
+                    call.owner = "net/neoforged/neoforge/client/model/block/BlockStateModelHooks";
+                    call.name = "registerFabricModelType";
+                    call.itf = false;
+                    changed = true;
+                }
+            }
+        }
+
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed Fabric's blockstate model type registration at BlockStateModelHooks");
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
+     * Points Fabric API's tooltip injections at the method NeoForge split them out of.
+     *
+     * <p>{@code ItemStack#addDetailsToTooltip} was the vanilla tooltip body, and every injection in Fabric's
+     * {@code ItemStackMixin} anchors somewhere inside it: the attributes, the component entries, the advanced
+     * check. NeoForge turned the public method into a wrapper around registry hooks and moved the body into
+     * the private {@code addDetailsToTooltipComponents}, with the registry-name line moved on into
+     * {@code addDetailsToTooltipTail}. The injections then found no target at all - "InvalidInjectionException:
+     * Callback method postTooltipsNonAdvanced ..." - and Fabric's tooltip events stopped firing for every mod
+     * that uses them.
+     *
+     * <p>Each injection is pointed at the method its own anchor moved to, which is why this cannot go through
+     * the plain annotation realignment table.
+     *
+     * @return the class bytes with the injections retargeted, or the original when nothing needed to change
+     */
+    private static byte[] retargetItemStackTooltipInjections(byte[] classBytes, String entryName) {
+        if (!"net/fabricmc/fabric/mixin/item/ItemStackMixin".equals(entryName.replace(".class", ""))) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var annotation : allAnnotationsOf(method)) {
+                var target = readStringValue(annotation, "method");
+                if (!"addDetailsToTooltip".equals(target)) {
+                    continue;
+                }
+                var at = readAnnotationValue(annotation, "at");
+                var anchor = at == null ? null : readStringValue(at, "target");
+                var movedTo = anchor != null && anchor.contains("DefaultedRegistry;getKey")
+                        ? "addDetailsToTooltipTail"
+                        : "addDetailsToTooltipComponents";
+                writeStringValue(annotation, "method", movedTo);
+                changed = true;
+            }
+        }
+
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed Fabric's tooltip injections at the methods NeoForge split them into");
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
+     * Points Fabric's item damage hook at the call NeoForge redirected it through.
+     *
+     * <p>Fabric's {@code CustomDamageHandler} hook wraps the call from
+     * {@code ItemStack#hurtAndBreak(int, LivingEntity, EquipmentSlot)} into the vanilla
+     * {@code hurtAndBreak(int, ServerLevel, ServerPlayer, Consumer)}. NeoForge added a
+     * {@code LivingEntity} overload - so a non-player owner can be carried through to its own damage hooks -
+     * and sends the entry point through that one instead, which leaves the wrap without an invocation.
+     * ForgifiedFabricAPI retargets the annotation and widens the handler's {@code ServerPlayer} parameter to
+     * {@code LivingEntity}; this does the same to the compiled mixin. Both types are references, so the
+     * parameter's local slot and the body (which only hands the value back to {@code original.call}) are
+     * unaffected.
+     *
+     * @return the class bytes with the hook retargeted, or the original when nothing needed to change
+     */
+    private static byte[] retargetItemStackDamageHook(byte[] classBytes, String entryName) {
+        if (!"net/fabricmc/fabric/mixin/item/ItemStackMixin".equals(entryName.replace(".class", ""))) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var playerOverload = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;";
+        var entityOverload = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;";
+        var changed = false;
+        for (var method : node.methods) {
+            for (var annotation : allAnnotationsOf(method)) {
+                var at = readAnnotationValue(annotation, "at");
+                var target = at == null ? null : readStringValue(at, "target");
+                if (target == null || !target.contains(playerOverload)) {
+                    continue;
+                }
+                writeStringValue(at, "target", target.replace(playerOverload, entityOverload));
+                changed |= retypeParameter(method, "net/minecraft/server/level/ServerPlayer", "net/minecraft/world/entity/LivingEntity");
+            }
+        }
+
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed Fabric's item damage hook at the overload NeoForge routes damage through");
+        return writeClass(node);
+    }
+
+    /** Rewrites one reference parameter type of a mixin handler, descriptor and debug info together. */
+    private static boolean retypeParameter(org.objectweb.asm.tree.MethodNode method, String fromInternal, String toInternal) {
+        var from = "L" + fromInternal + ";";
+        var to = "L" + toInternal + ";";
+        if (!method.desc.contains(from)) {
+            return false;
+        }
+        method.desc = method.desc.replace(from, to);
+        if (method.localVariables != null) {
+            for (var local : method.localVariables) {
+                if (from.equals(local.desc)) {
+                    local.desc = to;
+                }
+            }
+        }
+        for (var instruction : method.instructions) {
+            if (instruction instanceof org.objectweb.asm.tree.TypeInsnNode type && from.equals(type.desc)) {
+                type.desc = to;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Re-bounds Fabric's block-entity unload hook inside {@code LevelChunk#getBlockEntity}.
+     *
+     * <p>Fabric fires {@code ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD} there by redirecting the pending
+     * block-entity map's {@code remove}, bounded by a slice that starts at {@code createBlockEntity} - a call
+     * NeoForge's {@code getBlockEntity} no longer makes, so the slice matches nothing and the mixin class
+     * fails as a whole. That also silences the load and unload events next to it, which is why block entities
+     * were still being tracked as loaded when a world closed
+     * ({@code Mismatch in tracked blockentities, expected 0} in Fabric's own lifecycle test). ForgifiedFabricAPI
+     * bounds the same redirect with the {@code pendingBlockEntities} field read instead; this drops that
+     * slice in the same shape.
+     *
+     * @return the class bytes with the slice swapped, or the original when nothing needed to change
+     */
+    private static byte[] retargetLevelChunkBlockEntityRemoval(byte[] classBytes, String entryName) {
+        if (!"net/fabricmc/fabric/mixin/event/lifecycle/server/LevelChunkMixin".equals(entryName.replace(".class", ""))) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        // The redirect on the pending map, as Fabric compiles it: (Map, Object)Object.
+        var removed = false;
+        for (var method : node.methods) {
+            if (!"(Ljava/util/Map;Ljava/lang/Object;)Ljava/lang/Object;".equals(method.desc)) {
+                continue;
+            }
+            for (var annotation : allAnnotationsOf(method)) {
+                var at = readAnnotationValue(annotation, "at");
+                var target = at == null ? null : readStringValue(at, "target");
+                if (target == null || !target.startsWith("Ljava/util/Map;remove(")) {
+                    continue;
+                }
+                var slice = new AnnotationNode("Lorg/spongepowered/asm/mixin/injection/Slice;");
+                var to = new AnnotationNode("Lorg/spongepowered/asm/mixin/injection/At;");
+                to.visit("value", "FIELD");
+                to.visit("target", "Lnet/minecraft/world/level/chunk/LevelChunk;pendingBlockEntities:Ljava/util/Map;");
+                to.visit("opcode", org.objectweb.asm.Opcodes.GETFIELD);
+                slice.visit("to", to);
+                writeAnnotationValue(annotation, "slice", slice);
+                removed = true;
+            }
+        }
+
+        if (!removed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Re-bounded Fabric's block-entity unload hook to the pending block entity map");
+        return writeClass(node);
+    }
+
+    /** Replaces (or adds) a nested-annotation element. */
+    private static void writeAnnotationValue(AnnotationNode annotation, String name, AnnotationNode value) {
+        if (annotation.values == null) {
+            annotation.values = new java.util.ArrayList<>();
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (name.equals(annotation.values.get(i))) {
+                annotation.values.set(i + 1, value);
+                return;
+            }
+        }
+        annotation.values.add(name);
+        annotation.values.add(value);
+    }
+
+    /**
+     * Injection targets whose method NeoForge moved the body of, named per allowlisted mixin class.
+     *
+     * <p>Each of these wrappers still exists under the old name and still resolves, so the injection applies
+     * and simply finds nothing - a silent loss of whatever Fabric fired from the body. Where the new body is
+     * reachable it is worth following, and ForgifiedFabricAPI's own copies name the same new methods:
+     * <ul>
+     * <li>{@code AnvilMenuMixin}: NeoForge wraps {@code createResult} to fire AnvilUpdateEvent with the vanilla
+     * result, and the body became {@code createResultInternal} - without this Fabric's AllowEnchanting event
+     * never fires for the anvil.</li>
+     * <li>{@code LanguageMixin}: the translation parse gained a component consumer, and the resource read moved
+     * into the three-argument {@code parseTranslations} - without this mod-provided server language files are
+     * not read.</li>
+     * <li>{@code ServerConfigurationPacketListenerImplMixin}: {@code startConfiguration} now only kicks off the
+     * configuration phase, whose body is {@code runConfiguration} - without this the server's known-packs list
+     * is no longer narrowed to the packs it started with.</li>
+     * <li>{@code ServerPlayerMixin} (entity events): the body of {@code startSleepInBed} became the one-argument
+     * lambda it hands to {@code Optional#map}, so all three of Fabric's sleep hooks (sleeping direction, respawn
+     * point, nearby monsters) sit in the lambda now.</li>
+     * </ul>
+     */
+    private static final java.util.Map<String, java.util.Map<String, String>> RETARGETED_INJECTION_METHODS = java.util.Map.of(
+            "net/fabricmc/fabric/mixin/item/AnvilMenuMixin",
+            java.util.Map.of("createResult", "createResultInternal"),
+            "net/fabricmc/fabric/mixin/resource/server/LanguageMixin",
+            java.util.Map.of("parseTranslations(Ljava/util/function/BiConsumer;Ljava/lang/String;)V",
+                    "parseTranslations(Ljava/util/function/BiConsumer;Ljava/util/function/BiConsumer;Ljava/lang/String;)V"),
+            "net/fabricmc/fabric/mixin/resource/ServerConfigurationPacketListenerImplMixin",
+            java.util.Map.of("startConfiguration", "runConfiguration"),
+            "net/fabricmc/fabric/mixin/entity/event/ServerPlayerMixin",
+            java.util.Map.of("startSleepInBed", "lambda$startSleepInBed$0"));
+
+    /**
+     * The menu API's {@code openMenu} hook is <em>not</em> in the table above on purpose.
+     *
+     * <p>NeoForge added a two-argument {@code openMenu} for its extra screen data and the one-argument overload
+     * only delegates to it, so Fabric's two hooks anchor on a body that is no longer there - and pointing the
+     * annotation at the new overload is not enough: the handler would also need the extra parameter, and Mixin
+     * then synthesises a handler whose captured local is uninitialised, which fails verification and takes the
+     * server down. ForgifiedFabricAPI rewrote this mixin by hand instead. Leaving the annotation alone keeps the
+     * failure benign, which is what Fabric already sees on this tree: the menu API's newer extended-menu helpers
+     * stay dead, everything else in the class keeps working.
+     */
+
+    /**
+     * Points the injections named by {@link #RETARGETED_INJECTION_METHODS} at the methods NeoForge moved the
+     * bodies into.
+     *
+     * @return the class bytes with the method names retargeted, or the original when nothing needed to change
+     */
+    private static byte[] retargetInjectionMethods(byte[] classBytes, String entryName) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        var internalName = entryName.substring(0, entryName.length() - ".class".length());
+        var moved = RETARGETED_INJECTION_METHODS.get(internalName);
+        if (moved == null) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var annotation : allAnnotationsOf(method)) {
+                var target = readStringValue(annotation, "method");
+                var replacement = target == null ? null : moved.get(target);
+                if (replacement != null) {
+                    writeStringValue(annotation, "method", replacement);
+                    changed = true;
+                }
+            }
+        }
+
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed the injections in {} at the method(s) NeoForge moved the body into: {}", internalName, moved);
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    private static java.util.List<AnnotationNode> allAnnotationsOf(org.objectweb.asm.tree.MethodNode method) {
+        var all = new java.util.ArrayList<AnnotationNode>();
+        if (method.visibleAnnotations != null) {
+            all.addAll(method.visibleAnnotations);
+        }
+        if (method.invisibleAnnotations != null) {
+            all.addAll(method.invisibleAnnotations);
+        }
+        return all;
+    }
+
+    /** {@return the string a named annotation element holds, or null} Also reads the single-element list form. */
+    private static String readStringValue(AnnotationNode annotation, String name) {
+        if (annotation.values == null) {
+            return null;
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (!name.equals(annotation.values.get(i))) {
+                continue;
+            }
+            if (annotation.values.get(i + 1) instanceof String value) {
+                return value;
+            }
+            if (annotation.values.get(i + 1) instanceof java.util.List<?> list && list.size() == 1 && list.get(0) instanceof String value) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@return the nested annotation a named annotation element holds, or null}
+     *
+     * <p>Also reads the single-element array form: a handler's {@code at = @At(...)} reaches the class file as a
+     * one-element array, so a reader that only knows the plain form silently sees no anchor at all.
+     */
+    private static AnnotationNode readAnnotationValue(AnnotationNode annotation, String name) {
+        if (annotation.values == null) {
+            return null;
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (!name.equals(annotation.values.get(i))) {
+                continue;
+            }
+            if (annotation.values.get(i + 1) instanceof AnnotationNode nested) {
+                return nested;
+            }
+            if (annotation.values.get(i + 1) instanceof java.util.List<?> list && list.size() == 1
+                    && list.get(0) instanceof AnnotationNode nested) {
+                return nested;
+            }
+        }
+        return null;
+    }
+
+    /** Replaces the string a named annotation element holds, in both the plain and the single-element list form. */
+    private static void writeStringValue(AnnotationNode annotation, String name, String replacement) {
+        if (annotation.values == null) {
+            return;
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (!name.equals(annotation.values.get(i))) {
+                continue;
+            }
+            if (annotation.values.get(i + 1) instanceof String) {
+                annotation.values.set(i + 1, replacement);
+            } else if (annotation.values.get(i + 1) instanceof java.util.List<?> list && list.size() == 1 && list.get(0) instanceof String) {
+                annotation.values.set(i + 1, java.util.List.of(replacement));
+            }
+        }
+    }
+
+    /**
      * Makes a Fabric mod's own resource scan see the jar it was loaded from.
      *
      * <p>Mods scan their own package through {@code ClassLoader.getResources} - Twilight Forest's bean
@@ -1692,10 +2100,76 @@ public final class MixinJarPatcher {
      * Fabric's deserializer handles every vanilla model and fails on all of them: every block and item
      * draws black-and-magenta. NeoForge's parser covers the same ground its own way, so both handlers
      * go; the rest of the mixin keeps driving the plugin machinery Fabric mods need.
+     *
+     * <p>{@code ItemStackMixin} (fabric-events-interaction-v0) fires {@code ItemEvents.USE_ON} by wrapping
+     * the {@code Item#useOn} call inside {@code ItemStack#useOn}. NeoForge moved that call out of reach: the
+     * logical client now reaches it through a lambda and the logical server through
+     * {@code CommonHooks#onPlaceItemIntoWorld}. The wrap therefore never applies, and a mixin class that
+     * fails takes its siblings with it - which here would also kill {@code ItemEvents.USE}. The platform
+     * fires the same event from both of its call sites instead
+     * ({@link FabricBridgeHooks#fireFabricItemUseOn(Object)}), so only this one handler goes.
+     *
+     * <p>The rest are the set ForgifiedFabricAPI also drops, for the same reasons: each one anchors on a
+     * vanilla fluid, furnace, hopper or bed body that NeoForge rewrote. Fabric's fluid <em>physics</em> still
+     * reaches the game - the bridge builds NeoForge fluid types out of the same registry
+     * ({@link FabricBridgeHooks#fabricFluidBehavior(Object)}) - but the per-tag enter/exit callbacks those
+     * handlers drive, Fabric's stack-aware furnace remainder (which NeoForge now asks for itself) and the
+     * hopper hooks onto {@code ItemStorage} (NeoForge's own hopper consults item handlers) do not. The
+     * sleeping-direction one is replaced by a hook, since NeoForge's bed support now runs through
+     * {@code BlockState#getBedDirection} instead of {@code BedBlock#getBedOrientation}:
+     * {@link FabricBridgeHooks#fireFabricModifySleepingDirection(Object, Object, Object)}.
      */
-    private static final java.util.Map<String, java.util.Set<String>> STRIP_HANDLER_METHODS = java.util.Map.of(
-            "net/fabricmc/fabric/mixin/client/model/loading/ModelManagerMixin",
-            java.util.Set.of("cancelVanillaDeserialize", "actuallyDeserializeModel"));
+    private static final java.util.Map<String, java.util.Set<String>> STRIP_HANDLER_METHODS = java.util.Map.ofEntries(
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/model/loading/ModelManagerMixin",
+                    java.util.Set.of("cancelVanillaDeserialize", "actuallyDeserializeModel")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/event/interaction/ItemStackMixin",
+                    java.util.Set.of("handleUseOnEvent")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/content/registry/fluid/EntityMixin",
+                    java.util.Set.of("checkIfInSwimmableFluid", "checkIfUnderSwimmableFluid", "checkIfStandingInSwimmableFluid",
+                            "checkCustomFluids", "preventParticlesInFluids")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/content/registry/fluid/LivingEntityMixin",
+                    java.util.Set.of("isInCustomFluid", "travelInCustomFluid", "tryOtherFluidsForFluidJumping",
+                            "customFluidDrowning", "fixDoubleUpdateForCustomFluids", "jumpInCustomFluid",
+                            "swapFluidForShallowCheck", "swapFluidTag")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/item/AbstractFurnaceBlockEntityMixin",
+                    java.util.Set.of("getCraftingRemainder")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/transfer/HopperBlockEntityMixin",
+                    java.util.Set.of("hookInsert", "hookExtract")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/particle/EntityMixin",
+                    java.util.Set.of("modifyBlockStateParticleOption")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/particle/LivingEntityMixin",
+                    java.util.Set.of("modifyBlockStateParticleOption")),
+            // Both bed hooks go: NeoForge's bed support runs through BlockState#setBedOccupied and
+            // BlockState#getBedDirection instead of the BedBlock/LivingEntity calls they anchor on, and the
+            // platform fires both events from its own bed code (see FabricBridgeHooks). The rest of the class -
+            // the damage and sleep events - applies, and is what Fabric mods actually use.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/entity/event/LivingEntityMixin",
+                    java.util.Set.of("onGetSleepingDirection", "setOccupiedState")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/entity/event/elytra/LivingEntityMixin",
+                    java.util.Set.of("injectElytraCheck")),
+            // Both handlers go, and neither is a loss: NeoForge's defaultCraftingReminder already asks the
+            // stack-aware ItemStack#getCraftingRemainder, which is the whole point of Fabric's pair. Keeping
+            // half of it would be worse than keeping none - the remainder handler reads the stack the capture
+            // handler shares with it.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/item/CraftingRecipeMixin",
+                    java.util.Set.of("captureStack", "getStackRemainder")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/content/registry/FuelValuesMixin",
+                    java.util.Set.of("build")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/content/registry/fluid/AbstractBoatMixin",
+                    java.util.Set.of("customFluidSupport")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/event/interaction/ServerGamePacketListenerImplMixin",
+                    java.util.Set.of("onPickItemFromBlock")),
+            // NeoForge fixes MC-232360 itself - it asks BlockState#isEmpty instead of isAir, in both the section
+            // and its block counter - so Fabric's redirect has nothing left to correct. ForgifiedFabricAPI has no
+            // counterpart for either file.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/block/LevelChunkSectionMixin",
+                    java.util.Set.of("modifyAirCheck")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/block/ChunkSectionBlockStateCounterMixin",
+                    java.util.Set.of("modifyAirCheck")),
+            // Same shape: NeoForge's watchdog report prints entire stacks through its own ThreadInfoUtil, which
+            // is what Fabric's modifier substituted.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/crash/report/info/ServerWatchdogMixin",
+                    java.util.Set.of("printEntireThreadDump")));
 
     /**
      * Removes the injector handlers named by {@link #STRIP_HANDLER_METHODS} from an allowlisted mixin
@@ -2447,6 +2921,31 @@ public final class MixinJarPatcher {
                     versionMoved = resourceLookupRedirected;
                     patched.put(entry.getName(), versionMoved);
                 }
+                var blockStateModelTypesRedirected = redirectFabricBlockStateModelTypes(versionMoved);
+                if (blockStateModelTypesRedirected != null) {
+                    versionMoved = blockStateModelTypesRedirected;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var tooltipInjectionsRetargeted = retargetItemStackTooltipInjections(versionMoved, entry.getName());
+                if (tooltipInjectionsRetargeted != null) {
+                    versionMoved = tooltipInjectionsRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var anvilInjectionsRetargeted = retargetInjectionMethods(versionMoved, entry.getName());
+                if (anvilInjectionsRetargeted != null) {
+                    versionMoved = anvilInjectionsRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var damageHookRetargeted = retargetItemStackDamageHook(versionMoved, entry.getName());
+                if (damageHookRetargeted != null) {
+                    versionMoved = damageHookRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var chunkRemovalRetargeted = retargetLevelChunkBlockEntityRemoval(versionMoved, entry.getName());
+                if (chunkRemovalRetargeted != null) {
+                    versionMoved = chunkRemovalRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 allClasses.add(versionMoved);
                 if (!looksLikeMixinClass(entry.getName())) {
                     // Not a mixin: the only rewrites it may need are a call site of a renamed accessor
@@ -2473,8 +2972,11 @@ public final class MixinJarPatcher {
                 mixinClasses.add(bytes);
                 // Annotation targets first: MixinHandlerDescriptorFixer reads the target signature to
                 // decide the parameter order, so the target has to be correct before it runs.
-                var realigned = realignMixinTargets(bytes, entry.getName());
-                var source = realigned != null ? realigned : bytes;
+                // The chain starts from what the passes above already produced, not from the raw jar bytes:
+                // their annotation rewrites belong to the class too, and restarting from the original threw
+                // them away whenever a later pass also happened to fire on the same class.
+                var realigned = realignMixinTargets(versionMoved, entry.getName());
+                var source = realigned != null ? realigned : versionMoved;
                 var retargeted = retargetStaleReturnOrdinals(source, entry.getName());
                 if (retargeted != null) {
                     source = retargeted;

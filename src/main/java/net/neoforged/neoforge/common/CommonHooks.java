@@ -646,7 +646,11 @@ public class CommonHooks {
             level.captureBlockSnapshots = true;
 
         ItemStack copy = itemstack.copy();
-        InteractionResult ret = itemstack.getItem().useOn(context);
+        // NeoFabric: Fabric API fires ItemEvents.USE_ON by wrapping the Item#useOn call inside ItemStack#useOn, which
+        // on the logical server is this one; the bridge hands Fabric the same chance to answer (ItemStack asks for
+        // the client-side call).
+        var fabricResult = net.neoforged.fabricbridge.FabricBridgeHooks.fireFabricItemUseOn(context);
+        InteractionResult ret = fabricResult != null ? (InteractionResult) fabricResult : itemstack.getItem().useOn(context);
         if (itemstack.isEmpty())
             EventHooks.onPlayerDestroyItem(player, copy, context.getHand());
 

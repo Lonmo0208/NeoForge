@@ -49,7 +49,7 @@
          ItemStack input = this.inputSlots.getItem(0);
          this.onlyRenaming = false;
          this.cost.set(1);
-@@ -180,8 +_,10 @@
+@@ -180,8 +_,13 @@
                          int level = entry.getIntValue();
                          level = current == level ? level + 1 : Math.max(level, current);
                          Enchantment enchantment = enchantmentHolder.value();
@@ -57,7 +57,10 @@
 -                        if (this.player.hasInfiniteMaterials() || input.is(Items.ENCHANTED_BOOK)) {
 +                        // Neo: Respect IItemExtension#supportsEnchantment - we also delegate the logic for Enchanted Books to this method.
 +                        // Though we still allow creative players to combine any item with any enchantment in the anvil here.
-+                        boolean compatible = input.supportsEnchantment(enchantmentHolder);
++                        // NeoFabric: the vanilla Enchantment#canEnchant call is kept inside the expression because Fabric API's
++                        // AnvilMenuMixin redirects exactly that call to fire its AllowEnchanting event; the extension check keeps
++                        // its say, which mirrors how ForgifiedFabricAPI combines the two (fabric check OR neo check).
++                        boolean compatible = enchantment.canEnchant(input) || input.supportsEnchantment(enchantmentHolder);
 +                        if (this.player.getAbilities().instabuild) {
                              compatible = true;
                          }

@@ -85,14 +85,16 @@
          for (Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
              Holder<Enchantment> enchantment = entry.getKey();
              if (enchantment.is(tag)) {
-@@ -574,7 +_,9 @@
+@@ -574,7 +_,11 @@
      public static List<EnchantmentInstance> getAvailableEnchantmentResults(int value, ItemStack itemStack, Stream<Holder<Enchantment>> source) {
          List<EnchantmentInstance> results = Lists.newArrayList();
          boolean isBook = itemStack.is(Items.BOOK);
 -        source.filter(enchantment -> enchantment.value().isPrimaryItem(itemStack) || isBook).forEach(holder -> {
 +        // Neo: Rewrite filter logic to call isPrimaryItemFor instead of hardcoded vanilla logic.
 +        // The original logic is recorded in the default implementation of IItemExtension#isPrimaryItemFor.
-+        source.filter(itemStack::isPrimaryItemFor).forEach(holder -> {
++        // NeoFabric: the vanilla filter lambda (and its Enchantment#isPrimaryItem call) is kept as-is because Fabric
++        // API's EnchantmentHelperMixin redirects exactly that call; the isPrimaryItemFor check still applies.
++        source.filter(holder -> holder.value().isPrimaryItem(itemStack) || isBook || itemStack.isPrimaryItemFor(holder)).forEach(holder -> {
              Enchantment enchantment = holder.value();
  
              for (int level = enchantment.getMaxLevel(); level >= enchantment.getMinLevel(); level--) {

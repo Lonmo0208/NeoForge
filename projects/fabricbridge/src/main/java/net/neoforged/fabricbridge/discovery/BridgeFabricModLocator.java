@@ -1030,14 +1030,85 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
     }
 
     private static java.util.List<Path> classpathGameContent() {
-        var found = new ArrayList<Path>();
-        for (var candidate : systemClasspathRoots()) {
-            if (exposesGameContent(candidate)) {
-                found.add(candidate);
+        // The installed game first: that jar is the one the runtime classes come from, and handler realignment
+        // has to be resolved against exactly that. The class path is not a safe substitute on a production
+        // client - there it leads to the launcher's own versions/<id>/<id>.jar, the *unpatched* game, and a
+        // handler whose target NeoForge re-ordered then looks like it needs no rewrite at all. Fabric's loot
+        // api realigns one in ReloadableServerRegistries, and the mismatch that followed from resolving
+        // against the vanilla jar was a VerifyError that killed the client as soon as it loaded server
+        // resources. In dev there is no installed game, so the class path (the extracted classes) is used.
+        var found = new ArrayList<Path>(installedGameContent());
+        if (found.isEmpty()) {
+            for (var candidate : systemClasspathRoots()) {
+                if (exposesGameContent(candidate)) {
+                    found.add(candidate);
+                }
             }
         }
         LOGGER.info("[NeoFobric] Game content roots for mixin target resolution (in resolution order): {}", found);
         return found;
+    }
+
+    /**
+     * {@return the patched Minecraft jars from the install's library directory, most recently installed first}
+     *
+     * <p>These describe the game as it runs. A production dedicated server has nothing else to offer - the game
+     * lives in its own module layer rather than on the class path - and without a game to resolve against the
+     * whole realigning pass used to be skipped there, which cost everything the bridge does to the jars: the
+     * config registration redirect never happened, ForgeConfigAPIPort threw {@code NoSuchMethodError} inside
+     * Twilight Forest's entrypoint, and the server died loading registries that referred to those
+     * registrations. A production client does have a game on its class path, but the wrong one, so it uses
+     * these too (see {@link #classpathGameContent()}).
+     */
+    private static java.util.List<Path> installedGameContent() {
+        var found = new ArrayList<Path>();
+        var patchedRoot = FMLPaths.GAMEDIR.get().resolve("libraries").resolve("net").resolve("neoforged");
+        // Whichever side this is, the newest install of either jar describes the same patched game; a
+        // client-only or server-only install simply has one of them.
+        for (var name : new String[] { "minecraft-client-patched", "minecraft-server-patched" }) {
+            var versions = patchedRoot.resolve(name);
+            if (!Files.isDirectory(versions)) {
+                continue;
+            }
+            var byNewest = new ArrayList<Path>();
+            try (var entries = Files.list(versions)) {
+                entries.filter(Files::isDirectory).forEach(byNewest::add);
+            } catch (IOException e) {
+                LOGGER.debug("[NeoFobric] Failed to list the installed game versions under {}", versions, e);
+                continue;
+            }
+            // Newest first, by when the version directory was written: an install that was upgraded leaves the
+            // older game behind, and resolving mixin targets against it would realign handlers for a Minecraft
+            // that is not the one running. (Ordering by name would misread 26.2.0.99 as newer than 26.2.0.117.)
+            byNewest.sort(java.util.Comparator.comparingLong(BridgeFabricModLocator::lastModified).reversed());
+            for (var versionDir : byNewest) {
+                try (var jars = Files.list(versionDir)) {
+                    for (var jar : jars.filter(path -> path.getFileName().toString().endsWith(".jar")).toList()) {
+                        if (exposesGameContent(jar)) {
+                            found.add(jar);
+                        }
+                    }
+                } catch (IOException e) {
+                    LOGGER.debug("[NeoFobric] Failed to list the game jars under {}", versionDir, e);
+                }
+                if (!found.isEmpty()) {
+                    break;
+                }
+            }
+            if (!found.isEmpty()) {
+                break;
+            }
+        }
+        return found;
+    }
+
+    /** {@return when a path was last written, or 0 when that cannot be read} Used to rank installed games. */
+    private static long lastModified(Path path) {
+        try {
+            return Files.getLastModifiedTime(path).toMillis();
+        } catch (IOException e) {
+            return 0L;
+        }
     }
 
     /**

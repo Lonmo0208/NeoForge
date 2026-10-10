@@ -856,14 +856,18 @@
                  Vec3 standUp = BedBlock.findStandUpPosition(this.getType(), this.level(), bedPosition, facing, this.getYRot()).orElseGet(() -> {
                      BlockPos above = bedPosition.above();
                      return new Vec3(above.getX() + 0.5, above.getY() + 0.1, above.getZ() + 0.5);
-@@ -3799,7 +_,9 @@
+@@ -3799,7 +_,13 @@
  
      public @Nullable Direction getBedOrientation() {
          BlockPos bedPos = this.getSleepingPos().orElse(null);
 -        return bedPos != null ? BedBlock.getBedOrientation(this.level(), bedPos) : null;
 +        if (bedPos == null) return null;
 +        BlockState state = this.level().getBlockState(bedPos);
-+        return !state.isBed(level(), bedPos, this) ? null : state.getBedDirection(level(), bedPos);
++        Direction direction = !state.isBed(level(), bedPos, this) ? null : state.getBedDirection(level(), bedPos);
++        // NeoFabric: Fabric API fires EntitySleepEvents.MODIFY_SLEEPING_DIRECTION by wrapping the BedBlock#getBedOrientation
++        // call that used to sit here; NeoForge's bed support runs through BlockState#getBedDirection instead, so the bridge
++        // asks Fabric here (see MixinJarPatcher, which drops Fabric's wrap).
++        return (Direction) net.neoforged.fabricbridge.FabricBridgeHooks.fireFabricModifySleepingDirection(this, bedPos, direction);
      }
  
      @Override

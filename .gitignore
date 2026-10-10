@@ -53,3 +53,6 @@ build
 
 # NeoFobric: JVM exception tracing output (-Xlog:exceptions=trace:file=neofobric-exc.log), see the handoff docs
 /neofobric-exc.log*
+
+# local gametest reports
+/tmp/

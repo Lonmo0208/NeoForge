@@ -1,11 +1,13 @@
 --- a/net/minecraft/server/commands/EnchantCommand.java
 +++ b/net/minecraft/server/commands/EnchantCommand.java
-@@ -75,7 +_,7 @@
+@@ -75,7 +_,9 @@
              if (entity instanceof LivingEntity target) {
                  ItemStack item = target.getMainHandItem();
                  if (!item.isEmpty()) {
 -                    if (enchantment.canEnchant(item)
-+                    if (item.supportsEnchantment(enchantmentHolder) // Neo: Respect IItemExtension#supportsEnchantment
++                    // NeoFabric: the vanilla Enchantment#canEnchant call is kept inside the expression because Fabric API's
++                    // EnchantCommandMixin redirects exactly that call to fire its AllowEnchanting event.
++                    if ((enchantment.canEnchant(item) || item.supportsEnchantment(enchantmentHolder)) // Neo: Respect IItemExtension#supportsEnchantment
                          && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantmentsForCrafting(item).keySet(), enchantmentHolder)) {
                          item.enchant(enchantmentHolder, level);
                          success++;

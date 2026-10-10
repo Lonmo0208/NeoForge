@@ -205,6 +205,12 @@ public interface IBlockStateExtension {
      * @param occupied True if we are occupying the bed, or false if they are stopping use of the bed
      */
     default void setBedOccupied(Level level, BlockPos pos, LivingEntity sleeper, boolean occupied) {
+        // NeoFabric: Fabric API fires EntitySleepEvents.SET_BED_OCCUPATION_STATE by redirecting the Level#setBlock call
+        // that used to sit here; NeoForge's bed support runs through this method instead, so the bridge drops Fabric's
+        // redirect and the platform asks here (see MixinJarPatcher).
+        if (net.neoforged.fabricbridge.FabricBridgeHooks.fireFabricSetBedOccupationState(sleeper, pos, self(), occupied)) {
+            return;
+        }
         self().getBlock().setBedOccupied(self(), level, pos, sleeper, occupied);
     }
 

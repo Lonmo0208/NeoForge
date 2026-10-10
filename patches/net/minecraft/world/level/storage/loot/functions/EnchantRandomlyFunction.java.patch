@@ -1,11 +1,13 @@
 --- a/net/minecraft/world/level/storage/loot/functions/EnchantRandomlyFunction.java
 +++ b/net/minecraft/world/level/storage/loot/functions/EnchantRandomlyFunction.java
-@@ -72,7 +_,7 @@
+@@ -72,7 +_,9 @@
          Stream<Holder<Enchantment>> compatibleEnchantmentsStream = this.options
              .map(HolderSet::stream)
              .orElseGet(() -> context.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements().map(Function.identity()))
 -            .filter(candidate -> !shouldCheckCompatibility || candidate.value().canEnchant(itemStack));
-+            .filter(candidate -> !shouldCheckCompatibility || itemStack.supportsEnchantment(candidate)); // Neo: Respect IItemExtension#supportsEnchantment
++            // NeoFabric: the vanilla Enchantment#canEnchant call is kept inside this lambda because Fabric API's
++            // EnchantRandomlyFunctionMixin redirects exactly that call to fire its AllowEnchanting event.
++            .filter(candidate -> !shouldCheckCompatibility || candidate.value().canEnchant(itemStack) || itemStack.supportsEnchantment(candidate)); // Neo: Respect IItemExtension#supportsEnchantment
          List<Holder<Enchantment>> compatibleEnchantments = compatibleEnchantmentsStream.toList();
          Optional<Holder<Enchantment>> enchantment = Util.getRandomSafe(compatibleEnchantments, random);
          if (enchantment.isEmpty()) {
