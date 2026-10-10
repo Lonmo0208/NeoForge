@@ -52,10 +52,10 @@ public final class FabricConfigHooks {
      * {@return the registered config} Same contract as the ForgeConfigAPIPort overload this stands in for.
      *
      * @param tracker the config tracker the caller was about to use (the platform's); passed on by the
-     *            bridge so the call site keeps its shape
-     * @param type the config type
-     * @param spec the spec to register
-     * @param modId the id of the Fabric mod the config belongs to
+     *                bridge so the call site keeps its shape
+     * @param type    the config type
+     * @param spec    the spec to register
+     * @param modId   the id of the Fabric mod the config belongs to
      */
     public static ModConfig registerFabricModConfig(ConfigTracker tracker, ModConfig.Type type, IConfigSpec spec, String modId) {
         var config = tracker.registerConfig(type, spec, containerFor(modId));

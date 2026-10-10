@@ -1,13 +1,5 @@
 --- a/net/minecraft/server/ReloadableServerRegistries.java
 +++ b/net/minecraft/server/ReloadableServerRegistries.java
-@@ -2,6 +_,7 @@
- 
- import com.google.gson.JsonElement;
- import com.mojang.logging.LogUtils;
-+import com.mojang.serialization.DynamicOps;
- import com.mojang.serialization.JsonOps;
- import com.mojang.serialization.Lifecycle;
- import java.util.HashMap;
 @@ -43,7 +_,30 @@
          List<HolderLookup.RegistryLookup<?>> contextRegistriesWithTags = TagLoader.buildUpdatedLookups(
              context.getAccessForLoading(RegistryLayer.RELOADABLE), updatedContextTags
@@ -33,7 +25,7 @@
 +            }
 +
 +            @Override
-+            public <V> RegistryOps<V> createSerializationContext(DynamicOps<V> parent) {
++            public <V> RegistryOps<V> createSerializationContext(com.mojang.serialization.DynamicOps<V> parent) {
 +                return new net.neoforged.neoforge.common.conditions.ConditionalOps<>(baseContextWithTags.createSerializationContext(parent), conditionContext);
 +            }
 +        };

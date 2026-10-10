@@ -1,13 +1,5 @@
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
-@@ -108,6 +_,7 @@
- import net.minecraft.world.level.ClipContext;
- import net.minecraft.world.level.Level;
- import net.minecraft.world.level.block.BedBlock;
-+import net.minecraft.world.level.block.Block;
- import net.minecraft.world.level.block.Blocks;
- import net.minecraft.world.level.block.HoneyBlock;
- import net.minecraft.world.level.block.LadderBlock;
 @@ -211,7 +_,8 @@
      public static final float ELYTRA_VERTICAL_AIR_DRAG = 0.98F;
      public static final float BASE_SWIM_SPEED = 0.02F;
@@ -470,7 +462,7 @@
 +                // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces it) and its
 +                // answer is used only when no block overrides the context-aware one - see Block#rawSoundType.
 +                SoundType vanillaSoundType = state.getSoundType();
-+                SoundType rawSoundType = Block.rawSoundType(state.getBlock());
++                SoundType rawSoundType = net.minecraft.world.level.block.Block.rawSoundType(state.getBlock());
 +                if (vanillaSoundType != rawSoundType && state.getSoundType(this.level(), pos, this) == rawSoundType) {
 +                    this.playSound(vanillaSoundType.getFallSound(), vanillaSoundType.getVolume() * .5F, vanillaSoundType.getPitch() * .75F);
 +                } else {
@@ -631,11 +623,11 @@
 +        float blockFriction = 1.0F;
 +        if (this.onGround()) {
 +            BlockState stateBelow = this.level().getBlockState(posBelow);
-+            Block blockBelow = stateBelow.getBlock();
++            net.minecraft.world.level.block.Block blockBelow = stateBelow.getBlock();
 +            float vanillaFriction = blockBelow.getFriction();
 +            float contextFriction = stateBelow.getFriction(this.level(), posBelow, this);
 +            blockFriction = computeModifiedFriction(
-+                contextFriction != Block.rawFriction(blockBelow) ? contextFriction : vanillaFriction,
++                contextFriction != net.minecraft.world.level.block.Block.rawFriction(blockBelow) ? contextFriction : vanillaFriction,
 +                (float)this.getAttributeValue(Attributes.FRICTION_MODIFIER)
 +            );
 +        }
@@ -685,7 +677,7 @@
 +                // call; the platform's context-aware answer is taken when it was overridden, and Block
 +                // #rawScaffolding tells the two apart. With neither kind of mod in play the value is the same.
 +                BlockState climbingState = this.getInBlockState();
-+                boolean rawScaffolding = Block.rawScaffolding(climbingState);
++                boolean rawScaffolding = net.minecraft.world.level.block.Block.rawScaffolding(climbingState);
 +                boolean platformScaffolding = climbingState.isScaffolding(this);
 +                boolean scaffolding = platformScaffolding != rawScaffolding
 +                    ? platformScaffolding

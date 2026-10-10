@@ -6,13 +6,13 @@
 package net.neoforged.neoforge.common;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.net.URI;
-import java.net.URL;
 import net.neoforged.fml.jarcontents.JarContents;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;

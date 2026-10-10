@@ -42,7 +42,7 @@
              }
          };
          return load(loaderFactory, contextRegistries, registriesToLoad, executor);
-@@ -192,10 +_,16 @@
+@@ -192,9 +_,15 @@
                  return new NetworkRegistryLoadTask<>(data, Lifecycle.stable(), loadingErrors, entries, knownDataSource);
              }
          };
@@ -52,14 +52,12 @@
          return load(loaderFactory, contextRegistries, registriesToLoad, executor);
      }
  
--    private static CompletableFuture<RegistryAccess.Frozen> load(
 +    // NeoFobric: the vanilla signature, kept because mods inject into it - Fabric's registry-sync wraps
 +    // the supplyAsync call in this exact method to rebind its ScopedValue context on the worker thread,
 +    // and it cannot bind that context when the body has been moved into another overload.
-+    public static CompletableFuture<RegistryAccess.Frozen> load(
+     public static CompletableFuture<RegistryAccess.Frozen> load(
          RegistryDataLoader.LoaderFactory loaderFactory,
          List<HolderLookup.RegistryLookup<?>> contextRegistries,
-         List<RegistryDataLoader.RegistryData<?>> registriesToLoad,
 @@ -218,6 +_,15 @@
                      return CompletableFuture.allOf(loadCompletions)
                          .thenApplyAsync(

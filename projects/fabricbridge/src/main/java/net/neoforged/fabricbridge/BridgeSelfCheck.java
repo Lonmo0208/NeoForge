@@ -51,9 +51,42 @@ public final class BridgeSelfCheck {
     private static volatile boolean reported;
     /** Dedicated servers have no client tick to report from, so their verdict rides the server tick instead. */
     private static volatile int ticksWithPlayer;
+    /**
+     * Counts server ticks before a player has ever joined, so a dedicated server reports even when nobody
+     * does. Arming the checks and then staying silent for its whole life was the one gap the self-check had
+     * left (a dedicated server without players never printed a verdict).
+     */
+    private static volatile int ticksWithoutPlayer;
     /** The labels whose events only ever fire on a client - everything else is the server side's business. */
     private static final java.util.Set<String> CLIENT_SIDE_EVENTS =
             java.util.Set.of("ClientLifecycle.CLIENT_STARTED", "ClientTick.END_CLIENT_TICK");
+
+    /** One row of the event-bridge inventory (docs/NEOFOBRIC_HANDOFF.md, "阶段 60"): what the bridge promises. */
+    private record InventoryRow(String label, boolean selfArmed, String note) {}
+
+    /**
+     * The canonical inventory, kept next to the checks so a run reports it row by row instead of as a bare
+     * "N/M wired" - and so the rows a player's own actions trigger are visibly by-design rather than missing.
+     * A new event gets a row here and in the handoff document together.
+     */
+    private static final List<InventoryRow> INVENTORY = List.of(
+            new InventoryRow("ServerLifecycle.SERVER_STARTED", true, ""),
+            new InventoryRow("ServerTick.END_SERVER_TICK", true, "drives the dedicated server's report"),
+            new InventoryRow("ServerLevel.LOAD", true, ""),
+            new InventoryRow("ServerChunk.CHUNK_LOAD", true, ""),
+            new InventoryRow("ServerEntity.ENTITY_LOAD", true, ""),
+            new InventoryRow("ServerBlockEntity.BLOCK_ENTITY_LOAD", true, ""),
+            new InventoryRow("ServerPlayConnection.JOIN", true, "the dedicated report counts from this row"),
+            new InventoryRow("CommandRegistration.EVENT", true, ""),
+            new InventoryRow("LootTable.ALL_LOADED", true, ""),
+            new InventoryRow("ClientLifecycle.CLIENT_STARTED", true, "client side"),
+            new InventoryRow("ClientTick.END_CLIENT_TICK", true, "client side, drives the client report"),
+            new InventoryRow("PlayerBlockBreak.BEFORE/AFTER", false, "a Fabric test mod, or a one-off probe"),
+            new InventoryRow("ServerEntity.ENTITY_UNLOAD / ServerBlockEntity.BLOCK_ENTITY_UNLOAD", false,
+                    "leaving the area, or a server stop"),
+            new InventoryRow("ItemEvents.USE_ON / MODIFY_SLEEPING_DIRECTION / bed occupation", false,
+                    "a player interaction"),
+            new InventoryRow("PlayerPickItemEvents.BLOCK", false, "a player pick-block, or the call-site probe"));
 
     private BridgeSelfCheck() {}
 
@@ -263,15 +296,31 @@ public final class BridgeSelfCheck {
         }
         try {
             if (!Boolean.TRUE.equals(fired.get("ServerPlayConnection.JOIN"))) {
+                // A dedicated server may never see a player. Report after a grace period anyway, with the
+                // join row marked unexercised, so the inventory still reaches a log. The grace is raised with
+                // -Dneofobric.selfCheckServerTicks=<n> when a client is expected to connect a little later.
+                if (++ticksWithoutPlayer >= serverGraceTicks()) {
+                    reported = true;
+                    report(null, false);
+                }
                 return;
             }
             if (++ticksWithPlayer < 200) {
                 return;
             }
             reported = true;
-            report(null);
+            report(null, true);
         } catch (Throwable t) {
             LOGGER.debug("[NeoFobric] Self-check server progress failed", t);
+        }
+    }
+
+    /** {@return how long a dedicated server waits for a player before reporting anyway} */
+    private static int serverGraceTicks() {
+        try {
+            return Integer.getInteger("neofobric.selfCheckServerTicks", 400);
+        } catch (Throwable t) {
+            return 400;
         }
     }
 
@@ -324,7 +373,7 @@ public final class BridgeSelfCheck {
 
             if (ticksInWorld == 200) {
                 reported = true;
-                report(instance);
+                report(instance, true);
             }
         } catch (Throwable t) {
             LOGGER.debug("[NeoFobric] Self-check progress failed", t);
@@ -1136,7 +1185,8 @@ public final class BridgeSelfCheck {
         return null;
     }
 
-    private static void report(Object minecraft) {        var silent = new ArrayList<String>();
+    private static void report(Object minecraft, boolean playerSeen) {
+        var silent = new ArrayList<String>();
         var wired = 0;
         for (var entry : fired.entrySet()) {
             if (Boolean.TRUE.equals(entry.getValue())) {
@@ -1167,6 +1217,52 @@ public final class BridgeSelfCheck {
             }
         }
 
+        // The client-only rows are not this side's business on a dedicated server, and without a player the
+        // join row is simply not exercised. Neither may read as a silent wiring failure.
+        var notApplicable = new ArrayList<String>(remoteOnly);
+        var unexercised = new ArrayList<String>();
+        if (minecraft == null) {
+            notApplicable.addAll(CLIENT_SIDE_EVENTS);
+        }
+        if (!playerSeen) {
+            unexercised.add("ServerPlayConnection.JOIN");
+            // A player-less server may simply never load (or unload) anything, so these rows are no evidence
+            // of a broken hook either. The with-player comparison does show them all firing (9/9 wired on a
+            // dedicated server with a client attached).
+            unexercised.add("ServerChunk.CHUNK_LOAD");
+            unexercised.add("ServerEntity.ENTITY_LOAD");
+            unexercised.add("ServerBlockEntity.BLOCK_ENTITY_LOAD");
+        }
+        silent.removeIf(label -> notApplicable.contains(label) || unexercised.contains(label));
+
+        // The inventory view: every row the bridge promises, with the state it is in for this run.
+        var rows = new ArrayList<String>();
+        var selfArmed = 0;
+        var selfFired = 0;
+        var playerDriven = 0;
+        for (var row : INVENTORY) {
+            if (!row.selfArmed()) {
+                playerDriven++;
+                rows.add("  player-driven  " + row.label() + (row.note().isEmpty() ? "" : " (" + row.note() + ")"));
+                continue;
+            }
+            if (notApplicable.contains(row.label())) {
+                rows.add("  n/a            " + row.label());
+                continue;
+            }
+            selfArmed++;
+            if (Boolean.TRUE.equals(fired.get(row.label()))) {
+                selfFired++;
+                rows.add("  fired          " + row.label());
+            } else if (unavailable.contains(row.label())) {
+                rows.add("  absent         " + row.label());
+            } else if (unexercised.contains(row.label())) {
+                rows.add("  unexercised    " + row.label());
+            } else {
+                rows.add("  SILENT         " + row.label());
+            }
+        }
+
         var canary = minecraft == null ? "not applicable (dedicated server)" : "not sent";
         try {
             if (minecraft != null) {
@@ -1187,6 +1283,13 @@ public final class BridgeSelfCheck {
                 wired, fired.size(),
                 remoteOnly.isEmpty() ? "" : " (" + remoteOnly.size() + " of the rest belong to the server joined)",
                 canary);
+        LOGGER.info("[NeoFobric] Self-check inventory: {} row(s) - {} self-armed on this side ({} fired), "
+                + "{} player-driven, {} not applicable here",
+                INVENTORY.size(), selfArmed, selfFired, playerDriven, notApplicable.size());
+        if (!unexercised.isEmpty()) {
+            LOGGER.info("[NeoFobric] Self-check: no player joined, so these rows were not exercised: {}",
+                    String.join(", ", unexercised));
+        }
         if (!silent.isEmpty()) {
             LOGGER.warn("[NeoFobric] Self-check silent event(s): {}. A Fabric event that never fires means the call site "
                     + "NeoForge moved is still missed - see docs/NEOFOBRIC_HANDOFF.md ('调用点搬家').", String.join(", ", silent));
@@ -1207,12 +1310,16 @@ public final class BridgeSelfCheck {
             java.nio.file.Files.createDirectories(file.getParent());
             var text = new StringBuilder();
             text.append("NeoFobric self-check ").append(java.time.LocalDateTime.now()).append('\n')
-                    .append("events: ").append(wired).append('/').append(fired.size()).append(" wired\n");
-            for (var entry : fired.entrySet()) {
-                text.append("  ").append(Boolean.TRUE.equals(entry.getValue()) ? "fired  " : "SILENT ").append(' ').append(entry.getKey()).append('\n');
+                    .append("events: ").append(wired).append('/').append(fired.size()).append(" wired\n")
+                    .append("inventory: ").append(INVENTORY.size()).append(" row(s) - ")
+                    .append(selfArmed).append(" self-armed on this side, ").append(selfFired).append(" fired, ")
+                    .append(playerDriven).append(" player-driven, ").append(notApplicable.size())
+                    .append(" not applicable\n");
+            for (var line : rows) {
+                text.append(line).append('\n');
             }
-            for (var label : unavailable) {
-                text.append("  absent   ").append(label).append('\n');
+            if (!unexercised.isEmpty()) {
+                text.append("unexercised (no player): ").append(String.join(", ", unexercised)).append('\n');
             }
             text.append("network canary: ").append(canary).append('\n');
             java.nio.file.Files.writeString(file, text.toString(), java.nio.charset.StandardCharsets.UTF_8);

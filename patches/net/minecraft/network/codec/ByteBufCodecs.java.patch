@@ -1,21 +1,13 @@
 --- a/net/minecraft/network/codec/ByteBufCodecs.java
 +++ b/net/minecraft/network/codec/ByteBufCodecs.java
-@@ -50,6 +_,7 @@
- import net.minecraft.util.Mth;
- import org.joml.Quaternionfc;
- import org.joml.Vector3fc;
-+import org.jspecify.annotations.Nullable;
- 
- public interface ByteBufCodecs {
-     int MAX_INITIAL_COLLECTION_SIZE = 65536;
 @@ -560,31 +_,73 @@
      }
  
      private static <T, R> StreamCodec<RegistryFriendlyByteBuf, R> registry(
 -        ResourceKey<? extends Registry<T>> registryKey, Function<Registry<T>, IdMap<R>> mapExtractor
 +        ResourceKey<? extends Registry<T>> registryKey, Function<Registry<T>, IdMap<R>> mapExtractor,
-+        Function<Registry<T>, Function<Identifier, @Nullable R>> valueForName,
-+        Function<Registry<T>, Function<R, @Nullable Identifier>> nameForValue
++        Function<Registry<T>, Function<Identifier, @org.jspecify.annotations.Nullable R>> valueForName,
++        Function<Registry<T>, Function<R, @org.jspecify.annotations.Nullable Identifier>> nameForValue
      ) {
          return new StreamCodec<RegistryFriendlyByteBuf, R>() {
 -            private IdMap<R> getRegistryOrThrow(RegistryFriendlyByteBuf input) {
@@ -62,8 +54,8 @@
                  VarInt.write(output, id);
              }
          };
-+    }
-+
+     }
+ 
 +    /// Neo: true for built-in registries whose numeric ids are not marked for ID syncing (e.g. a
 +    /// registry a bridged Fabric mod created through Fabric's registry API - Fabric mods encode such
 +    /// entries by id because on Fabric both sides always load the same mods and the ids line up).
@@ -74,8 +66,8 @@
 +    /// either are synced or are dynamic) keep their id-based path untouched.
 +    private static boolean isNamesEncoded(Registry<?> registry) {
 +        return net.neoforged.neoforge.registries.RegistryManager.isNonSyncedBuiltInRegistry(registry);
-     }
- 
++    }
++
      static <T> StreamCodec<RegistryFriendlyByteBuf, T> registry(ResourceKey<? extends Registry<T>> registryKey) {
 -        return registry(registryKey, r -> r);
 +        return registry(registryKey, r -> r, r -> id -> r.getValue(id), r -> r::getKey);

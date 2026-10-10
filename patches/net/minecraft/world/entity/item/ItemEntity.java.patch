@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/entity/item/ItemEntity.java
 +++ b/net/minecraft/world/entity/item/ItemEntity.java
-@@ -28,6 +_,8 @@
- import net.minecraft.world.item.ItemStack;
- import net.minecraft.world.level.Explosion;
- import net.minecraft.world.level.Level;
-+import net.minecraft.world.level.block.Block;
-+import net.minecraft.world.level.block.state.BlockState;
- import net.minecraft.world.level.gameevent.GameEvent;
- import net.minecraft.world.level.gamerules.GameRules;
- import net.minecraft.world.level.portal.TeleportTransition;
 @@ -52,6 +_,10 @@
      private @Nullable EntityReference<Entity> thrower;
      private @Nullable UUID target;
@@ -63,11 +54,11 @@
 +                    BlockPos groundPos = getBlockPosBelowThatAffectsMyMovement();
 +                    // NeoFobric: vanilla-shaped call first (a Fabric-side mixin replaces it), the platform's
 +                    // context-aware answer only when the block overrides it - see Block#rawFriction.
-+                    BlockState groundState = this.level().getBlockState(groundPos);
-+                    Block groundBlock = groundState.getBlock();
++                    net.minecraft.world.level.block.state.BlockState groundState = this.level().getBlockState(groundPos);
++                    net.minecraft.world.level.block.Block groundBlock = groundState.getBlock();
 +                    float vanillaFriction = groundBlock.getFriction();
 +                    float contextFriction = groundState.getFriction(level(), groundPos, this);
-+                    groundFriction *= contextFriction != Block.rawFriction(groundBlock) ? contextFriction : vanillaFriction;
++                    groundFriction *= contextFriction != net.minecraft.world.level.block.Block.rawFriction(groundBlock) ? contextFriction : vanillaFriction;
                  }
  
                  this.setDeltaMovement(this.getDeltaMovement().multiply(groundFriction, airDrag, groundFriction));

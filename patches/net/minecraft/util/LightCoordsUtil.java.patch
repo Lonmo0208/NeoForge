@@ -1,13 +1,5 @@
 --- a/net/minecraft/util/LightCoordsUtil.java
 +++ b/net/minecraft/util/LightCoordsUtil.java
-@@ -3,6 +_,7 @@
- import net.minecraft.core.BlockPos;
- import net.minecraft.world.level.BlockAndLightGetter;
- import net.minecraft.world.level.LightLayer;
-+import net.minecraft.world.level.block.Block;
- import net.minecraft.world.level.block.state.BlockState;
- 
- public class LightCoordsUtil {
 @@ -104,7 +_,14 @@
  
          int packedBrightness = brightnessGetter.packedBrightness(level, pos);
@@ -18,7 +10,7 @@
 +        // #rawLightEmission tells the two apart. With neither kind of mod in play this is the value it always was.
 +        int vanillaEmission = state.getLightEmission();
 +        int contextEmission = state.getLightEmission(level, pos);
-+        int blockSelfEmission = contextEmission != Block.rawLightEmission(state)
++        int blockSelfEmission = contextEmission != net.minecraft.world.level.block.Block.rawLightEmission(state)
 +            ? contextEmission
 +            : vanillaEmission;
          return block < blockSelfEmission ? withBlock(packedBrightness, blockSelfEmission) : packedBrightness;

@@ -1,13 +1,5 @@
 --- a/com/mojang/blaze3d/opengl/GlCommandEncoder.java
 +++ b/com/mojang/blaze3d/opengl/GlCommandEncoder.java
-@@ -20,6 +_,7 @@
- import com.mojang.blaze3d.systems.ScissorState;
- import com.mojang.blaze3d.systems.TransientMemory;
- import com.mojang.blaze3d.textures.GpuTexture;
-+import com.mojang.blaze3d.vertex.VertexFormat;
- import com.mojang.blaze3d.textures.GpuTextureView;
- import com.mojang.logging.LogUtils;
- import java.nio.ByteBuffer;
 @@ -239,7 +_,8 @@
  
      @Override
@@ -71,7 +63,7 @@
 +            // (iris, with a shader pack active) hand back a one-element array on purpose. Indexing it
 +            // with this loop's fixed bound crashed the first draw with
 +            // "ArrayIndexOutOfBoundsException: Index 1 out of bounds for length 1".
-+            VertexFormat[] formatBindings = pipeline != null ? pipeline.info().getVertexFormatBindings() : null;
++            com.mojang.blaze3d.vertex.VertexFormat[] formatBindings = pipeline != null ? pipeline.info().getVertexFormatBindings() : null;
 +
              for (int i = 0; i < 16; i++) {
 -                if (renderPass.vertexBuffers[i] == null && pipeline != null && pipeline.info().getVertexFormatBindings()[i] != null) {

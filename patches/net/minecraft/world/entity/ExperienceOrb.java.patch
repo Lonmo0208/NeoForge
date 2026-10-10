@@ -1,14 +1,5 @@
 --- a/net/minecraft/world/entity/ExperienceOrb.java
 +++ b/net/minecraft/world/entity/ExperienceOrb.java
-@@ -18,6 +_,8 @@
- import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
- import net.minecraft.world.item.enchantment.EnchantmentHelper;
- import net.minecraft.world.level.Level;
-+import net.minecraft.world.level.block.Block;
-+import net.minecraft.world.level.block.state.BlockState;
- import net.minecraft.world.level.entity.EntityTypeTest;
- import net.minecraft.world.level.storage.ValueInput;
- import net.minecraft.world.level.storage.ValueOutput;
 @@ -106,7 +_,7 @@
          } else {
              super.tick();
@@ -26,11 +17,11 @@
 +                BlockPos pos = this.getBlockPosBelowThatAffectsMyMovement();
 +                // NeoFobric: vanilla-shaped call first (a Fabric-side mixin replaces it), the platform's
 +                // context-aware answer only when the block overrides it - see Block#rawFriction.
-+                BlockState groundState = this.level().getBlockState(pos);
-+                Block groundBlock = groundState.getBlock();
++                net.minecraft.world.level.block.state.BlockState groundState = this.level().getBlockState(pos);
++                net.minecraft.world.level.block.Block groundBlock = groundState.getBlock();
 +                float vanillaFriction = groundBlock.getFriction();
 +                float contextFriction = groundState.getFriction(this.level(), pos, this);
-+                friction *= contextFriction != Block.rawFriction(groundBlock) ? contextFriction : vanillaFriction;
++                friction *= contextFriction != net.minecraft.world.level.block.Block.rawFriction(groundBlock) ? contextFriction : vanillaFriction;
              }
  
              this.setDeltaMovement(this.getDeltaMovement().scale(friction));

@@ -1,15 +1,15 @@
 --- a/net/minecraft/client/gui/render/GuiRenderer.java
 +++ b/net/minecraft/client/gui/render/GuiRenderer.java
-@@ -88,7 +_,12 @@
+@@ -88,7 +_,13 @@
      private final Projection guiProjection = new Projection();
      private final ProjectionMatrixBuffer guiProjectionMatrixBuffer = new ProjectionMatrixBuffer("gui");
      private final FeatureRenderDispatcher featureRenderDispatcher;
--    private final Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> pictureInPictureRenderers;
++    // NeoFobric: the vanilla-shaped picture-in-picture renderer map stays where vanilla had it. Fabric's
++    // rendering mixins register through it (@Shadow for some, the wrapped builder call for others) and
++    // preparePictureInPictureState falls back to it when no NeoForge pool matches the state. It is public
++    // through the access transformer, not through this patch.
+     public final Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> pictureInPictureRenderers;
 +    private final Map<Class<? extends PictureInPictureRenderState>, net.neoforged.neoforge.client.gui.PictureInPictureRendererPool<?>> pictureInPictureRendererPools;
-+    // NeoFobric: the vanilla-shaped picture-in-picture renderer map, kept for Fabric's rendering
-+    // mixins: they register through it (@Shadow for some, the wrapped builder call for others) and it
-+    // is what preparePictureInPictureState falls back to when no NeoForge pool matches the state.
-+    public final Map<Class<? extends PictureInPictureRenderState>, net.minecraft.client.gui.render.pip.PictureInPictureRenderer<?>> pictureInPictureRenderers;
 +    private final Set<PictureInPictureRenderState> pictureInPictureRenderStatesScratch = new it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<>();
      private @Nullable GuiItemAtlas itemAtlas;
      private int cachedGuiScale;

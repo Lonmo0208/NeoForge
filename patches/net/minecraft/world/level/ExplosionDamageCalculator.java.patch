@@ -1,13 +1,6 @@
 --- a/net/minecraft/world/level/ExplosionDamageCalculator.java
 +++ b/net/minecraft/world/level/ExplosionDamageCalculator.java
-@@ -3,15 +_,25 @@
- import java.util.Optional;
- import net.minecraft.core.BlockPos;
- import net.minecraft.world.entity.Entity;
-+import net.minecraft.world.level.block.Block;
- import net.minecraft.world.level.block.state.BlockState;
- import net.minecraft.world.level.material.FluidState;
- import net.minecraft.world.phys.Vec3;
+@@ -9,9 +_,18 @@
  
  public class ExplosionDamageCalculator {
      public Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter level, BlockPos pos, BlockState block, FluidState fluid) {
@@ -20,11 +13,11 @@
 +        // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces that one), and the
 +        // platform's position-aware answer is used when the block overrides it - Block#rawExplosionResistance
 +        // tells the two apart. With neither kind of mod in play this is the value it always was.
-+        Block blockType = block.getBlock();
++        net.minecraft.world.level.block.Block blockType = block.getBlock();
 +        float vanillaResistance = blockType.getExplosionResistance();
 +        float contextResistance = block.getExplosionResistance(level, pos, explosion);
 +        return Optional.of(Math.max(
-+            contextResistance != Block.rawExplosionResistance(blockType) ? contextResistance : vanillaResistance,
++            contextResistance != net.minecraft.world.level.block.Block.rawExplosionResistance(blockType) ? contextResistance : vanillaResistance,
 +            fluid.getExplosionResistance(level, pos, explosion)));
      }
  
