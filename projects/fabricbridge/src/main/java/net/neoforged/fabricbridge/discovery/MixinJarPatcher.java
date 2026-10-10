@@ -93,6 +93,31 @@ public final class MixinJarPatcher {
             "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)");
 
     /**
+     * Members the platform <em>renamed</em> rather than merely reshaped, keyed by the old member
+     * (name and descriptor, without the owning class).
+     *
+     * <p>{@link #ANNOTATION_TARGET_REALIGNMENTS} only swaps a parameter list, which cannot express a
+     * rename. NeoForge's structure patch renames vanilla's {@code StructureTemplate#placeEntities} -
+     * the half of a structure paste that spawns the template's entities - to
+     * {@code addEntitiesToWorld} and reshapes it (the mirror, rotation and bounding box moved into
+     * the place settings, and {@code processEntityInfos} pre-transforms the positions). The loop a
+     * Fabric mod hooks is still the same loop: it iterates the same {@code processEntityInfos} result,
+     * and its first argument is still the level, so pointing the old annotation at the new member
+     * means the same thing. With the stale name the whole mixin found no target at all and was
+     * skipped silently: the case that motivated this entry filters which entities a pasted schematic
+     * may spawn through {@code EntityControlStructureProcessor}s.
+     *
+     * <p>The key is matched as the <em>tail</em> of an annotation value, so both spellings resolve: a
+     * bare {@code method} selector ({@code placeEntities(...)V}) and a class-qualified {@code @At}
+     * target ({@code L…StructureTemplate;placeEntities(...)V}).
+     *
+     * <p>Add an entry only after checking both sides against the versions actually installed.
+     */
+    private static final Map<String, String> ANNOTATION_MEMBER_RENAMES = Map.of(
+            "placeEntities(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Mirror;Lnet/minecraft/world/level/block/Rotation;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/BoundingBox;ZLnet/minecraft/util/ProblemReporter;)V",
+            "addEntitiesToWorld(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructurePlaceSettings;Lnet/minecraft/util/ProblemReporter;)V");
+
+    /**
      * The same realignment, scoped to one mixin class.
      *
      * <p>Needed when one descriptor is an injection <em>target</em> for one mixin and the <em>method
@@ -606,6 +631,10 @@ public final class MixinJarPatcher {
 
     /** Builds the corrected descriptor by swapping the old parameter list for the new one. */
     private static String replacementFor(String descriptor, Map<String, String> scoped) {
+        var renamed = renamedMember(descriptor);
+        if (renamed != null) {
+            return renamed;
+        }
         var open = descriptor.indexOf('(');
         var close = descriptor.indexOf(')');
         if (open < 0 || close <= open) {
@@ -617,6 +646,22 @@ public final class MixinJarPatcher {
             return null;
         }
         return descriptor.substring(0, open) + replacement + descriptor.substring(close + 1);
+    }
+
+    /**
+     * Rewrites a renamed member, keeping whatever class qualifier the annotation carried.
+     *
+     * <p>Matched on the tail so that {@code placeEntities(...)V} (a selector) and
+     * {@code Lnet/minecraft/…/StructureTemplate;placeEntities(...)V} (a call target) both resolve.
+     */
+    private static String renamedMember(String descriptor) {
+        for (var entry : ANNOTATION_MEMBER_RENAMES.entrySet()) {
+            var old = entry.getKey();
+            if (descriptor.endsWith(old)) {
+                return descriptor.substring(0, descriptor.length() - old.length()) + entry.getValue();
+            }
+        }
+        return null;
     }
 
     private static final String CALLBACK_INFO = "org/spongepowered/asm/mixin/injection/callback/CallbackInfo";
@@ -1879,8 +1924,523 @@ public final class MixinJarPatcher {
         return writer.toByteArray();
     }
 
-    private static java.util.List<AnnotationNode> allAnnotationsOf(org.objectweb.asm.tree.MethodNode method) {
-        var all = new java.util.ArrayList<AnnotationNode>();
+    /** The injection annotations whose {@code at} names a member: the ones a retarget can move. */
+    private static final java.util.Set<String> ANCHORED_INJECTIONS = java.util.Set.of(
+            "Lorg/spongepowered/asm/mixin/injection/Inject;",
+            "Lorg/spongepowered/asm/mixin/injection/Redirect;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArg;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArgs;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyVariable;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyConstant;",
+            "Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;",
+            "Lcom/llamalad7/mixinextras/injector/wrapwithcondition/WrapWithCondition;",
+            "Lcom/llamalad7/mixinextras/injector/modifyexpressionvalue/ModifyExpressionValue;",
+            "Lcom/llamalad7/mixinextras/injector/modifyreceiver/ModifyReceiver;",
+            "Lcom/llamalad7/mixinextras/injector/modifyargs/ModifyArgs;");
+
+    /** MixinExtras sugar a handler reads out of the host method's frame, which a retarget must not move. */
+    private static final java.util.Set<String> HOST_FRAME_SUGAR = java.util.Set.of(
+            "Lcom/llamalad7/mixinextras/sugar/Local;",
+            "Lcom/llamalad7/mixinextras/sugar/Share;",
+            "Lcom/llamalad7/mixinextras/sugar/Definition;",
+            "Lcom/llamalad7/mixinextras/sugar/Expression;");
+
+    /**
+     * Points an injection at the method its anchor moved into, derived from the bytecode rather than listed.
+     *
+     * <p>NeoForge splits vanilla bodies (a wrapper plus a private worker) and adds delegating overloads, so an
+     * injection can name a method that still exists while the call it wraps moved one level in. The handler is
+     * validated against the wrapped call rather than the host, so pointing the selector at the method the
+     * selected one delegates to brings the injection back.
+     *
+     * <p>Only when the handler takes no {@code @Local}/{@code @Share} sugar: sugar is read out of the host's
+     * frame, and a handler moved to a method whose parameters or locals differ makes Mixin synthesise a capture
+     * that fails verification - which does not fail that injection but the whole class, and for a server class
+     * the server with it. Those are left alone on purpose.
+     *
+     * <p>Conditions, all read out of the two classes: the anchor must be absent from the selected method,
+     * present in <em>exactly one</em> other method of the same target class, and that method must be called by
+     * the selected one.
+     */
+    private static byte[] retargetMovedAnchors(byte[] classBytes, String entryName, TargetResolver resolver) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        var internalName = entryName.substring(0, entryName.length() - ".class".length());
+        if (KEEP_INERT_MIXINS.contains(internalName)) {
+            LOGGER.info("[NeoFobric] Leaving the injections in {} inert on purpose - the platform covers what they"
+                    + " would install, and reviving them breaks it", internalName);
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        var targets = mixinTargets(node);
+        if (targets.isEmpty()) {
+            return null;
+        }
+
+        var changed = false;
+        var moves = new java.util.ArrayList<String>();
+        for (var method : node.methods) {
+            // Plain @Local/@Share sugar reads the host's locals, whose names and liveness cannot be checked
+            // from here - those handlers are left alone. argsOnly sugar only needs the host's parameters, and
+            // the move is taken when the method it moves to still takes those types.
+            var sugarTypes = argsOnlySugarTypes(method);
+            if (sugarTypes == null) {
+                continue;
+            }
+            for (var annotation : allAnnotationsOf(method)) {
+                if (!ANCHORED_INJECTIONS.contains(annotation.desc)) {
+                    continue;
+                }
+                var selector = readStringValue(annotation, "method");
+                var at = atAnnotationsOf(annotation);
+                if (selector == null || at.size() != 1) {
+                    continue;
+                }
+                var kind = readStringValue(at.get(0), "value");
+                var anchor = readStringValue(at.get(0), "target");
+                if (anchor == null || kind == null
+                        || !java.util.Set.of("INVOKE", "INVOKE_ASSIGN", "FIELD", "NEW").contains(kind)) {
+                    continue;
+                }
+                var host = movedHost(resolver, targets, selector, anchor);
+                if (host == null || !hostTakesSugarTypes(resolver, targets, host, sugarTypes)) {
+                    continue;
+                }
+                // A handler that binds the host's own parameters needs a host that starts with them; the wrapping
+                // injectors bind the wrapped call instead, which the anchor already fixes.
+                if (!CALL_SIDE_INJECTIONS.contains(annotation.desc)
+                        && !hostStartsWithHandlerParams(resolver, targets, host, declaredHostParams(method))) {
+                    continue;
+                }
+                writeStringValue(annotation, "method", host);
+                moves.add(selector + " -> " + host);
+                changed = true;
+            }
+        }
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Moved {} injection selector(s) in {} onto the method the anchor moved into: {}",
+                moves.size(), entryName.replace('/', '.'), moves);
+        return writeClass(node);
+    }
+
+    /** {@return whether the handler reads sugar out of the host method's frame} */
+    private static boolean usesHostFrame(org.objectweb.asm.tree.MethodNode handler) {
+        // MixinExtras' sugar carries CLASS retention, so it lands in the invisible list; both are read.
+        return declaresSugar(handler.visibleParameterAnnotations)
+                || declaresSugar(handler.invisibleParameterAnnotations);
+    }
+
+    private static boolean declaresSugar(java.util.List<AnnotationNode>[] parameters) {
+        if (parameters == null) {
+            return false;
+        }
+        for (var annotations : parameters) {
+            if (annotations == null) {
+                continue;
+            }
+            for (var annotation : annotations) {
+                if (HOST_FRAME_SUGAR.contains(annotation.desc)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@return the parameter types the handler's {@code argsOnly} sugar asks for, or null when it reads host locals}
+     *
+     * <p>{@code @Local(argsOnly = true)} binds a parameter of the host method, which a retarget can survive as
+     * long as the method it moves to still takes that type - the caller checks that before rewriting anything.
+     * Plain {@code @Local} (and {@code @Share}/{@code @Definition}) read the host's <em>locals</em>, whose names
+     * and liveness cannot be checked from here, so those still block a retarget.
+     */
+    private static java.util.List<String> argsOnlySugarTypes(org.objectweb.asm.tree.MethodNode handler) {
+        var parameterTypes = parametersFor(handler);
+        var needed = new java.util.ArrayList<String>();
+        var lists = new java.util.ArrayList<java.util.List<AnnotationNode>[]>();
+        if (handler.visibleParameterAnnotations != null) {
+            lists.add(handler.visibleParameterAnnotations);
+        }
+        if (handler.invisibleParameterAnnotations != null) {
+            lists.add(handler.invisibleParameterAnnotations);
+        }
+        for (var parameters : lists) {
+            for (var index = 0; index < parameters.length && index < parameterTypes.size(); index++) {
+                var annotations = parameters[index];
+                if (annotations == null) {
+                    continue;
+                }
+                for (var annotation : annotations) {
+                    if (!HOST_FRAME_SUGAR.contains(annotation.desc)) {
+                        continue;
+                    }
+                    if (!annotation.desc.endsWith("/Local;")
+                            || !Boolean.TRUE.equals(readBooleanValue(annotation, "argsOnly"))) {
+                        return null;
+                    }
+                    needed.add(parameterTypes.get(index));
+                }
+            }
+        }
+        return needed;
+    }
+
+    /**
+     * {@return every parameter of the method, in order, as descriptor fragments}
+     *
+     * <p>Primitives and arrays are kept: the result is indexed against the parameter-annotation arrays, and a
+     * list that skipped them would report a handler's sugar against the wrong parameter - which is how a
+     * handler reading a local slipped past the retarget check and took its whole class down.
+     */
+    private static java.util.List<String> parametersFor(org.objectweb.asm.tree.MethodNode handler) {
+        var out = new java.util.ArrayList<String>();
+        var descriptor = handler.desc;
+        var index = descriptor.indexOf('(') + 1;
+        while (index < descriptor.length() && descriptor.charAt(index) != ')') {
+            var start = index;
+            while (descriptor.charAt(index) == '[') {
+                index++;
+            }
+            if (descriptor.charAt(index) == 'L') {
+                var end = descriptor.indexOf(';', index);
+                out.add(descriptor.substring(start, end + 1));
+                index = end + 1;
+            } else {
+                out.add(descriptor.substring(start, index + 1));
+                index++;
+            }
+        }
+        return out;
+    }
+
+    private static Boolean readBooleanValue(AnnotationNode annotation, String name) {
+        if (annotation.values == null) {
+            return null;
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (name.equals(annotation.values.get(i)) && annotation.values.get(i + 1) instanceof Boolean value) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    /** Injection kinds whose handler binds the <em>wrapped call's</em> receiver and arguments, not the host's. */
+    private static final java.util.Set<String> CALL_SIDE_INJECTIONS = java.util.Set.of(
+            "Lorg/spongepowered/asm/mixin/injection/Redirect;",
+            "Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;",
+            "Lcom/llamalad7/mixinextras/injector/wrapwithcondition/WrapWithCondition;",
+            "Lcom/llamalad7/mixinextras/injector/modifyexpressionvalue/ModifyExpressionValue;",
+            "Lcom/llamalad7/mixinextras/injector/modifyreceiver/ModifyReceiver;",
+            "Lcom/llamalad7/mixinextras/injector/modifyargs/ModifyArgs;");
+
+    /**
+     * Mixin classes whose injections have to stay inert even when their anchor is found in a new home.
+     *
+     * <p>Fabric's registry sync installs itself from the tail of {@code Bootstrap.bootStrap}, and this platform's
+     * own registry sync does that job - reviving Fabric's half on top of it fails registry loading outright
+     * ("Failed to load registries due to errors"), which is how it was found. The anchor hunt cannot tell an
+     * injection that is dead by accident from one that is dead because the platform already covers it, so the
+     * classes in this position are named here and skipped.
+     */
+    private static final java.util.Set<String> KEEP_INERT_MIXINS = java.util.Set.of(
+            "net/fabricmc/fabric/mixin/registry/sync/BootstrapMixin");
+
+    /**
+     * {@return whether the method the retarget points at declares the handler's host parameters as a prefix}
+     *
+     * <p>{@code @Inject} and its siblings bind the host method's own parameters, in order; a handler may take a
+     * prefix of them. A destination that starts with different types would make Mixin bind the handler's
+     * parameters to the wrong arguments, which fails the whole class rather than that one injection.
+     */
+    private static boolean hostStartsWithHandlerParams(TargetResolver resolver, java.util.List<String> targets,
+            String host, java.util.List<String> declared) {
+        if (declared.isEmpty()) {
+            return true;
+        }
+        for (var target : targets) {
+            var bytes = resolver.apply(target);
+            if (bytes == null) {
+                continue;
+            }
+            ClassNode targetNode;
+            try {
+                targetNode = new ClassNode();
+                new ClassReader(bytes).accept(targetNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            } catch (Throwable t) {
+                continue;
+            }
+            for (var candidate : selectedMethods(targetNode, host)) {
+                var available = parametersFor(candidate);
+                if (available.size() >= declared.size()
+                        && available.subList(0, declared.size()).equals(declared)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@return the types a handler declares for the host method's own parameters}
+     *
+     * <p>{@code @Inject} and its siblings bind these to the method they inject into, so a retarget has to find
+     * a method that still takes exactly them - the wrapping injectors instead bind the wrapped call's receiver
+     * and arguments, which the anchor already pins down.
+     */
+    private static java.util.List<String> declaredHostParams(org.objectweb.asm.tree.MethodNode handler) {
+        var types = parametersFor(handler);
+        var out = new java.util.ArrayList<String>();
+        for (var index = 0; index < types.size(); index++) {
+            var type = types.get(index);
+            if (hasSugar(handler, index) || type.equals("Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;")
+                    || type.equals("Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;")
+                    || type.equals("Lcom/llamalad7/mixinextras/injector/wrapoperation/Operation;")) {
+                continue;
+            }
+            out.add(type);
+        }
+        return out;
+    }
+
+    /** {@return whether the handler's parameter at {@code index} carries MixinExtras sugar} */
+    private static boolean hasSugar(org.objectweb.asm.tree.MethodNode handler, int index) {
+        // Collected rather than List.of(...): a handler may carry only one of the two annotation lists, and
+        // List.of rejects a null element.
+        var lists = new java.util.ArrayList<java.util.List<AnnotationNode>[]>();
+        if (handler.visibleParameterAnnotations != null) {
+            lists.add(handler.visibleParameterAnnotations);
+        }
+        if (handler.invisibleParameterAnnotations != null) {
+            lists.add(handler.invisibleParameterAnnotations);
+        }
+        for (var parameters : lists) {
+            if (index >= parameters.length || parameters[index] == null) {
+                continue;
+            }
+            for (var annotation : parameters[index]) {
+                if (HOST_FRAME_SUGAR.contains(annotation.desc)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** {@return whether the retarget's destination still declares exactly the parameters the handler binds} */
+    private static boolean hostTakesHandlerParams(TargetResolver resolver, java.util.List<String> targets,
+            String host, java.util.List<String> declared) {
+        if (declared.isEmpty()) {
+            return true;
+        }
+        for (var target : targets) {
+            var bytes = resolver.apply(target);
+            if (bytes == null) {
+                continue;
+            }
+            ClassNode targetNode;
+            try {
+                targetNode = new ClassNode();
+                new ClassReader(bytes).accept(targetNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            } catch (Throwable t) {
+                continue;
+            }
+            for (var candidate : selectedMethods(targetNode, host)) {
+                if (parametersFor(candidate).equals(declared)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@return whether the method the retarget points at still takes the types the handler's sugar binds}
+     *
+     * <p>Mixed into a method that lost one of them, {@code @Local(argsOnly = true)} would resolve to nothing and
+     * Mixin would drop the whole class rather than that one injection - so a host that does not carry them all
+     * is not a host this pass may move the injection to.
+     */
+    private static boolean hostTakesSugarTypes(TargetResolver resolver, java.util.List<String> targets,
+            String host, java.util.List<String> sugarTypes) {
+        if (sugarTypes.isEmpty()) {
+            return true;
+        }
+        for (var target : targets) {
+            var bytes = resolver.apply(target);
+            if (bytes == null) {
+                continue;
+            }
+            ClassNode targetNode;
+            try {
+                targetNode = new ClassNode();
+                new ClassReader(bytes).accept(targetNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            } catch (Throwable t) {
+                continue;
+            }
+            for (var candidate : selectedMethods(targetNode, host)) {
+                var available = parametersFor(candidate);
+                if (available.containsAll(sugarTypes)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * {@return {@code name+descriptor} of the one method the selected method delegates to that carries the
+     * anchor, or null when the bytecode does not say so unambiguously}
+     */
+    private static String movedHost(TargetResolver resolver, java.util.List<String> targets,
+            String selector, String anchor) {
+        var wanted = parseAnchorMember(anchor);
+        if (wanted == null) {
+            return null;
+        }
+        for (var target : targets) {
+            var bytes = resolver.apply(target);
+            if (bytes == null) {
+                continue;
+            }
+            ClassNode targetNode;
+            try {
+                targetNode = new ClassNode();
+                new ClassReader(bytes).accept(targetNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            } catch (Throwable t) {
+                continue;
+            }
+            var selected = selectedMethods(targetNode, selector);
+            if (selected.isEmpty()) {
+                continue;
+            }
+            var carriers = new java.util.ArrayList<org.objectweb.asm.tree.MethodNode>();
+            for (var candidate : targetNode.methods) {
+                if (carriesAnchor(candidate, wanted)) {
+                    carriers.add(candidate);
+                }
+            }
+            if (carriers.isEmpty() || carriers.size() > 1) {
+                continue;
+            }
+            var host = carriers.get(0);
+            // The selected method has to hand off to it: a wrapper calling its worker, or a short overload
+            // calling the long one. A shared member that merely lives elsewhere is not a move.
+            for (var method : selected) {
+                if (callsMethod(method, host.name, host.desc)) {
+                    return host.name + host.desc;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** {@return the target class's methods the selector names, ignoring any owner prefix and omitted return type} */
+    private static java.util.List<org.objectweb.asm.tree.MethodNode> selectedMethods(ClassNode targetNode,
+            String selector) {
+        var spec = selector;
+        if (spec.startsWith("L") && spec.indexOf(';') > 0) {
+            spec = spec.substring(spec.indexOf(';') + 1);
+        }
+        var open = spec.indexOf('(');
+        var name = open < 0 ? spec : spec.substring(0, open);
+        var desc = open < 0 ? null : spec.substring(open);
+        var out = new java.util.ArrayList<org.objectweb.asm.tree.MethodNode>();
+        for (var method : targetNode.methods) {
+            if (!method.name.equals(name)) {
+                continue;
+            }
+            if (desc != null && !method.desc.startsWith(desc.substring(0, desc.indexOf(')') + 1))) {
+                continue;
+            }
+            out.add(method);
+        }
+        return out;
+    }
+
+    /** A parsed {@code @At} target: the member it names, with the parts the annotation spelled out. */
+    private record AnchorMember(String owner, String name, String desc) {
+    }
+
+    private static AnchorMember parseAnchorMember(String target) {
+        String owner = null;
+        String name;
+        String desc = null;
+        if (target.startsWith("L") && target.indexOf(';') > 0) {
+            var semi = target.indexOf(';');
+            owner = target.substring(1, semi);
+            var rest = target.substring(semi + 1);
+            var open = rest.indexOf('(');
+            var colon = rest.indexOf(':');
+            if (open >= 0) {
+                name = rest.substring(0, open);
+                desc = rest.substring(open);
+            } else if (colon >= 0) {
+                name = rest.substring(0, colon);
+                desc = rest.substring(colon + 1);
+            } else {
+                name = rest;
+            }
+        } else if (target.contains("(")) {
+            var open = target.indexOf('(');
+            name = target.substring(0, open);
+            desc = target.substring(open);
+        } else {
+            name = target;
+        }
+        return name.isEmpty() ? null : new AnchorMember(owner, name, desc);
+    }
+
+    /** {@return whether the method's instructions call or read the anchored member} */
+    private static boolean carriesAnchor(org.objectweb.asm.tree.MethodNode method, AnchorMember wanted) {
+        if (method.instructions == null) {
+            return false;
+        }
+        for (var instruction : method.instructions) {
+            if (instruction instanceof org.objectweb.asm.tree.MethodInsnNode call) {
+                if (call.name.equals(wanted.name()) && (wanted.owner() == null || call.owner.equals(wanted.owner()))
+                        && (wanted.desc() == null || call.desc.equals(wanted.desc()))) {
+                    return true;
+                }
+            } else if (instruction instanceof org.objectweb.asm.tree.FieldInsnNode field) {
+                if (field.name.equals(wanted.name()) && (wanted.owner() == null || field.owner.equals(wanted.owner()))) {
+                    return true;
+                }
+            } else if (instruction instanceof org.objectweb.asm.tree.TypeInsnNode type
+                    && type.getOpcode() == org.objectweb.asm.Opcodes.NEW) {
+                if (wanted.owner() != null && type.desc.equals("L" + wanted.owner() + ";")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** {@return whether the method calls {@code owner.name+desc} on anything} */
+    private static boolean callsMethod(org.objectweb.asm.tree.MethodNode method, String name, String desc) {
+        if (method.instructions == null) {
+            return false;
+        }
+        for (var instruction : method.instructions) {
+            if (instruction instanceof org.objectweb.asm.tree.MethodInsnNode call
+                    && call.name.equals(name) && call.desc.equals(desc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static java.util.List<AnnotationNode> allAnnotationsOf(org.objectweb.asm.tree.MethodNode method) {        var all = new java.util.ArrayList<AnnotationNode>();
         if (method.visibleAnnotations != null) {
             all.addAll(method.visibleAnnotations);
         }
@@ -3658,8 +4218,7 @@ public final class MixinJarPatcher {
                 var anvilInjectionsRetargeted = retargetInjectionMethods(versionMoved, entry.getName());
                 if (anvilInjectionsRetargeted != null) {
                     versionMoved = anvilInjectionsRetargeted;
-                    patched.put(entry.getName(), versionMoved);
-                }
+                    patched.put(entry.getName(), versionMoved);                }
                 var damageHookRetargeted = retargetItemStackDamageHook(versionMoved, entry.getName());
                 if (damageHookRetargeted != null) {
                     versionMoved = damageHookRetargeted;
@@ -3668,6 +4227,13 @@ public final class MixinJarPatcher {
                 var chunkRemovalRetargeted = retargetLevelChunkBlockEntityRemoval(versionMoved, entry.getName());
                 if (chunkRemovalRetargeted != null) {
                     versionMoved = chunkRemovalRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                // Last of the retargets: it reads the anchors the passes above may have rewritten, and it works
+                // out where an anchor went from the two classes rather than from a list.
+                var movedAnchorsRetargeted = retargetMovedAnchors(versionMoved, entry.getName(), resolver);
+                if (movedAnchorsRetargeted != null) {
+                    versionMoved = movedAnchorsRetargeted;
                     patched.put(entry.getName(), versionMoved);
                 }
                 var behaviourLookupGuarded = initialiseCreateBehavioursOnLookup(versionMoved, entry.getName());

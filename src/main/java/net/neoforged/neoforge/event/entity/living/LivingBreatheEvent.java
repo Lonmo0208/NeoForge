@@ -14,7 +14,7 @@ import net.neoforged.neoforge.common.NeoForge;
 /**
  * LivingBreatheEvent is fired whenever a living entity ticks.<br>
  * <br>
- * This event is fired via {@link CommonHooks#onLivingBreathe(LivingEntity, ServerLevel, int, int)}.<br>
+ * This event is fired via {@link CommonHooks#onLivingBreathe(LivingEntity, ServerLevel, int, int, boolean)}.<br>
  * <br>
  * This event is not {@link ICancellableEvent}.<br>
  * <br>

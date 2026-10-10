@@ -314,6 +314,7 @@ public final class BridgeSelfCheck {
 
             schematicProgressProbe(instance);
             schematicUploadDriver(instance);
+            createFeatureProbe();
 
             if (!canarySent && ticksInWorld == 20) {
                 canarySent = true;
@@ -514,6 +515,338 @@ public final class BridgeSelfCheck {
     }
 
     private static int schematicProbeHeartbeat;
+
+    /** Guards {@link #createFeatureProbe} so its one-shot report runs once per launch. */
+    private static boolean createProbeRan;
+
+    /**
+     * Reports, once the world is up, whether Create's fan processing actually works - by running it.
+     *
+     * <p>Why: a type list that looks right proves nothing about the feature. Three separate layers have
+     * to line up for "a fan blowing through water washes items": the fluid tag that makes water a fan
+     * catalyst (data shipped in the mod jar), the recipe property set the fan consults before it accepts
+     * an item (Create adds it through a {@code @WrapOperation} on the vanilla recipe manager's
+     * {@code finalizeRecipeLoading}), and the recipe lookup that produces the washed stack. So this
+     * drives the same calls the air current makes - {@code FanProcessingType.getAt} at the catalyst
+     * block, {@code SplashingType.canProcess}, then {@code FanProcessing.applyProcessing} on a real item
+     * entity once per tick until the stack converts - and prints what each one answered.
+     *
+     * <p>Runs on the server thread with the world loaded. Enabled with
+     * {@code -Dneofobric.createProbe=true}; silent otherwise.
+     */
+    static void createFeatureProbe() {
+        if (!Boolean.getBoolean("neofobric.createProbe") || createProbeRan) {
+            return;
+        }
+        try {
+            var minecraft = Class.forName("net.minecraft.client.Minecraft", false, gameLoader)
+                    .getMethod("getInstance").invoke(null);
+            var server = member(minecraft, "singleplayerServer");
+            if (server == null) {
+                server = invoke(minecraft, "getSingleplayerServer");
+            }
+            if (server == null) {
+                return; // No world yet - try again on a later tick.
+            }
+            createProbeRan = true;
+            // Everything that reads a level, a recipe manager or an entity belongs on the server thread.
+            var serverThread = server;
+            invoke(serverThread, "execute", (Runnable) () -> runCreateFeatureProbe(serverThread));
+        } catch (Throwable t) {
+            createProbeRan = true;
+            LOGGER.warn("[NeoFobric] create probe failed", t);
+        }
+    }
+
+    /**
+     * {@return the recipe manager's recipes, picked by return type rather than by name}
+     *
+     * <p>Fabric API's recipe-sync module adds an {@code @Accessor} on the recipe manager's own map, and that
+     * generates a second {@code getRecipes()} returning {@code RecipeMap} beside the vanilla one returning a
+     * {@code Collection}. They differ only in return type, so a lookup by name and argument count finds either
+     * depending on the order {@code getMethods()} happens to use - which is what made this probe answer
+     * "no recipes at all" in one run and "11089 recipes" in the next. Both shapes are reported, and the
+     * collection is preferred.
+     */
+    private static Object recipesOf(Object recipeManager) throws ReflectiveOperationException {
+        var shapes = new java.util.ArrayList<String>();
+        Object collection = null;
+        Object map = null;
+        for (var method : recipeManager.getClass().getMethods()) {
+            if (method.getParameterCount() != 0 || !method.getName().equals("getRecipes")) {
+                continue;
+            }
+            shapes.add(method.getReturnType().getSimpleName());
+            var value = method.invoke(recipeManager);
+            if (value == null) {
+                continue;
+            }
+            if (java.util.Collection.class.isAssignableFrom(method.getReturnType())) {
+                collection = value;
+            } else {
+                map = value;
+            }
+        }
+        LOGGER.info("[NeoFobric] create probe: getRecipes is answered by {} method(s) returning {}",
+                shapes.size(), shapes);
+        if (collection != null) {
+            return collection;
+        }
+        return map == null ? null : invoke(map, "values");
+    }
+
+    /** The probe body; runs on the server thread once a world exists. */
+    private static void runCreateFeatureProbe(Object server) {
+        try {
+            LOGGER.info("[NeoFobric] create probe: \"fan blows through water and washes the item\" - running it");
+
+            // The registry state: the type list is what the fan iterates, and it is rebuilt from a
+            // registry the Fabric entrypoints fill.
+            var registries = Class.forName("com.zurrtum.create.api.registry.CreateRegistries", false, gameLoader);
+            LOGGER.info("[NeoFobric] create probe: FAN_PROCESSING_TYPE holds {}",
+                    invoke(registries.getField("FAN_PROCESSING_TYPE").get(null), "keySet"));
+
+            var typeRegistry = Class.forName(
+                    "com.zurrtum.create.content.kinetics.fan.processing.FanProcessingTypeRegistry", false, gameLoader);
+            LOGGER.info("[NeoFobric] create probe: the rebuilt fan list has {} entry/entries",
+                    size(typeRegistry.getField("SORTED_TYPES_VIEW").get(null)));
+
+            var armTypes = Class.forName(
+                    "com.zurrtum.create.content.kinetics.mechanicalArm.ArmInteractionPointType", false, gameLoader);
+            LOGGER.info("[NeoFobric] create probe: the rebuilt arm list has {} entry/entries",
+                    size(armTypes.getField("SORTED_TYPES_VIEW").get(null)));
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] create probe: registry report failed", t);
+        }
+
+        try {
+            var level = invoke(server, "overworld");
+
+            // What the recipe manager actually holds, per Create recipe type.
+            var recipes = recipesOf(invoke(server, "getRecipeManager"));
+            var counts = new java.util.TreeMap<String, Integer>();
+            LOGGER.info("[NeoFobric] create probe: the recipe manager answered with {} holding {} entr(ies)",
+                    recipes == null ? "null" : recipes.getClass().getName(), size(recipes));
+            if (recipes instanceof Iterable<?> iterable) {
+                // Recipe types mostly do not override toString, so the registry's own id is what identifies
+                // them - "create:splashing" and friends.
+                var recipeTypes = Class.forName("net.minecraft.core.registries.BuiltInRegistries", false, gameLoader)
+                        .getField("RECIPE_TYPE").get(null);
+                for (var recipe : iterable) {
+                    var type = invoke(invoke(recipe, "value"), "getType");
+                    var key = invoke(recipeTypes, "getKey", type);
+                    counts.merge(key == null ? String.valueOf(invoke(type, "toString")) : key.toString(),
+                            1, Integer::sum);
+                }
+            }
+            // Logged whole and unfiltered: a filtered report is what let the previous version of this probe
+            // look like it had not run at all when its key set simply did not match the filter.
+            LOGGER.info("[NeoFobric] create probe: recipe types by count {}", counts);
+            if (counts.isEmpty()) {
+                LOGGER.warn("[NeoFobric] create probe: the recipe manager reported no recipes at all");
+            }
+
+            // The catalyst: water has to carry the tag Create gives its splashing catalyst, or no fan
+            // in front of water will ever pick the washing type. The vanilla water tag is checked next to
+            // it, so a miss can be told apart from "no fluid tags resolved at all".
+            var fluidTags = Class.forName("com.zurrtum.create.AllFluidTags", false, gameLoader);
+            var splashTag = fluidTags.getField("FAN_PROCESSING_CATALYSTS_SPLASHING").get(null);
+            var water = Class.forName("net.minecraft.world.level.material.Fluids", false, gameLoader)
+                    .getField("WATER").get(null);
+            var waterState = invoke(water, "defaultFluidState");
+            LOGGER.info("[NeoFobric] create probe: water carries the splashing catalyst tag = {} (vanilla water tag = {})",
+                    carries(waterState, splashTag),
+                    carries(waterState, Class.forName("net.minecraft.tags.FluidTags", false, gameLoader)
+                            .getField("WATER").get(null)));
+
+            // What a fan in front of a water block would pick, resolved the way the fan resolves it. Real
+            // water near the player is preferred; in a world that has none the probe places a source block
+            // itself (this only ever runs in the throwaway world the probe is pointed at).
+            var splashing = Class.forName(
+                            "com.zurrtum.create.content.kinetics.fan.processing.AllFanProcessingTypes",
+                            false,
+                            gameLoader)
+                    .getField("SPLASHING").get(null);
+            var fanType = Class.forName(
+                    "com.zurrtum.create.content.kinetics.fan.processing.FanProcessingType", false, gameLoader);
+            var waterPos = waterNear(server, level, splashTag);
+            if (waterPos == null) {
+                waterPos = placeWater(server, level);
+                LOGGER.info("[NeoFobric] create probe: no water near the player - placed a source block at {}", waterPos);
+            }
+            if (waterPos == null) {
+                LOGGER.info("[NeoFobric] create probe: could not get hold of a water block - skipped the type lookup");
+            } else {
+                var resolved = invoke(fanType, "getAt", level, waterPos);
+                if (resolved == splashing) {
+                    LOGGER.info("[NeoFobric] create probe: a fan drawing from {} processes with the SPLASHING type - "
+                            + "the catalyst resolved to the washing type", waterPos);
+                } else if (resolved == null) {
+                    LOGGER.warn("[NeoFobric] create probe: a fan drawing from {} found no processing type at all",
+                            waterPos);
+                } else {
+                    LOGGER.warn("[NeoFobric] create probe: a fan drawing from {} picked {} instead of the splashing type",
+                            waterPos, invoke(resolved, "getClass"));
+                }
+            }
+
+            // The wash itself, on a real item entity, through the same calls the air current makes.
+            var stack = itemStack("minecraft:black_concrete_powder");
+            if (stack == null) {
+                LOGGER.warn("[NeoFobric] create probe: minecraft:black_concrete_powder is not registered");
+                return;
+            }
+            LOGGER.info("[NeoFobric] create probe: canProcess(black_concrete_powder) = {}",
+                    invoke(splashing, "canProcess", stack, level));
+            LOGGER.info("[NeoFobric] create probe: process(black_concrete_powder) = {}",
+                    invoke(splashing, "process", stack, level));
+
+            var fanProcessing = Class.forName(
+                    "com.zurrtum.create.content.kinetics.fan.processing.FanProcessing", false, gameLoader);
+            var entity = newItemEntity(server, level, stack);
+            var processed = false;
+            var tick = 0;
+            while (tick < 400 && !processed) {
+                processed = Boolean.TRUE.equals(invoke(fanProcessing, "applyProcessing", entity, splashing));
+                tick++;
+            }
+            LOGGER.info("[NeoFobric] create probe: the fan's per-tick call washed it into {} after {} tick(s)",
+                    invoke(entity, "getItem"), tick);
+            LOGGER.info("[NeoFobric] create probe: done");
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] create probe: fan processing failed", t);
+        }
+    }
+
+    /** {@return a position near the first player whose fluid carries {@code tag}, or null} */
+    private static Object waterNear(Object server, Object level, Object tag) {
+        try {
+            var players = invoke(invoke(server, "getPlayerList"), "getPlayers");
+            if (!(players instanceof java.util.List<?> list) || list.isEmpty()) {
+                return null;
+            }
+            var pos = invoke(list.get(0), "blockPosition");
+            var posClass = Class.forName("net.minecraft.core.BlockPos", false, gameLoader);
+            var constructor = posClass.getConstructor(int.class, int.class, int.class);
+            var x = (int) invoke(pos, "getX");
+            var y = (int) invoke(pos, "getY");
+            var z = (int) invoke(pos, "getZ");
+            for (var dy = -4; dy <= 2; dy++) {
+                for (var dx = -12; dx <= 12; dx++) {
+                    for (var dz = -12; dz <= 12; dz++) {
+                        var candidate = constructor.newInstance(x + dx, y + dy, z + dz);
+                        var fluid = invoke(level, "getFluidState", candidate);
+                        if (carries(fluid, tag)) {
+                            return candidate;
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] create probe: water search failed", t);
+        }
+        return null;
+    }
+
+    /**
+     * {@return whether {@code state} carries the tag {@code tag}}
+     *
+     * <p>Called by exact parameter type on purpose. {@code TypedInstance} declares {@code is(TagKey)},
+     * {@code is(HolderSet)}, {@code is(T)} and {@code is(Holder)}, and the erased {@code is(Object)} accepts
+     * a TagKey argument as well - so the untyped lookup picked whichever overload {@code getMethods()}
+     * happened to list first and answered "false" by comparing the fluid against the tag key itself.
+     */
+    private static boolean carries(Object state, Object tag) throws ReflectiveOperationException {
+        return Boolean.TRUE.equals(invokeExact(state, "is",
+                new Class<?>[] {Class.forName("net.minecraft.tags.TagKey", false, gameLoader)}, tag));
+    }
+
+    /** Calls a method by its exact parameter types, for names that erasure collapses into one overload. */
+    private static Object invokeExact(Object owner, String name, Class<?>[] types, Object... args)
+            throws ReflectiveOperationException {
+        var method = owner.getClass().getMethod(name, types);
+        method.setAccessible(true);
+        return method.invoke(owner, args);
+    }
+
+    /** {@return where a water source block was placed beside the first player, or null} */
+    private static Object placeWater(Object server, Object level) {
+        try {
+            var players = invoke(invoke(server, "getPlayerList"), "getPlayers");
+            if (!(players instanceof java.util.List<?> list) || list.isEmpty()) {
+                LOGGER.info("[NeoFobric] create probe: no players on the server yet - no water placed");
+                return null;
+            }
+            var pos = invoke(list.get(0), "blockPosition");
+            var constructor = Class.forName("net.minecraft.core.BlockPos", false, gameLoader)
+                    .getConstructor(int.class, int.class, int.class);
+            var x = (int) invoke(pos, "getX");
+            var y = (int) invoke(pos, "getY");
+            var z = (int) invoke(pos, "getZ");
+            var water = invoke(
+                    Class.forName("net.minecraft.core.registries.BuiltInRegistries", false, gameLoader)
+                            .getField("BLOCK").get(null),
+                    "getValue",
+                    Class.forName("net.minecraft.resources.Identifier", false, gameLoader)
+                            .getMethod("parse", String.class).invoke(null, "minecraft:water"));
+            if (water == null) {
+                LOGGER.info("[NeoFobric] create probe: no block registered as minecraft:water");
+                return null;
+            }
+            var state = invoke(water, "defaultBlockState");
+            int[][] offsets = {{2, 0, 0}, {2, 1, 0}, {-2, 0, 0}, {0, 0, 2}, {0, 0, -2}, {0, 1, 0}, {2, -1, 0}};
+            for (var offset : offsets) {
+                var candidate = constructor.newInstance(x + offset[0], y + offset[1], z + offset[2]);
+                if (!Boolean.TRUE.equals(invoke(invoke(level, "getBlockState", candidate), "isAir"))) {
+                    continue;
+                }
+                invoke(level, "setBlockAndUpdate", candidate, state);
+                return candidate;
+            }
+            LOGGER.info("[NeoFobric] create probe: every spot beside the player at {} is occupied - no water placed",
+                    pos);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] create probe: placing water failed", t);
+        }
+        return null;
+    }
+
+    /** {@return a default instance of the item registered under {@code id}, or null} */    private static Object itemStack(String id) {
+        try {
+            var items = Class.forName("net.minecraft.core.registries.BuiltInRegistries", false, gameLoader)
+                    .getField("ITEM").get(null);
+            var identifier = Class.forName("net.minecraft.resources.Identifier", false, gameLoader)
+                    .getMethod("parse", String.class).invoke(null, id);
+            var item = invoke(items, "getValue", identifier);
+            return item == null ? null : invoke(item, "getDefaultInstance");
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] create probe: no item registered as {}", id, t);
+            return null;
+        }
+    }
+
+    /** {@return a detached item entity holding {@code stack}, standing at the first player} */
+    private static Object newItemEntity(Object server, Object level, Object stack)
+            throws ReflectiveOperationException {
+        var players = invoke(invoke(server, "getPlayerList"), "getPlayers");
+        var player = players instanceof java.util.List<?> list && !list.isEmpty() ? list.get(0) : null;
+        var x = player == null ? 0.0 : (double) invoke(player, "getX");
+        var y = player == null ? 64.0 : (double) invoke(player, "getY");
+        var z = player == null ? 0.0 : (double) invoke(player, "getZ");
+        var entityClass = Class.forName("net.minecraft.world.entity.item.ItemEntity", false, gameLoader);
+        var constructor = entityClass.getConstructor(
+                Class.forName("net.minecraft.world.level.Level", false, gameLoader),
+                double.class,
+                double.class,
+                double.class,
+                Class.forName("net.minecraft.world.item.ItemStack", false, gameLoader));
+        return constructor.newInstance(level, x, y, z, stack);
+    }
+
+    private static int size(Object collection) {
+        return collection instanceof java.util.Collection<?> c ? c.size() : -1;
+    }
+
     /** Set by the upload driver so the probe also reports the client-side block entity, screen or not. */
     private static volatile Object schematicProbePos;
 
@@ -749,7 +1082,11 @@ public final class BridgeSelfCheck {
         if (owner == null) {
             throw new NoSuchMethodException(name + " on null");
         }
-        for (var type = owner.getClass(); type != null; type = type.getSuperclass()) {
+        // A Class stands for its static methods - FanProcessingType.getAt and FanProcessing.applyProcessing
+        // are called that way.
+        var statics = owner instanceof Class<?>;
+        var start = statics ? (Class<?>) owner : owner.getClass();
+        for (var type = start; type != null; type = type.getSuperclass()) {
             for (var method : type.getMethods()) {
                 if (!method.getName().equals(name) || method.getParameterCount() != args.length) {
                     continue;
@@ -758,7 +1095,7 @@ public final class BridgeSelfCheck {
                     continue;
                 }
                 method.setAccessible(true);
-                return method.invoke(owner, args);
+                return method.invoke(statics ? null : owner, args);
             }
         }
         throw new NoSuchMethodException(name + "/" + args.length);

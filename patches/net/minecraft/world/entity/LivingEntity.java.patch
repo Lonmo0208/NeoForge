@@ -1,5 +1,13 @@
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -108,6 +_,7 @@
+ import net.minecraft.world.level.ClipContext;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.BedBlock;
++import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.Blocks;
+ import net.minecraft.world.level.block.HoneyBlock;
+ import net.minecraft.world.level.block.LadderBlock;
 @@ -211,7 +_,8 @@
      public static final float ELYTRA_VERTICAL_AIR_DRAG = 0.98F;
      public static final float BASE_SWIM_SPEED = 0.02F;
@@ -61,12 +69,18 @@
      public boolean canBreatheUnderwater() {
          return this.is(EntityTypeTags.CAN_BREATHE_UNDER_WATER);
      }
-@@ -435,6 +_,9 @@
+@@ -435,6 +_,15 @@
                  }
              }
  
 +            int airSupply = this.getAirSupply();
-+            net.neoforged.neoforge.common.CommonHooks.onLivingBreathe(this, level, airSupply - decreaseAirSupply(airSupply), increaseAirSupply(airSupply) - airSupply);
++            // The two vanilla checks are asked here, on purpose, and handed to the hook below. NeoForge's patch
++            // compiled away the vanilla body these live in, and with it the calls: a Fabric-era mixin that
++            // wraps one of them (breathing gear decides whether its wearer may breathe) had nothing left to
++            // wrap, so the hook answers for the platform and the wrapped answer for everyone else.
++            this.isEyeInFluid(FluidTags.LAVA);
++            boolean waterBreathing = MobEffectUtil.hasWaterBreathing(this);
++            net.neoforged.neoforge.common.CommonHooks.onLivingBreathe(this, level, airSupply - decreaseAirSupply(airSupply), increaseAirSupply(airSupply) - airSupply, waterBreathing);
 +            if (false) // Neo: Handled in CommonHooks#onLivingBreathe(LivingEntity, int, int)
              if (this.isEyeInFluid(FluidTags.WATER)
                  && !level.getBlockState(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
@@ -434,7 +448,7 @@
          boolean damaged = super.causeFallDamage(effectiveFallDistance, damageModifier, damageSource);
          int dmg = this.calculateFallDamage(effectiveFallDistance, damageModifier);
          if (dmg > 0) {
-@@ -1847,10 +_,10 @@
+@@ -1847,10 +_,18 @@
              int xx = Mth.floor(this.getX());
              int yy = Mth.floor(this.getY() - 0.2F);
              int zz = Mth.floor(this.getZ());
@@ -444,7 +458,15 @@
              if (!state.isAir()) {
 -                SoundType soundType = state.getSoundType();
 -                this.playSound(soundType.getFallSound(), soundType.getVolume() * 0.5F, soundType.getPitch() * 0.75F);
-+                state.playFallSound(this.level(), pos, this);
++                // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces it) and its
++                // answer is used only when no block overrides the context-aware one - see Block#rawSoundType.
++                SoundType vanillaSoundType = state.getSoundType();
++                SoundType rawSoundType = Block.rawSoundType(state.getBlock());
++                if (vanillaSoundType != rawSoundType && state.getSoundType(this.level(), pos, this) == rawSoundType) {
++                    this.playSound(vanillaSoundType.getFallSound(), vanillaSoundType.getVolume() * .5F, vanillaSoundType.getPitch() * .75F);
++                } else {
++                    state.playFallSound(this.level(), pos, this);
++                }
              }
          }
      }
@@ -585,15 +607,32 @@
      }
  
      protected void travelFlying(Vec3 input, float speed) {
-@@ -2451,7 +_,7 @@
+@@ -2449,11 +_,20 @@
+ 
+     private void travelInAir(Vec3 input) {
          BlockPos posBelow = this.getBlockPosBelowThatAffectsMyMovement();
-         float blockFriction = this.onGround()
-             ? computeModifiedFriction(
+-        float blockFriction = this.onGround()
+-            ? computeModifiedFriction(
 -                this.level().getBlockState(posBelow).getBlock().getFriction(), (float)this.getAttributeValue(Attributes.FRICTION_MODIFIER)
-+                this.level().getBlockState(posBelow).getFriction(this.level(), posBelow, this), (float)this.getAttributeValue(Attributes.FRICTION_MODIFIER)
-             )
-             : 1.0F;
+-            )
+-            : 1.0F;
++        // NeoFobric: the vanilla-shaped call comes first, because a Fabric-side mixin replaces that one; the
++        // platform's context-aware answer is taken only when the block overrides it, and the raw property tells
++        // the two apart. With neither kind of mod in play this is the value it always was.
++        float blockFriction = 1.0F;
++        if (this.onGround()) {
++            BlockState stateBelow = this.level().getBlockState(posBelow);
++            Block blockBelow = stateBelow.getBlock();
++            float vanillaFriction = blockBelow.getFriction();
++            float contextFriction = stateBelow.getFriction(this.level(), posBelow, this);
++            blockFriction = computeModifiedFriction(
++                contextFriction != Block.rawFriction(blockBelow) ? contextFriction : vanillaFriction,
++                (float)this.getAttributeValue(Attributes.FRICTION_MODIFIER)
++            );
++        }
          Vec3 movement = this.handleRelativeFrictionAndCalculateMovement(input, blockFriction);
+         double movementY = movement.y;
+         MobEffectInstance levitationEffect = this.getEffect(MobEffects.LEVITATION);
 @@ -2487,10 +_,13 @@
          boolean isFalling = this.getDeltaMovement().y <= 0.0;
          double oldY = this.getY();
@@ -626,15 +665,28 @@
              this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.04F, 0.0));
          }
      }
-@@ -2689,7 +_,7 @@
+@@ -2689,8 +_,19 @@
              double xd = Mth.clamp(delta.x, -0.15F, 0.15F);
              double zd = Mth.clamp(delta.z, -0.15F, 0.15F);
              double yd = Math.max(delta.y, -0.15F);
 -            if (yd < 0.0 && !this.getInBlockState().is(Blocks.SCAFFOLDING) && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
-+            if (yd < 0.0D && !this.getInBlockState().isScaffolding(this) && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
-                 yd = 0.0;
+-                yd = 0.0;
++            if (yd < 0.0D && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
++                // NeoFobric: the vanilla-shaped check is asked first, because a Fabric-side mixin replaces that
++                // call; the platform's context-aware answer is taken when it was overridden, and Block
++                // #rawScaffolding tells the two apart. With neither kind of mod in play the value is the same.
++                BlockState climbingState = this.getInBlockState();
++                boolean rawScaffolding = Block.rawScaffolding(climbingState);
++                boolean platformScaffolding = climbingState.isScaffolding(this);
++                boolean scaffolding = platformScaffolding != rawScaffolding
++                    ? platformScaffolding
++                    : climbingState.is(Blocks.SCAFFOLDING);
++                if (!scaffolding) {
++                    yd = 0.0;
++                }
              }
  
+             delta = new Vec3(xd, yd, zd);
 @@ -2936,6 +_,7 @@
              ItemStack previous = lastEquipmentItems.get(slot);
              ItemStack current = this.getItemBySlot(slot);

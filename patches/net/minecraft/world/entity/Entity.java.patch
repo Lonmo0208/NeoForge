@@ -71,12 +71,22 @@
          double restitution = this.isSuppressingBounce() ? 0.0 : this.getEntityBounciness();
          Vec3 currentMovement = this.getDeltaMovement();
          Vec3 movementAfterBounce = currentMovement;
-@@ -818,7 +_,7 @@
+@@ -817,8 +_,17 @@
+         boolean bounced = restitution > 0.0 && (xCollision || zCollision);
          if (this.verticalCollision) {
              if (this.verticalCollisionBelow) {
++                // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces that one) and
++                // the platform's state- and position-aware answer wins when it was overridden - Block
++                // #rawBounceRestitution is the value the platform's own chain would produce, which tells the two
++                // apart. With neither kind of mod in play this is the value it always was.
++                Block onBlock = effectState.getBlock();
++                double vanillaBounciness = this.getBlockBounciness(onBlock);
++                double contextBounciness = this.getBlockBounciness(effectPos, effectState);
++                double rawBounciness = Block.rawBounceRestitution(onBlock) * (this instanceof LivingEntity ? 1.0 : 0.8);
++                double blockBounciness = contextBounciness != rawBounciness ? contextBounciness : vanillaBounciness;
                  restitution = !(-currentMovement.y < this.getEffectiveGravity()) && !this.isSuppressingBounce() && !effectState.is(BlockTags.SUPPRESSES_BOUNCE)
 -                    ? Math.max(restitution, this.getBlockBounciness(effectState.getBlock()))
-+                    ? Math.max(restitution, this.getBlockBounciness(effectPos, effectState)) // NeoForge: Allow bounciness to be state and position specific
++                    ? Math.max(restitution, blockBounciness) // NeoForge: Allow bounciness to be state and position specific
                      : 0.0;
              }
  
@@ -100,7 +110,7 @@
                  ? getOnPos.atY(Mth.floor(this.position.y - offset))
                  : getOnPos;
          } else {
-@@ -1435,20 +_,33 @@
+@@ -1435,20 +_,43 @@
          return !aboveState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !aboveState.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? affectingPos : abovePos;
      }
  
@@ -137,7 +147,17 @@
 -        SoundType soundType = blockState.getSoundType();
 -        this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
 +        // Neo: Allow the blockstate full control over step sounds
-+        blockState.playStepSound(this.level(), pos, this, .15F, 1F);
++        // NeoFobric: the vanilla-shaped call is asked first, because a Fabric-side mixin replaces that one and
++        // nothing else would hear it. Its answer is used only when no block overrides the context-aware one -
++        // that override is the more specific answer, and Block#rawSoundType tells the two apart. With no such
++        // mixin in play the platform path below runs exactly as before.
++        SoundType vanillaSoundType = blockState.getSoundType();
++        SoundType rawSoundType = Block.rawSoundType(blockState.getBlock());
++        if (vanillaSoundType != rawSoundType && blockState.getSoundType(this.level(), pos, this) == rawSoundType) {
++            this.playSound(vanillaSoundType.getStepSound(), vanillaSoundType.getVolume() * .15F, vanillaSoundType.getPitch() * 1F);
++        } else {
++            blockState.playStepSound(this.level(), pos, this, .15F, 1F);
++        }
      }
  
      private boolean shouldPlayAmethystStepSound(BlockState affectingState) {

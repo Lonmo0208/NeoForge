@@ -84,14 +84,19 @@
                  this.destroyBlock(pos);
                  return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
              });
-@@ -254,8 +_,8 @@
+@@ -254,8 +_,13 @@
              }
  
              this.destroyProgress = this.destroyProgress + state.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), pos);
 -            if (this.destroyTicks % 4.0F == 0.0F) {
 -                SoundType soundType = state.getSoundType();
 +            if (this.destroyTicks % 4.0F == 0.0F && !net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions.of(state).playHitSound(state, this.minecraft.level, pos, direction, this.minecraft.getSoundManager())) {
-+                SoundType soundType = state.getSoundType(this.minecraft.level, pos, this.minecraft.player);
++                // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces it); its answer
++                // is used only when no block overrides the context-aware one - see Block#rawSoundType.
++                SoundType vanillaSoundType = state.getSoundType();
++                SoundType rawSoundType = Block.rawSoundType(state.getBlock());
++                SoundType contextSoundType = state.getSoundType(this.minecraft.level, pos, this.minecraft.player);
++                SoundType soundType = vanillaSoundType != rawSoundType && contextSoundType == rawSoundType ? vanillaSoundType : contextSoundType;
                  this.minecraft
                      .getSoundManager()
                      .play(

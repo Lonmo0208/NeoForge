@@ -116,6 +116,77 @@
      public float getBounceRestitution() {
          return this.bounceRestitution;
      }
+@@ -472,6 +_,70 @@
+         return this.friction;
+     }
+ 
++    /**
++     * {@return the friction this block was built with, read straight off the field}
++     *
++     * <p>NeoFobric: where an entity asks for the walk-off speed, a Fabric-side mixin replaces the <em>call</em>
++     * to {@link #getFriction()}, but it cannot reach this read. Those call sites ask the vanilla way (so such a
++     * mixin gets its say) and the platform's context-aware hook (so a NeoForge block does), and compare against
++     * this to tell which of the two answered. With neither in play the value is what it always was.
++     */
++    public static float rawFriction(Block block) {
++        return block.friction;
++    }
++
++    /**
++     * {@return the sound type this block was built with, read straight off the field}
++     *
++     * <p>NeoFobric: the same contract as {@link #rawFriction(Block)} - a Fabric-side mixin replaces calls to
++     * {@code BlockState#getSoundType()}, never this read, so the two answers can be told apart at the call
++     * sites that play a block's step, fall, break or hit sound.
++     */
++    public static SoundType rawSoundType(Block block) {
++        return block.soundType;
++    }
++
++    /**
++     * {@return the explosion resistance this block was built with, read straight off the field}
++     *
++     * <p>NeoFobric: the same contract as {@link #rawFriction(Block)} - a Fabric-side mixin replaces calls to
++     * {@code Block#getExplosionResistance()}, never this read.
++     */
++    public static float rawExplosionResistance(Block block) {
++        return block.explosionResistance;
++    }
++
++    /**
++     * {@return the bounce restitution this block was built with, read straight off the field}
++     *
++     * <p>NeoFobric: the same contract as {@link #rawFriction(Block)} - a Fabric-side mixin replaces calls to
++     * {@code Entity#getBlockBounciness(Block)}, never this read.
++     */
++    public static float rawBounceRestitution(Block block) {
++        return block.bounceRestitution;
++    }
++
++    /**
++     * {@return the light emission of {@code state}, asked where no Fabric-side mixin looks}
++     *
++     * <p>NeoFobric: the state's own field is private to the state class, so the reference lives here instead.
++     * Mixins wrap the {@code BlockState#getLightEmission()} calls they select, and this call site is not one of
++     * them, which is what makes it usable as the "what the platform would say without any mod" answer.
++     */
++    public static int rawLightEmission(BlockState state) {
++        return state.getLightEmission();
++    }
++
++    /**
++     * {@return whether {@code state} carries the vanilla scaffolding tag, asked where no Fabric-side mixin looks}
++     *
++     * <p>NeoFobric: the same contract as {@link #rawFriction(Block)} - mixins wrap the {@code BlockState#is}
++     * calls they select, and this call site is not one of them.
++     */
++    public static boolean rawScaffolding(BlockState state) {
++        return state.is(Blocks.SCAFFOLDING);
++    }
++
+     public float getSpeedFactor() {
+         return this.speedFactor;
+     }
 @@ -497,6 +_,7 @@
      public void handlePrecipitation(BlockState state, Level level, BlockPos pos, Biome.Precipitation precipitation) {
      }

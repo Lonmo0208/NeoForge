@@ -1,13 +1,18 @@
 --- a/net/minecraft/client/renderer/LevelEventHandler.java
 +++ b/net/minecraft/client/renderer/LevelEventHandler.java
-@@ -304,8 +_,8 @@
+@@ -304,8 +_,13 @@
                  break;
              case 2001:
                  BlockState blockState = Block.stateById(data);
 -                if (!blockState.isAir()) {
 -                    SoundType soundType = blockState.getSoundType();
 +                if (!blockState.isAir() && !net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions.of(blockState).playBreakSound(blockState, this.level, pos)) {
-+                    SoundType soundType = blockState.getSoundType(this.level, pos, null);
++                    // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces it); its
++                    // answer is used only when no block overrides the context-aware one - see Block#rawSoundType.
++                    SoundType vanillaSoundType = blockState.getSoundType();
++                    SoundType rawSoundType = Block.rawSoundType(blockState.getBlock());
++                    SoundType contextSoundType = blockState.getSoundType(this.level, pos, null);
++                    SoundType soundType = vanillaSoundType != rawSoundType && contextSoundType == rawSoundType ? vanillaSoundType : contextSoundType;
                      this.level
                          .playLocalSound(
                              pos, soundType.getBreakSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false

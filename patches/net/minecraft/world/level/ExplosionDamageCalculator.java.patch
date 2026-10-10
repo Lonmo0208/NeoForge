@@ -1,11 +1,31 @@
 --- a/net/minecraft/world/level/ExplosionDamageCalculator.java
 +++ b/net/minecraft/world/level/ExplosionDamageCalculator.java
-@@ -11,7 +_,7 @@
+@@ -3,15 +_,25 @@
+ import java.util.Optional;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.world.entity.Entity;
++import net.minecraft.world.level.block.Block;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.material.FluidState;
+ import net.minecraft.world.phys.Vec3;
+ 
+ public class ExplosionDamageCalculator {
      public Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter level, BlockPos pos, BlockState block, FluidState fluid) {
-         return block.isAir() && fluid.isEmpty()
-             ? Optional.empty()
+-        return block.isAir() && fluid.isEmpty()
+-            ? Optional.empty()
 -            : Optional.of(Math.max(block.getBlock().getExplosionResistance(), fluid.getExplosionResistance()));
-+            : Optional.of(Math.max(block.getExplosionResistance(level, pos, explosion), fluid.getExplosionResistance(level, pos, explosion)));
++        if (block.isAir() && fluid.isEmpty()) {
++            return Optional.empty();
++        }
++        // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces that one), and the
++        // platform's position-aware answer is used when the block overrides it - Block#rawExplosionResistance
++        // tells the two apart. With neither kind of mod in play this is the value it always was.
++        Block blockType = block.getBlock();
++        float vanillaResistance = blockType.getExplosionResistance();
++        float contextResistance = block.getExplosionResistance(level, pos, explosion);
++        return Optional.of(Math.max(
++            contextResistance != Block.rawExplosionResistance(blockType) ? contextResistance : vanillaResistance,
++            fluid.getExplosionResistance(level, pos, explosion)));
      }
  
      public boolean shouldBlockExplode(Explosion explosion, BlockGetter level, BlockPos pos, BlockState state, float power) {

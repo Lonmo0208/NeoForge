@@ -30,7 +30,7 @@
                      this.tesselateAmbientOcclusion(output, x + (float)offset.x, y + (float)offset.y, z + (float)offset.z, this.parts, level, blockState, pos);
                  } else {
                      this.tesselateFlat(output, x + (float)offset.x, y + (float)offset.y, z + (float)offset.z, this.parts, level, blockState, pos);
-@@ -93,10 +_,22 @@
+@@ -93,10 +_,27 @@
      private void tesselateAmbientOcclusion(
          BlockQuadOutput output, float x, float y, float z, List<BlockStateModelPart> parts, BlockAndTintGetter level, BlockState state, BlockPos pos
      ) {
@@ -44,7 +44,12 @@
 +                case TRUE -> true;
 +                case DEFAULT -> {
 +                    if (lightEmission == -1) {
-+                        lightEmission = state.getLightEmission(level, pos);
++                        // NeoFobric: the vanilla-shaped call is asked first (a Fabric-side mixin replaces that
++                        // one), and the platform's position-aware answer is used when the block overrides it -
++                        // Block#rawLightEmission tells the two apart.
++                        int vanillaEmission = state.getLightEmission();
++                        int contextEmission = state.getLightEmission(level, pos);
++                        lightEmission = contextEmission != Block.rawLightEmission(state) ? contextEmission : vanillaEmission;
 +                    }
 +                    yield lightEmission == 0;
 +                }

@@ -63,6 +63,10 @@ build
 !/tools/*.ps1
 !/tools/*.sh
 !/tools/mc-api-diff
+!/tools/mixin-anchor-verify
 
 # NeoFobric: the diff tool writes its report here
 /tools/mc-api-diff/report.txt
+
+# NeoFobric: the verifier compiles itself here
+/tools/mixin-anchor-verify/.build/

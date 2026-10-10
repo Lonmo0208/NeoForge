@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/item/ItemEntity.java
 +++ b/net/minecraft/world/entity/item/ItemEntity.java
+@@ -28,6 +_,8 @@
+ import net.minecraft.world.item.ItemStack;
+ import net.minecraft.world.level.Explosion;
+ import net.minecraft.world.level.Level;
++import net.minecraft.world.level.block.Block;
++import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.gameevent.GameEvent;
+ import net.minecraft.world.level.gamerules.GameRules;
+ import net.minecraft.world.level.portal.TeleportTransition;
 @@ -52,6 +_,10 @@
      private @Nullable EntityReference<Entity> thrower;
      private @Nullable UUID target;
@@ -46,13 +55,19 @@
              if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > 0.1F) {
                  this.setUnderwaterMovement();
              } else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > 0.1F) {
-@@ -144,7 +_,8 @@
+@@ -144,7 +_,14 @@
                  float airDrag = this.getAirDrag();
                  float groundFriction = airDrag;
                  if (this.onGround()) {
 -                    groundFriction *= this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction();
 +                    BlockPos groundPos = getBlockPosBelowThatAffectsMyMovement();
-+                    groundFriction *= this.level().getBlockState(groundPos).getFriction(level(), groundPos, this);
++                    // NeoFobric: vanilla-shaped call first (a Fabric-side mixin replaces it), the platform's
++                    // context-aware answer only when the block overrides it - see Block#rawFriction.
++                    BlockState groundState = this.level().getBlockState(groundPos);
++                    Block groundBlock = groundState.getBlock();
++                    float vanillaFriction = groundBlock.getFriction();
++                    float contextFriction = groundState.getFriction(level(), groundPos, this);
++                    groundFriction *= contextFriction != Block.rawFriction(groundBlock) ? contextFriction : vanillaFriction;
                  }
  
                  this.setDeltaMovement(this.getDeltaMovement().multiply(groundFriction, airDrag, groundFriction));

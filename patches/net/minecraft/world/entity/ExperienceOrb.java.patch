@@ -1,5 +1,14 @@
 --- a/net/minecraft/world/entity/ExperienceOrb.java
 +++ b/net/minecraft/world/entity/ExperienceOrb.java
+@@ -18,6 +_,8 @@
+ import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+ import net.minecraft.world.item.enchantment.EnchantmentHelper;
+ import net.minecraft.world.level.Level;
++import net.minecraft.world.level.block.Block;
++import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.entity.EntityTypeTest;
+ import net.minecraft.world.level.storage.ValueInput;
+ import net.minecraft.world.level.storage.ValueOutput;
 @@ -106,7 +_,7 @@
          } else {
              super.tick();
@@ -9,13 +18,19 @@
                  this.setUnderwaterMovement();
              } else if (!colliding) {
                  this.applyGravity();
-@@ -136,7 +_,8 @@
+@@ -136,7 +_,14 @@
              this.applyEffectsFromBlocks();
              float friction = this.getAirDrag();
              if (this.onGround()) {
 -                friction *= this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction();
 +                BlockPos pos = this.getBlockPosBelowThatAffectsMyMovement();
-+                friction *= this.level().getBlockState(pos).getFriction(this.level(), pos, this);
++                // NeoFobric: vanilla-shaped call first (a Fabric-side mixin replaces it), the platform's
++                // context-aware answer only when the block overrides it - see Block#rawFriction.
++                BlockState groundState = this.level().getBlockState(pos);
++                Block groundBlock = groundState.getBlock();
++                float vanillaFriction = groundBlock.getFriction();
++                float contextFriction = groundState.getFriction(this.level(), pos, this);
++                friction *= contextFriction != Block.rawFriction(groundBlock) ? contextFriction : vanillaFriction;
              }
  
              this.setDeltaMovement(this.getDeltaMovement().scale(friction));

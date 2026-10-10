@@ -103,12 +103,34 @@ public final class FabricBridge {
             // to the game classes as FML transforms them.
             try {
                 FabricLoaderImpl.INSTANCE.loadClassTweakers();
+                registerEnumExtensionTargets();
             } catch (Throwable t) {
                 LOGGER.error("[NeoFobric] Failed to read the Fabric access wideners; mods that widen game classes will misbehave", t);
             }
 
             LOGGER.info("[NeoFobric] Fabric Loader {} started with {} Fabric mod(s) in {} ms",
                     FabricLoaderImpl.VERSION, FabricLoaderImpl.INSTANCE.getAllMods().size(), System.currentTimeMillis() - start);
+        }
+    }
+
+    /**
+     * Marks every game enum a Fabric mod extends, so the platform's {@code IExtensibleEnum} marker can step
+     * aside before Mixin prepares any config.
+     *
+     * <p>The class tweakers are the authoritative list - a mod that extends an enum declares it there, and the
+     * loader has just read them all into Fabric's own instance, which is available long before any game class is
+     * transformed. Collecting the same set from the mixins instead (which the jar patcher also does, as a
+     * fallback) races with FML's own class loading: an enum whose extension is noticed only after something has
+     * already defined the class keeps its marker, FML refuses the extension, and the mod's enum constants are
+     * missing (WilderWild's grass colour modifier then fails to parse out of its own biome JSON).
+     */
+    private static void registerEnumExtensionTargets() {
+        var extensions = FabricLoaderImpl.INSTANCE.getClassTweaker().getAllEnumExtensions();
+        for (var target : extensions.keySet()) {
+            net.neoforged.fabricbridge.transform.NeoFobricClassTweakerProcessor.registerEnumExtensionTarget(target);
+        }
+        if (!extensions.isEmpty()) {
+            LOGGER.info("[NeoFobric] {} game enum(s) are extended by Fabric mods, from the class tweakers", extensions.size());
         }
     }
 

@@ -17,7 +17,7 @@ import net.neoforged.neoforge.common.NeoForge;
 /**
  * LivingDrownEvent is fired whenever a living entity can't breathe and its air supply is less than or equal to zero.
  * <p>
- * This event is fired via {@link CommonHooks#onLivingBreathe(LivingEntity, ServerLevel, int, int)}.
+ * This event is fired via {@link CommonHooks#onLivingBreathe(LivingEntity, ServerLevel, int, int, boolean)}.
  * <p>
  * This event is {@link ICancellableEvent}. Effects of cancellation are noted in {@link #setCanceled(boolean)}.
  * <p>

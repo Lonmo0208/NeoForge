@@ -296,6 +296,17 @@ neoDev {
             if (project.hasProperty('neofobric.componentProbe')) {
                 systemProperty("neofobric.componentProbe", "true")
             }
+            // Prints the state of Create's own registries and of the type lists it rebuilds from them at the
+            // tail of BuiltInRegistries.freeze() (see BridgeSelfCheck#createFeatureProbe). A list built before
+            // the fabric entrypoints registered the types is empty, and a fan then processes nothing.
+            if (project.hasProperty('neofobric.createProbe')) {
+                systemProperty("neofobric.createProbe", "true")
+            }
+            // Reproduces a schematic upload without touching the GUI, and reports both sides
+            // (see BridgeSelfCheck#schematicUploadDriver). Needs a schematic in run/<name>/schematics.
+            if (project.hasProperty('neofobric.schematicTest')) {
+                systemProperty("neofobric.schematicTest", "true")
+            }
             // Checks the Fabric <-> NeoForge transfer bridge against a real journalled handler and logs
             // PASS/FAIL (see FabricTransferHooks#selfTest).
             if (project.hasProperty('neofobric.transferProbe')) {

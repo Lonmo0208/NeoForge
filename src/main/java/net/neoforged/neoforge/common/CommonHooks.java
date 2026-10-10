@@ -1508,15 +1508,18 @@ public class CommonHooks {
      * @param entity           The living entity which is currently updated
      * @param consumeAirAmount The amount of air to consume when the entity is unable to breathe
      * @param refillAirAmount  The amount of air to refill when the entity is able to breathe
+     * @param waterBreathing   The vanilla water-breathing answer, asked at the call site so that anything
+     *                         wrapping {@code MobEffectUtil#hasWaterBreathing} there still gets its say
      * @implNote This method needs to closely replicate the logic found right after the call site in {@link LivingEntity#baseTick()} as it overrides it.
      */
-    public static void onLivingBreathe(LivingEntity entity, ServerLevel level, int consumeAirAmount, int refillAirAmount) {
+    public static void onLivingBreathe(LivingEntity entity, ServerLevel level, int consumeAirAmount, int refillAirAmount,
+            boolean waterBreathing) {
         // Check things that vanilla considers to be air - these will cause the air supply to be increased.
         EntityFluidInteraction fluidInteraction = entity.getFluidInteraction();
         boolean isAir = !fluidInteraction.isEyeInFluidMatching(entity, (_, type, _) -> !type.isAir()) || entity.level().getBlockState(BlockPos.containing(entity.getX(), entity.getEyeY(), entity.getZ())).is(Blocks.BUBBLE_COLUMN);
         boolean canBreathe = isAir;
         // The following effects cause the entity to not drown, but do not cause the air supply to be increased.
-        if (!isAir && (MobEffectUtil.hasWaterBreathing(entity) || !fluidInteraction.isEyeInFluidMatching(entity, (e, type, _) -> e.canDrownInFluidType(type)) || (entity instanceof Player player && player.getAbilities().invulnerable))) {
+        if (!isAir && (waterBreathing || !fluidInteraction.isEyeInFluidMatching(entity, (e, type, _) -> e.canDrownInFluidType(type)) || (entity instanceof Player player && player.getAbilities().invulnerable))) {
             canBreathe = true;
             refillAirAmount = 0;
         }

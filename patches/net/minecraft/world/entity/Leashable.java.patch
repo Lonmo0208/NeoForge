@@ -1,12 +1,27 @@
 --- a/net/minecraft/world/entity/Leashable.java
 +++ b/net/minecraft/world/entity/Leashable.java
-@@ -188,7 +_,8 @@
+@@ -18,6 +_,8 @@
+ import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
+ import net.minecraft.world.item.Items;
+ import net.minecraft.world.level.Level;
++import net.minecraft.world.level.block.Block;
++import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.gamerules.GameRules;
+ import net.minecraft.world.level.storage.ValueInput;
+ import net.minecraft.world.level.storage.ValueOutput;
+@@ -188,7 +_,14 @@
  
      static <E extends Entity & Leashable> float angularFriction(E entity) {
          if (entity.onGround()) {
 -            return entity.level().getBlockState(entity.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.91F;
 +            var groundPos = entity.getBlockPosBelowThatAffectsMyMovement();
-+            return entity.level().getBlockState(groundPos).getFriction(entity.level(), groundPos, entity) * 0.91F;
++            // NeoFobric: vanilla-shaped call first (a Fabric-side mixin replaces it), the platform's
++            // context-aware answer only when the block overrides it - see Block#rawFriction.
++            BlockState groundState = entity.level().getBlockState(groundPos);
++            Block groundBlock = groundState.getBlock();
++            float vanillaFriction = groundBlock.getFriction();
++            float contextFriction = groundState.getFriction(entity.level(), groundPos, entity);
++            return (contextFriction != Block.rawFriction(groundBlock) ? contextFriction : vanillaFriction) * 0.91F;
          } else {
              return entity.isInLiquid() ? 0.8F : 0.91F;
          }
