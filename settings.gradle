@@ -11,6 +11,31 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
+// NeoFobric: the bridge is compiled against the fabric-loader checkout at <root>/fabric-loader,
+// which is a submodule pinned to one upstream commit (.gitmodules, see the git link on GitHub).
+// Fetch it on demand, so that a plain `git clone` - and a CI job, which checks out without
+// submodules - builds without an extra manual step. When the fetch is not possible (no git, no
+// network, a source archive) the build stops later with the one command to run instead.
+// providers.exec rather than a raw ProcessBuilder: only this one is allowed at configuration time
+// under the configuration cache.
+final fabricLoaderMarker = new File(settingsDir, 'fabric-loader/src/main/java/net/fabricmc/loader/impl/FabricLoaderImpl.java')
+if (!fabricLoaderMarker.isFile() && new File(settingsDir, '.gitmodules').isFile()) {
+    System.out.println('NeoFobric: fabric-loader/ is not checked out, fetching the pinned submodule (this may take a minute)')
+    try {
+        final fetch = providers.exec {
+            commandLine 'git', 'submodule', 'update', '--init', '--recursive', 'fabric-loader'
+            workingDir = settingsDir
+            ignoreExitValue = true
+        }
+        final exitValue = fetch.result.get().exitValue
+        if (exitValue != 0) {
+            System.out.println("NeoFobric: git submodule update exited with ${exitValue}; run `git submodule update --init fabric-loader` by hand to see why")
+        }
+    } catch (Exception e) {
+        System.out.println("NeoFobric: could not run git submodule update (${e.message}); run `git submodule update --init fabric-loader` by hand")
+    }
+}
+
 // This makes the version available to buildSrc
 gradle.ext.moddevgradle_plugin_version = moddevgradle_plugin_version
 gradle.ext.minecraft_version = minecraft_version

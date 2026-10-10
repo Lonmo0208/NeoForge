@@ -7,28 +7,35 @@ base {
 }
 
 // Fobric: the fabric-loader fat jar, built from the local checkout by the root build (or resolved
-// from Maven when fobric.fabricLoader.local=false). Declared as a file collection outside the
-// dependencies block so the task dependency (builtBy) survives.
-def fabricLoaderJar = files(rootProject.fabricLoaderFatJar) {
-    builtBy rootProject.tasks.named('buildFabricLoader')
-}
-
-configurations {
-    // Exposes the fabric-loader fat jar as a consumable variant carrying fabric-loader's own Maven
-    // coordinates (net.fabricmc:fabric-loader). NeoForge's userdev tooling requires every library
-    // to be resolvable to Maven identifiers, which bare file dependencies cannot provide.
-    fabricLoaderBundle {
-        canBeConsumed = true
-        canBeResolved = false
-    }
-}
-
-configurations.fabricLoaderBundle {
-    outgoing {
-        capability("net.fabricmc:fabric-loader:${rootProject.fabricLoaderVersion}")
-        artifact(rootProject.fabricLoaderFatJar) {
-            builtBy rootProject.tasks.named('buildFabricLoader')
+// from Maven when neofobric.fabricLoader.local=false). Declared as a file collection outside the
+// dependencies block so the task dependency (builtBy) survives. Neither the file nor the variant
+// below exists in Maven mode, where fabric-loader already is a resolvable Maven artifact.
+if (rootProject.fabricLoaderLocalMode) {
+    configurations {
+        // Exposes the fabric-loader fat jar as a consumable variant carrying fabric-loader's own Maven
+        // coordinates (net.fabricmc:fabric-loader). NeoForge's userdev tooling requires every library
+        // to be resolvable to Maven identifiers, which bare file dependencies cannot provide.
+        fabricLoaderBundle {
+            canBeConsumed = true
+            canBeResolved = false
         }
+    }
+
+    configurations.fabricLoaderBundle {
+        outgoing {
+            // The released coordinate, not the fat jar's own "+local" name: this is what the dev
+            // runtime resolves fabric-loader by, and what the installer's profile references.
+            capability("net.fabricmc:fabric-loader:${rootProject.fabricLoaderBaseVersion}")
+            artifact(rootProject.fabricLoaderFatJar) {
+                builtBy rootProject.tasks.named('buildFabricLoader')
+            }
+        }
+    }
+
+    dependencies {
+        compileOnly(files(rootProject.fabricLoaderFatJar) {
+            builtBy rootProject.tasks.named('buildFabricLoader')
+        })
     }
 }
 
@@ -57,7 +64,9 @@ dependencies {
     }
 
     if (rootProject.fabricLoaderLocalMode) {
-        compileOnly(fabricLoaderJar)
+        compileOnly(files(rootProject.fabricLoaderFatJar) {
+            builtBy rootProject.tasks.named('buildFabricLoader')
+        })
     } else {
         compileOnly("net.fabricmc:fabric-loader:${rootProject.fabricLoaderBaseVersion}")
     }

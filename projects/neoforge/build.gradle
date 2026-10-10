@@ -209,10 +209,10 @@ tasks.named('installerJar', Zip).configure {
     from(configurations.fabricbridgeEmbedded) {
         into "maven/net/neoforged/fabricbridge/${project.version}/"
     }
-    // The fat jar's classifier is not part of its Maven coordinates, so embed it under the
+    // The artifact's classifier is not part of its Maven coordinates, so embed it under the
     // classifier-less name the library entries in install_profile.json/version.json reference.
     // Capture values at configuration time: the closures run at execution time.
-    final fabricLoaderVersion = rootProject.fabricLoaderVersion
+    final fabricLoaderVersion = rootProject.fabricLoaderEmbedVersion
     from(configurations.fabricLoaderEmbedded) {
         into "maven/net/fabricmc/fabric-loader/${fabricLoaderVersion}/"
         rename { String fileName -> "fabric-loader-${fabricLoaderVersion}.jar" }

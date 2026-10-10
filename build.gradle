@@ -32,32 +32,44 @@ if (fixedProjectVersion == null) {
 System.out.println("NeoForge version ${project.version}")
 
 // ** NeoFobric: Fabric Loader bridge **
-// Integrates the fabric-loader runtime (checked out at <root>/fabric-loader, treated as read-only)
-// into NeoForge. By default the fabric-loader fat jar is built from the local checkout by running
-// the checkout's own Gradle wrapper in a subprocess, so pulling upstream changes into that
-// checkout is picked up on the next build. Set `-Pneofobric.fabricLoader.local=false` to resolve a
-// published fabric-loader from Maven instead.
+// Integrates the fabric-loader runtime into NeoForge. The build compiles the bridge against the
+// checkout at <root>/fabric-loader (the submodule, treated as read-only) and builds its fat jar with
+// the checkout's own wrapper in a subprocess, so pulling upstream changes into that checkout is
+// picked up on the next build. settings.gradle fetches the submodule for a plain clone; the pinned
+// version in gradle.properties is only the fallback for when the checkout is missing, which is also
+// what -Pneofobric.fabricLoader.local=false resolves from Maven instead.
 ext.fabricLoaderDir = rootProject.file('fabric-loader')
 ext.fabricLoaderLocalMode = providers.gradleProperty("neofobric.fabricLoader.local").map { it.toBoolean() }.orElse("true").get()
+ext.fabricLoaderPinnedVersion = providers.gradleProperty("neofobric.fabricLoader.version").orElse("").get()
 
 final fabricLoaderVersionMatcher = ext.fabricLoaderDir.exists()
         ? (new File(ext.fabricLoaderDir, 'src/main/java/net/fabricmc/loader/impl/FabricLoaderImpl.java').text =~ /VERSION\s*=\s*"([^"]+)";/)
         : null
-if (fabricLoaderVersionMatcher == null || fabricLoaderVersionMatcher.count == 0) {
-    ext.fabricLoaderVersion = null
-    ext.fabricLoaderBaseVersion = null
-} else {
+final boolean fabricLoaderCheckout = fabricLoaderVersionMatcher != null && fabricLoaderVersionMatcher.count > 0
+if (fabricLoaderCheckout) {
     ext.fabricLoaderBaseVersion = fabricLoaderVersionMatcher[0][1]
-    // Mirrors how the fabric-loader build derives its own version outside of CI.
+    // Mirrors how the fabric-loader build derives its own version outside of CI. Only the locally
+    // built fat jar carries that suffix; the Maven coordinate stays the released one.
     ext.fabricLoaderVersion = ext.fabricLoaderBaseVersion + (System.getenv("GITHUB_ACTIONS") ? "" : "+local")
+} else {
+    ext.fabricLoaderBaseVersion = ext.fabricLoaderPinnedVersion
+    ext.fabricLoaderVersion = ext.fabricLoaderPinnedVersion
 }
-ext.fabricLoaderFatJar = ext.fabricLoaderVersion == null
+if (ext.fabricLoaderBaseVersion == null || ext.fabricLoaderBaseVersion.isEmpty()) {
+    throw new IllegalStateException("Cannot determine the fabric-loader version: there is no checkout at ${ext.fabricLoaderDir} and neofobric.fabricLoader.version is not set in gradle.properties.")
+}
+// The version fabric-loader is published and embedded under. The locally built fat jar carries a
+// "+local" file name, but every coordinate it is referenced by (the dev runtime's capability, the
+// installer's embedded maven directory, install_profile.json) stays the released one, so nothing a
+// distribution ships depends on a version that exists nowhere else.
+ext.fabricLoaderEmbedVersion = ext.fabricLoaderBaseVersion
+ext.fabricLoaderFatJar = !fabricLoaderCheckout
         ? null
         : new File(ext.fabricLoaderDir, "build/libs/fabric-loader-${ext.fabricLoaderVersion}-fat.jar")
 
 if (ext.fabricLoaderLocalMode) {
-    if (ext.fabricLoaderVersion == null) {
-        throw new IllegalStateException("neofobric.fabricLoader.local is enabled, but no fabric-loader checkout was found at ${ext.fabricLoaderDir} (or its version could not be determined).")
+    if (!fabricLoaderCheckout) {
+        throw new IllegalStateException("neofobric.fabricLoader.local is enabled, but there is no fabric-loader checkout at ${ext.fabricLoaderDir} - run `git submodule update --init fabric-loader`, or drop that property to resolve fabric-loader from Maven instead.")
     }
     // Capture the values at configuration time; the task configuration closure delegates to the task.
     final fabricLoaderCheckoutDir = ext.fabricLoaderDir
@@ -75,7 +87,11 @@ if (ext.fabricLoaderLocalMode) {
         inputs.files new File(fabricLoaderCheckoutDir, 'build.gradle'), new File(fabricLoaderCheckoutDir, 'settings.gradle'),
                 new File(fabricLoaderCheckoutDir, 'gradle.properties')
         outputs.file fabricLoaderJarFile
-        outputs.upToDateWhen { fabricLoaderJarFile.isFile() }
+        // No upToDateWhen here: a predicate that only looks at the output file would keep a jar built
+        // from older checkout sources and silently ignore the change, which is the one thing this task
+        // exists to pick up (measured: a pull that touched src/ still reported UP-TO-DATE). The declared
+        // inputs above are what decide, so a checkout that changed rebuilds and one that did not is
+        // reused.
     }
 }
 // =========================================================================================

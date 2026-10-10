@@ -46,8 +46,10 @@ build
 
 **/out/
 
-#NeoFobric: the fabric-loader checkout (upstream repo, cloned next to NeoForge) and its build outputs
-/fabric-loader/
+# NeoFobric: the fabric-loader checkout is a git submodule (see .gitmodules); it is only needed
+# for `-Pneofobric.fabricLoader.local=true`, the default Maven mode does not read it.
+# /fabric-loader/ is deliberately NOT ignored - the submodule link is what makes GitHub point at
+# the upstream repository instead of an empty directory.
 /仅供参考
 /fabric
 
@@ -74,3 +76,4 @@ build
 
 # NeoFobric: the call diff compiles itself here
 /tools/vanilla-call-diff/.build/
+.zcodeignore
