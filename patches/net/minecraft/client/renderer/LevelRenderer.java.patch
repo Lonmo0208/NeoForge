@@ -32,14 +32,35 @@
          PostChain entityOutlineChain = this.shaderManager.getPostChain(ENTITY_OUTLINE_POST_CHAIN_ID, LevelTargetBundle.OUTLINE_TARGETS);
          if (featureFrame.hasAnyOutline() && entityOutlineChain != null) {
              entityOutlineChain.addToFrame(frame, screenWidth, screenHeight, this.targets);
-@@ -225,11 +_,12 @@
-                 deltaPartialTick,
-                 this.levelRenderState.cloudColor,
-                 this.levelRenderState.cloudHeight,
+@@ -217,19 +_,24 @@
+ 
+         CloudStatus cloudStatus = this.optionsRenderState.cloudStatus;
+         if (cloudStatus != CloudStatus.OFF && ARGB.alpha(this.levelRenderState.cloudColor) > 0) {
+-            this.addCloudsPass(
+-                frame,
+-                cloudStatus,
+-                this.levelRenderState.cameraRenderState.pos,
+-                this.levelRenderState.gameTime,
+-                deltaPartialTick,
+-                this.levelRenderState.cloudColor,
+-                this.levelRenderState.cloudHeight,
 -                this.optionsRenderState.cloudRange
-+                this.optionsRenderState.cloudRange,
-+                modelViewMatrix
-             );
+-            );
++            NEOFOBRIC_CLOUD_MATRIX.set(modelViewMatrix);
++            try {
++                this.addCloudsPass(
++                    frame,
++                    cloudStatus,
++                    this.levelRenderState.cameraRenderState.pos,
++                    this.levelRenderState.gameTime,
++                    deltaPartialTick,
++                    this.levelRenderState.cloudColor,
++                    this.levelRenderState.cloudHeight,
++                    this.optionsRenderState.cloudRange
++                );
++            } finally {
++                NEOFOBRIC_CLOUD_MATRIX.remove();
++            }
          }
  
 -        this.addWeatherPass(frame, terrainFog);
@@ -134,7 +155,7 @@
                  profiler.pop();
                  if (translucentTarget != null) {
                      translucentTarget.get().copyDepthFrom(mainTarget.get());
-@@ -432,16 +_,25 @@
+@@ -432,16 +_,26 @@
  
                  profiler.push("renderTranslucentFeatures");
                  featureFrame.executeTranslucent();
@@ -155,17 +176,27 @@
          );
      }
  
-+    /// @deprecated Neo: use [#addCloudsPass(FrameGraphBuilder, CloudStatus, Vec3, long, float, int, float, int, Matrix4fc)] instead
-+    @Deprecated
++    /// The vanilla-shaped overload, kept on the live path: a Fabric-side mixin wraps this call to move the
++    /// clouds with the wind, and the platform pass it relays to needs the matrix {@link #render} was handed
++    /// (see {@link #NEOFOBRIC_CLOUD_MATRIX}).
      private void addCloudsPass(
          FrameGraphBuilder frame,
          CloudStatus cloudStatus,
-@@ -452,6 +_,21 @@
+@@ -452,6 +_,30 @@
          float cloudHeight,
          int cloudRange
      ) {
-+        addCloudsPass(frame, cloudStatus, cameraPosition, gameTime, partialTicks, cloudColor, cloudHeight, cloudRange, RenderSystem.getModelViewStack());
++        Matrix4fc carried = NEOFOBRIC_CLOUD_MATRIX.get();
++        addCloudsPass(frame, cloudStatus, cameraPosition, gameTime, partialTicks, cloudColor, cloudHeight, cloudRange,
++                carried != null ? carried : RenderSystem.getModelViewStack());
 +    }
++
++    /**
++     * Carries the matrix {@link #render} received into the vanilla-shaped {@code addCloudsPass}: that
++     * signature is the one a Fabric-side mixin wraps, and the platform's own pass wants the matrix the
++     * wrapped call cannot pass.
++     */
++    private static final ThreadLocal<Matrix4fc> NEOFOBRIC_CLOUD_MATRIX = new ThreadLocal<>();
 +
 +    // Neo: Add modelViewMatrix for use in our event
 +    private void addCloudsPass(

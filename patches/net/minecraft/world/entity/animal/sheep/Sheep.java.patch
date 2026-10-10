@@ -1,11 +1,21 @@
 --- a/net/minecraft/world/entity/animal/sheep/Sheep.java
 +++ b/net/minecraft/world/entity/animal/sheep/Sheep.java
-@@ -145,7 +_,7 @@
+@@ -145,7 +_,18 @@
      @Override
      public InteractionResult mobInteract(Player player, InteractionHand hand) {
          ItemStack itemStack = player.getItemInHand(hand);
--        if (itemStack.is(Items.SHEARS)) {
-+        if (false && itemStack.is(Items.SHEARS)) { // Neo: Shear logic is handled by IShearable
++        // NeoFobric: the vanilla shears question goes back where vanilla asked it - a Fabric-side mixin
++        // replaces this call to make its own shears count, and NeoForge moved the shearing itself into
++        // ShearsItem#interactLivingEntity (the IShearable chain). That chain is asked first, so its hooks
++        // still run and the shear happens once; the vanilla action below is the fallback for the items
++        // the chain does not answer for.
+         if (itemStack.is(Items.SHEARS)) {
++            InteractionResult platform = itemStack.interactLivingEntity(player, this, hand);
++
++            if (platform.consumesAction()) {
++                return platform;
++            }
++
              if (this.level() instanceof ServerLevel level && this.readyForShearing()) {
                  this.shear(level, SoundSource.PLAYERS, itemStack);
                  this.gameEvent(GameEvent.SHEAR, player);

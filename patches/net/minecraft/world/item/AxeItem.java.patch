@@ -9,21 +9,48 @@
      protected static final Map<Block, Block> STRIPPABLES = new Builder<Block, Block>()
          .put(Blocks.OAK_WOOD, Blocks.STRIPPED_OAK_WOOD)
          .put(Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG)
-@@ -65,7 +_,7 @@
+@@ -56,6 +_,13 @@
+         super(properties.axe(material, attackDamageBaseline, attackSpeedBaseline));
+     }
+ 
++    /**
++     * Carries the interaction context into {@link #evaluateNewBlockState(Level, BlockPos, Player, BlockState)}:
++     * that signature is the one a Fabric-side mixin wraps, and the platform lookup it relays to needs the
++     * context the wrapped call cannot pass.
++     */
++    private static final ThreadLocal<UseOnContext> NEOFOBRIC_USE_CONTEXT = new ThreadLocal<>();
++
+     @Override
+     public InteractionResult useOn(UseOnContext context) {
+         Level level = context.getLevel();
+@@ -65,7 +_,15 @@
              return InteractionResult.PASS;
          }
  
 -        Optional<BlockState> newBlock = this.evaluateNewBlockState(level, pos, player, level.getBlockState(pos));
-+        Optional<BlockState> newBlock = this.evaluateNewBlockState(level, pos, player, level.getBlockState(pos), context);
++        // NeoFobric: the vanilla-shaped overload stays on the live path - a Fabric-side mixin wraps this call
++        // to run its own axe behaviour first, and the platform's tool-modified lookup is what it relays to.
++        Optional<BlockState> newBlock;
++        NEOFOBRIC_USE_CONTEXT.set(context);
++        try {
++            newBlock = this.evaluateNewBlockState(level, pos, player, level.getBlockState(pos));
++        } finally {
++            NEOFOBRIC_USE_CONTEXT.remove();
++        }
          if (newBlock.isEmpty()) {
              return InteractionResult.PASS;
          }
-@@ -91,19 +_,18 @@
+@@ -91,19 +_,24 @@
              && !player.isSecondaryUseActive();
      }
  
--    private Optional<BlockState> evaluateNewBlockState(Level level, BlockPos pos, @Nullable Player player, BlockState oldState) {
++    /** {@return the state an axe would turn {@code oldState} into} Relays the vanilla-shaped signature to the
++     * context-aware one; the context comes from {@link #NEOFOBRIC_USE_CONTEXT}. */
+     private Optional<BlockState> evaluateNewBlockState(Level level, BlockPos pos, @Nullable Player player, BlockState oldState) {
 -        Optional<BlockState> strippedBlock = this.getStripped(oldState);
++        return this.evaluateNewBlockState(level, pos, player, oldState, NEOFOBRIC_USE_CONTEXT.get());
++    }
++
 +    private Optional<BlockState> evaluateNewBlockState(Level level, BlockPos pos, @Nullable Player player, BlockState oldState, UseOnContext context) {
 +        Optional<BlockState> strippedBlock = Optional.ofNullable(oldState.getToolModifiedState(context, net.neoforged.neoforge.common.ItemAbilities.AXE_STRIP, false));
          if (strippedBlock.isPresent()) {

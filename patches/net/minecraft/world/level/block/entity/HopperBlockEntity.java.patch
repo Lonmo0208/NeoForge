@@ -42,13 +42,20 @@
  
      @Override
      public void setBlockState(BlockState blockState) {
-@@ -139,11 +_,13 @@
+@@ -139,11 +_,20 @@
      }
  
      private static boolean ejectItems(Level level, BlockPos blockPos, HopperBlockEntity self) {
 -        Container container = getAttachedContainer(level, blockPos, self);
 -        if (container == null) {
-+        var containerOrHandler = getContainerOrHandlerAt(level, blockPos.relative(self.facing), self.facing.getOpposite());
++        // NeoFobric: the vanilla-shaped lookup goes back on the live path - a Fabric-side mixin injects at
++        // that call to veto ejection (it captures the Container and cancels the method from there). Its
++        // answer is the Container the handler-aware lookup would find anyway, so it is reused; only a
++        // capability-only target still needs the second call.
++        Container attached = getAttachedContainer(level, blockPos, self);
++        var containerOrHandler = attached != null
++                ? new net.neoforged.neoforge.transfer.item.ContainerOrHandler(attached, null)
++                : getContainerOrHandlerAt(level, blockPos.relative(self.facing), self.facing.getOpposite());
 +        if (containerOrHandler.isEmpty()) {
              return false;
          }
@@ -67,13 +74,18 @@
      }
  
      private static int[] getSlots(Container container, Direction direction) {
-@@ -216,8 +_,9 @@
+@@ -216,8 +_,14 @@
      public static boolean suckInItems(Level level, Hopper hopper) {
          BlockPos blockPos = BlockPos.containing(hopper.getLevelX(), hopper.getLevelY() + 1.0, hopper.getLevelZ());
          BlockState blockState = level.getBlockState(blockPos);
 -        Container container = getSourceContainer(level, hopper, blockPos, blockState);
 -        if (container != null) {
-+        var containerOrHandler = getSourceContainerOrHandler(level, hopper, blockPos, blockState);
++        // NeoFobric: same as ejectItems - the vanilla-shaped lookup is asked first so a Fabric-side mixin's
++        // injection at that call still lands, and its answer is reused when it finds a Container.
++        Container source = getSourceContainer(level, hopper, blockPos, blockState);
++        var containerOrHandler = source != null
++                ? new net.neoforged.neoforge.transfer.item.ContainerOrHandler(source, null)
++                : getSourceContainerOrHandler(level, hopper, blockPos, blockState);
 +        if (containerOrHandler.container() != null) {
 +            Container container = containerOrHandler.container();
              Direction direction = Direction.DOWN;

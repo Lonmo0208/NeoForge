@@ -293,11 +293,13 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
     private static final Map<String, Set<String>> WIDEN_PRIVATE_MEMBERS = buildPinnedWidenMembers();
 
     /**
-     * The pinned entries must be <em>mutable</em> sets: {@code registerWidenedMembers} adds the scan's
-     * findings to them, and an immutable {@code Set.of} value made that add throw
-     * {@code UnsupportedOperationException} - an exception the jar patcher swallows at debug level, so
-     * every owner alphabetically after the first pinned class the scan hit was silently never
-     * registered (that is how GrassColor.pixels could be found by the scan yet still crash at runtime).
+     * The pinned entries start as plain sorted sets; the first {@code registerWidenedMembers} merge
+     * copies each one it touches into a {@link java.util.concurrent.ConcurrentSkipListSet}. Keeping
+     * them mutable (never {@code Set.of}) remains the rule for any future pin: an immutable value once
+     * made the merge throw {@code UnsupportedOperationException}, an exception the jar patcher
+     * swallowed at debug level, so every owner alphabetically after the first pinned class the scan hit
+     * was silently never registered (that is how GrassColor.pixels could be found by the scan yet
+     * still crash at runtime).
      */
     private static Map<String, Set<String>> buildPinnedWidenMembers() {
         var map = new java.util.concurrent.ConcurrentHashMap<String, Set<String>>();
@@ -311,19 +313,29 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
     }
 
     /**
-     * Adds members found by {@link MixinAccessScanner}. Called once while the game layer is built; the
-     * scan exists so startup does not have to be re-run for every individual access gap.
+     * Adds members found by {@link MixinAccessScanner}. Called while the game layer is built, once per
+     * Fabric mod jar - and those scan-and-merge calls run <em>in parallel</em>, so the per-owner sets
+     * this merges into have to be thread-safe. They started out as {@code TreeSet}s, and two jars whose
+     * scans reached the same owner corrupted one red-black tree between them: one worker died with a
+     * {@code NullPointerException} out of {@code TreeMap.rotateLeft} while the other spun forever inside
+     * {@code TreeSet.add} on the broken tree - the client hung in its patching phase, two cores pegged.
      */
     public static void registerWidenedMembers(Map<String, Set<String>> found) {
         found.forEach((owner, members) -> {
-            var existing = WIDEN_PRIVATE_MEMBERS.computeIfAbsent(owner, key -> new java.util.TreeSet<>());
-            if (!(existing instanceof java.util.TreeSet)) {
-                // Defensive: an owner pinned with an immutable set would make the add below throw
-                // UnsupportedOperation - replace it with a mutable copy of the same members.
-                var mutable = new java.util.TreeSet<>(existing);
-                WIDEN_PRIVATE_MEMBERS.replace(owner, existing, mutable);
-                existing = mutable;
-            }
+            // compute() is atomic per key, so exactly one thread builds the concurrent set for an
+            // owner and every later merge - and every reader above - sees that same instance. The add
+            // below is then safe, and iteration by the class transform is weakly consistent instead of
+            // throwing ConcurrentModificationException.
+            var existing = WIDEN_PRIVATE_MEMBERS.compute(owner, (key, current) -> {
+                if (current instanceof java.util.concurrent.ConcurrentSkipListSet) {
+                    return current;
+                }
+                var concurrent = new java.util.concurrent.ConcurrentSkipListSet<String>();
+                if (current != null) {
+                    concurrent.addAll(current);
+                }
+                return concurrent;
+            });
             for (var member : members) {
                 if (existing.add(member)) {
                     // Debug, not info: the scan widens every private member of every referenced

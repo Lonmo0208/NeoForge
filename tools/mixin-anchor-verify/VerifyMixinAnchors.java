@@ -27,7 +27,8 @@
  *   java -cp "out;$ASM;$ASMT" VerifyMixinAnchors <gameClassesDir>[;<more>] <modJarDir> [onlyFilter]
  *
  * Notes:
- *  - Nested jars are read too (fabric-api ships its modules inside META-INF/jars/).
+ *  - Nested jars are read too (fabric-api ships its modules inside META-INF/jars/), and for those the
+ *    patched copy from the run directory's processedMods is read - that is what the game loads.
  *  - @Overwrite is checked as well: it fails hard when its counterpart is gone.
  *  - A descriptor in a selector is honoured when written; without one, the injection must succeed in
  *    every overload Mixin would pick, and one that only succeeds in some is reported as DEAD-partial.
@@ -613,8 +614,19 @@ public class VerifyMixinAnchors {
                 name = target;
             }
         } else if (target.contains("(")) {
+            // Mixin's other spelling: "path/to/Class.member(desc)". The dot before the member is the split -
+            // taking the whole prefix as the member name left the owner null and made every such anchor miss
+            // (it reported Fabric's ModelBlockRenderer constructor hook as dead while the instruction sat in
+            // the method).
             var open = target.indexOf('(');
-            name = target.substring(0, open);
+            var head = target.substring(0, open);
+            var dot = head.lastIndexOf('.');
+            if (dot > 0) {
+                owner = head.substring(0, dot).replace('.', '/');
+                name = head.substring(dot + 1);
+            } else {
+                name = head;
+            }
             desc = target.substring(open);
         } else if (target.contains(".") && !target.contains("/")) {
             var dot = target.lastIndexOf('.');
@@ -624,6 +636,19 @@ public class VerifyMixinAnchors {
             name = target;
         }
         return new Anchor(value, owner, name, desc, ordinal, sliceFrom, sliceTo, unmodelled);
+    }
+
+    /**
+     * {@return whether the two owners name the same method through a supertype or a subtype}
+     *
+     * <p>A mixin may name the class a call is written against, or the one that declares the member - Create's
+     * fluid-interaction hook says {@code MutableBlockPos#getY()} while the call in the bytecode is emitted on
+     * {@code Vec3i}, which is where that method lives. Reading that as a miss made the verifier call a working
+     * injection dead.
+     */
+    static boolean upcastOrDowncastOf(String anchorOwner, String instructionOwner) {
+        return HIERARCHY.getOrDefault(anchorOwner, java.util.Set.of()).contains(instructionOwner)
+                || HIERARCHY.getOrDefault(instructionOwner, java.util.Set.of()).contains(anchorOwner);
     }
 
     /**
@@ -1015,7 +1040,8 @@ public class VerifyMixinAnchors {
                 if (!call.name.equals(anchor.name())) {
                     return false;
                 }
-                if (anchor.owner() != null && !call.owner.equals(anchor.owner())) {
+                if (anchor.owner() != null && !call.owner.equals(anchor.owner())
+                        && !upcastOrDowncastOf(anchor.owner(), call.owner)) {
                     return false;
                 }
                 return anchor.desc() == null || call.desc.equals(anchor.desc());
@@ -1036,7 +1062,11 @@ public class VerifyMixinAnchors {
                 if (!(instruction instanceof TypeInsnNode type) || type.getOpcode() != Opcodes.NEW) {
                     return false;
                 }
-                return anchor.owner() == null || type.desc.equals("L" + anchor.owner() + ";");
+                // A NEW instruction's desc is the internal type name, not an L...; descriptor - comparing it
+                // against a descriptor form never matched, which reported the one Fabric mixin wrapping a
+                // constructor as dead even though the instruction sits right there in the method.
+                return anchor.owner() == null || type.desc.equals(anchor.owner())
+                        || type.desc.equals("L" + anchor.owner() + ";");
             }
             default -> {
                 return false;
@@ -1053,6 +1083,49 @@ public class VerifyMixinAnchors {
     record ClassEntry(ClassNode node) {
     }
 
+    private static Map<String, Path> patchedNestedIndex;
+
+    /**
+     * {@return the patched copy of a nested jar, or null when only the shipped one exists}
+     *
+     * <p>The jar patcher extracts a jar's nested modules, patches them and adds the patched copies to the
+     * game's mod path, so that is what runs. Found by walking up from the outer jar to the run directory's
+     * own {@code .neofobric/processedMods}.
+     */
+    private static Path patchedNested(Path outerJar, String label) {
+        if (patchedNestedIndex == null) {
+            patchedNestedIndex = new java.util.HashMap<>();
+            var dir = outerJar.toAbsolutePath().getParent();
+            for (var hops = 0; dir != null && hops < 4; hops++, dir = dir.getParent()) {
+                var processed = dir.resolve(".neofobric").resolve("processedMods");
+                if (!Files.isDirectory(processed)) {
+                    continue;
+                }
+                try (var stream = Files.walk(processed)) {
+                    stream.filter(Files::isRegularFile)
+                            .filter(p -> p.getFileName().toString().endsWith(".neofobric-realigned.jar"))
+                            .forEach(p -> patchedNestedIndex.putIfAbsent(p.getFileName().toString(), p));
+                } catch (IOException ignored) {
+                    // no patched nest: fall back to the shipped copy
+                }
+                break;
+            }
+        }
+        var stem = label.endsWith(".jar") ? label.substring(0, label.length() - 4) : label;
+        var hash = stem.lastIndexOf('-');
+        if (hash > 0 && stem.length() - hash - 1 >= 8
+                && stem.substring(hash + 1).chars().allMatch(c -> Character.digit(c, 16) >= 0)) {
+            // The shipped name carries a content hash; the loader drops it when it extracts the module.
+            stem = stem.substring(0, hash);
+        }
+        for (var candidate : patchedNestedIndex.entrySet()) {
+            if (candidate.getKey().endsWith(".neofobric-realigned.jar") && candidate.getKey().startsWith(stem)) {
+                return candidate.getValue();
+            }
+        }
+        return null;
+    }
+
     static List<ClassEntry> readClasses(Path jar, List<Path> nestedOut) {
         var out = new ArrayList<ClassEntry>();
         try (var zf = new ZipFile(jar.toFile())) {
@@ -1065,9 +1138,17 @@ public class VerifyMixinAnchors {
                     // unreadable class: not this tool's problem
                 }
             }
-            // fabric-api hides its modules in nested jars, and those carry most of its mixins.
+            // fabric-api hides its modules in nested jars, and those carry most of its mixins. The copy the
+            // game actually loads is the one the jar patcher wrote out (processedMods/...), not the one
+            // shipped inside this jar - reading the shipped copy reported a retargeted mixin as dead.
             for (var entry : zf.stream().filter(e -> e.getName().endsWith(".jar")).toList()) {
                 var label = entry.getName().substring(entry.getName().lastIndexOf('/') + 1);
+                var patched = patchedNested(jar, label);
+                if (patched != null) {
+                    nestedOut.add(patched);
+                    out.addAll(readClasses(patched, new ArrayList<>()));
+                    continue;
+                }
                 var tmp = Files.createTempFile("nested-", "-" + label);
                 try (var in = zf.getInputStream(entry)) {
                     Files.copy(in, tmp, StandardCopyOption.REPLACE_EXISTING);

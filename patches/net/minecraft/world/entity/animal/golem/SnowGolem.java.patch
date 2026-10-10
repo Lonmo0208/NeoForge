@@ -9,12 +9,24 @@
                  return;
              }
  
-@@ -136,7 +_,7 @@
+@@ -136,11 +_,16 @@
      @Override
      protected InteractionResult mobInteract(Player player, InteractionHand hand) {
          ItemStack itemStack = player.getItemInHand(hand);
--        if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
-+        if (false && itemStack.is(Items.SHEARS) && this.readyForShearing()) { // Neo: Shear logic is handled by IShearable
-             if (this.level() instanceof ServerLevel level) {
-                 this.shear(level, SoundSource.PLAYERS, itemStack);
-                 this.gameEvent(GameEvent.SHEAR, player);
++        // NeoFobric: same shape as Sheep#mobInteract - the vanilla question returns, the platform's
++        // ShearsItem#interactLivingEntity chain is asked first (so its hooks run and the shear happens
++        // once), and the vanilla action is the fallback for the items that chain does not answer for.
+         if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
+-            if (this.level() instanceof ServerLevel level) {
+-                this.shear(level, SoundSource.PLAYERS, itemStack);
+-                this.gameEvent(GameEvent.SHEAR, player);
+-                itemStack.hurtAndBreak(1, player, hand.asEquipmentSlot());
++            if (!itemStack.interactLivingEntity(player, this, hand).consumesAction()) {
++                if (this.level() instanceof ServerLevel level) {
++                    this.shear(level, SoundSource.PLAYERS, itemStack);
++                    this.gameEvent(GameEvent.SHEAR, player);
++                    itemStack.hurtAndBreak(1, player, hand.asEquipmentSlot());
++                }
+             }
+ 
+             return InteractionResult.SUCCESS;
