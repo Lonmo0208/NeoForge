@@ -285,6 +285,204 @@ public final class FabricBridgeHooks {
     }
 
     /**
+     * Offers a pick-block result to Fabric's {@code PlayerPickItemEvents.BLOCK} and returns what should
+     * actually be picked. Called from {@code ServerGamePacketListenerImpl#handlePickItemFromBlock}, where the
+     * platform computes the vanilla stack and where Fabric's own injection cannot reach any more: NeoForge
+     * calls {@code BlockState#getCloneItemStack(BlockPos, LevelReader, boolean, Player)} rather than the
+     * three-argument form Fabric's handler wraps.
+     *
+     * <p>The contract is Fabric's own: a listener returning {@code null} or an empty stack means "keep the
+     * vanilla result", anything else replaces it (that is exactly what the injection this replaces did).
+     *
+     * @param includeDataForEvent the flag the packet carried, which is what Fabric passes on - the platform's
+     *                            own copy has already been narrowed by the player's infinite-materials mode
+     * @param vanilla             the stack the platform would have picked
+     */
+    public static Object fireFabricPickItemFromBlock(Object player, Object pos, Object state, boolean includeDataForEvent, Object vanilla) {
+        if (!bridgeActive()) {
+            return vanilla;
+        }
+        try {
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var events = Class.forName("net.fabricmc.fabric.api.event.player.PlayerPickItemEvents", false, gameLoader);
+            var event = Class.forName("net.fabricmc.fabric.api.event.Event", false, gameLoader);
+            var callback = Class.forName("net.fabricmc.fabric.api.event.player.PlayerPickItemEvents$PickItemFromBlock", false, gameLoader);
+            var pick = callback.getMethod("onPickItemFromBlock",
+                    Class.forName("net.minecraft.server.level.ServerPlayer", false, gameLoader),
+                    Class.forName("net.minecraft.core.BlockPos", false, gameLoader),
+                    Class.forName("net.minecraft.world.level.block.state.BlockState", false, gameLoader),
+                    boolean.class);
+            pick.setAccessible(true);
+            var invoker = event.getMethod("invoker").invoke(events.getField("BLOCK").get(null));
+            var result = pick.invoke(invoker, player, pos, state, includeDataForEvent);
+            if (result == null) {
+                return vanilla;
+            }
+            // This class compiles without Minecraft on its own classpath, so "empty means keep vanilla" is
+            // asked of the stack itself rather than spelled as an ItemStack call.
+            var stackClass = Class.forName("net.minecraft.world.item.ItemStack", false, gameLoader);
+            if (Boolean.TRUE.equals(stackClass.getMethod("isEmpty").invoke(result))) {
+                return vanilla;
+            }
+            return result;
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not fire Fabric's pick-block event", t);
+            return vanilla;
+        }
+    }
+
+    /**
+     * Asks a model for a material flag the way the renderer API does, and hands back the platform's own answer
+     * for every model that does not implement the Fabric interface.
+     *
+     * <p>The renderer API injects {@code FabricBlockStateModel} as a super-interface of
+     * {@code BlockStateModel} and declares a five-argument {@code hasMaterialFlag(level, pos, state, random, flag)}
+     * there, beside a {@code materialFlags(...)}. The platform's extraction and moving-block paths call their
+     * own four-argument form instead, so a Fabric model's override would never be consulted on those two paths;
+     * they ask here now. A model that does not override the five-argument method keeps the platform's answer,
+     * which is what the interface's default implementation would have produced anyway.
+     *
+     * @param vanilla the flag the platform's own lookup returned
+     */
+    public static boolean fabricMaterialFlag(Object model, int flag, Object level, Object pos, Object state, Object random, boolean vanilla) {
+        if (!bridgeActive() || model == null) {
+            return vanilla;
+        }
+        try {
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var modelInterface = Class.forName("net.fabricmc.fabric.api.client.renderer.v1.model.FabricBlockStateModel", false, gameLoader);
+            if (!modelInterface.isInstance(model)) {
+                return vanilla;
+            }
+            var method = model.getClass().getMethod("hasMaterialFlag",
+                    Class.forName("net.minecraft.client.renderer.block.BlockAndTintGetter", false, gameLoader),
+                    Class.forName("net.minecraft.core.BlockPos", false, gameLoader),
+                    Class.forName("net.minecraft.world.level.block.state.BlockState", false, gameLoader),
+                    Class.forName("net.minecraft.util.RandomSource", false, gameLoader),
+                    int.class);
+            if (method.getDeclaringClass() == modelInterface) {
+                // Not overridden: the interface's default is the platform's own answer.
+                return vanilla;
+            }
+            return (boolean) method.invoke(model, level, pos, state, random, flag);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not ask {} for its material flag", model, t);
+            return vanilla;
+        }
+    }
+
+    /**
+     * Picks the GUI texture for a sign edit screen the way Fabric does, and returns it for the screen to use.
+     *
+     * <p>A wood type whose name carries a namespace is one a mod registered, and Fabric reads that sign's
+     * texture from the mod's own namespace ({@code mymod:textures/gui/signs/custom.png}) rather than from
+     * {@code minecraft:}. The platform builds the identifier from {@code Identifier.parse} plus
+     * {@code withPrefix} now, so the injection Fabric used could not match any more; the screens ask here
+     * instead, and the vanilla identifier they computed themselves is what comes back for every vanilla wood
+     * type - this only ever replaces it.
+     *
+     * @param prefix  the folder the screen uses, e.g. {@code textures/gui/signs/}
+     * @param vanilla the identifier the platform would have used
+     */
+    public static Object fabricSignScreenTexture(Object woodType, String prefix, Object vanilla) {
+        if (!bridgeActive() || woodType == null) {
+            return vanilla;
+        }
+        try {
+            var name = (String) woodType.getClass().getMethod("name").invoke(woodType);
+            var colon = name == null ? -1 : name.indexOf(':');
+            if (colon < 0) {
+                return vanilla;
+            }
+            var gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            var identifier = Class.forName("net.minecraft.resources.Identifier", false, gameLoader);
+            var path = name.substring(colon + 1);
+            if (path.endsWith(".png")) {
+                path = path.substring(0, path.length() - ".png".length());
+            }
+            return identifier.getMethod("parse", String.class).invoke(null,
+                    name.substring(0, colon) + ":" + prefix + path + ".png");
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not build a namespaced sign texture for {}", woodType, t);
+            return vanilla;
+        }
+    }
+
+    /** {@code SmartBlockEntity}'s lazy-init flag plus {@code initialize} and {@code hasLevel}, resolved once. */
+    private static volatile java.lang.reflect.Field createInitialisedField;
+    private static volatile java.lang.reflect.Method createHasLevelMethod;
+    /** { initialize} is inherited in different places, so it is cached per concrete class. */
+    private static final java.util.Map<Class<?>, java.lang.reflect.Method> createInitialiseMethods = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Names already reported, so the diagnostic logging below stays quiet. */
+    private static final java.util.Set<String> PROBED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /**
+     * Completes Create's block entity initialisation when a behaviour is looked up before the entity ever
+     * ticked. Called from the head of {@code SmartBlockEntity#getBehaviour}, so it returns as fast as it can:
+     * once the entity is initialised this is a flag read and nothing else.
+     *
+     * <p>Create attaches its behaviours, client ones included, from {@code initialize()}, which runs lazily on
+     * the entity's first tick; a renderer asking for one in the frame before that tick throws on the null it
+     * gets back. Doing it here makes the lookup self-sufficient, and it cannot run twice: the flag is set
+     * before {@code initialize()} is entered.
+     */
+    public static void ensureCreateBlockEntityInitialised(Object blockEntity) {
+        if (!bridgeActive() || blockEntity == null) {
+            return;
+        }
+        var simpleName = blockEntity.getClass().getSimpleName();
+        try {
+            var field = createInitialisedField;
+            if (field == null) {
+                // Walk up: the flag is declared on SmartBlockEntity, while the entity asking is a subclass -
+                // and getDeclaredField answers for one class only, so a plain lookup throws and the catch below
+                // used to swallow it, leaving the hook doing nothing at all.
+                for (var type = blockEntity.getClass(); type != null && field == null; type = type.getSuperclass()) {
+                    try {
+                        field = type.getDeclaredField("initialized");
+                    } catch (NoSuchFieldException ignored) {
+                        // Keep walking; the declaring class is the one that matters.
+                    }
+                }
+                if (field == null) {
+                    return;
+                }
+                field.setAccessible(true);
+                createInitialisedField = field;
+            }
+            if (field.getBoolean(blockEntity)) {
+                return;
+            }
+            var hasLevel = createHasLevelMethod;
+            if (hasLevel == null) {
+                hasLevel = blockEntity.getClass().getMethod("hasLevel");
+                createHasLevelMethod = hasLevel;
+            }
+            if (!Boolean.TRUE.equals(hasLevel.invoke(blockEntity))) {
+                if (PROBED.add("nolevel" + simpleName)) {
+                    LOGGER.debug("[NeoFobric] Behaviour looked up on an uninitialised block entity with no level yet: {}", simpleName);
+                }
+                return;
+            }
+            var initialise = createInitialiseMethods.get(blockEntity.getClass());
+            if (initialise == null) {
+                initialise = blockEntity.getClass().getMethod("initialize");
+                createInitialiseMethods.put(blockEntity.getClass(), initialise);
+            }
+            field.setBoolean(blockEntity, true);
+            initialise.invoke(blockEntity);
+            if (PROBED.add("early" + simpleName)) {
+                LOGGER.debug("[NeoFobric] Initialised a block entity from its behaviour lookup, before its first tick: {}", simpleName);
+            }
+        } catch (Throwable t) {
+            if (PROBED.add("failed" + simpleName)) {
+                LOGGER.debug("[NeoFobric] Behaviour-lookup initialisation of {} failed", simpleName, t);
+            }
+        }
+    }
+
+    /**
      * Asks Fabric what sleeping direction a sleeping entity should face, and hands back the answer.
      *
      * <p>Fabric fires this event by wrapping the {@code BedBlock#getBedOrientation} call inside

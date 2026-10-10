@@ -46,12 +46,18 @@
      private boolean noBlocksAround(Entity entity) {
          return entity.level()
              .getBlockStates(entity.getBoundingBox().inflate(0.0625).expandTowards(0.0, -0.55, 0.0))
-@@ -704,7 +_,7 @@
+@@ -704,7 +_,13 @@
              if (level.isLoaded(pos)) {
                  BlockState blockState = level.getBlockState(pos);
                  boolean includeData = this.player.hasInfiniteMaterials() && packet.includeData();
 -                ItemStack itemStack = blockState.getCloneItemStack(level, pos, includeData);
-+                ItemStack itemStack = blockState.getCloneItemStack(pos, level, includeData, player);
++                // NeoFobric: Fabric's PlayerPickItemEvents.BLOCK used to wrap the three-argument
++                // getCloneItemStack; the platform calls the four-argument form, so the event is offered from
++                // here instead of from an injection. The listener sees the packet's own flag, as Fabric passes
++                // it (the platform's copy is already narrowed by the player's infinite-materials mode).
++                ItemStack itemStack = (ItemStack) net.neoforged.fabricbridge.FabricBridgeHooks.fireFabricPickItemFromBlock(
++                        this.player, pos, blockState, packet.includeData(),
++                        blockState.getCloneItemStack(pos, level, includeData, player));
                  if (!itemStack.isEmpty()) {
                      if (includeData) {
                          addBlockDataToItem(blockState, level, pos, itemStack);

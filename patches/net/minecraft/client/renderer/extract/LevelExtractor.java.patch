@@ -78,12 +78,18 @@
                  if (state != null) {
                      levelRenderState.blockEntityRenderStates.add(state);
                  }
-@@ -341,19 +_,23 @@
+@@ -341,19 +_,29 @@
                  BlockState state = this.level.getBlockState(pos);
                  if (!state.isAir() && this.level.getWorldBorder().isWithinBounds(pos)) {
                      BlockStateModel blockStateModel = this.minecraft.getModelManager().getBlockStateModelSet().get(state);
 -                    boolean isBlockTranslucent = blockStateModel.hasMaterialFlag(1);
-+                    boolean isBlockTranslucent = blockStateModel.hasMaterialFlag(this.level, pos, state, 1);
++                    // NeoFobric: the renderer API's models decide their material flags from the level, position,
++                    // state and a seeded random source; this call site uses the platform's four-argument form, so
++                    // the bridge asks the Fabric side first and keeps the platform answer as the fallback.
++                    boolean isBlockTranslucent = net.neoforged.fabricbridge.FabricBridgeHooks.fabricMaterialFlag(
++                            blockStateModel, 1, this.level, pos, state,
++                            net.minecraft.util.RandomSource.createThreadLocalInstance(state.getSeed(pos)),
++                            blockStateModel.hasMaterialFlag(this.level, pos, state, 1));
                      boolean highContrast = this.minecraft.options.highContrastBlockOutline().get();
                      CollisionContext context = CollisionContext.of(camera.entity());
 +                    var event = new net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent(this, this.level, pos, state, blockHitResult, context, isBlockTranslucent, highContrast, camera, levelRenderState);

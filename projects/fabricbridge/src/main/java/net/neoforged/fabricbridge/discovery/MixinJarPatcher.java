@@ -1284,6 +1284,60 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * Makes Create's block entity behaviours available before the first tick, not only after it.
+     *
+     * <p>{@code SmartBlockEntity} attaches its behaviours - client ones included - from {@code initialize()},
+     * which it runs lazily on the entity's first tick. A block entity that reaches the client during chunk
+     * handling can be rendered in that same frame, before that tick has happened, and a renderer that needs a
+     * behaviour (Create's mixer, for one) then throws on the null it gets back. Every diagnostic probe run
+     * confirmed that ordering by accident: inserting anything at all into this class made the crash disappear,
+     * because the extra work let the tick win the race.
+     *
+     * <p>The lookup therefore completes the initialisation itself - see
+     * {@link FabricBridgeHooks#ensureCreateBlockEntityInitialised(Object)}, which also reports the cases it
+     * cannot handle, so a run that still crashes says why.
+     *
+     * @return the class bytes with the lookup guarded, or the original when nothing needed to change
+     */
+    private static byte[] initialiseCreateBehavioursOnLookup(byte[] classBytes, String entryName) {
+        if (!"com/zurrtum/create/foundation/blockEntity/SmartBlockEntity".equals(entryName.replace(".class", ""))) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            if (!"getBehaviour".equals(method.name)
+                    || !"(Lcom/zurrtum/create/foundation/blockEntity/behaviour/BehaviourType;)Lcom/zurrtum/create/api/behaviour/BlockEntityBehaviour;".equals(method.desc)) {
+                continue;
+            }
+            // An unconditional call, so no branch and no new stack map frames are needed; the guard lives in
+            // the helper, which returns immediately once the entity is initialised.
+            var ensure = new org.objectweb.asm.tree.InsnList();
+            ensure.add(new org.objectweb.asm.tree.VarInsnNode(org.objectweb.asm.Opcodes.ALOAD, 0));
+            ensure.add(new org.objectweb.asm.tree.MethodInsnNode(org.objectweb.asm.Opcodes.INVOKESTATIC,
+                    "net/neoforged/fabricbridge/FabricBridgeHooks", "ensureCreateBlockEntityInitialised",
+                    "(Ljava/lang/Object;)V", false));
+            method.instructions.insert(ensure);
+            changed = true;
+        }
+
+        if (!changed) {
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Made Create's behaviour lookup initialise the block entity first");
+        var writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
      * Re-bounds Fabric's block-entity unload hook inside {@code LevelChunk#getBlockEntity}.
      *
      * <p>Fabric fires {@code ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD} there by redirecting the pending
@@ -1298,7 +1352,11 @@ public final class MixinJarPatcher {
      * @return the class bytes with the slice swapped, or the original when nothing needed to change
      */
     private static byte[] retargetLevelChunkBlockEntityRemoval(byte[] classBytes, String entryName) {
-        if (!"net/fabricmc/fabric/mixin/event/lifecycle/server/LevelChunkMixin".equals(entryName.replace(".class", ""))) {
+        // Both sides carry the same redirect: the server module keeps the load/unload pair in its event package,
+        // while the client module has a module of its own for the same trick, and each needs the same re-bounding.
+        var internal = entryName.replace(".class", "");
+        if (!"net/fabricmc/fabric/mixin/event/lifecycle/server/LevelChunkMixin".equals(internal)
+                && !"net/fabricmc/fabric/mixin/event/lifecycle/client/LevelChunkMixin".equals(internal)) {
             return null;
         }
         ClassNode node;
@@ -2121,7 +2179,7 @@ public final class MixinJarPatcher {
      */
     private static final java.util.Map<String, java.util.Set<String>> STRIP_HANDLER_METHODS = java.util.Map.ofEntries(
             java.util.Map.entry("net/fabricmc/fabric/mixin/client/model/loading/ModelManagerMixin",
-                    java.util.Set.of("cancelVanillaDeserialize", "actuallyDeserializeModel")),
+                    java.util.Set.of("cancelVanillaDeserialize", "actuallyDeserializeModel", "resolveExtraModels")),
             java.util.Map.entry("net/fabricmc/fabric/mixin/event/interaction/ItemStackMixin",
                     java.util.Set.of("handleUseOnEvent")),
             java.util.Map.entry("net/fabricmc/fabric/mixin/content/registry/fluid/EntityMixin",
@@ -2169,7 +2227,65 @@ public final class MixinJarPatcher {
             // Same shape: NeoForge's watchdog report prints entire stacks through its own ThreadInfoUtil, which
             // is what Fabric's modifier substituted.
             java.util.Map.entry("net/fabricmc/fabric/mixin/crash/report/info/ServerWatchdogMixin",
-                    java.util.Set.of("printEntireThreadDump")));
+                    java.util.Set.of("printEntireThreadDump")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/renderer/block/particle/ScreenEffectRendererMixin",
+                    java.util.Set.of("onReturnGetInWallBlockState")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/renderer/block/render/LevelRendererMixin",
+                    java.util.Set.of("cancelCollectParts")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/sound/SoundEngineMixin",
+                    java.util.Set.of("getStream")),
+            // The custom-fluid HUD bubbles, the renderer API's material flag proxy on the extractor path, and the
+            // screen API's render hook: each fails on a NeoForge-rewritten body while its own class carries the
+            // hooks Fabric mods actually use - ScreenEvents.remove/beforeTick/afterTick and the renderer API's
+            // siblings - so dropping the one that cannot bind brings the rest back. What is lost is the fluid
+            // bubble overlay, the material flags on that one path, and ScreenEvents' before/after render pair.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/content/registry/client/fluid/HudMixin",
+                    java.util.Set.of("popTheBubbleForCustomFluids")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/renderer/block/render/LevelExtractorMixin",
+                    java.util.Set.of("hasMaterialFlagProxy")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/screen/GuiMixin",
+                    java.util.Set.of("onExtractGui")),
+            // The HUD layer API's wraps of the direct overlay calls: NeoForge's Hud no longer makes them, it
+            // registers the same overlays with its GuiLayerManager instead - which is the machinery the bridge's
+            // FabricHudLayers already hooks - so Fabric's layer API keeps working and these wraps are obsolete.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/rendering/HudMixin",
+                    java.util.Set.of("wrapAirBar", "wrapArmorBar", "wrapBossHealthOverlay", "wrapChat", "wrapCrosshair",
+                            "wrapDemoTimer", "wrapExperienceLevel", "wrapExtractInfoBar", "wrapExtractSpectatorGui",
+                            "wrapFoodBar", "wrapHealthBar", "wrapHeldItemTooltip", "wrapHotbar", "wrapMiscOverlays",
+                            "wrapMobEffectOverlay", "wrapMountHealth", "wrapOverlayMessage", "wrapPlayerList",
+                            "wrapScoreboardSidebar", "wrapSleepOverlay", "wrapSpectatorMenu", "wrapTitleAndSubtitle")),
+            // Datagen's tag provider: the argument modifier watches a body NeoForge rewrote. Datagen only.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/datagen/TagsProviderMixin",
+                    java.util.Set.of("addReplaced")),
+            // The menu hook NeoForge moved behind a second openMenu overload: making it bind needs the
+            // handler's parameters rewritten as well (which ForgifiedFabricAPI did by hand), and pointing the
+            // annotation alone kills the server. Dropping it revives the class's closeContainer redirect, so the
+            // extended-menu half stays unimplemented and everything else in the class works.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/menu/ServerPlayerMixin",
+                    java.util.Set.of("fabric_storeOpenedMenu", "fabric_closeContainerScreenIfAllowed", "fabric_replaceVanillaScreenPacket")),
+            // The next round of the same: the item API's client-side block breaking hook and the renderer API's
+            // model wrapper remembering the bakery.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/item/client/MultiPlayerGameModeMixin",
+                    java.util.Set.of("fabricItemContinueBlockBreakingInject")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/renderer/block/model/SimpleModelWrapperMixin",
+                    java.util.Set.of("storeModelBakery")),
+            // The fluid renderer kept FA's head hook (custom fluid *appearance* still gets its chance) but this
+            // expression modifier watches a vanilla check NeoForge's rewritten tesselate no longer performs.
+            // What is lost is FA's say in the "is this face an overlay" decision, not the fluid API itself.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/rendering/fluid/FluidRendererMixin",
+                    java.util.Set.of("modifyNonOverlayCheck")),
+            // Both sign screens build their texture with Identifier.parse(...).withPrefix(...) now, so the
+            // withDefaultNamespace call these wrap is gone. Known difference: a custom SignType registered through
+            // Fabric's API falls back to the minecraft: namespace for the GUI texture instead of its own.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/object/builder/client/SignEditScreenMixin",
+                    java.util.Set.of("init")),
+            java.util.Map.entry("net/fabricmc/fabric/mixin/object/builder/client/HangingSignEditScreenMixin",
+                    java.util.Set.of("init")),
+            // The moving-block submission of FA's material flags (the same wrap LevelExtractorMixin carried, at
+            // the other end of the pipeline). Everything else in this class - the Mesh-taking submit methods that
+            // make FRAPI work at all - stays.
+            java.util.Map.entry("net/fabricmc/fabric/mixin/client/renderer/submit/SubmitNodeCollectionMixin",
+                    java.util.Set.of("hasMaterialFlagProxy")));
 
     /**
      * Removes the injector handlers named by {@link #STRIP_HANDLER_METHODS} from an allowlisted mixin
@@ -2944,6 +3060,11 @@ public final class MixinJarPatcher {
                 var chunkRemovalRetargeted = retargetLevelChunkBlockEntityRemoval(versionMoved, entry.getName());
                 if (chunkRemovalRetargeted != null) {
                     versionMoved = chunkRemovalRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var behaviourLookupGuarded = initialiseCreateBehavioursOnLookup(versionMoved, entry.getName());
+                if (behaviourLookupGuarded != null) {
+                    versionMoved = behaviourLookupGuarded;
                     patched.put(entry.getName(), versionMoved);
                 }
                 allClasses.add(versionMoved);

@@ -49,6 +49,11 @@ public final class BridgeSelfCheck {
     private static volatile boolean canarySent;
     private static volatile int canarySentAtTick = -1;
     private static volatile boolean reported;
+    /** Dedicated servers have no client tick to report from, so their verdict rides the server tick instead. */
+    private static volatile int ticksWithPlayer;
+    /** The labels whose events only ever fire on a client - everything else is the server side's business. */
+    private static final java.util.Set<String> CLIENT_SIDE_EVENTS =
+            java.util.Set.of("ClientLifecycle.CLIENT_STARTED", "ClientTick.END_CLIENT_TICK");
 
     private BridgeSelfCheck() {}
 
@@ -71,6 +76,62 @@ public final class BridgeSelfCheck {
             }
         }
         LOGGER.info(inventory.toString());
+    }
+
+    /**
+     * Logs what Fabric's networking layer ended up holding: the payload types mods declared per direction,
+     * and how many global channel receivers are registered on each side.
+     *
+     * <p>This is the networking half of the entrypoint inventory, and it belongs after the entrypoints have
+     * run - at boot the payloads are not registered yet, so every count would read zero. Callers invoke it
+     * once the mod-initializer stage is done ({@code FabricBridge#invokeEntrypoints}) and again after the
+     * client stage, so the second line shows what the client entrypoints added.
+     *
+     * <p>What it proves: a mod whose networking setup silently never ran - the failure mode that cost a
+     * whole day on Jade, where the packets only blew up at play time - shows up here as a smaller count or
+     * a zero, instead of as a stack trace in the middle of a session.
+     */
+    public static void logNetworkingInventory() {
+        if (!enabled() || !FabricBridge.hasFabricMods()) {
+            return;
+        }
+        if (gameLoader == null) {
+            try {
+                gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            } catch (Throwable t) {
+                gameLoader = Thread.currentThread().getContextClassLoader();
+            }
+        }
+        var parts = new ArrayList<String>();
+
+        // The per-direction payload type counts live in an internal map; the loader's own API has no count,
+        // and a missing field here (a fabric-api release that renames it) must not break anything.
+        for (var field : new String[] { "SERVERBOUND_PLAY", "CLIENTBOUND_PLAY", "SERVERBOUND_CONFIGURATION", "CLIENTBOUND_CONFIGURATION" }) {
+            try {
+                var registryClass = Class.forName("net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl", false, gameLoader);
+                var registry = registryClass.getField(field).get(null);
+                var packetTypes = registryClass.getDeclaredField("packetTypes");
+                packetTypes.setAccessible(true);
+                parts.add(field.toLowerCase(java.util.Locale.ROOT) + "=" + ((java.util.Map<?, ?>) packetTypes.get(registry)).size());
+            } catch (Throwable t) {
+                parts.add(field.toLowerCase(java.util.Locale.ROOT) + "=?");
+            }
+        }
+
+        for (var side : new String[] { "serverbound", "clientbound" }) {
+            var holderName = "serverbound".equals(side)
+                    ? "net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking"
+                    : "net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking";
+            try {
+                var holder = Class.forName(holderName, false, gameLoader);
+                var receivers = (java.util.Set<?>) holder.getMethod("getGlobalReceivers").invoke(null);
+                parts.add(side + " receivers=" + receivers.size());
+            } catch (Throwable t) {
+                parts.add(side + " receivers=?");
+            }
+        }
+
+        LOGGER.info("[NeoFobric] Fabric networking: {}", String.join(", ", parts));
     }
 
     private static boolean enabled() {
@@ -147,8 +208,10 @@ public final class BridgeSelfCheck {
                     };
                 }
                 fired.put(label, Boolean.TRUE);
-                if ("END_CLIENT_TICK".equals(label) || label.endsWith(".END_CLIENT_TICK")) {
+                if (label.endsWith(".END_CLIENT_TICK")) {
                     progress();
+                } else if (label.endsWith(".END_SERVER_TICK")) {
+                    progressServer();
                 }
                 return defaultValue(method.getReturnType());
             };
@@ -178,6 +241,39 @@ public final class BridgeSelfCheck {
         if (type == double.class) return 0D;
         if (type == char.class) return (char) 0;
         return null;
+    }
+
+    /**
+     * The dedicated-server half of {@link #progress()}: no client tick exists there and the canary is a
+     * client-to-server packet, so once a player has been online long enough for chunks, entities and loot
+     * tables to load, the wiring verdict is reported without it. A client's integrated server keeps the
+     * client path, which counts the same way and knows the canary's outcome.
+     */
+    private static void progressServer() {
+        if (reported || gameLoader == null || !isDedicatedServer()) {
+            return;
+        }
+        try {
+            if (!Boolean.TRUE.equals(fired.get("ServerPlayConnection.JOIN"))) {
+                return;
+            }
+            if (++ticksWithPlayer < 200) {
+                return;
+            }
+            reported = true;
+            report(null);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Self-check server progress failed", t);
+        }
+    }
+
+    /** {@return whether this JVM is a dedicated server} Never throws: the check must not be able to break a run. */
+    private static boolean isDedicatedServer() {
+        try {
+            return net.neoforged.fml.loading.FMLEnvironment.getDist() == net.neoforged.api.distmarker.Dist.DEDICATED_SERVER;
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
     /**
@@ -254,25 +350,54 @@ public final class BridgeSelfCheck {
             }
         }
 
-        var canary = "not sent";
+        // A client talking to a server it does not host never sees the server side's events, and that is
+        // not the silent wiring this check is looking for - keep the two apart or the warning below cries
+        // wolf on every multiplayer join.
+        var remoteOnly = new ArrayList<String>();
+        if (minecraft != null) {
+            try {
+                var hosts = (boolean) minecraft.getClass().getMethod("hasSingleplayerServer").invoke(minecraft);
+                if (!hosts) {
+                    silent.removeIf(label -> {
+                        if (CLIENT_SIDE_EVENTS.contains(label)) {
+                            return false;
+                        }
+                        remoteOnly.add(label);
+                        return true;
+                    });
+                }
+            } catch (Throwable t) {
+                LOGGER.debug("[NeoFobric] Self-check could not tell whether this client hosts its server", t);
+            }
+        }
+
+        var canary = minecraft == null ? "not applicable (dedicated server)" : "not sent";
         try {
-            var connection = minecraft.getClass().getMethod("getConnection").invoke(minecraft);
-            
-            var player = minecraft.getClass().getField("player").get(minecraft);
-            if (canarySent) {
-                canary = connection != null && player != null
-                        ? "ok (" + (ticksInWorld - canarySentAtTick) + " ticks after sending, still connected)"
-                        : "FAILED (disconnected after the canary payload)";
+            if (minecraft != null) {
+                var connection = minecraft.getClass().getMethod("getConnection").invoke(minecraft);
+
+                var player = minecraft.getClass().getField("player").get(minecraft);
+                if (canarySent) {
+                    canary = connection != null && player != null
+                            ? "ok (" + (ticksInWorld - canarySentAtTick) + " ticks after sending, still connected)"
+                            : "FAILED (disconnected after the canary payload)";
+                }
             }
         } catch (Throwable t) {
             canary = "unavailable";
         }
 
-        LOGGER.info("[NeoFobric] Self-check: events {}/{} wired, network canary {}",
-                wired, fired.size(), canary);
+        LOGGER.info("[NeoFobric] Self-check: events {}/{} wired{}, network canary {}",
+                wired, fired.size(),
+                remoteOnly.isEmpty() ? "" : " (" + remoteOnly.size() + " of the rest belong to the server joined)",
+                canary);
         if (!silent.isEmpty()) {
             LOGGER.warn("[NeoFobric] Self-check silent event(s): {}. A Fabric event that never fires means the call site "
                     + "NeoForge moved is still missed - see docs/NEOFOBRIC_HANDOFF.md ('调用点搬家').", String.join(", ", silent));
+        }
+        if (!remoteOnly.isEmpty()) {
+            LOGGER.info("[NeoFobric] Self-check: {} event(s) belong to the server this client joined, so they are not "
+                    + "expected to fire here: {}", remoteOnly.size(), String.join(", ", remoteOnly));
         }
         if (!unavailable.isEmpty()) {
             LOGGER.info("[NeoFobric] Self-check skipped event(s) whose holder class is absent: {}", String.join(", ", unavailable));

@@ -320,6 +320,19 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         for (var entry : net.neoforged.fabricbridge.discovery.FabricJarRegistry.getEntries().entrySet()) {
             var info = entry.getValue();
 
+            // fabric-loader does not load a mod whose environment is the other side, so its mixins never
+            // apply there - and a client-only module's mixins are written against classes that side does
+            // not have. Fabric's screen module is the visible case: registering its config on a dedicated
+            // server makes Mixin reach for net.minecraft.client.gui.screens.Screen, which the dist cleaner
+            // has already taken away, so every such config costs an ERROR and two WARNs and gains nothing.
+            var environment = info.environment();
+            if (environment != null && !environment.isBlank() && !"*".equals(environment)
+                    && !(client ? "client" : "server").equals(environment)) {
+                LOGGER.debug("[NeoFobric] Skipping the mixin configs of {} - its environment is \"{}\", not this {} side",
+                        info.modId(), environment, client ? "client" : "server");
+                continue;
+            }
+
             for (var configPath : info.mixinConfigsFor(client)) {
                 if (!registeredConfigPaths.add(configPath)) {
                     LOGGER.info("[NeoFobric] Ignoring the duplicate of mixin config {} from {} - another jar provides"

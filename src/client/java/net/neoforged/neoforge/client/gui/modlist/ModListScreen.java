@@ -551,8 +551,12 @@ public class ModListScreen extends Screen {
                 graphics.text(ModListScreen.this.font, language.getVisualOrder(ModListScreen.this.font.ellipsize(displayInfo.displayName(), maxTextWidth)), textLeft, top, 0xFFFFFFFF);
                 top += ModListScreen.this.font.lineHeight;
                 final Component version = Component.literal(displayInfo.version());
-                graphics.text(ModListScreen.this.font, language.getVisualOrder(ModListScreen.this.font.ellipsize(version, maxTextWidth)), textLeft, top, 0xFF000000 + TextColor.GRAY.getValue());
-                drawLoaderTag(graphics, textLeft + ModListScreen.this.font.width(version) + 5, top, this.loader);
+                // The tag has to follow the text that is actually drawn, not the untruncated version: a
+                // long version is ellipsized, and measuring the full one placed the tag past the end of the
+                // row, where it then fell foul of its own "no room" guard and disappeared entirely.
+                final var versionLine = language.getVisualOrder(ModListScreen.this.font.ellipsize(version, maxTextWidth));
+                graphics.text(ModListScreen.this.font, versionLine, textLeft, top, 0xFF000000 + TextColor.GRAY.getValue());
+                drawLoaderTag(graphics, textLeft + ModListScreen.this.font.width(versionLine) + 5, top, this.loader);
 
                 final int iconX = expandIconX();
                 if (iconX >= 0 && (hovered || this.expanded)) {

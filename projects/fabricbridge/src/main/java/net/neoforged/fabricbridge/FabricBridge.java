@@ -150,6 +150,9 @@ public final class FabricBridge {
             }
 
             LOGGER.info("[NeoFobric] Fabric entrypoints invoked");
+            // The mod initializers are the stage that registers payloads and channel receivers, so this is
+            // the first moment the networking inventory can say anything (see its javadoc).
+            BridgeSelfCheck.logNetworkingInventory();
         }
     }
 
@@ -168,6 +171,9 @@ public final class FabricBridge {
             invokeIsolated("client", net.fabricmc.api.ClientModInitializer.class,
                     net.fabricmc.api.ClientModInitializer::onInitializeClient);
             LOGGER.info("[NeoFobric] Fabric client entrypoints invoked");
+            // Second reading of the inventory: the client entrypoints are where the clientbound payloads and
+            // receivers get registered, so this line is the one that shows them.
+            BridgeSelfCheck.logNetworkingInventory();
         }
     }
 
