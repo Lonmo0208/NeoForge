@@ -577,20 +577,32 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
 
         FabricModInfo info;
         try (var jar = JarContents.ofPath(path)) {
+            // Which loader a jar belongs to follows its metadata, newest first: NeoForge, then Fabric, and
+            // only then the Forge era.
+            //
             // A jar that declares itself a NeoForge mod belongs to FML, even when it also carries a
-            // fabric.mod.json: the multi-loader builds of Sodium and Iris ship both files, and claiming
-            // such a jar takes it away from FML entirely - the NeoForge mod never initialises, while
-            // fabric-loader resolves the Fabric half of the metadata and dies on the sibling it names
-            // ("Mod 'Iris' (iris) requires any 0.9.x version of sodium, which is missing", because the
-            // installed Sodium is the NeoForge build). The bridge owns pure-Fabric jars only.
-            for (var fmlMetadata : FML_MOD_METADATA) {
-                if (jar.readFile(fmlMetadata) != null) {
-                    LOGGER.info("[NeoFobric] Leaving {} to FML - it declares {}", path.getFileName(), fmlMetadata);
-                    FabricJarRegistry.markForeignModPath(path);
-                    return;
-                }
+            // fabric.mod.json: the multi-loader builds of Sodium and Iris ship both files, and claiming such
+            // a jar takes it away from FML entirely - the NeoForge mod never initialises, while fabric-loader
+            // resolves the Fabric half of the metadata and dies on the sibling it names ("Mod 'Iris' (iris)
+            // requires any 0.9.x version of sodium, which is missing", because the installed Sodium is the
+            // NeoForge build).
+            if (jar.readFile("META-INF/neoforge.mods.toml") != null) {
+                LOGGER.info("[NeoFobric] Leaving {} to FML - it declares META-INF/neoforge.mods.toml",
+                        path.getFileName());
+                FabricJarRegistry.markForeignModPath(path);
+                return;
             }
+            // Below NeoForge sits Fabric. A Fabric build that also ships a stray legacy mods.toml is still a
+            // Fabric mod - Create: Ultimate Factory's carries one with modLoader="javafml" and
+            // loaderVersion="[47,)" left over from a Forge build - and leaving it to FML means FML skips the
+            // jar as an old Forge build while the bridge never picks it up either, so the mod never loads.
             byte[] metadata = jar.readFile(FabricJarRegistry.FABRIC_MOD_JSON);
+            if (metadata == null && jar.readFile("META-INF/mods.toml") != null) {
+                LOGGER.info("[NeoFobric] Leaving {} to FML - it declares META-INF/mods.toml and no fabric.mod.json",
+                        path.getFileName());
+                FabricJarRegistry.markForeignModPath(path);
+                return;
+            }
             if (metadata == null) {
                 return; // Not a Fabric mod.
             }

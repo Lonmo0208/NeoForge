@@ -56,3 +56,12 @@ build
 
 # local gametest reports
 /tmp/
+
+# NeoFobric: the tools the handoff notes tell you to run belong in the repo; only their build output
+# stays out. With the whole folder ignored the notes pointed at scripts nobody else could get.
+/tools/*
+!/tools/*.ps1
+!/tools/mc-api-diff
+
+# NeoFobric: the diff tool writes its report here
+/tools/mc-api-diff/report.txt

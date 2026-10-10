@@ -371,6 +371,20 @@ public final class BridgeSelfCheck {
             var present = found instanceof java.util.Optional<?> optional && optional.isPresent();
             LOGGER.info("[NeoFobric] registry probe at {}: ENTITY_SUB_PREDICATE_TYPE size={} has type_specific={}",
                     where, size, present);
+            // The world load of a Fabric mod's data fails with "Unknown registry key in ResourceKey[
+            // minecraft:root / minecraft:worldgen/carver]: betterend:end_round_cave" and "Unbound values in
+            // registry ... configured_carver", so this asks whether the code that registers a carver landed
+            // at all.
+            var carvers = registries.getField("CARVER").get(null);
+            var carverId = Class.forName("net.minecraft.resources.Identifier", false, gameLoader)
+                    .getMethod("parse", String.class).invoke(null, "betterend:end_round_cave");
+            var carverSize = (int) carvers.getClass().getMethod("size").invoke(carvers);
+            var carverFound = carvers.getClass().getMethod("getOptional", carverId.getClass()).invoke(carvers, carverId);
+            var keys = (java.util.Set<?>) carvers.getClass().getMethod("keySet").invoke(carvers);
+            LOGGER.info("[NeoFobric] registry probe at {}: CARVER size={} has betterend:end_round_cave={} keys={}",
+                    where, carverSize,
+                    carverFound instanceof java.util.Optional<?> optional && optional.isPresent(),
+                    keys.stream().map(String::valueOf).limit(12).sorted().toList());
         } catch (Throwable t) {
             LOGGER.warn("[NeoFobric] registry probe failed at {}", where, t);
         }

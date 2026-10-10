@@ -415,6 +415,24 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         // (and Mixin, which runs later) should see the tweaked class.
         if (isFabricClassTweakerTarget(node.name)) {
             changed |= applyFabricClassTweaker(node);
+            // A widener that makes a private method accessible leaves it un-overridable - that is the
+            // point for a private method, nobody was allowed to override it - and the visitor spells that out
+            // by marking the now public method final. Every other mod then reads "cannot override" for a
+            // method the platform has always allowed overriding, and a NeoForge mod that overrides it dies on
+            // IncompatibleClassChangeError at class load (sophisticatedbackpacks overriding
+            // AbstractContainerScreen#getHoveredSlot). Dropping the flag only relaxes the class.
+            var unfinalised = 0;
+            for (var method : node.methods) {
+                if ((method.access & Opcodes.ACC_FINAL) != 0) {
+                    method.access &= ~Opcodes.ACC_FINAL;
+                    unfinalised++;
+                }
+            }
+            if (unfinalised > 0) {
+                changed = true;
+                LOGGER.info("[NeoFobric] Dropped ACC_FINAL from {} method(s) of {} so the class stays overridable",
+                        unfinalised, node.name.replace('/', '.'));
+            }
         }
         var addedMethods = false;
         var duckFallback = DUCK_FALLBACKS.get(context.node().name);

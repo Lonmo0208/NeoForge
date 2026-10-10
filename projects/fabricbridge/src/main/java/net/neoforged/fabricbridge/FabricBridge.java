@@ -156,6 +156,9 @@ public final class FabricBridge {
             // Every Fabric storage the mod set registers exists by now, so the NeoForge capabilities can be
             // offered to Fabric's lookups from here on (see FabricTransferHooks).
             FabricTransferHooks.install();
+            // The moment the Fabric entrypoints are done is the moment to ask whether what they register into
+            // the game's own registries landed (-Dneofobric.registryProbe).
+            BridgeSelfCheck.registryProbe("fabric entrypoints done");
         }
     }
 

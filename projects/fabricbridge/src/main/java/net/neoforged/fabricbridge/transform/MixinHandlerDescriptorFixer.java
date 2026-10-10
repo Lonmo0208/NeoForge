@@ -61,8 +61,9 @@ public final class MixinHandlerDescriptorFixer {
      * two do not receive the target's parameters, the third receives the receiver only.
      *
      * <p>The "value first" injectors are excluded as well: {@code @ModifyVariable}, {@code @ModifyArg},
-     * {@code @ModifyArgs} and {@code @ModifyConstant} hand the modified value (or the argument array /
-     * the constant) in as the <em>first</em> parameter, with the target's own parameters following it.
+     * {@code @ModifyArgs}, {@code @ModifyConstant} and {@code @ModifyExpressionValue} hand the modified
+     * value (or the argument array, or the constant) in as the <em>first</em> parameter, with the target's
+     * own parameters following it.
      * A handler like Twilight Forest's {@code (float, ServerLevel, DamageSource)} therefore looks like a
      * permutation of {@code hurtServer(ServerLevel, DamageSource, float)} and used to be reordered into
      * exactly that order - after which Mixin's handling of the modified variable no longer matched the
@@ -79,8 +80,7 @@ public final class MixinHandlerDescriptorFixer {
     private static final Set<String> POSITIONAL_INJECTORS = Set.of(
             "Lorg/spongepowered/asm/mixin/injection/Inject;",
             "Lorg/spongepowered/asm/mixin/injection/Redirect;",
-            "Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;",
-            "Lcom/llamalad7/mixinextras/injector/ModifyExpressionValue;");
+            "Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;");
 
     private MixinHandlerDescriptorFixer() {}
 

@@ -1185,4 +1185,24 @@ public final class FabricBridgeHooks {
     }
 
     private static final Object[] EMPTY_PARTS = new Object[0];
+
+    /**
+     * Keeps a block that a mod maps to two point-of-interest types from failing the class that registers it.
+     *
+     * <p>Vanilla only runs this check while it builds its own types; NeoForge runs the same registration for
+     * every modded POI type, so a mod that maps one block to two types - which vanilla's own
+     * {@code TYPE_BY_STATE.put} silently lets the later one win - dies with an {@code IllegalStateException}
+     * inside that mod's static initializer. The class is then unusable, and so is everything that touches it:
+     * Better End's {@code EndPoiTypes} took its carvers and features with it, and the world's data packs
+     * failed to bind. The later type wins here, like vanilla, and the pair is reported once.
+     */
+    public static void noteDuplicatePoiType(Object blockState, Object previous, Object replacement) {
+        if (REPORTED_POI_CONFLICTS.add(String.valueOf(blockState))) {
+            LOGGER.warn("[NeoFobric] {} is mapped to two point-of-interest types ({} and {}); keeping the later "
+                    + "one, the way vanilla does", blockState, previous, replacement);
+        }
+    }
+
+    private static final java.util.Set<String> REPORTED_POI_CONFLICTS =
+            java.util.concurrent.ConcurrentHashMap.newKeySet();
 }

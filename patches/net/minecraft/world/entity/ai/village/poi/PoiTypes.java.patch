@@ -9,7 +9,7 @@
  
      private static Set<BlockState> getBlockStates(Block block) {
          return ImmutableSet.copyOf(block.getStateDefinition().getPossibleStates());
-@@ -74,6 +_,7 @@
+@@ -74,13 +_,17 @@
      }
  
      private static void registerBlockStates(Holder<PoiType> type, Set<BlockState> matchingStates) {
@@ -17,3 +17,16 @@
          matchingStates.forEach(
              blockState -> {
                  Holder<PoiType> previous = TYPE_BY_STATE.put(blockState, type);
+                 if (previous != null) {
+-                    throw (IllegalStateException)Util.pauseInIde(
+-                        new IllegalStateException(String.format(Locale.ROOT, "%s is defined in more than one PoI type", blockState))
+-                    );
++                    // NeoFobric: vanilla only checks this for its own types, so a mod could always map one block
++                    // to two of them and the later mapping simply won. NeoForge runs this registration for every
++                    // modded type, which turns that into an exception inside the mod's static initializer and
++                    // takes the whole class - and everything that touches it - down with it. The later mapping
++                    // wins and the bridge reports it (see FabricBridgeHooks#noteDuplicatePoiType).
++                    net.neoforged.fabricbridge.FabricBridgeHooks.noteDuplicatePoiType(blockState, previous, type);
+                 }
+             }
+         );
