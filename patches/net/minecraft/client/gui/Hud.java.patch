@@ -160,7 +160,7 @@
                      graphics.blitSprite(RenderPipelines.GUI_TEXTURED, getMobEffectSprite(effect), x + 3, y + 3, 18, 18, ARGB.white(alpha));
                  }
              }
-@@ -539,32 +_,52 @@
+@@ -539,32 +_,61 @@
          return effect.unwrapKey().map(ResourceKey::identifier).map(id -> id.withPrefix("mob_effect/")).orElseGet(MissingTextureAtlasSprite::getLocation);
      }
  
@@ -178,16 +178,30 @@
 -        }
 -
 -        this.extractVehicleHealth(graphics);
+-        Hud.ContextualInfo nextContextualInfo = this.nextContextualInfoState();
+-        if (nextContextualInfo != this.contextualInfoBar.getFirst()) {
+-            this.contextualInfoBar = Pair.of(nextContextualInfo, this.contextualInfoBars.get(nextContextualInfo).get());
+-        }
+-
++        // NeoFobric: vanilla refreshed the contextual bar's state right here, and the layer that draws the bar
++        // was split out of this method - which left a Fabric-side mixin that replaces that refresh with nothing
++        // left to replace (its handler binds this method's own graphics and delta as trailing parameters, so it
++        // has to fire in this method). The body is back where vanilla had it; the layer recomputes the same
++        // value when it draws, so nothing changes for anyone not replacing this call.
++        Hud.ContextualInfo nextContextualInfo = this.nextContextualInfoState();
++        if (nextContextualInfo != this.contextualInfoBar.getFirst()) {
++            this.contextualInfoBar = Pair.of(nextContextualInfo, this.contextualInfoBars.get(nextContextualInfo).get());
++        }
 +    }
 +
 +    // Neo: Wrap in a method to call it when re-rendering
 +    private void updateContextualBarRenderer() {
-         Hud.ContextualInfo nextContextualInfo = this.nextContextualInfoState();
-         if (nextContextualInfo != this.contextualInfoBar.getFirst()) {
-             this.contextualInfoBar = Pair.of(nextContextualInfo, this.contextualInfoBars.get(nextContextualInfo).get());
-         }
++        Hud.ContextualInfo nextContextualInfo = this.nextContextualInfoState();
++        if (nextContextualInfo != this.contextualInfoBar.getFirst()) {
++            this.contextualInfoBar = Pair.of(nextContextualInfo, this.contextualInfoBars.get(nextContextualInfo).get());
++        }
 +    }
- 
++
 +    // Neo: Split off into separate method to wrap in a layer
 +    private void extractContextualInfoBarBackground(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
          this.contextualInfoBar.getSecond().extractBackground(graphics, deltaTracker);

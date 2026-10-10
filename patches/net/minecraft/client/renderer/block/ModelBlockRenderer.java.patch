@@ -9,12 +9,45 @@
          this.ambientOcclusion = ambientOcclusion;
          this.cull = cull;
          this.blockColors = blockColors;
-@@ -53,11 +_,18 @@
+@@ -49,15 +_,51 @@
+         return !cutoutLeaves && blockState.getBlock() instanceof LeavesBlock;
+     }
+ 
++    /**
++     * {@return whether the model overrides the platform's level-aware part collection}
++     *
++     * <p>Asked once per model class and cached: the answer cannot change, and this runs for every block drawn.
++     * The interface's default lives on {@code BlockStateModelExtension}, so a class that does not override the
++     * five-argument method is a vanilla-shaped model - the kind that asks to be called the old way.
++     */
++    private static final java.util.Map<Class<?>, Boolean> CONTEXT_AWARE_MODELS = new java.util.concurrent.ConcurrentHashMap<>();
++
++    private static boolean collectsWithContext(BlockStateModel model) {
++        return CONTEXT_AWARE_MODELS.computeIfAbsent(model.getClass(), type -> {
++            for (var method : type.getMethods()) {
++                if (method.getName().equals("collectParts") && method.getParameterCount() == 5) {
++                    return method.getDeclaringClass()
++                            != net.neoforged.neoforge.client.extensions.BlockStateModelExtension.class;
++                }
++            }
++            return false;
++        });
++    }
++
+     public void tesselateBlock(
          BlockQuadOutput output, float x, float y, float z, BlockAndTintGetter level, BlockPos pos, BlockState blockState, BlockStateModel model, long seed
      ) {
          this.random.setSeed(seed);
 -        model.collectParts(this.random, this.parts);
-+        model.collectParts(level, pos, blockState, this.random, this.parts);
++        // NeoFobric: a model that knows this platform's level-aware call gets it; a model written against the
++        // vanilla shape (which is what a Fabric-side mixin wraps, at this very line) is asked that way, so the
++        // mixin hears its call and the parts it substitutes are the ones that end up rendered. The interface
++        // carries both, with the level-aware one defaulting to the vanilla-shaped one.
++        if (collectsWithContext(model)) {
++            model.collectParts(level, pos, blockState, this.random, this.parts);
++        } else {
++            model.collectParts(this.random, this.parts);
++        }
          if (!this.parts.isEmpty()) {
 +            this.lighter.reset();
              try {

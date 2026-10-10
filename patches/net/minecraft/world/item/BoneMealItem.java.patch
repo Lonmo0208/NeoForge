@@ -1,22 +1,48 @@
 --- a/net/minecraft/world/item/BoneMealItem.java
 +++ b/net/minecraft/world/item/BoneMealItem.java
-@@ -37,7 +_,7 @@
+@@ -37,7 +_,18 @@
          BlockPos pos = context.getClickedPos();
          BlockPos relative = pos.relative(context.getClickedFace());
          ItemStack boneMealStack = context.getItemInHand();
 -        if (growCrop(boneMealStack, level, pos)) {
-+        if (applyBonemeal(boneMealStack, level, pos, context.getPlayer())) {
++        // NeoFobric: the call the vanilla line made is the one a Fabric-side mixin replaces - it decides which
++        // blocks its own bone meal applies to - so it is the call this site makes, and growCrop forwards to the
++        // platform's flow. Exactly one of the two runs, never both. The player rides in the carrier because the
++        // vanilla shape has no room for it and the platform's path reports it to the NeoForge event.
++        NEOFOBRIC_PLAYER.set(context.getPlayer());
++        boolean applied;
++        try {
++            applied = growCrop(boneMealStack, level, pos);
++        } finally {
++            NEOFOBRIC_PLAYER.remove();
++        }
++        if (applied) {
              if (!level.isClientSide()) {
                  boneMealStack.causeUseVibration(context.getPlayer(), GameEvent.ITEM_INTERACT_FINISH);
                  level.levelEvent(1505, pos, 15);
-@@ -61,8 +_,17 @@
+@@ -61,8 +_,32 @@
          }
      }
  
++    /**
++     * Carries the player across the vanilla-shaped door, whose signature has no room for it.
++     *
++     * <p>Set by {@link #useOn} for the duration of one call and read by {@link #growCrop}, on the same thread.
++     */
++    private static final ThreadLocal<net.minecraft.world.entity.player.@Nullable Player> NEOFOBRIC_PLAYER = new ThreadLocal<>();
++
++    /**
++     * The vanilla-shaped door this class calls - and a Fabric-side mixin may replace.
++     *
++     * <p>NeoForge moved this method's body into {@link #applyBonemeal} (which takes the player and fires its
++     * event), leaving this one a delegate. Calling the delegate from {@link #useOn} is what lets a mixin written
++     * against the vanilla shape hear the call again: its own answer replaces the whole step, and its call to the
++     * original lands here and forwards to the platform's flow - so the bone meal is applied once either way.
++     */
 +    @Deprecated //Forge: Use Player/Hand version
      public static boolean growCrop(ItemStack itemStack, Level level, BlockPos pos) {
 +        if (level instanceof net.minecraft.server.level.ServerLevel)
-+            return applyBonemeal(itemStack, level, pos, null);
++            return applyBonemeal(itemStack, level, pos, NEOFOBRIC_PLAYER.get());
 +        return false;
 +    }
 +

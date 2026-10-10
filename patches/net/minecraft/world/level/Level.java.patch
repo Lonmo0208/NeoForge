@@ -63,6 +63,19 @@
      }
  
      public void updatePOIOnBlockStateChange(BlockPos pos, BlockState oldState, BlockState newState) {
+@@ -274,6 +_,12 @@
+ 
+     @Override
+     public boolean removeBlock(BlockPos pos, boolean movedByPiston) {
++        // NeoFobric: the break path calls this - the vanilla-shaped call a Fabric-side mixin replaces - and
++        // carries the platform's own removal with it, because that removal needs the block state, the tool and
++        // the drop decision that this signature has no room for. Any other caller gets the vanilla behaviour.
++        if (net.neoforged.fabricbridge.FabricBridgeHooks.hasDestroyAction()) {
++            return net.neoforged.fabricbridge.FabricBridgeHooks.runDestroyAction();
++        }
+         FluidState fluidState = this.getFluidState(pos);
+         return this.setBlock(pos, fluidState.createLegacyBlock(), 3 | (movedByPiston ? 64 : 0));
+     }
 @@ -316,6 +_,7 @@
      }
  

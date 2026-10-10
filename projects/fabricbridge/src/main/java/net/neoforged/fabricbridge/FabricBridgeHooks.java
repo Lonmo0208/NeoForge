@@ -37,6 +37,47 @@ public final class FabricBridgeHooks {
     private FabricBridgeHooks() {}
 
     /**
+     * The block-removal step the game-mode class would take, carried to the vanilla-shaped call it made.
+     *
+     * <p>NeoForge's break path removes the block through a private helper of its own, which took the call the
+     * vanilla API made - and the comment right beside that code records why it matters: a Fabric mixin injects
+     * at that call site, and once it moves the injection fails silently. So the call goes back where vanilla had
+     * it, and this carries the platform's own removal to it: {@code Level#removeBlock} runs what the site pushed
+     * when the site is the caller, and keeps its ordinary behaviour for every other caller. The value is a
+     * {@link java.util.function.BooleanSupplier} because the platform's removal needs the block state, the tool
+     * and the drop decision, none of which fit the vanilla two-argument shape.
+     */
+    private static final ThreadLocal<java.util.function.BooleanSupplier> destroyAction = new ThreadLocal<>();
+
+    public static void pushDestroyAction(java.util.function.BooleanSupplier action) {
+        destroyAction.set(action);
+    }
+
+    public static void popDestroyAction() {
+        destroyAction.remove();
+    }
+
+    /** {@return whether the platform's own block removal is waiting behind the vanilla-shaped call} */
+    public static boolean hasDestroyAction() {
+        return destroyAction.get() != null;
+    }
+
+    /**
+     * {@return what the platform's block removal answered}
+     *
+     * <p>Cleared before the action runs, because the platform's removal reaches back into {@code Level#removeBlock}
+     * through its own extension path - a beehive's drops do. With the action still waiting there, that inner call
+     * would run the whole removal again, and again: the Fabric test suite caught it as a stack overflow
+     * ({@code fake_player_tests_test_fake_player_break_beehive}). Cleared, the inner call takes the plain path,
+     * which is exactly what it would take without this bridge.
+     */
+    public static boolean runDestroyAction() {
+        var action = destroyAction.get();
+        destroyAction.remove();
+        return action != null && action.getAsBoolean();
+    }
+
+    /**
      * {@return whether the bridge has discovered Fabric mods and should inject itself into the game}
      */
     public static boolean bridgeActive() {

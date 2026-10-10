@@ -2013,12 +2013,10 @@ public final class MixinJarPatcher {
             if (host == null || !hostTakesSugarTypes(resolver, targets, host, sugarTypes)) {
                 continue;
             }
-            // A host the selected method calls is a wrapper handing off to its worker. When the platform instead
-            // lifted the body out into a method of its own (Hud#updateContextualBarRenderer carries exactly what
-            // extractHotbarAndDecorations used to run), nothing calls it from there - the new host's body does
-            // the same work, which its instruction mix shows.
-            if (!CALL_SIDE_INJECTIONS.contains(annotation.desc)
-                    && !hostStartsWithHandlerParams(resolver, targets, host, declaredHostParams(method))) {
+            // Whatever the injector, a handler that binds the host's own parameters needs a host that starts
+            // with them - in front for @Inject, behind the wrapped call and its Operation for the wrapping ones.
+            if (!hostStartsWithHandlerParams(resolver, targets, host,
+                    declaredHostParams(method, anchor, CALL_SIDE_INJECTIONS.contains(annotation.desc)))) {
                 continue;
             }
             if (!hostIsCalledBySelection(resolver, targets, selector, host)
@@ -2224,7 +2222,7 @@ public final class MixinJarPatcher {
     }
 
     /**
-     * {@return whether the hand-off target is the selected method's body, lifted into a method of its own}
+     * {@return whether the anchor is a call into the very class being patched}
      *
      * <p>NeoForge splits methods up as well as delegating them: {@code Hud#extractHotbarAndDecorations} still
      * exists but no longer runs the contextual bar code, which moved verbatim into
@@ -2240,45 +2238,7 @@ public final class MixinJarPatcher {
     private static boolean hostIsBodyLookalike(TargetResolver resolver, java.util.List<String> targets,
             String selector, String host, String anchor) {
         var wanted = parseAnchorMember(anchor);
-        if (wanted == null) {
-            return false;
-        }
-        for (var target : targets) {
-            if (!target.equals(wanted.owner())) {
-                continue;
-            }
-            var bytes = resolver.apply(target);
-            if (bytes == null) {
-                continue;
-            }
-            ClassNode targetNode;
-            try {
-                targetNode = new ClassNode();
-                new ClassReader(bytes).accept(targetNode, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-            } catch (Throwable t) {
-                continue;
-            }
-            var hosts = selectedMethods(targetNode, host);
-            if (hosts.isEmpty()) {
-                continue;
-            }
-            for (var selected : selectedMethods(targetNode, selector)) {
-                var selectedBody = realInstructions(selected);
-                if (selectedBody.isEmpty()) {
-                    continue;
-                }
-                for (var candidate : hosts) {
-                    var hostBody = realInstructions(candidate);
-                    if (hostBody.size() < 6 || hostBody.size() > selectedBody.size()) {
-                        continue;
-                    }
-                    if (containsRun(selectedBody, hostBody)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return wanted != null && wanted.owner() != null && targets.contains(wanted.owner());
     }
 
     /** {@return the method's instructions, without labels, frames and line markers} */
@@ -2348,14 +2308,22 @@ public final class MixinJarPatcher {
     /**
      * {@return the types a handler declares for the host method's own parameters}
      *
-     * <p>{@code @Inject} and its siblings bind these to the method they inject into, so a retarget has to find
-     * a method that still takes exactly them - the wrapping injectors instead bind the wrapped call's receiver
-     * and arguments, which the anchor already pins down.
+     * <p>{@code @Inject} and its siblings bind these to the method they inject into. The wrapping injectors bind
+     * the wrapped call's receiver and arguments first - which the anchor pins down - but they may bind the host's
+     * parameters <em>after</em> those, as a trailing list: Create's HUD handler takes the host's graphics and
+     * delta after the wrapped call and its {@code Operation}, so a host that does not take them is not a host it
+     * can move to. Carrier parameters are skipped wherever they appear.
      */
-    private static java.util.List<String> declaredHostParams(org.objectweb.asm.tree.MethodNode handler) {
+    private static java.util.List<String> declaredHostParams(org.objectweb.asm.tree.MethodNode handler,
+            String anchor, boolean callSide) {
         var types = parametersFor(handler);
+        var skip = 0;
+        if (callSide) {
+            var wanted = parseAnchorMember(anchor);
+            skip = 1 + (wanted == null || wanted.desc() == null ? 0 : countParameters(wanted.desc()));
+        }
         var out = new java.util.ArrayList<String>();
-        for (var index = 0; index < types.size(); index++) {
+        for (var index = skip; index < types.size(); index++) {
             var type = types.get(index);
             if (hasSugar(handler, index) || type.equals("Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;")
                     || type.equals("Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;")
@@ -2365,6 +2333,26 @@ public final class MixinJarPatcher {
             out.add(type);
         }
         return out;
+    }
+
+    /** {@return how many parameters a method descriptor takes} */
+    private static int countParameters(String descriptor) {
+        var open = descriptor.indexOf('(');
+        var close = descriptor.indexOf(')');
+        if (open < 0 || close < 0) {
+            return 0;
+        }
+        var count = 0;
+        for (var index = open + 1; index < close; index++) {
+            while (descriptor.charAt(index) == '[') {
+                index++;
+            }
+            if (descriptor.charAt(index) == 'L') {
+                index = descriptor.indexOf(';', index);
+            }
+            count++;
+        }
+        return count;
     }
 
     /** {@return whether the handler's parameter at {@code index} carries MixinExtras sugar} */
@@ -2484,7 +2472,11 @@ public final class MixinJarPatcher {
                     carriers.add(candidate);
                 }
             }
-            if (carriers.isEmpty() || carriers.size() > 1) {
+            // Several methods calling the same member stay untouched: picking one of them by "the selected
+            // method can reach it" was tried and moved an injection onto a call it was not written for, which
+            // failed the whole class at apply time. The caller decides on the single-carrier case only; the
+            // multi-carrier ones are read against the vanilla baseline by hand.
+            if (carriers.size() != 1) {
                 continue;
             }
             // Whether this host is where the work went is the caller's business: either the selected method
@@ -2494,6 +2486,36 @@ public final class MixinJarPatcher {
             return host.name + host.desc;
         }
         return null;
+    }
+
+    /** {@return whether {@code from} reaches {@code target} by calls within the class, one or two hops} */
+    private static boolean reaches(ClassNode owner, org.objectweb.asm.tree.MethodNode from, String target) {
+        if (from.instructions == null) {
+            return false;
+        }
+        var direct = new java.util.ArrayList<String>();
+        for (var instruction : from.instructions) {
+            if (instruction instanceof org.objectweb.asm.tree.MethodInsnNode call) {
+                if ((call.name + call.desc).equals(target)) {
+                    return true;
+                }
+                direct.add(call.name + call.desc);
+            }
+        }
+        for (var hop : direct) {
+            for (var method : owner.methods) {
+                if (!(method.name + method.desc).equals(hop) || method.instructions == null) {
+                    continue;
+                }
+                for (var instruction : method.instructions) {
+                    if (instruction instanceof org.objectweb.asm.tree.MethodInsnNode call
+                            && (call.name + call.desc).equals(target)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /** {@return the target class's methods the selector names, ignoring any owner prefix and omitted return type} */

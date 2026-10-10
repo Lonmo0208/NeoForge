@@ -11,19 +11,32 @@
      public ItemStack(ItemLike item, int count) {
          this(item.asItem().builtInRegistryHolder(), count);
      }
-@@ -358,6 +_,25 @@
+@@ -358,6 +_,38 @@
      }
  
      public InteractionResult useOn(UseOnContext context) {
 +        var e = net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent(context, net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent.UsePhase.ITEM_AFTER_BLOCK));
 +        if (e.isCanceled()) return e.getCancellationResult();
-+        if (!context.getLevel().isClientSide()) return net.neoforged.neoforge.common.CommonHooks.onPlaceItemIntoWorld(context);
-+        // NeoFabric: Fabric API fires ItemEvents.USE_ON by wrapping this very call; since NeoForge moved the call
-+        // into this lambda, the bridge asks Fabric here instead (CommonHooks asks for the server-side call).
-+        return onItemUse(context, (c) -> {
-+            var fabricResult = net.neoforged.fabricbridge.FabricBridgeHooks.fireFabricItemUseOn(context);
-+            return fabricResult != null ? (InteractionResult) fabricResult : getItem().useOn(context);
-+        });
++        InteractionResult result;
++        if (!context.getLevel().isClientSide()) {
++            result = net.neoforged.neoforge.common.CommonHooks.onPlaceItemIntoWorld(context);
++        } else {
++            // NeoFabric: Fabric API fires ItemEvents.USE_ON by wrapping this very call; since NeoForge moved the
++            // call into this lambda, the bridge asks Fabric here instead (CommonHooks asks for the server-side
++            // call).
++            result = onItemUse(context, (c) -> {
++                var fabricResult = net.neoforged.fabricbridge.FabricBridgeHooks.fireFabricItemUseOn(context);
++                return fabricResult != null ? (InteractionResult) fabricResult : getItem().useOn(context);
++            });
++        }
++        // NeoFobric: the vanilla tail is asked here. Vanilla read this flag to award its own stat, and a
++        // Fabric-side mixin replaces that call to record the placement it has just been part of - the rewritten
++        // flow awards the stat elsewhere, which left the mixin with nothing to replace. The value is the vanilla
++        // one and the platform's stat stays where the platform puts it.
++        if (result instanceof InteractionResult.Success success) {
++            success.wasItemInteraction();
++        }
++        return result;
 +    }
 +
 +    @Override

@@ -42,7 +42,7 @@
              return false;
          }
  
-@@ -275,30 +_,55 @@
+@@ -275,30 +_,66 @@
          }
  
          BlockState adjustedState = block.playerWillDestroy(this.level, pos, state, this.player);
@@ -68,7 +68,18 @@
 -        boolean canDestroy = this.player.hasCorrectToolForDrops(adjustedState);
 +        boolean canDestroy = adjustedState.canHarvestBlock(this.level, pos, this.player); // previously player.hasCorrectToolForDrops(blockstate)
          itemStack.mineBlock(this.level, adjustedState, pos, this.player);
-+        boolean changed = removeBlock(pos, adjustedState, canDestroy, destroyedWith.copy());
++        // NeoFobric: the removal is asked the way the vanilla line asked it, because a Fabric-side mixin
++        // replaces that call (it lets a block veto its own removal) - the note below says what happens when a
++        // call site like this moves. The platform's own removal rides along in the carrier and runs from
++        // Level#removeBlock, so the block is removed once, by the platform's path, whoever is listening.
++        net.neoforged.fabricbridge.FabricBridgeHooks
++                .pushDestroyAction(() -> removeBlock(pos, adjustedState, canDestroy, destroyedWith.copy()));
++        boolean changed;
++        try {
++            changed = this.level.removeBlock(pos, false);
++        } finally {
++            net.neoforged.fabricbridge.FabricBridgeHooks.popDestroyAction();
++        }
 +        // Neo: the destroy call stays here, in destroyBlock, rather than inside the helper below. Mods
 +        // built against the vanilla API inject at this exact call site (Fabric's
 +        // PlayerBlockBreakEvents.AFTER does), and an injection point that has been moved into another
