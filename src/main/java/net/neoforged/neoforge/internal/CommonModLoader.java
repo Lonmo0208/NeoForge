@@ -52,6 +52,9 @@ public abstract class CommonModLoader {
             RegistryManager.postNewRegistryEvent();
             GameData.unfreezeData();
             GameData.postRegisterEvents();
+            // NeoFobric: run the Fabric Loader entrypoints while the registries are still open, so
+            // Fabric mods can register their content just like they do in a pure Fabric environment.
+            net.neoforged.fabricbridge.FabricBridgeHooks.runFabricEntrypoints();
             GameData.freezeData();
             registriesLoaded = true;
         });

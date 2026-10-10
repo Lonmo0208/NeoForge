@@ -133,12 +133,15 @@
          return true;
      }
  
-@@ -1014,12 +_,13 @@
+@@ -1014,12 +_,16 @@
      }
  
      public boolean addEffect(MobEffectInstance newEffect, @Nullable Entity source) {
 -        if (!this.canBeAffected(newEffect)) {
-+        if (!net.neoforged.neoforge.common.CommonHooks.canMobEffectBeApplied(this, newEffect, source)) {
++        // NeoFobric: run the vanilla immunity check first (Fabric API's mixin wraps this exact call
++        // to fire its own events), then the NeoForge applicability event. The NeoForge event is
++        // skipped when the vanilla check already denies the effect.
++        if (!this.canBeAffected(newEffect) || !net.neoforged.neoforge.common.CommonHooks.canMobEffectBeApplied(this, newEffect, source)) {
              return false;
          }
  
@@ -163,12 +166,15 @@
      public boolean canBeAffected(MobEffectInstance newEffect) {
          if (this.is(EntityTypeTags.IMMUNE_TO_INFESTED)) {
              return !newEffect.is(MobEffects.INFESTED);
-@@ -1045,7 +_,7 @@
+@@ -1045,7 +_,10 @@
      }
  
      public void forceAddEffect(MobEffectInstance newEffect, @Nullable Entity source) {
 -        if (this.canBeAffected(newEffect)) {
-+        if (net.neoforged.neoforge.common.CommonHooks.canMobEffectBeApplied(this, newEffect, source)) {
++        // NeoFobric: keep the vanilla canBeAffected call in the method body - Fabric API's mixin
++        // injects directly after this exact invocation. The NeoForge applicability event runs
++        // afterwards and is skipped when the vanilla check already denies the effect.
++        if (this.canBeAffected(newEffect) && net.neoforged.neoforge.common.CommonHooks.canMobEffectBeApplied(this, newEffect, source)) {
              MobEffectInstance previousEffect = this.activeEffects.put(newEffect.getEffect(), newEffect);
              if (previousEffect == null) {
                  this.onEffectAdded(newEffect, source);

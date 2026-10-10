@@ -5,8 +5,12 @@
 
 package net.neoforged.neoforge.client.gui.modlist;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.regex.Pattern;
+import java.util.zip.ZipFile;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.IoSupplier;
@@ -19,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 ///
 /// @see #packRoot(String, String)
 /// @see #packAsset(Identifier)
+/// @see #jarEntry(Path, String)
 public sealed interface ImageResource {
     /// Retrieves the image resource contents from the given resource manager. If the resource does not exist, this returns `null`.
     ///
@@ -44,6 +49,18 @@ public sealed interface ImageResource {
     /// and overriding of resources.
     static ImageResource packAsset(Identifier id) {
         return new PackAsset(id);
+    }
+
+    /// Creates an image resource read straight out of a jar file at the given path.
+    ///
+    /// This is for display information that does not belong to a pack - mods published by a loader
+    /// bridge carry their icon inside their own jar rather than through the resource manager.
+    ///
+    /// @param jar  the jar file
+    /// @param path the path of the entry inside the jar
+    /// @return an image resource for the given jar entry
+    static ImageResource jarEntry(Path jar, String path) {
+        return new JarEntry(jar, path);
     }
 
     @ApiStatus.Internal
@@ -76,6 +93,42 @@ public sealed interface ImageResource {
         @Override
         public String toString() {
             return path.toString();
+        }
+    }
+
+    @ApiStatus.Internal
+    record JarEntry(Path jar, String path) implements ImageResource {
+        @Override
+        public @Nullable IoSupplier<InputStream> get(ResourceManager resourceManager) {
+            final ZipFile zip;
+            final java.util.zip.ZipEntry entry;
+            try {
+                zip = new ZipFile(jar.toFile());
+                entry = zip.getEntry(path.replace('\\', '/'));
+                if (entry == null) {
+                    zip.close();
+                    return null;
+                }
+            } catch (IOException e) {
+                return null;
+            }
+            // The caller opens the stream and owns closing it, so the zip file is held open until
+            // then - the wrapper closes the handle together with the stream.
+            return () -> new FilterInputStream(zip.getInputStream(entry)) {
+                @Override
+                public void close() throws IOException {
+                    try {
+                        super.close();
+                    } finally {
+                        zip.close();
+                    }
+                }
+            };
+        }
+
+        @Override
+        public String toString() {
+            return jar + "!" + path;
         }
     }
 }

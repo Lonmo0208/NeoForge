@@ -1,11 +1,14 @@
 --- a/net/minecraft/client/gui/render/GuiRenderer.java
 +++ b/net/minecraft/client/gui/render/GuiRenderer.java
-@@ -88,7 +_,8 @@
+@@ -88,7 +_,11 @@
      private final Projection guiProjection = new Projection();
      private final ProjectionMatrixBuffer guiProjectionMatrixBuffer = new ProjectionMatrixBuffer("gui");
      private final FeatureRenderDispatcher featureRenderDispatcher;
 -    private final Map<Class<? extends PictureInPictureRenderState>, PictureInPictureRenderer<?>> pictureInPictureRenderers;
 +    private final Map<Class<? extends PictureInPictureRenderState>, net.neoforged.neoforge.client.gui.PictureInPictureRendererPool<?>> pictureInPictureRendererPools;
++    // NeoFobric: keep the vanilla-shaped picture-in-picture renderer map for Fabric's rendering
++    // mixins (@Shadow target). It mirrors the NeoForge pool contents so both access paths work.
++    public final Map<Class<? extends PictureInPictureRenderState>, net.minecraft.client.gui.render.pip.PictureInPictureRenderer<?>> pictureInPictureRenderers = new java.util.IdentityHashMap<>();
 +    private final Set<PictureInPictureRenderState> pictureInPictureRenderStatesScratch = new it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<>();
      private @Nullable GuiItemAtlas itemAtlas;
      private int cachedGuiScale;

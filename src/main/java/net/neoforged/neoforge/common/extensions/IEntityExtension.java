@@ -34,7 +34,19 @@ import net.neoforged.neoforge.network.payload.AdvancedAddEntityPayload;
 import org.jspecify.annotations.Nullable;
 
 public interface IEntityExtension {
-    private Entity self() {
+    /**
+     * {@return this instance, typed as an entity}
+     *
+     * <p>Must stay a {@code default} method rather than a {@code private} one. The JVM compiles a call
+     * to it from the surrounding default methods as {@code invokeinterface}, so the implementation has
+     * to be reachable by whoever implements this interface. A private method is not: the implementing
+     * class gets no implementation, and a mixin that calls {@code this.self()} ends up materialising a
+     * private method of its own on the target, which then <em>hides</em> the interface's default for
+     * {@code ILivingEntityExtension.self()} - leaving the interface's own default methods unable to call
+     * it and failing at runtime with
+     * {@code AbstractMethodError: ... does not define or inherit ... self()}.
+     */
+    default Entity self() {
         return (Entity) this;
     }
 

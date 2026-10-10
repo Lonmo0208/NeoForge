@@ -46,12 +46,53 @@
      }
  
      public static CompletableFuture<RegistryAccess.Frozen> load(
-@@ -192,14 +_,16 @@
+@@ -192,14 +_,57 @@
                  return new NetworkRegistryLoadTask<>(data, Lifecycle.stable(), loadingErrors, entries, knownDataSource);
              }
          };
 -        return load(loaderFactory, contextRegistries, registriesToLoad, executor);
-+        return load(loaderFactory, contextRegistries, registriesToLoad, executor, false);
++        // NeoFobric: this vanilla-shaped overload carries its own copy of the async call structure.
++        // Fabric's registry-sync wraps the supplyAsync call in this exact signature to re-bind its
++        // ScopedValue context on the worker thread; with a plain forwarder the binding would be
++        // lost. fromResources is always false on this path.
++        var fromResources = false;
++        return CompletableFuture.<CompletableFuture<RegistryAccess.Frozen>>supplyAsync(
++                () -> {
++                    Map<ResourceKey<?>, Exception> loadingErrors = new ConcurrentHashMap<>();
++                    List<RegistryLoadTask<?>> loadTasks = registriesToLoad.stream()
++                        .map(r -> loaderFactory.create((RegistryDataLoader.RegistryData<?>)r, loadingErrors))
++                        .collect(Collectors.toUnmodifiableList());
++                    RegistryOps.RegistryInfoLookup contextAndNewRegistries = createContext(contextRegistries, loadTasks);
++                    int taskCount = loadTasks.size();
++                    CompletableFuture<?>[] loadCompletions = new CompletableFuture[taskCount];
++
++                    for (int i = 0; i < taskCount; i++) {
++                        loadCompletions[i] = loadTasks.get(i).load(contextAndNewRegistries, executor);
++                    }
++
++                    return CompletableFuture.allOf(loadCompletions)
++                        .thenApplyAsync(
++                            ignored -> {
++                                List<RegistryLoadTask<?>> frozenRegistries = loadTasks.stream().filter(task -> task.freezeRegistry(loadingErrors)).toList();
++                                if (!loadingErrors.isEmpty()) {
++                                    throw logErrors(loadingErrors);
++                                } else {
++                                    List<? extends Registry<?>> registries = frozenRegistries.stream()
++                                        .flatMap(task -> task.validateRegistry(loadingErrors).stream())
++                                        .toList();
++                                    if (!loadingErrors.isEmpty()) {
++                                        throw logErrors(loadingErrors);
++                                    } else {
++                                        return new RegistryAccess.ImmutableRegistryAccess(registries).freeze();
++                                    }
++                                }
++                            },
++                            executor
++                        );
++                },
++                executor
++            )
++            .thenCompose(c -> (CompletionStage<RegistryAccess.Frozen>)c);
      }
  
 +    // Neo: Added parameter to know we are loading server-side from resources

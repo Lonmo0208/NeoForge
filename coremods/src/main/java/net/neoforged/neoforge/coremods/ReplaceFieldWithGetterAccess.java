@@ -18,6 +18,8 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Replaces direct field access in a class with access to the getter.
@@ -28,6 +30,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
  * If no methodName is passed, any method matching the described signature will be used as callable method.
  */
 public class ReplaceFieldWithGetterAccess extends SimpleClassProcessor {
+    private static final Logger LOG = LoggerFactory.getLogger(ReplaceFieldWithGetterAccess.class);
+
     private final Map<String, String> fieldToMethod;
     private final Set<Target> targets;
     private final String className;
@@ -59,8 +63,16 @@ public class ReplaceFieldWithGetterAccess extends SimpleClassProcessor {
     private static void redirectFieldToMethod(ClassNode classNode, String fieldName, @Nullable String methodName) {
         var foundField = CoremodUtils.getFieldByName(classNode, fieldName);
 
-        if (!Modifier.isPrivate(foundField.access) || Modifier.isStatic(foundField.access)) {
-            throw new IllegalStateException("Field " + fieldName + " in " + classNode.name + " is not private and an instance field");
+        if (Modifier.isStatic(foundField.access)) {
+            throw new IllegalStateException("Field " + fieldName + " in " + classNode.name + " is static");
+        }
+
+        if (!Modifier.isPrivate(foundField.access)) {
+            // NeoFobric: the field may already have been widened to public by the Fabric bridge's
+            // class tweaker (Fabric mods access it directly). In that case there is nothing to
+            // encapsulate, so skip the getter redirection instead of failing.
+            LOG.info("Field {} in {} is not private (already widened), skipping getter redirection", fieldName, classNode.name);
+            return;
         }
 
         String methodDescriptor = "()" + foundField.desc;

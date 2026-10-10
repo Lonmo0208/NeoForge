@@ -147,9 +147,28 @@ dependencies {
     compileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
 
     userdevCompileOnly jarJar("io.github.llamalad7:mixinextras-neoforge:${project.mixin_extras_version}")
+    // NeoFobric: in development, NeoForge loads from class folders, so the JiJ expansion that
+    // provides MixinExtras in production installs does not happen. MixinExtras carries an
+    // FMLModType manifest attribute, so putting it on the dev runtime classpath makes FML's
+    // InDevJarLocator load it as a game library - which Fabric mixin configurations need for
+    // @WrapOperation/@WrapMethod/MIXINEXTRAS:EXPRESSION. Production installs still get it from
+    // the universal jar's JiJ entry only (runtimeOnly is not part of the launcher profile).
+    runtimeOnly "io.github.llamalad7:mixinextras-neoforge:${project.mixin_extras_version}"
 
     userdevTestFixtures("net.neoforged.fancymodloader:junit-fml:${project.fancy_mod_loader_version}") {
         endorseStrictVersions()
+    }
+
+    // NeoFobric: the bridge that integrates the fabric-loader runtime into NeoForge. The bridge jar
+    // is a proper Maven artifact; the fabric-loader fat jar is exposed through the bridge's
+    // fabricLoaderBundle variant, which carries fabric-loader's Maven coordinates (required by
+    // the userdev tooling). With neofobric.fabricLoader.local=false, fabric-loader resolves from
+    // Maven instead.
+    libraries(project(':fabricbridge'))
+    if (rootProject.fabricLoaderLocalMode) {
+        libraries(project(path: ':fabricbridge', configuration: 'fabricLoaderBundle'))
+    } else {
+        libraries("net.fabricmc:fabric-loader:${rootProject.fabricLoaderBaseVersion}")
     }
 
     // Must be implementation instead of compileOnly so that running dependent projects such as tests will trigger (re)compilation of coremods.
@@ -161,6 +180,53 @@ dependencies {
             requireCapability 'net.neoforged:neoforge'
         }
     }
+}
+
+// NeoFobric: resolve the bridge and fabric-loader jars for embedding into the production installer.
+// Neither artifact is hosted on a public Maven repository, so they are embedded into the
+// installer's maven directory (like NeoForge's own universal jar in artifact-including builds);
+// the installer extracts embedded artifacts into the libraries directory before downloading.
+configurations {
+    fabricbridgeEmbedded {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    fabricLoaderEmbedded {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+dependencies {
+    fabricbridgeEmbedded(project(':fabricbridge'))
+    if (rootProject.fabricLoaderLocalMode) {
+        fabricLoaderEmbedded(project(path: ':fabricbridge', configuration: 'fabricLoaderBundle'))
+    } else {
+        fabricLoaderEmbedded("net.fabricmc:fabric-loader:${rootProject.fabricLoaderBaseVersion}")
+    }
+}
+
+tasks.named('installerJar', Zip).configure {
+    from(configurations.fabricbridgeEmbedded) {
+        into "maven/net/neoforged/fabricbridge/${project.version}/"
+    }
+    // The fat jar's classifier is not part of its Maven coordinates, so embed it under the
+    // classifier-less name the library entries in install_profile.json/version.json reference.
+    // Capture values at configuration time: the closures run at execution time.
+    final fabricLoaderVersion = rootProject.fabricLoaderVersion
+    from(configurations.fabricLoaderEmbedded) {
+        into "maven/net/fabricmc/fabric-loader/${fabricLoaderVersion}/"
+        rename { String fileName -> "fabric-loader-${fabricLoaderVersion}.jar" }
+    }
+}
+
+// NeoFobric: the profile tasks list libraries as IdentifiedFiles, whose file inputs do not carry
+// the producer task dependencies of project/file-based artifacts (bridge + fabric-loader).
+// Depending on the configuration directly builds its artifacts before the tasks run.
+tasks.withType(net.neoforged.neodev.installer.CreateInstallerProfile).configureEach {
+    dependsOn configurations.launcherProfileClasspath
+}
+tasks.withType(net.neoforged.neodev.installer.CreateLauncherProfile).configureEach {
+    dependsOn configurations.launcherProfileClasspath
 }
 
 // Select runtimeElements rather than universalJar from the main source set
@@ -177,6 +243,47 @@ neoDev {
         configureEach {
             gameDirectory = layout.projectDir.dir("run/$name")
             systemProperty("terminal.ansi", "true")
+            if (project.hasProperty('neofobric.traceEntrypoints')) {
+                systemProperty("neofobric.traceEntrypoints", "true")
+            }
+            // A/B diagnosis: -Pneofobric.disabled=true runs NeoForge without the Fabric bridge.
+            if (project.hasProperty('neofobric.disabled')) {
+                systemProperty("neofobric.disabled", "true")
+            }
+            // A/B diagnosis: switch off individual bridge stages to find the culprit.
+            for (var flag : ['neofobric.noJarPatcher', 'neofobric.noConflictFilter', 'neofobric.noClassTweaker', 'neofobric.noAccessorTrim', 'neofobric.noAccessorRenames', 'neofobric.noClassPatch', 'neofobric.noPrepareModInit', 'neofobric.noClientEntrypoints', 'neofobric.noHandlerFix', 'neofobric.noFabricMixins', 'neofobric.registerAllMixinConfigs', 'neofobric.noDefaultMixinSkips']) {
+                if (project.hasProperty(flag)) {
+                    systemProperty(flag, "true")
+                }
+            }
+            // Mixin verbose logging, for finding why a specific injection did not install.
+            if (project.hasProperty('neofobric.mixinDebug')) {
+                systemProperty("mixin.debug.verbose", "true")
+                systemProperty("mixin.debug.export", "true")
+                systemProperty("mixin.checks", "true")
+            }
+            if (project.hasProperty('neofobric.traceMixinClasses')) {
+                systemProperty("neofobric.traceMixinClasses", "true")
+            }
+            // MC's GL state validation runs in dev only (production never enables it from its very
+            // definition: VALIDATION = IS_RUNNING_IN_IDE && !disable). It assumes the vanilla renderer
+            // owns the pipeline and the GL state, which stops being true the moment Sodium or iris drive
+            // the renderer - with a shader pack active it reported three of their legitimate states as
+            // fatal in a row (an unchecked array index in validateDraw, then "Missing sampler Sampler1").
+            // Dev runs therefore start with it off, matching production; pass
+            // -Pneoforge.enableGlValidation=true to turn it back on when debugging the vanilla path.
+            if (!project.hasProperty('neoforge.enableGlValidation')) {
+                systemProperty("neoforge.disableGlValidation", "true")
+            }
+            if (project.hasProperty('neofobric.skipMixinConfigs')) {
+                systemProperty("neofobric.skipMixinConfigs", project.property('neofobric.skipMixinConfigs'))
+            }
+            if (project.hasProperty('neofobric.onlyMixinConfigs')) {
+                systemProperty("neofobric.onlyMixinConfigs", project.property('neofobric.onlyMixinConfigs'))
+            }
+            if (project.hasProperty('neofobric.skipMixinClasses')) {
+                systemProperty("neofobric.skipMixinClasses", project.property('neofobric.skipMixinClasses'))
+            }
         }
         client {
             client()
@@ -578,3 +685,18 @@ publishing {
 tasks.withType(JavaCompile.class).configureEach(task -> {
     Collections.addAll(task.getOptions().getCompilerArgs(), "-Xmaxerrs", "9999");
 });
+
+// NeoFobric: 开发客户端直接进入指定存档，便于在没有人手操作窗口的环境里验证"能进世界"。
+// 用法：./gradlew :neoforge:runClient -Pneofobric.quickPlayWorld=<存档目录名>
+//       ./gradlew :neoforge:runClient -Pneofobric.quickPlayServer=<主机:端口>
+// 不传参数时行为不变，正常停在主菜单。
+if (project.hasProperty('neofobric.quickPlayWorld')) {
+    neoDev.runs.client {
+        programArguments.addAll('--quickPlaySingleplayer', project.property('neofobric.quickPlayWorld'))
+    }
+}
+if (project.hasProperty('neofobric.quickPlayServer')) {
+    neoDev.runs.client {
+        programArguments.addAll('--quickPlayMultiplayer', project.property('neofobric.quickPlayServer'))
+    }
+}

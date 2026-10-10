@@ -141,6 +141,22 @@ class LibraryCollector {
             }
         }
 
+        // If no whitelisted repository hosts the library, assume it is embedded into the
+        // installer's maven directory (like NeoForge's own universal jar in artifact-including
+        // installer builds). The installer extracts embedded maven artifacts into the libraries
+        // directory before downloading, and both the installer and the vanilla launcher skip
+        // downloads for files whose SHA-1 already matches.
+        libraryFuture = libraryFuture.exceptionally(error -> {
+            LOGGER.warn("  Library {} is not hosted on any repository. Assuming it is embedded in the installer maven directory.", name);
+            return new Library(
+                    name,
+                    new LibraryDownload(new LibraryArtifact(
+                            sha1,
+                            fileSize,
+                            joinUris(NEOFORGED_MAVEN, path).toString(),
+                            path)));
+        });
+
         libraries.add(libraryFuture);
     }
 

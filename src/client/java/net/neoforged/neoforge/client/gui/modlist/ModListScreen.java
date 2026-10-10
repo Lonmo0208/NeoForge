@@ -23,6 +23,7 @@ import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -70,6 +71,7 @@ import net.minecraft.util.SpecialDates;
 import net.minecraft.util.Util;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.neoforged.fml.VersionChecker;
 import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -78,6 +80,7 @@ import net.neoforged.neoforge.client.gui.widget.BackgroundWithPipingWidget;
 import net.neoforged.neoforge.client.gui.widget.ResizableTextureImageWidget;
 import net.neoforged.neoforge.client.gui.widget.SolidColorWidget;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -95,13 +98,38 @@ public class ModListScreen extends Screen {
     static final int ICON_SIZE = 24;
     static final int BANNER_HEIGHT = 50;
 
+    /// Indentation of a bundled mod's row under the mod that carries it.
+    static final int CHILD_INDENT = 10;
+
+    /// Which loader a mod list row comes from. Shown as a small chip next to the version.
+    enum LoaderTag {
+        NEOFORGE("NeoForge", 0xFFFFA033),
+        FABRIC("Fabric", 0xFFDBC1A4);
+
+        private final String label;
+        /// Brand colour, used for both the chip's border and its text.
+        private final int color;
+
+        LoaderTag(String label, int color) {
+            this.label = label;
+            this.color = color;
+        }
+    }
+
+    /// One mod as the screen lists it: what to show, which loader it came from, and - for a mod
+    /// carried inside another one's jar - the id of that mod.
+    record ModRow(ModDisplayInfo info, LoaderTag loader, @Nullable String parentId) {}
+
     private final @Nullable Screen lastScreen;
-    private final ImmutableList<ModDisplayInfo> mods;
+    private final ImmutableList<ModRow> mods;
     private final Path modsFolder;
     private final ConfigurationScreenFactory configFactory;
     private final VersionCheckResultSupplier versionCheck;
 
+    /// The rows without a parent: always visible, each carrying its bundled mods.
     private final List<ModsList.Entry> allEntries;
+    /// Every row, bundled ones included, for searches and for the child lists.
+    private final List<ModsList.Entry> everyEntry = new ArrayList<>();
     private SortType currentSort = SortType.A_TO_Z;
 
     @Nullable
@@ -115,7 +143,7 @@ public class ModListScreen extends Screen {
     private EditBox search;
 
     public static ModListScreen create(@Nullable Screen lastScreen) {
-        final Builder<ModDisplayInfo> mods = ImmutableList.builder();
+        final Builder<ModRow> mods = ImmutableList.builder();
 
         for (ModContainer container : ModList.get().getSortedMods()) {
             final ModDisplayInfo displayInfo;
@@ -165,13 +193,42 @@ public class ModListScreen extends Screen {
                 displayInfo = container.getCustomExtension(ModDisplayInfo.class)
                         .orElseGet(() -> new DefaultModDisplayInfo(container));
             }
-            mods.add(displayInfo);
+            mods.add(new ModRow(displayInfo, LoaderTag.NEOFORGE, parentModIdOf(container.getModInfo())));
+        }
+
+        // Rows for mods from other loaders, contributed by a bridge (see ModListContributions). They
+        // have no FML container, so they can only come from outside ModList - but they are installed
+        // mods a player expects to find here all the same. An id an FML mod already uses is skipped:
+        // the bridge's row would be a duplicate of the same mod.
+        for (var contributed : ModListContributions.contributions()) {
+            if (ModList.get().getModContainerById(contributed.info().id()).isEmpty()) {
+                mods.add(new ModRow(contributed.info(), LoaderTag.FABRIC,
+                        contributed.bundledBy().isBlank() ? null : contributed.bundledBy()));
+            }
         }
 
         return new ModListScreen(lastScreen, mods.build(), FMLPaths.MODSDIR.get(), ConfigurationScreenFactory.DEFAULT, VersionCheckResultSupplier.DEFAULT);
     }
 
-    private ModListScreen(@Nullable Screen lastScreen, ImmutableList<ModDisplayInfo> mods, Path modsFolder, ConfigurationScreenFactory configFactory, VersionCheckResultSupplier versionCheck) {
+    /// {@return the mod whose jar carries this mod's jar (jar-in-jar), or `null`}
+    ///
+    /// The FML discovery attributes link a nested jar to its parent jar; the parent's mod is what the
+    /// player thinks of as the mod they installed, so its children are shown under it. A parent that
+    /// is not itself in the list (or an attribute set that cannot be read) leaves the mod top-level.
+    private static @Nullable String parentModIdOf(IModInfo info) {
+        try {
+            final var parent = info.getOwningFile().getFile().getDiscoveryAttributes().parent();
+            if (parent == null) {
+                return null;
+            }
+            final var parentMods = parent.getModInfos();
+            return parentMods.isEmpty() ? null : parentMods.getFirst().getModId();
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private ModListScreen(@Nullable Screen lastScreen, ImmutableList<ModRow> mods, Path modsFolder, ConfigurationScreenFactory configFactory, VersionCheckResultSupplier versionCheck) {
         super(translatable("neoforge.screen.mods.title"));
         this.lastScreen = lastScreen;
         this.mods = mods;
@@ -228,9 +285,27 @@ public class ModListScreen extends Screen {
         main.addChild(this.displayPanel.getMainLayout());
 
         this.allEntries.clear();
-        for (ModDisplayInfo mod : mods) {
-            this.allEntries.add(this.displayList.new Entry(this.versionCheck.get(mod.id()), mod));
+        this.everyEntry.clear();
+        final Map<String, ModsList.Entry> byId = new java.util.HashMap<>();
+        final List<ModsList.Entry> all = new ArrayList<>(mods.size());
+        for (ModRow mod : mods) {
+            final var entry = this.displayList.new Entry(this.versionCheck.get(mod.info().id()), mod.info(), mod.loader());
+            all.add(entry);
+            byId.putIfAbsent(mod.info().id(), entry);
         }
+        for (int i = 0; i < mods.size(); i++) {
+            final var entry = all.get(i);
+            final var parentId = mods.get(i).parentId();
+            final ModsList.Entry parent = parentId == null || parentId.equals(entry.displayInfo.id()) ? null : byId.get(parentId);
+            if (parent != null) {
+                // A bundled mod: shown under the mod whose jar carries it, until that row is expanded.
+                entry.parent = parent;
+                parent.children.add(entry);
+            } else {
+                this.allEntries.add(entry);
+            }
+        }
+        this.everyEntry.addAll(all);
         this.updateModsList();
 
         this.layout.visitWidgets(this::addRenderableWidget);
@@ -266,12 +341,28 @@ public class ModListScreen extends Screen {
     private void updateModsList() {
         if (this.displayList == null) return;
 
-        final ArrayList<ModsList.Entry> entries = new ArrayList<>(this.allEntries);
-        this.currentSort.sort(entries);
         assert this.search != null;
         final String filter = this.search.getValue().toLowerCase(Locale.ROOT);
-        if (!filter.isEmpty()) {
+        final ArrayList<ModsList.Entry> entries = new ArrayList<>();
+        if (filter.isEmpty()) {
+            // The tree: every top-level mod, with the mods bundled inside it listed directly under it
+            // once its row is expanded (and hidden while it is not).
+            final ArrayList<ModsList.Entry> roots = new ArrayList<>(this.allEntries);
+            this.currentSort.sort(roots);
+            for (ModsList.Entry root : roots) {
+                entries.add(root);
+                if (root.expanded && !root.children.isEmpty()) {
+                    final ArrayList<ModsList.Entry> children = new ArrayList<>(root.children);
+                    this.currentSort.sort(children);
+                    entries.addAll(children);
+                }
+            }
+        } else {
+            // A search looks through every row, bundled mods included: a player searching for a
+            // module should find it whether or not its parent happens to be expanded.
+            entries.addAll(this.everyEntry);
             entries.removeIf(entry -> !entry.displayInfo.displayName().getString().toLowerCase(Locale.ROOT).contains(filter));
+            this.currentSort.sort(entries);
         }
         final ModsList.Entry selected = this.displayList.getSelected();
         this.displayList.replaceEntries(entries);
@@ -359,19 +450,61 @@ public class ModListScreen extends Screen {
 
         class Entry extends ObjectSelectionList.Entry<ModsList.Entry> {
             private static final Identifier VERSION_CHECK_ICONS = Identifier.fromNamespaceAndPath(NeoForgeMod.MOD_ID, "textures/gui/version_check_icons.png");
+            /// Vanilla's locator-bar triangles: the closest thing the game ships to an expand/collapse
+            /// glyph (7x10). The down triangle invites expanding (the bundled mods are listed below),
+            /// the up one folding them away again.
+            private static final Identifier EXPAND_ICON = Identifier.withDefaultNamespace("hud/locator_bar_arrow_down");
+            private static final Identifier COLLAPSE_ICON = Identifier.withDefaultNamespace("hud/locator_bar_arrow_up");
+            private static final int EXPAND_ICON_WIDTH = 7;
+            private static final int EXPAND_ICON_HEIGHT = 10;
             final VersionChecker.@Nullable CheckResult checkResult;
             final ModDisplayInfo displayInfo;
+            final LoaderTag loader;
             @Nullable
             final ImageData iconData;
+            /// The mod whose jar carries this one; `null` for a mod the player installed directly.
+            ModsList.@Nullable Entry parent;
+            /// The mods carried inside this one's jar, listed beneath it while expanded.
+            final List<ModsList.Entry> children = new ArrayList<>();
+            /// Bundled mods are hidden until the player expands the row (they are also sorted into it).
+            boolean expanded;
 
-            Entry(VersionChecker.@Nullable CheckResult checkResult, ModDisplayInfo displayInfo) {
+            Entry(VersionChecker.@Nullable CheckResult checkResult, ModDisplayInfo displayInfo, LoaderTag loader) {
                 this.checkResult = checkResult;
                 this.displayInfo = displayInfo;
+                this.loader = loader;
                 if (displayInfo.icon() != null) {
                     this.iconData = ModListScreen.this.loadImage("icon", displayInfo.id(), Objects.requireNonNull(displayInfo.icon()), displayInfo.iconBlur());
                 } else {
                     this.iconData = null;
                 }
+            }
+
+            int depth() {
+                return this.parent == null ? 0 : 1;
+            }
+
+            /// {@return the x of the expand/collapse icon, or -1 when there is nothing to expand}
+            private int expandIconX() {
+                return this.children.isEmpty() ? -1 : this.getContentRight() - EXPAND_ICON_WIDTH - 3;
+            }
+
+            private int expandIconY() {
+                return this.getContentYMiddle() - EXPAND_ICON_HEIGHT / 2;
+            }
+
+            @Override
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                final int iconX = expandIconX();
+                if (iconX >= 0
+                        && event.x() >= iconX - 2 && event.x() < iconX + EXPAND_ICON_WIDTH + 2
+                        && event.y() >= expandIconY() - 1 && event.y() < expandIconY() + EXPAND_ICON_HEIGHT + 1) {
+                    // Clicking the icon expands or collapses the bundled mods instead of selecting.
+                    this.expanded = !this.expanded;
+                    ModListScreen.this.updateModsList();
+                    return true;
+                }
+                return super.mouseClicked(event, doubleClick);
             }
 
             @Override
@@ -383,13 +516,19 @@ public class ModListScreen extends Screen {
             public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a) {
                 int left = this.getContentX();
                 int top = this.getContentY();
+                // Bundled mods are indented so the hierarchy reads at a glance.
+                left += depth() * CHILD_INDENT;
                 int textLeft = left + 2;
 
                 if (iconData != null) {
                     graphics.blit(iconData.sprite, left, top, left + ICON_SIZE, top + ICON_SIZE, 0.0F, 1.0F, 0.0F, 1.0F);
                     textLeft += ICON_SIZE + 4;
                 }
-                int maxTextWidth = getRowWidth() - textLeft + left - 4;
+                int maxTextWidth = getRowWidth() - textLeft + this.getContentX() - 4;
+                if (expandIconX() >= 0) {
+                    maxTextWidth -= EXPAND_ICON_WIDTH + 4;
+                }
+                maxTextWidth -= 2 + ModListScreen.this.font.width(this.loader.label) + 5;
 
                 if (checkResult != null && checkResult.status().shouldDraw() && FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.VERSION_CHECK)) {
                     graphics.blit(
@@ -411,7 +550,36 @@ public class ModListScreen extends Screen {
                 final Language language = Language.getInstance();
                 graphics.text(ModListScreen.this.font, language.getVisualOrder(ModListScreen.this.font.ellipsize(displayInfo.displayName(), maxTextWidth)), textLeft, top, 0xFFFFFFFF);
                 top += ModListScreen.this.font.lineHeight;
-                graphics.text(ModListScreen.this.font, language.getVisualOrder(ModListScreen.this.font.ellipsize(Component.literal(displayInfo.version()), maxTextWidth)), textLeft, top, 0xFF000000 + TextColor.GRAY.getValue());
+                final Component version = Component.literal(displayInfo.version());
+                graphics.text(ModListScreen.this.font, language.getVisualOrder(ModListScreen.this.font.ellipsize(version, maxTextWidth)), textLeft, top, 0xFF000000 + TextColor.GRAY.getValue());
+                drawLoaderTag(graphics, textLeft + ModListScreen.this.font.width(version) + 5, top, this.loader);
+
+                final int iconX = expandIconX();
+                if (iconX >= 0 && (hovered || this.expanded)) {
+                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                            this.expanded ? COLLAPSE_ICON : EXPAND_ICON,
+                            iconX, expandIconY(), EXPAND_ICON_WIDTH, EXPAND_ICON_HEIGHT);
+                }
+            }
+
+            /// The loader tag: a dark chip with a 1px brand-coloured border and brand-coloured text.
+            /// Drawn from primitives on purpose - vanilla ships no sprite for this.
+            private void drawLoaderTag(GuiGraphicsExtractor graphics, int x, int y, LoaderTag tag) {
+                final var font = ModListScreen.this.font;
+                final int width = font.width(tag.label);
+                final int left = x - 2;
+                final int top = y - 1;
+                final int right = x + width + 2;
+                final int bottom = y + font.lineHeight;
+                if (right > this.getContentRight()) {
+                    return; // Not enough room next to the version; the tag is decoration, not data.
+                }
+                graphics.fill(left, top, right, bottom, 0xC0181818);
+                graphics.fill(left, top, right, top + 1, tag.color);
+                graphics.fill(left, bottom - 1, right, bottom, tag.color);
+                graphics.fill(left, top, left + 1, bottom, tag.color);
+                graphics.fill(right - 1, top, right, bottom, tag.color);
+                graphics.text(font, tag.label, x, y, tag.color);
             }
         }
     }

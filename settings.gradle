@@ -22,6 +22,13 @@ dependencyResolutionManagement {
     rulesMode = RulesMode.FAIL_ON_PROJECT_RULES
     repositories {
         mavenCentral()
+        // NeoFobric: only consulted for the fabric-loader artifact when neofobric.fabricLoader.local=false.
+        maven {
+            url = 'https://maven.fabricmc.net/'
+            content {
+                includeModule('net.fabricmc', 'fabric-loader')
+            }
+        }
     }
 }
 
@@ -37,6 +44,10 @@ project(':neoforge').projectDir = file('projects/neoforge')
 
 include ':tests'
 project(":tests").projectDir = file("tests")
+
+// NeoFobric: bridge subproject that integrates the fabric-loader runtime into NeoForge.
+include ':fabricbridge'
+project(':fabricbridge').projectDir = file('projects/fabricbridge')
 
 include ':testframework'
 include ':coremods'

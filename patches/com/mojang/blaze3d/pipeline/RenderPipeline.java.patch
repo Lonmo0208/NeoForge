@@ -137,7 +137,7 @@
          private void withSnippet(RenderPipeline.Snippet snippet) {
              if (snippet.vertexShader.isPresent()) {
                  this.vertexShader = snippet.vertexShader;
-@@ -332,6 +_,10 @@
+@@ -332,9 +_,38 @@
              if (snippet.polygonMode.isPresent()) {
                  this.polygonMode = snippet.polygonMode;
              }
@@ -148,13 +148,41 @@
          }
  
          public RenderPipeline.Snippet buildSnippet() {
++            // The vanilla-signature construction stays in this method on purpose: fabric-rendering-v1's
++            // RenderPipelineBuilderMixin wraps the `new Snippet(...)` instruction here, and its handler
++            // is compiled against the vanilla parameter list. Building with the widened constructor
++            // only when a stencil test is set keeps that instruction vanilla-shaped while NeoForge's
++            // own snippets keep their stencil test - the wider construction lives in its own method,
++            // which Fabric never wrapped.
++            if (this.stencilTest.isEmpty()) {
++                return new RenderPipeline.Snippet(
++                    this.vertexShader,
++                    this.fragmentShader,
++                    this.definesBuilder.map(ShaderDefines.Builder::build),
++                    this.bindGroupLayouts.map(Collections::unmodifiableList),
++                    this.colorTargetStates,
++                    this.activeColorTargetStateCount,
++                    this.depthStencilState,
++                    this.polygonMode,
++                    this.cull,
++                    this.vertexFormatPerBuffer,
++                    this.primitiveTopology
++                );
++            }
++            return buildSnippetWithStencilTest(this.stencilTest.get());
++        }
++
++        private RenderPipeline.Snippet buildSnippetWithStencilTest(net.neoforged.neoforge.client.stencil.StencilTest stencilTest) {
+             return new RenderPipeline.Snippet(
+                 this.vertexShader,
+                 this.fragmentShader,
 @@ -346,7 +_,8 @@
                  this.polygonMode,
                  this.cull,
                  this.vertexFormatPerBuffer,
 -                this.primitiveTopology
 +                this.primitiveTopology,
-+                this.stencilTest
++                Optional.of(stencilTest)
              );
          }
  

@@ -1,0 +1,64 @@
+plugins {
+    id 'java-library'
+}
+
+base {
+    archivesName = 'fabricbridge'
+}
+
+// Fobric: the fabric-loader fat jar, built from the local checkout by the root build (or resolved
+// from Maven when fobric.fabricLoader.local=false). Declared as a file collection outside the
+// dependencies block so the task dependency (builtBy) survives.
+def fabricLoaderJar = files(rootProject.fabricLoaderFatJar) {
+    builtBy rootProject.tasks.named('buildFabricLoader')
+}
+
+configurations {
+    // Exposes the fabric-loader fat jar as a consumable variant carrying fabric-loader's own Maven
+    // coordinates (net.fabricmc:fabric-loader). NeoForge's userdev tooling requires every library
+    // to be resolvable to Maven identifiers, which bare file dependencies cannot provide.
+    fabricLoaderBundle {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+configurations.fabricLoaderBundle {
+    outgoing {
+        capability("net.fabricmc:fabric-loader:${rootProject.fabricLoaderVersion}")
+        artifact(rootProject.fabricLoaderFatJar) {
+            builtBy rootProject.tasks.named('buildFabricLoader')
+        }
+    }
+}
+
+// The bridge runs on the bootstrap classpath next to FML itself. Everything it compiles against
+// (FML, sponge-mixin, ASM, fabric-loader) is provided at runtime by NeoForge's own libraries or
+// by the fabric-loader fat jar, so all dependencies are compileOnly here.
+dependencies {
+    compileOnly("net.neoforged.fancymodloader:loader:${fancy_mod_loader_version}") {
+        transitive = false
+    }
+    // Provides net.neoforged.api.distmarker.Dist on the bootstrap classpath.
+    compileOnly("net.neoforged:mergetool:${mergetool_version}:api") { transitive = false }
+    compileOnly("org.slf4j:slf4j-api:2.0.17")
+    compileOnly("net.fabricmc:sponge-mixin:${mixin_version}") { transitive = false }
+    for (var asmModule : ["org.ow2.asm:asm", "org.ow2.asm:asm-tree"]) {
+        compileOnly(asmModule) {
+            version {
+                strictly project.asm_version
+            }
+        }
+    }
+
+    if (rootProject.fabricLoaderLocalMode) {
+        compileOnly(fabricLoaderJar)
+    } else {
+        compileOnly("net.fabricmc:fabric-loader:${rootProject.fabricLoaderBaseVersion}")
+    }
+}
+
+tasks.withType(Javadoc.class).configureEach {
+    enabled = false
+}
+

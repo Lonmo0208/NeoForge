@@ -1,0 +1,2 @@
+net.neoforged.fabricbridge.transform.FabricBootstrapProcessor
+net.neoforged.fabricbridge.transform.NeoFobricClassTweakerProcessor

@@ -22,7 +22,7 @@ if (fixedProjectVersion == null) {
         final preReleaseSuffix = project.minecraft_version.split("-", 2)[1]
         project.version = "${project.neoforge_snapshot_next_stable}.0-alpha.0+${preReleaseSuffix}.${(new Date()).format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('UTC'))}"
     } else {
-        project.version = gradleutils.version.toString() + "-BugFix"
+        project.version = gradleutils.version.toString()
     }
 } else {
     project.version = fixedProjectVersion
@@ -30,6 +30,55 @@ if (fixedProjectVersion == null) {
 
 // Print version, generally useful to know - also appears on CI
 System.out.println("NeoForge version ${project.version}")
+
+// ** NeoFobric: Fabric Loader bridge **
+// Integrates the fabric-loader runtime (checked out at <root>/fabric-loader, treated as read-only)
+// into NeoForge. By default the fabric-loader fat jar is built from the local checkout by running
+// the checkout's own Gradle wrapper in a subprocess, so pulling upstream changes into that
+// checkout is picked up on the next build. Set `-Pneofobric.fabricLoader.local=false` to resolve a
+// published fabric-loader from Maven instead.
+ext.fabricLoaderDir = rootProject.file('fabric-loader')
+ext.fabricLoaderLocalMode = providers.gradleProperty("neofobric.fabricLoader.local").map { it.toBoolean() }.orElse("true").get()
+
+final fabricLoaderVersionMatcher = ext.fabricLoaderDir.exists()
+        ? (new File(ext.fabricLoaderDir, 'src/main/java/net/fabricmc/loader/impl/FabricLoaderImpl.java').text =~ /VERSION\s*=\s*"([^"]+)";/)
+        : null
+if (fabricLoaderVersionMatcher == null || fabricLoaderVersionMatcher.count == 0) {
+    ext.fabricLoaderVersion = null
+    ext.fabricLoaderBaseVersion = null
+} else {
+    ext.fabricLoaderBaseVersion = fabricLoaderVersionMatcher[0][1]
+    // Mirrors how the fabric-loader build derives its own version outside of CI.
+    ext.fabricLoaderVersion = ext.fabricLoaderBaseVersion + (System.getenv("GITHUB_ACTIONS") ? "" : "+local")
+}
+ext.fabricLoaderFatJar = ext.fabricLoaderVersion == null
+        ? null
+        : new File(ext.fabricLoaderDir, "build/libs/fabric-loader-${ext.fabricLoaderVersion}-fat.jar")
+
+if (ext.fabricLoaderLocalMode) {
+    if (ext.fabricLoaderVersion == null) {
+        throw new IllegalStateException("neofobric.fabricLoader.local is enabled, but no fabric-loader checkout was found at ${ext.fabricLoaderDir} (or its version could not be determined).")
+    }
+    // Capture the values at configuration time; the task configuration closure delegates to the task.
+    final fabricLoaderCheckoutDir = ext.fabricLoaderDir
+    final fabricLoaderBaseVersionStr = ext.fabricLoaderBaseVersion
+    final fabricLoaderJarFile = ext.fabricLoaderFatJar
+    tasks.register('buildFabricLoader', Exec) {
+        group = 'neofobric'
+        description = "Builds the fabric-loader fat jar from the local fabric-loader checkout (${fabricLoaderBaseVersionStr})."
+        // Run the checkout's own wrapper in a subprocess: fabric-loader is a self-contained build
+        // and is deliberately kept unmodified, so it must not be turned into a composite build.
+        workingDir = fabricLoaderCheckoutDir
+        commandLine System.getProperty("java.home") + '/bin/java', '-cp', 'gradle/wrapper/gradle-wrapper.jar', 'org.gradle.wrapper.GradleWrapperMain', ':fatJar', '--console=plain', '--stacktrace'
+        environment 'JAVA_HOME', System.getProperty("java.home")
+        inputs.dir new File(fabricLoaderCheckoutDir, 'src')
+        inputs.files new File(fabricLoaderCheckoutDir, 'build.gradle'), new File(fabricLoaderCheckoutDir, 'settings.gradle'),
+                new File(fabricLoaderCheckoutDir, 'gradle.properties')
+        outputs.file fabricLoaderJarFile
+        outputs.upToDateWhen { fabricLoaderJarFile.isFile() }
+    }
+}
+// =========================================================================================
 
 allprojects {
     version = rootProject.version

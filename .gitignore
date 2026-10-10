@@ -45,3 +45,8 @@ build
 **/runs/
 
 **/out/
+
+#NeoFobric: the fabric-loader checkout (upstream repo, cloned next to NeoForge) and its build outputs
+/fabric-loader/
+/仅供参考
+/fabric
