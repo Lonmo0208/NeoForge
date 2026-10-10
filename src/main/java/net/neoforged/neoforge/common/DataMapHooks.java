@@ -17,6 +17,7 @@ import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -68,11 +69,31 @@ public class DataMapHooks {
         return INVERSE_WAXABLES_DATAMAP.containsKey(block) ? INVERSE_WAXABLES_DATAMAP.get(block) : HoneycombItem.WAX_OFF_BY_BLOCK.get().get(block);
     }
 
+    /**
+     * NeoFobric: the state a Fabric mod registered as this state's stripped form, or {@code null} when the
+     * Fabric side has nothing to say about it.
+     *
+     * <p>Fabric keeps the stripped state behind a transformer rather than a plain block, because a
+     * registration can ask for the original state's properties to be copied. Its own call site sits in
+     * {@code AxeItem#getStripped}, a method this tree no longer calls - the axe goes through
+     * {@code getAxeStrippingState} - so the lookup has to be made on Fabric's behalf from here.
+     */
+    @Nullable
+    public static BlockState getBlockStrippedByFabric(BlockState state) {
+        return (BlockState) net.neoforged.fabricbridge.FabricBridgeHooks.strippedStateFromFabric(state);
+    }
+
     @ApiStatus.Internal
     public static FuelValues populateFuelValues(RegistryAccess lookupProvider, FeatureFlagSet features) {
         FuelValues.Builder builder = new FuelValues.Builder(lookupProvider, features);
         Registry<Item> registry = lookupProvider.lookupOrThrow(Registries.ITEM);
         registry.getDataMap(NeoForgeDataMaps.FURNACE_FUELS).forEach((key, fuel) -> builder.add(registry.getValue(key), fuel.burnTime()));
+        // NeoFobric: replay Fabric API's fuel events on the table that actually gets built. Fabric fires them
+        // from inside FuelValues#vanillaBurnTimes, and this tree assembles the table from the furnace-fuel data
+        // map instead - the exclusion of non-flammable wood included - so a Fabric mod's fuels would never be
+        // registered and its exclusions never applied. The order is Fabric's own: build callbacks first, then
+        // the vanilla exclusion, then the exclusion callbacks.
+        net.neoforged.fabricbridge.FabricBridgeHooks.applyFabricFuelEvents(builder, lookupProvider, features, AbstractFurnaceBlockEntity.BURN_TIME_STANDARD);
         return builder.build();
     }
 

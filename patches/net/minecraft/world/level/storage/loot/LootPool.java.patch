@@ -10,24 +10,37 @@
              )
              .apply(i, LootPool::new)
      );
-@@ -50,7 +_,8 @@
+@@ -45,6 +_,11 @@
+     private NumberProvider rolls;
+     private NumberProvider bonusRolls;
+ 
++    // Neo: vanilla-shaped constructor, kept as the shared body of every construction. The named form
++    // below delegates here, so a Fabric mod mixing into (or calling) this constructor still runs for
++    // pools built by NeoForge's own builder and codec - the name is assigned afterwards because
++    // java requires the delegation to be the first statement. Without a name this is exactly what
++    // vanilla did (vanilla had no pool names at all).
+     private LootPool(
+         List<LootPoolEntryContainer> entries,
          List<LootItemCondition> conditions,
-         List<LootItemFunction> functions,
-         NumberProvider rolls,
--        NumberProvider bonusRolls
-+        NumberProvider bonusRolls,
-+        java.util.Optional<String> name
-     ) {
-         this.entries = entries;
-         this.conditions = conditions;
-@@ -59,6 +_,7 @@
-         this.compositeFunction = LootItemFunctions.compose(functions);
-         this.rolls = rolls;
+@@ -61,6 +_,18 @@
          this.bonusRolls = bonusRolls;
-+        this.name = name.orElse(null);
      }
  
++    private LootPool(
++        List<LootPoolEntryContainer> entries,
++        List<LootItemCondition> conditions,
++        List<LootItemFunction> functions,
++        NumberProvider rolls,
++        NumberProvider bonusRolls,
++        java.util.Optional<String> name
++    ) {
++        this(entries, conditions, functions, rolls, bonusRolls);
++        this.name = name.orElse(null);
++    }
++
      private void addRandomItem(Consumer<ItemStack> result, LootContext context) {
+         RandomSource random = context.getRandom();
+         List<LootPoolEntry> validEntries = Lists.newArrayList();
 @@ -114,6 +_,57 @@
          Validatable.validate(output, "bonus_rolls", this.bonusRolls);
      }

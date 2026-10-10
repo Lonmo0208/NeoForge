@@ -22,6 +22,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForgeMod;
@@ -83,6 +84,16 @@ public class GenericPacketSplitter extends MessageToMessageEncoder<Packet<?>> im
 
         if (packet instanceof ServerboundCustomPayloadPacket serverboundCustomPayloadPacket && serverboundCustomPayloadPacket.payload() instanceof SplitPacketPayload) {
             // Don't split our own split packets
+            out.add(packet);
+            return;
+        }
+
+        // NeoFobric: Fabric carries and splits its own payloads - its splitter is driven by the payload types
+        // it registered, and its context-carrying payload codecs refuse to be encoded outside Fabric's own
+        // send path. Measuring one here re-encodes it outside that path, and the first context payload ended
+        // the connection with "PacketContext is required, but it wasn't set up!". Fabric channels are
+        // therefore left to Fabric, exactly as they are on a Fabric server.
+        if (isFabricPayload(packet)) {
             out.add(packet);
             return;
         }
@@ -164,6 +175,25 @@ public class GenericPacketSplitter extends MessageToMessageEncoder<Packet<?>> im
             case SERVERBOUND -> new ServerboundCustomPayloadPacket(new SplitPacketPayload(payload));
             case CLIENTBOUND -> new ClientboundCustomPayloadPacket(new SplitPacketPayload(payload));
         };
+    }
+
+    /**
+     * {@return whether the packet carries a payload type a Fabric mod registered}
+     *
+     * <p>See the note in {@link #encode}: Fabric's own splitter takes care of those, and their codecs are
+     * only encodable from Fabric's send path.
+     */
+    private static boolean isFabricPayload(Packet<?> packet) {
+        CustomPacketPayload payload = null;
+
+        if (packet instanceof ClientboundCustomPayloadPacket clientboundCustomPayloadPacket) {
+            payload = clientboundCustomPayloadPacket.payload();
+        } else if (packet instanceof ServerboundCustomPayloadPacket serverboundCustomPayloadPacket) {
+            payload = serverboundCustomPayloadPacket.payload();
+        }
+
+        return payload != null
+                && net.neoforged.fabricbridge.FabricBridgeHooks.isFabricChannel(payload.type().id().toString());
     }
 
     @Override

@@ -1,12 +1,22 @@
 --- a/net/minecraft/world/entity/ai/attributes/DefaultAttributes.java
 +++ b/net/minecraft/world/entity/ai/attributes/DefaultAttributes.java
-@@ -190,11 +_,12 @@
+@@ -190,11 +_,22 @@
          .build();
  
      public static AttributeSupplier getSupplier(EntityType<? extends LivingEntity> type) {
 -        return SUPPLIERS.get(type);
 +        AttributeSupplier supplier = net.neoforged.neoforge.common.CommonHooks.getAttributesView().get(type);
 +        return supplier != null ? supplier : SUPPLIERS.get(type);
++    }
++
++    /// Neo: the vanilla default-attribute map as it stands right now.
++    ///
++    /// Fabric API's default attribute registry replaces this very field with a mutable copy (its mixin does
++    /// that at the end of this class's static initialiser) and writes its registrations there, so this is the
++    /// only place they can be read from. NeoForge's own map wins in [#getSupplier], which is why the bridge
++    /// rebases NeoForge's map on this one once the Fabric entrypoints have run.
++    public static Map<EntityType<? extends LivingEntity>, AttributeSupplier> vanillaSuppliers() {
++        return SUPPLIERS;
      }
  
      public static boolean hasSupplier(EntityType<?> type) {

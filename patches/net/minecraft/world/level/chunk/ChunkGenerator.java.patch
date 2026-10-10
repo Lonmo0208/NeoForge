@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/chunk/ChunkGenerator.java
 +++ b/net/minecraft/world/level/chunk/ChunkGenerator.java
-@@ -94,9 +_,14 @@
+@@ -94,9 +_,21 @@
      public ChunkGenerator(BiomeSource biomeSource, Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter) {
          this.biomeSource = biomeSource;
          this.generationSettingsGetter = generationSettingsGetter;
@@ -12,7 +12,14 @@
 +
 +    @org.jetbrains.annotations.ApiStatus.Internal
 +    public void refreshFeaturesPerStep() {
-+        ((net.neoforged.neoforge.common.util.Lazy<?>) this.featuresPerStep).invalidate();
++        // Neo: the field is typed as the vanilla Supplier, so another loader may have replaced it with
++        // its own lazy supplier - fabric-biome-api-v1 swaps in a Guava memoized supplier after applying
++        // its biome modifications. Only NeoForge's own Lazy has a cache to drop; a foreign supplier
++        // computes on first use (after every modification is in), so there is nothing to invalidate.
++        // The unguarded cast used to kill the server at startup with a ClassCastException.
++        if (this.featuresPerStep instanceof net.neoforged.neoforge.common.util.Lazy<?> lazy) {
++            lazy.invalidate();
++        }
      }
  
      public void validate() {

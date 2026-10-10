@@ -93,6 +93,85 @@ public final class MixinJarPatcher {
             "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)");
 
     /**
+     * The same realignment, scoped to one mixin class.
+     *
+     * <p>Needed when one descriptor is an injection <em>target</em> for one mixin and the <em>method
+     * selector</em> for another in the same module: a global rewrite would send the second one's body
+     * selector to a method it does not intend. Case at hand (fabric-registry-sync-v0): its
+     * {@code WorldLoaderMixin} replaces the registry list passed to the vanilla four-argument
+     * {@code RegistryDataLoader.load} inside {@code WorldLoader.lambda$load$0} - that substitution is
+     * literally what loads modded dynamic registries. NeoForge's WorldLoader calls its own
+     * five-argument overload instead (the extra list carries the static-layer tags for condition
+     * contexts), so the vanilla-shaped call is absent, the injection is skipped silently, and every
+     * modded dynamic registry stays unloaded - fabric-registry-sync's testmod then dies with
+     * {@code Missing registry: fabric:test_dynamic_synced_1}. The module's sibling
+     * {@code RegistryDataLoaderMixin} names the same four-argument list as its {@code method} selector,
+     * and that one must keep pointing at the four-argument overload.
+     */
+    private static final Map<String, Map<String, String>> SCOPED_ANNOTATION_TARGET_REALIGNMENTS = Map.of(
+            "net/fabricmc/fabric/mixin/registry/sync/WorldLoaderMixin",
+            Map.of(
+                    "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;)",
+                    "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/List;)"),
+            // Same module, second half of the same story: wrapIsServerCall binds registry-sync's
+            // IS_SERVER ScopedValue around the LoaderFactory call inside the four-argument overload.
+            // NeoForge's five-argument overload builds its loader factory itself and calls the
+            // LoaderFactory overload directly, so that shim is off the live path and the value is never
+            // bound: RegistryDataLoader's own beforeLoad wrap then sees IS_SERVER=false and never fires
+            // DynamicRegistrySetupCallback, and fabric-registry-sync's testmod - which asserts the
+            // callback ran before the server starts - kills the server with
+            // "DRM setup was not called before startup!". Pointing the wrap at the five-argument
+            // overload puts it back on the live path.
+            "net/fabricmc/fabric/mixin/registry/sync/RegistryDataLoaderMixin",
+            Map.of(
+                    "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;)",
+                    "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/List;)"),
+            // fabric-networking-api-v1 keeps its "what can the peer receive" bookkeeping in the buffers the
+            // connection hands out: ServerConfigurationPacketListenerImplMixin wraps the vanilla one-argument
+            // RegistryFriendlyByteBuf#decorator and stamps every buffer it produces with the channels the peer
+            // declared - which is what a payload writer reads while it is being encoded (Fabric API's own
+            // play-phase test writes that set into a payload and asserts it is not null). NeoForge's decorator
+            // takes the connection type as a second argument, so the one-argument call the wrap targets no
+            // longer exists, the wrap is skipped silently, and the set stays null. Pointing the wrap at
+            // NeoForge's overload puts the stamping back on the live path; the handler is widened to match by
+            // {@link #widenWrapOperationHandlers}.
+            "net/fabricmc/fabric/mixin/networking/ServerConfigurationPacketListenerImplMixin",
+            Map.of(
+                    "(Lnet/minecraft/core/RegistryAccess;)",
+                    "(Lnet/minecraft/core/RegistryAccess;Lnet/neoforged/neoforge/network/connection/ConnectionType;)"),
+            // fabric-gametest-api-v1 starts its server-side game tests from a HEAD injection into
+            // RegistryDataLoader's four-argument load(...): it records there whether the load carries the test
+            // registries, and its freeze-time hook then registers the tests into them. NeoForge moved the
+            // asynchronous structure into the five-argument overload (the extra list carries the static-layer
+            // tags for condition contexts) and left the four-argument one as a forwarder, so that HEAD never
+            // ran on the live path, the flag stayed false, and the test server ran vanilla's single smoke test
+            // and nothing else - with no warning anywhere. Pointing the injection at the overload that actually
+            // runs fixes it; the handler's missing parameter is appended by extendInjectorHandlerParams.
+            "net/fabricmc/fabric/mixin/gametest/RegistryDataLoaderMixin",
+            Map.of(
+                    "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;)",
+                    "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/List;)"),
+            // fabric-transfer-api-v1 keeps a write's side effects off the world until its transaction commits by
+            // wrapping the setChanged() call inside setItem(slot, stack) and skipping it while a write is in
+            // flight - its VanillaStorageTests asserts an uncommitted insert schedules no comparator update.
+            // NeoForge reshaped that method: the two-argument overload is now a forwarder and the side effects
+            // (including setChanged()) live in the three-argument setItem(slot, stack, insideTransaction), so
+            // the wrap found no call site in the overload it names and the suppression silently degraded - every
+            // uncommitted write scheduled a comparator update. Pointing the wrap at the overload that really
+            // calls setChanged() restores it; it stays correct next to NeoForge's own flag because both gate the
+            // same call from opposite directions (Fabric sets its flag around the write, NeoForge passes the
+            // flag down from its transaction API).
+            "net/fabricmc/fabric/mixin/transfer/BaseContainerBlockEntityMixin",
+            Map.of(
+                    "(ILnet/minecraft/world/item/ItemStack;)",
+                    "(ILnet/minecraft/world/item/ItemStack;Z)"),
+            // SimpleContainer's setChanged() moved into the transactional overload in the same shape.
+            "net/fabricmc/fabric/mixin/transfer/SimpleContainerMixin",
+            Map.of(
+                    "(ILnet/minecraft/world/item/ItemStack;)",
+                    "(ILnet/minecraft/world/item/ItemStack;Z)"));
+
+    /**
      * Moves Fabric's common-version channel off {@code c:version}.
      *
      * <p>Fabric and NeoForge both run a configuration-phase version handshake. NeoForge uses
@@ -260,10 +339,13 @@ public final class MixinJarPatcher {
             return null;
         }
 
+        var internalName = entryName.endsWith(".class") ? entryName.substring(0, entryName.length() - ".class".length()) : entryName;
+        var scoped = SCOPED_ANNOTATION_TARGET_REALIGNMENTS.getOrDefault(internalName, Map.of());
+
         var changed = false;
         for (var method : node.methods) {
-            changed |= realignAnnotations(method.visibleAnnotations);
-            changed |= realignAnnotations(method.invisibleAnnotations);
+            changed |= realignAnnotations(method.visibleAnnotations, scoped);
+            changed |= realignAnnotations(method.invisibleAnnotations, scoped);
         }
         if (!changed) {
             return null;
@@ -275,7 +357,7 @@ public final class MixinJarPatcher {
         return writer.toByteArray();
     }
 
-    private static boolean realignAnnotations(List<AnnotationNode> annotations) {
+    private static boolean realignAnnotations(List<AnnotationNode> annotations, Map<String, String> scoped) {
         if (annotations == null) {
             return false;
         }
@@ -287,7 +369,7 @@ public final class MixinJarPatcher {
             for (var i = 1; i < annotation.values.size(); i += 2) {
                 var value = annotation.values.get(i);
                 if (value instanceof String text) {
-                    var replaced = replacementFor(text);
+                    var replaced = replacementFor(text, scoped);
                     if (replaced != null) {
                         annotation.values.set(i, replaced);
                         changed = true;
@@ -296,7 +378,7 @@ public final class MixinJarPatcher {
                     for (var j = 0; j < list.size(); j++) {
                         var element = list.get(j);
                         if (element instanceof String text) {
-                            var replaced = replacementFor(text);
+                            var replaced = replacementFor(text, scoped);
                             if (replaced != null) {
                                 ((List<Object>) list).set(j, replaced);
                                 changed = true;
@@ -305,13 +387,13 @@ public final class MixinJarPatcher {
                             // Array-valued members hold nested annotations too: MixinExtras declares
                             // slice()/@Slice's from as arrays, so @WrapOperation(slice = @Slice(from =
                             // @At(target = ...))) reaches the target through a list, not a direct node.
-                            changed |= realignAnnotations(java.util.List.of(nested));
+                            changed |= realignAnnotations(java.util.List.of(nested), scoped);
                         }
                     }
                 } else if (value instanceof AnnotationNode nested) {
                     // Targets also live in nested annotations - @Inject(at = @At(target = ...)), and
                     // @WrapOperation(..., slice = @Slice(from = @At(target = ...))) two levels down.
-                    changed |= realignAnnotations(java.util.List.of(nested));
+                    changed |= realignAnnotations(java.util.List.of(nested), scoped);
                 }
             }
         }
@@ -319,14 +401,14 @@ public final class MixinJarPatcher {
     }
 
     /** Builds the corrected descriptor by swapping the old parameter list for the new one. */
-    private static String replacementFor(String descriptor) {
+    private static String replacementFor(String descriptor, Map<String, String> scoped) {
         var open = descriptor.indexOf('(');
         var close = descriptor.indexOf(')');
         if (open < 0 || close <= open) {
             return null;
         }
         var params = descriptor.substring(open, close + 1);
-        var replacement = ANNOTATION_TARGET_REALIGNMENTS.get(params);
+        var replacement = scoped.getOrDefault(params, ANNOTATION_TARGET_REALIGNMENTS.get(params));
         if (replacement == null) {
             return null;
         }
@@ -599,6 +681,57 @@ public final class MixinJarPatcher {
             "com/zurrtum/create/client/mixin/KeyboardHandlerMixin", java.util.Set.of("onKeyReleased"));
 
     /**
+     * Replaces the whole-list swap in fabric-registry-sync's {@code WorldLoaderMixin} with a merge.
+     *
+     * <p>The mixin's handler returns Fabric's own registry list, ignoring the list it was handed - on a
+     * pure Fabric game those carry the same registries, so replacing is harmless there. NeoForge's list
+     * additionally carries its own datapack registries (biome modifiers, data maps, ...), so replacing
+     * drops them and the server dies at startup with {@code Missing registry:
+     * neoforge:biome_modifier}. The patched body hands both lists to the bridge's
+     * {@code RegistryListBridge.merge}, which keeps NeoForge's entries and appends the Fabric ones that
+     * are not already present. The body is straight-line either way (load, call, call, return), so no
+     * stack map frames are involved.
+     */
+    private static byte[] mergeRegistryListSwap(byte[] classBytes, String entryName) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        var internalName = entryName.substring(0, entryName.length() - ".class".length());
+        if (!"net/fabricmc/fabric/mixin/registry/sync/WorldLoaderMixin".equals(internalName)) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        for (var method : node.methods) {
+            if (!"modifyLoadedEntries".equals(method.name) || !"(Ljava/util/List;)Ljava/util/List;".equals(method.desc)) {
+                continue;
+            }
+            method.instructions.clear();
+            method.tryCatchBlocks.clear();
+            method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            method.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                    "net/fabricmc/fabric/api/event/registry/DynamicRegistries", "getBootstrappingRegistries",
+                    "()Ljava/util/List;", false));
+            method.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                    "net/neoforged/fabricbridge/RegistryListBridge", "merge",
+                    "(Ljava/util/List;Ljava/util/List;)Ljava/util/List;", false));
+            method.instructions.add(new InsnNode(Opcodes.ARETURN));
+            method.maxStack = 2;
+            method.maxLocals = 1;
+            LOGGER.info("[NeoFobric] Turned the datapack registry list swap in {} into a merge, so NeoForge's own datapack registries survive",
+                    internalName.replace('/', '.'));
+            return writeClass(node);
+        }
+        return null;
+    }
+
+    /**
      * Rewrites {@code @At(value = "RETURN", ordinal = N)} to {@code @At("TAIL")} on the handlers named
      * by {@link #STALE_RETURN_ORDINAL_HANDLERS}.
      */
@@ -780,41 +913,59 @@ public final class MixinJarPatcher {
 
             // The target(s): named methods whose parameters start with exactly this prefix. A prefix
             // that equals a whole target (the vanilla shim) has nothing to append to and is ignored;
-            // only one longer match may exist.
-            var name = singleMethodTarget(inject);
-            if (name == null || name.contains("(")) {
+            // only one longer match may exist. A selector that names the target by descriptor (the shape
+            // @Inject uses when several overloads share a name, and the shape the realigns above rewrite)
+            // resolves exactly instead of by prefix search.
+            var selector = singleMethodTarget(inject);
+            if (selector == null) {
                 continue;
             }
             MethodNode longerTarget = null;
-            var ambiguous = false;
-            for (var target : targetClass.methods) {
-                if (!target.name.equals(name)) {
+            var annotationNeedsDesc = !selector.contains("(");
+            if (annotationNeedsDesc) {
+                var ambiguous = false;
+                for (var target : targetClass.methods) {
+                    if (!target.name.equals(selector)) {
+                        continue;
+                    }
+                    var targetArgs = Type.getArgumentTypes(target.desc);
+                    if (targetArgs.length < prefix.length) {
+                        continue;
+                    }
+                    var matches = true;
+                    for (var i = 0; i < prefix.length; i++) {
+                        if (!targetArgs[i].equals(prefix[i])) {
+                            matches = false;
+                            break;
+                        }
+                    }
+                    if (!matches) {
+                        continue;
+                    }
+                    if (targetArgs.length == prefix.length) {
+                        continue;
+                    }
+                    if (longerTarget != null) {
+                        ambiguous = true;
+                        break;
+                    }
+                    longerTarget = target;
+                }
+                if (ambiguous) {
                     continue;
                 }
-                var targetArgs = Type.getArgumentTypes(target.desc);
-                if (targetArgs.length < prefix.length) {
-                    continue;
-                }
-                var matches = true;
-                for (var i = 0; i < prefix.length; i++) {
-                    if (!targetArgs[i].equals(prefix[i])) {
-                        matches = false;
+            } else {
+                var open = selector.indexOf('(');
+                var targetName = selector.substring(0, open);
+                var targetDesc = selector.substring(open);
+                for (var target : targetClass.methods) {
+                    if (target.name.equals(targetName) && target.desc.equals(targetDesc)) {
+                        longerTarget = target;
                         break;
                     }
                 }
-                if (!matches) {
-                    continue;
-                }
-                if (targetArgs.length == prefix.length) {
-                    continue;
-                }
-                if (longerTarget != null) {
-                    ambiguous = true;
-                    break;
-                }
-                longerTarget = target;
             }
-            if (ambiguous || longerTarget == null) {
+            if (longerTarget == null) {
                 continue;
             }
 
@@ -872,14 +1023,311 @@ public final class MixinJarPatcher {
             handler.maxLocals += addedSlots;
             handler.desc = Type.getMethodDescriptor(Type.getReturnType(handler.desc), newArgs);
 
-            for (var i = 0; i + 1 < inject.values.size(); i += 2) {
-                if ("method".equals(inject.values.get(i))) {
-                    inject.values.set(i + 1, name + longerTarget.desc);
+            if (annotationNeedsDesc) {
+                for (var i = 0; i + 1 < inject.values.size(); i += 2) {
+                    if ("method".equals(inject.values.get(i))) {
+                        inject.values.set(i + 1, longerTarget.name + longerTarget.desc);
+                    }
                 }
             }
             LOGGER.info("[NeoFobric] Appended {} missing trailing parameter(s) to @Inject handler {}#{} (target {}.{})",
                     missing.length, node.name.replace('/', '.'), handler.name,
-                    targetClass.name.replace('/', '.'), name);
+                    targetClass.name.replace('/', '.'), longerTarget.name);
+            changed = true;
+        }
+
+        if (!changed) {
+            return null;
+        }
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /** Fabric API's tooltip-order scraper: it reads {@code ItemStack} bytecode to learn the vanilla order. */
+    private static final String FABRIC_TOOLTIP_ORDER_SCANNER = "net/fabricmc/fabric/impl/item/VanillaTooltipProviderOrder";
+
+    /** Fabric API's client-side tag loader: it reads tag files straight out of the mods' jars. */
+    private static final String FABRIC_CLIENT_TAG_LOADER = "net/fabricmc/fabric/impl/tag/client/ClientTagsLoader";
+
+    /**
+     * Hands Fabric API's client-side tag loader a parse that understands its own spelling of the removal list.
+     *
+     * <p>{@code ClientTagsLoader} parses the tag files it finds with {@code TagFile.CODEC}, and Fabric's
+     * tag-removal extension writes that list as a {@code fabric:remove} field - so this one call site is pointed
+     * at {@code TagFileHooks}, which folds the Fabric key into the vanilla one before parsing. The codec itself
+     * cannot carry the second spelling: Fabric wraps it (to keep the removal list it reads) and the client's
+     * registry sync runs through the wrapped codec, where a changed shape leaves the client without the tags it
+     * needs to parse the registries it receives.
+     *
+     * <p>The receiver is already on the stack when the call is made, so the static call keeps its shape by
+     * taking the codec as its first argument.
+     *
+     * @return the class bytes with the call redirected, or the original when it does not contain it
+     */
+    private static byte[] redirectFabricTagFileParse(byte[] classBytes, String entryName) {
+        if (!FABRIC_CLIENT_TAG_LOADER.equals(entryName.replace(".class", ""))) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
+                        && call.getOpcode() == Opcodes.INVOKEINTERFACE
+                        && "com/mojang/serialization/Codec".equals(call.owner)
+                        && "parse".equals(call.name)
+                        && "(Lcom/mojang/serialization/Dynamic;)Lcom/mojang/serialization/DataResult;".equals(call.desc)) {
+                    call.setOpcode(Opcodes.INVOKESTATIC);
+                    call.owner = "net/neoforged/neoforge/common/TagFileHooks";
+                    call.name = "parseTagFile";
+                    call.desc = "(Lcom/mojang/serialization/Codec;Lcom/mojang/serialization/Dynamic;)Lcom/mojang/serialization/DataResult;";
+                    call.itf = false;
+                    changed = true;
+                }
+            }
+        }
+
+        if (!changed) {
+            LOGGER.info("[NeoFobric] Fabric's client tag loader no longer parses through Codec#parse; the"
+                    + " fabric:remove redirect needs checking against it");
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed Fabric API's client tag loader at TagFileHooks for its tag file parse");
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
+     * Points Fabric API's tooltip-order scan at the method NeoForge moved the list into.
+     *
+     * <p>{@code VanillaTooltipProviderOrder} reads the {@code DataComponents} field references out of
+     * {@code ItemStack#addDetailsToTooltip}'s bytecode to learn the order of the vanilla tooltip components -
+     * that order is what its {@code ItemComponentTooltipProviderRegistry} puts Fabric's own providers
+     * around. NeoForge split the vanilla body up: the list now lives in the private
+     * {@code addDetailsToTooltipComponents} (which NeoForge's own {@code ComponentTooltipOrderTest} scans by
+     * name), while the public method only runs NeoForge's hooks and its registry appenders. The scan
+     * therefore found nothing and every mod touching that registry died in its static initialiser with
+     * "Found no component types in appendTooltip method". The component method still carries the exact
+     * vanilla order - its list is the same one the registry appends - so the scan is pointed at it.
+     */
+    private static byte[] retargetVanillaTooltipOrderScan(byte[] classBytes, String entryName) {
+        if (!FABRIC_TOOLTIP_ORDER_SCANNER.equals(entryName.replace(".class", ""))) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (insn instanceof org.objectweb.asm.tree.LdcInsnNode ldc && "addDetailsToTooltip".equals(ldc.cst)) {
+                    ldc.cst = "addDetailsToTooltipComponents";
+                    changed = true;
+                }
+            }
+        }
+
+        if (!changed) {
+            LOGGER.info("[NeoFobric] {} no longer names addDetailsToTooltip; the vanilla tooltip order scan"
+                    + " needs checking against NeoForge's ItemStack", FABRIC_TOOLTIP_ORDER_SCANNER.replace('/', '.'));
+            return null;
+        }
+        LOGGER.info("[NeoFobric] Pointed Fabric API's vanilla tooltip order scan at ItemStack#addDetailsToTooltipComponents");
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /** MixinExtras' wrapper handed to a {@code @WrapOperation} handler. */
+    private static final String WRAP_OPERATION_DESC = "Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;";
+    /** Dotted, for comparing against {@code Type#getClassName()}. */
+    private static final String OPERATION = "com.llamalad7.mixinextras.injector.wrapoperation.Operation";
+    /** Internal name, for comparing against {@code MethodInsnNode#owner}. */
+    private static final String OPERATION_OWNER = "com/llamalad7/mixinextras/injector/wrapoperation/Operation";
+    private static final String OPERATION_CALL_DESC = "([Ljava/lang/Object;)Ljava/lang/Object;";
+
+    /**
+     * Appends the parameters NeoForge's version of a wrapped method has over the vanilla one to the
+     * {@code @WrapOperation} handler, and feeds them to the {@code Operation.call} it makes.
+     *
+     * <p>{@link #extendInjectorHandlerParams} does the same for {@code @Inject} handlers; a wrap needs
+     * one step more, because MixinExtras validates the arity when the handler calls
+     * {@code Operation.call} - the extra parameters have to appear in that argument array as well, or the
+     * call throws at the first packet. Case at hand: fabric-networking-api-v1 wraps
+     * {@code RegistryFriendlyByteBuf#decorator} to stamp the buffers the connection hands out, and
+     * NeoForge's decorator takes the connection type as a second argument the vanilla-shaped handler does
+     * not declare.
+     *
+     * <p>Only static targets are handled: for an instance method the argument array starts with the
+     * receiver, and this rewrite has no way to know where the handler got it from.
+     */
+    private static byte[] widenWrapOperationHandlers(byte[] classBytes, String entryName,
+            java.util.function.Function<String, byte[]> targetBytecode) {
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        var changed = false;
+        var resolvedOwners = new java.util.HashMap<String, ClassNode>();
+        for (var handler : node.methods) {
+            var wrap = findAnnotation(handler, WRAP_OPERATION_DESC);
+            if (wrap == null) {
+                continue;
+            }
+            var args = Type.getArgumentTypes(handler.desc);
+            var operationIndex = -1;
+            for (var i = 0; i < args.length; i++) {
+                if (args[i].getClassName().equals(OPERATION)) {
+                    operationIndex = i;
+                    break;
+                }
+            }
+            // The wrapper is the last parameter by convention, and anything after it would be
+            // MixinExtras sugar this rewrite does not carry along.
+            if (operationIndex <= 0 || operationIndex != args.length - 1) {
+                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: the Operation is not the last parameter",
+                        node.name.replace('/', '.'), handler.name);
+                continue;
+            }
+            var prefix = new Type[operationIndex];
+            System.arraycopy(args, 0, prefix, 0, operationIndex);
+
+            var target = annotationDescriptor(wrap);
+            if (target == null) {
+                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: no target descriptor in the annotation",
+                        node.name.replace('/', '.'), handler.name);
+                continue;
+            }
+            var open = target.indexOf('(');
+            var close = target.indexOf(')');
+            if (open < 0 || close <= open) {
+                continue;
+            }
+            // The descriptor names its owner, and the wrapped method lives there - not necessarily in the
+            // mixin's own target class (the mixin targets the class whose code makes the call; the call
+            // itself usually goes to another class entirely).
+            var ownerEnd = target.lastIndexOf(';', open);
+            if (!target.startsWith("L") || ownerEnd < 0) {
+                continue;
+            }
+            var owner = target.substring(1, ownerEnd);
+            var name = target.substring(ownerEnd + 1, open);
+            var desc = target.substring(open);
+            ClassNode wrappedOwner = null;
+            if (!resolvedOwners.containsKey(owner)) {
+                var ownerBytes = targetBytecode.apply(owner);
+                if (ownerBytes != null) {
+                    try {
+                        var ownerNode = new ClassNode();
+                        new ClassReader(ownerBytes).accept(ownerNode, 0);
+                        wrappedOwner = ownerNode;
+                    } catch (Throwable t) {
+                        // Fall through: the owner is reported as unresolvable below.
+                    }
+                }
+                resolvedOwners.put(owner, wrappedOwner);
+            } else {
+                wrappedOwner = resolvedOwners.get(owner);
+            }
+            if (wrappedOwner == null) {
+                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: cannot resolve the owner of {}{}",
+                        node.name.replace('/', '.'), handler.name, name, desc);
+                continue;
+            }
+            MethodNode wrapped = null;
+            for (var candidate : wrappedOwner.methods) {
+                if (candidate.name.equals(name) && candidate.desc.equals(desc)) {
+                    wrapped = candidate;
+                    break;
+                }
+            }
+            if (wrapped == null) {
+                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: {} does not declare {}{}",
+                        node.name.replace('/', '.'), handler.name, wrappedOwner.name.replace('/', '.'), name, desc);
+                continue;
+            }
+            if ((wrapped.access & org.objectweb.asm.Opcodes.ACC_STATIC) == 0) {
+                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: {} is an instance method",
+                        node.name.replace('/', '.'), handler.name, name);
+                continue;
+            }
+            var wrappedArgs = Type.getArgumentTypes(wrapped.desc);
+            if (wrappedArgs.length <= prefix.length) {
+                continue;
+            }
+            var missing = new Type[wrappedArgs.length - prefix.length];
+            System.arraycopy(wrappedArgs, prefix.length, missing, 0, missing.length);
+
+            var newArgs = new Type[wrappedArgs.length + 1];
+            System.arraycopy(prefix, 0, newArgs, 0, prefix.length);
+            System.arraycopy(missing, 0, newArgs, prefix.length, missing.length);
+            newArgs[wrappedArgs.length] = args[operationIndex];
+
+            var isStatic = (handler.access & org.objectweb.asm.Opcodes.ACC_STATIC) != 0;
+            var oldOperationSlot = isStatic ? 0 : 1;
+            for (var param : prefix) {
+                oldOperationSlot += param.getSize();
+            }
+            var addedSlots = 0;
+            for (var missingType : missing) {
+                addedSlots += missingType.getSize();
+            }
+
+            for (var insn : handler.instructions) {
+                if (insn instanceof VarInsnNode varInsn && varInsn.var >= oldOperationSlot) {
+                    varInsn.var += addedSlots;
+                } else if (insn instanceof IincInsnNode iinc && iinc.var >= oldOperationSlot) {
+                    iinc.var += addedSlots;
+                }
+            }
+            if (handler.localVariables != null) {
+                for (var local : handler.localVariables) {
+                    if (local.index >= oldOperationSlot) {
+                        local.index += addedSlots;
+                    }
+                }
+            }
+            handler.signature = null;
+            handler.maxLocals += addedSlots;
+            handler.desc = Type.getMethodDescriptor(Type.getReturnType(handler.desc), newArgs);
+            // The array the handler passes to Operation.call is built with the old arity; grow it and hand
+            // the appended parameters over at the end, where the wrapped method expects them.
+            if (!extendOperationCallArray(handler, prefix.length, missing, isStatic, addedSlots)) {
+                // Put the method back the way it was: a handler whose call would still have the old arity
+                // must not be left half-widened.
+                handler.desc = Type.getMethodDescriptor(Type.getReturnType(handler.desc), args);
+                handler.maxLocals -= addedSlots;
+                for (var insn : handler.instructions) {
+                    if (insn instanceof VarInsnNode varInsn && varInsn.var >= oldOperationSlot + addedSlots) {
+                        varInsn.var -= addedSlots;
+                    } else if (insn instanceof IincInsnNode iinc && iinc.var >= oldOperationSlot + addedSlots) {
+                        iinc.var -= addedSlots;
+                    }
+                }
+                LOGGER.info("[NeoFobric] Not widening @WrapOperation handler {}#{}: its Operation.call could not be found",
+                        node.name.replace('/', '.'), handler.name);
+                continue;
+            }
+
+            LOGGER.info("[NeoFobric] Widened @WrapOperation handler {}#{} for {}.{}{}", node.name.replace('/', '.'),
+                    handler.name, wrappedOwner.name.replace('/', '.'), name, wrapped.desc);
             changed = true;
         }
 
@@ -892,8 +1340,159 @@ public final class MixinJarPatcher {
     }
 
     /**
-     * Rewrites the handler to cover {@code delegatee}'s parameters and retargets the annotation.
+     * Grows the {@code new Object[n]{...}} a {@code @WrapOperation} handler builds for
+     * {@code Operation.call} by the appended parameters. The array is built right before the call, in the
+     * straight-line shape javac emits for it.
      */
+    private static boolean extendOperationCallArray(MethodNode handler, int prefixLength, Type[] missing,
+            boolean handlerIsStatic, int addedSlots) {
+        org.objectweb.asm.tree.MethodInsnNode call = null;
+        for (var insn : handler.instructions) {
+            if (insn instanceof org.objectweb.asm.tree.MethodInsnNode methodInsn
+                    && OPERATION_OWNER.equals(methodInsn.owner) && "call".equals(methodInsn.name)
+                    && OPERATION_CALL_DESC.equals(methodInsn.desc)) {
+                call = methodInsn;
+                break;
+            }
+        }
+        if (call == null) {
+            return false;
+        }
+
+        // Walk back to the array construction: ANEWARRAY java/lang/Object, preceded by its size constant.
+        org.objectweb.asm.tree.AbstractInsnNode arrayCreation = call.getPrevious();
+        while (arrayCreation != null && !(arrayCreation instanceof org.objectweb.asm.tree.TypeInsnNode typeInsn
+                && typeInsn.getOpcode() == org.objectweb.asm.Opcodes.ANEWARRAY)) {
+            arrayCreation = arrayCreation.getPrevious();
+        }
+        if (arrayCreation == null) {
+            return false;
+        }
+        var sizeInsn = prevRealInstruction(arrayCreation);
+        var size = sizeInsn == null ? null : intConstantValue(sizeInsn);
+        if (size == null) {
+            return false;
+        }
+        handler.instructions.set(sizeInsn, intConstant(size + missing.length));
+
+        // The slots the appended parameters live in, taken from the handler's new descriptor: the prefix
+        // keeps its positions, the appended parameters follow it.
+        var newArgs = Type.getArgumentTypes(handler.desc);
+        var appendedSlots = new int[missing.length];
+        var slot = handlerIsStatic ? 0 : 1;
+        for (var i = 0; i < newArgs.length; i++) {
+            if (i >= prefixLength && i < prefixLength + missing.length) {
+                appendedSlots[i - prefixLength] = slot;
+            }
+            slot += newArgs[i].getSize();
+        }
+
+        var inserts = new org.objectweb.asm.tree.InsnList();
+        for (var i = 0; i < missing.length; i++) {
+            inserts.add(new InsnNode(org.objectweb.asm.Opcodes.DUP));
+            inserts.add(intConstant(prefixLength + i));
+            inserts.add(new VarInsnNode(org.objectweb.asm.Opcodes.ALOAD, appendedSlots[i]));
+            inserts.add(new InsnNode(org.objectweb.asm.Opcodes.AASTORE));
+        }
+        handler.instructions.insertBefore(call, inserts);
+        handler.maxStack += 2;   // DUP plus the loaded parameter
+        return true;
+    }
+
+    private static org.objectweb.asm.tree.AbstractInsnNode prevRealInstruction(org.objectweb.asm.tree.AbstractInsnNode insn) {
+        var previous = insn.getPrevious();
+        while (previous != null && previous.getOpcode() < 0) {
+            previous = previous.getPrevious();
+        }
+        return previous;
+    }
+
+    /** {@return the value of an int constant instruction, or {@code null} when it is not one} */
+    private static Integer intConstantValue(org.objectweb.asm.tree.AbstractInsnNode insn) {
+        if (insn instanceof InsnNode plain) {
+            var opcode = plain.getOpcode();
+            if (opcode == org.objectweb.asm.Opcodes.ICONST_M1) {
+                return -1;
+            }
+            if (opcode >= org.objectweb.asm.Opcodes.ICONST_0 && opcode <= org.objectweb.asm.Opcodes.ICONST_5) {
+                return opcode - org.objectweb.asm.Opcodes.ICONST_0;
+            }
+        }
+        if (insn instanceof org.objectweb.asm.tree.IntInsnNode intInsn
+                && (intInsn.getOpcode() == org.objectweb.asm.Opcodes.BIPUSH
+                        || intInsn.getOpcode() == org.objectweb.asm.Opcodes.SIPUSH)) {
+            return intInsn.operand;
+        }
+        if (insn instanceof org.objectweb.asm.tree.LdcInsnNode ldc && ldc.cst instanceof Integer value) {
+            return value;
+        }
+        return null;
+    }
+
+    private static org.objectweb.asm.tree.AbstractInsnNode intConstant(int value) {
+        if (value >= -1 && value <= 5) {
+            return new InsnNode(org.objectweb.asm.Opcodes.ICONST_0 + value);
+        }
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            return new org.objectweb.asm.tree.IntInsnNode(org.objectweb.asm.Opcodes.BIPUSH, value);
+        }
+        if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+            return new org.objectweb.asm.tree.IntInsnNode(org.objectweb.asm.Opcodes.SIPUSH, value);
+        }
+        return new org.objectweb.asm.tree.LdcInsnNode(value);
+    }
+
+    private static String annotationString(AnnotationNode annotation, String key) {
+        if (annotation.values == null) {
+            return null;
+        }
+        for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+            if (key.equals(annotation.values.get(i)) && annotation.values.get(i + 1) instanceof String text) {
+                return text;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@return the first method descriptor in an annotation, nested annotations and lists included}
+     *
+     * <p>An injector's target usually sits one level down: {@code @WrapOperation(at = @At(target = "..."))},
+     * and MixinExtras puts the same thing inside {@code slice = @Slice(from = @At(...))}. Looking only at
+     * the annotation's own {@code target} key finds nothing for those and the whole rewrite quietly skips.
+     */
+    private static String annotationDescriptor(AnnotationNode annotation) {
+        if (annotation.values == null) {
+            return null;
+        }
+        for (var i = 1; i < annotation.values.size(); i += 2) {
+            var value = annotation.values.get(i);
+            if (value instanceof String text && text.indexOf('(') > 0 && text.indexOf(')') > 0) {
+                return text;
+            }
+            if (value instanceof AnnotationNode nested) {
+                var found = annotationDescriptor(nested);
+                if (found != null) {
+                    return found;
+                }
+            }
+            if (value instanceof List<?> list) {
+                for (var element : list) {
+                    if (element instanceof String text && text.indexOf('(') > 0 && text.indexOf(')') > 0) {
+                        return text;
+                    }
+                    if (element instanceof AnnotationNode nested) {
+                        var found = annotationDescriptor(nested);
+                        if (found != null) {
+                            return found;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     private static void widenHandler(MethodNode handler, AnnotationNode inject, MethodNode delegatee, Type[] targetParams) {
         var oldArgs = Type.getArgumentTypes(handler.desc);
         var delegateeArgs = Type.getArgumentTypes(delegatee.desc);
@@ -965,7 +1564,14 @@ public final class MixinJarPatcher {
      * {@code AssertionError: Implemented in Mixin} when components are initialized.
      */
     private static final java.util.Set<String> STRIP_COLLIDING_MEMBER_MIXINS = java.util.Set.of(
-            "net/fabricmc/fabric/mixin/item/DataComponentMapBuilderMixin");
+            "net/fabricmc/fabric/mixin/item/DataComponentMapBuilderMixin",
+            // fabric-tag-api-v1's TagFileMixin re-declares the record's {@code remove} component - NeoForge
+            // added one with the same erased descriptor and the same "entries to drop from the tag" meaning,
+            // so the mixin's own copy costs nothing while its codec modifier is what teaches the tag file the
+            // {@code fabric:remove} key. Dropping the whole mixin (which is what happens without this entry)
+            // leaves the key unparsed: fabric-tag-api-v1's TagEntryRemovalTests then finds the tag exactly as
+            // written, with the entries that were supposed to disappear still in it.
+            "net/fabricmc/fabric/mixin/tag/TagFileMixin");
 
     /**
      * Injector handlers that must never register, named per allowlisted mixin class.
@@ -1711,6 +2317,18 @@ public final class MixinJarPatcher {
                 if (versionMoved != bytes) {
                     patched.put(entry.getName(), versionMoved);
                 }
+                // Runs for plain classes too: the tooltip-order scanner is an ordinary implementation class,
+                // not a mixin.
+                var orderScanRetargeted = retargetVanillaTooltipOrderScan(versionMoved, entry.getName());
+                if (orderScanRetargeted != null) {
+                    versionMoved = orderScanRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var tagParseRedirected = redirectFabricTagFileParse(versionMoved, entry.getName());
+                if (tagParseRedirected != null) {
+                    versionMoved = tagParseRedirected;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 allClasses.add(versionMoved);
                 if (!looksLikeMixinClass(entry.getName())) {
                     // Not a mixin: the only rewrites it may need are a call site of a renamed accessor
@@ -1743,6 +2361,10 @@ public final class MixinJarPatcher {
                 if (retargeted != null) {
                     source = retargeted;
                 }
+                var mergedList = mergeRegistryListSwap(source, entry.getName());
+                if (mergedList != null) {
+                    source = mergedList;
+                }
                 var stripped = stripCollidingDuckMembers(source, entry.getName(), resolver);
                 if (stripped != null) {
                     source = stripped;
@@ -1767,6 +2389,10 @@ public final class MixinJarPatcher {
                 if (appended != null) {
                     source = appended;
                 }
+                var wrapsWidened = widenWrapOperationHandlers(source, entry.getName(), resolver);
+                if (wrapsWidened != null) {
+                    source = wrapsWidened;
+                }
                 byte[] fixed = null;
                 if (!Boolean.getBoolean("neofobric.noHandlerFix")) {
                     fixed = MixinHandlerDescriptorFixer.fix(source, resolver);
@@ -1784,7 +2410,7 @@ public final class MixinJarPatcher {
                     patched.put(entry.getName(), renamed);
                 } else if (callSitesMoved != null) {
                     patched.put(entry.getName(), callSitesMoved);
-                } else if (realigned != null || stripped != null || handlerStripped != null || retargeted != null) {
+                } else if (realigned != null || stripped != null || handlerStripped != null || retargeted != null || mergedList != null) {
                     patched.put(entry.getName(), source);
                 }
             }

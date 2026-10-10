@@ -61,7 +61,7 @@
          }
  
          @Override
-@@ -465,5 +_,11 @@
+@@ -465,5 +_,14 @@
              ComposterBlock.empty(null, this.state, this.level, this.pos);
              this.changed = true;
          }
@@ -70,6 +70,9 @@
 +    public static float getValue(ItemStack item) {
 +        var value = item.getData(net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps.COMPOSTABLES);
 +        if (value != null) return value.chance();
-+        return -1f;
++        // NeoFobric: fall back to the legacy table this class still carries. Fabric's composting-chance
++        // registry writes into it - it has no way to reach a data map, since data maps are filled from data
++        // packs - so without the fallback an item a Fabric mod made compostable simply cannot be composted.
++        return COMPOSTABLES.getFloat(item.getItem());
      }
  }

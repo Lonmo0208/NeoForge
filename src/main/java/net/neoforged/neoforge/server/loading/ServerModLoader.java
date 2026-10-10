@@ -25,6 +25,15 @@ public class ServerModLoader extends CommonModLoader {
 
     public static void load(boolean gameTestServer) {
         ServerModLoader.gameTestServer = gameTestServer;
+        if (CommonModLoader.areRegistriesLoaded()) {
+            // NeoFobric: the mods are already up. A second game instance in one process - Fabric's client game
+            // tests start a dedicated server next to the running client - walks the loaders again, and mod
+            // construction is single-shot: the first DeferredRegister throws "Cannot register new entries to
+            // DeferredRegister after RegisterEvent has been fired" and the second instance cannot start at
+            // all. Everything the loaders set up is process-wide and still in place, so the instance reuses
+            // it, exactly as a second world does on the client.
+            return;
+        }
         LanguageHook.loadBuiltinLanguages();
         try {
             begin(() -> {}, false);

@@ -1,6 +1,6 @@
 --- a/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java
 +++ b/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java
-@@ -22,20 +_,44 @@
+@@ -22,20 +_,46 @@
      }
  
      static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(
@@ -10,15 +10,17 @@
 +    }
 +
 +    /**
-+     * Neo: the vanilla two-argument signature, kept because mods built against the vanilla API wrap this
-+     * very call to install their own payload lookup (Fabric's networking module does). It yields the
-+     * vanilla codec: the extra connection context the overload takes is only needed to find codecs
-+     * NeoForge's network registry knows about.
++     * Neo: the vanilla two-argument signature, and the one the packet classes build their codecs with. Mods
++     * built against the vanilla API wrap this very call to install their own payload lookup - Fabric's
++     * networking module does, which is why the call site must keep this shape. The connection context the
++     * overload above takes travels inside the type list instead (NetworkRegistry#contextualTypes), so this
++     * method still resolves against the right protocol and flow; a list without context falls back to the
++     * context-free lookup.
 +     */
 +    static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(
          CustomPacketPayload.FallbackProvider<B> fallback, List<CustomPacketPayload.TypeAndCodec<? super B, ?>> types
      ) {
-+        return codec(fallback, types, typeId -> null);
++        return codec(fallback, types, net.neoforged.neoforge.network.registration.NetworkRegistry.registeredCodecLookup(types));
 +    }
 +
 +    private static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(

@@ -43,13 +43,28 @@
              return result;
          }
  
-@@ -91,7 +_,8 @@
+@@ -91,7 +_,23 @@
  
          public AttributeSupplier build() {
              this.instanceFrozen = true;
 -            return new AttributeSupplier(this.builder.buildKeepingLast());
 +            others.forEach(b -> b.instanceFrozen = true);
-+            return new AttributeSupplier(ImmutableMap.copyOf(this.entries));
++            // Neo: also take whatever was written straight into the vanilla ImmutableMap.Builder field.
++            // Fabric's default attribute registry copies an existing supplier's instances into that field
++            // through the accessor (FabricDefaultAttributeRegistryImpl.createFromExistingSupplier), and
++            // such writes never reach the parallel ledger - building from the ledger alone produced an
++            // empty supplier, and the first entity of that type died with "Can't find attribute
++            // minecraft:max_health". Building the vanilla field here is what vanilla's build() did;
++            // ImmutableMap.Builder accepts exactly one build, which matches the vanilla contract (a
++            // builder is built once and discarded).
++            //
++            // The two views overlap: NeoForge's own add()/create() writes into both, with equivalent
++            // instances on both sides. buildKeepingLast() collapses those the way vanilla's own build()
++            // did (last write wins) - buildOrThrow() refuses duplicates outright and threw "Multiple
++            // entries with same key" while DefaultAttributes initialized.
++            var merged = new java.util.LinkedHashMap<Holder<Attribute>, AttributeInstance>(this.entries);
++            merged.putAll(this.builder.buildKeepingLast());
++            return new AttributeSupplier(ImmutableMap.copyOf(merged));
          }
      }
  }

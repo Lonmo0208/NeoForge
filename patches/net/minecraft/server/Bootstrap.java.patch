@@ -1,5 +1,14 @@
 --- a/net/minecraft/server/Bootstrap.java
 +++ b/net/minecraft/server/Bootstrap.java
+@@ -37,6 +_,8 @@
+ public class Bootstrap {
+     public static final PrintStream STDOUT = System.out;
+     private static volatile boolean isBootstrapped;
++    /** NeoFobric: whether the one-shot {@link #validate()} pass has already run in this process. */
++    private static boolean validated;
+     private static final Logger LOGGER = LogUtils.getLogger();
+     public static final AtomicLong bootstrapDuration = new AtomicLong(-1L);
+ 
 @@ -59,6 +_,8 @@
              CauldronInteractions.bootStrap();
              BuiltInRegistries.bootStrap();
@@ -9,7 +18,23 @@
              wrapStreams();
              bootstrapDuration.set(Duration.between(start, Instant.now()).toMillis());
          }
-@@ -121,7 +_,6 @@
+@@ -116,12 +_,22 @@
+ 
+     public static void validate() {
+         checkBootstrapCalled(() -> "validate");
++        if (validated) {
++            // NeoFobric: the IDE-only validation is a one-shot, like bootStrap above. A second game instance in
++            // one process - Fabric's client game tests start a dedicated server next to the running client -
++            // walks this again, and Commands#validate rebuilds the static registry layer from scratch. That
++            // rebuild re-runs every static bootstrap now that mod data exists, and a mod that hooks one of them
++            // (Fabric's biome API adds biomes to the nether preset) asks for a datapack entry's holder, which no
++            // static build can register - vanilla's "Unreferenced key" check then fails the world load. Nothing
++            // the check inspects has changed since the first run.
++            return;
++        }
++        validated = true;
+         if (SharedConstants.IS_RUNNING_IN_IDE) {
+             getMissingTranslations(Language.DEFAULT_INSTANCE).forEach(key -> LOGGER.error("Missing translations: {}", key));
              Commands.validate();
          }
  

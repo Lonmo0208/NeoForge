@@ -1,20 +1,30 @@
 --- a/net/minecraft/network/protocol/common/ClientboundCustomPayloadPacket.java
 +++ b/net/minecraft/network/protocol/common/ClientboundCustomPayloadPacket.java
-@@ -16,11 +_,15 @@
+@@ -14,13 +_,25 @@
+ 
+ public record ClientboundCustomPayloadPacket(CustomPacketPayload payload) implements Packet<ClientCommonPacketListener> {
      private static final int MAX_PAYLOAD_SIZE = 1048576;
++    // Neo: the vanilla two-argument CustomPacketPayload#codec call shape is kept - Fabric API's networking
++    // module wraps exactly this call (one @WrapOperation per ordinal on the two-argument descriptor in
++    // ClientboundCustomPayloadPacketMixin), and NeoForge used to pass the protocol and the flow as extra
++    // arguments, which moved the injection target out of existence and silently kept every Fabric payload
++    // out of the codec. The connection context now travels inside the type list
++    // (NetworkRegistry#contextualTypes), so the network registry is still consulted with the protocol and
++    // the flow.
      public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundCustomPayloadPacket> GAMEPLAY_STREAM_CODEC = CustomPacketPayload.<RegistryFriendlyByteBuf>codec(
              id -> DiscardedPayload.codec(id, 1048576),
 -            Util.make(Lists.newArrayList(new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC)), types -> {})
-+            Util.make(Lists.newArrayList(new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC)), types -> {}),
-+            net.minecraft.network.ConnectionProtocol.PLAY,
-+            net.minecraft.network.protocol.PacketFlow.CLIENTBOUND
++            net.neoforged.neoforge.network.registration.NetworkRegistry.contextualTypes(
++                    net.minecraft.network.ConnectionProtocol.PLAY, net.minecraft.network.protocol.PacketFlow.CLIENTBOUND,
++                    Util.make(Lists.newArrayList(new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC)), types -> {}))
          )
          .map(ClientboundCustomPayloadPacket::new, ClientboundCustomPayloadPacket::payload);
      public static final StreamCodec<FriendlyByteBuf, ClientboundCustomPayloadPacket> CONFIG_STREAM_CODEC = CustomPacketPayload.<FriendlyByteBuf>codec(
 -            id -> DiscardedPayload.codec(id, 1048576), List.of(new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC))
-+            id -> DiscardedPayload.codec(id, 1048576), List.of(new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC)),
-+            net.minecraft.network.ConnectionProtocol.CONFIGURATION,
-+            net.minecraft.network.protocol.PacketFlow.CLIENTBOUND
++            id -> DiscardedPayload.codec(id, 1048576),
++            net.neoforged.neoforge.network.registration.NetworkRegistry.contextualTypes(
++                    net.minecraft.network.ConnectionProtocol.CONFIGURATION, net.minecraft.network.protocol.PacketFlow.CLIENTBOUND,
++                    List.of(new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC)))
          )
          .map(ClientboundCustomPayloadPacket::new, ClientboundCustomPayloadPacket::payload);
  

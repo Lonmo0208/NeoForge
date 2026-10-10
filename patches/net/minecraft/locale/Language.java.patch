@@ -1,6 +1,6 @@
 --- a/net/minecraft/locale/Language.java
 +++ b/net/minecraft/locale/Language.java
-@@ -36,9 +_,11 @@
+@@ -36,9 +_,19 @@
          DeprecatedTranslationsInfo deprecatedInfo = DeprecatedTranslationsInfo.loadFromDefaultResource();
          Map<String, String> loadedData = new HashMap<>();
          BiConsumer<String, String> output = loadedData::put;
@@ -9,6 +9,14 @@
 +        parseTranslations(output, componentMap::put, "/assets/minecraft/lang/en_us.json");
          deprecatedInfo.applyToMap(loadedData);
 -        final Map<String, String> storage = Map.copyOf(loadedData);
++        // NeoFobric: Fabric API's server-language mixin breaks into this method by redirecting the vanilla
++        // `Map.copyOf(map)` call - it splices the mod language files into that map and hands back the copy.
++        // NeoForge dropped the call when it made the map mutable for LanguageHook, so the redirect had
++        // nothing to bind to and every server-side language entry from a Fabric mod stayed untranslated
++        // (fabric-resource-loader-v1's test mod asserts exactly that). Calling it and keeping the mutable
++        // map gives both: Fabric's entries land in the map LanguageHook writes into, and the ignored copy
++        // is the immutable snapshot vanilla would have used.
++        Map.copyOf(loadedData);
 +        final Map<String, String> storage = loadedData; // Neo keep the map mutable to make LanguageHook work
 +        net.neoforged.neoforge.server.LanguageHook.captureLanguageMap(loadedData, componentMap);
          return new Language() {

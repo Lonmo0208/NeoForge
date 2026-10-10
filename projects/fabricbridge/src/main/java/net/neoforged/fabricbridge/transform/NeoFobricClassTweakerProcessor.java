@@ -61,6 +61,9 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
     private static final List<String> FABRIC_CHANNEL_PACKET_SENDERS = List.of(
             "handleRegistration", "handleUnregistration");
 
+    /** Holds the {@code minecraft:register}/{@code minecraft:unregister} channel constants of Fabric. */
+    private static final String FABRIC_NETWORKING_IMPL = "net/fabricmc/fabric/impl/networking/NetworkingImpl";
+
     private static final String CHANNEL_NAME_DESC = "(Lnet/minecraft/resources/Identifier;)V";
 
     /**
@@ -125,6 +128,22 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
 
     private static final String IBLOCK_STATE_EXTENSION =
             "net/neoforged/neoforge/common/extensions/IBlockStateExtension";
+
+    /**
+     * The item half of the same story as {@link #FABRIC_BLOCK_STATE}: Fabric's {@code FabricItemStack} and
+     * NeoForge's {@code ItemInstanceExtension} both declare a default {@code getCraftingRemainder()}, and
+     * both interfaces end up on {@code ItemStack} - Fabric's through the duck fallback, NeoForge's through
+     * its own build (and, in a dev run, through the same fallback). The JVM refuses to choose between two
+     * unrelated defaults and the first use dies with
+     * {@code IncompatibleClassChangeError: Conflicting default methods}; a brewing stand does exactly that
+     * while brewing, which is what fabric-item-api-v1's gametest hits. Hanging Fabric's interface under
+     * NeoForge's gives the two defaults one chain, where Fabric's overrides as it should.
+     */
+    private static final String FABRIC_ITEM_STACK =
+            "net/fabricmc/fabric/api/item/v1/FabricItemStack";
+
+    private static final String ITEM_INSTANCE_EXTENSION =
+            "net/neoforged/neoforge/common/extensions/ItemInstanceExtension";
 
     /**
      * The block-side twin of {@link #FABRIC_BLOCK_STATE}: {@code FabricBlock.getAppearance(BlockState,
@@ -322,8 +341,10 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
             return true;
         }
         return RESOURCE_IMPL_CANDIDATES.contains(name) || FABRIC_CHANNEL_CLASSES.contains(name)
+                || FABRIC_NETWORKING_IMPL.equals(name)
                 || BUILT_IN_REGISTRIES.equals(name) || INGREDIENT.equals(name)
                 || FABRIC_BLOCK_STATE_MODEL.equals(name) || FABRIC_BLOCK_STATE.equals(name) || FABRIC_BLOCK.equals(name)
+                || FABRIC_ITEM_STACK.equals(name)
                 || WIDEN_PRIVATE_MEMBERS.containsKey(name)
                 || InjectedInterfaceSource.get().containsKey(name)
                 || isFabricClassTweakerTarget(name);
@@ -344,11 +365,13 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         if (!DUCK_FALLBACKS.containsKey(context.node().name) && !isResourceImpl
                 && !ACCESSOR_FIELDS.containsKey(context.node().name)
                 && !FABRIC_CHANNEL_CLASSES.contains(context.node().name)
+                && !FABRIC_NETWORKING_IMPL.equals(context.node().name)
                 && !BUILT_IN_REGISTRIES.equals(context.node().name)
                 && !INGREDIENT.equals(context.node().name)
                 && !FABRIC_BLOCK_STATE_MODEL.equals(context.node().name)
                 && !FABRIC_BLOCK_STATE.equals(context.node().name)
                 && !FABRIC_BLOCK.equals(context.node().name)
+                && !FABRIC_ITEM_STACK.equals(context.node().name)
                 && !WIDEN_PRIVATE_MEMBERS.containsKey(context.node().name)
                 && !InjectedInterfaceSource.get().containsKey(context.node().name)
                 && !isFabricClassTweakerTarget(context.node().name)) {
@@ -376,6 +399,9 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         if (FABRIC_CHANNEL_CLASSES.contains(node.name)) {
             changed |= suppressFabricChannelPackets(node);
         }
+        if (FABRIC_NETWORKING_IMPL.equals(node.name)) {
+            changed |= renameFabricCommonChannelIds(node);
+        }
         if (BUILT_IN_REGISTRIES.equals(node.name)) {
             changed |= widenCreateContents(node);
         }
@@ -390,6 +416,9 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         }
         if (FABRIC_BLOCK.equals(node.name)) {
             changed |= hangInterfaceUnder(node, IBLOCK_EXTENSION);
+        }
+        if (FABRIC_ITEM_STACK.equals(node.name)) {
+            changed |= hangInterfaceUnder(node, ITEM_INSTANCE_EXTENSION);
         }
         var toWiden = WIDEN_PRIVATE_MEMBERS.get(node.name);
         if (toWiden != null) {
@@ -436,7 +465,66 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         return changed ? ComputeFlags.SIMPLE_REWRITE : ComputeFlags.NO_REWRITE;
     }
 
+    /**
+     * Moves Fabric's own {@code minecraft:register}/{@code minecraft:unregister} channels onto ids of their
+     * own ({@code minecraft:fabric_register} / {@code minecraft:fabric_unregister}).
+     *
+     * <p>Both loaders negotiate modded channels, and both originally did it on those two ids with different
+     * wire formats: Fabric sends its {@code RegistrationPayload}, NeoForge its {@code MinecraftRegisterPayload}.
+     * The collision used to be handled by stubbing Fabric's sends out ({@link #suppressFabricChannelPackets}),
+     * which cost Fabric mods their channel declarations - the peer's "what can you receive" set stayed empty -
+     * until it broke a mod that gates on {@code ServerConfigurationNetworking#canSend}. Renaming the two
+     * constants lets both exchanges run side by side: Fabric's payloads travel on their own ids, where its own
+     * payload lookup (its packet mixins wrap the vanilla {@code CustomPacketPayload#codec} call, see
+     * {@code ClientboundCustomPayloadPacket}) answers for them, and NeoForge keeps its own ids untouched.
+     *
+     * <p>The ids are built in {@code NetworkingImpl}'s static initialiser as
+     * {@code Identifier.withDefaultNamespace("register")}; every other user reads the resulting constant,
+     * so rewriting the two literals here covers Fabric's whole stack. The resulting ids are also listed in
+     * {@code FabricBridgeHooks#isFabricChannel}, so NeoForge's send gate lets them through.
+     */
+    private static boolean renameFabricCommonChannelIds(ClassNode node) {
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof org.objectweb.asm.tree.LdcInsnNode ldc) || !(ldc.cst instanceof String literal)) {
+                    continue;
+                }
+                if (!"register".equals(literal) && !"unregister".equals(literal)) {
+                    continue;
+                }
+                if (!(insn.getNext() instanceof MethodInsnNode call)
+                        || !"withDefaultNamespace".equals(call.name)
+                        || !"net/minecraft/resources/Identifier".equals(call.owner)) {
+                    continue;
+                }
+                ldc.cst = "fabric_" + literal;
+                changed = true;
+            }
+        }
+        if (changed) {
+            LOGGER.info("[NeoFobric] Moved Fabric's register/unregister channels off the ids NeoForge claims");
+        }
+        return changed;
+    }
+
+    /**
+     * Stubs Fabric's channel registration and de-registration sends out, so the bridge can keep Fabric's
+     * channel bookkeeping out of the wire.
+     *
+     * <p>This was the bridge's answer to the {@code minecraft:register} collision: Fabric's
+     * {@code RegistrationPayload} and NeoForge's {@code MinecraftRegisterPayload} claimed the same ids with
+     * different formats, and encoding one through the other's codec killed the connection. That collision is
+     * gone since {@link #renameFabricCommonChannelIds} moved Fabric's constants to ids of their own, so the
+     * exchange is left alone and Fabric's side of the channel negotiation works again - which is what the
+     * mods asking {@code ServerConfigurationNetworking#canSend} need. The switch remains for diagnosing a
+     * Fabric peer whose declarations misbehave: {@code -Dneofobric.suppressFabricChannelPackets=true}.
+     */
     private static boolean suppressFabricChannelPackets(ClassNode node) {
+        if (!Boolean.getBoolean("neofobric.suppressFabricChannelPackets")) {
+            return false;
+        }
+
         var changed = false;
         for (var method : node.methods) {
             var isInitialRegistration = SEND_INITIAL_REGISTRATION.equals(method.name) && "()V".equals(method.desc);

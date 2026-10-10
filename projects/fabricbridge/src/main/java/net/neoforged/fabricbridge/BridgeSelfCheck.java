@@ -52,6 +52,27 @@ public final class BridgeSelfCheck {
 
     private BridgeSelfCheck() {}
 
+    /**
+     * Logs how many entrypoints each stage has, once, at boot.
+     *
+     * <p>This is the cheap answer to "is a whole loader feature missing": fabric-api's server-side game
+     * tests are declared through the {@code fabric-gametest} entrypoint, and a count of zero there means the
+     * test server runs vanilla's single smoke test and nothing else, with no warning anywhere.
+     */
+    private static void logEntrypointInventory() {
+        var inventory = new StringBuilder("[NeoFobric] Fabric entrypoints:");
+        for (var key : new String[] { "preLaunch", "main", "client", "server", "fabric-gametest", "fabric-client-gametest" }) {
+            try {
+                var count = net.fabricmc.loader.impl.FabricLoaderImpl.INSTANCE
+                        .getEntrypointContainers(key, Object.class).size();
+                inventory.append(' ').append(key).append('=').append(count);
+            } catch (Throwable t) {
+                inventory.append(' ').append(key).append("=?");
+            }
+        }
+        LOGGER.info(inventory.toString());
+    }
+
     private static boolean enabled() {
         return !"false".equals(System.getProperty("neofobric.selfCheck"));
     }
@@ -80,6 +101,8 @@ public final class BridgeSelfCheck {
             if (gameLoader == null) {
                 gameLoader = Thread.currentThread().getContextClassLoader();
             }
+
+            logEntrypointInventory();
 
             // Server side: lifecycle, ticks, world/chunk/entity/block-entity loading, player join,
             // command registration and loot table loading all happen naturally when a world opens.

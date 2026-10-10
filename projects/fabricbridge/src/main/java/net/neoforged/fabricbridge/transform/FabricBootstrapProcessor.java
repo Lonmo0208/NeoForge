@@ -336,7 +336,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
                 try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(entry.getKey())) {
                     configContent = jar.readFile(configPath);
                     if (configContent != null) {
-                        configContent = relaxMixinConfig(configContent);
+                        configContent = relaxMixinConfig(configContent, client, configPath);
                         configContent = MixinConflictFilter.filter(configContent, jar, info.modId(), client);
                     }
                 } catch (Exception e) {
@@ -378,8 +378,17 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
     }
 
     /**
-     * Rewrites a Fabric mixin config to be lenient: {@code "required": false} on the config and
-     * {@code "defaultRequire": 0} in every {@code injectors} block.
+     * Rewrites a Fabric mixin config: folds the dist sections into {@code "mixins"}, and makes the config
+     * lenient - {@code "required": false} on the config and {@code "defaultRequire": 0} in every
+     * {@code injectors} block.
+     *
+     * <p>The folding exists because FML's mixin service runs the configs in
+     * {@code MixinEnvironment.DEFAULT}: the {@code "client"} and {@code "server"} arrays of a Fabric mixin
+     * config are then never applied, on either dist. That silently disabled whole features - fabric-api's
+     * gametest module starts its test server from a {@code server} block mixin, so the server looked like a
+     * plain server and no test ever ran, and its client-block mixins were attempted on a server instead.
+     * The section matching the running dist is therefore moved into {@code "mixins"} and the other one is
+     * dropped.
      *
      * <p>NeoForge reshapes some Minecraft internals (event hooks replacing vanilla call sites,
      * refactored renderer interfaces, ...), so not every Fabric mixin finds its injection target
@@ -387,7 +396,12 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
      * lenient ones log a warning and skip just that injection, letting the game run while the
      * affected loader-side integrations are implemented.
      */
-    private static byte[] relaxMixinConfig(byte[] content) {
+    private static byte[] relaxMixinConfig(byte[] content, boolean client, String configName) {
+        var folded = foldDistSections(content, client, configName);
+        if (folded != null) {
+            content = folded;
+        }
+
         var text = new String(content, java.nio.charset.StandardCharsets.UTF_8);
 
         var relaxed = text
@@ -412,6 +426,59 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             return content;
         }
         return relaxed.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Moves the {@code "client"} or {@code "server"} array of a mixin config into {@code "mixins"} -
+     * whichever matches the running dist - and removes the other one.
+     *
+     * @return the rewritten config, or {@code null} when there is nothing to fold
+     */
+    private static byte[] foldDistSections(byte[] content, boolean client, String configName) {
+        com.google.gson.JsonObject root;
+        try {
+            root = com.google.gson.JsonParser.parseString(new String(content, java.nio.charset.StandardCharsets.UTF_8))
+                    .getAsJsonObject();
+        } catch (Throwable t) {
+            // Not JSON, or not an object: leave it to the lenient rewrite below.
+            return null;
+        }
+
+        var wantedKey = client ? "client" : "server";
+        var unwantedKey = client ? "server" : "client";
+        if (!root.has(wantedKey) && !root.has(unwantedKey)) {
+            return null;
+        }
+
+        var mixins = root.getAsJsonArray("mixins");
+        if (mixins == null) {
+            mixins = new com.google.gson.JsonArray();
+            root.add("mixins", mixins);
+        }
+        var wanted = root.getAsJsonArray(wantedKey);
+        var moved = 0;
+        if (wanted != null) {
+            for (var entry : wanted) {
+                var name = entry.getAsString();
+                var present = false;
+                for (var existing : mixins) {
+                    if (existing.isJsonPrimitive() && name.equals(existing.getAsString())) {
+                        present = true;
+                        break;
+                    }
+                }
+                if (!present) {
+                    mixins.add(name);
+                    moved++;
+                }
+            }
+        }
+        root.remove(wantedKey);
+        root.remove(unwantedKey);
+
+        LOGGER.info("[NeoFobric] Folded the {} section of {} into \"mixins\" ({} entries); FML's mixin service"
+                + " runs configs in the DEFAULT environment, where dist sections never apply", wantedKey, configName, moved);
+        return new com.google.gson.Gson().toJson(root).getBytes(java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private static void skipFully(net.fabricmc.loader.impl.lib.gson.JsonReader reader) throws IOException {
@@ -441,6 +508,32 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             }
         }
         return null;
+    }
+
+    /**
+     * {@return the {@code Thread.currentThread()} call the client hand-off goes in front of}
+     *
+     * <p>Same instruction fabric-loader's {@code EntrypointPatch} picks on 1.19.4+: the last
+     * {@code currentThread()} call before the "Backend library" log line in the constructor. Fabric API's
+     * registry sync hangs its deferred registry freeze on that very call through its own mixin, which is
+     * why the bridge's entrypoints have to be in front of it (see the anchor comment in
+     * {@link #injectClientGameInstanceHandoff}). Callers insert <em>before</em> the returned instruction -
+     * Mixin's injection at the same call would otherwise end up ahead of them.
+     */
+    private static AbstractInsnNode findCurrentThreadCall(MethodNode method) {
+        AbstractInsnNode result = null;
+        for (var insn : method.instructions) {
+            if (insn instanceof LdcInsnNode ldc && ldc.cst instanceof String value
+                    && (value.startsWith("Backend library") || value.startsWith("LWJGL Version"))) {
+                break;
+            }
+            if (insn instanceof MethodInsnNode methodInsn && methodInsn.getOpcode() == Opcodes.INVOKESTATIC
+                    && methodInsn.owner.equals("java/lang/Thread") && methodInsn.name.equals("currentThread")
+                    && methodInsn.desc.equals("()Ljava/lang/Thread;")) {
+                result = methodInsn;
+            }
+        }
+        return result;
     }
 
     /**
@@ -490,34 +583,38 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             return false;
         }
 
-        // Anchor inside the constructor only, and as early as is safe.
+        // Anchor inside the constructor, directly in front of `this.gameThread = Thread.currentThread()`.
         //
-        // The client hand-off has to complete before the client reaches the point where Fabric mod
-        // mixins read the client state: Sodium's Minecraft#setFullscreen hook reads its config while
-        // the window is being set up, which is roughly a fifth of the way into this constructor. So
-        // the hand-off is anchored right after the window field is assigned - the instance and the
-        // window both exist by then, and it is still well ahead of that hook. Anchoring at the end
-        // of the constructor is too late; anchoring before the window exists makes the entrypoints
-        // see a null window.
-        // Anchor inside the constructor, as early as the hand-off is valid.
+        // That is the point fabric-loader itself starts the client entrypoints from (its EntrypointPatch
+        // moves the hook "just before the Thread.currentThread() call" on 1.19.4+), and the spot carries
+        // two independent constraints:
         //
-        // The constraint is a race against Fabric mod mixins that read client state during this very
-        // constructor: Sodium's Minecraft#setFullscreen hook reads its config while the window is
-        // being created, and in current Minecraft the window field is only assigned around
-        // instruction 840 of ~1960 - i.e. *after* that hook has already run. Anchoring at the window
-        // assignment or at the end of the constructor is therefore always too late.
+        // 1. The registry freeze. Fabric API's registry sync performs its deferred registry freeze from a
+        //    mixin on that same instruction, and entrypoints do register content (Fabric's particle test
+        //    mod registers a particle type). A mixin on that instruction lands ahead of code inserted here
+        //    by this transformer, so anchoring anywhere later loses that race and the registering mod is
+        //    handed "Registry is already frozen"; the registry window NeoForge keeps open for these
+        //    entrypoints (see FabricBridgeHooks#deferRegistryFreeze) is closed behind them.
+        // 2. The state the entrypoints read. `Minecraft.getInstance()` has to work (the instance is
+        //    assigned well before this point), the options must not exist yet (Fabric's key mapping API
+        //    refuses to register a key binding once they are initialised), and Fabric mod mixins that read
+        //    client state during this constructor - Sodium's Minecraft#setFullscreen hook reads its config
+        //    while the window is created - all run after it. A null window is tolerated (Sodium's config
+        //    builder stores it without touching it), a null instance is not.
         //
-        // The Minecraft instance and its options are what is needed, and the options field is
-        // assigned at roughly instruction 370, comfortably ahead of the window setup. A null window
-        // is tolerated by the entrypoints that matter (Sodium's config builder stores the window but
-        // does not touch it), while a null instance is not - so this is the earliest safe point.
-        // The Minecraft instance is needed (`Minecraft.getInstance()` has to work for the entrypoints) and
-        // the options must not exist yet: Fabric's key mapping API refuses to register a key binding once
-        // the options are initialised ("GameOptions has already been initialised"), and the options object
-        // is built before it is assigned to the field. So the hook goes right before that construction,
-        // which sits comfortably after "instance = this" and still well ahead of the window setup.
-        var insertionPoint = findBeforeOptionsConstruction(target);
-        var anchor = "before-options";
+        // The later anchors below are fallbacks for a Minecraft whose constructor does not contain that
+        // call in a recognisable place any more.
+        var insertionPoint = findCurrentThreadCall(target);
+        var anchor = "before-current-thread";
+        // Mixin injects Fabric API's registry-sync freeze callback at that same call and its insertion
+        // ends up ahead of anything placed directly after it, so this one goes in front of the call.
+        var insertBefore = insertionPoint != null;
+
+        if (insertionPoint == null) {
+            insertBefore = false;
+            insertionPoint = findBeforeOptionsConstruction(target);
+            anchor = "before-options";
+        }
         if (insertionPoint == null) {
             insertionPoint = findFieldAssignment(target, "options");
             anchor = "options-field";
@@ -554,7 +651,11 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         var instructions = new InsnList();
         instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
         instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "attachGameInstance", "(Ljava/lang/Object;)V", false));
-        target.instructions.insert(insertionPoint, instructions);
+        if (insertBefore) {
+            target.instructions.insertBefore(insertionPoint, instructions);
+        } else {
+            target.instructions.insert(insertionPoint, instructions);
+        }
 
         // Fabric's client entrypoints are invoked from attachGameInstance, i.e. here, while the
         // Minecraft instance is still being constructed. That ordering is required, not incidental:

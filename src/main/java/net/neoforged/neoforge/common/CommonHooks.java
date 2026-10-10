@@ -931,7 +931,51 @@ public class CommonHooks {
             return NeoForgeMod.LAVA_TYPE.value();
         if (NeoForgeMod.MILK.asOptional().filter(milk -> milk == fluid).isPresent() || NeoForgeMod.FLOWING_MILK.asOptional().filter(milk -> milk == fluid).isPresent())
             return NeoForgeMod.MILK_TYPE.value();
+        // NeoFobric: a fluid from a mod that only knows Fabric cannot override getFluidType - Fabric has no
+        // such concept - so this guard can never be satisfied for it, and the throw turned every one of its
+        // tick-time lookups into a crash (reached from EntityFluidInteraction's tag lookup, where a Fabric
+        // mod's custom fluid is being queried while a player ticks). What Fabric mods do declare is a fluid
+        // behaviour against a fluid tag, and NeoForge reads the same physics off a fluid type - so the bridge
+        // translates that declaration here, and a fluid it says nothing about falls back to the empty type,
+        // the one NeoForge uses for "no fluid", so its tag-based queries land on a tracker instead of killing
+        // the server. Fluids from NeoForge mods keep the loud failure.
+        if (net.neoforged.fabricbridge.FabricBridgeHooks.isFabricModClass(fluid.getClass())) {
+            var behavior = net.neoforged.fabricbridge.FabricBridgeHooks.fabricFluidBehavior(fluid);
+            return behavior != null ? fabricFluidType(behavior) : NeoForgeMod.EMPTY_TYPE.value();
+        }
         throw new RuntimeException("Mod fluids must override getFluidType.");
+    }
+
+    /**
+     * NeoFobric: the NeoForge fluid type a Fabric fluid declaration describes.
+     *
+     * <p>A fluid Fabric registered as water-like gets NeoForge's own water type: the two describe the same
+     * physics, and sharing the instance keeps every lookup - by tag, by type - on the same tracker.
+     */
+    private static FluidType fabricFluidType(net.neoforged.fabricbridge.FabricBridgeHooks.FabricFluidBehavior behavior) {
+        if (behavior.waterLike()) {
+            return NeoForgeMod.WATER_TYPE.value();
+        }
+
+        return new FluidType(FluidType.Properties.create()
+                .canSwim(behavior.canSwim())
+                .canDrown(behavior.canDrown())
+                .canPushEntity(behavior.canPushEntity())
+                .supportsBoating(behavior.supportsBoating())
+                .motionScale(behavior.motionScale())
+                .fallDistanceModifier(behavior.fallDistanceModifier())) {
+            @Override
+            public boolean move(LivingEntity entity, Vec3 movementVector, double gravity) {
+                // NeoFobric: NeoForge hands movement in a modded fluid to its type, and everything Fabric
+                // declared about that movement - its gravity multiplier, its speed and slowdown, whether mobs
+                // float in it - is in the behaviour, so it is run from here. The two values its method takes
+                // that this hook does not pass are recomputed the way LivingEntity#travelInFluid computes
+                // them, which is where the hook is called from.
+                return net.neoforged.fabricbridge.FabricBridgeHooks.moveInFabricFluid(
+                        behavior.behavior(), behavior.tag(), entity, movementVector, gravity,
+                        entity.getDeltaMovement().y <= 0.0, entity.getY());
+            }
+        };
     }
 
     // FIXME: is this still needed
@@ -1170,6 +1214,13 @@ public class CommonHooks {
     /** FOR INTERNAL USE ONLY, DO NOT CALL DIRECTLY */
     @Deprecated
     public static void modifyAttributes() {
+        // NeoFobric: rebase on the vanilla map before the events fire. Fabric API's default attribute registry
+        // does not go through EntityAttributeCreationEvent - it writes into the vanilla map itself (its mixin
+        // swaps DefaultAttributes' immutable field for a mutable copy) - and this pass runs a second time after
+        // the Fabric entrypoints. Without the rebase the events below would combine onto NeoForge's own, older
+        // copy and a Fabric mod's replacement would never be seen ("Pig does not have test attribute"). Running
+        // the creation event again right after restores whatever NeoForge mods had defined.
+        FORGE_ATTRIBUTES.putAll(DefaultAttributes.vanillaSuppliers());
         ModLoader.postEvent(new EntityAttributeCreationEvent(FORGE_ATTRIBUTES));
         Map<EntityType<? extends LivingEntity>, AttributeSupplier.Builder> finalMap = new HashMap<>();
         ModLoader.postEvent(new EntityAttributeModificationEvent(finalMap));

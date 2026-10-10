@@ -115,24 +115,28 @@
          return visibilityPercent;
      }
  
-@@ -982,9 +_,14 @@
+@@ -982,8 +_,21 @@
              return false;
          }
  
--        Map<Holder<MobEffect>, MobEffectInstance> copy = Maps.newHashMap(this.activeEffects);
--        this.activeEffects.clear();
--        this.onEffectsRemoved(copy.values());
-+        Map<Holder<MobEffect>, MobEffectInstance> map = new java.util.HashMap<>(this.activeEffects.size());
-+        for (Map.Entry<Holder<MobEffect>, MobEffectInstance> entry : this.activeEffects.entrySet()) {
-+            if (!net.neoforged.neoforge.event.EventHooks.onEffectRemoved(this, entry.getValue())) {
-+                map.put(entry.getKey(), entry.getValue());
++        // NeoFobric: keep vanilla's shape - the copy of the effect map, the clear of the live one, and the
++        // copy handed to onEffectsRemoved - because Fabric API binds both of its early-removal hooks to those
++        // instructions: its ALLOW_EARLY_REMOVE event refuses a removal by putting the effect back into the map
++        // the clear was called on. NeoForge's own per-effect veto is folded in on top - the effects it keeps go
++        // back after the clear and are dropped from the copy that is reported as removed.
+         Map<Holder<MobEffect>, MobEffectInstance> copy = Maps.newHashMap(this.activeEffects);
+         this.activeEffects.clear();
++        Map<Holder<MobEffect>, MobEffectInstance> kept = new java.util.HashMap<>(copy.size());
++        for (Map.Entry<Holder<MobEffect>, MobEffectInstance> entry : copy.entrySet()) {
++            if (net.neoforged.neoforge.event.EventHooks.onEffectRemoved(this, entry.getValue())) {
++                kept.put(entry.getKey(), entry.getValue());
 +            }
 +        }
-+        map.keySet().forEach(this.activeEffects::remove);
-+        this.onEffectsRemoved(map.values());
++        this.activeEffects.putAll(kept);
++        copy.keySet().removeAll(kept.keySet());
+         this.onEffectsRemoved(copy.values());
          return true;
      }
- 
 @@ -1014,12 +_,16 @@
      }
  

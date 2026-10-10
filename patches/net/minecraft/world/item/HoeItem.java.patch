@@ -13,13 +13,20 @@
      protected static final Map<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> TILLABLES = Maps.newHashMap(
          ImmutableMap.of(
              Blocks.GRASS_BLOCK,
-@@ -44,7 +_,8 @@
+@@ -44,7 +_,15 @@
      public InteractionResult useOn(UseOnContext context) {
          Level level = context.getLevel();
          BlockPos pos = context.getClickedPos();
 -        Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> logicPair = TILLABLES.get(level.getBlockState(pos).getBlock());
 +        BlockState toolModifiedState = level.getBlockState(pos).getToolModifiedState(context, net.neoforged.neoforge.common.ItemAbilities.HOE_TILL, false);
 +        Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> logicPair = toolModifiedState == null ? null : Pair.of(ctx -> true, changeIntoState(toolModifiedState));
++        if (logicPair == null) {
++            // NeoFobric: fall back to the legacy table this class still carries. Fabric's tillable-block
++            // registry writes into it - it cannot reach the block tool-modification path, which lives on
++            // NeoForge's side - so without the fallback a block a Fabric mod made tillable stays untillable.
++            logicPair = TILLABLES.get(level.getBlockState(pos).getBlock());
++        }
++
          if (logicPair == null) {
              return InteractionResult.PASS;
          }

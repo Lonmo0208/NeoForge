@@ -42,6 +42,9 @@ dependencies {
     // Provides net.neoforged.api.distmarker.Dist on the bootstrap classpath.
     compileOnly("net.neoforged:mergetool:${mergetool_version}:api") { transitive = false }
     compileOnly("org.slf4j:slf4j-api:2.0.17")
+    // Reads and rewrites the Fabric mixin configs (folding the dist sections into "mixins"); the game
+    // already ships gson, so it is compile-time only here.
+    compileOnly("com.google.code.gson:gson:2.10.1")
     compileOnly("net.fabricmc:sponge-mixin:${mixin_version}") { transitive = false }
     for (var asmModule : ["org.ow2.asm:asm", "org.ow2.asm:asm-tree"]) {
         compileOnly(asmModule) {

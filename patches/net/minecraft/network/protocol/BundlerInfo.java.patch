@@ -1,6 +1,6 @@
 --- a/net/minecraft/network/protocol/BundlerInfo.java
 +++ b/net/minecraft/network/protocol/BundlerInfo.java
-@@ -27,6 +_,26 @@
+@@ -27,6 +_,32 @@
              }
  
              @Override
@@ -9,6 +9,12 @@
 +                    P p = (P)bundlePacket;
 +                    java.util.List<Packet<?>> packets = net.neoforged.neoforge.network.registration.NetworkRegistry.filterGameBundlePackets(context, p.subPackets());
 +                    if (packets.isEmpty()) {
++                        // NeoFobric: dropping the whole bundle here produces no message at all, and vanilla's
++                        // PacketBundleUnpacker refuses that ("must produce at least one message") - it took
++                        // the connection down. An empty bundle is expressible: the delimiter pair around
++                        // nothing, which is exactly what vanilla sends for one.
++                        packetSender.accept(delimiterPacket);
++                        packetSender.accept(delimiterPacket);
 +                        return;
 +                    }
 +                    if (packets.size() == 1) {

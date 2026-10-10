@@ -908,6 +908,10 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         return roots;
     }
 
+    public static java.util.List<Path> gameContentRoots() {
+        return classpathGameContent();
+    }
+
     private static java.util.List<Path> classpathGameContent() {
         var found = new ArrayList<Path>();
         for (var candidate : systemClasspathRoots()) {
@@ -938,6 +942,59 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             }
         } catch (Exception e) {
             LOGGER.debug("[NeoFobric] Failed to probe classpath entry {}", candidate, e);
+        }
+        return false;
+    }
+
+    /**
+     * Marker file identifying a classpath entry that exposes Minecraft's own data files.
+     */
+    private static final String VANILLA_DATA_MARKER = "data/minecraft/tags/block/mineable/pickaxe.json";
+
+    /** The classpath entries carrying Minecraft's data, found on the first call. */
+    private static volatile java.util.List<Path> vanillaDataRoots;
+
+    /**
+     * {@return the classpath entries that carry Minecraft's own data files}
+     *
+     * <p>Fabric's {@code minecraft} mod is built from the paths the bridge hands it, and Fabric APIs read vanilla
+     * files by path: the client tag API walks the mods' jars for tag files, and a tag a mod aliases to a vanilla
+     * one (its {@code c:ores} against {@code #minecraft:diamond_ores}) dead-ends unless the entry holding the
+     * vanilla data is one of them. In dev the patched game jar holds classes only - the data lives in the
+     * resources jar neodev assembles - and this has to be probed for, because the paths are needed while FML is
+     * still discovering mods, long before any mod file can be queried.
+     */
+    public static java.util.List<Path> vanillaDataRoots() {
+        var cached = vanillaDataRoots;
+        if (cached != null) {
+            return cached;
+        }
+
+        var found = new ArrayList<Path>();
+        for (var candidate : systemClasspathRoots()) {
+            if (exposesVanillaData(candidate)) {
+                found.add(candidate);
+            }
+        }
+
+        cached = java.util.List.copyOf(found);
+        vanillaDataRoots = cached;
+        LOGGER.info("[NeoFobric] Classpath entries carrying Minecraft's data: {}", cached);
+        return cached;
+    }
+
+    private static boolean exposesVanillaData(Path candidate) {
+        try {
+            if (Files.isDirectory(candidate)) {
+                return Files.isRegularFile(candidate.resolve(VANILLA_DATA_MARKER));
+            }
+            if (Files.isRegularFile(candidate)) {
+                try (var jar = JarContents.ofPath(candidate)) {
+                    return jar.readFile(VANILLA_DATA_MARKER) != null;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("[NeoFobric] Failed to probe classpath entry {} for data", candidate, e);
         }
         return false;
     }

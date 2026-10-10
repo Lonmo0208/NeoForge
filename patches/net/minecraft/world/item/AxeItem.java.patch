@@ -42,7 +42,7 @@
                  if (waxoffBlock.isPresent()) {
                      spawnSoundAndParticle(level, pos, player, oldState, SoundEvents.AXE_WAX_OFF, 3004);
                      return waxoffBlock;
-@@ -124,8 +_,25 @@
+@@ -124,8 +_,34 @@
          }
      }
  
@@ -50,8 +50,17 @@
 +    public static BlockState getAxeStrippingState(BlockState originalState) {
 +        var strippable = originalState.getData(net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps.STRIPPABLES);
 +        if (strippable != null) return strippable.strippedBlock().withPropertiesOf(originalState);
++        // NeoFobric: ask Fabric's strippable-block registry before the legacy copy below. A Fabric registration
++        // carries its own transformer - some of them ask for the original state's properties to be copied -
++        // and its call site, AxeItem#getStripped, is no longer on the live path in this tree, so a Fabric
++        // registration would otherwise be invisible here.
++        BlockState fabricStripped = net.neoforged.neoforge.common.DataMapHooks.getBlockStrippedByFabric(originalState);
++        if (fabricStripped != null) return fabricStripped;
 +        Block block = STRIPPABLES.get(originalState.getBlock());
-+        return block != null ? block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, originalState.getValue(RotatedPillarBlock.AXIS)) : null;
++        // NeoFobric: the legacy path assumes a pillar-like block, so only copy an axis the state really has.
++        return block != null && originalState.hasProperty(RotatedPillarBlock.AXIS)
++                ? block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, originalState.getValue(RotatedPillarBlock.AXIS))
++                : null;
 +    }
 +
      private Optional<BlockState> getStripped(BlockState state) {

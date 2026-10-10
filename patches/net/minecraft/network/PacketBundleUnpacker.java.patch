@@ -1,11 +1,38 @@
 --- a/net/minecraft/network/PacketBundleUnpacker.java
 +++ b/net/minecraft/network/PacketBundleUnpacker.java
-@@ -14,7 +_,7 @@
+@@ -14,9 +_,34 @@
      }
  
      protected void encode(ChannelHandlerContext ctx, Packet<?> msg, List<Object> out) throws Exception {
 -        this.bundlerInfo.unbundlePacket(msg, out::add);
 +        this.bundlerInfo.unbundlePacket(msg, out::add, ctx);
++        if (out.isEmpty()) {
++            // NeoFobric: MessageToMessageEncoder refuses an empty output with "PacketBundleUnpacker must
++            // produce at least one message" and takes the connection down, so name what was sent while the
++            // packet object is still at hand - a bundle that only carried empty bundles looks non-empty
++            // until it is unbundled.
++            org.slf4j.LoggerFactory.getLogger("NeoFobricBundleTrace")
++                    .warn("Unbundling {} produced nothing; its sub-packets are {}", msg.getClass().getName(),
++                            msg instanceof net.minecraft.network.protocol.BundlePacket<?> bundle
++                                    ? describeSubPackets(bundle.subPackets())
++                                    : "<not a bundle>");
++        }
          if (msg.isTerminal()) {
              ctx.pipeline().remove(ctx.name());
          }
++    }
++
++    private static String describeSubPackets(Iterable<? extends Packet<?>> subPackets) {
++        var description = new StringBuilder("[");
++        for (var subPacket : subPackets) {
++            if (description.length() > 1) {
++                description.append(", ");
++            }
++            description.append(subPacket.getClass().getSimpleName());
++            if (subPacket instanceof net.minecraft.network.protocol.BundlePacket<?> nested) {
++                description.append('(').append(describeSubPackets(nested.subPackets())).append(')');
++            }
++        }
++        return description.append(']').toString();
+     }
+ }

@@ -1,11 +1,15 @@
 --- a/net/minecraft/world/level/block/LiquidBlock.java
 +++ b/net/minecraft/world/level/block/LiquidBlock.java
-@@ -195,7 +_,7 @@
+@@ -195,7 +_,11 @@
  
      @Override
      protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
 -        if (this.shouldSpreadLiquid(level, pos, state)) {
-+        if (!net.neoforged.neoforge.fluids.FluidInteractionRegistry.canInteract(level, pos)) {
++        // NeoFobric: keep vanilla's own condition on the re-flow a neighbour change triggers, next to
++        // NeoForge's. shouldSpreadLiquid is the one place Fabric's flow events see a neighbour-driven re-flow -
++        // its block API refuses or performs the spread from there - so with the call gone those events never
++        // fire and a fluid Fabric asked to stop spreading flows back into the space anyway.
++        if (this.shouldSpreadLiquid(level, pos, state) && !net.neoforged.neoforge.fluids.FluidInteractionRegistry.canInteract(level, pos)) {
              level.scheduleTick(pos, state.getFluidState().getType(), this.fluid.getTickDelay(level));
          }
  

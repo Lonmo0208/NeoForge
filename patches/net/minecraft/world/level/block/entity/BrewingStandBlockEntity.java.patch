@@ -8,18 +8,20 @@
          ItemStack ingredient = items.get(3);
          PotionBrewing potionBrewing = level.potionBrewing();
  
-@@ -178,8 +_,10 @@
+@@ -178,7 +_,13 @@
              items.set(dest, potionBrewing.mix(ingredient, items.get(dest)));
          }
  
 +        net.neoforged.neoforge.event.EventHooks.onPotionBrewed(items);
-+        // Neo: Query the crafting remainder prior to stack mutation (shrink) in order to grab the correct value
-+        ItemStackTemplate remainder = ingredient.getCraftingRemainder();
          ingredient.shrink(1);
--        ItemStackTemplate remainder = ingredient.getItem().getCraftingRemainder();
++        // NeoFobric: keep vanilla's shape here - the query happens after the shrink and reads the item, so a
++        // stack this shrink emptied has no remainder. NeoForge moved it in front of the shrink to read the
++        // stack's own remainder, which for a single dragon breath turns vanilla's "nothing left" into a glass
++        // bottle, and Fabric API's brewing hook binds to the vanilla call. A Fabric mod's stack-aware remainder
++        // is still reached through that call.
+         ItemStackTemplate remainder = ingredient.getItem().getCraftingRemainder();
          if (remainder != null) {
              if (ingredient.isEmpty()) {
-                 ingredient = remainder.create();
 @@ -215,13 +_,13 @@
  
      @Override

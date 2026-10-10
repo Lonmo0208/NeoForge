@@ -18,6 +18,8 @@ import net.neoforged.fml.loading.VersionInfo;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.impl.game.GameProvider;
 import net.fabricmc.loader.impl.game.patch.GameTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import net.fabricmc.loader.impl.metadata.BuiltinModMetadata;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.util.Arguments;
@@ -29,6 +31,7 @@ import net.fabricmc.loader.impl.util.Arguments;
  * checks, the game directory, and the environment type.
  */
 final class BridgedGameProvider implements GameProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BridgedGameProvider.class);
     private final Arguments arguments = new Arguments();
 
     @Override
@@ -54,7 +57,7 @@ final class BridgedGameProvider implements GameProvider {
     @Override
     public Collection<BuiltinMod> getBuiltinMods() {
         var metadata = new BuiltinModMetadata.Builder(getGameId(), getNormalizedGameVersion()).setName(getGameName()).build();
-        return List.of(new BuiltinMod(List.of(minecraftJarPath()), metadata));
+        return List.of(new BuiltinMod(minecraftPaths(), metadata));
     }
 
     @Override
@@ -181,16 +184,27 @@ final class BridgedGameProvider implements GameProvider {
         return null;
     }
 
-    private static Path minecraftJarPath() {
-        try {
-            var loader = FMLLoader.getCurrentOrNull();
-            var minecraftModFile = loader != null ? LoadingModList.get().getModFileById("minecraft") : null;
-            if (minecraftModFile != null) {
-                return minecraftModFile.getFile().getContents().getPrimaryPath();
-            }
-        } catch (Throwable ignored) {
-            // Fall through to the game directory.
-        }
-        return FMLPaths.GAMEDIR.get();
+    /**
+     * NeoFobric: the paths Fabric's {@code minecraft} mod is built from, each found on the classpath.
+     *
+     * <p>Fabric APIs read vanilla files by path: the client tag API walks the mods' jars for tag files, and a
+     * tag a mod aliases to a vanilla one (its {@code c:ores} against {@code #minecraft:diamond_ores}, for
+     * instance) dead-ends unless the entry holding the vanilla data is among the paths handed over here. FML
+     * builds its own {@code minecraft} mod out of a composite of exactly these - the resources jar with the
+     * vanilla data, the patched game jar with the classes, the classes directory in dev - but the mod file
+     * cannot be queried yet: this runs while FML is still discovering mods.
+     */
+    static List<Path> minecraftPaths() {
+        var paths = new java.util.LinkedHashSet<Path>();
+        // The game directory stays first, the way it always was: it is the root Fabric's own game pack is set up
+        // from.
+        paths.add(FMLPaths.GAMEDIR.get());
+        // Then the game's own data and classes: that is what Fabric APIs reach vanilla files through, and the
+        // client tag API reads vanilla tag files out of the game's own jar to fall back on when the synced tags
+        // do not cover a tag.
+        paths.addAll(net.neoforged.fabricbridge.discovery.BridgeFabricModLocator.vanillaDataRoots());
+        paths.addAll(net.neoforged.fabricbridge.discovery.BridgeFabricModLocator.gameContentRoots());
+        return List.copyOf(paths);
     }
 }
+

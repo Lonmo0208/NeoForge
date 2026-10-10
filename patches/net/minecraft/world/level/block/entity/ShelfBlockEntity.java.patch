@@ -1,12 +1,18 @@
 --- a/net/minecraft/world/level/block/entity/ShelfBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/ShelfBlockEntity.java
-@@ -84,6 +_,20 @@
+@@ -84,6 +_,26 @@
          return retrievedItem;
      }
  
 +    @Override
 +    public void setItem(int slot, ItemStack itemStack) {
-+        setItem(slot, itemStack, false);
++        // NeoFobric: the two-argument overload is the non-transactional path, which for a list-backed container
++        // is exactly the interface's default implementation - so keep that default on the live path instead of
++        // forwarding past it. The default is where fabric-transfer-api-v1 wraps setChanged() to suppress a
++        // write's side effects while one of its transactions is open; the forwarder below would skip it and the
++        // suppression would never be consulted (its VanillaStorageTests asserts a shelf schedules no comparator
++        // update for an uncommitted insert).
++        ListBackedContainer.super.setItem(slot, itemStack);
 +    }
 +
 +    // Neo: Skip side effects if insideTransaction is true so the caller can defer them until the transaction commits

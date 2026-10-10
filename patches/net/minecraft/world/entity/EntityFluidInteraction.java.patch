@@ -55,7 +55,7 @@
                                          if (x == eyeBlockX && z == eyeBlockZ && eyeY >= fluidBottom && eyeY <= fluidTop) {
                                              tracker.eyesInside = true;
                                          }
-@@ -118,43 +_,168 @@
+@@ -118,43 +_,178 @@
          return hasFluid;
      }
  
@@ -214,7 +214,17 @@
 +        } else if (fluidTag == net.minecraft.tags.FluidTags.LAVA) {
 +            return net.neoforged.neoforge.common.NeoForgeMod.LAVA_TYPE.value();
 +        } else {
-+            throw new IllegalArgumentException("Cannot look up tracker by tag for non-vanilla fluid: " + fluidTag);
++            // NeoFobric: NeoForge replaced the tag-based fluid tracking with FluidType, so only the two
++            // vanilla tags had a mapping and any other tag refused to resolve. Fabric mods do register
++            // custom fluids and tag them, and Fabric's own API resolves those tags through here (its
++            // content-registries test mod tags a fluid and then ticks a player, which killed the server
++            // with "Cannot look up tracker by tag for non-vanilla fluid"). A tag's fluids carry the type,
++            // and NeoForge tracks them by that same type, so resolving the first fluid of the tag keeps
++            // both systems on one tracker.
++            for (var fluid : net.minecraft.core.registries.BuiltInRegistries.FLUID.getTagOrEmpty(fluidTag)) {
++                return fluid.value().getFluidType();
++            }
++            throw new IllegalArgumentException("Cannot look up tracker by tag for an empty fluid tag: " + fluidTag);
 +        }
 +    }
 +

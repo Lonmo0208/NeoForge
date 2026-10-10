@@ -10,7 +10,7 @@
          return result;
      }
  
-@@ -52,16 +_,41 @@
+@@ -52,22 +_,95 @@
          scanDirectory(manager, FileToIdConverter.registry(registryKey), ops, codec, result);
      }
  
@@ -48,13 +48,20 @@
 +                        // Fabric's marker: that loader wants the file skipped.
 +                        return;
 +                    }
-+                    if (optional.isEmpty()) {
-+                        LOGGER.debug("Skipping loading data file '{}' from '{}' as its conditions were not met", id, location);
-+                    } else if (result.putIfAbsent(id, (T) optional.get()) != null) {
++                    // The map and the id come first on purpose: javac orders a lambda's captured parameters by
++                    // first use, and Fabric API's resource-conditions mixin injects into this lambda's HEAD
++                    // with the vanilla parameter shape (Map, Identifier, Object). Touching the id before the map
++                    // - or touching the resource location at all - gives the lambda different leading
++                    // parameters and the injection is rejected as "Invalid descriptor", which took the whole
++                    // resource-conditions layer of that module down with it.
++                    if (optional.isPresent() && result.putIfAbsent(id, (T) optional.get()) != null) {
                          throw new IllegalStateException("Duplicate data file ignored with ID " + id);
                      }
++                    if (optional.isEmpty()) {
++                        LOGGER.debug("Skipping loading data file '{}' as its conditions were not met", id);
++                    }
                  }).ifError(error -> LOGGER.error("Couldn't parse data file '{}' from '{}': {}", id, location, error));
-@@ -69,5 +_,46 @@
+             } catch (JsonParseException | IllegalArgumentException | IOException e) {
                  LOGGER.error("Couldn't parse data file '{}' from '{}'", id, location, e);
              }
          }
