@@ -1,11 +1,18 @@
 --- a/net/minecraft/world/entity/ai/attributes/AttributeSupplier.java
 +++ b/net/minecraft/world/entity/ai/attributes/AttributeSupplier.java
-@@ -65,8 +_,24 @@
+@@ -65,8 +_,34 @@
      }
  
      public static class Builder {
--        private final ImmutableMap.Builder<Holder<Attribute>, AttributeInstance> builder = ImmutableMap.builder();
-+        private final Map<Holder<Attribute>, AttributeInstance> builder = new java.util.HashMap<>();
++        // Neo: the vanilla field type is back. Mods written against the vanilla API read this field
++        // through an accessor - Fabric's default attribute registry does, to copy a supplier's instances
++        // into a fresh builder - and what they find there has to be an ImmutableMap.Builder. An accessor
++        // whose declared type does not match the field never binds, and the call then dies with
++        // AbstractMethodError.
+         private final ImmutableMap.Builder<Holder<Attribute>, AttributeInstance> builder = ImmutableMap.builder();
++        // Neo: ImmutableMap.Builder offers no way to read anything back, so NeoForge's own additions (the
++        // copy constructors, combine and hasAttribute) keep a parallel view of what went in.
++        private final Map<Holder<Attribute>, AttributeInstance> entries = new java.util.HashMap<>();
          private boolean instanceFrozen;
 +        private final java.util.List<AttributeSupplier.Builder> others = new java.util.ArrayList<>();
 +
@@ -13,26 +20,36 @@
 +
 +        public Builder(AttributeSupplier attributeMap) {
 +            this.builder.putAll(attributeMap.instances);
++            this.entries.putAll(attributeMap.instances);
 +        }
 +
 +        public void combine(Builder other) {
-+            this.builder.putAll(other.builder);
++            this.builder.putAll(other.entries);
++            this.entries.putAll(other.entries);
 +            others.add(other);
 +        }
 +
 +        public boolean hasAttribute(Holder<Attribute> attribute) {
-+            return this.builder.containsKey(attribute);
++            return this.entries.containsKey(attribute);
 +        }
  
          private AttributeInstance create(Holder<Attribute> attribute) {
              AttributeInstance result = new AttributeInstance(attribute, attributeInstance -> {
+@@ -75,6 +_,7 @@
+                 }
+             });
+             this.builder.put(attribute, result);
++            this.entries.put(attribute, result);
+             return result;
+         }
+ 
 @@ -91,7 +_,8 @@
  
          public AttributeSupplier build() {
              this.instanceFrozen = true;
 -            return new AttributeSupplier(this.builder.buildKeepingLast());
 +            others.forEach(b -> b.instanceFrozen = true);
-+            return new AttributeSupplier(ImmutableMap.copyOf(this.builder));
++            return new AttributeSupplier(ImmutableMap.copyOf(this.entries));
          }
      }
  }

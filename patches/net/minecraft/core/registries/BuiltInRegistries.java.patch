@@ -1,13 +1,54 @@
 --- a/net/minecraft/core/registries/BuiltInRegistries.java
 +++ b/net/minecraft/core/registries/BuiltInRegistries.java
-@@ -440,6 +_,10 @@
-         ((MappedRegistry)registry).bindAllTagsToEmpty();
-     }
+@@ -413,7 +_,24 @@
+     private static void freeze() {
+         REGISTRY.freeze();
  
-+    public static java.util.Set<Identifier> getVanillaRegistrationOrder() {
-+        return java.util.Collections.unmodifiableSet(LOADERS.keySet());
++        // Neo: reopen the root registry right away. Vanilla freezes it to close the set of built-in
++        // registries, but that is not the state this game actually runs in: NeoForge reopens the root for
++        // NewRegistryEvent and never closes it again, and a mod is allowed to create its own registry on
++        // first use. Create does exactly that from a hook on this very method, so the freeze here turned
++        // "register a new registry" into "Registry is already frozen" and killed the whole bootstrap.
++        // Reopening it keeps that possible; the contained registries are still frozen below, so no
++        // built-in entry can be added either way.
++        ((MappedRegistry<?>) REGISTRY).unfreeze(true);
++
+         for (Registry<?> registry : REGISTRY) {
++            // Neo: this method runs more than once in practice. Fabric's registry sync defers the whole
++            // bootStrap() to after mod initialization and runs it again, and NeoForge has already frozen
++            // the registries by then. Re-binding the bootstrapped tags of a closed registry would wipe the
++            // tags mod init just bound and throws "Registry is already frozen" out of validateWrite, so a
++            // registry that is closed already has nothing left to do here.
++            if (registry instanceof MappedRegistry<?> mappedRegistry && mappedRegistry.isFrozen()) {
++                continue;
++            }
+             bindBootstrappedTagsToEmpty(registry);
+             registry.freeze();
+         }
+@@ -421,6 +_,15 @@
+ 
+     private static <T extends Registry<?>> void validate(Registry<T> registry) {
+         registry.forEach(r -> {
++            // Neo: both checks below are about the registries the built-in bootstrap populates. A registry
++            // that a mod creates on the fly during bootstrap - the bridged Fabric mods build their own from
++            // a frozen-registry hook - is empty here by design: its contents arrive later, from its data
++            // pack or from mod initialization. Validating it would report "was empty after loading" for
++            // something that is simply not loaded yet.
++            if (!LOADERS.containsKey(r.key().identifier())) {
++                return;
++            }
++
+             if (r.keySet().isEmpty()) {
+                 Util.logAndPauseIfInIde("Registry '" + registry.getKey((T)r) + "' was empty after loading");
+             }
+@@ -438,6 +_,10 @@
+ 
+     private static void bindBootstrappedTagsToEmpty(Registry<?> registry) {
+         ((MappedRegistry)registry).bindAllTagsToEmpty();
 +    }
 +
++    public static java.util.Set<Identifier> getVanillaRegistrationOrder() {
++        return java.util.Collections.unmodifiableSet(LOADERS.keySet());
+     }
+ 
      @FunctionalInterface
-     private interface RegistryBootstrap<T> {
-         Object run(Registry<T> registry);

@@ -259,20 +259,30 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
      * {@code -Dneofobric.registerAllMixinConfigs=true} to register everything.
      */
     private static final List<String> DEFAULT_SKIPPED_MIXIN_CONFIGS = List.of(
-            // Rewrites the registry lifecycle into Fabric's two-phase freeze: BootstrapMixin redirects
-            // bootStrap() to createContents() so the freeze is deferred, and MinecraftMixin/MainMixin
-            // call bootStrap() again after mod init to finish it. NeoForge freezes the registries once,
-            // during startup, so that second pass hits "Registry is already frozen" from
-            // bindBootstrappedTagsToEmpty and the game never gets past initialisation. NeoForge runs its
-            // own registry synchronisation, so the mechanism is duplicated here; dropping the config
-            // leaves the normal single freeze.
-            "fabric-registry-sync-v0",
-            // Its client mixins rewrite BlockStateModel / ModelLoader after NeoForge has already patched
-            // them, and every vanilla model then fails with
-            // "Failed to load model minecraft:models/block/<name>.json" from ModelManager - the game draws
-            // black-and-magenta placeholder cubes for every block and item. NeoForge's model system has the
-            // same extension points, so dropping Fabric's copy restores model loading.
-            "fabric-model-loading-api-v1");
+            // fabric-registry-sync-v0 used to be skipped here: it defers the vanilla registry freeze to
+            // after mod initialization (BootstrapMixin redirects bootStrap() to createContents, then
+            // MainMixin/MinecraftMixin run bootStrap() again), and NeoForge's single freeze made that
+            // second pass die on an already closed registry. Both halves are fixed now - the root registry
+            // stays open, and BuiltInRegistries.freeze() skips registries that are closed already - and it
+            // has to be registered: its ListenableRegistry/RegistryAttribute layer is what
+            // RegistryEntryAddedCallback, FabricRegistryBuilder, the menu API and the recipe API stand on.
+            // Without it they throw "Unsupported registry" / "registry not marked as modded".
+            // fabric-model-loading-api-v1 also used to be skipped whole: its
+            // BlockStateModelUnbakedMixin replaces the codecs of BlockStateModel.Unbaked.<clinit> and
+            // bypasses NeoForge's custom-model dispatch, so every blockstate model failed to decode.
+            // That one mixin is now dropped by name (see MixinConflictFilter
+            // DEFAULT_SKIPPED_MIXIN_CLASSES) and the config is registered again: its plugin machinery
+            // is what puts Fabric mods' extra models into the bakery - without it Create's
+            // dynamically rendered parts (partial models, create:block/flywheel/block) silently fall
+            // back to the missing model and draw black-and-magenta.
+            // Fabric's creative tab module ships its own page switcher for the creative inventory: the
+            // client mixin adds previous/next arrows and filters tab visibility by its own page model,
+            // right next to the page arrows and filtering the host loader already does - the screen ends up
+            // with two switchers that disagree about which tabs are on the current page. NeoForge's paging
+            // is the one that stays (it is where every tab lives in this setup), and the Fabric API methods
+            // of that interface are routed onto it by MixinJarPatcher#bridgeCreativeTabApi. Only the client
+            // config is dropped: the common one carries the tab registration API Fabric mods actually use.
+            "fabric-creative-tab-api-v1.client.mixins.json");
 
     private static void registerFabricMixinConfigs() {
         if (!FabricBridge.hasFabricMods()) {
@@ -434,6 +444,23 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
     }
 
     /**
+     * {@return the instruction that constructs the options object in the Minecraft constructor} Fabric's
+     * key mapping API refuses to register a key binding once the options are initialised, and the object
+     * is fully built before it is stored in its field - so the hook has to sit in front of the constructor
+     * call itself, not in front of the assignment.
+     */
+    private static AbstractInsnNode findBeforeOptionsConstruction(MethodNode method) {
+        for (var insn : method.instructions) {
+            if (insn instanceof MethodInsnNode methodInsn && methodInsn.getOpcode() == Opcodes.INVOKESPECIAL
+                    && methodInsn.name.equals("<init>")
+                    && methodInsn.owner.equals("net/minecraft/client/Options")) {
+                return insn;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return the last {@code RETURN} of the method, i.e. the point where every field is assigned
      */
     private static AbstractInsnNode lastReturn(MethodNode method) {
@@ -484,8 +511,17 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         // assigned at roughly instruction 370, comfortably ahead of the window setup. A null window
         // is tolerated by the entrypoints that matter (Sodium's config builder stores the window but
         // does not touch it), while a null instance is not - so this is the earliest safe point.
-        var insertionPoint = findFieldAssignment(target, "options");
-        var anchor = "options-field";
+        // The Minecraft instance is needed (`Minecraft.getInstance()` has to work for the entrypoints) and
+        // the options must not exist yet: Fabric's key mapping API refuses to register a key binding once
+        // the options are initialised ("GameOptions has already been initialised"), and the options object
+        // is built before it is assigned to the field. So the hook goes right before that construction,
+        // which sits comfortably after "instance = this" and still well ahead of the window setup.
+        var insertionPoint = findBeforeOptionsConstruction(target);
+        var anchor = "before-options";
+        if (insertionPoint == null) {
+            insertionPoint = findFieldAssignment(target, "options");
+            anchor = "options-field";
+        }
         if (insertionPoint == null) {
             insertionPoint = findFieldAssignment(target, "window");
             anchor = "window-field";

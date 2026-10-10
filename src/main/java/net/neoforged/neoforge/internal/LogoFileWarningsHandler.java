@@ -6,14 +6,16 @@
 package net.neoforged.neoforge.internal;
 
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.ModLoader;
-import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Mod(NeoForgeMod.MOD_ID)
 public class LogoFileWarningsHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogoFileWarningsHandler.class);
+
     private static final boolean HIDE_WARNING_SCREEN = Boolean.getBoolean("neoforge.warnings.logofile.hide");
 
     public LogoFileWarningsHandler() {
@@ -36,9 +38,14 @@ public class LogoFileWarningsHandler {
 
             // Skip warning if bannerFile or iconFile is present, since it means the developer consciously kept the old property (for multi-version compat)
             if (bannerFile.isEmpty() && iconFile.isEmpty()) {
-                // This shouldn't need to be translated, as it will only ever show for developers
-                //noinspection UnstableApiUsage
-                ModLoader.addLoadingIssue(ModLoadingIssue.warning("Mod %s uses the deprecated `logoFile` property; change to `bannerFile` and/or (for square icons) `iconFile`", info.getModId()).withAffectedMod(info));
+                // NeoFobric: a log line, not a loading issue. `logoFile` still works - FML reads it as a
+                // fallback for the mod's display image - so nobody can act on the notice, while a
+                // NeoFobric instance routinely carries third-party mods that use the old property (the
+                // NeoForge builds of Sodium and Iris both do). Reporting it as a loading issue raised the
+                // warning screen and blocked the game for information that changes nothing; the notice
+                // stays available in the log at debug level.
+                LOGGER.debug("Mod {} uses the deprecated `logoFile` property; change to `bannerFile` and/or (for square icons) `iconFile`",
+                        info.getModId());
             }
         });
     }

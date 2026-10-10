@@ -50,3 +50,6 @@ build
 /fabric-loader/
 /仅供参考
 /fabric
+
+# NeoFobric: JVM exception tracing output (-Xlog:exceptions=trace:file=neofobric-exc.log), see the handoff docs
+/neofobric-exc.log*

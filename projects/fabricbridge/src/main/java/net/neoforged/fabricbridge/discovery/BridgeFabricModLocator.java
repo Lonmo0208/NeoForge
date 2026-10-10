@@ -71,6 +71,14 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
     private static final String CLIENT_GAME_CONTENT_MARKER = "net/minecraft/client/Minecraft.class";
 
     /**
+     * Metadata files that mark a jar as a NeoForge mod. Such a jar is never claimed by the bridge, so a
+     * multi-loader build (the NeoForge Sodium/Iris jars carry both this and a {@code fabric.mod.json})
+     * stays with FML.
+     */
+    private static final java.util.List<String> FML_MOD_METADATA = java.util.List.of(
+            "META-INF/neoforge.mods.toml", "META-INF/mods.toml");
+
+    /**
      * Module name of the composite module holding all Fabric mod classes.
      */
     public static final String FABRIC_MODULE_NAME = "neofobric.fabric.mods";
@@ -131,11 +139,31 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             context.addLocated(path);
         }
 
+        // Packages the platform (Minecraft, NeoForge, FML and the libraries they bring) already
+        // provides must not be merged into the composite module: a JPMS module may not claim a
+        // package another module of the same layer owns, and FML then refuses to start with
+        //   Modules neofobric.fabric.mods and neoforge export package net.neoforged.neoforge.common
+        // Multi-loader libraries are exactly that case - ForgeConfigAPIPort's Fabric build
+        // reimplements the whole net.neoforged config API, and both it and Create Fly bring
+        // nightconfig with them. The platform copy is the authoritative implementation on NeoForge,
+        // so the Fabric duplicate is shadowed (and reported) instead of being merged.
+        var platformPackages = platformProvidedPackages(fabricJars.keySet());
+
         // Merge all Fabric content into one JPMS module to avoid split-package conflicts.
+        // contentsList stays index-aligned with fabricPaths, so the realigning pass below can swap
+        // individual entries for their rewritten copies.
+        var fabricPaths = new ArrayList<Path>(fabricJars.size());
         var contentsList = new ArrayList<JarContents>(fabricJars.size());
+        var contentFilters = new ArrayList<JarContents.PathFilter>(fabricJars.size());
+        var shadowedPackages = new java.util.concurrent.ConcurrentHashMap<Path, java.util.Set<String>>();
         for (var path : fabricJars.keySet()) {
             try {
-                contentsList.add(JarContents.ofPath(path));
+                var content = JarContents.ofPath(path);
+                fabricPaths.add(path);
+                contentsList.add(content);
+                contentFilters.add(platformPackages.isEmpty()
+                        ? null
+                        : platformShadowFilter(path, platformPackages, shadowedPackages));
             } catch (Exception e) {
                 LOGGER.error("[NeoFobric] Failed to open Fabric mod jar {}", path, e);
                 // Un-claim so the file is reported by the regular discovery pipeline instead.
@@ -145,6 +173,10 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         }
         if (contentsList.isEmpty()) {
             return;
+        }
+        for (var entry : shadowedPackages.entrySet()) {
+            LOGGER.info("[NeoFobric] Shadowed {} platform-provided package(s) from {}: {}",
+                    entry.getValue().size(), entry.getKey().getFileName(), entry.getValue());
         }
 
         // Pull Minecraft dependency jars that Fabric mods mixin into (duck-type interfaces,
@@ -159,6 +191,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             if (libraryJar != null) {
                 try {
                     contentsList.add(JarContents.ofPath(libraryJar));
+                    contentFilters.add(null);
                     context.addLocated(libraryJar);
                     LOGGER.info("[NeoFobric] Integrated {} into the Fabric game library for mixin support", libraryJar.getFileName());
                 } catch (Exception e) {
@@ -185,7 +218,6 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             // One resolver for the whole pass: the jars are opened once and held, and lookups are
             // memoized, instead of reopening the game jar (and walking the mods folder on a miss)
             // for every single target lookup.
-            var fabricPaths = new ArrayList<Path>(fabricJars.keySet());
             try (var resolver = new MixinJarPatcher.TargetResolver(gameContent, fabricPaths)) {
                 // Colliding accessor members are planned before any jar is written: a call site can live
                 // in a different jar than the accessor it calls.
@@ -203,10 +235,9 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             }
         }
 
-        // Point the game library at the realigned copies where one was produced. The Fabric jars
-        // occupy the first fabricJars.size() positions of contentsList, in fabricJars order.
+        // Point the game library at the realigned copies where one was produced, keeping the
+        // filters aligned with their delegates.
         var gameLibraryContents = new ArrayList<JarContents>(contentsList.size());
-        var fabricPaths = new ArrayList<Path>(fabricJars.keySet());
         for (var i = 0; i < contentsList.size(); i++) {
             var content = contentsList.get(i);
             var effective = i < fabricPaths.size() ? realignedJars.get(fabricPaths.get(i)) : null;
@@ -222,8 +253,13 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             }
         }
 
-        var composite = new CompositeJarContents(gameLibraryContents);
-        var moduleInfo = new FabricCompositeModuleInfo();
+        // A composite is only needed when it actually combines something or filters something:
+        // CompositeJarContents rejects a single unfiltered delegate.
+        var filtered = contentFilters.stream().anyMatch(java.util.Objects::nonNull);
+        var composite = gameLibraryContents.size() == 1 && !filtered
+                ? gameLibraryContents.getFirst()
+                : new CompositeJarContents(gameLibraryContents, filtered ? contentFilters : null);
+        var moduleInfo = new FabricCompositeModuleInfo(platformPackages);
         IModFile modFile;
         try {
             modFile = IModFile.create(composite, moduleInfo, JarModsDotTomlModFileReader::manifestParser,
@@ -248,7 +284,77 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // on every launch, so a mod removed from mods/ cannot leave a ghost row behind.
         writeModsMenuFile(fabricJars, realignedJars);
 
+        // Fabric-loader's own discovery walks the mods folder and takes every jar that carries a
+        // fabric.mod.json as a Fabric mod. A multi-loader NeoForge jar sitting there (the NeoForge
+        // builds of Sodium and Iris do) would then be read as a Fabric mod too, and its Fabric
+        // dependency list resolved against a fabric side that is not installed. The mods folder it
+        // scans is redirected to a view that links the Fabric jars only, which leaves exactly the same
+        // set discoverable there as before minus the jars that belong to FML.
+        if (FabricJarRegistry.hasForeignMods()) {
+            redirectFabricModsFolder(modsDir, fabricJars);
+        }
+
+        // Boot fabric-loader here, not in the FML registration window: discovery has just finished and
+        // the mods folder redirect above is in place, which is everything the loader's own mod scan
+        // needs. The mod list has to exist before the game layer transforms its first class, because
+        // that is when mixin config plugins are constructed - and they legitimately ask the loader for
+        // their own mod container. Create's plugin does it through
+        // com.zurrtum.create.Create.<clinit> (FabricLoader.getModContainer("create").orElseThrow()),
+        // which turned the too-late boot into ExceptionInInitializerError and no startup at all.
+        try {
+            net.neoforged.fabricbridge.FabricBridge.bootIfNeeded();
+        } catch (Throwable t) {
+            LOGGER.error("[NeoFobric] Early fabric-loader boot failed - the bridge retries during the"
+                    + " registration window, mixin config plugins that ask for their mod container"
+                    + " before that will not find it", t);
+        }
+
         LOGGER.info("[NeoFobric] Merged {} Fabric jar(s) into the composite game library", fabricJars.size());
+    }
+
+    /**
+     * Points fabric-loader at a mods folder holding links to the Fabric jars only, so the NeoForge jars
+     * in the real folder cannot be discovered as Fabric mods through that scan either.
+     *
+     * <p>Only <em>top-level</em> Fabric jars are linked: the nested jars were never reachable through
+     * this scan (they live in the bridge cache, not in the mods folder), and leaving that set unchanged
+     * is the whole point of the redirect.
+     */
+    private static void redirectFabricModsFolder(Path modsDir, Map<Path, FabricModInfo> fabricJars) {
+        var view = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve(".neofobric").resolve("fabricMods");
+        try {
+            if (Files.isDirectory(view)) {
+                try (var entries = Files.list(view)) {
+                    for (var entry : (Iterable<Path>) entries::iterator) {
+                        deleteQuietly(entry);
+                    }
+                }
+            } else {
+                Files.createDirectories(view);
+            }
+            var linked = 0;
+            for (var path : fabricJars.keySet()) {
+                if (!modsDir.equals(path.toAbsolutePath().normalize().getParent())) {
+                    continue;
+                }
+                var link = view.resolve(path.getFileName().toString());
+                try {
+                    Files.createLink(link, path);
+                } catch (Exception linkUnavailable) {
+                    Files.copy(path, link, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+                // fabric-loader may offer it back through addToClassPath; it is game content already.
+                FabricJarRegistry.markGameLayerPath(link);
+                linked++;
+            }
+            System.setProperty("fabric.modsFolder", view.toString());
+            exposePlatformMods(modsDir, view, fabricJars);
+            LOGGER.info("[NeoFobric] Pointed fabric-loader's mods folder at {} ({} Fabric jar(s)); the NeoForge jars in {} stay FML's",
+                    view, linked, modsDir);
+        } catch (IOException e) {
+            LOGGER.error("[NeoFobric] Failed to prepare the Fabric-only mods folder {} - NeoForge jars that ship a fabric.mod.json may be read as Fabric mods",
+                    view, e);
+        }
     }
 
     /**
@@ -297,6 +403,11 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             }
             out.append("]}");
             Files.writeString(file, out.toString(), java.nio.charset.StandardCharsets.UTF_8);
+            // The main menu's branding line reads this to show both loaders' mods in one count:
+            // NeoForge counts its own through ModList, and this is the number of Fabric mods the
+            // bridge loaded (one per mod id - nested jars that ship the same module twice collapse,
+            // matching what the mod list screen shows).
+            System.setProperty("neofobric.fabricModCount", Integer.toString(written));
             LOGGER.info("[NeoFobric] Published {} Fabric mod(s) to the mod list screen manifest", written);
         } catch (IOException e) {
             // Display only: a missing manifest means the mod list simply does not show Fabric mods.
@@ -400,6 +511,19 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
 
         FabricModInfo info;
         try (var jar = JarContents.ofPath(path)) {
+            // A jar that declares itself a NeoForge mod belongs to FML, even when it also carries a
+            // fabric.mod.json: the multi-loader builds of Sodium and Iris ship both files, and claiming
+            // such a jar takes it away from FML entirely - the NeoForge mod never initialises, while
+            // fabric-loader resolves the Fabric half of the metadata and dies on the sibling it names
+            // ("Mod 'Iris' (iris) requires any 0.9.x version of sodium, which is missing", because the
+            // installed Sodium is the NeoForge build). The bridge owns pure-Fabric jars only.
+            for (var fmlMetadata : FML_MOD_METADATA) {
+                if (jar.readFile(fmlMetadata) != null) {
+                    LOGGER.info("[NeoFobric] Leaving {} to FML - it declares {}", path.getFileName(), fmlMetadata);
+                    FabricJarRegistry.markForeignModPath(path);
+                    return;
+                }
+            }
             byte[] metadata = jar.readFile(FabricJarRegistry.FABRIC_MOD_JSON);
             if (metadata == null) {
                 return; // Not a Fabric mod.
@@ -428,6 +552,162 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 LOGGER.error("[NeoFobric] Failed to process nested jar {} of Fabric mod {}", nestedJar, info.modId(), e);
             }
         }
+    }
+
+    /**
+     * Makes the platform's NeoForge mods visible to fabric-loader.
+     *
+     * <p>Fabric mods decide features by asking {@code FabricLoader.isModLoaded(...)} - Create's client
+     * mixin plugin is the canonical example: with sodium loaded it adds its Sodium render helper, with
+     * iris loaded it adds {@code IrisPipelinesMixin}, which registers Create's FRAPI pipelines
+     * ("ponder:pipeline/*") with Iris so shader packs can map them to their programs. In this setup
+     * sodium and iris are the <em>NeoForge</em> builds and are not Fabric mods, so the question
+     * answered "no": Iris never learned those pipelines and fell back to the vanilla program for them
+     * ("Missing program ponder:pipeline/entity_block_solid in override list"), which under a shader
+     * pack renders the affected blocks unshaded - visible as transparent-with-shadows geometry.
+     *
+     * <p>The fix is not to fake containers: every NeoForge mod found in the platform mods folder gets
+     * a one-file jar with a {@code fabric.mod.json} carrying its real id, version and name, written
+     * into the redirected Fabric mods folder. fabric-loader's own discovery then resolves it like any
+     * other mod, so {@code isModLoaded}, {@code getModContainer} and version-range dependency checks
+     * all see the platform mods with their true metadata.
+     *
+     * <p>The loader-side ids ({@code neoforge}, {@code minecraft}, {@code forge}, ...) are left alone:
+     * a Fabric mod asking about them would take loader-specific code paths that this bridge does not
+     * provide, whereas sodium/iris-style content mods are exactly the ported counterpart the bridge
+     * stands on. Ids already claimed by a real Fabric jar are skipped - the real mod wins.
+     */
+    private static void exposePlatformMods(Path modsDir, Path view, Map<Path, FabricModInfo> fabricJars) {
+        var claimed = new java.util.HashSet<String>();
+        for (var info : fabricJars.values()) {
+            claimed.add(info.modId());
+        }
+        for (var info : FabricJarRegistry.getEntries().values()) {
+            claimed.add(info.modId());
+        }
+
+        var blocked = java.util.Set.of("minecraft", "neoforge", "forge", "fml", "fabricloader", "java", "javafml", "lowcodefml");
+        var exposed = new ArrayList<String>();
+        try (var jars = Files.list(modsDir)) {
+            for (var jarPath : (Iterable<Path>) jars::iterator) {
+                if (!Files.isRegularFile(jarPath) || !jarPath.toString().endsWith(".jar")) {
+                    continue;
+                }
+                for (var mod : readForgeModsDotToml(jarPath)) {
+                    var id = mod[0];
+                    if (id.isEmpty() || blocked.contains(id) || claimed.contains(id)) {
+                        continue;
+                    }
+                    var version = sanitizeFabricVersion(mod[1]);
+                    var name = mod[2].isEmpty() ? id : mod[2];
+                    var target = view.resolve("neofobric-platform-" + id + ".jar");
+                    try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(target))) {
+                        out.putNextEntry(new java.util.zip.ZipEntry("fabric.mod.json"));
+                        out.write(("{\"schemaVersion\":1,\"id\":\"" + id + "\",\"version\":\"" + version
+                                + "\",\"name\":\"" + escapeJson(name)
+                                + "\",\"environment\":\"*\",\"custom\":{\"neofobric\":\"platform-mod\"}}")
+                                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        out.closeEntry();
+                    }
+                    exposed.add(id + " " + version);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("[NeoFobric] Failed to expose the NeoForge mods in {} to fabric-loader", modsDir, e);
+            return;
+        }
+        if (!exposed.isEmpty()) {
+            LOGGER.info("[NeoFobric] Exposed {} NeoForge mod(s) to fabric-loader (mods probing isModLoaded see them): {}",
+                    exposed.size(), String.join(", ", exposed));
+        }
+    }
+
+    /**
+     * {@return {id, version, displayName} of every {@code [[mods]]} entry in the jar's
+     *         {@code neoforge.mods.toml}, or an empty list when the jar has none}
+     *
+     * <p>Deliberately a section-aware line scan rather than a TOML parser: only {@code modId} /
+     * {@code version} / {@code displayName} lines inside {@code [[mods]]} are read, so the
+     * {@code modId = ...} lines of {@code [[dependencies.x]]} blocks (which name other mods, not this
+     * jar's) are never mistaken for a mod.
+     */
+    private static java.util.List<String[]> readForgeModsDotToml(Path jarPath) {
+        var mods = new ArrayList<String[]>();
+        try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
+            var entry = zip.getEntry("META-INF/neoforge.mods.toml");
+            if (entry == null) {
+                return mods;
+            }
+            var text = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            String id = null;
+            String version = "";
+            String displayName = "";
+            var inModsSection = false;
+            for (var rawLine : text.split("\n")) {
+                var line = rawLine.strip();
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+                if (line.startsWith("[")) {
+                    if (inModsSection && id != null) {
+                        mods.add(new String[] { id, version, displayName });
+                    }
+                    inModsSection = line.startsWith("[[mods]]");
+                    if (!inModsSection) {
+                        id = null;
+                        version = "";
+                        displayName = "";
+                    }
+                    continue;
+                }
+                if (!inModsSection) {
+                    continue;
+                }
+                var eq = line.indexOf('=');
+                if (eq < 0) {
+                    continue;
+                }
+                var key = line.substring(0, eq).strip();
+                var value = unquoteToml(line.substring(eq + 1).strip());
+                switch (key) {
+                    case "modId" -> id = value;
+                    case "version" -> version = value;
+                    case "displayName" -> displayName = value;
+                    default -> { }
+                }
+            }
+            if (inModsSection && id != null) {
+                mods.add(new String[] { id, version, displayName });
+            }
+        } catch (Exception e) {
+            LOGGER.debug("[NeoFobric] Could not read neoforge.mods.toml of {}", jarPath, e);
+        }
+        return mods;
+    }
+
+    private static String unquoteToml(String value) {
+        if (value.length() >= 2
+                && ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'")))) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
+
+    /**
+     * {@return the version as fabric-loader's version parser accepts it} FML versions are often
+     * placeholders or loose strings ({@code ${file.jarVersion}); fabric-loader rejects anything that
+     * is not a version, so those degrade to {@code 0.0.0} instead of failing resolution.
+     */
+    private static String sanitizeFabricVersion(String version) {
+        if (version == null || version.isBlank() || version.contains("${")) {
+            return "0.0.0";
+        }
+        var cleaned = version.replaceAll("[^0-9A-Za-z.+_-]", "-");
+        return cleaned.isEmpty() ? "0.0.0" : cleaned;
+    }
+
+    private static String escapeJson(String text) {
+        return text.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private static void deleteQuietly(Path path) {
@@ -477,25 +757,160 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      * both are on the bootstrap classpath. Entries are verified by probing for a Minecraft class
      * instead of being trusted by name, so nothing is loaded from a wrong location.
      */
-    private static java.util.List<Path> classpathGameContent() {
-        var candidates = new java.util.LinkedHashSet<Path>();
+    /**
+     * {@return the packages the platform classpath provides out of the packages the Fabric jars
+     * claim} Only the intersection is material: it is exactly the set of packages the composite
+     * module must not claim itself. Everything the platform classpath exposes counts as platform
+     * content - in dev the extracted class folders plus FML/NeoForge/library jars, in production
+     * the patched game jars plus the launcher libraries.
+     */
+    private static java.util.Set<String> platformProvidedPackages(java.util.Collection<Path> fabricJars) {
+        var fabricPackages = new java.util.HashSet<String>();
+        for (var path : fabricJars) {
+            try (var contents = JarContents.ofPath(path)) {
+                contents.visitContent((relativePath, resource) -> {
+                    var packageName = packageOfEntry(relativePath);
+                    if (packageName != null) {
+                        fabricPackages.add(packageName);
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.debug("[NeoFobric] Failed to index the packages of {}", path, e);
+            }
+        }
+        if (fabricPackages.isEmpty()) {
+            return java.util.Set.of();
+        }
+
+        var platform = new java.util.LinkedHashSet<String>();
+        for (var root : systemClasspathRoots()) {
+            try {
+                if (Files.isDirectory(root)) {
+                    for (var packageName : fabricPackages) {
+                        if (Files.isDirectory(root.resolve(packageName.replace('.', '/')))) {
+                            platform.add(packageName);
+                        }
+                    }
+                } else if (Files.isRegularFile(root)) {
+                    try (var contents = JarContents.ofPath(root)) {
+                        contents.visitContent((relativePath, resource) -> {
+                            var packageName = packageOfEntry(relativePath);
+                            if (packageName != null && fabricPackages.contains(packageName)) {
+                                platform.add(packageName);
+                            }
+                        });
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.debug("[NeoFobric] Failed to scan the classpath entry {}", root, e);
+            }
+            if (platform.size() == fabricPackages.size()) {
+                break;
+            }
+        }
+        return platform;
+    }
+
+    /**
+     * {@return a filter that hides the classes of {@code jar} living in {@link
+     * #platformProvidedPackages platform-provided packages}} Those classes cannot be part of the
+     * composite module (split package), and the platform implementation is the one that should be
+     * used anyway. Non-class entries (assets, fabric.mod.json, ...) are never filtered. What was
+     * hidden is recorded in {@code shadowedPackages} for the startup report.
+     */
+    private static JarContents.PathFilter platformShadowFilter(
+            Path jar, java.util.Set<String> platformPackages, Map<Path, java.util.Set<String>> shadowedPackages) {
+        return relativePath -> {
+            var packageName = packageOfEntry(relativePath);
+            if (packageName == null || !platformPackages.contains(packageName)) {
+                return true;
+            }
+            shadowedPackages.computeIfAbsent(jar, key -> java.util.concurrent.ConcurrentHashMap.newKeySet())
+                    .add(packageName);
+            return false;
+        };
+    }
+
+    /**
+     * {@return the package a class entry belongs to, or null if the entry is not a class or has no
+     * package} Multi-release jars store classes as {@code META-INF/versions/<n>/a/b/C.class} while
+     * they are loaded as {@code a.b.C}, so the version prefix is stripped - and keeping it would
+     * produce the illegal package name {@code META-INF.versions.17.a.b} that JPMS rejects outright.
+     */
+    private static String packageOfEntry(String relativePath) {
+        if (!relativePath.endsWith(".class")) {
+            return null;
+        }
+        if (relativePath.startsWith("META-INF/versions/")) {
+            var versionEnd = relativePath.indexOf('/', "META-INF/versions/".length());
+            if (versionEnd < 0) {
+                return null;
+            }
+            relativePath = relativePath.substring(versionEnd + 1);
+        } else if (relativePath.startsWith("META-INF/")) {
+            return null;
+        }
+        var lastSlash = relativePath.lastIndexOf('/');
+        if (lastSlash < 1) {
+            return null;
+        }
+        var directory = relativePath.substring(0, lastSlash);
+        if (!directory.contains("/")) {
+            // The default package - never a package of its own in JPMS terms.
+            return null;
+        }
+        var packageName = directory.replace('/', '.');
+        return isValidPackageName(packageName) ? packageName : null;
+    }
+
+    /** {@return whether every segment of the name is a legal Java identifier} */
+    private static boolean isValidPackageName(String name) {
+        var start = 0;
+        while (start < name.length()) {
+            var end = name.indexOf('.', start);
+            if (end < 0) {
+                end = name.length();
+            }
+            if (!Character.isJavaIdentifierStart(name.charAt(start))) {
+                return false;
+            }
+            for (var i = start + 1; i < end; i++) {
+                if (!Character.isJavaIdentifierPart(name.charAt(i))) {
+                    return false;
+                }
+            }
+            start = end + 1;
+        }
+        return true;
+    }
+
+    /**
+     * {@return every root the system classloader searches} The launcher feeds FML and the game
+     * through the classpath in both dev and production, so this is the platform's own view of
+     * itself - no need to guess at directory names or jar file names.
+     */
+    private static java.util.Set<Path> systemClasspathRoots() {
+        var roots = new java.util.LinkedHashSet<Path>();
         for (var entry : System.getProperty("java.class.path", "").split(java.io.File.pathSeparator)) {
             if (!entry.isBlank()) {
-                candidates.add(Path.of(entry));
+                roots.add(Path.of(entry));
             }
         }
         try {
             for (var url : ((java.net.URLClassLoader) ClassLoader.getSystemClassLoader()).getURLs()) {
                 if ("file".equals(url.getProtocol())) {
-                    candidates.add(Path.of(url.toURI()));
+                    roots.add(Path.of(url.toURI()));
                 }
             }
         } catch (Throwable ignored) {
             // Not a URLClassLoader (or the URL is not a file) - the class path property is enough.
         }
+        return roots;
+    }
 
+    private static java.util.List<Path> classpathGameContent() {
         var found = new ArrayList<Path>();
-        for (var candidate : candidates) {
+        for (var candidate : systemClasspathRoots()) {
             if (exposesGameContent(candidate)) {
                 found.add(candidate);
             }
@@ -567,6 +982,19 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      * {@code META-INF/services} entries are collected as service providers.
      */
     private static final class FabricCompositeModuleInfo implements JarModuleInfo {
+        /** Packages the platform owns; the composite module must not claim them (split package). */
+        private final java.util.Set<String> platformPackages;
+        /**
+         * Classes that are not on the platform but sit in one of its packages. They are dropped:
+         * JPMS cannot put a single class of the composite into the platform's package. This is
+         * expected to stay empty - it only fills when a mod adds classes into platform packages.
+         */
+        private final java.util.Set<String> strandedClasses = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+        FabricCompositeModuleInfo(java.util.Set<String> platformPackages) {
+            this.platformPackages = platformPackages;
+        }
+
         @Override
         public String name() {
             return FABRIC_MODULE_NAME;
@@ -592,28 +1020,41 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 packages.add(modulePackage);
             }
             builder.packages(packages);
+            if (!strandedClasses.isEmpty()) {
+                LOGGER.warn("[NeoFobric] Dropped {} class(es) that live in a platform-owned package and"
+                                + " therefore cannot be loaded from the Fabric composite module: {}",
+                        strandedClasses.size(), strandedClasses.stream().limit(10).toList());
+            }
             return builder.build();
         }
 
         /**
-         * 从一个资源路径推出它所属的包名。只认类文件：{@code a/b/C.class} 的包是 {@code a.b}，
-         * {@code module-info.class} 与 {@code package-info.class} 这一类没有包语义的条目会被
-         * 目录深度判断挡掉，不需要依赖 FML 内部的包名合法性判断。
+         * 从一个资源路径推出它所属的包名，只认类文件。平台已经拥有的包会被跳过：复合模块声明它会直接
+         * 让模块解析失败（ResolutionException: Modules neofobric.fabric.mods and neoforge export
+         * package ...）。同名类的副本在进入这里之前就已被内容过滤器挡掉了，所以这里挡下的是平台没有
+         * 的新类，记进 {@link #strandedClasses} 供启动日志报告。
          */
-        private static void collectPackage(java.util.Set<String> packages, String path) {
-            if (!path.endsWith(".class")) {
+        private void collectPackage(java.util.Set<String> packages, String path) {
+            var packageName = packageOfEntry(path);
+            if (packageName == null) {
                 return;
             }
-            var lastSlash = path.lastIndexOf('/');
-            if (lastSlash < 1) {
+            if (platformPackages.contains(packageName)) {
+                strandedClasses.add(classNameOfEntry(path));
                 return;
             }
-            var directory = path.substring(0, lastSlash);
-            // "a/b/C.class" -> "a.b"；单目录段且无点的名字不是包路径（例如模块描述符所在目录）。
-            if (!directory.contains("/")) {
-                return;
+            packages.add(packageName);
+        }
+
+        /** {@return the binary name of a class entry, with the multi-release prefix removed} */
+        private static String classNameOfEntry(String path) {
+            if (path.startsWith("META-INF/versions/")) {
+                var versionEnd = path.indexOf('/', "META-INF/versions/".length());
+                if (versionEnd >= 0) {
+                    path = path.substring(versionEnd + 1);
+                }
             }
-            packages.add(directory.replace('/', '.'));
+            return path.substring(0, path.length() - ".class".length()).replace('/', '.');
         }
     }
 }

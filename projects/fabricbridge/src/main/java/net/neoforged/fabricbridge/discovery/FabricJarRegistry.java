@@ -34,7 +34,37 @@ public final class FabricJarRegistry {
      */
     private static final Set<Path> GAME_LAYER_PATHS = ConcurrentHashMap.newKeySet();
 
+    /**
+     * Jars the bridge deliberately left to FML because they declare a NeoForge mod file, even when they
+     * also carry a {@code fabric.mod.json} (the multi-loader builds of Sodium and Iris). Fabric-loader's
+     * dev-mode classpath discovery enumerates every {@code fabric.mod.json} on the game class loader and
+     * would otherwise read them as Fabric mods; see {@code BridgedLauncher}.
+     */
+    private static final Set<Path> FOREIGN_MOD_PATHS = ConcurrentHashMap.newKeySet();
+
     private FabricJarRegistry() {}
+
+    public static void markForeignModPath(Path path) {
+        FOREIGN_MOD_PATHS.add(path);
+    }
+
+    /** {@return whether this exact jar was left to FML} */
+    public static boolean isForeignModPath(Path path) {
+        return FOREIGN_MOD_PATHS.contains(path);
+    }
+
+    public static boolean hasForeignMods() {
+        return !FOREIGN_MOD_PATHS.isEmpty();
+    }
+
+    /** {@return the file names of the jars left to FML} */
+    public static Set<String> foreignModFileNames() {
+        var names = new java.util.HashSet<String>();
+        for (var path : FOREIGN_MOD_PATHS) {
+            names.add(path.getFileName().toString());
+        }
+        return names;
+    }
 
     public static boolean hasFabricMods() {
         return !FABRIC_JARS.isEmpty();

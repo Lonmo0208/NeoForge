@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -135,6 +136,12 @@ public final class CreativeModeTabRegistry {
 
     @SuppressWarnings("UnstableApiUsage")
     private static void recalculateItemCreativeModeTabs() {
+        // A tab registered after the last ordering pass has no edges; without this it would be placed
+        // by the name comparator instead of after the vanilla tabs. See #applyDefaultTabOrdering.
+        if (hasTabsWithoutOrder()) {
+            applyDefaultTabOrdering();
+        }
+
         final MutableGraph<CreativeModeTab> graph = GraphBuilder.directed().nodeOrder(ElementOrder.<CreativeModeTab>insertion()).build();
 
         for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
@@ -169,48 +176,100 @@ public final class CreativeModeTabRegistry {
             runnable.accept(false);
     }
 
-    @ApiStatus.Internal
-    public static void sortTabs() {
+    /**
+     * The vanilla tabs that are not {@link #DEFAULT_TABS}, in the order they are shown.
+     *
+     * <p>Identified by key rather than by registry position on purpose: the old code assumed
+     * {@code registryOrder[0..9]} were the vanilla tabs, which only holds while every mod registers
+     * <em>after</em> vanilla content. A tab registered late (a bridged Fabric mod registers in its
+     * entrypoint, after the registry events this class is sorted from) would shift that window and
+     * scramble the whole vanilla order.
+     */
+    private static final List<ResourceKey<CreativeModeTab>> VANILLA_TAB_ORDER = List.of(
+            CreativeModeTabs.BUILDING_BLOCKS,
+            CreativeModeTabs.COLORED_BLOCKS,
+            CreativeModeTabs.NATURAL_BLOCKS,
+            CreativeModeTabs.FUNCTIONAL_BLOCKS,
+            CreativeModeTabs.REDSTONE_BLOCKS,
+            CreativeModeTabs.TOOLS_AND_UTILITIES,
+            CreativeModeTabs.COMBAT,
+            CreativeModeTabs.FOOD_AND_DRINKS,
+            CreativeModeTabs.INGREDIENTS,
+            CreativeModeTabs.SPAWN_EGGS);
+
+    /**
+     * Derives the ordering edges that do not come from tab declarations: the vanilla chain, and
+     * "modded tabs come after the last vanilla tab" for everything else.
+     *
+     * <p>Called from {@link #sortTabs()} and again from {@link #recalculateItemCreativeModeTabs()}
+     * whenever a tab appeared after the last ordering pass: with no edge at all, the topological sort
+     * falls back to its name comparator, and e.g. {@code create:base} sorts before
+     * {@code minecraft:building_blocks} - the modded tabs jump to the first page of the creative
+     * screen and push vanilla to the second, which is exactly what bridged Fabric mods (their
+     * entrypoints run after the registry events) produced.
+     */
+    private static void applyDefaultTabOrdering() {
         edges.clear();
 
+        Identifier lastVanilla = null;
+        for (final ResourceKey<CreativeModeTab> key : VANILLA_TAB_ORDER) {
+            final CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.getValue(key);
+            if (tab == null)
+                continue;
+            final Identifier name = key.identifier();
+
+            if (!tab.tabsBefore.isEmpty() || !tab.tabsAfter.isEmpty()) {
+                addTabOrder(tab, name);
+            } else {
+                // If there is no order specified ensure vanilla ordering by specifying the previous and next vanilla tab as edges
+                if (lastVanilla != null)
+                    edges.put(lastVanilla, name);
+                lastVanilla = name;
+            }
+        }
+
+        for (final Holder<CreativeModeTab> value : BuiltInRegistries.CREATIVE_MODE_TAB.listElements().toList()) {
+            if (DEFAULT_TABS.contains(value.value()))
+                continue;
+            if (VANILLA_TAB_ORDER.contains(value.unwrapKey().orElseThrow()))
+                continue;
+
+            final CreativeModeTab tab = value.value();
+            final Identifier name = value.unwrapKey().orElseThrow().identifier();
+
+            if (!tab.tabsBefore.isEmpty() || !tab.tabsAfter.isEmpty())
+                addTabOrder(tab, name);
+            else if (lastVanilla != null) // if there is no order specified ensure the tab comes after the last vanilla tab
+                edges.put(lastVanilla, name);
+        }
+    }
+
+    /**
+     * {@return whether the registry contains a tab that has no ordering at all - neither declared by
+     * the tab nor derived by {@link #applyDefaultTabOrdering()}} Such a tab would be placed by the
+     * name comparator instead of after the vanilla tabs.
+     */
+    private static boolean hasTabsWithoutOrder() {
+        for (final Holder<CreativeModeTab> value : BuiltInRegistries.CREATIVE_MODE_TAB.listElements().toList()) {
+            final CreativeModeTab tab = value.value();
+            if (DEFAULT_TABS.contains(tab) || !tab.tabsBefore.isEmpty() || !tab.tabsAfter.isEmpty())
+                continue;
+            final Identifier name = value.unwrapKey().orElseThrow().identifier();
+            if (!edges.containsKey(name) && !edges.containsValue(name))
+                return true;
+        }
+        return false;
+    }
+
+    @ApiStatus.Internal
+    public static void sortTabs() {
+        DEFAULT_TABS.clear();
         DEFAULT_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.getValue(CreativeModeTabs.HOTBAR));
         DEFAULT_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.getValue(CreativeModeTabs.SEARCH));
         DEFAULT_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.getValue(CreativeModeTabs.OP_BLOCKS));
         DEFAULT_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.getValue(CreativeModeTabs.INVENTORY));
 
-        final List<Holder<CreativeModeTab>> indexed = new ArrayList<>();
-        BuiltInRegistries.CREATIVE_MODE_TAB.listElements().filter(c -> !DEFAULT_TABS.contains(c.value())).forEach(indexed::add);
-        int vanillaTabs = 10;
-
-        for (int i = 0; i < vanillaTabs; i++) // Vanilla ordering
-        {
-            final Holder<CreativeModeTab> value = indexed.get(i);
-            final CreativeModeTab tab = value.value();
-            final Identifier name = value.unwrapKey().orElseThrow().identifier();
-
-            if (!tab.tabsBefore.isEmpty() || !tab.tabsAfter.isEmpty())
-                addTabOrder(tab, name);
-            else {
-                // If there is no order specified ensure vanilla ordering by specifying the previous and next indexed tab as edges
-                if (i != 0)
-                    edges.put(indexed.get(i - 1).unwrapKey().orElseThrow().identifier(), name);
-                if (i + 1 < indexed.size())
-                    edges.put(name, indexed.get(i + 1).unwrapKey().orElseThrow().identifier());
-            }
-        }
-
-        Identifier lastVanilla = indexed.get(vanillaTabs - 1).unwrapKey().orElseThrow().identifier();
-        for (int i = vanillaTabs; i < indexed.size(); i++) {
-            final Holder<CreativeModeTab> value = indexed.get(i);
-            final CreativeModeTab tab = value.value();
-            final Identifier name = value.unwrapKey().orElseThrow().identifier();
-
-            if (!tab.tabsBefore.isEmpty() || !tab.tabsAfter.isEmpty())
-                addTabOrder(tab, name);
-            else // if there is no order specified ensure the tab comes after the last vanilla tab
-                edges.put(lastVanilla, name);
-        }
-
+        applyDefaultTabOrdering();
         recalculateItemCreativeModeTabs();
     }
 

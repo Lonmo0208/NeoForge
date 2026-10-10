@@ -159,11 +159,16 @@
              );
      }
  
-@@ -2193,6 +_,7 @@
+@@ -2193,6 +_,12 @@
  
      @Override
      public void handleCustomPayload(ServerboundCustomPayloadPacket packet) {
-+        super.handleCustomPayload(packet); // Neo: Call super to invoke modded payload handling.
++        // Neo: handle the payload here instead of calling super: Fabric's networking mixin on the base
++        // class only knows the configuration-phase addon and disconnects the player ("Unknown addon")
++        // for any play-phase payload that reaches it - which is every payload NeoForge handles itself,
++        // such as a NeoForge-native mod's handshake. Fabric's play-phase handling is a HEAD inject on
++        // THIS method, so it keeps running.
++        this.handleCustomPayloadCommon(packet); // Neo: invoke modded payload handling.
      }
  
      @Override

@@ -18,13 +18,18 @@ import java.util.zip.ZipOutputStream;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,32 +66,31 @@ public final class MixinJarPatcher {
      *
      * <p>Unlike handler parameter drift this cannot be derived from the target class: the descriptor
      * appears inside a Mixin <em>annotation</em>, and the annotation only has to name the method -
-     * nothing checks it against the real signature. A wrong one therefore fails silently under
-     * {@code defaultRequire: 0}, which is what makes these so hard to spot in logs.
+     * nothing checks it against the real signature. Add an entry only after checking the descriptor
+     * against the version of the mod that is actually installed.
      *
-     * <p>{@code fabric-registry-sync-v0} is the case that matters today: its {@code IS_SERVER}
-     * ScopedValue is bound by the {@code @WrapOperation} on {@code RegistryDataLoader.load}. The
-     * declared target was the pre-26.2 four-argument overload, so the wrap never installed, nothing
-     * bound {@code IS_SERVER}, and {@code beforeLoad} died in a {@code CompletableFuture} worker with
-     * {@code NoSuchElementException: ScopedValue not bound} - the binding does not travel to another
-     * thread, so it must be established inside the same lambda the game runs on.
+     * <p>Current entry, verified against the installed fabric-api 0.161: NeoForge widened
+     * {@code ClientPacketListener.startWaitingForNewLevel} with two {@code ResourceKey} parameters
+     * (the level-loading screen shows the dimension being entered), and the call site inside
+     * {@code handleRespawn} uses the widened form. fabric-data-attachment-api-v1's client mixin
+     * anchors an {@code @Slice} on the three-argument form, so with the stale descriptor the whole
+     * {@code @WrapOperation} finds no instructions ("did not match any instructions") and the client
+     * silently stops copying data attachments across a respawn. The three-argument overload still
+     * exists as a deprecated shim, which is exactly why this only shows up as a silent skip.
      *
-     * <p>Values mirror ForgifiedFabricAPI-26.2.x, the upstream port that already solved this.
+     * <p>Keys are the parenthesized parameter lists only (no return type) - {@link #replacementFor}
+     * splits the descriptor at the parentheses and keeps the original return type.
+     *
+     * <p>History: the two entries this used to hold were written for an older fabric-registry-sync
+     * whose annotations still declared pre-26.2 descriptors. Rewriting those was harmful - the wrap
+     * started targeting the wrong call and every world load died with
+     * {@code NoSuchElementException: ScopedValue not bound}. The matching {@code RegistryDataLoader}
+     * overloads were restored to their vanilla signatures instead, so those annotations resolve as
+     * written and the entries could be dropped.
      */
     private static final Map<String, String> ANNOTATION_TARGET_REALIGNMENTS = Map.of(
-            // RegistryDataLoader.load: Fabric API wraps a LoaderFactory overload that no longer
-            // exists publicly; the public entry point takes the ResourceManager directly.
-            "(Lnet/minecraft/resources/RegistryDataLoader$LoaderFactory;Ljava/util/List;Ljava/util/List;Ljava/util/concurrent/Executor;)",
-            "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/List;"
-                    + "Ljava/util/concurrent/Executor;)",
-            // RegistryDataLoader.lambda$load$0: Fabric API still declares a trailing boolean that
-            // was removed. This @ModifyArg is what binds IS_SERVER (see supplyAsync), so a stale
-            // descriptor here leaves the ScopedValue unbound and beforeLoad then dies inside a
-            // CompletableFuture worker with NoSuchElementException: ScopedValue not bound.
-            "(Ljava/util/List;Lnet/minecraft/resources/RegistryDataLoader$LoaderFactory;"
-                    + "Ljava/util/List;Ljava/util/concurrent/Executor;Z)",
-            "(Ljava/util/List;Lnet/minecraft/resources/RegistryDataLoader$LoaderFactory;"
-                    + "Ljava/util/List;Ljava/util/concurrent/Executor;)");
+            "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;)",
+            "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)");
 
     /**
      * Moves Fabric's common-version channel off {@code c:version}.
@@ -119,6 +123,87 @@ public final class MixinJarPatcher {
             Map.of("c:version", "neofobric:version"),
             "net/fabricmc/fabric/impl/networking/CommonRegisterPayload.class",
             Map.of("c:register", "neofobric:register"));
+
+    /**
+     * Fabric's creative tab paging API is implemented by a client mixin that adds its own page arrows and
+     * its own tab visibility filter next to the ones the host loader already has. That mixin is not
+     * registered here (see {@code FabricBootstrapProcessor.DEFAULT_SKIPPED_MIXIN_CONFIGS}) - one page
+     * switcher is enough - which would leave every method of this interface throwing
+     * {@code AssertionError("Implemented by mixin")} for Fabric mods that use the API.
+     *
+     * <p>The interface bodies are rewritten to route onto the page state the loader keeps on the creative
+     * screen instead (the {@code getCreativeTabPage*} methods of
+     * {@code net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen}), so both APIs
+     * describe the same pages: whatever the Fabric API reports or switches is what the screen shows.
+     */
+    private static final String CREATIVE_TAB_SCREEN_INTERFACE =
+            "net/fabricmc/fabric/api/client/creativetab/v1/FabricCreativeModeInventoryScreen.class";
+
+    /** Fabric interface method -> the screen method that answers it. */
+    private static final Map<String, String> CREATIVE_TAB_DELEGATES = Map.of(
+            "switchToPage(I)Z", "switchToCreativeTabPage(I)Z",
+            "getCurrentPage()I", "getCreativeTabPageIndex()I",
+            "getPageCount()I", "getCreativeTabPageCount()I",
+            "getTabsOnPage(I)Ljava/util/List;", "getCreativeTabPageTabs(I)Ljava/util/List;",
+            "getPage(Lnet/minecraft/world/item/CreativeModeTab;)I", "getCreativeTabPageOf(Lnet/minecraft/world/item/CreativeModeTab;)I",
+            "hasAdditionalPages()Z", "hasAdditionalCreativeTabPages()Z",
+            "getSelectedTab()Lnet/minecraft/world/item/CreativeModeTab;", "getSelectedCreativeTab()Lnet/minecraft/world/item/CreativeModeTab;",
+            "setSelectedTab(Lnet/minecraft/world/item/CreativeModeTab;)Z", "selectCreativeTab(Lnet/minecraft/world/item/CreativeModeTab;)Z");
+
+    /**
+     * @param classBytes the class bytes
+     * @param entryName the jar entry path
+     * @return the class bytes with the interface's default bodies delegating to the screen, or null when
+     *         this is not the interface or nothing matched
+     */
+    private static byte[] bridgeCreativeTabApi(byte[] classBytes, String entryName) {
+        if (!CREATIVE_TAB_SCREEN_INTERFACE.equals(entryName)) {
+            return null;
+        }
+        try {
+            var node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+            var changed = false;
+            for (var method : node.methods) {
+                var target = CREATIVE_TAB_DELEGATES.get(method.name + method.desc);
+                if (target == null) {
+                    continue;
+                }
+                var targetName = target.substring(0, target.indexOf('('));
+                var targetDesc = target.substring(target.indexOf('('));
+                var argumentTypes = Type.getArgumentTypes(method.desc);
+
+                method.instructions.clear();
+                method.tryCatchBlocks.clear();
+                method.localVariables = null;
+                method.visibleLocalVariableAnnotations = null;
+                method.invisibleLocalVariableAnnotations = null;
+
+                var stack = 1;
+                method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                // The default body lives in the interface, so `this` is typed as the interface - the
+                // call to the screen needs the cast spelled out or the verifier rejects it.
+                method.instructions.add(new org.objectweb.asm.tree.TypeInsnNode(Opcodes.CHECKCAST, CREATIVE_TAB_SCREEN_OWNER));
+                for (var i = 0; i < argumentTypes.length; i++) {
+                    method.instructions.add(new VarInsnNode(argumentTypes[i].getOpcode(Opcodes.ILOAD), 1 + i));
+                    stack += argumentTypes[i].getSize();
+                }
+                method.instructions.add(new MethodInsnNode(
+                        Opcodes.INVOKEVIRTUAL, CREATIVE_TAB_SCREEN_OWNER, targetName, targetDesc, false));
+                method.instructions.add(new InsnNode(Type.getReturnType(method.desc).getOpcode(Opcodes.IRETURN)));
+                method.maxStack = Math.max(stack, 1 + Type.getReturnType(method.desc).getSize());
+                method.maxLocals = 1 + java.util.Arrays.stream(argumentTypes).mapToInt(Type::getSize).sum();
+                changed = true;
+            }
+            return changed ? writeClass(node) : null;
+        } catch (Exception e) {
+            LOGGER.warn("[NeoFobric] Failed to bridge the Fabric creative tab page API in {}", entryName, e);
+            return null;
+        }
+    }
+
+    private static final String CREATIVE_TAB_SCREEN_OWNER =
+            "net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen";
 
     /**
      * @param bytes the class bytes
@@ -209,14 +294,24 @@ public final class MixinJarPatcher {
                     }
                 } else if (value instanceof List<?> list) {
                     for (var j = 0; j < list.size(); j++) {
-                        if (list.get(j) instanceof String text) {
+                        var element = list.get(j);
+                        if (element instanceof String text) {
                             var replaced = replacementFor(text);
                             if (replaced != null) {
                                 ((List<Object>) list).set(j, replaced);
                                 changed = true;
                             }
+                        } else if (element instanceof AnnotationNode nested) {
+                            // Array-valued members hold nested annotations too: MixinExtras declares
+                            // slice()/@Slice's from as arrays, so @WrapOperation(slice = @Slice(from =
+                            // @At(target = ...))) reaches the target through a list, not a direct node.
+                            changed |= realignAnnotations(java.util.List.of(nested));
                         }
                     }
+                } else if (value instanceof AnnotationNode nested) {
+                    // Targets also live in nested annotations - @Inject(at = @At(target = ...)), and
+                    // @WrapOperation(..., slice = @Slice(from = @At(target = ...))) two levels down.
+                    changed |= realignAnnotations(java.util.List.of(nested));
                 }
             }
         }
@@ -355,6 +450,448 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * {@return whether the handler declares a MixinExtras sugar parameter (like {@code @Local}) after
+     * its callback parameter}
+     */
+    /**
+     * Generates the bytecode of {@code BridgeModelDiscoveryMixin} - see the injection comment in
+     * {@link #patchJar}. Written here because the bridge compiles without Minecraft on its classpath;
+     * the generated class references only types that the game layer can see at runtime.
+     */
+    /**
+     * Generates the bytecode of {@code BridgeModelDiscoveryMixin} - see the injection comment in
+     * {@link #patchJar}. Written here because the bridge compiles without Minecraft on its classpath;
+     * the generated class references only types that the game layer can see at runtime.
+     *
+     * <p>{@code createSide} picks which source of extra models the handler feeds into discovery: the
+     * Fabric plugin dispatcher (generated into fabric-model-loading-api-v1's jar, whose classes it
+     * references) or Create's registered partial models (generated into create's jar). Each variant
+     * only ever lands in the jar whose classes it needs, so neither has to guard against the other
+     * being absent - and, being straight-line code with a single loop, it needs none of the frame
+     * computation tricks an exception-guarded body would.
+     */
+    private static byte[] generateBridgeModelDiscoveryMixin(boolean createSide) {
+        var self = createSide
+                ? "com/zurrtum/create/client/mixin/BridgeCreatePartialModelMixin"
+                : "net/fabricmc/fabric/mixin/client/model/loading/BridgeModelDiscoveryMixin";
+        var discovery = "net/minecraft/client/resources/model/ModelDiscovery";
+        var cls = new ClassNode();
+        cls.visit(Opcodes.V17, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, self, null, "java/lang/Object", null);
+        // @Mixin is RetentionPolicy.CLASS: sponge-mixin reads it through Annotations.getInvisible,
+        // i.e. from RuntimeInvisibleAnnotations. Writing it visible makes MixinInfo.readPriority throw
+        // "missing an @Mixin annotation" and the whole config fails to prepare. @Inject below is
+        // RUNTIME and must stay visible.
+        var mixin = cls.visitAnnotation("Lorg/spongepowered/asm/mixin/Mixin;", false);
+        mixin.visit("value", java.util.List.of(org.objectweb.asm.Type.getObjectType(discovery)));
+        mixin.visitEnd();
+
+        var ctor = cls.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
+        ctor.visitCode();
+        ctor.visitVarInsn(Opcodes.ALOAD, 0);
+        ctor.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        ctor.visitInsn(Opcodes.RETURN);
+        ctor.visitMaxs(1, 1);
+        ctor.visitEnd();
+
+        var handler = new MethodNode(Opcodes.ACC_PRIVATE,
+                createSide ? "neofobric$feedCreatePartials" : "neofobric$feedExtraModels",
+                "(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V", null, null);
+        cls.methods.add(handler);
+        var inject = handler.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/Inject;", true);
+        inject.visit("method", java.util.List.of("resolve"));
+        var at = new org.objectweb.asm.tree.AnnotationNode("Lorg/spongepowered/asm/mixin/injection/At;");
+        at.values = java.util.List.of("value", "HEAD");
+        inject.visit("at", at);
+        inject.visitEnd();
+
+        var loop = new org.objectweb.asm.tree.LabelNode();
+        var done = new org.objectweb.asm.tree.LabelNode();
+        var insns = handler.instructions;
+
+        if (createSide) {
+            // for (Identifier id : PartialModelEventHandler.getRegisterAdditional().keySet())
+            //     ((ModelDiscovery) (Object) this).getOrCreateModel(id);
+            insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                    "com/zurrtum/create/client/flywheel/lib/model/baked/PartialModelEventHandler", "getRegisterAdditional",
+                    "()Ljava/util/Map;", false));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "keySet", "()Ljava/util/Set;", true));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Set", "iterator", "()Ljava/util/Iterator;", true));
+        } else {
+            // ModelLoadingEventDispatcher dispatcher = ModelLoadingEventDispatcher.CURRENT.get();
+            // if (dispatcher == null) return;
+            // for (UnbakedExtraModel<?> model : dispatcher.getExtraModels().values())
+            //     ((ModelDiscovery) (Object) this).addRoot(model);
+            insns.add(new FieldInsnNode(Opcodes.GETSTATIC,
+                    "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher", "CURRENT",
+                    "Ljava/lang/ThreadLocal;"));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/ThreadLocal", "get", "()Ljava/lang/Object;", false));
+            insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher"));
+            insns.add(new VarInsnNode(Opcodes.ASTORE, 1));
+            insns.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            insns.add(new JumpInsnNode(Opcodes.IFNULL, done));
+            insns.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                    "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher", "getExtraModels",
+                    "()Ljava/util/Map;", false));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "values", "()Ljava/util/Collection;", true));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Collection", "iterator", "()Ljava/util/Iterator;", true));
+        }
+        insns.add(new VarInsnNode(Opcodes.ASTORE, 2));
+        insns.add(loop);
+        insns.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Iterator", "hasNext", "()Z", true));
+        insns.add(new JumpInsnNode(Opcodes.IFEQ, done));
+        insns.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        insns.add(new TypeInsnNode(Opcodes.CHECKCAST, discovery));
+        insns.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Iterator", "next", "()Ljava/lang/Object;", true));
+        if (createSide) {
+            insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/resources/Identifier"));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, discovery, "getOrCreateModel",
+                    "(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/resources/model/ModelDiscovery$ModelWrapper;",
+                    false));
+            insns.add(new InsnNode(Opcodes.POP));
+        } else {
+            insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/client/resources/model/ResolvableModel"));
+            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, discovery, "addRoot",
+                    "(Lnet/minecraft/client/resources/model/ResolvableModel;)V", false));
+        }
+        insns.add(new JumpInsnNode(Opcodes.GOTO, loop));
+        insns.add(done);
+        insns.add(new InsnNode(Opcodes.RETURN));
+        handler.maxLocals = 3;
+        handler.maxStack = 3;
+        cls.visitEnd();
+
+        var writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES) {
+            @Override
+            protected String getCommonSuperClass(String type1, String type2) {
+                if (type1.equals(type2)) {
+                    return type1;
+                }
+                // Never load classes here: this runs on the bootstrap layer, outside the game layer.
+                return "java/lang/Object";
+            }
+        };
+        cls.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
+     * Mixin injector handlers whose {@code @At(value = "RETURN", ordinal = N)} selector points past
+     * the end of a target method NeoForge patched into a different shape.
+     *
+     * <p>Vanilla's {@code KeyboardHandler.keyPress} has six RETURNs and Create's
+     * {@code KeyboardHandlerMixin} injects at the sixth (ordinal 5) - the method's final return.
+     * NeoForge's own patch restructured that method down to three RETURNs, so the ordinal is out of
+     * range and the injection is silently skipped (the bridge relaxes requires): key <em>presses</em>
+     * still reach Create - its press handler uses {@code @At("TAIL")} - but key <em>releases</em> never
+     * do, which leaves every hold-and-release interaction dead. The schematic tool menu is exactly
+     * that: the key opens the menu on press and the release is what focuses/commits the selection, so
+     * with the release handler missing the whole blueprint key set looks unresponsive.
+     *
+     * <p>Retargeting the selector to {@code TAIL} is the exact vanilla placement: TAIL injects before
+     * the method's last RETURN, and the ordinal-5 return <em>was</em> the last RETURN in vanilla. The
+     * table is explicit because "which return the ordinal meant" is not derivable from the patched
+     * class - a middle-return ordinal would need a different anchor.
+     */
+    private static final Map<String, java.util.Set<String>> STALE_RETURN_ORDINAL_HANDLERS = Map.of(
+            "com/zurrtum/create/client/mixin/KeyboardHandlerMixin", java.util.Set.of("onKeyReleased"));
+
+    /**
+     * Rewrites {@code @At(value = "RETURN", ordinal = N)} to {@code @At("TAIL")} on the handlers named
+     * by {@link #STALE_RETURN_ORDINAL_HANDLERS}.
+     */
+    private static byte[] retargetStaleReturnOrdinals(byte[] classBytes, String entryName) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        var internalName = entryName.substring(0, entryName.length() - ".class".length());
+        var handlers = STALE_RETURN_ORDINAL_HANDLERS.get(internalName);
+        if (handlers == null) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            if (!handlers.contains(method.name)) {
+                continue;
+            }
+            for (var annotations : java.util.Arrays.asList(method.visibleAnnotations, method.invisibleAnnotations)) {
+                if (annotations == null) {
+                    continue;
+                }
+                for (var annotation : annotations) {
+                    if (annotation.values == null) {
+                        continue;
+                    }
+                    for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+                        if (!"at".equals(annotation.values.get(i))) {
+                            continue;
+                        }
+                        var atValue = annotation.values.get(i + 1);
+                        var atNodes = atValue instanceof java.util.List<?> list
+                                ? list.stream().filter(org.objectweb.asm.tree.AnnotationNode.class::isInstance)
+                                        .map(org.objectweb.asm.tree.AnnotationNode.class::cast).toList()
+                                : atValue instanceof org.objectweb.asm.tree.AnnotationNode single ? java.util.List.of(single) : java.util.List.<org.objectweb.asm.tree.AnnotationNode>of();
+                        for (var at : atNodes) {
+                            if (at.values == null) {
+                                continue;
+                            }
+                            for (var j = 0; j + 1 < at.values.size(); j += 2) {
+                                if (!"value".equals(at.values.get(j)) || !"RETURN".equals(at.values.get(j + 1))) {
+                                    continue;
+                                }
+                                at.values.set(j + 1, "TAIL");
+                                for (var k = 0; k + 1 < at.values.size(); k += 2) {
+                                    if ("ordinal".equals(at.values.get(k))) {
+                                        at.values.remove(k);
+                                        at.values.remove(k);
+                                        break;
+                                    }
+                                }
+                                LOGGER.info("[NeoFobric] Retargeted @At(RETURN, ordinal) to @At(TAIL) on {}#{} - NeoForge's patch changed the target's return count",
+                                        internalName.replace('/', '.'), method.name);
+                                changed = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return changed ? writeClass(node) : null;
+    }
+
+    private static boolean hasTrailingSugar(MethodNode handler, int cirIndex) {
+        var sugarPrefix = "Lcom/llamalad7/mixinextras/sugar/";
+        for (var lists : java.util.Arrays.asList(handler.visibleParameterAnnotations, handler.invisibleParameterAnnotations)) {
+            if (lists == null) {
+                continue;
+            }
+            for (var i = cirIndex + 1; i < lists.length && i < cirIndex + 9; i++) {
+                var list = lists[i];
+                if (list == null) {
+                    continue;
+                }
+                for (var annotation : list) {
+                    if (annotation.desc.startsWith(sugarPrefix)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Moves parameter annotations at or after {@code fromIndex} right by {@code inserted}, matching a
+     * descriptor that grew by {@code inserted} parameters in that range.
+     *
+     * @return the shifted array ({@code null} when there was nothing to shift)
+     */
+    private static java.util.List<org.objectweb.asm.tree.AnnotationNode>[] shiftParameterAnnotations(
+            java.util.List<org.objectweb.asm.tree.AnnotationNode>[] annotations, int fromIndex, int inserted) {
+        if (annotations == null || inserted == 0) {
+            return annotations;
+        }
+        @SuppressWarnings("unchecked")
+        java.util.List<org.objectweb.asm.tree.AnnotationNode>[] shifted =
+                new java.util.List[annotations.length + inserted];
+        for (var i = 0; i < annotations.length; i++) {
+            shifted[i < fromIndex ? i : i + inserted] = annotations[i];
+        }
+        return shifted;
+    }
+
+    /**
+     * Appends the target's trailing parameters to an {@code @Inject} handler that declared only a
+     * prefix of them.
+     *
+     * <p>NeoForge keeps vanilla-shaped convenience shims next to the methods it widened (the
+     * deprecated 3-argument {@code ModelManager.discoverModelDependencies} next to the real 4-argument
+     * one). A Fabric mixin selecting that method by bare name then binds ambiguously and - worse -
+     * once the shim is gone, an {@code @Inject} handler declaring only the vanilla 3-parameter prefix
+     * cannot bind the 4-parameter target at all: "Invalid descriptor ... Expected (..., extra, CIR)
+     * but found (..., CIR)". Both fabric-model-loading-api-v1's {@code resolveExtraModels} and
+     * Create's partial-model collector died this way, and every extra model they register went
+     * undiscovered (Create's moving parts drew the missing-model checkerboard).
+     *
+     * <p>The handler body never touches the parameters it did not declare, so appending them to the
+     * descriptor and moving every local slot at or above the callback up by the added width is enough;
+     * same technique as {@link #widenHandler}. The annotation's {@code method} selector is pinned to
+     * the exact descriptor so the handler can only bind the widened method.
+     */
+    private static byte[] extendInjectorHandlerParams(byte[] classBytes, String entryName,
+            java.util.function.Function<String, byte[]> targetBytecode) {
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        var targetClass = firstTargetClass(node, targetBytecode);
+        if (targetClass == null) {
+            return null;
+        }
+
+        var changed = false;
+        for (var handler : node.methods) {
+            var inject = findAnnotation(handler, "Lorg/spongepowered/asm/mixin/injection/Inject;");
+            if (inject == null) {
+                continue;
+            }
+            var args = Type.getArgumentTypes(handler.desc);
+            var callbackClass = CALLBACK_INFO.replace('/', '.');
+            var cirIndex = -1;
+            for (var i = 0; i < args.length; i++) {
+                var argClass = args[i].getClassName();
+                if (argClass.equals(callbackClass) || argClass.equals(callbackClass + "Returnable")) {
+                    cirIndex = i;
+                    break;
+                }
+            }
+            if (cirIndex <= 0) {
+                continue;
+            }
+            var isStatic = (handler.access & org.objectweb.asm.Opcodes.ACC_STATIC) != 0;
+            var prefix = new Type[cirIndex];
+            System.arraycopy(args, 0, prefix, 0, cirIndex);
+            if (prefix.length == 0) {
+                continue;
+            }
+            // Handlers carrying MixinExtras sugar (@Local) after the callback are left alone: appending
+            // a parameter makes the sugar engine's wrapper machinery fail (it reads sugar generics from
+            // the handler signature and falls back to the raw injector, which then rejects the sugar
+            // parameter), and a half-processed class breaks other handlers in it. Fabric mods needing
+            // those get the value fed by the bridge's own sugar-free mixin instead
+            // (BridgeModelDiscoveryMixin, generated into fabric-model-loading-api-v1's realigned jar).
+            if (hasTrailingSugar(handler, cirIndex)) {
+                continue;
+            }
+
+            // The target(s): named methods whose parameters start with exactly this prefix. A prefix
+            // that equals a whole target (the vanilla shim) has nothing to append to and is ignored;
+            // only one longer match may exist.
+            var name = singleMethodTarget(inject);
+            if (name == null || name.contains("(")) {
+                continue;
+            }
+            MethodNode longerTarget = null;
+            var ambiguous = false;
+            for (var target : targetClass.methods) {
+                if (!target.name.equals(name)) {
+                    continue;
+                }
+                var targetArgs = Type.getArgumentTypes(target.desc);
+                if (targetArgs.length < prefix.length) {
+                    continue;
+                }
+                var matches = true;
+                for (var i = 0; i < prefix.length; i++) {
+                    if (!targetArgs[i].equals(prefix[i])) {
+                        matches = false;
+                        break;
+                    }
+                }
+                if (!matches) {
+                    continue;
+                }
+                if (targetArgs.length == prefix.length) {
+                    continue;
+                }
+                if (longerTarget != null) {
+                    ambiguous = true;
+                    break;
+                }
+                longerTarget = target;
+            }
+            if (ambiguous || longerTarget == null) {
+                continue;
+            }
+
+            var targetArgs = Type.getArgumentTypes(longerTarget.desc);
+            var missing = new Type[targetArgs.length - prefix.length];
+            System.arraycopy(targetArgs, prefix.length, missing, 0, missing.length);
+            var sugar = new Type[args.length - cirIndex - 1];
+            System.arraycopy(args, cirIndex + 1, sugar, 0, sugar.length);
+            var newArgs = new Type[prefix.length + missing.length + 1 + sugar.length];
+            System.arraycopy(prefix, 0, newArgs, 0, prefix.length);
+            System.arraycopy(missing, 0, newArgs, prefix.length, missing.length);
+            newArgs[prefix.length + missing.length] = args[cirIndex];
+            System.arraycopy(sugar, 0, newArgs, prefix.length + missing.length + 1, sugar.length);
+
+            var baseSlot = isStatic ? 0 : 1;
+            var oldCIRSlot = baseSlot;
+            for (var i = 0; i < prefix.length; i++) {
+                oldCIRSlot += prefix[i].getSize();
+            }
+            var addedSlots = 0;
+            for (var missingType : missing) {
+                addedSlots += missingType.getSize();
+            }
+
+            for (var insn : handler.instructions) {
+                if (insn instanceof VarInsnNode varInsn && varInsn.var >= oldCIRSlot) {
+                    varInsn.var += addedSlots;
+                } else if (insn instanceof IincInsnNode iinc && iinc.var >= oldCIRSlot) {
+                    iinc.var += addedSlots;
+                }
+            }
+            if (handler.localVariables != null) {
+                for (var local : handler.localVariables) {
+                    if (local.index >= oldCIRSlot) {
+                        local.index += addedSlots;
+                    }
+                }
+            }
+            // Parameter annotations (MixinExtras' @Local sugar) are indexed by parameter: entries at or
+            // after the callback move right with it, or the sugar would end up "on" the callback - and
+            // MixinExtras rejects non-trailing sugared parameters outright.
+            handler.visibleParameterAnnotations =
+                    shiftParameterAnnotations(handler.visibleParameterAnnotations, cirIndex, missing.length);
+            handler.invisibleParameterAnnotations =
+                    shiftParameterAnnotations(handler.invisibleParameterAnnotations, cirIndex, missing.length);
+            if (handler.parameters != null) {
+                for (var i = 0; i < missing.length; i++) {
+                    handler.parameters.add(cirIndex, new org.objectweb.asm.tree.ParameterNode(null, 0));
+                }
+            }
+            // The generic signature still describes the original parameter list; a stale one makes
+            // MixinExtras' sugar handling fail (it reads the sugar generics from it) and fall back to
+            // the raw injector, which then dies on the sugar parameter it does not know about.
+            handler.signature = null;
+            handler.maxLocals += addedSlots;
+            handler.desc = Type.getMethodDescriptor(Type.getReturnType(handler.desc), newArgs);
+
+            for (var i = 0; i + 1 < inject.values.size(); i += 2) {
+                if ("method".equals(inject.values.get(i))) {
+                    inject.values.set(i + 1, name + longerTarget.desc);
+                }
+            }
+            LOGGER.info("[NeoFobric] Appended {} missing trailing parameter(s) to @Inject handler {}#{} (target {}.{})",
+                    missing.length, node.name.replace('/', '.'), handler.name,
+                    targetClass.name.replace('/', '.'), name);
+            changed = true;
+        }
+
+        if (!changed) {
+            return null;
+        }
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /**
      * Rewrites the handler to cover {@code delegatee}'s parameters and retargets the annotation.
      */
     private static void widenHandler(MethodNode handler, AnnotationNode inject, MethodNode delegatee, Type[] targetParams) {
@@ -404,6 +941,198 @@ public final class MixinJarPatcher {
     /**
      * {@return the first resolvable class the mixin targets, or {@code null}}
      */
+    /**
+     * Removes the merge-colliding members from an allowlisted duck-type mixin so the remainder can
+     * still apply.
+     *
+     * <p>{@link net.neoforged.fabricbridge.transform.MixinConflictFilter} drops a mixin whose merged
+     * member already exists on the target - necessary, because Mixin refuses the whole class
+     * ("cannot overwrite method ... @Overwrite is required"). For a duck mixin that implements a
+     * Fabric interface that wholesale drop is worse than the collision: the interface stays absent
+     * (or its throwing defaults stay in place), and Fabric code calling it dies. When the mixin has
+     * members that do <em>not</em> collide, stripping only the colliding ones lets Mixin hang the
+     * interface on the target and merge the rest; the interface method whose member was stripped
+     * resolves to the target's own implementation.
+     *
+     * <p>Gated to an explicit allowlist: whether a colliding member's semantics match the target's
+     * own implementation is a per-mixin judgement the bytecode cannot make. Verified entry:
+     * fabric-item-api-v1's {@code DataComponentMapBuilderMixin} - NeoForge's
+     * {@code DataComponentMap.Builder#get} has the same erased descriptor and the same map lookup
+     * the mixin writes, so losing the mixin's copy costs nothing, while
+     * {@code getOrCreate}/{@code getOrEmpty}/{@code contains} still merge and satisfy
+     * {@code FabricComponentMapBuilder}. Without this, {@code DefaultItemComponentTest} (and any
+     * mod using {@code DefaultItemComponentEvents}) dies with
+     * {@code AssertionError: Implemented in Mixin} when components are initialized.
+     */
+    private static final java.util.Set<String> STRIP_COLLIDING_MEMBER_MIXINS = java.util.Set.of(
+            "net/fabricmc/fabric/mixin/item/DataComponentMapBuilderMixin");
+
+    /**
+     * Injector handlers that must never register, named per allowlisted mixin class.
+     *
+     * <p>{@code ModelManagerMixin} (fabric-model-loading-api-v1) implements Fabric's custom JSON model
+     * formats as a <em>pair</em> of handlers: a {@code @Redirect} that cancels vanilla's model
+     * deserialization and a {@code @ModifyArg} that substitutes Fabric's own deserializer. NeoForge
+     * replaced the vanilla call with its own {@code UnbakedModelParser.parse}, so the cancel half
+     * misses (silently, requires being relaxed) while the substitute half still applies - and then
+     * Fabric's deserializer handles every vanilla model and fails on all of them: every block and item
+     * draws black-and-magenta. NeoForge's parser covers the same ground its own way, so both handlers
+     * go; the rest of the mixin keeps driving the plugin machinery Fabric mods need.
+     */
+    private static final java.util.Map<String, java.util.Set<String>> STRIP_HANDLER_METHODS = java.util.Map.of(
+            "net/fabricmc/fabric/mixin/client/model/loading/ModelManagerMixin",
+            java.util.Set.of("cancelVanillaDeserialize", "actuallyDeserializeModel"));
+
+    /**
+     * Removes the injector handlers named by {@link #STRIP_HANDLER_METHODS} from an allowlisted mixin
+     * class. Handlers are registrations Mixin scans for, never code the target calls, so removing one
+     * only means that injection does not happen.
+     */
+    private static byte[] stripListedInjectorHandlers(byte[] classBytes, String entryName) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        var internalName = entryName.substring(0, entryName.length() - ".class".length());
+        var handlerNames = STRIP_HANDLER_METHODS.get(internalName);
+        if (handlerNames == null) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        var removed = node.methods.stream()
+                .filter(m -> handlerNames.contains(m.name))
+                .map(m -> m.name + m.desc)
+                .toList();
+        if (removed.isEmpty()) {
+            return null;
+        }
+        node.methods.removeIf(m -> handlerNames.contains(m.name));
+        LOGGER.info("[NeoFobric] Removed {} injector handler(s) from {}: {}",
+                removed.size(), internalName, removed);
+        return writeClass(node);
+    }
+
+    public static byte[] stripCollidingDuckMembers(byte[] classBytes, String entryName,
+            java.util.function.Function<String, byte[]> targetBytecode) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        var internalName = entryName.substring(0, entryName.length() - ".class".length());
+        if (!STRIP_COLLIDING_MEMBER_MIXINS.contains(internalName)) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        var targets = readMixinTargets(node);
+        if (targets.isEmpty()) {
+            return null;
+        }
+        var candidates = new ArrayList<MethodNode>();
+        for (var method : node.methods) {
+            if (isMergeCandidate(method)) {
+                candidates.add(method);
+            }
+        }
+        if (candidates.isEmpty()) {
+            return null;
+        }
+        var colliding = new ArrayList<MethodNode>();
+        for (var method : candidates) {
+            var key = method.name + method.desc;
+            for (var target : targets) {
+                var targetBytes = targetBytecode.apply(target);
+                if (targetBytes == null) {
+                    continue;
+                }
+                if (targetHasMethod(targetBytes, key)) {
+                    colliding.add(method);
+                    break;
+                }
+            }
+        }
+        if (colliding.isEmpty() || colliding.size() == candidates.size()) {
+            // Nothing to strip, or nothing would survive - the wholesale drop stays the filter's job.
+            return null;
+        }
+        node.methods.removeAll(colliding);
+        var stripped = colliding.stream().map(m -> m.name + m.desc).toList();
+        LOGGER.info("[NeoFobric] Stripped {} colliding member(s) from {} so the remaining duck methods can merge: {}",
+                colliding.size(), internalName, stripped);
+        return writeClass(node);
+    }
+
+    /**
+     * {@return whether one of the target classes declares a member with the given name+descriptor}
+     */
+    private static boolean targetHasMethod(byte[] targetBytes, String nameAndDesc) {
+        try {
+            var node = new ClassNode();
+            new ClassReader(targetBytes).accept(node, 0);
+            for (var method : node.methods) {
+                if ((method.name + method.desc).equals(nameAndDesc)) {
+                    return true;
+                }
+            }
+        } catch (Throwable t) {
+            // Unresolvable target - treat as absent, the conflict filter catches real collisions.
+        }
+        return false;
+    }
+
+    /**
+     * {@return whether the mixin method would be merged into the target} Same rule set as
+     * {@code MixinConflictFilter.isCandidate}: private, constructor, {@code @Shadow},
+     * {@code @Unique}, {@code @Accessor}/{@code @Invoker}, {@code @Overwrite} and injector-handler
+     * members are not merged.
+     */
+    private static final java.util.Set<String> NOT_MERGED_ANNOTATIONS = java.util.Set.of(
+            "Lorg/spongepowered/asm/mixin/Overwrite;",
+            "Lorg/spongepowered/asm/mixin/Shadow;",
+            "Lorg/spongepowered/asm/mixin/Unique;",
+            "Lorg/spongepowered/asm/mixin/gen/Accessor;",
+            "Lorg/spongepowered/asm/mixin/gen/Invoker;",
+            "Lorg/spongepowered/asm/mixin/injection/Inject;",
+            "Lorg/spongepowered/asm/mixin/injection/Redirect;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArg;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArgs;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyVariable;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyConstant;",
+            "Lcom/llamalad7/mixinextras/injector/wrapoperation/WrapOperation;",
+            "Lcom/llamalad7/mixinextras/injector/wrapmethod/WrapMethod;",
+            "Lcom/llamalad7/mixinextras/injector/ModifyExpressionValue;",
+            "Lcom/llamalad7/mixinextras/injector/ModifyReturnValue;",
+            "Lcom/llamalad7/mixinextras/injector/ModifyReceiver;");
+
+    private static boolean isMergeCandidate(MethodNode method) {
+        if (method.name.equals("<init>") || method.name.equals("<clinit>")) {
+            return false;
+        }
+        if (java.lang.reflect.Modifier.isPrivate(method.access & 0x7)) {
+            return false;
+        }
+        for (var list : java.util.Arrays.asList(method.visibleAnnotations, method.invisibleAnnotations)) {
+            if (list == null) {
+                continue;
+            }
+            for (var annotation : list) {
+                if (NOT_MERGED_ANNOTATIONS.contains(annotation.desc)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private static ClassNode firstTargetClass(ClassNode mixin, java.util.function.Function<String, byte[]> targetBytecode) {
         for (var target : readMixinTargets(mixin)) {
             var bytes = targetBytecode.apply(target);
@@ -939,6 +1668,41 @@ public final class MixinJarPatcher {
                     continue;
                 }
                 entries.add(entry.getName());
+                // The bridge's own sugar-free extra-model feed. Fabric's extra-model collector (and
+                // Create's partial-model collector) target ModelManager.discoverModelDependencies by
+                // bare name, which NeoForge's deprecated vanilla-shape overload makes ambiguous - the
+                // injection silently matches neither overload, so every Fabric-registered extra model
+                // goes undiscovered and dynamically rendered parts draw the missing-model checkerboard.
+                // Rewriting their @Local-sugar handlers breaks MixinExtras' wrapper machinery, so the
+                // job is done by one generated sugar-free mixin injected into this module instead: it
+                // feeds the same sources (Create's registered partials, Fabric's plugin-registered
+                // extra models) into discovery through ModelDiscovery.resolve's receiver, which needs
+                // no local capture at all.
+                if (jarPath.getFileName().toString().startsWith("fabric-model-loading-api-v1-")
+                        && entry.getName().equals("fabric-model-loading-api-v1.mixins.json")) {
+                    var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    var mixinClassPath = "net/fabricmc/fabric/mixin/client/model/loading/BridgeModelDiscoveryMixin.class";
+                    if (!configText.contains("BridgeModelDiscoveryMixin") && configText.contains("\"client\"")) {
+                        var withEntry = configText.replaceFirst("(\"client\"\\s*:\\s*\\[)", "$1\n    \"BridgeModelDiscoveryMixin\",");
+                        patched.put("fabric-model-loading-api-v1.mixins.json", withEntry.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        entries.add(mixinClassPath);
+                        patched.put(mixinClassPath, generateBridgeModelDiscoveryMixin(false));
+                        LOGGER.info("[NeoFobric] Injected BridgeModelDiscoveryMixin into {}", jarPath.getFileName());
+                    }
+                }
+                if (entry.getName().equals("create.client.mixins.json")) {
+                    var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    // Only Create Fly's own config (its mixin package is com.zurrtum.create.client.mixin).
+                    if (configText.contains("\"package\": \"com.zurrtum.create.client.mixin\"")
+                            && !configText.contains("BridgeCreatePartialModelMixin")) {
+                        var withEntry = configText.replaceFirst("(\"client\"\\s*:\\s*\\[)", "$1\n    \"BridgeCreatePartialModelMixin\",");
+                        patched.put(entry.getName(), withEntry.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        var mixinClassPath = "com/zurrtum/create/client/mixin/BridgeCreatePartialModelMixin.class";
+                        entries.add(mixinClassPath);
+                        patched.put(mixinClassPath, generateBridgeModelDiscoveryMixin(true));
+                        LOGGER.info("[NeoFobric] Injected BridgeCreatePartialModelMixin into {}", jarPath.getFileName());
+                    }
+                }
                 if (!entry.getName().endsWith(".class")) {
                     continue;
                 }
@@ -949,10 +1713,17 @@ public final class MixinJarPatcher {
                 }
                 allClasses.add(versionMoved);
                 if (!looksLikeMixinClass(entry.getName())) {
-                    // Not a mixin: the only rewrite it may need is a call site of a renamed accessor
-                    // member (Fabric's own implementation classes do the casting).
+                    // Not a mixin: the only rewrites it may need are a call site of a renamed accessor
+                    // member (Fabric's own implementation classes do the casting) or a page API that is
+                    // served by the host loader's creative screen.
+                    var plain = versionMoved;
+                    var bridgedPages = bridgeCreativeTabApi(plain, entry.getName());
+                    if (bridgedPages != null) {
+                        plain = bridgedPages;
+                        patched.put(entry.getName(), plain);
+                    }
                     if (!accessorRenames.isEmpty()) {
-                        var withCalls = rewriteAccessorCallSites(versionMoved, accessorRenames, entry.getName());
+                        var withCalls = rewriteAccessorCallSites(plain, accessorRenames, entry.getName());
                         if (withCalls != null) {
                             patched.put(entry.getName(), withCalls);
                         }
@@ -968,6 +1739,18 @@ public final class MixinJarPatcher {
                 // decide the parameter order, so the target has to be correct before it runs.
                 var realigned = realignMixinTargets(bytes, entry.getName());
                 var source = realigned != null ? realigned : bytes;
+                var retargeted = retargetStaleReturnOrdinals(source, entry.getName());
+                if (retargeted != null) {
+                    source = retargeted;
+                }
+                var stripped = stripCollidingDuckMembers(source, entry.getName(), resolver);
+                if (stripped != null) {
+                    source = stripped;
+                }
+                var handlerStripped = stripListedInjectorHandlers(source, entry.getName());
+                if (handlerStripped != null) {
+                    source = handlerStripped;
+                }
                 var callSitesMoved = accessorRenames.isEmpty() ? null : rewriteAccessorCallSites(source, accessorRenames, entry.getName());
                 if (callSitesMoved != null) {
                     source = callSitesMoved;
@@ -980,6 +1763,10 @@ public final class MixinJarPatcher {
                 if (extended != null) {
                     source = extended;
                 }
+                var appended = extendInjectorHandlerParams(source, entry.getName(), resolver);
+                if (appended != null) {
+                    source = appended;
+                }
                 byte[] fixed = null;
                 if (!Boolean.getBoolean("neofobric.noHandlerFix")) {
                     fixed = MixinHandlerDescriptorFixer.fix(source, resolver);
@@ -991,14 +1778,14 @@ public final class MixinJarPatcher {
                     patched.put(entry.getName(), trimmed);
                 } else if (fixed != null) {
                     patched.put(entry.getName(), fixed);
-                } else if (extended != null) {
-                    patched.put(entry.getName(), extended);
+                } else if (extended != null || appended != null) {
+                    patched.put(entry.getName(), source);
                 } else if (renamed != null) {
                     patched.put(entry.getName(), renamed);
                 } else if (callSitesMoved != null) {
                     patched.put(entry.getName(), callSitesMoved);
-                } else if (realigned != null) {
-                    patched.put(entry.getName(), realigned);
+                } else if (realigned != null || stripped != null || handlerStripped != null || retargeted != null) {
+                    patched.put(entry.getName(), source);
                 }
             }
         } catch (IOException e) {
@@ -1048,7 +1835,7 @@ public final class MixinJarPatcher {
                 var entry = zip.getEntry(name);
                 var replacement = patched.get(name);
                 var outEntry = new ZipEntry(name);
-                if (entry.getMethod() == ZipEntry.STORED && replacement == null) {
+                if (entry != null && entry.getMethod() == ZipEntry.STORED && replacement == null) {
                     // Keep stored entries exactly as they are (size and CRC are mandatory then).
                     outEntry.setMethod(ZipEntry.STORED);
                     outEntry.setSize(entry.getSize());
@@ -1058,7 +1845,7 @@ public final class MixinJarPatcher {
                 out.putNextEntry(outEntry);
                 if (replacement != null) {
                     out.write(replacement);
-                } else {
+                } else if (entry != null) {
                     zip.getInputStream(entry).transferTo(out);
                 }
                 out.closeEntry();

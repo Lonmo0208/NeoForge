@@ -5,6 +5,7 @@
 
 package net.neoforged.neoforge.client.event;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -12,8 +13,10 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.IModBusEvent;
 import net.neoforged.neoforge.client.resources.VanillaClientListeners;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.SortedReloadListenerEvent;
 import org.jetbrains.annotations.ApiStatus;
+import org.slf4j.Logger;
 
 /**
  * This event allows mods to register client-side reload listeners to the resource manager.
@@ -24,6 +27,8 @@ import org.jetbrains.annotations.ApiStatus;
  * @see {@link AddServerReloadListenersEvent} for registering server-side reload listeners.
  */
 public class AddClientReloadListenersEvent extends SortedReloadListenerEvent implements IModBusEvent {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     @ApiStatus.Internal
     public AddClientReloadListenersEvent(ReloadableResourceManager resourceManager) {
         super(resourceManager.getListeners(), AddClientReloadListenersEvent::lookupName);
@@ -32,6 +37,14 @@ public class AddClientReloadListenersEvent extends SortedReloadListenerEvent imp
     private static Identifier lookupName(PreparableReloadListener listener) {
         Identifier key = VanillaClientListeners.getNameForClass(listener.getClass());
         if (key == null) {
+            var bridged = AddServerReloadListenersEvent.bridgedListenerKey(listener.getClass());
+            if (bridged != null) {
+                // A Fabric mod added this listener with a mixin into the resource manager, which is how
+                // reload listeners are contributed on that side; there is no vanilla-style name for it.
+                // Handing it a synthetic key keeps it in the ordering graph instead of aborting the load.
+                LOGGER.debug("Giving the bridged Fabric reload listener {} the key {}", listener, bridged);
+                return bridged;
+            }
             if (listener.getClass().getPackageName().startsWith("net.minecraft")) {
                 throw new IllegalArgumentException("A key for the reload listener " + listener + " was not provided in VanillaClientListeners!");
             } else {

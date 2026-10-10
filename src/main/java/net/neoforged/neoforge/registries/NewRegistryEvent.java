@@ -62,7 +62,12 @@ public class NewRegistryEvent extends Event implements IModBusEvent {
             registerToRootRegistry(registry);
         }
 
-        ((WritableRegistry<?>) BuiltInRegistries.REGISTRY).freeze();
+        // Neo: the root registry stays open. Closing it again here only enforces "no new registries once
+        // this event is over", and that discipline is what blocks the other loader: Fabric mods create
+        // their registries on first use, from their entrypoints, which run after this event - Create
+        // registers a whole set of datapack registries that way. The contained registries are still closed
+        // by GameData.freezeData, so built-in content cannot be added either way.
+        // ((WritableRegistry<?>) BuiltInRegistries.REGISTRY).freeze();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

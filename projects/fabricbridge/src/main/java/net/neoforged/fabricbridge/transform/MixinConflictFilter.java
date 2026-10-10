@@ -51,30 +51,37 @@ public final class MixinConflictFilter {
     private static final String MIXIN_ANNOTATION = "Lorg/spongepowered/asm/mixin/Mixin;";
 
     /**
-     * Mixin classes that must never be applied, because no automatic fix reaches their problem.
+     * Mixin classes that are dropped by name, as a last resort for ones the automatic fixes cannot
+     * reach.
      *
-     * <p>Currently only {@code RegistryDataLoaderMixin}. The four payload mixins that used to be
-     * listed here are <em>not</em> harmful: reading NeoForge's own sources shows NeoForge already
-     * patches the same ground ({@code BundlePacket.<init>} calls {@code BundlePacketUtils.flatten},
-     * and {@code FriendlyByteBuf.readCollection}/{@code readMap} already clamp to
-     * {@code ByteBufCodecs.MAX_INITIAL_COLLECTION_SIZE}), so those two Fabric mixins are idempotent
-     * repeats. The two custom-payload mixins cannot even apply, because they target the two-argument
-     * {@code CustomPacketPayload.codec} while NeoForge's is four-argument. Skipping them cost working
-     * functionality - large-payload splitting in particular - for no benefit.
+     * <p>{@code BlockStateModelUnbakedMixin} (fabric-model-loading-api-v1) redirects the two
+     * {@code Codec.flatComapMap} calls of {@code BlockStateModel.Unbaked.<clinit>} and replaces their
+     * results with Fabric's own custom-model codecs. On NeoForge the same two calls exist (the
+     * ordinals still match, so this is not an injection miss - it applies), but the codecs carry
+     * NeoForge's own custom-model dispatch ({@code CustomUnbakedBlockStateModel}); replacing the
+     * results bypasses it and every blockstate model then fails to decode - the
+     * "Failed to load model minecraft:models/block/<name>.json" catastrophe for all of vanilla, which
+     * is why the whole module used to be skipped. The module's other five mixins are kept (the config
+     * is registered again) and drive the plugin machinery Fabric mods - Create's partial models among
+     * them - need; only this codec replacement stays out.
      *
-     * <p>{@code RegistryDataLoaderMixin} binds an {@code IS_SERVER} {@code ScopedValue} in a
-     * {@code @WrapOperation} and reads it in a {@code @ModifyArg} in the same async pipeline. Its
-     * declared targets use signatures NeoForge no longer has, so the write side never installs while
-     * the read side does; a {@code ScopedValue} binding does not cross threads, so the read dies in a
-     * {@code CompletableFuture} worker with {@code NoSuchElementException: ScopedValue not bound},
-     * taking the client down right after the world finishes loading. Dropping the class costs only
-     * {@code DynamicRegistrySetupCallback}, which world generation does not need.
+     * <p>Entries this list used to hold, kept as history so nobody re-evaluates them:
+     * {@code RegistryDataLoaderMixin} (fabric-registry-sync-v0's stale annotation left its
+     * {@code IS_SERVER} ScopedValue unbound) is solved properly by
+     * {@code MixinJarPatcher.ANNOTATION_TARGET_REALIGNMENTS} being emptied - the simple-name skip also
+     * dropped Create's own mixin of the same name, which is how Create adds its datapack registries.
+     * The four fabric-networking payload mixins are harmless repeats: NeoForge already patches the
+     * same ground ({@code BundlePacket.<init>} calls {@code BundlePacketUtils.flatten},
+     * {@code FriendlyByteBuf.readCollection}/{@code readMap} already clamp), and the two
+     * custom-payload mixins cannot apply at all (they target the two-argument
+     * {@code CustomPacketPayload.codec} while NeoForge's is four-argument). Skipping those cost
+     * working functionality - large-payload splitting in particular - for no benefit.
      *
      * <p>Overridden by {@code -Dneofobric.noDefaultMixinSkips=true} and by
      * {@code -Dneofobric.registerAllMixinConfigs=true}.
      */
     private static final List<String> DEFAULT_SKIPPED_MIXIN_CLASSES = List.of(
-            "RegistryDataLoaderMixin");
+            "BlockStateModelUnbakedMixin");
 
     /**
      * {@return whether {@code mixinClass} names exactly the class {@code simpleName}}
@@ -142,9 +149,13 @@ public final class MixinConflictFilter {
                     candidatePaths.add(mixinClass.replace('.', '/') + ".class");
 
                     byte[] classBytes = null;
+                    String classPath = null;
                     for (var candidatePath : candidatePaths) {
                         classBytes = jar.readFile(candidatePath);
-                        if (classBytes != null) break;
+                        if (classBytes != null) {
+                            classPath = candidatePath;
+                            break;
+                        }
                     }
                     if (classBytes == null) {
                         continue;
@@ -192,6 +203,18 @@ public final class MixinConflictFilter {
                         continue;
                     }
                     var duckInterfaces = conflictsWithTarget(classBytes, jar);
+                    if (duckInterfaces != null) {
+                        // Before giving up on the mixin, let the jar patcher strip merge-colliding
+                        // members from the allowlisted duck mixins (idempotent: it returns null when
+                        // nothing collides, e.g. because the realigned jar copy is already stripped).
+                        // With a collision gone the remaining methods can merge, and dropping the
+                        // entry - which abandons the whole interface - is no longer necessary.
+                        var stripped = net.neoforged.fabricbridge.discovery.MixinJarPatcher
+                                .stripCollidingDuckMembers(classBytes, classPath, targetBytecode::apply);
+                        if (stripped != null) {
+                            continue;
+                        }
+                    }
                     if (duckInterfaces != null) {
                         // The mixin implements Fabric-owned interfaces (a duck-type mixin). Keep the
                         // interface injection alive even though the mixin body is dropped, so casts

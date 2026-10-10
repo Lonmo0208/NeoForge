@@ -9,7 +9,7 @@
          new RegistryDataLoader.RegistryData<>(Registries.BIOME, Biome.NETWORK_CODEC),
          new RegistryDataLoader.RegistryData<>(Registries.CHAT_TYPE, ChatType.DIRECT_CODEC),
          new RegistryDataLoader.RegistryData<>(Registries.TRIM_PATTERN, TrimPattern.DIRECT_CODEC),
-@@ -162,21 +_,33 @@
+@@ -162,18 +_,30 @@
          new RegistryDataLoader.RegistryData<>(Registries.DIALOG, Dialog.DIRECT_CODEC),
          new RegistryDataLoader.RegistryData<>(Registries.WORLD_CLOCK, WorldClock.DIRECT_CODEC),
          new RegistryDataLoader.RegistryData<>(Registries.TIMELINE, Timeline.NETWORK_CODEC)
@@ -41,76 +41,30 @@
 +                return new ResourceManagerRegistryLoadTask<>(data, Lifecycle.stable(), loadingErrors, resourceManager, pendingTags);
              }
          };
--        return load(loaderFactory, contextRegistries, registriesToLoad, executor);
-+        return load(loaderFactory, contextRegistries, registriesToLoad, executor, true);
-     }
- 
-     public static CompletableFuture<RegistryAccess.Frozen> load(
-@@ -192,14 +_,57 @@
+         return load(loaderFactory, contextRegistries, registriesToLoad, executor);
+@@ -192,10 +_,16 @@
                  return new NetworkRegistryLoadTask<>(data, Lifecycle.stable(), loadingErrors, entries, knownDataSource);
              }
          };
--        return load(loaderFactory, contextRegistries, registriesToLoad, executor);
-+        // NeoFobric: this vanilla-shaped overload carries its own copy of the async call structure.
-+        // Fabric's registry-sync wraps the supplyAsync call in this exact signature to re-bind its
-+        // ScopedValue context on the worker thread; with a plain forwarder the binding would be
-+        // lost. fromResources is always false on this path.
-+        var fromResources = false;
-+        return CompletableFuture.<CompletableFuture<RegistryAccess.Frozen>>supplyAsync(
-+                () -> {
-+                    Map<ResourceKey<?>, Exception> loadingErrors = new ConcurrentHashMap<>();
-+                    List<RegistryLoadTask<?>> loadTasks = registriesToLoad.stream()
-+                        .map(r -> loaderFactory.create((RegistryDataLoader.RegistryData<?>)r, loadingErrors))
-+                        .collect(Collectors.toUnmodifiableList());
-+                    RegistryOps.RegistryInfoLookup contextAndNewRegistries = createContext(contextRegistries, loadTasks);
-+                    int taskCount = loadTasks.size();
-+                    CompletableFuture<?>[] loadCompletions = new CompletableFuture[taskCount];
-+
-+                    for (int i = 0; i < taskCount; i++) {
-+                        loadCompletions[i] = loadTasks.get(i).load(contextAndNewRegistries, executor);
-+                    }
-+
-+                    return CompletableFuture.allOf(loadCompletions)
-+                        .thenApplyAsync(
-+                            ignored -> {
-+                                List<RegistryLoadTask<?>> frozenRegistries = loadTasks.stream().filter(task -> task.freezeRegistry(loadingErrors)).toList();
-+                                if (!loadingErrors.isEmpty()) {
-+                                    throw logErrors(loadingErrors);
-+                                } else {
-+                                    List<? extends Registry<?>> registries = frozenRegistries.stream()
-+                                        .flatMap(task -> task.validateRegistry(loadingErrors).stream())
-+                                        .toList();
-+                                    if (!loadingErrors.isEmpty()) {
-+                                        throw logErrors(loadingErrors);
-+                                    } else {
-+                                        return new RegistryAccess.ImmutableRegistryAccess(registries).freeze();
-+                                    }
-+                                }
-+                            },
-+                            executor
-+                        );
-+                },
-+                executor
-+            )
-+            .thenCompose(c -> (CompletionStage<RegistryAccess.Frozen>)c);
++        // NeoFobric: forwards to the vanilla-shaped overload below. That is where Fabric's registry-sync
++        // rebinds its ScopedValue context on the worker thread, so the async structure has to live in one
++        // place - a copy here would leave the hook unbound for this path.
+         return load(loaderFactory, contextRegistries, registriesToLoad, executor);
      }
  
-+    // Neo: Added parameter to know we are loading server-side from resources
-     private static CompletableFuture<RegistryAccess.Frozen> load(
+-    private static CompletableFuture<RegistryAccess.Frozen> load(
++    // NeoFobric: the vanilla signature, kept because mods inject into it - Fabric's registry-sync wraps
++    // the supplyAsync call in this exact method to rebind its ScopedValue context on the worker thread,
++    // and it cannot bind that context when the body has been moved into another overload.
++    public static CompletableFuture<RegistryAccess.Frozen> load(
          RegistryDataLoader.LoaderFactory loaderFactory,
          List<HolderLookup.RegistryLookup<?>> contextRegistries,
          List<RegistryDataLoader.RegistryData<?>> registriesToLoad,
--        Executor executor
-+        Executor executor,
-+        boolean fromResources
-     ) {
-         return CompletableFuture.<CompletableFuture<RegistryAccess.Frozen>>supplyAsync(
-                 () -> {
 @@ -218,6 +_,15 @@
                      return CompletableFuture.allOf(loadCompletions)
                          .thenApplyAsync(
                              ignored -> {
-+                                if (fromResources && net.neoforged.neoforge.gametest.GameTestHooks.isGametestEnabled()) {
++                                if (net.neoforged.neoforge.gametest.GameTestHooks.isGametestEnabled()) {
 +                                    var byKeyMap = loadTasks.stream().collect(java.util.stream.Collectors.toMap(d -> d.registryKey(), d -> d.readOnlyRegistry()));
 +                                    var envRegistry = (net.minecraft.core.WritableRegistry) byKeyMap.get(Registries.TEST_ENVIRONMENT);
 +                                    var testsRegistry = (net.minecraft.core.WritableRegistry) byKeyMap.get(Registries.TEST_INSTANCE);

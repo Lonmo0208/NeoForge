@@ -132,10 +132,53 @@ final class BridgedGameProvider implements GameProvider {
         return false;
     }
 
+    /**
+     * {@return the Minecraft version, or null when it cannot be determined} FML only derives it from
+     * the discovered mod files after its whole discovery pass, and the bridge boots fabric-loader
+     * <em>inside</em> that pass - mixin config plugins are constructed when the game layer transforms
+     * its first class and ask the loader for their mod container. Fabric refuses to resolve mod
+     * dependencies against an unknown game version ("minecraft uses the non-semantic version
+     * unknown"), so the value has to come from the game files directly at that point.
+     */
     private static String minecraftVersion() {
         var loader = FMLLoader.getCurrentOrNull();
         VersionInfo versionInfo = loader != null ? loader.getVersionInfo() : null;
-        return versionInfo != null && versionInfo.mcVersion() != null ? versionInfo.mcVersion() : "unknown";
+        if (versionInfo != null && versionInfo.mcVersion() != null) {
+            return versionInfo.mcVersion();
+        }
+        var fromVersionJson = versionJsonGameVersion();
+        return fromVersionJson != null ? fromVersionJson : "unknown";
+    }
+
+    /** Cached {@code version.json} reading; the file cannot change while the game runs. */
+    private static volatile String versionJsonGameVersion;
+
+    /**
+     * {@return the {@code id} of the {@code version.json} carried by the game content} That is the
+     * version FML itself reads out of the jar later on, so it is the same string the dependency
+     * resolution would use - the launch argument copy is gone by now (FML consumes it while building
+     * its {@code VersionInfo}).
+     */
+    private static String versionJsonGameVersion() {
+        var cached = versionJsonGameVersion;
+        if (cached != null) {
+            return cached;
+        }
+
+        var resource = ClassLoader.getSystemResource("version.json");
+        if (resource == null) {
+            return null;
+        }
+        try (var in = resource.openStream()) {
+            var json = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            var id = java.util.regex.Pattern.compile("\"id\"\\s*:\\s*\"([^\"]+)\"").matcher(json);
+            if (id.find()) {
+                return versionJsonGameVersion = id.group(1);
+            }
+        } catch (Exception ignored) {
+            // Reported by the caller through the usual "unknown" path.
+        }
+        return null;
     }
 
     private static Path minecraftJarPath() {

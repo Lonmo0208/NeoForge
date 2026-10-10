@@ -109,6 +109,38 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
             "net/neoforged/neoforge/client/extensions/BlockStateModelExtension";
 
     /**
+     * The block-state half of the same story as {@link #FABRIC_BLOCK_STATE_MODEL}: Fabric's
+     * {@code FabricBlockState} and NeoForge's {@code IBlockStateExtension} both declare a default
+     * {@code getAppearance(BlockAndLightGetter, BlockPos, Direction, BlockState, BlockPos)} with the
+     * same erased descriptor, and both interfaces end up on {@code BlockState} (NeoForge injects its
+     * extension at compile time, fabric-block-api-v1's {@code BlockStateMixin} adds Fabric's). A class
+     * inheriting two unrelated same-signature defaults dies with
+     * {@code IncompatibleClassChangeError: Conflicting default methods} the first time one is called -
+     * Create's connected-texture code does exactly that while rendering a schematic. Hanging
+     * {@code FabricBlockState} under {@code IBlockStateExtension} gives the two defaults one chain, so
+     * Fabric's own (equal in meaning, delegating to the block) wins by being most specific.
+     */
+    private static final String FABRIC_BLOCK_STATE =
+            "net/fabricmc/fabric/api/block/v1/FabricBlockState";
+
+    private static final String IBLOCK_STATE_EXTENSION =
+            "net/neoforged/neoforge/common/extensions/IBlockStateExtension";
+
+    /**
+     * The block-side twin of {@link #FABRIC_BLOCK_STATE}: {@code FabricBlock.getAppearance(BlockState,
+     * BlockAndLightGetter, BlockPos, Direction, BlockState, BlockPos)} and NeoForge's
+     * {@code IBlockExtension.getAppearance(...)} have the same erased descriptor and both default to
+     * {@code return state} - and both interfaces sit on {@code Block}. Fabric's state-level default
+     * calls {@code block.getAppearance(...)}, so the block-level conflict would fire on the very next
+     * frame after the state-level one is fixed.
+     */
+    private static final String FABRIC_BLOCK =
+            "net/fabricmc/fabric/api/block/v1/FabricBlock";
+
+    private static final String IBLOCK_EXTENSION =
+            "net/neoforged/neoforge/common/extensions/IBlockExtension";
+
+    /**
      * Fabric's own access-widener/class-tweaker rules, read out of every mod's {@code accessWidener}
      * file by Fabric's {@code loadClassTweakers()} (called from {@code FabricBridge.bootIfNeeded}).
      *
@@ -291,7 +323,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         }
         return RESOURCE_IMPL_CANDIDATES.contains(name) || FABRIC_CHANNEL_CLASSES.contains(name)
                 || BUILT_IN_REGISTRIES.equals(name) || INGREDIENT.equals(name)
-                || FABRIC_BLOCK_STATE_MODEL.equals(name)
+                || FABRIC_BLOCK_STATE_MODEL.equals(name) || FABRIC_BLOCK_STATE.equals(name) || FABRIC_BLOCK.equals(name)
                 || WIDEN_PRIVATE_MEMBERS.containsKey(name)
                 || InjectedInterfaceSource.get().containsKey(name)
                 || isFabricClassTweakerTarget(name);
@@ -315,6 +347,8 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 && !BUILT_IN_REGISTRIES.equals(context.node().name)
                 && !INGREDIENT.equals(context.node().name)
                 && !FABRIC_BLOCK_STATE_MODEL.equals(context.node().name)
+                && !FABRIC_BLOCK_STATE.equals(context.node().name)
+                && !FABRIC_BLOCK.equals(context.node().name)
                 && !WIDEN_PRIVATE_MEMBERS.containsKey(context.node().name)
                 && !InjectedInterfaceSource.get().containsKey(context.node().name)
                 && !isFabricClassTweakerTarget(context.node().name)) {
@@ -350,6 +384,12 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         }
         if (FABRIC_BLOCK_STATE_MODEL.equals(node.name)) {
             changed |= hangFabricBlockStateModelUnderExtension(node);
+        }
+        if (FABRIC_BLOCK_STATE.equals(node.name)) {
+            changed |= hangInterfaceUnder(node, IBLOCK_STATE_EXTENSION);
+        }
+        if (FABRIC_BLOCK.equals(node.name)) {
+            changed |= hangInterfaceUnder(node, IBLOCK_EXTENSION);
         }
         var toWiden = WIDEN_PRIVATE_MEMBERS.get(node.name);
         if (toWiden != null) {
@@ -440,12 +480,20 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
      * already present is left alone.
      */
     private static boolean hangFabricBlockStateModelUnderExtension(ClassNode node) {
-        if (node.interfaces.contains(BLOCK_STATE_MODEL_EXTENSION)) {
+        return hangInterfaceUnder(node, BLOCK_STATE_MODEL_EXTENSION);
+    }
+
+    /**
+     * Adds {@code superInterface} to the interface {@code node} when it is not there yet, giving two
+     * interfaces with same-signature defaults one inheritance chain instead of a conflict.
+     */
+    private static boolean hangInterfaceUnder(ClassNode node, String superInterface) {
+        if (node.interfaces.contains(superInterface)) {
             return false;
         }
-        node.interfaces.add(BLOCK_STATE_MODEL_EXTENSION);
-        LOGGER.info("[NeoFobric] Made {} extend {} so Fabric's and NeoForge's model defaults share one chain",
-                node.name.replace('/', '.'), BLOCK_STATE_MODEL_EXTENSION.replace('/', '.'));
+        node.interfaces.add(superInterface);
+        LOGGER.info("[NeoFobric] Made {} extend {} so Fabric's and NeoForge's defaults share one chain",
+                node.name.replace('/', '.'), superInterface.replace('/', '.'));
         return true;
     }
 

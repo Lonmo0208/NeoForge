@@ -65,7 +65,7 @@
 +        layerManager.add(CROSSHAIR, this::extractCrosshair, hudVisible);
 +        layerManager.add(AFTER_CAMERA_DECORATIONS, (guiGraphics, _) -> guiGraphics.nextStratum(), hudVisible);
 +        // TODO: Split this up again into its pieces
-+        layerManager.add(HOTBAR, this::extractHotbar, hudVisible);
++        layerManager.add(HOTBAR, this::extractHotbarAndDecorations, hudVisible);
 +        layerManager.add(PLAYER_HEALTH, (guiGraphics, _) -> extractHealthLevel(guiGraphics), survivalVisible);
 +        layerManager.add(ARMOR_LEVEL, (guiGraphics, _) -> extractArmorLevel(guiGraphics), survivalVisible);
 +        layerManager.add(FOOD_LEVEL, (guiGraphics, _) -> extractFoodLevel(guiGraphics), survivalVisible);
@@ -160,13 +160,13 @@
                      graphics.blitSprite(RenderPipelines.GUI_TEXTURED, getMobEffectSprite(effect), x + 3, y + 3, 18, 18, ARGB.white(alpha));
                  }
              }
-@@ -539,32 +_,51 @@
+@@ -539,32 +_,52 @@
          return effect.unwrapKey().map(ResourceKey::identifier).map(id -> id.withPrefix("mob_effect/")).orElseGet(MissingTextureAtlasSprite::getLocation);
      }
  
--    private void extractHotbarAndDecorations(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-+    // Neo: Split off into separate method to wrap in a layer
-+    private void extractHotbar(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
++    // Neo: split off into a separate method to wrap in a layer. Keeps the vanilla name so mods written
++    // against it (mixins injecting into the hotbar extraction) still find their target.
+     private void extractHotbarAndDecorations(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
          if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
              this.spectatorGui.extractHotbar(graphics);
          } else {

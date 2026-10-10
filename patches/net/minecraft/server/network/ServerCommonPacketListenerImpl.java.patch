@@ -20,10 +20,24 @@
      }
  
      private void close() {
-@@ -93,12 +_,38 @@
+@@ -93,12 +_,52 @@
  
      @Override
      public void handleCustomPayload(ServerboundCustomPayloadPacket packet) {
++        this.handleCustomPayloadCommon(packet);
++    }
++
++    /// Neo: the shared body of [#handleCustomPayload], callable by subclasses without going through the
++    /// overridable method above.
++    ///
++    /// {@link ServerGamePacketListenerImpl#handleCustomPayload} calls this directly instead of
++    /// {@code super.handleCustomPayload(packet)}: Fabric's networking (fabric-networking-api-v1) mixes
++    /// into the method above and only knows the configuration-phase addon, so any play-phase payload
++    /// that reaches it is treated as a protocol error ("Unknown addon") and disconnects the player -
++    /// which is what every payload NeoForge (rather than Fabric) handles did, e.g. a NeoForge-native
++    /// mod's client handshake. Fabric's own play-phase traffic is injected into the subclass method, so
++    /// it is unaffected either way.
++    protected final void handleCustomPayloadCommon(ServerboundCustomPayloadPacket packet) {
 +        // Neo: Unconditionally handle register/unregister payloads.
 +        if (packet.payload() instanceof net.neoforged.neoforge.network.payload.MinecraftRegisterPayload minecraftRegisterPayload) {
 +            net.neoforged.neoforge.network.registration.NetworkRegistry.onMinecraftRegister(this.getConnection(), minecraftRegisterPayload.newChannels());

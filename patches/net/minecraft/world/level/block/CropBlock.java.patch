@@ -17,11 +17,19 @@
                  }
              }
          }
-@@ -97,7 +_,8 @@
+@@ -97,7 +_,17 @@
          return Mth.nextInt(level.getRandom(), 2, 5);
      }
  
--    protected static float getGrowthSpeed(Block type, BlockGetter level, BlockPos pos) {
++    /**
++     * Neo: the vanilla signature, kept for mods that call this helper the way the vanilla API declares it.
++     * The implementation below takes the crop's block state (NeoForge lets a crop's own state take part in
++     * the calculation), so this forwards with the state of the given block.
++     */
+     protected static float getGrowthSpeed(Block type, BlockGetter level, BlockPos pos) {
++        return getGrowthSpeed(type.defaultBlockState(), level, pos);
++    }
++
 +    protected static float getGrowthSpeed(BlockState cropBlockState, BlockGetter level, BlockPos pos) {
 +        Block type = cropBlockState.getBlock();
          float speed = 1.0F;

@@ -18,15 +18,6 @@
      }
  
      public void createTrackingEmitter(Entity entity, ParticleOptions particle) {
-@@ -60,7 +_,7 @@
-     }
- 
-     private <T extends ParticleOptions> @Nullable Particle makeParticle(T options, double x, double y, double z, double xa, double ya, double za) {
--        ParticleProvider<T> provider = (ParticleProvider<T>)this.resourceManager.getProviders().get(BuiltInRegistries.PARTICLE_TYPE.getId(options.getType()));
-+        ParticleProvider<T> provider = (ParticleProvider<T>)this.resourceManager.getProviders().get(BuiltInRegistries.PARTICLE_TYPE.getKey(options.getType()));
-         return provider == null ? null : provider.createParticle(options, this.level, x, y, z, xa, ya, za, this.random);
-     }
- 
 @@ -110,6 +_,8 @@
              return new ItemPickupParticleGroup(this);
          } else if (type == ParticleRenderType.ELDER_GUARDIANS) {

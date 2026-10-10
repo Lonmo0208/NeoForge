@@ -19,7 +19,7 @@
 +     * @deprecated Neo: use the constructor {@link #LootDataType(ResourceKey, Codec, LootDataType.ContextGetter, T, java.util.function.BiConsumer) with a default value and id setter} to support conditions
 +     */
 +    @Deprecated
-+    private LootDataType(ResourceKey<Registry<T>> registryKey, Codec<T> codec, LootDataType.ContextGetter<T> contextGetter) {
++    public LootDataType(ResourceKey<Registry<T>> registryKey, Codec<T> codec, LootDataType.ContextGetter<T> contextGetter) {
 +        this(registryKey, codec, contextGetter, null, (it, id) -> {});
 +    }
 +

@@ -10,7 +10,7 @@
          return result;
      }
  
-@@ -52,16 +_,29 @@
+@@ -52,16 +_,41 @@
          scanDirectory(manager, FileToIdConverter.registry(registryKey), ops, codec, result);
      }
  
@@ -35,10 +35,22 @@
              try (Reader reader = entry.getValue().openAsReader()) {
 -                codec.parse(ops, StrictJsonParser.parse(reader)).ifSuccess(parsed -> {
 -                    if (result.putIfAbsent(id, (T)parsed) != null) {
-+                conditionalCodec.parse(ops, com.google.gson.JsonParser.parseReader(reader)).ifSuccess(parsed -> {
-+                    if (parsed.isEmpty()) {
++                // Neo: the parse result is taken as an Object on purpose. Fabric's resource conditions
++                // (fabric-resource-conditions-api-v1) wrap this very parse call and hand back their own
++                // marker object in place of the parsed value when a file's conditions are not met. Typing
++                // the lambda's parameter as the conditional codec's Optional would cast that marker at the
++                // lambda's entry and die with ClassCastException (java.lang.Object -> java.util.Optional) -
++                // which is exactly what happened once both condition systems met on the same file.
++                com.mojang.serialization.DataResult<Object> parseResult = (com.mojang.serialization.DataResult<Object>) (com.mojang.serialization.DataResult<?>) conditionalCodec
++                        .parse(ops, com.google.gson.JsonParser.parseReader(reader));
++                parseResult.ifSuccess(parsed -> {
++                    if (!(parsed instanceof java.util.Optional<?> optional)) {
++                        // Fabric's marker: that loader wants the file skipped.
++                        return;
++                    }
++                    if (optional.isEmpty()) {
 +                        LOGGER.debug("Skipping loading data file '{}' from '{}' as its conditions were not met", id, location);
-+                    } else if (result.putIfAbsent(id, parsed.get()) != null) {
++                    } else if (result.putIfAbsent(id, (T) optional.get()) != null) {
                          throw new IllegalStateException("Duplicate data file ignored with ID " + id);
                      }
                  }).ifError(error -> LOGGER.error("Couldn't parse data file '{}' from '{}': {}", id, location, error));

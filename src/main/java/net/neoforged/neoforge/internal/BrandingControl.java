@@ -36,10 +36,40 @@ public class BrandingControl {
         if (brandings == null) {
             ImmutableList.Builder<String> brd = ImmutableList.builder();
             brd.add("Minecraft " + SharedConstants.getCurrentVersion().name());
-            int modCount = ModList.get().size();
-            brd.add(FMLTranslations.parseMessage("fml.menu.branding", BRANDING_NAME + ' ' + NeoForgeVersion.getVersion(), modCount));
+
+            final String brandingName = BRANDING_NAME + ' ' + NeoForgeVersion.getVersion();
+            final int modCount = ModList.get().size();
+            // When the Fabric bridge is active its mods run alongside FML's, but ModList only knows
+            // FML's side - the count shown here would silently ignore every Fabric mod. The bridge
+            // publishes its count as a system property, so the line can report the total and the
+            // split. The property is only set while the bridge actually loaded mods, which keeps the
+            // plain line for a Fabric-mod-free (or bridge-disabled) game.
+            final Integer fabricMods = fabricModCount();
+            if (fabricMods == null) {
+                brd.add(FMLTranslations.parseMessage("fml.menu.branding", brandingName, modCount));
+            } else {
+                brd.add(FMLTranslations.parseMessage("fml.menu.branding.bridged", brandingName, modCount + fabricMods, modCount, fabricMods));
+            }
+
             brandings = brd.build();
             brandingsNoMC = brandings.subList(1, brandings.size());
+        }
+    }
+
+    /**
+     * {@return the number of Fabric mods the bridge loaded, or null when it loaded none}
+     */
+    @Nullable
+    private static Integer fabricModCount() {
+        final String property = System.getProperty("neofobric.fabricModCount");
+
+        if (property == null || property.isBlank())
+            return null;
+
+        try {
+            return Integer.parseInt(property.trim());
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 

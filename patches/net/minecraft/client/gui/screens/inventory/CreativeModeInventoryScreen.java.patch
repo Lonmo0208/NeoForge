@@ -250,7 +250,7 @@
          graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprites[Mth.clamp(pos, 0, sprites.length)], x, y, 26, 32);
          int iconX = x + 13 - 8;
          int iconY = y + 16 - 8 + (isTop ? 1 : -1);
-@@ -875,6 +_,14 @@
+@@ -875,6 +_,70 @@
          }
      }
  
@@ -260,6 +260,62 @@
 +
 +    public void setCurrentPage(net.neoforged.neoforge.client.gui.CreativeTabsScreenPage currentPage) {
 +        this.currentPage = currentPage;
++    }
++
++    // Neo: adapters for the bridged Fabric creative tab page API
++    // (net.fabricmc.fabric.api.client.creativetab.v1.FabricCreativeModeInventoryScreen). Fabric ships its
++    // own page arrows and its own tab visibility filter for that API, which would be a second page
++    // switcher next to this screen's; the bridge does not register that mixin, and routes the Fabric API
++    // methods here instead, so both APIs describe the same set of pages and the screen keeps exactly one
++    // switcher. See MixinJarPatcher#bridgeCreativeTabApi, which rewrites the interface bodies to call
++    // these methods.
++
++    public int getCreativeTabPageIndex() {
++        int index = this.pages.indexOf(this.currentPage);
++        return index < 0 ? 0 : index;
++    }
++
++    public int getCreativeTabPageCount() {
++        return Math.max(this.pages.size(), 1);
++    }
++
++    public boolean switchToCreativeTabPage(int page) {
++        if (page < 0 || page >= this.pages.size() || this.pages.get(page) == this.currentPage) {
++            return false;
++        }
++        this.setCurrentPage(this.pages.get(page));
++        return true;
++    }
++
++    public int getCreativeTabPageOf(net.minecraft.world.item.CreativeModeTab tab) {
++        for (int i = 0; i < this.pages.size(); i++) {
++            if (this.pages.get(i).getVisibleTabs().contains(tab)) {
++                return i;
++            }
++        }
++        // Fabric's contract: a tab that is not on any single page (it shows on all of them) reports the
++        // current page.
++        return this.getCreativeTabPageIndex();
++    }
++
++    public java.util.List<net.minecraft.world.item.CreativeModeTab> getCreativeTabPageTabs(int page) {
++        if (page < 0 || page >= this.pages.size()) {
++            return java.util.List.of();
++        }
++        return this.pages.get(page).getVisibleTabs();
++    }
++
++    public boolean hasAdditionalCreativeTabPages() {
++        return this.pages.size() > 1;
++    }
++
++    public net.minecraft.world.item.CreativeModeTab getSelectedCreativeTab() {
++        return selectedTab;
++    }
++
++    public boolean selectCreativeTab(net.minecraft.world.item.CreativeModeTab tab) {
++        this.selectTab(tab);
++        return true;
 +    }
 +
      private static class CustomCreativeSlot extends Slot {

@@ -74,6 +74,15 @@ public final class FabricBridgeHooks {
         }
 
         if (!Boolean.getBoolean("neofobric.noClientEntrypoints")) {
+            // Fabric mods do register content from a client entrypoint (particle types are the classic
+            // case) and NeoForge's registries are closed by this point, so the tempting move is to open a
+            // registry window here - GameData.unfreezeData()/freezeData(), the same pair NeoForge uses.
+            // That does not work yet: unfreezeData() dies on its very first touch of BuiltInRegistries
+            // ("Not bootstrapped (called from registry minecraft:game_event)"), because Fabric's registry
+            // sync defers the registry bootstrap and the class is initialised late. Opening the window is
+            // therefore left to whoever figures out that ordering; until then a mod that registers content
+            // here fails with "Registry is already frozen", which is exactly what the Fabric API particle
+            // test mod reports.
             try {
                 FabricBridge.invokeClientEntrypoints();
             } catch (Throwable t) {

@@ -5,6 +5,7 @@
 
 package net.neoforged.neoforge.event;
 
+import com.mojang.logging.LogUtils;
 import java.util.Map;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
@@ -17,6 +18,8 @@ import net.neoforged.neoforge.resource.ContextAwareReloadListener;
 import net.neoforged.neoforge.resource.ListenerKey;
 import net.neoforged.neoforge.resource.VanillaServerListeners;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 /**
  * The main ResourceManager is recreated on each reload, just after {@link ReloadableServerResources}'s creation.
@@ -25,6 +28,7 @@ import org.jetbrains.annotations.ApiStatus;
  * The event is fired on the {@link NeoForge#EVENT_BUS}
  */
 public class AddServerReloadListenersEvent extends SortedReloadListenerEvent {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final ReloadableServerResources serverResources;
     private final RegistryAccess registryAccess;
     private final Map<ListenerKey<?>, PreparableReloadListener> retainedListeners;
@@ -88,6 +92,14 @@ public class AddServerReloadListenersEvent extends SortedReloadListenerEvent {
     private static Identifier lookupName(PreparableReloadListener listener) {
         Identifier key = VanillaServerListeners.getNameForClass(listener.getClass());
         if (key == null) {
+            var bridged = bridgedListenerKey(listener.getClass());
+            if (bridged != null) {
+                // A Fabric mod added this listener with a mixin into the resource manager, which is how
+                // reload listeners are contributed on that side; there is no vanilla-style name for it.
+                // Handing it a synthetic key keeps it in the ordering graph instead of aborting the load.
+                LOGGER.debug("Giving the bridged Fabric reload listener {} the key {}", listener, bridged);
+                return bridged;
+            }
             if (listener.getClass().getPackageName().startsWith("net.minecraft")) {
                 throw new IllegalArgumentException("A key for the reload listener " + listener + " was not provided in VanillaServerListeners!");
             } else {
@@ -95,5 +107,27 @@ public class AddServerReloadListenersEvent extends SortedReloadListenerEvent {
             }
         }
         return key;
+    }
+
+    /**
+     * Module name of the Fabric composite module the NeoFobric bridge merges all Fabric mods into. Kept
+     * as a literal because NeoForge core does not compile against the bridge
+     * (see {@code BridgeFabricModLocator.FABRIC_MODULE_NAME}, which this has to match).
+     */
+    private static final String BRIDGED_FABRIC_MODULE = "neofobric.fabric.mods";
+
+    /**
+     * {@return a stable key for a reload listener that comes from the bridged Fabric module, or null if
+     * the class does not belong to it} Only classes of the Fabric composite module are accepted: the
+     * mixin check above stays in force for everything else.
+     */
+    @ApiStatus.Internal
+    public static @Nullable Identifier bridgedListenerKey(Class<?> listenerClass) {
+        if (!BRIDGED_FABRIC_MODULE.equals(listenerClass.getModule().getName())) {
+            return null;
+        }
+        var path = listenerClass.getName().toLowerCase(java.util.Locale.ROOT)
+                .replace('$', '.');
+        return Identifier.fromNamespaceAndPath("neofobric", "bridged/" + path);
     }
 }

@@ -1,15 +1,45 @@
 --- a/net/minecraft/server/ReloadableServerRegistries.java
 +++ b/net/minecraft/server/ReloadableServerRegistries.java
-@@ -44,7 +_,8 @@
+@@ -2,6 +_,7 @@
+ 
+ import com.google.gson.JsonElement;
+ import com.mojang.logging.LogUtils;
++import com.mojang.serialization.DynamicOps;
+ import com.mojang.serialization.JsonOps;
+ import com.mojang.serialization.Lifecycle;
+ import java.util.HashMap;
+@@ -43,7 +_,30 @@
+         List<HolderLookup.RegistryLookup<?>> contextRegistriesWithTags = TagLoader.buildUpdatedLookups(
              context.getAccessForLoading(RegistryLayer.RELOADABLE), updatedContextTags
          );
-         HolderLookup.Provider loadingContextWithTags = HolderLookup.Provider.create(contextRegistriesWithTags.stream());
--        RegistryOps<JsonElement> ops = loadingContextWithTags.createSerializationContext(JsonOps.INSTANCE);
-+        var conditionContext = new net.neoforged.neoforge.common.conditions.ConditionContext(updatedContextTags, RegistryAccess.EMPTY, loadingContextWithTags, net.minecraft.world.flag.FeatureFlags.VANILLA_SET);
-+        RegistryOps<JsonElement> ops = new net.neoforged.neoforge.common.conditions.ConditionalOps<>(loadingContextWithTags.createSerializationContext(JsonOps.INSTANCE), conditionContext);
+-        HolderLookup.Provider loadingContextWithTags = HolderLookup.Provider.create(contextRegistriesWithTags.stream());
++        HolderLookup.Provider baseContextWithTags = HolderLookup.Provider.create(contextRegistriesWithTags.stream());
++        var conditionContext = new net.neoforged.neoforge.common.conditions.ConditionContext(updatedContextTags, RegistryAccess.EMPTY, baseContextWithTags, net.minecraft.world.flag.FeatureFlags.VANILLA_SET);
++        // Neo: fabric-loot-api-v3 (ReloadableServerRegistriesMixin) snapshots the ops object returned by the
++        // createSerializationContext call below into a WeakHashMap (ops -> provider) and expects exactly that
++        // object to reach the scheduled load tasks, where the loot REPLACE/MODIFY events look the provider back
++        // up. Handing down a second wrapper object breaks that identity and loot listeners receive a null
++        // provider, so the conditional ops is produced straight from createSerializationContext. It is still a
++        // RegistryOps, so conditional codecs keep finding the condition context on it.
++        HolderLookup.Provider loadingContextWithTags = new HolderLookup.Provider() {
++            @Override
++            public Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
++                return baseContextWithTags.listRegistryKeys();
++            }
++
++            @Override
++            public <T> Optional<? extends HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> key) {
++                return baseContextWithTags.lookup(key);
++            }
++
++            @Override
++            public <V> RegistryOps<V> createSerializationContext(DynamicOps<V> parent) {
++                return new net.neoforged.neoforge.common.conditions.ConditionalOps<>(baseContextWithTags.createSerializationContext(parent), conditionContext);
++            }
++        };
+         RegistryOps<JsonElement> ops = loadingContextWithTags.createSerializationContext(JsonOps.INSTANCE);
          List<CompletableFuture<WritableRegistry<?>>> registryLoads = LootDataType.values()
              .map(type -> scheduleRegistryLoad((LootDataType<?>)type, ops, manager, executor))
-             .toList();
 @@ -60,7 +_,16 @@
          return CompletableFuture.supplyAsync(() -> {
              WritableRegistry<T> registry = new MappedRegistry<>(type.registryKey(), Lifecycle.experimental());

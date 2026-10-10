@@ -19,7 +19,7 @@
 +     * @deprecated Neo: use constructor with additional data instead
 +     */
 +    @Deprecated
-+    SerializableChunkData(
++    public SerializableChunkData(
 +            PalettedContainerFactory containerFactory,
 +            ChunkPos chunkPos,
 +            int minSectionY,

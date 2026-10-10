@@ -100,23 +100,34 @@
                  ? getOnPos.atY(Mth.floor(this.position.y - offset))
                  : getOnPos;
          } else {
-@@ -1435,20 +_,20 @@
+@@ -1435,20 +_,33 @@
          return !aboveState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !aboveState.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? affectingPos : abovePos;
      }
  
--    protected void playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound) {
++    // Neo: vanilla-shaped overloads, kept for Fabric mods. NeoForge widened both methods so the block
++    // state can play its own step sound at the position that triggered it; a caller written against
++    // vanilla only knows the state, and vanilla played the sound at the entity's own position, so these
++    // forward with the entity's position - the exact place vanilla used. (Overrides of these overloads
++    // are only reached by direct callers: NeoForge's own call sites pass the position they know.)
+     protected void playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound) {
 -        SoundType primaryStepSoundType = primaryStepSound.getSoundType();
 -        this.playSound(primaryStepSoundType.getStepSound(), primaryStepSoundType.getVolume() * 0.15F, primaryStepSoundType.getPitch());
 -        this.playMuffledStepSound(secondaryStepSound);
++        this.playCombinationStepSounds(primaryStepSound, secondaryStepSound, this.blockPosition(), this.blockPosition());
++    }
++
 +    protected void playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound, BlockPos primaryPos, BlockPos secondaryPos) {
 +        // Neo: Allow the blockstate full control over step sounds
 +        primaryStepSound.playStepSound(this.level, primaryPos, this, .15F, 1F);
 +        this.playMuffledStepSound(secondaryStepSound, secondaryPos);
      }
  
--    protected void playMuffledStepSound(BlockState blockState) {
+     protected void playMuffledStepSound(BlockState blockState) {
 -        SoundType secondaryStepSoundType = blockState.getSoundType();
 -        this.playSound(secondaryStepSoundType.getStepSound(), secondaryStepSoundType.getVolume() * 0.05F, secondaryStepSoundType.getPitch() * 0.8F);
++        this.playMuffledStepSound(blockState, this.blockPosition());
++    }
++
 +    protected void playMuffledStepSound(BlockState blockState, BlockPos pos) {
 +        // Neo: Allow the blockstate full control over step sounds
 +        blockState.playStepSound(this.level, pos, this, .05F, .8F);

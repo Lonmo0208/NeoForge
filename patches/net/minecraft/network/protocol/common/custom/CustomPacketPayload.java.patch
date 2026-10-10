@@ -1,18 +1,36 @@
 --- a/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java
 +++ b/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java
-@@ -22,20 +_,25 @@
+@@ -22,20 +_,44 @@
      }
  
      static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(
--        CustomPacketPayload.FallbackProvider<B> fallback, List<CustomPacketPayload.TypeAndCodec<? super B, ?>> types
 +        final CustomPacketPayload.FallbackProvider<B> fallback, List<CustomPacketPayload.TypeAndCodec<? super B, ?>> types, net.minecraft.network.ConnectionProtocol protocol, net.minecraft.network.protocol.PacketFlow packetFlow
++    ) {
++        return codec(fallback, types, typeId -> net.neoforged.neoforge.network.registration.NetworkRegistry.getCodec(typeId, protocol, packetFlow));
++    }
++
++    /**
++     * Neo: the vanilla two-argument signature, kept because mods built against the vanilla API wrap this
++     * very call to install their own payload lookup (Fabric's networking module does). It yields the
++     * vanilla codec: the extra connection context the overload takes is only needed to find codecs
++     * NeoForge's network registry knows about.
++     */
++    static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(
+         CustomPacketPayload.FallbackProvider<B> fallback, List<CustomPacketPayload.TypeAndCodec<? super B, ?>> types
      ) {
++        return codec(fallback, types, typeId -> null);
++    }
++
++    private static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(
++        final CustomPacketPayload.FallbackProvider<B> fallback, List<CustomPacketPayload.TypeAndCodec<? super B, ?>> types,
++        java.util.function.Function<Identifier, StreamCodec<? super B, ? extends CustomPacketPayload>> registeredCodecs
++    ) {
          final Map<Identifier, StreamCodec<? super B, ? extends CustomPacketPayload>> idToType = types.stream()
              .collect(Collectors.toUnmodifiableMap(t -> t.type().id(), CustomPacketPayload.TypeAndCodec::codec));
          return new StreamCodec<B, CustomPacketPayload>() {
              private StreamCodec<? super B, ? extends CustomPacketPayload> findCodec(Identifier typeId) {
                  StreamCodec<? super B, ? extends CustomPacketPayload> codec = idToType.get(typeId);
-+                if (codec == null) codec = net.neoforged.neoforge.network.registration.NetworkRegistry.getCodec(typeId, protocol, packetFlow);
++                if (codec == null) codec = registeredCodecs.apply(typeId);
                  return codec != null ? codec : fallback.create(typeId);
              }
  

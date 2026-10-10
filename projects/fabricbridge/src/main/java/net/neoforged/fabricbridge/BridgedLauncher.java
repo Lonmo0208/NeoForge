@@ -113,7 +113,77 @@ final class BridgedLauncher implements FabricLauncher {
 
     @Override
     public ClassLoader getTargetClassLoader() {
-        return targetClassLoader();
+        var loader = targetClassLoader();
+        // Development mode's classpath discovery enumerates every fabric.mod.json on this loader, which
+        // would pick up the NeoForge builds of Sodium and Iris - multi-loader jars that ship both
+        // metadata files - as Fabric mods, and then resolve their Fabric dependencies against a fabric
+        // side that is not installed. The wrapper hides exactly those entries and delegates the rest.
+        return FabricJarRegistry.hasForeignMods() ? new ForeignModHidingLoader(loader) : loader;
+    }
+
+    /**
+     * The game class loader with the {@code fabric.mod.json} of FML-owned jars hidden.
+     *
+     * <p>Only that one resource is filtered, and only for the jars the bridge left to FML (see
+     * {@link FabricJarRegistry#markForeignModPath}); class loading and every other resource go straight
+     * to the delegate, because fabric-loader resolves language adapters, entrypoint classes and mixin
+     * resources through this loader too.
+     */
+    private static final class ForeignModHidingLoader extends ClassLoader {
+        private static final String FABRIC_MOD_JSON = "fabric.mod.json";
+
+        private final ClassLoader delegate;
+        private final java.util.Set<String> hiddenJarNames = FabricJarRegistry.foreignModFileNames();
+
+        ForeignModHidingLoader(ClassLoader delegate) {
+            super(delegate);
+            this.delegate = delegate;
+        }
+
+        @Override
+        public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+            return delegate.loadClass(name);
+        }
+
+        @Override
+        public java.net.URL getResource(String name) {
+            return isFiltered(name) ? null : delegate.getResource(name);
+        }
+
+        @Override
+        public java.util.Enumeration<java.net.URL> getResources(String name) throws IOException {
+            var urls = delegate.getResources(name);
+            if (!isFiltered(name)) {
+                return urls;
+            }
+            var kept = new java.util.ArrayList<java.net.URL>();
+            while (urls.hasMoreElements()) {
+                var url = urls.nextElement();
+                if (!isForeign(url)) {
+                    kept.add(url);
+                }
+            }
+            return java.util.Collections.enumeration(kept);
+        }
+
+        @Override
+        public InputStream getResourceAsStream(String name) {
+            return isFiltered(name) ? null : delegate.getResourceAsStream(name);
+        }
+
+        private boolean isFiltered(String name) {
+            return FABRIC_MOD_JSON.equals(name) && !hiddenJarNames.isEmpty();
+        }
+
+        private boolean isForeign(java.net.URL url) {
+            var text = url.toString();
+            for (var jarName : hiddenJarNames) {
+                if (text.contains(jarName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     @Override

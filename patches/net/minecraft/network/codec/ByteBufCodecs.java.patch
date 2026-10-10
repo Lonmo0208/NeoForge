@@ -1,37 +1,135 @@
 --- a/net/minecraft/network/codec/ByteBufCodecs.java
 +++ b/net/minecraft/network/codec/ByteBufCodecs.java
-@@ -564,7 +_,7 @@
+@@ -50,6 +_,7 @@
+ import net.minecraft.util.Mth;
+ import org.joml.Quaternionfc;
+ import org.joml.Vector3fc;
++import org.jspecify.annotations.Nullable;
+ 
+ public interface ByteBufCodecs {
+     int MAX_INITIAL_COLLECTION_SIZE = 65536;
+@@ -560,31 +_,73 @@
+     }
+ 
+     private static <T, R> StreamCodec<RegistryFriendlyByteBuf, R> registry(
+-        ResourceKey<? extends Registry<T>> registryKey, Function<Registry<T>, IdMap<R>> mapExtractor
++        ResourceKey<? extends Registry<T>> registryKey, Function<Registry<T>, IdMap<R>> mapExtractor,
++        Function<Registry<T>, Function<Identifier, @Nullable R>> valueForName,
++        Function<Registry<T>, Function<R, @Nullable Identifier>> nameForValue
      ) {
          return new StreamCodec<RegistryFriendlyByteBuf, R>() {
-             private IdMap<R> getRegistryOrThrow(RegistryFriendlyByteBuf input) {
+-            private IdMap<R> getRegistryOrThrow(RegistryFriendlyByteBuf input) {
 -                return mapExtractor.apply(input.registryAccess().lookupOrThrow(registryKey));
-+                return mapExtractor.apply(getSyncableRegistryOrThrow(input, registryKey));
++            private Registry<T> getRegistry(RegistryFriendlyByteBuf input) {
++                return input.registryAccess().lookupOrThrow(registryKey);
              }
  
              public R decode(RegistryFriendlyByteBuf input) {
-@@ -594,7 +_,7 @@
++                Registry<T> registry = this.getRegistry(input);
++                // Neo: built-in registries that are not marked as synced go by name - see the javadoc of
++                // #isNamesEncoded.
++                if (isNamesEncoded(registry)) {
++                    Identifier identifier = Identifier.STREAM_CODEC.decode(input);
++                    R value = valueForName.apply(registry).apply(identifier);
++
++                    if (value == null) {
++                        throw new DecoderException("Unknown entry " + identifier + " of registry " + registryKey);
++                    }
++
++                    return value;
++                }
++
+                 int id = VarInt.read(input);
+-                return (R)this.getRegistryOrThrow(input).byIdOrThrow(id);
++                return (R)mapExtractor.apply(registry).byIdOrThrow(id);
+             }
+ 
+             public void encode(RegistryFriendlyByteBuf output, R value) {
+-                int id = this.getRegistryOrThrow(output).getIdOrThrow(value);
++                Registry<T> registry = this.getRegistry(output);
++                if (isNamesEncoded(registry)) {
++                    Identifier identifier = nameForValue.apply(registry).apply(value);
++
++                    if (identifier == null) {
++                        throw new EncoderException("Unregistered entry of registry " + registryKey + ": " + value);
++                    }
++
++                    Identifier.STREAM_CODEC.encode(output, identifier);
++                    return;
++                }
++
++                int id = mapExtractor.apply(registry).getIdOrThrow(value);
+                 VarInt.write(output, id);
+             }
+         };
++    }
++
++    /// Neo: true for built-in registries whose numeric ids are not marked for ID syncing (e.g. a
++    /// registry a bridged Fabric mod created through Fabric's registry API - Fabric mods encode such
++    /// entries by id because on Fabric both sides always load the same mods and the ids line up).
++    /// Vanilla's behaviour here was a hard {@code CodecException}, which killed the connection the
++    /// moment a Fabric mod sent one of its own registry entries - Create's {@code create:open_screen}
++    /// menu packet, for example. Encoding by name instead of id keeps both loaders working: the wire
++    /// format is still self-contained, needs no registry syncing, and NeoForge's own registries (which
++    /// either are synced or are dynamic) keep their id-based path untouched.
++    private static boolean isNamesEncoded(Registry<?> registry) {
++        return net.neoforged.neoforge.registries.RegistryManager.isNonSyncedBuiltInRegistry(registry);
+     }
+ 
+     static <T> StreamCodec<RegistryFriendlyByteBuf, T> registry(ResourceKey<? extends Registry<T>> registryKey) {
+-        return registry(registryKey, r -> r);
++        return registry(registryKey, r -> r, r -> id -> r.getValue(id), r -> r::getKey);
+     }
+ 
+     static <T> StreamCodec<RegistryFriendlyByteBuf, Holder<T>> holderRegistry(ResourceKey<? extends Registry<T>> registryKey) {
+-        return registry(registryKey, Registry::asHolderIdMap);
++        return registry(registryKey, Registry::asHolderIdMap,
++                r -> id -> r.get(ResourceKey.create(registryKey, id)).orElse(null),
++                r -> holder -> holder.unwrapKey().map(ResourceKey::identifier).orElse(null));
+     }
+ 
+     static <T> StreamCodec<RegistryFriendlyByteBuf, Holder<T>> holder(
+@@ -593,19 +_,35 @@
+         return new StreamCodec<RegistryFriendlyByteBuf, Holder<T>>() {
              private static final int DIRECT_HOLDER_ID = 0;
  
-             private IdMap<Holder<T>> getRegistryOrThrow(RegistryFriendlyByteBuf input) {
+-            private IdMap<Holder<T>> getRegistryOrThrow(RegistryFriendlyByteBuf input) {
 -                return input.registryAccess().lookupOrThrow(registryKey).asHolderIdMap();
-+                return getSyncableRegistryOrThrow(input, registryKey).asHolderIdMap();
++            private Registry<T> getRegistry(RegistryFriendlyByteBuf input) {
++                return input.registryAccess().lookupOrThrow(registryKey);
              }
  
              public Holder<T> decode(RegistryFriendlyByteBuf input) {
-@@ -616,13 +_,38 @@
-         };
-     }
- 
-+    private static <T> Registry<T> getSyncableRegistryOrThrow(RegistryFriendlyByteBuf buffer, ResourceKey<? extends Registry<T>> registryKey) {
-+        var registry = buffer.registryAccess().lookupOrThrow(registryKey);
-+        if (net.neoforged.neoforge.registries.RegistryManager.isNonSyncedBuiltInRegistry(registry)) {
-+            throw new io.netty.handler.codec.CodecException("Cannot use ID syncing for non-synced built-in registry: " + registry.key());
-+        }
-+        return registry;
-+    }
++                Registry<T> registry = this.getRegistry(input);
++                // Neo: name-encoded for non-synced built-in registries - see #isNamesEncoded.
++                if (isNamesEncoded(registry)) {
++                    Identifier identifier = Identifier.STREAM_CODEC.decode(input);
++                    return registry.get(ResourceKey.create(registryKey, identifier))
++                            .orElseThrow(() -> new DecoderException("Unknown entry " + identifier + " of registry " + registryKey));
++                }
 +
-     static <T> StreamCodec<RegistryFriendlyByteBuf, HolderSet<T>> holderSet(ResourceKey<? extends Registry<T>> registryKey) {
-         return new StreamCodec<RegistryFriendlyByteBuf, HolderSet<T>>() {
+                 int id = VarInt.read(input);
+-                return id == 0 ? Holder.direct(directCodec.decode(input)) : (Holder)this.getRegistryOrThrow(input).byIdOrThrow(id - 1);
++                return id == 0 ? Holder.direct(directCodec.decode(input)) : (Holder)registry.asHolderIdMap().byIdOrThrow(id - 1);
+             }
+ 
+             public void encode(RegistryFriendlyByteBuf output, Holder<T> holder) {
++                Registry<T> registry = this.getRegistry(output);
++                if (isNamesEncoded(registry)) {
++                    Identifier identifier = holder.unwrapKey().map(ResourceKey::identifier)
++                            .orElseThrow(() -> new EncoderException("Cannot encode a direct holder against the non-synced built-in registry " + registryKey));
++                    Identifier.STREAM_CODEC.encode(output, identifier);
++                    return;
++                }
++
+                 switch (holder.kind()) {
+                     case REFERENCE:
+-                        int id = this.getRegistryOrThrow(output).getIdOrThrow(holder);
++                        int id = registry.asHolderIdMap().getIdOrThrow(holder);
+                         VarInt.write(output, id + 1);
+                         break;
+                     case DIRECT:
+@@ -621,8 +_,25 @@
              private static final int NAMED_SET = -1;
              private final StreamCodec<RegistryFriendlyByteBuf, Holder<T>> holderCodec = ByteBufCodecs.holderRegistry(registryKey);
  

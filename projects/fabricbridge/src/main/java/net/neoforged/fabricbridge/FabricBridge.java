@@ -128,6 +128,10 @@ public final class FabricBridge {
             var gameDir = FMLPaths.GAMEDIR.get();
 
             loader.prepareModInit(gameDir, null);
+            // Arm the content-layer acceptance check before mods run: it watches whether the Fabric
+            // events a bridge change could have silently broken still fire, and pokes the network once
+            // per world join (see BridgeSelfCheck's javadoc).
+            BridgeSelfCheck.install();
             invokeIsolated("preLaunch", net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint.class,
                     net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint::onPreLaunch);
             invokeIsolated("main", net.fabricmc.api.ModInitializer.class, net.fabricmc.api.ModInitializer::onInitialize);
