@@ -182,13 +182,15 @@ public abstract class CreateInstallerProfile extends DefaultTask {
 
         var profile = new InstallerProfile(
                 1,
-                "NeoForge",
-                "neoforge-%s".formatted(getNeoForgeVersion().get()),
+                // NeoFobric: these three strings are what the installer's window shows. They are branding, so
+                // the fork renames them; the mod id, the maven coordinates and every library path stay NeoForge.
+                "NeoFobric",
+                "neofobric-%s".formatted(getNeoForgeVersion().get()),
                 icon,
                 getMinecraftVersion().get(),
                 "/version.json",
                 "/big_logo.png",
-                "Welcome to the simple NeoForge installer",
+                "Welcome to the simple NeoFobric installer",
                 "https://mirrors.neoforged.net",
                 true,
                 data,
