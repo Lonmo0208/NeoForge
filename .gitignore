@@ -53,6 +53,17 @@ build
 /仅供参考
 /fabric
 
+# NeoFobric: our own handoff documentation stays on the maintainer's disk only. It is not for the
+# repository and not for GitHub.
+/docs/NEOFOBRIC_HANDOFF.md
+/docs/handoff/
+/docs/FABRIC_BRIDGE.md
+/docs/WORLD_LOAD_FAILURE_ANALYSIS.md
+
+# NeoFobric: no prebuilt installer in the repository root. Build it with
+# ./gradlew :neoforge:installerJar - the artifact lands in projects/neoforge/build/libs.
+/neoforge-fobric-installer.jar
+
 # NeoFobric: JVM exception tracing output (-Xlog:exceptions=trace:file=neofobric-exc.log), see the handoff docs
 /neofobric-exc.log*
 
