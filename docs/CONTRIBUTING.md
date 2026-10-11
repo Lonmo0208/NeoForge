@@ -45,3 +45,49 @@ Contributor License Agreement
 This is intended as a **legally binding copyright assignment** to the NeoForged project for contributions under the patches codebase. However you retain your copyright for all other contributions.
 
 [Porting]: ../docs/PORTING.md
+
+## Running the tests in this fork / 在本 fork 上跑测试
+
+### NeoForge's own suites / 平台自己的套件
+
+**中文**（CI 跑的就是这几条，见 `.github/workflows/test-prs.yml`）：
+- `./gradlew :tests:runGameTestServer` —— NeoForge 自己的 gametest 全量；本 fork 当前 **195/195 全过** ✓，约 20 秒，**跑完自动退出** ✓；
+- `./gradlew :tests:runClient` —— 客户端框架测试；当前 **12/12 全过** ✓。**它跑完会停在主菜单、不会自己退出** ✗，看日志里最后一条 `result=PASSED` 即可收尾（需要世界的测试在 GameTestServer 那条里，不在这里）；
+- `./gradlew :tests:runUnitTests`、`./gradlew :neoforge:testProductionClient` / `:neoforge:testProductionServer` —— 单元测试与生产安装回归，CI 也跑 ✓。
+
+**English** (these are the commands CI runs, see `.github/workflows/test-prs.yml`):
+- `./gradlew :tests:runGameTestServer` — NeoForge's full gametest suite; currently **195/195** in this fork. Takes ~20 s and exits by itself.
+- `./gradlew :tests:runClient` — the client-side framework tests; currently **12/12**. It **stops at the main menu and never exits** — read the last `result=PASSED` line and close it. Tests that need a world live in the GameTestServer run instead.
+- `./gradlew :tests:runUnitTests`, `./gradlew :neoforge:testProductionClient` / `:neoforge:testProductionServer` — unit tests and the production-install regression, also run by CI.
+
+### ★ Known trap: stale client-test state / 已知坑：客户端测试的残留状态
+
+**中文**：`:tests:runClient` 若一启动就崩、日志里是
+`IllegalStateException: Adding duplicate key 'ResourceKey[minecraft:test_environment / neotests:tests/…]' to registry`，
+那是 **`tests/runs/client/tests/` 里上一次跑测留下的状态** ✗ ⇒ **删掉这个目录再跑** ✓（`saves/` 与它无关 ✓）。
+排除桥的依据（已实测两次）：`./gradlew :tests:runClient -Pneofobric.disabled=true` 关桥跑纯 NeoForge **会复现同一崩溃** ⇒ 不是桥 ✓；只把 `tests/` 隔离、`saves/` 放回 **则不崩** ⇒ 就是它 ✓。
+
+**English**: if `:tests:runClient` dies right at startup with
+`IllegalStateException: Adding duplicate key 'ResourceKey[minecraft:test_environment / neotests:tests/…]' to registry`,
+the cause is the **leftover state in `tests/runs/client/tests/`** from an earlier (crashed or half-finished) run — delete that directory and start again (`saves/` is unrelated).
+How the bridge was ruled out: `-Pneofobric.disabled=true` (bridge off, plain NeoForge) reproduces the same crash, while quarantining only `tests/` and keeping `saves/` does not.
+
+### The Fabric side / Fabric 那一侧（本 fork 的意义所在）
+
+**中文**：把 Fabric API 的测试包放进对应运行目录的 `mods/`，再带系统属性启动：
+- 服务端：`projects/neoforge/run/server/mods/` ← `fabric-api`、`fabric-api-testmods-filtered`、`fabric-gametest-api-v1`；
+  启动：`JDK_JAVA_OPTIONS="-Dfabric-api.gametest -Dfabric-api.gametest.report-file=<可写路径>" ./gradlew :neoforge:runServer`
+  ⇒ 当前 **`All 114 required tests passed`** ✓（跑完自动停服 ✓）；
+- 客户端：`projects/neoforge/run/client/mods/` 再加 `fabric-client-gametest-api-v1`，同样的 `-Dfabric-api.gametest` 跑 `:neoforge:runClient`（跑完停在主菜单 ✓）。
+- 这些包来自本仓库的 `fabric/` 子树（Fabric API 源码，含 testmods）；`…-testmods-filtered` 是其上筛掉跑不了用例后的包 ✓。
+- 一条**固有差异**：`fabric-tag-api-v1-testmod` 里有一条**用例自身互斥**的断言（同一个数据包要求同时"在/不在"），任何加载器上都过不了 —— 见 [README](../README.md) 的"已知限制" ✓。
+
+**English**: drop Fabric API's test packs into the run directory's `mods/` and pass the system property:
+- Server: `projects/neoforge/run/server/mods/` gets `fabric-api`, `fabric-api-testmods-filtered` and `fabric-gametest-api-v1`; run `JDK_JAVA_OPTIONS="-Dfabric-api.gametest -Dfabric-api.gametest.report-file=<writable path>" ./gradlew :neoforge:runServer` — currently **`All 114 required tests passed`**, and the server stops by itself.
+- Client: the same plus `fabric-client-gametest-api-v1` in `projects/neoforge/run/client/mods/`, and `:neoforge:runClient` with the same `-Dfabric-api.gametest` (it stops at the main menu).
+- The packs come from the `fabric/` subtree (Fabric API sources including testmods); `…-testmods-filtered` is that with the unrunnable cases filtered out.
+- One inherent difference: `fabric-tag-api-v1-testmod` contains an assertion that contradicts itself (the same data pack must both be and not be present), which cannot pass on any loader — see the README's known limitations.
+
+### Diagnosis switches / 诊断开关
+
+**中文 / English**: `-Pneofobric.disabled=true` runs NeoForge with the Fabric bridge switched off (use it for A/B); the single-stage switches such as `-Pneofobric.noPatchCache=true` are listed one by one in the run configuration inside `projects/neoforge/build.gradle`.
