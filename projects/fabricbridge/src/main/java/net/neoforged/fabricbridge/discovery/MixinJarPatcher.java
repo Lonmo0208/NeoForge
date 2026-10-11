@@ -2765,19 +2765,26 @@ public final class MixinJarPatcher {
     }
 
     /**
-     * Makes a Fabric mod's own resource scan see the jar it was loaded from.
+     * Makes a Fabric mod's resource lookups see the jar it was loaded from.
      *
      * <p>Mods scan their own package through {@code ClassLoader.getResources} - Twilight Forest's bean
      * context looks for its {@code @Component} classes that way. The loader in this environment answers for
      * class files but returns nothing for package directories, so such a scan comes up empty (Twilight
      * Forest logs "Found 0 @Component classes" and then dies on the null its entrypoint got back).
      *
-     * <p>{@code FabricResourceHooks} asks the loader first and only falls back to the caller's own jar when
-     * the loader had nothing, so nothing that works today changes; the fallback URL is the directory entry
-     * the scan opens its file system on.
+     * <p>Others read their data files through a <em>platform</em> class, which is the same problem with the
+     * sides swapped: WorldWeaver asks {@code MinecraftServer.class.getResourceAsStream("/data/<mod>/...")},
+     * and while Fabric has the whole game on one class path, here the mod's files are in the Fabric module
+     * and {@code MinecraftServer} is in the platform's, so the lookup finds nothing and the mod carries on
+     * with a null (its city generator then dies on {@code this.structure}). Those calls are pointed at the
+     * matching hook too.
+     *
+     * <p>{@code FabricResourceHooks} asks the original receiver first and only falls back to the caller's
+     * own jar when it had nothing, so nothing that works today changes; the jar path is what the fallback
+     * reads, and the directory URL of the enumeration variant is the entry a scan opens its file system on.
      *
      * @param jarPath the jar the patched class comes from, which is what the fallback enumerates
-     * @return the class bytes with the call redirected, or the original when it does not contain it
+     * @return the class bytes with the calls redirected, or null when it does not contain any
      */
     private static byte[] redirectFabricModResourceLookup(byte[] classBytes, java.nio.file.Path jarPath) {
         ClassNode node;
@@ -2791,20 +2798,41 @@ public final class MixinJarPatcher {
         var changed = false;
         for (var method : node.methods) {
             for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-                if (insn instanceof org.objectweb.asm.tree.MethodInsnNode call
-                        && call.getOpcode() == Opcodes.INVOKEVIRTUAL
-                        && "java/lang/ClassLoader".equals(call.owner)
-                        && "getResources".equals(call.name)
-                        && "(Ljava/lang/String;)Ljava/util/Enumeration;".equals(call.desc)) {
-                    // The receiver and the name are already on the stack; the jar path goes on top of them.
-                    method.instructions.insertBefore(call, new org.objectweb.asm.tree.LdcInsnNode(jarPath.toString()));
-                    call.setOpcode(Opcodes.INVOKESTATIC);
-                    call.owner = "net/neoforged/neoforge/common/FabricResourceHooks";
-                    call.name = "fabricModResources";
-                    call.desc = "(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)Ljava/util/Enumeration;";
-                    call.itf = false;
-                    changed = true;
+                if (!(insn instanceof org.objectweb.asm.tree.MethodInsnNode call)
+                        || call.getOpcode() != Opcodes.INVOKEVIRTUAL) {
+                    continue;
                 }
+                String hook;
+                String desc;
+                switch (call.owner + "#" + call.name + call.desc) {
+                    case "java/lang/ClassLoader#getResources(Ljava/lang/String;)Ljava/util/Enumeration;" -> {
+                        hook = "fabricModResources";
+                        desc = "(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)Ljava/util/Enumeration;";
+                    }
+                    case "java/lang/ClassLoader#getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;" -> {
+                        hook = "fabricModResourceStream";
+                        desc = "(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)Ljava/io/InputStream;";
+                    }
+                    case "java/lang/Class#getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;" -> {
+                        hook = "fabricModResourceStream";
+                        desc = "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/io/InputStream;";
+                    }
+                    case "java/lang/Class#getResource(Ljava/lang/String;)Ljava/net/URL;" -> {
+                        hook = "fabricModResource";
+                        desc = "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/net/URL;";
+                    }
+                    default -> {
+                        continue;
+                    }
+                }
+                // The receiver and the name are already on the stack; the jar path goes on top of them.
+                method.instructions.insertBefore(call, new org.objectweb.asm.tree.LdcInsnNode(jarPath.toString()));
+                call.setOpcode(Opcodes.INVOKESTATIC);
+                call.owner = "net/neoforged/neoforge/common/FabricResourceHooks";
+                call.name = hook;
+                call.desc = desc;
+                call.itf = false;
+                changed = true;
             }
         }
 

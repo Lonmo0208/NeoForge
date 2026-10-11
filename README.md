@@ -15,9 +15,9 @@
 
 ## 现状：请当作「能玩但别当真」的测试版 / Current state: a playable-but-don't-trust-it beta
 
-**中文**：bug 可能还有很多，兼容性也可能还不够好，**甚至无法和 FFAPI（Forgified Fabric API）一起用**（见下）。**服务端可以用** ✓ —— 进程内专服与生产安装出来的专服都实测过：能起到 `Done`，模组正常加载。**其他设备理论都能装**：凡是能装 NeoForge 26.2 + Fabric 的环境（Windows / Linux / macOS，各种启动器）理论上都可以 —— **但我们只在开发机上验证过，没有做多设备验证**，请你自己试。**机械动力（Create）的部分特性可以正常使用**，但肯定还有我们不知道的 bug；**其他 Fabric 模组同理**：能进游戏 ≠ 每个功能都对；**NeoForge 模组也可能被连锁效应波及**（桥改的是两边共用的那一层）。
+**中文**：bug 可能还有很多，兼容性也可能还不够好，**甚至无法和 FFAPI（Forgified Fabric API）一起用**（见下）。**服务端可以用** ✓ —— 进程内专服与生产安装出来的专服都实测过：能起到 `Done`，模组正常加载。**其他设备理论都能装**：凡是能装 NeoForge 26.2 + Fabric 的环境（Windows / Linux / macOS，各种启动器）理论上都可以 —— **但我们只在开发机上验证过，没有做多设备验证**，请你自己试。**机械动力·飞跃版（Create Fly）的部分特性可以正常使用**，但肯定还有我们不知道的 bug；**其他 Fabric 模组同理**：能进游戏 ≠ 每个功能都对；**NeoForge 模组也可能被连锁效应波及**（桥改的是两边共用的那一层）。
 
-**English**: There are probably still plenty of bugs, compatibility may still be rough, and it **cannot be installed together with FFAPI (Forgified Fabric API)** (see below). **The server side works** ✓ — both an in-process dedicated server and a production-installed one reach `Done` with mods loaded. **Other machines should work in theory** — anything that can run NeoForge 26.2 + Fabric (Windows / Linux / macOS, any launcher) ought to be fine, **but we only ever verified on the development machine; there is no multi-device testing**, so please try it yourself. **Parts of Create work correctly**, but there are certainly bugs we do not know about; **the same goes for other Fabric mods**: launching is not the same as every feature working; **NeoForge mods can be hit by knock-on effects too** (the bridge touches the layer both loaders share).
+**English**: There are probably still plenty of bugs, compatibility may still be rough, and it **cannot be installed together with FFAPI (Forgified Fabric API)** (see below). **The server side works** ✓ — both an in-process dedicated server and a production-installed one reach `Done` with mods loaded. **Other machines should work in theory** — anything that can run NeoForge 26.2 + Fabric (Windows / Linux / macOS, any launcher) ought to be fine, **but we only ever verified on the development machine; there is no multi-device testing**, so please try it yourself. **Parts of Create Fly work correctly**, but there are certainly bugs we do not know about; **the same goes for other Fabric mods**: launching is not the same as every feature working; **NeoForge mods can be hit by knock-on effects too** (the bridge touches the layer both loaders share).
 
 ## 反馈 / Feedback
 
@@ -30,18 +30,19 @@
 
 **English**: We ran **Fabric API's own test flow** end to end: the server suite reports **`All 114 required tests passed`** ✓ — every one of upstream's required gametests is green, and that is the strongest evidence this repository has. The client suite also runs to completion; **the only failure is an upstream test case that contradicts itself** (`fabric-tag-api-v1-testmod`: one data pack both adds `dirt` to `sword_efficient` and removes content from another tag, so two assertions demand the same pack be present and absent at once — unsolvable here). That is a documented known difference, not a gap in the bridge. The bridge's built-in self-check reports its event inventory as **11/11 wired** on the client ✓, and a dedicated server prints the report even with no player ✓. Production install chain: a dedicated server installed with the installer built from this repository reaches `Done`, and the client reaches the game.
 
-### 实测能跑的模组（39 个）/ The 39 mods that have actually been run
+### 实测能跑的模组（42 个）/ The 42 mods that have actually been run
 
 ```
 EchoChest-v26.2.0-mc26.2.x-NeoForge          FarmersDelight-26.2-3.6.28+refabricated
 ForgeConfigAPIPort-v26.2.1-mc26.2.x-Fabric   FrozenLib-3.0.3-mc26.2-fabric
 IllagerInvasion-v26.2.0-mc26.2.x-NeoForge    Jade-mc26.2-NeoForge-26.2.10
 MutantMonsters-v26.2.2-mc26.2.x-NeoForge     NetherChested-v26.2.0-mc26.2.x-NeoForge
-PuzzlesLib-v26.2.4-mc26.2.x-NeoForge         RebornCore-6.1.0
+PuzzlesLib-v26.2.4-mc26.2.x-NeoForge         RebornCore-6.1.1
 TechReborn-6.1.1                             WilderWild-4.3-mc26.2-fabric
 appliedenergistics2-26.2.1-alpha             bagus_lib-26.2-27.7.0
-bclib-26.201.2                               better-end-26.201.2
-biolith-neoforge-3.7.0-beta.1                byepregen-neoforge-26.2-1.1.2.5
+bclib-26.201.3                               better-end-26.201.3
+better-nether-26.201.3                       biolith-neoforge-3.7.0-beta.1
+byepregen-neoforge-26.2-1.1.2.5              c2me-neoforge-mc26.2-0.4.2-alpha.0.98
 create-fly-26.2-rc-2-6.0.9-1                 create_ultimate_factory-2.2.4-fabric-26.2
 delightlib-26.06.23-26.2-fabric              earthmobsmod-26.2-30.5.0
 exdeorum-5.1                                 fabric-api-0.161.0+26.2
@@ -49,10 +50,10 @@ framework-neoforge-26.2-0.13.26              goldenhopper-neoforge-26.2-1.7.0
 guideme-26.2.2-alpha                         iris-neoforge-1.11.4+mc26.2
 jei-26.2-neoforge-30.39.0.233                mezz_config-26.2-neoforge-0.6.8-standalone
 modmenu-20.0.3                               moredelight-26.06.23-26.2-fabric
-sodium-neoforge-0.9.2+mc26.2                 sophisticatedbackpacks-26.2-3.26.9.2191
-sophisticatedcore-26.2-1.5.5.2379            sophisticatedstorage-26.2-1.5.117.2157
-toms_storage_fabric-26.2-2.11.3              twilightforest.re26-26.2-4.8.4207-hotfix-fabric
-worldweaver-26.201.2
+sodium-extra-neoforge-0.9.4+mc26.2           sodium-neoforge-0.9.2+mc26.2
+sophisticatedbackpacks-26.2-3.26.10.2199     sophisticatedcore-26.2-1.5.7.2388
+sophisticatedstorage-26.2-1.5.118.2162       toms_storage_fabric-26.2-2.11.3
+twilightforest.re26-26.2-4.8.4207-hotfix-fabric    worldweaver-26.201.3
 ```
 
 > **中文**：这一批能"进游戏并正常玩一阵" —— 不代表每个功能都对。
@@ -60,9 +61,9 @@ worldweaver-26.201.2
 
 ### 目前相对稳一点的方向 / The relatively stable corner
 
-**中文**：**末地相关内容**（bclib / Better End / WorldWeaver 这一系）目前理论上是兼容更好的：**我们只验证到"能进末地、地形（可能）生成正常"** —— 功能方块、结构、生物等**没有测试**。越跨界的内容越可能出问题（跨加载器互相依赖、双方都要接管同一段原版逻辑的地方）。
+**中文**：**更好的末地 / 更好的下界（bclib / Better End / Better Nether / WorldWeaver 这一系）**目前理论上是兼容更好的：末地**只验证到"能进末地、地形（可能）生成正常"** —— 功能方块、结构、生物等**没有测试**；**更好的下界现在能正常加载、它的结构（地狱城市）也能正常生成**（这正是 2026-10-11 那次崩溃修掉的 —— 之前是 `this.structure` 为 null）。越跨界的内容越可能出问题（跨加载器互相依赖、双方都要接管同一段原版逻辑的地方）。
 
-**English**: **End-dimension content** (the bclib / Better End / WorldWeaver family) is currently the better bet in theory: **we only verified that you can enter the End and that terrain (probably) generates** — functional blocks, structures and mobs there are **untested**. The more a feature crosses loaders (mods depending on each other across the border, or both sides wanting to own the same piece of vanilla logic), the more likely it breaks.
+**English**: **Better End / Better Nether (the bclib / Better End / Better Nether / WorldWeaver family)** is currently the better bet in theory: for the End, **we only verified that you can enter and that terrain (probably) generates** — functional blocks, structures and mobs there are **untested**; **Better Nether now loads and its structures (the nether cities) generate correctly** (that is the crash fixed on 2026-10-11 — `this.structure` used to be null). The more a feature crosses loaders (mods depending on each other across the border, or both sides wanting to own the same piece of vanilla logic), the more likely it breaks.
 
 ## 已知不兼容 / Known incompatibilities
 

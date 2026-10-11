@@ -1628,4 +1628,53 @@ public final class FabricBridgeHooks {
         var superclass = type.getSuperclass();
         return superclass != null && !superclass.equals(Object.class) && typeImplements(superclass, interfaceName);
     }
+
+    /** entry name to the Fabric jar that holds it; built on the first miss, which is a rare lookup. */
+    private static volatile java.util.Map<String, String> fabricResourceIndex;
+
+    /**
+     * {@return the path of the Fabric mod jar holding {@code entry}, or {@code null} when none does}
+     *
+     * <p>Fabric lets any mod read any other mod's files, because every mod sits on one class path there. Here
+     * the Fabric jars are merged into a single game module instead, so a lookup that starts from a
+     * <em>platform</em> class cannot reach them at all: WorldWeaver asks
+     * {@code MinecraftServer.class.getResourceAsStream("/data/betternether/structure/...")} for its city
+     * templates, and BetterNether's own jar is what has them. The bridge searches all of them, which is what
+     * {@code FabricResourceHooks} falls back to once the original lookup came back empty.
+     */
+    public static String fabricModResourceJar(String entry) {
+        if (entry == null || entry.isEmpty() || entry.startsWith("/")) {
+            return null;
+        }
+        var index = fabricResourceIndex;
+        if (index == null) {
+            synchronized (FabricBridgeHooks.class) {
+                if (fabricResourceIndex == null) {
+                    fabricResourceIndex = indexFabricResources();
+                }
+                index = fabricResourceIndex;
+            }
+        }
+        return index.get(entry);
+    }
+
+    private static java.util.Map<String, String> indexFabricResources() {
+        var index = new java.util.HashMap<String, String>();
+        for (var path : net.neoforged.fabricbridge.discovery.FabricJarRegistry.getPaths()) {
+            try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(path)) {
+                var jarPath = path.toString();
+                jar.visitContent((relativePath, resource) -> {
+                    if (!relativePath.endsWith("/")) {
+                        // First jar in registration order wins, the same way the class path would answer.
+                        index.putIfAbsent(relativePath, jarPath);
+                    }
+                });
+            } catch (Throwable t) {
+                // A jar that cannot be read contributes nothing; the others still answer.
+            }
+        }
+        LOGGER.debug("[NeoFobric] Indexed {} resource entries across {} Fabric jar(s)",
+                index.size(), net.neoforged.fabricbridge.discovery.FabricJarRegistry.getPaths().size());
+        return index;
+    }
 }
