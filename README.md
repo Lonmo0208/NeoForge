@@ -19,8 +19,13 @@
 
 **English**: There are probably still plenty of bugs, compatibility may still be rough, and it **cannot be installed together with FFAPI (Forgified Fabric API)** (see below). **The server side works** ✓ — both an in-process dedicated server and a production-installed one reach `Done` with mods loaded. **Other machines should work in theory** — anything that can run NeoForge 26.2 + Fabric (Windows / Linux / macOS, any launcher) ought to be fine, **but we only ever verified on the development machine; there is no multi-device testing**, so please try it yourself. **Parts of Create work correctly**, but there are certainly bugs we do not know about; **the same goes for other Fabric mods**: launching is not the same as every feature working; **NeoForge mods can be hit by knock-on effects too** (the bridge touches the layer both loaders share).
 
-### 我们跑了什么测试 / What we tested
+## 反馈 / Feedback
 
+**中文**：**欢迎报 bug —— 趁 token 还没烧完，收到就会修**（在本仓库开 Issue，或者直接找作者）。修得快慢另说，但会修。反正不管最后修成什么样，**它都还是比 Forbric 那坨史好**。报的时候如果方便，带上：游戏版本 + 加载器版本（安装器自报的那个号）+ 模组清单 + `logs/latest.log`（或者崩档报告），能省很多来回。
+
+**English**: **Bug reports are welcome — while we still have tokens to burn, we will fix what comes in** (open an issue here, or ping the author). Fast or slow, it gets fixed. And whatever it looks like in the end, **it is still a better pile of garbage than Forbric's**. If you can, include: game version + loader version (the number the installer reports) + your mod list + `logs/latest.log` (or the crash report) — it saves a lot of back-and-forth.
+
+### 我们跑了什么测试 / What we tested
 **中文**：**Fabric API 仓库自带的测试流程**跑完了：服务端套件 **`All 114 required tests passed`** ✓ —— 上游那套 gametest 全量 114 条必测项全绿，这是本仓库最硬的一条证据。客户端套件同样跑到收尾，**唯一没过的是上游测试用例自己内部互斥**（`fabric-tag-api-v1-testmod`：同一个数据包既要给 `sword_efficient` 加 `dirt`、又要移除另一个标签的内容，两条断言要求同一个包"在/不在"，本环境无解）—— 记档的已知差异，不算桥的缺口。桥内置自检：事件清单在客户端 **11/11 wired** ✓，专服没有玩家也能打出报表 ✓。生产安装链：用本仓库构建的安装器装出来的**专服**能起到 `Done`、**客户端**能进游戏。
 
 **English**: We ran **Fabric API's own test flow** end to end: the server suite reports **`All 114 required tests passed`** ✓ — every one of upstream's required gametests is green, and that is the strongest evidence this repository has. The client suite also runs to completion; **the only failure is an upstream test case that contradicts itself** (`fabric-tag-api-v1-testmod`: one data pack both adds `dirt` to `sword_efficient` and removes content from another tag, so two assertions demand the same pack be present and absent at once — unsolvable here). That is a documented known difference, not a gap in the bridge. The bridge's built-in self-check reports its event inventory as **11/11 wired** on the client ✓, and a dedicated server prints the report even with no player ✓. Production install chain: a dedicated server installed with the installer built from this repository reaches `Done`, and the client reaches the game.
@@ -87,6 +92,22 @@ cd NeoFobric
 
 A plain clone works too: `settings.gradle` fetches the `fabric-loader` submodule on demand (pinned to a fixed commit). **Install**: (1) install **NeoForge 26.2** the official way; (2) run the installer you just built; (3) drop **Fabric and NeoForge mods together** into `mods/`. **Uninstall / roll back**: remove this loader from the install, or just reinstall NeoForge over it — nothing irreversible is written into the game.
 
+### 第一次启动会慢，这是正常的 / The first launch is slow, and that is normal
+
+**中文**：**第一次进游戏会明显慢。** 原因是桥要先**处理一遍 Fabric 侧的模组**：扫描它们的 jar，把需要调整的部分（**尤其是 Fabric API 各个模块的 mixin 锚点** —— NeoForge 把原版的调用点搬过位置，这些锚点得跟着改）**生成一份修改后的副本放进缓存**（`.neofobric/` 目录里），之后就都从缓存加载。所以：
+
+- **第一次启动**：慢（本机 94 个 Fabric jar 约 10 秒，冷盘 / 慢机器上更久，还要叠上游戏自身的首次资源加载）；
+- **之后的启动**：和普通 NeoForge 差不多；
+- **★ 只要动过模组集（加、删、换任意一个模组），这份缓存整体失效，下次启动会再处理一遍** —— "刚换完模组第一次慢、之后快"就是它的正常节奏，不是卡死；
+- 想强制跳缓存：加 JVM 参数 `-Dneofobric.noPatchCache=true`（调试用，会更慢）。
+
+**English**: **The first launch takes noticeably longer.** The bridge has to **process every Fabric-side mod once**: it scans their jars and **writes patched copies into a cache** (under `.neofobric/`) for the parts that need adjusting — **above all the Fabric API modules' mixin anchors**, which have to follow the vanilla call sites NeoForge moved. After that, everything loads from the cache:
+
+- **First launch**: slow (about 10 seconds for 94 Fabric jars on our machine; longer on a cold disk or a slow one, on top of the game's own first-time resource loading);
+- **Later launches**: about the same as ordinary NeoForge;
+- **★ Touch the mod set at all (add, remove or swap one mod) and the whole cache is invalidated** — the next launch pays that cost again. "Slow once after changing mods, fast afterwards" is the normal rhythm, not a hang;
+- To bypass the cache: add the JVM argument `-Dneofobric.noPatchCache=true` (debugging only — it gets slower).
+
 ## 许可与出处 / Licensing & attribution
 
 **中文**：见 [README-LICENSE.md](README-LICENSE.md)：**我们自己写的部分**沿用 NeoForge 的 `LGPL-2.1-only`；内嵌的 Fabric API 模块与 fabric-loader 是 `Apache-2.0`（各自保留声明）；我们**没有复制** FFAPI（Apache-2.0）或 Sinytra Connector（MIT）的代码，只在注释里引用它们公开的做法，并已在许可文件里致谢。
@@ -97,6 +118,10 @@ A plain clone works too: `settings.gradle` fetches the `fabric-loader` submodule
 
 ## 关于这个项目 / About this project
 
-**中文**：**这是个 AI 项目**（人定方向、验结果；代码、文档、排查过程大量由 AI 完成），所以它是一坨"史"，我们自己也这么叫它。但我们对这一坨有要求：**它得比 Forbric 那坨好** —— 好在它用的是**真正的 fabric-loader**（不是重新实现一遍 Fabric API 的语义）、**不丢掉 NeoForge**（底座还在、NeoForge 模组照常跑、不装 Fabric 模组时它就是普通 NeoForge）、并且把上游 **Fabric API 自己的测试流程**跑完了（114/114）还把结果原样写在这里。想要"正经"的 NeoForge ↔ Fabric 互通方案，请去看 **Sinytra Connector + FFAPI**；我们这条纯属自娱自乐的一条岔路。
+**中文**：**这是个 AI 项目**（人定方向、验结果；代码、文档、排查过程大量由 AI 完成），所以它是一坨"史"，我们自己也这么叫它。但我们对这一坨有要求：**它得比 Forbric 那坨好** —— 好在它用的是**真正的 fabric-loader**（不是重新实现一遍 Fabric API 的语义）、**不丢掉 NeoForge**（底座还在、NeoForge 模组照常跑、不装 Fabric 模组时它就是普通 NeoForge），并且把上游 **Fabric API 自己的测试流程**跑完了（114/114），还把结果原样写在这里。
 
-**English**: **This is an AI project** (humans set the direction and check results; much of the code, documentation and debugging is done by AI), which is why we call it a pile of garbage ourselves. But this pile has standards: **it has to be better than Forbric's** — it uses the **real fabric-loader** (not a re-implementation of Fabric API semantics), it **does not throw NeoForge away** (the base stays, NeoForge mods keep working, and with no Fabric mods it is an ordinary NeoForge), and it ran **Fabric API's own test flow** to 114/114 and wrote the result down instead of hand-waving. If you want a "serious" NeoForge ↔ Fabric interop, go look at **Sinytra Connector + FFAPI**; this one is a for-fun detour.
+**English**: **This is an AI project** (humans set the direction and check results; much of the code, documentation and debugging is done by AI), which is why we call it a pile of garbage ourselves. But this pile has standards: **it has to be better than Forbric's** — it uses the **real fabric-loader** (not a re-implementation of Fabric API semantics), it **does not throw NeoForge away** (the base stays, NeoForge mods keep working, and with no Fabric mods it is an ordinary NeoForge), and it ran **Fabric API's own test flow** to 114/114 and wrote the result down instead of hand-waving.
+
+**中文**：**再强调一遍：这是一坨 AI 写的史。** 它**肯定不如信雅互联（Sinytra Connector）+ FFAPI** —— 人家是认真做的工程，我们是从正经路子旁边岔出去的一坨。但写它，就是想让 Forbric 看一眼同一道题的两个答案：**同样是方向盘全交给 AI，凭什么你写出来是一坨臭的，我这坨好歹是巧克力味的？** 想要"正经"的 NeoForge ↔ Fabric 互通方案，请去看 **Sinytra Connector + FFAPI**；我们这条纯属自娱自乐的一条岔路。
+
+**English**: **One more time: this is a pile of AI-written garbage.** It is **certainly not as good as Sinytra Connector + FFAPI** — those are serious engineering; this is a pile that wandered off the proper path. But it was written to show Forbric two answers to the same question: **if the steering wheel is handed to an AI either way, why is yours a stinky pile while mine at least smells like chocolate?** If you want a "serious" NeoForge ↔ Fabric interop, go look at **Sinytra Connector + FFAPI**; this one is a for-fun detour.
