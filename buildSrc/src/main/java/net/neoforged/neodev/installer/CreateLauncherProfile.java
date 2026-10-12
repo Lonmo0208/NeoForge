@@ -121,9 +121,10 @@ public abstract class CreateLauncherProfile extends DefaultTask {
         arguments.put("jvm", jvmArguments);
 
         var profile = new LauncherProfile(
-                // NeoFobric: the launcher entry's name, which the installer profile's "version" field has to
-                // match exactly - the launcher resolves versions/<id>/<id>.json from it. Renamed with the fork.
-                "neofobric-%s".formatted(getNeoForgeVersion().get()),
+                // NeoFobric: the launcher entry's id, which the installer profile's "version" field has to
+                // match exactly - the launcher resolves versions/<id>/<id>.json from it, and it keeps the
+                // "neoforge" prefix so launchers classify the entry as NeoForge instead of Forge.
+                "neoforge-%s".formatted(getNeoForgeVersion().get()),
                 time,
                 time,
                 "release",

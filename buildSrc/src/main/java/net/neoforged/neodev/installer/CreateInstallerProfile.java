@@ -182,10 +182,15 @@ public abstract class CreateInstallerProfile extends DefaultTask {
 
         var profile = new InstallerProfile(
                 1,
-                // NeoFobric: these three strings are what the installer's window shows. They are branding, so
-                // the fork renames them; the mod id, the maven coordinates and every library path stay NeoForge.
-                "NeoFobric",
-                "neofobric-%s".formatted(getNeoForgeVersion().get()),
+                // NeoFobric: the welcome string is what the installer's window shows - branding, so the fork
+                // renames it. The profile name stays "NeoForge" on purpose: launchers classify an installer
+                // by its profile (and later show a foreign "Forge" entry for an unknown name), and this field
+                // is not visible in the launchers people actually use, while the welcome text is. The version
+                // id keeps the "neoforge" prefix for the same reason: launchers look for that word in the id
+                // and mangle an id without it. The mod id, the maven coordinates and every library path stay
+                // NeoForge too.
+                "NeoForge",
+                "neoforge-%s".formatted(getNeoForgeVersion().get()),
                 icon,
                 getMinecraftVersion().get(),
                 "/version.json",
