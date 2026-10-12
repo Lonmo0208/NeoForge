@@ -21,6 +21,7 @@ import net.neoforged.fml.loading.moddiscovery.readers.JarModsDotTomlModFileReade
 import net.neoforged.neoforgespi.locating.IDiscoveryPipeline;
 import net.neoforged.neoforgespi.locating.IModFile;
 import net.neoforged.neoforgespi.locating.IModFileCandidateLocator;
+import net.neoforged.neoforgespi.locating.IncompatibleFileReporting;
 import net.neoforged.neoforgespi.ILaunchContext;
 import net.neoforged.neoforgespi.locating.ModFileDiscoveryAttributes;
 import org.slf4j.Logger;
@@ -76,6 +77,19 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      * <p>Read before the Fabric jars are examined, because a Fabric jar can only be skipped once it is known
      * that the platform provides the same mod.
      */
+    /**
+     * {@return the id in the form both loaders agree on}
+     *
+     * <p>NeoForge normalises mod ids to lower case with hyphens turned into underscores, while Fabric keeps
+     * the id as written. Both are the same mod: the NeoForge build of Cloth Config is {@code cloth_config}
+     * where the Fabric one is {@code cloth-config}, and without this the lookup below misses the pair, the
+     * Fabric jar is claimed as well, and the two module layers fail to resolve because both export
+     * {@code me.shedaniel.*} (ResolutionException: Module cloth_config contains package ...).
+     */
+    private static String normalizeModId(String id) {
+        return id.toLowerCase(java.util.Locale.ROOT).replace('-', '_');
+    }
+
     private static java.util.Set<String> readForgeModIds(Path modsDir) {
         var ids = new java.util.HashSet<String>();
         try (var jars = Files.list(modsDir)) {
@@ -84,7 +98,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                         && jarPath.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar")) {
                     for (var mod : readForgeModsDotToml(jarPath)) {
                         if (!mod[0].isEmpty()) {
-                            ids.add(mod[0]);
+                            ids.add(normalizeModId(mod[0]));
                         }
                     }
                 }
@@ -187,6 +201,12 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         for (var path : fmlProvidedJars) {
             context.addLocated(path);
         }
+
+        // NeoFobric: FML mods whose requirements only a Fabric mod can satisfy. Iris requires Sodium, and in
+        // a mixed pack the Sodium that loads is the Fabric build - FML alone would refuse the whole launch
+        // ("Mod iris requires sodium ... which is missing"). Those requirements are relaxed in a rewritten
+        // copy of the mod file, which claims the original and takes its place in the pipeline.
+        relaxFabricSatisfiableRequirements(context, pipeline, modsDir, fabricJars);
 
         // Packages the platform (Minecraft, NeoForge, FML and the libraries they bring) already
         // provides must not be merged into the composite module: a JPMS module may not claim a
@@ -486,7 +506,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                         .append(",\"license\":").append(jsonString(info.license()))
                         .append(",\"website\":").append(jsonString(info.websiteUrl()))
                         .append(",\"issues\":").append(jsonString(info.issuesUrl()))
-                        .append(",\"icon\":").append(jsonString(info.iconPath()))
+                        .append(",\"icon\":").append(jsonString(iconInJar(effective, info.iconPath())))
                         .append(",\"root\":").append(jsonString(effective.toString()))
                         .append(",\"bundledBy\":").append(jsonString(info.bundledBy()))
                         .append('}');
@@ -502,6 +522,26 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         } catch (IOException e) {
             // Display only: a missing manifest means the mod list simply does not show Fabric mods.
             LOGGER.warn("[NeoFobric] Failed to write the mod list screen manifest {}", file, e);
+        }
+    }
+
+    /**
+     * {@return the icon path when the jar actually carries that entry, else null}
+     *
+     * <p>The mod list screen resolves a contributed icon against the jar and logs a warning per missing
+     * one; the wover modules, for example, declare per-module icons their jars never ship, which would be
+     * sixteen warnings on every open of the screen. An icon that is not there is simply not advertised,
+     * and the screen draws its placeholder instead.
+     */
+    private static String iconInJar(Path jarPath, String iconPath) {
+        if (iconPath == null || iconPath.isEmpty()) {
+            return null;
+        }
+        try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
+            return zip.getEntry(iconPath) != null ? iconPath : null;
+        } catch (Exception e) {
+            LOGGER.debug("[NeoFobric] Could not check the icon {} of {}", iconPath, jarPath, e);
+            return null;
         }
     }
 
@@ -640,7 +680,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             return;
         }
 
-        if (fmlProvidedModIds.contains(info.modId())) {
+        if (fmlProvidedModIds.contains(normalizeModId(info.modId()))) {
             // NeoFobric: both loaders ship this mod, so only one build may be loaded. The Fabric one is the one
             // to go: FML's dependencies and mixin gating are written against the NeoForge build, and skipping it
             // here is what keeps the two module layers from exporting the same packages (Sodium).
@@ -807,6 +847,207 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             LOGGER.debug("[NeoFobric] Could not read neoforge.mods.toml of {}", jarPath, e);
         }
         return mods;
+    }
+
+    /** Suffix of the rewritten copy of an FML mod whose unsatisfiable-in-FML requirements were relaxed. */
+    private static final String RELAXED_SUFFIX = ".neofobric-fml.jar";
+
+    /**
+     * Relaxes the mod-file requirements that only a Fabric mod can satisfy.
+     *
+     * <p>FML resolves a mod's dependencies against FML mods alone, so a NeoForge mod that requires a library
+     * whose only build on disk is the Fabric one is refused outright - in a mixed pack Iris requires
+     * Sodium, and Sodium is the Fabric build there. The requirement is turned into an optional one in a
+     * freshly written copy of the mod file (same container, same classes, only that entry changed): the
+     * bridge claims the original path so FML's folder locator skips it, and hands the copy to the discovery
+     * pipeline instead. The classes keep working because the Fabric build answers for the same code at
+     * runtime, and the loader layout link moves the mod's own references onto that build
+     * (see compbridlnk.SodiumLoaderLayoutLink).
+     *
+     * <p>Only requirements whose id no FML mod provides and a loading Fabric mod does are touched; anything
+     * else stays exactly as the mod declared it. The declared version range is not evaluated - the
+     * substitution is logged so a mismatch is visible.
+     */
+    private static void relaxFabricSatisfiableRequirements(ILaunchContext context, IDiscoveryPipeline pipeline,
+            Path modsDir, Map<Path, FabricModInfo> fabricJars) {
+        if (fabricJars.isEmpty()) {
+            return;
+        }
+        var fabricIds = new java.util.HashMap<String, FabricModInfo>();
+        for (var info : fabricJars.values()) {
+            fabricIds.putIfAbsent(normalizeModId(info.modId()), info);
+        }
+        var loadedFabricIds = java.util.Set.copyOf(fabricIds.keySet());
+        try (var jars = Files.list(modsDir)) {
+            for (var jarPath : (Iterable<Path>) jars::iterator) {
+                var fileName = jarPath.getFileName().toString();
+                if (!Files.isRegularFile(jarPath) || !fileName.toLowerCase(java.util.Locale.ROOT).endsWith(".jar")) {
+                    continue;
+                }
+                var relaxed = planRequirementRelaxations(jarPath, fabricIds);
+                if (relaxed == null) {
+                    continue;
+                }
+                var copy = writeRelaxedCopy(modsDir, jarPath, relaxed, loadedFabricIds);
+                if (copy == null) {
+                    continue;
+                }
+                context.addLocated(jarPath);
+                pipeline.addPath(copy, ModFileDiscoveryAttributes.DEFAULT, IncompatibleFileReporting.WARN_ALWAYS);
+                for (var substitution : relaxed.substitutions()) {
+                    LOGGER.info("[NeoFobric] {}: {} - the requirement is relaxed and the Fabric build answers "
+                            + "for it at runtime", fileName, substitution);
+                }
+                LOGGER.info("[NeoFobric] Left {} to the rewritten copy {}", fileName, copy.getFileName());
+            }
+        } catch (IOException e) {
+            LOGGER.debug("[NeoFobric] Could not list the mods folder for requirement relaxation", e);
+        }
+    }
+
+    private record RelaxedToml(byte[] bytes, java.util.List<String> substitutions) {}
+
+    /** One {@code [[dependencies.<owner>]]} block while it is being evaluated. */
+    private static final class DependencyBlock {
+        String owner;
+        String modId;
+        String type;
+        int modIdLine = -1;
+        int typeLine = -1;
+    }
+
+    /**
+     * {@return the relaxed {@code META-INF/neoforge.mods.toml} of this jar, or null when every requirement
+     *         is already satisfiable within FML}
+     */
+    private static RelaxedToml planRequirementRelaxations(Path jarPath, Map<String, FabricModInfo> fabricIds) {
+        String text;
+        try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
+            var entry = zip.getEntry("META-INF/neoforge.mods.toml");
+            if (entry == null) {
+                return null;
+            }
+            text = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            LOGGER.debug("[NeoFobric] Could not read neoforge.mods.toml of {}", jarPath, e);
+            return null;
+        }
+
+        var lines = new ArrayList<>(java.util.List.of(text.split("\n", -1)));
+        var blocks = new ArrayList<DependencyBlock>();
+        DependencyBlock current = null;
+        for (var i = 0; i < lines.size(); i++) {
+            var stripped = lines.get(i).strip();
+            if (stripped.startsWith("[[dependencies") && stripped.endsWith("]]")) {
+                current = new DependencyBlock();
+                current.owner = stripped.substring("[[dependencies".length(), stripped.length() - 2).strip();
+                blocks.add(current);
+                continue;
+            }
+            if (stripped.startsWith("[")) {
+                current = null;
+                continue;
+            }
+            if (current == null || stripped.isEmpty() || stripped.startsWith("#")) {
+                continue;
+            }
+            var eq = stripped.indexOf('=');
+            if (eq < 0) {
+                continue;
+            }
+            var key = stripped.substring(0, eq).strip();
+            var value = tomlValue(stripped.substring(eq + 1).strip());
+            if ("modId".equals(key)) {
+                current.modId = value;
+                current.modIdLine = i;
+            } else if ("type".equals(key)) {
+                current.type = value;
+                current.typeLine = i;
+            }
+        }
+
+        // An absent type means required, and only a requirement that no FML mod provides but a loading
+        // Fabric mod does gets relaxed. Replacements go in by index; insertions are remembered and applied
+        // afterwards in descending order, so the indexes stay valid while the list grows.
+        var substitutions = new ArrayList<String>();
+        var insertions = new ArrayList<Integer>();
+        for (var dep : blocks) {
+            if (dep.modId == null || dep.modId.isEmpty()) {
+                continue;
+            }
+            var normalized = normalizeModId(dep.modId);
+            var provider = fabricIds.get(normalized);
+            if (provider == null || fmlProvidedModIds.contains(normalized)) {
+                continue;
+            }
+            if (dep.type != null && !"required".equals(dep.type)) {
+                continue;
+            }
+            if (dep.typeLine >= 0) {
+                lines.set(dep.typeLine, "type = \"optional\"");
+            } else {
+                insertions.add(dep.modIdLine);
+            }
+            substitutions.add(dep.owner + " depends on " + dep.modId + ", answered by "
+                    + provider.modId() + " " + provider.version());
+        }
+        if (substitutions.isEmpty()) {
+            return null;
+        }
+        insertions.sort(java.util.Collections.reverseOrder());
+        for (var after : insertions) {
+            lines.add(after + 1, "type = \"optional\"");
+        }
+        return new RelaxedToml(String.join("\n", lines).getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                java.util.List.copyOf(substitutions));
+    }
+
+    /**
+     * Writes the relaxed copy of an FML mod file into the bridge's cache directory.
+     *
+     * <p>Class entries go through the loader layout link while they are copied: with the Fabric build of
+     * Sodium loading, the NeoForge layout the mod was compiled against does not exist, and its references
+     * have to point at the Fabric one. Signature files are dropped - a rewritten entry invalidates them.
+     */
+    private static Path writeRelaxedCopy(Path modsDir, Path jarPath, RelaxedToml relaxed,
+            java.util.Set<String> loadedFabricIds) {
+        var cacheDir = modsDir.resolve(MixinJarPatcher.CACHE_DIR_NAME);
+        var copy = cacheDir.resolve(jarPath.getFileName().toString() + RELAXED_SUFFIX);
+        try {
+            Files.createDirectories(cacheDir);
+            try (var zip = new java.util.zip.ZipFile(jarPath.toFile());
+                    var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(copy,
+                            java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING))) {
+                var entries = zip.entries();
+                while (entries.hasMoreElements()) {
+                    var entry = entries.nextElement();
+                    if (isJarSignature(entry.getName())) {
+                        continue;
+                    }
+                    out.putNextEntry(new java.util.zip.ZipEntry(entry.getName()));
+                    if (entry.getName().equals("META-INF/neoforge.mods.toml")) {
+                        out.write(relaxed.bytes());
+                    } else if (entry.getName().endsWith(".class")) {
+                        var bytes = zip.getInputStream(entry).readAllBytes();
+                        out.write(net.neoforged.fabricbridge.compbridlnk.SodiumLoaderLayoutLink
+                                .retargetForFabricBuild(entry.getName(), bytes, loadedFabricIds));
+                    } else {
+                        zip.getInputStream(entry).transferTo(out);
+                    }
+                    out.closeEntry();
+                }
+            }
+            return copy;
+        } catch (IOException e) {
+            LOGGER.error("[NeoFobric] Could not write the relaxed copy of {}", jarPath, e);
+            return null;
+        }
+    }
+
+    private static boolean isJarSignature(String entryName) {
+        var upper = entryName.toUpperCase(java.util.Locale.ROOT);
+        return upper.startsWith("META-INF/")
+                && (upper.endsWith(".SF") || upper.endsWith(".RSA") || upper.endsWith(".DSA") || upper.endsWith(".EC"));
     }
 
     /**
