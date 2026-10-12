@@ -568,6 +568,42 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * Points references to a mod's loader-specific classes at the build that will actually load.
+     *
+     * <p>Some mods ship the same code once per loader with the loader's own classes in a loader-named
+     * subpackage, and a Fabric mod that integrates with one of them names the Fabric copy. Only one of the
+     * two builds can be the loaded one, and the resolver cannot see the other at all when it is an FML mod
+     * (FML mods are not game content and not Fabric jars), so the side that decides is the FABRIC one: its
+     * class resolving out of the Fabric jars of this pass means the Fabric build is what loads, and then the
+     * NeoForge-layout references are the dead ones (and vice versa).
+     */
+    private static byte[] retargetLoaderSpecificLayout(byte[] classBytes, String entryName, TargetResolver resolver) {
+        var moves = net.neoforged.fabricbridge.compbridlnk.SodiumLoaderLayoutLink.movedClassNames();
+        if (moves.isEmpty()) {
+            return null;
+        }
+        var applicable = new java.util.HashMap<String, String>(moves.size());
+        for (var move : moves.entrySet()) {
+            if (resolver.apply(move.getKey()) != null) {
+                // The Fabric build is loading: point NeoForge-layout references at the Fabric layout.
+                applicable.put(move.getValue(), move.getKey());
+            } else {
+                // No Fabric build of it in this pass: the Fabric-layout references are the dead ones.
+                applicable.put(move.getKey(), move.getValue());
+            }
+        }
+        if (applicable.isEmpty()) {
+            return null;
+        }
+        var rewritten = net.neoforged.fabricbridge.transform.LayoutRetargeter.retarget(entryName, classBytes, applicable);
+        if (rewritten == classBytes) {
+            return null; // Nothing in this class references the moved names.
+        }
+        LOGGER.info("[NeoFobric] Pointed a loader-specific reference at the build that loads in {}", entryName);
+        return rewritten;
+    }
+
+    /**
      * Rewrites stale method descriptors inside this class's Mixin annotations.
      *
      * <p>Idempotent: each entry is only rewritten from its old form, so a jar that was already
@@ -3771,8 +3807,11 @@ public final class MixinJarPatcher {
      */
     private static String patchCacheStamp(Path jarPath, TargetResolver resolver) {
         try {
+            // The environment is part of the stamp: the patched copy has the other side's members stripped
+            // (stripForeignEnvironmentMembers), so a client-patched jar must never be served to a server,
+            // and a shared mods directory would otherwise hand out whichever side patched first.
             return "v1/" + Files.size(jarPath) + ":" + Files.getLastModifiedTime(jarPath).toMillis()
-                    + "/" + resolver.stamp() + "/" + bridgeStamp() + "/" + modSetStamp;
+                    + "/" + resolver.stamp() + "/" + bridgeStamp() + "/" + modSetStamp + "/" + currentEnvironmentName();
         } catch (Throwable t) {
             return null;
         }
@@ -4344,6 +4383,96 @@ public final class MixinJarPatcher {
      * @return the jar the game layer should load: the original when nothing changed, otherwise a
      *         realigned copy next to it
      */
+    /** target class to overwritten method names, read from the FML side's jars once per run. */
+    private static volatile java.util.Map<String, java.util.Set<String>> platformOverwritesCache;
+
+    /**
+     * {@return the members the <em>platform</em> side's mixins overwrite, keyed by target class}
+     *
+     * <p>The access scan below widens game members for the Fabric side's handlers, and a member some
+     * <em>NeoForge</em> mod overwrites privately cannot be widened either - its own {@code @Overwrite} is then
+     * refused ("cannot reduce visibility"). The bridge never reads those jars for anything else, so their mixin
+     * classes are collected here, once, from the mods folder next to the Fabric jars.
+     */
+    private static java.util.Map<String, java.util.Set<String>> platformOverwrites(java.nio.file.Path jarPath) {
+        var cached = platformOverwritesCache;
+        if (cached != null) {
+            return cached;
+        }
+        // The mods folder itself, not the jar's parent: a nested jar sits under .neofobric/processedMods.
+        java.nio.file.Path modsDir;
+        try {
+            modsDir = net.neoforged.fml.loading.FMLPaths.MODSDIR.get();
+        } catch (Throwable t) {
+            modsDir = jarPath.getParent();
+        }
+        var collected = new java.util.ArrayList<byte[]>();
+        var jars = 0;
+        try (var listing = java.nio.file.Files.list(modsDir)) {
+            for (var path : (Iterable<java.nio.file.Path>) listing::iterator) {
+                if (!java.nio.file.Files.isRegularFile(path)
+                        || !path.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar")) {
+                    continue;
+                }
+                try (var zip = new java.util.zip.ZipFile(path.toFile())) {
+                    if (zip.getEntry("META-INF/neoforge.mods.toml") == null) {
+                        // A Fabric jar: the scan below already sees those, through the locator.
+                        continue;
+                    }
+                    jars++;
+                    for (var entries = zip.entries(); entries.hasMoreElements(); ) {
+                        var entry = entries.nextElement();
+                        var name = entry.getName();
+                        if (!name.endsWith(".class") || !name.contains("mixin")) {
+                            continue;
+                        }
+                        try (var in = zip.getInputStream(entry)) {
+                            collected.add(in.readAllBytes());
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.debug("[NeoFobric] Could not read the mixin classes of {}", path, e);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("[NeoFobric] Could not list {} for the platform overwrite check", modsDir, e);
+        }
+        var overwrites = 0;
+        java.util.Map<String, java.util.Set<String>> result;
+        try {
+            result = net.neoforged.fabricbridge.transform.MixinAccessScanner.overwritesOf(collected);
+            overwrites = result.values().stream().mapToInt(java.util.Set::size).sum();
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not read the FML side's overwrites", t);
+            result = java.util.Map.of();
+        }
+        LOGGER.info("[NeoFobric] Read {} mixin class(es) from {} NeoForge jar(s): {} class(es)/{} member(s) are overwritten and stay private",
+                collected.size(), jars, result.size(), overwrites);
+        if (jars > 0) {
+            // Only a real answer is cached: an empty listing (a jar whose parent is not the mods folder) must
+            // be retried, or the first nested jar would decide for the whole run.
+            platformOverwritesCache = result;
+        }
+        return result;
+    }
+
+    /** {@return whether the entry is a jar signature file, which a patched copy cannot satisfy any more} */
+    private static boolean isSignatureEntry(String name) {
+        var upper = name.toUpperCase(java.util.Locale.ROOT);
+        return upper.startsWith("META-INF/")
+                && (upper.endsWith(".SF") || upper.endsWith(".RSA") || upper.endsWith(".DSA") || upper.endsWith(".EC"));
+    }
+
+    /** {@return whether the manifest line is a per-entry digest, which a patched class invalidates} */
+    private static boolean isDigestLine(String line) {
+        var colon = line.indexOf(':');
+        if (colon < 0) {
+            return false;
+        }
+        var key = line.substring(0, colon).trim().toLowerCase(java.util.Locale.ROOT);
+        return key.endsWith("-digest") || key.equals("signature-version") || key.equals("signature-algorithm");
+    }
+
     public static Path patchJar(Path jarPath, TargetResolver resolver,
             java.util.Map<String, java.util.Map<String, String>> accessorRenames) {
         if (Boolean.getBoolean("neofobric.noJarPatcher")) {
@@ -4473,6 +4602,13 @@ public final class MixinJarPatcher {
                 if (versionMoved != bytes) {
                     patched.put(entry.getName(), versionMoved);
                 }
+                // First of the retargets: everything below reads targets and anchors, so a reference to a
+                // sibling build's loader package has to be on the build that loads before they look.
+                var loaderLayoutRetargeted = retargetLoaderSpecificLayout(versionMoved, entry.getName(), resolver);
+                if (loaderLayoutRetargeted != null) {
+                    versionMoved = loaderLayoutRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 // Runs for plain classes too: the tooltip-order scanner is an ordinary implementation class,
                 // not a mixin.
                 var orderScanRetargeted = retargetVanillaTooltipOrderScan(versionMoved, entry.getName());
@@ -4529,6 +4665,15 @@ public final class MixinJarPatcher {
                 var behaviourLookupGuarded = initialiseCreateBehavioursOnLookup(versionMoved, entry.getName());
                 if (behaviourLookupGuarded != null) {
                     versionMoved = behaviourLookupGuarded;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                // The loader strips members a mod declared for the other environment before the class is
+                // ever loaded (EnvironmentStrippingData/ClassStripper); this runs for every class, mixin
+                // or not, because the reference that breaks a dedicated server usually sits in an ordinary
+                // class (see stripForeignEnvironmentMembers).
+                var environmentStripped = stripForeignEnvironmentMembers(versionMoved, entry.getName(), currentEnvironmentName());
+                if (environmentStripped != null) {
+                    versionMoved = environmentStripped;
                     patched.put(entry.getName(), versionMoved);
                 }
                 allClasses.add(versionMoved);
@@ -4649,7 +4794,8 @@ public final class MixinJarPatcher {
         // known after one startup instead of one member per attempt. Failures are never fatal - the
         // worst case is that a gap is reported later, at runtime, as before.
         try {
-            var found = net.neoforged.fabricbridge.transform.MixinAccessScanner.findPrivateMembers(allClasses, resolver);
+            var found = net.neoforged.fabricbridge.transform.MixinAccessScanner.findPrivateMembers(allClasses, resolver,
+                    platformOverwrites(jarPath));
             var members = found.values().stream().mapToInt(java.util.Set::size).sum();
             LOGGER.info("[NeoFobric] Access scan of {}: {} classes ({}, mixins), {} class(es)/{} member(s) to widen",
                     jarPath.getFileName(), allClasses.size(), mixinClasses.size(), found.size(), members);
@@ -4682,9 +4828,34 @@ public final class MixinJarPatcher {
         }
         try (var zip = new ZipFile(jarPath.toFile());
                 var out = new ZipOutputStream(Files.newOutputStream(patchedPath))) {
+            // A patched class no longer matches the digests its manifest carries, and Mixin refuses to apply
+            // a mixin whose digest does not check out ("SHA-384 digest error for ...", measured with
+            // ferritecore's Fabric build, whose jar lists one for every entry). The signature files describe
+            // the unpatched jar as well, so they go too - a patched copy cannot be verified either way.
+            var signaturesStale = !patched.isEmpty();
             for (var name : entries) {
+                if (signaturesStale && isSignatureEntry(name)) {
+                    continue;
+                }
                 var entry = zip.getEntry(name);
                 var replacement = patched.get(name);
+                if (signaturesStale && replacement == null && "META-INF/MANIFEST.MF".equals(name) && entry != null) {
+                    var stripped = new java.io.ByteArrayOutputStream();
+                    try (var in = zip.getInputStream(entry);
+                            var reader = new java.io.BufferedReader(
+                                    new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if (isDigestLine(line)) {
+                                continue;
+                            }
+                            stripped.write(line.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                            stripped.write('\r');
+                            stripped.write('\n');
+                        }
+                    }
+                    replacement = stripped.toByteArray();
+                }
                 var outEntry = new ZipEntry(name);
                 if (entry != null && entry.getMethod() == ZipEntry.STORED && replacement == null) {
                     // Keep stored entries exactly as they are (size and CRC are mandatory then).
@@ -4976,6 +5147,135 @@ public final class MixinJarPatcher {
             }
         }
         return targets;
+    }
+
+    private static final String ENVIRONMENT_DESCRIPTOR = "Lnet/fabricmc/api/Environment;";
+    private static final String ENVIRONMENT_INTERFACE_DESCRIPTOR = "Lnet/fabricmc/api/EnvironmentInterface;";
+    private static final String ENVIRONMENT_INTERFACES_DESCRIPTOR = "Lnet/fabricmc/api/EnvironmentInterfaces;";
+
+    /** The Fabric environment name for this run, or {@code null} when it cannot be told. */
+    private static String currentEnvironmentName() {
+        try {
+            return net.neoforged.fabricbridge.FabricBridge.toEnvType(net.neoforged.fml.loading.FMLEnvironment.getDist()).name();
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /** {@return whether these annotations declare the member for the other Fabric environment} */
+    private static boolean declaredForOtherEnvironment(List<AnnotationNode> annotations, String environment) {
+        if (annotations == null) {
+            return false;
+        }
+        for (var annotation : annotations) {
+            if (!ENVIRONMENT_DESCRIPTOR.equals(annotation.desc) || annotation.values == null) {
+                continue;
+            }
+            for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+                if (!"value".equals(annotation.values.get(i))) {
+                    continue;
+                }
+                if (annotation.values.get(i + 1) instanceof String[] enumValue && enumValue.length == 2) {
+                    return !environment.equals(enumValue[1]);
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Collects the interfaces these annotations declare for the other Fabric environment. */
+    private static void collectForeignEnvironmentInterfaces(List<AnnotationNode> annotations, String environment, List<String> out) {
+        if (annotations == null) {
+            return;
+        }
+        for (var annotation : annotations) {
+            if (annotation.values == null) {
+                continue;
+            }
+            if (ENVIRONMENT_INTERFACES_DESCRIPTOR.equals(annotation.desc)) {
+                for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+                    if (!"value".equals(annotation.values.get(i)) || !(annotation.values.get(i + 1) instanceof List<?> nested)) {
+                        continue;
+                    }
+                    for (var entry : nested) {
+                        if (entry instanceof AnnotationNode nestedAnnotation) {
+                            collectForeignEnvironmentInterfaces(List.of(nestedAnnotation), environment, out);
+                        }
+                    }
+                }
+                continue;
+            }
+            if (!ENVIRONMENT_INTERFACE_DESCRIPTOR.equals(annotation.desc)) {
+                continue;
+            }
+            String itf = null;
+            var mismatch = false;
+            for (var i = 0; i + 1 < annotation.values.size(); i += 2) {
+                var value = annotation.values.get(i + 1);
+                if ("value".equals(annotation.values.get(i)) && value instanceof String[] enumValue && enumValue.length == 2) {
+                    mismatch = !environment.equals(enumValue[1]);
+                } else if ("itf".equals(annotation.values.get(i)) && value instanceof Type type) {
+                    itf = type.getInternalName();
+                }
+            }
+            if (mismatch && itf != null) {
+                out.add(itf);
+            }
+        }
+    }
+
+    /**
+     * Mirrors the Fabric loader's environment stripping (EnvironmentStrippingData + ClassStripper) for a
+     * patched jar: members a mod declares for the other side are removed before the class reaches this
+     * environment, exactly as the loader does at class-load time.
+     *
+     * <p>Without it a dedicated server links client references a Fabric mod is allowed to keep behind
+     * {@code @Environment(CLIENT)}: farmersdelight's ModItems registers its SkilletItem (a class in the
+     * common package that mentions LocalPlayer), the entrypoint dies with NoClassDefFoundError and the
+     * failed registrations cascade into "Failed to parse farmersdelight:..." registry errors that stop
+     * the server from starting. NeoForge's own dist markers say nothing about Fabric's annotations, so
+     * nothing else on this side would ever remove them.
+     */
+    private static byte[] stripForeignEnvironmentMembers(byte[] classBytes, String entryName, String environment) {
+        if (environment == null || !entryName.endsWith(".class")) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        var fields = new ArrayList<String>();
+        var methods = new ArrayList<String>();
+        for (var field : node.fields) {
+            if (declaredForOtherEnvironment(field.visibleAnnotations, environment)
+                    || declaredForOtherEnvironment(field.invisibleAnnotations, environment)) {
+                fields.add(field.name);
+            }
+        }
+        for (var method : node.methods) {
+            if (declaredForOtherEnvironment(method.visibleAnnotations, environment)
+                    || declaredForOtherEnvironment(method.invisibleAnnotations, environment)) {
+                methods.add(method.name + method.desc);
+            }
+        }
+        var interfaces = new ArrayList<String>();
+        collectForeignEnvironmentInterfaces(node.visibleAnnotations, environment, interfaces);
+        collectForeignEnvironmentInterfaces(node.invisibleAnnotations, environment, interfaces);
+        if (fields.isEmpty() && methods.isEmpty() && interfaces.isEmpty()) {
+            return null;
+        }
+        node.fields.removeIf(field -> fields.contains(field.name));
+        node.methods.removeIf(method -> methods.contains(method.name + method.desc));
+        if (!interfaces.isEmpty()) {
+            node.interfaces.removeAll(interfaces);
+        }
+        LOGGER.info("[NeoFobric] Stripped {} field(s), {} method(s) and {} interface(s) declared for the {} side in {} - Fabric's loader removes them here too",
+                fields.size(), methods.size(), interfaces.size(), environment.equals("CLIENT") ? "server" : "client",
+                entryName.replace('/', '.'));
+        return writeClass(node);
     }
 
     private static byte[] writeClass(ClassNode node) {

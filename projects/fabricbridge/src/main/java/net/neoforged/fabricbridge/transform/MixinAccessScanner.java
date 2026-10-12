@@ -68,10 +68,32 @@ public final class MixinAccessScanner {
      */
     public static Map<String, Set<String>> findPrivateMembers(List<byte[]> mixinClasses,
             java.util.function.Function<String, byte[]> gameClasses) {
+        return findPrivateMembers(mixinClasses, gameClasses, collectOverwrittenMethods(mixinClasses));
+    }
+
+    /**
+     * As {@link #findPrivateMembers(List, java.util.function.Function)}, with the overwrites of the
+     * <em>platform</em> side supplied as well.
+     *
+     * <p>The bridge only sees the Fabric jars, but a NeoForge mod can overwrite the same game members - and
+     * widening one of those breaks it exactly the same way (measured: FerriteCore's NeoForge build, whose
+     * {@code @Overwrite setValueInternal} was refused after the Fabric side widened it for its own handlers).
+     * The caller reads the FML side's mixin classes and hands their overwrites in here.
+     */
+    public static Map<String, Set<String>> findPrivateMembers(List<byte[]> mixinClasses,
+            java.util.function.Function<String, byte[]> gameClasses,
+            Map<String, Set<String>> platformOverwrites) {
         var referenced = new TreeSet<String>();
         for (var bytes : mixinClasses) {
             collectReferences(bytes, referenced);
         }
+        // A member a mixin overwrites privately must stay private: widening it turns that overwrite into
+        // "cannot reduce visibility" and Mixin refuses the whole mixin (measured with FerriteCore's
+        // @Overwrite setValueInternal on StateHolder). Widening exists so handlers can *read* a member, so
+        // the overwrite wins and the member is left alone - reported, because another mod may have wanted it.
+        var overwritten = collectOverwrittenMethods(mixinClasses);
+        platformOverwrites.forEach((owner, names) ->
+                overwritten.computeIfAbsent(owner, key -> new TreeSet<>()).addAll(names));
 
         var result = new LinkedHashMap<String, Set<String>>();
         for (var owner : referenced) {
@@ -82,12 +104,95 @@ public final class MixinAccessScanner {
             if (targetBytes == null) {
                 continue;
             }
+            var keepPrivate = overwritten.getOrDefault(owner, Set.of());
+            var members = privateMembersOf(targetBytes);
+            if (!keepPrivate.isEmpty()) {
+                var kept = new TreeSet<>(members);
+                kept.retainAll(keepPrivate);
+                if (!kept.isEmpty()) {
+                    LOGGER.info("[NeoFobric] Leaving {} member(s) of {} private - a mixin overwrites them: {}",
+                            kept.size(), owner.replace('/', '.'), kept);
+                    members = new TreeSet<>(members);
+                    members.removeAll(keepPrivate);
+                }
+            }
             // Registered even when the class declares no private members: a direct reference from a
             // Fabric class to a non-public game class (for example sodium reaching the package-private
             // GlDevice) needs the CLASS widened to public, and the widen pass keys off this map.
-            result.put(owner, privateMembersOf(targetBytes));
+            result.put(owner, members);
         }
         return result;
+    }
+
+    /** {@return target class internal name to the method names these mixin classes overwrite on it} */
+    public static Map<String, Set<String>> overwritesOf(List<byte[]> mixinClasses) {
+        return collectOverwrittenMethods(mixinClasses);
+    }
+
+    /**
+     * {@return target class internal name to the method names a mixin set overwrites on it}
+     *
+     * <p>Both spellings count: {@code @Mixin(SomeClass.class)} and {@code @Mixin(targets = "...")}, and a
+     * method counts when it carries {@code @Overwrite} (which may name its own target instead).
+     */
+    private static Map<String, Set<String>> collectOverwrittenMethods(List<byte[]> mixinClasses) {
+        var overwritten = new LinkedHashMap<String, Set<String>>();
+        for (var bytes : mixinClasses) {
+            try {
+                new ClassReader(bytes).accept(new ClassVisitor(Opcodes.ASM9) {
+                    private final Set<String> targets = new TreeSet<>();
+
+                    @Override
+                    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                        if (!"Lorg/spongepowered/asm/mixin/Mixin;".equals(desc)) {
+                            return null;
+                        }
+                        return new AnnotationVisitor(Opcodes.ASM9) {
+                            @Override
+                            public AnnotationVisitor visitArray(String name) {
+                                if (!"value".equals(name)) {
+                                    return null;
+                                }
+                                return new AnnotationVisitor(Opcodes.ASM9) {
+                                    @Override
+                                    public void visit(String ignored, Object value) {
+                                        if (value instanceof org.objectweb.asm.Type type) {
+                                            targets.add(type.getInternalName());
+                                        }
+                                    }
+                                };
+                            }
+
+                            @Override
+                            public void visit(String name, Object value) {
+                                if ("targets".equals(name) && value instanceof String text) {
+                                    targets.add(text.replace('.', '/'));
+                                }
+                            }
+                        };
+                    }
+
+                    @Override
+                    public MethodVisitor visitMethod(int access, String name, String desc, String sig, String[] ex) {
+                        return new MethodVisitor(Opcodes.ASM9) {
+                            @Override
+                            public AnnotationVisitor visitAnnotation(String annDesc, boolean visible) {
+                                if (!"Lorg/spongepowered/asm/mixin/Overwrite;".equals(annDesc)) {
+                                    return null;
+                                }
+                                for (var target : targets) {
+                                    overwritten.computeIfAbsent(target, key -> new TreeSet<>()).add(name);
+                                }
+                                return null;
+                            }
+                        };
+                    }
+                }, 0);
+            } catch (Throwable t) {
+                // A class this scanner cannot read contributes nothing, exactly as in collectReferences.
+            }
+        }
+        return overwritten;
     }
 
     /** Collects the names of every game class the mixin mentions, from instructions and annotations. */
