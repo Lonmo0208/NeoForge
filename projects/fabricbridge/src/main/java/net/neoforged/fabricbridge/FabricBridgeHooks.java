@@ -100,6 +100,7 @@ public final class FabricBridgeHooks {
         // mod's Sodium settings page to the NeoForge build of Sodium is the first of them, and each link is a
         // no-op whenever the mod it links to is absent.
         net.neoforged.fabricbridge.compbridlnk.SodiumConfigApiLink.linkSodiumConfigEntryPoints();
+        net.neoforged.fabricbridge.compbridlnk.ModMenuConfigLink.linkModMenuConfigScreens();
         runHooksTheGameReachesTooEarly();
         traceFabricPaths();
     }
