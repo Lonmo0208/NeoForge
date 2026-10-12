@@ -261,6 +261,19 @@ public final class ConfigurationScreen extends OptionsSubScreen {
         this(mod, parent, ConfigurationSectionScreen::new);
     }
 
+    /**
+     * Compatibility constructor for mods compiled against the string-id form of this screen.
+     *
+     * <p>The Fabric build of Twilight Forest opens this screen from Mod Menu and still calls
+     * {@code new ConfigurationScreen("twilightforest", parent)}. An id FML knows resolves to its container;
+     * a Fabric mod id resolves to the synthetic container its configuration was registered with, see
+     * {@link net.neoforged.neoforge.common.FabricConfigHooks#containerForModId(String)}.
+     */
+    @Deprecated
+    public ConfigurationScreen(final String modId, final Screen parent) {
+        this(net.neoforged.neoforge.common.FabricConfigHooks.containerForModId(modId), parent);
+    }
+
     public ConfigurationScreen(final ModContainer mod, final Screen parent, ConfigurationSectionScreen.Filter filter) {
         this(mod, parent, (a, b, c, d) -> new ConfigurationSectionScreen(a, b, c, d, filter));
     }

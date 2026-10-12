@@ -148,6 +148,19 @@ public final class FabricConfigHooks {
     }
 
     /**
+     * {@return the container a mod's configuration screen should use for this mod id}
+     *
+     * <p>An id FML knows resolves to its real container; a Fabric mod id resolves to the same synthetic
+     * container its configuration was registered with. Callers reach this through the compatibility
+     * {@code ConfigurationScreen(String, Screen)} constructor, which mods compiled against the older
+     * platform keep calling - the Fabric build of Twilight Forest opens the screen that way from Mod Menu.
+     */
+    public static ModContainer containerForModId(String modId) {
+        var known = net.neoforged.fml.ModList.get().getModContainerById(modId);
+        return known.isPresent() ? known.get() : containerFor(modId);
+    }
+
+    /**
      * A container for a mod FML does not know about. Only the mod id and the event bus are ever asked for
      * on the config path, and the bus is a private one so nothing else is ever posted to it.
      */
