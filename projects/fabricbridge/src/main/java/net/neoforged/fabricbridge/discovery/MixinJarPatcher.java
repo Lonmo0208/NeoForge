@@ -568,6 +568,275 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * Temporary diagnostic for the connected-textures pipeline, off unless asked for with
+     * {@code -Dneofobric.debugContinuity=true}.
+     *
+     * <p>Continuity is silent when nothing applies, so "CTM does not work" has three indistinguishable
+     * causes: its reload listener may never run, it may run and find no {@code .properties}, or it may find
+     * them and never wrap a model. One log line at each point separates them, and the lines go through
+     * slf4j, which Fabric mods already log through. Remove together with the property when the pipeline is
+     * understood.
+     *
+     * @return the rewritten bytes, or null when this class carries no probe point
+     */
+    private static byte[] injectContinuityProbe(byte[] classBytes, String entryName) {
+        if (!Boolean.getBoolean("neofobric.debugContinuity")) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Exception e) {
+            return null;
+        }
+        var injected = false;
+        for (var method : node.methods) {
+            var message = probeMessage(entryName, method.name, method.desc);
+            if (message == null) {
+                continue;
+            }
+            var probe = new org.objectweb.asm.tree.InsnList();
+            probe.add(new org.objectweb.asm.tree.LdcInsnNode("NeoFobricCTM"));
+            probe.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                    "org/slf4j/LoggerFactory", "getLogger",
+                    "(Ljava/lang/String;)Lorg/slf4j/Logger;", false));
+            probe.add(new org.objectweb.asm.tree.LdcInsnNode(message));
+            probe.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
+                    "org/slf4j/Logger", "info", "(Ljava/lang/String;)V", true));
+            method.instructions.insert(probe);
+            injected = true;
+        }
+        if (!injected) {
+            return null;
+        }
+        var writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        node.accept(writer);
+        LOGGER.info("[NeoFobric] Injected the CTM probe into {}", entryName);
+        return writer.toByteArray();
+    }
+
+    /** {@return the probe line for one method, or null when it carries no probe point} */
+    private static String probeMessage(String entryName, String methodName, String methodDesc) {
+        if (entryName.endsWith("CtmPropertiesLoader.class")) {
+            return methodName.equals("loadAll") && methodDesc.contains("ResourceManager")
+                    ? "probe: CTM scan entry reached" : null;
+        }
+        if (entryName.endsWith("CtmPropertiesLoader$LoadingContainer.class")) {
+            return methodName.equals("<init>") ? "probe: one CTM definition parsed" : null;
+        }
+        if (entryName.endsWith("CtmBlockStateModel.class")) {
+            return methodName.equals("<init>") ? "probe: one block model wrapped for CTM" : null;
+        }
+        if (entryName.endsWith("ModelLoadingPluginManager.class")) {
+            return methodName.equals("preparePlugins") ? "probe: model loading plugins are being prepared" : null;
+        }
+        if (entryName.endsWith("ModelLoadingEventDispatcher.class")) {
+            if (methodName.equals("<init>")) {
+                return "probe: model loading dispatcher constructed";
+            }
+            return methodName.equals("modifyBlockModel") ? "probe: dispatcher per-model bake modifier ran" : null;
+        }
+        if (entryName.endsWith("ModelBakeryMixin.class")) {
+            if (methodName.equals("onReturnInit")) {
+                return "probe: bakery init hook ran (dispatcher attach)";
+            }
+            return methodName.equals("wrapBlockModelBake") ? "probe: bakery per-model bake hook ran" : null;
+        }
+        return null;
+    }
+
+    /**
+     * Points a name-only {@code <init>} injector selector at the constructor NeoForge kept the body in.
+     *
+     * <p>A mixin that writes {@code @Inject(method = "<init>", at = @At("RETURN"))} means "the constructor",
+     * which is unambiguous against one constructor. NeoForge splits some constructors in two: a small
+     * delegating one (the original signature, now just calling the other) and the real one with the added
+     * platform arguments, and only the delegating one keeps the original position in the class file. Mixin
+     * then attaches the injection to the delegating constructor - which the game never calls, because
+     * everything goes through the full one - and the handler silently never runs. Fabric's model loading
+     * pipeline died exactly that way ({@code ModelBakeryMixin.onReturnInit} never set the bakery's event
+     * dispatcher, so no model plugin ever modified a baked model).
+     *
+     * <p>The selector is rewritten to the explicit descriptor of the constructor with the most parameters,
+     * in every injector annotation of the mixin that names {@code <init>}. Only mixins whose target the
+     * resolver can read and whose target really has more than one constructor are touched.
+     *
+     * @return the rewritten class bytes, or null when nothing matched
+     */
+    private static byte[] retargetAmbiguousConstructorSelectors(byte[] classBytes, String entryName,
+            TargetResolver resolver) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        try {
+            return retargetAmbiguousConstructorSelectorsUnchecked(classBytes, entryName, resolver);
+        } catch (Throwable t) {
+            // A repair pass must never sink a jar: on any surprise the class stays as it came in.
+            LOGGER.warn("[NeoFobric] Could not check the constructor selectors of {}", entryName, t);
+            return null;
+        }
+    }
+
+    private static byte[] retargetAmbiguousConstructorSelectorsUnchecked(byte[] classBytes, String entryName,
+            TargetResolver resolver) {
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        // Cheap gate first: only mixin classes are worth the target lookup (and the annotation walks here
+        // trip over a null list on classes that carry no annotations at all).
+        var isMixin = false;
+        if (node.visibleAnnotations != null) {
+            isMixin = node.visibleAnnotations.stream().anyMatch(a -> "Lorg/spongepowered/asm/mixin/Mixin;".equals(a.desc));
+        }
+        if (!isMixin && node.invisibleAnnotations != null) {
+            isMixin = node.invisibleAnnotations.stream().anyMatch(a -> "Lorg/spongepowered/asm/mixin/Mixin;".equals(a.desc));
+        }
+        if (!isMixin) {
+            return null;
+        }
+        var targets = mixinTargets(node);
+        if (targets.isEmpty()) {
+            return null;
+        }
+        String fullDescriptor = null;
+        for (var target : targets) {
+            var targetBytes = resolver.apply(target);
+            if (targetBytes == null) {
+                continue;
+            }
+            try {
+                var targetNode = new ClassNode();
+                new ClassReader(targetBytes).accept(targetNode, 0);
+                var constructors = new java.util.ArrayList<MethodNode>();
+                for (var method : targetNode.methods) {
+                    if (method.name.equals("<init>")) {
+                        constructors.add(method);
+                    }
+                }
+                if (constructors.size() < 2) {
+                    continue;
+                }
+                // Only repair the case that is provably broken: the constructor a name-only selector lands
+                // on (the first one in the class file) is a shell whose whole body delegates to another
+                // constructor. Then, and only then, the injection can never fire, and the delegation names
+                // the constructor with the real body.
+                fullDescriptor = delegatingConstructorTarget(constructors.getFirst(), target);
+                if (fullDescriptor != null) {
+                    break;
+                }
+            } catch (Throwable t) {
+                // A target we cannot read is a target we cannot repair.
+            }
+        }
+        if (fullDescriptor == null) {
+            return null;
+        }
+        var rewritten = new java.util.ArrayList<String>();
+        for (var method : node.methods) {
+            rewritten.clear();
+            // List.of rejects nulls, and most methods carry only one of the two annotation lists.
+            var annotationsHere = new java.util.ArrayList<AnnotationNode>(2);
+            if (method.visibleAnnotations != null) {
+                annotationsHere.addAll(method.visibleAnnotations);
+            }
+            if (method.invisibleAnnotations != null) {
+                annotationsHere.addAll(method.invisibleAnnotations);
+            }
+            for (var annotation : annotationsHere) {
+                    if (annotation.desc == null || annotation.values == null
+                            || !INJECTOR_ANNOTATIONS.contains(annotation.desc)) {
+                        continue;
+                    }
+                    for (var i = 1; i < annotation.values.size(); i += 2) {
+                        if (!"method".equals(annotation.values.get(i - 1))) {
+                            continue;
+                        }
+                        var value = annotation.values.get(i);
+                        if (value instanceof String text && text.equals("<init>")) {
+                            annotation.values.set(i, fullDescriptor);
+                            rewritten.add(method.name);
+                        } else if (value instanceof java.util.List<?> list) {
+                            // A raw list whose elements were already read as strings compares fine here.
+                            for (var j = 0; j < list.size(); j++) {
+                                if (list.get(j) instanceof String text && text.equals("<init>")) {
+                                    @SuppressWarnings("unchecked")
+                                    var raw = (java.util.List<Object>) list;
+                                    raw.set(j, fullDescriptor);
+                                    rewritten.add(method.name);
+                                }
+                            }
+                        }
+                    }
+            }
+            if (!rewritten.isEmpty()) {
+                LOGGER.info("[NeoFobric] Pointed the <init> selector(s) of {} in {} at the constructor that "
+                        + "carries the body: {}", rewritten, entryName, fullDescriptor);
+                return writeClass(node);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@return the descriptor of the constructor this constructor delegates to, or null when its body is
+     *         anything else}
+     *
+     * <p>A platform that adds arguments to a constructor usually keeps the original signature as a thin
+     * shell whose whole body is {@code this(...)}. A name-only {@code <init>} selector attaches to that
+     * shell - it comes first in the class file - and an injection there never runs. When the first
+     * constructor carries a real body, the selector is left alone: it works as it always did.
+     */
+    private static String delegatingConstructorTarget(MethodNode constructor, String owner) {
+        var started = false;
+        for (var cursor = constructor.instructions.getFirst(); cursor != null; cursor = cursor.getNext()) {
+            if (cursor instanceof org.objectweb.asm.tree.LabelNode || cursor instanceof org.objectweb.asm.tree.LineNumberNode
+                    || cursor instanceof org.objectweb.asm.tree.FrameNode) {
+                continue;
+            }
+            if (cursor instanceof VarInsnNode load) {
+                if (!started) {
+                    // The shell starts with aload_0; any further loads are the arguments it may pass on.
+                    if (load.getOpcode() != Opcodes.ALOAD || load.var != 0) {
+                        return null;
+                    }
+                    started = true;
+                }
+                continue;
+            }
+            if (cursor instanceof org.objectweb.asm.tree.LdcInsnNode
+                    || cursor instanceof org.objectweb.asm.tree.InsnNode
+                    || (cursor instanceof FieldInsnNode field && field.getOpcode() == Opcodes.GETSTATIC)) {
+                // Constants the shell passes on, like the empty-standalone defaults the platform added.
+                continue;
+            }
+            if (cursor instanceof MethodInsnNode call) {
+                return started && call.getOpcode() == Opcodes.INVOKESPECIAL && call.owner.equals(owner)
+                        && call.name.equals("<init>") ? call.desc : null;
+            }
+            // Any other instruction (a jump, a field write, a call on something else) means the
+            // constructor does real work and is not the dead shell this pass looks for.
+            return null;
+        }
+        return null;
+    }
+
+    /** The mixin annotations whose {@code method} members name target methods. */
+    private static final java.util.Set<String> INJECTOR_ANNOTATIONS = java.util.Set.of(
+            "Lorg/spongepowered/asm/mixin/injection/Inject;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArg;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArgs;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyConstant;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyVariable;",
+            "Lorg/spongepowered/asm/mixin/injection/Redirect;",
+            "Lcom/llamalad7/mixinextras/injector/WrapOperation;",
+            "Lcom/llamalad7/mixinextras/injector/WrapWithCondition;");
+
+    /**
      * Points references to a mod's loader-specific classes at the build that will actually load.
      *
      * <p>Some mods ship the same code once per loader with the loader's own classes in a loader-named
@@ -4602,11 +4871,35 @@ public final class MixinJarPatcher {
                 if (versionMoved != bytes) {
                     patched.put(entry.getName(), versionMoved);
                 }
+                // Temporary diagnostic for the connected-textures pipeline, off unless asked for with
+                // -Dneofobric.debugContinuity=true: it logs whether the CTM scan runs, how many definitions
+                // it finds, and whether any block model gets wrapped. Counters do not tell apart a listener
+                // that never runs from one that finds nothing, and the mod itself is silent either way.
+                var ctmProbed = injectContinuityProbe(versionMoved, entry.getName());
+                if (ctmProbed != null) {
+                    versionMoved = ctmProbed;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 // First of the retargets: everything below reads targets and anchors, so a reference to a
                 // sibling build's loader package has to be on the build that loads before they look.
                 var loaderLayoutRetargeted = retargetLoaderSpecificLayout(versionMoved, entry.getName(), resolver);
                 if (loaderLayoutRetargeted != null) {
                     versionMoved = loaderLayoutRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                // The platform split some constructors in two, so a name-only <init> selector lands on the
+                // delegating half that nothing calls; point those selectors at the half with the body. Kept
+                // to the model loading mixin of Fabric API: that pipeline was dead and reviving it is the fix
+                // for model plugins (Continuity's connected textures among them), while the other same-shape
+                // selectors in the current mod set wake up machinery that has never run under this bridge and
+                // is not validated yet - Fabric's BlockEntityTypeMixin in particular breaks registry loading
+                // and with it the world ("Failed to load registries", the player sees the datapack error
+                // screen). Each of those needs its own verification before it may join this list.
+                var ctorSelectorRetargeted = entry.getName().contains("client/model/loading")
+                        ? retargetAmbiguousConstructorSelectors(versionMoved, entry.getName(), resolver)
+                        : null;
+                if (ctorSelectorRetargeted != null) {
+                    versionMoved = ctorSelectorRetargeted;
                     patched.put(entry.getName(), versionMoved);
                 }
                 // Runs for plain classes too: the tooltip-order scanner is an ordinary implementation class,
