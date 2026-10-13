@@ -616,6 +616,180 @@ public final class MixinJarPatcher {
         return writer.toByteArray();
     }
 
+    /**
+     * {@return whether the constructor-selector repair runs on this class}
+     *
+     * <p>Fabric's model loading mixin is always in; {@code -Dneofobric.ctorRetarget} adds comma-separated
+     * class name fragments for the one-by-one verification of the other selectors (see the pass below and
+     * the dormant-injection notes in the handoff document). Handlers whose arguments pin their constructor
+     * are skipped by the pass itself, so enabling a class here cannot orphan a live injection.
+     */
+    private static boolean retargetCtorSelectorEnabled(String entryName) {
+        if (entryName.contains("client/model/loading")) {
+            return true;
+        }
+        var extra = System.getProperty("neofobric.ctorRetarget");
+        if (extra == null || extra.isEmpty()) {
+            return false;
+        }
+        for (var fragment : extra.split(",")) {
+            var trimmed = fragment.strip();
+            if (!trimmed.isEmpty() && entryName.contains(trimmed)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds every class name this class's stack map frames mention to {@code out}.
+     *
+     * <p>Frames are where the platform's frame computation resolves a merged type's hierarchy, so a name
+     * that only appears there stays invisible until the class is transformed - which is exactly how an
+     * optional integration becomes an accidental hard dependency (voxy-extra's replay hook).
+     */
+    private static void collectFrameTypes(byte[] classBytes, java.util.Set<String> out) {
+        try {
+            var node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+            for (var method : node.methods) {
+                for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                    if (insn instanceof org.objectweb.asm.tree.FrameNode frame) {
+                        collectFrameEntries(frame.local, out);
+                        collectFrameEntries(frame.stack, out);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            // A class this pass cannot read contributes no candidates.
+        }
+    }
+
+    private static void collectFrameEntries(java.util.List<Object> frameEntries, java.util.Set<String> out) {
+        if (frameEntries == null) {
+            return;
+        }
+        for (var entry : frameEntries) {
+            if (entry instanceof String name && !name.startsWith("[") && name.indexOf('/') > 0) {
+                out.add(name);
+            }
+        }
+    }
+
+    /**
+     * Writes a minimal stub class for every frame type that exists nowhere the loader can reach.
+     *
+     * <p>Fabric's mixin class writer falls back to {@code Object} when it cannot find a type while
+     * computing a merged frame; the platform's writer looks the class file up instead and fails the whole
+     * class load with {@code Cannot find class com/replaymod/...} when there is none. The referenced class
+     * belongs to an optional integration whose every use sits behind a guard, so the program never needs
+     * it - only the frame computation wants to know its shape. A stub whose sole parent is {@code Object}
+     * gives that shape back: the merge resolves, the class loads, and the guard keeps the integration
+     * inert exactly like it is on Fabric.
+     *
+     * <p>Only names absent from the resolver's content and from every mod jar on disk are stubbed, so a
+     * real class can never be shadowed - including the NeoForge mods, which the resolver cannot see
+     * because FML loads them.
+     */
+    private static void writeFrameTypeStubs(Path jarPath, TargetResolver resolver, java.util.Set<String> candidates,
+            java.util.List<String> entries, java.util.Map<String, byte[]> patched) {
+        if (candidates.isEmpty()) {
+            return;
+        }
+        for (var name : candidates) {
+            if (name.startsWith("java/") || name.startsWith("javax/") || name.startsWith("jdk/")
+                    || name.startsWith("sun/") || name.startsWith("com/sun/")
+                    || resolver.apply(name) != null || allModJarClassNames().contains(name)) {
+                continue;
+            }
+            try {
+                // Anything the running JVM already answers for (the JDK and the loader's own classes)
+                // needs no stub either.
+                Class.forName(name.replace('/', '.'), false, Thread.currentThread().getContextClassLoader());
+                continue;
+            } catch (Throwable absent) {
+                // Falls through: nothing provides this name.
+            }
+            var entryName = name + ".class";
+            if (patched.containsKey(entryName) || entries.contains(entryName)) {
+                continue;
+            }
+            patched.put(entryName, generateStubClass(name));
+            entries.add(entryName);
+            LOGGER.info("[NeoFobric] Stubbed the absent frame type {} in {} so the platform's frame computation can resolve it",
+                    name, jarPath.getFileName());
+        }
+    }
+
+    /** {@return a minimal public class extending Object, for a name nothing on disk provides} */
+    private static byte[] generateStubClass(String internalName) {
+        var cls = new ClassNode();
+        cls.visit(Opcodes.V17, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, internalName, null, "java/lang/Object", null);
+        var ctor = cls.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
+        ctor.visitCode();
+        ctor.visitVarInsn(Opcodes.ALOAD, 0);
+        ctor.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        ctor.visitInsn(Opcodes.RETURN);
+        ctor.visitMaxs(1, 1);
+        ctor.visitEnd();
+        cls.visitEnd();
+        var writer = new ClassWriter(0);
+        cls.accept(writer);
+        return writer.toByteArray();
+    }
+
+    /** Class names of every mod jar on disk, for the "exists nowhere" check; built once, lazily. */
+    private static final java.util.concurrent.atomic.AtomicReference<java.util.Set<String>> MOD_JAR_CLASS_NAMES =
+            new java.util.concurrent.atomic.AtomicReference<>();
+
+    private static java.util.Set<String> allModJarClassNames() {
+        var cached = MOD_JAR_CLASS_NAMES.get();
+        if (cached != null) {
+            return cached;
+        }
+        var names = java.util.concurrent.ConcurrentHashMap.<String>newKeySet();
+        try (var jars = Files.list(net.neoforged.fml.loading.FMLPaths.MODSDIR.get())) {
+            for (var jar : (Iterable<Path>) jars
+                    .filter(p -> p.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar"))::iterator) {
+                collectJarClassNames(jar, names, 1);
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not scan the mod jars for the frame type check", t);
+        }
+        MOD_JAR_CLASS_NAMES.compareAndSet(null, names);
+        return MOD_JAR_CLASS_NAMES.get();
+    }
+
+    private static void collectJarClassNames(Path jarPath, java.util.Set<String> names, int nestedDepth) {
+        try (var zip = new ZipFile(jarPath.toFile())) {
+            var nested = new ArrayList<Path>();
+            var zipEntries = zip.entries();
+            while (zipEntries.hasMoreElements()) {
+                var entry = zipEntries.nextElement();
+                var name = entry.getName();
+                if (name.endsWith(".class")) {
+                    names.add(name.substring(0, name.length() - ".class".length()));
+                } else if (nestedDepth > 0 && name.startsWith("META-INF/jarjar/") && name.endsWith(".jar")) {
+                    // FML's jar-in-jar jars carry their classes too; copied out just far enough to read names.
+                    var temp = Files.createTempFile("neofobric-jij-", ".jar");
+                    try (var stream = zip.getInputStream(entry)) {
+                        Files.copy(stream, temp, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    nested.add(temp);
+                }
+            }
+            for (var temp : nested) {
+                try {
+                    collectJarClassNames(temp, names, nestedDepth - 1);
+                } finally {
+                    deleteQuietly(temp);
+                }
+            }
+        } catch (Throwable t) {
+            // A jar that cannot be read contributes nothing to the name set.
+        }
+    }
+
     /** {@return the probe line for one method, or null when it carries no probe point} */
     private static String probeMessage(String entryName, String methodName, String methodDesc) {
         if (entryName.endsWith("CtmPropertiesLoader.class")) {
@@ -643,6 +817,15 @@ public final class MixinJarPatcher {
             }
             return methodName.equals("wrapBlockModelBake") ? "probe: bakery per-model bake hook ran" : null;
         }
+        if (entryName.endsWith("object/builder/BlockEntityTypeMixin.class")) {
+            return methodName.equals("mutableBlocks") ? "probe: BlockEntityType validBlocks made mutable" : null;
+        }
+        if (entryName.endsWith("datagen/client/ModelProviderMixin.class")) {
+            return methodName.equals("init") ? "probe: datagen model provider hook ran" : null;
+        }
+        if (entryName.endsWith("core/model/quad/BakedQuadMixin.class")) {
+            return methodName.equals("init") ? "probe: sodium baked quad hook ran" : null;
+        }
         return null;
     }
 
@@ -658,8 +841,9 @@ public final class MixinJarPatcher {
      * pipeline died exactly that way ({@code ModelBakeryMixin.onReturnInit} never set the bakery's event
      * dispatcher, so no model plugin ever modified a baked model).
      *
-     * <p>The selector is rewritten to the explicit descriptor of the constructor with the most parameters,
-     * in every injector annotation of the mixin that names {@code <init>}. Only mixins whose target the
+     * <p>The selector is rewritten to the explicit descriptor of the constructor the shell delegates to, in
+     * every injector annotation of the mixin that names {@code <init>} and whose handler carries no target
+     * arguments of its own (see {@link #handlerPinsConstructorByArguments}). Only mixins whose target the
      * resolver can read and whose target really has more than one constructor are touched.
      *
      * @return the rewritten class bytes, or null when nothing matched
@@ -736,9 +920,20 @@ public final class MixinJarPatcher {
         if (fullDescriptor == null) {
             return null;
         }
+        // A handler's own arguments pin the constructor it belongs to: when a handler's parameters spell out
+        // a constructor's argument list, Mixin attaches it to exactly that constructor. Those injections are
+        // not dormant - they fire from the delegating constructor, which is where the vanilla-shaped call
+        // sites (the game's own pipelines included) still arrive, and the delegate has produced a fully
+        // initialised instance by the time the handler runs. Rewriting such a selector points it at a
+        // constructor the handler's arguments no longer match, and Mixin drops the injection without a
+        // sound: BlockEntityType's mutable-block support and Sodium's baked-quad caches died exactly that way
+        // (363 and 2,003,552 runs fell to zero). Only handlers that carry no target arguments of their own -
+        // just the CallbackInfo - leave the choice to Mixin, land on the delegating shell and need the repair.
         var rewritten = new java.util.ArrayList<String>();
+        var pinned = new java.util.ArrayList<String>();
         for (var method : node.methods) {
-            rewritten.clear();
+            var pinsByArguments = handlerPinsConstructorByArguments(method);
+            var rewroteThis = false;
             // List.of rejects nulls, and most methods carry only one of the two annotation lists.
             var annotationsHere = new java.util.ArrayList<AnnotationNode>(2);
             if (method.visibleAnnotations != null) {
@@ -758,28 +953,93 @@ public final class MixinJarPatcher {
                         }
                         var value = annotation.values.get(i);
                         if (value instanceof String text && text.equals("<init>")) {
-                            annotation.values.set(i, fullDescriptor);
-                            rewritten.add(method.name);
+                            if (pinsByArguments) {
+                                pinned.add(method.name);
+                            } else {
+                                annotation.values.set(i, fullDescriptor);
+                                rewroteThis = true;
+                            }
                         } else if (value instanceof java.util.List<?> list) {
                             // A raw list whose elements were already read as strings compares fine here.
                             for (var j = 0; j < list.size(); j++) {
                                 if (list.get(j) instanceof String text && text.equals("<init>")) {
-                                    @SuppressWarnings("unchecked")
-                                    var raw = (java.util.List<Object>) list;
-                                    raw.set(j, fullDescriptor);
-                                    rewritten.add(method.name);
+                                    if (pinsByArguments) {
+                                        pinned.add(method.name);
+                                    } else {
+                                        @SuppressWarnings("unchecked")
+                                        var raw = (java.util.List<Object>) list;
+                                        raw.set(j, fullDescriptor);
+                                        rewroteThis = true;
+                                    }
                                 }
                             }
                         }
                     }
             }
-            if (!rewritten.isEmpty()) {
-                LOGGER.info("[NeoFobric] Pointed the <init> selector(s) of {} in {} at the constructor that "
-                        + "carries the body: {}", rewritten, entryName, fullDescriptor);
-                return writeClass(node);
+            if (rewroteThis) {
+                rewritten.add(method.name);
             }
         }
+        if (!rewritten.isEmpty()) {
+            LOGGER.info("[NeoFobric] Pointed the <init> selector(s) of {} in {} at the constructor that "
+                    + "carries the body: {}{}", rewritten, entryName, fullDescriptor,
+                    pinned.isEmpty() ? "" : "; left alone, their arguments pin the constructor: " + pinned);
+            return writeClass(node);
+        }
+        if (!pinned.isEmpty()) {
+            LOGGER.info("[NeoFobric] Left the <init> selector(s) of {} in {} alone - their arguments pin the "
+                    + "constructor they target", pinned, entryName);
+        }
         return null;
+    }
+
+    /**
+     * {@return whether this handler's own parameters already pin the constructor it targets}
+     *
+     * <p>Only a trailing {@code CallbackInfo}/{@code CallbackInfoReturnable} is the injector's own; every
+     * other parameter names one constructor argument, and Mixin then attaches the handler to exactly the
+     * constructor whose signature those parameters match - there is no ambiguity left to repair. Any
+     * handler shape this check does not recognise is treated as pinning, so it is left alone.
+     */
+    private static boolean handlerPinsConstructorByArguments(MethodNode method) {
+        var descriptor = method.desc;
+        var open = descriptor.indexOf('(');
+        var close = descriptor.indexOf(')', open + 1);
+        if (open < 0 || close < 0) {
+            return true;
+        }
+        var args = descriptor.substring(open + 1, close);
+        var parameters = 0;
+        var lastParameter = "";
+        var index = 0;
+        while (index < args.length()) {
+            var start = index;
+            while (index < args.length() && args.charAt(index) == '[') {
+                index++;
+            }
+            if (index < args.length() && args.charAt(index) == 'L') {
+                var end = args.indexOf(';', index);
+                if (end < 0) {
+                    return true;
+                }
+                lastParameter = args.substring(start, end + 1);
+                index = end + 1;
+            } else {
+                if (index >= args.length()) {
+                    return true;
+                }
+                lastParameter = args.substring(start, index + 1);
+                index++;
+            }
+            parameters++;
+        }
+        if (parameters == 0) {
+            return false;
+        }
+        if (lastParameter.contains("injection/callback/CallbackInfo")) {
+            return parameters > 1;
+        }
+        return true;
     }
 
     /**
@@ -4080,10 +4340,26 @@ public final class MixinJarPatcher {
             // (stripForeignEnvironmentMembers), so a client-patched jar must never be served to a server,
             // and a shared mods directory would otherwise hand out whichever side patched first.
             return "v1/" + Files.size(jarPath) + ":" + Files.getLastModifiedTime(jarPath).toMillis()
-                    + "/" + resolver.stamp() + "/" + bridgeStamp() + "/" + modSetStamp + "/" + currentEnvironmentName();
+                    + "/" + resolver.stamp() + "/" + bridgeStamp() + "/" + modSetStamp + "/" + currentEnvironmentName()
+                    + "/" + diagnosticSwitchStamp();
         } catch (Throwable t) {
             return null;
         }
+    }
+
+    /**
+     * {@return the values of the diagnostic switches that change the patched bytes}
+     *
+     * <p>They belong in the patch cache key for the same reason the environment does: a run with probes
+     * injected, an extra constructor selector repaired, or the transfer bridge skipped writes different
+     * bytes, and without this a later launch of the same bridge would be served that debug artifact - probe
+     * spam in the log, a per-class experiment leaking into normal play. A key of an unset switch reads as
+     * empty, so normal runs share one cache as before.
+     */
+    private static String diagnosticSwitchStamp() {
+        return System.getProperty("neofobric.debugContinuity", "") + ":"
+                + System.getProperty("neofobric.ctorRetarget", "") + ":"
+                + System.getProperty("neofobric.noTransferBridge", "");
     }
 
     /**
@@ -4765,6 +5041,9 @@ public final class MixinJarPatcher {
         // implementation classes too (ModPackResourcesUtil calls PackMetadataSection.codecForPackType),
         // so the access scan has to look at all of them, not only the mixins.
         var allClasses = new ArrayList<byte[]>();
+        // Types this jar's stack map frames mention; the ones that exist nowhere get a stub, see
+        // writeFrameTypeStubs.
+        var frameStubCandidates = new java.util.HashSet<String>();
         // Mixin classes only, for the rewrites below.
         var mixinClasses = new ArrayList<byte[]>();
         try (var zip = new ZipFile(jarPath.toFile())) {
@@ -4891,11 +5170,11 @@ public final class MixinJarPatcher {
                 // delegating half that nothing calls; point those selectors at the half with the body. Kept
                 // to the model loading mixin of Fabric API: that pipeline was dead and reviving it is the fix
                 // for model plugins (Continuity's connected textures among them), while the other same-shape
-                // selectors in the current mod set wake up machinery that has never run under this bridge and
-                // is not validated yet - Fabric's BlockEntityTypeMixin in particular breaks registry loading
-                // and with it the world ("Failed to load registries", the player sees the datapack error
-                // screen). Each of those needs its own verification before it may join this list.
-                var ctorSelectorRetargeted = entry.getName().contains("client/model/loading")
+                // selectors in the current mod set wake up machinery that has never run under this bridge -
+                // each has to be verified on its own before it may join by default. -Dneofobric.ctorRetarget
+                // takes comma-separated class name fragments for that verification run (never commit a value
+                // into the default set without a run that shows the world still loading).
+                var ctorSelectorRetargeted = retargetCtorSelectorEnabled(entry.getName())
                         ? retargetAmbiguousConstructorSelectors(versionMoved, entry.getName(), resolver)
                         : null;
                 if (ctorSelectorRetargeted != null) {
@@ -4970,6 +5249,7 @@ public final class MixinJarPatcher {
                     patched.put(entry.getName(), versionMoved);
                 }
                 allClasses.add(versionMoved);
+                collectFrameTypes(versionMoved, frameStubCandidates);
                 if (!looksLikeMixinClass(entry.getName())) {
                     // Not a mixin: the only rewrites it may need are a call site of a renamed accessor
                     // member (Fabric's own implementation classes do the casting) or a page API that is
@@ -5119,6 +5399,7 @@ public final class MixinJarPatcher {
             LOGGER.error("[NeoFobric] Failed to create the realigned-copy directory for {}", jarPath, e);
             return jarPath;
         }
+        writeFrameTypeStubs(jarPath, resolver, frameStubCandidates, entries, patched);
         try (var zip = new ZipFile(jarPath.toFile());
                 var out = new ZipOutputStream(Files.newOutputStream(patchedPath))) {
             // A patched class no longer matches the digests its manifest carries, and Mixin refuses to apply

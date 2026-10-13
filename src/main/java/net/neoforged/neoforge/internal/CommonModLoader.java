@@ -54,26 +54,30 @@ public abstract class CommonModLoader {
             GameData.postRegisterEvents();
             // NeoFobric: run the Fabric Loader entrypoints while the registries are still open, so
             // Fabric mods can register their content just like they do in a pure Fabric environment.
-            net.neoforged.fabricbridge.FabricBridgeHooks.runFabricEntrypoints();
-            // NeoFobric: Fabric's default attribute registry does not use NeoForge's
-            // EntityAttributeCreationEvent; it replaces the (immutable) vanilla default attribute map with a
-            // mutable copy - its mixin does that at the tail of DefaultAttributes' static initialiser - and
-            // writes there. DefaultAttributes#getSupplier reads NeoForge's own map first, and that map was
-            // filled by the attribute pass above, before any of this ran, so every attribute a Fabric mod
-            // registered stayed invisible ("Pig does not have test attribute"). Rebasing copies them over, and
-            // re-applying the modification event re-layers what NeoForge mods asked for on top. The creation
-            // event is deliberately not repeated - it refuses a second entry for the same entity, which is how
-            // a NeoForge mod's mob (bagus_lib's) died here.
-            net.neoforged.neoforge.common.CommonHooks.rebaseAttributesAfterFabricEntrypoints();
-            // NeoFobric: the Fabric client entrypoints are the one part of Fabric mod initialisation that
-            // cannot run here - they need the game instance, and their insertion point sits inside the
-            // Minecraft constructor - yet Fabric mods do register content from them (particle types are
-            // the classic case). Fabric's own registry sync solves the same problem by moving the
-            // registry freeze to after the mod initialisers, so on a client run the bridge takes the
-            // freeze over and runs it as soon as the client entrypoints are through. Datagen and the
-            // dedicated server keep the freeze here.
+            // On a normal client run the whole Fabric side moves to the client window instead (the
+            // Minecraft constructor - see FabricBridgeHooks#deferFabricWindow): a Fabric main entrypoint
+            // may use the client (voxy-extra reads Minecraft.getInstance() in its class initialiser),
+            // and Fabric itself invokes both entrypoint sets from that constructor. Datagen and the
+            // dedicated server keep everything here, where the freeze cannot be deferred past.
             if (datagen || FMLEnvironment.getDist() != Dist.CLIENT
-                    || !net.neoforged.fabricbridge.FabricBridgeHooks.deferRegistryFreeze(GameData::freezeData)) {
+                    || !net.neoforged.fabricbridge.FabricBridgeHooks.deferFabricWindow(
+                            GameData::freezeData,
+                            net.neoforged.neoforge.common.CommonHooks::rebaseAttributesAfterFabricEntrypoints)) {
+                net.neoforged.fabricbridge.FabricBridgeHooks.runFabricEntrypoints();
+                // NeoFobric: Fabric's default attribute registry does not use NeoForge's
+                // EntityAttributeCreationEvent; it replaces the (immutable) vanilla default attribute map with a
+                // mutable copy - its mixin does that at the tail of DefaultAttributes' static initialiser - and
+                // writes there. DefaultAttributes#getSupplier reads NeoForge's own map first, and that map was
+                // filled by the attribute pass above, before the Fabric entrypoints ran, so every attribute a
+                // Fabric mod registered stayed invisible ("Pig does not have test attribute"). Rebasing copies
+                // them over, and re-applying the modification event re-layers what NeoForge mods asked for on
+                // top. The creation event is deliberately not repeated - it refuses a second entry for the
+                // same entity, which is how a NeoForge mod's mob (bagus_lib's) died here. On a client this
+                // rebase runs from the client window instead, directly behind the entrypoints.
+                net.neoforged.neoforge.common.CommonHooks.rebaseAttributesAfterFabricEntrypoints();
+                // NeoFobric: on a client the freeze is taken over with the entrypoints (deferFabricWindow)
+                // and runs once both entrypoint sets are through; datagen and the dedicated server freeze
+                // right here, as they always did.
                 GameData.freezeData();
             }
             registriesLoaded = true;

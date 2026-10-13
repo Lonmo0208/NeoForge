@@ -149,7 +149,11 @@ public final class FabricBridge {
             var loader = FabricLoaderImpl.INSTANCE;
             var gameDir = FMLPaths.GAMEDIR.get();
 
-            loader.prepareModInit(gameDir, null);
+            // On a client the game instance is already in place - attachGameInstance prepares the loader
+            // before the entrypoints, the way Fabric does - and passing it through keeps this call from
+            // clobbering it with null. On the server and datagen paths nothing has set an instance yet,
+            // which is also what setServerGameInstance expects to find when the server object appears.
+            loader.prepareModInit(gameDir, loader.getGameInstance());
             // Arm the content-layer acceptance check before mods run: it watches whether the Fabric
             // events a bridge change could have silently broken still fire, and pokes the network once
             // per world join (see BridgeSelfCheck's javadoc).
@@ -163,11 +167,10 @@ public final class FabricBridge {
                         net.fabricmc.api.DedicatedServerModInitializer::onInitializeServer);
                 entrypointsInvoked = true;
             } else {
-                // Client entrypoints need a usable Minecraft instance and window, which do not exist
-                // yet; FabricBridgeHooks#onClientInitialized triggers them from the client's first
-                // screen instead. The registry window is over by then, so Fabric mods that register
-                // content in their client entrypoint would be too late - the same limitation Fabric
-                // mods have when they register content outside of ModInitializer.
+                // Client entrypoints need a usable Minecraft instance, which does not exist on the
+                // paths that run the main set here (datagen, and servers never reach this branch).
+                // On a client run the whole block runs from the client window instead
+                // (FabricBridgeHooks#attachGameInstance), main set first, then these.
                 LOGGER.info("[NeoFobric] Deferring Fabric client entrypoints until the client is set up");
             }
 

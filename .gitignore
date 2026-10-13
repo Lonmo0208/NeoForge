@@ -88,3 +88,6 @@ build
 # NeoFobric: the call diff compiles itself here
 /tools/vanilla-call-diff/.build/
 .zcodeignore
+
+# NeoFobric: the static mixin reference check the handoff work order tells you to run
+!/tools/mixin-targets

@@ -331,6 +331,15 @@ neoDev {
             if (project.hasProperty('neofobric.skipMixinClasses')) {
                 systemProperty("neofobric.skipMixinClasses", project.property('neofobric.skipMixinClasses'))
             }
+            // Both change the bytes the patcher writes (the cache key records them), so a run that wants to
+            // see their effect has to hand them to the game JVM: the extra classes whose constructor
+            // selectors are checked against the repair, and the continuity probes.
+            if (project.hasProperty('neofobric.ctorRetarget')) {
+                systemProperty("neofobric.ctorRetarget", project.property('neofobric.ctorRetarget'))
+            }
+            if (project.hasProperty('neofobric.debugContinuity')) {
+                systemProperty("neofobric.debugContinuity", "true")
+            }
         }
         client {
             client()

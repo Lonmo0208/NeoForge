@@ -752,9 +752,11 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         //    mod registers a particle type). A mixin on that instruction lands ahead of code inserted here
         //    by this transformer, so anchoring anywhere later loses that race and the registering mod is
         //    handed "Registry is already frozen"; the registry window NeoForge keeps open for these
-        //    entrypoints (see FabricBridgeHooks#deferRegistryFreeze) is closed behind them.
+        //    entrypoints (see FabricBridgeHooks#deferFabricWindow) is closed behind them.
         // 2. The state the entrypoints read. `Minecraft.getInstance()` has to work (the instance is
-        //    assigned well before this point), the options must not exist yet (Fabric's key mapping API
+        //    assigned well before this point) - both entrypoint sets run from here, the way fabric-loader
+        //    runs them, and a Fabric main entrypoint may read the client too (voxy-extra reads it in its
+        //    class initialiser) - the options must not exist yet (Fabric's key mapping API
         //    refuses to register a key binding once they are initialised), and Fabric mod mixins that read
         //    client state during this constructor - Sodium's Minecraft#setFullscreen hook reads its config
         //    while the window is created - all run after it. A null window is tolerated (Sodium's config
@@ -815,7 +817,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             target.instructions.insert(insertionPoint, instructions);
         }
 
-        // Fabric's client entrypoints are invoked from attachGameInstance, i.e. here, while the
+        // The Fabric entrypoints are invoked from attachGameInstance, i.e. here, while the
         // Minecraft instance is still being constructed. That ordering is required, not incidental:
         // Sodium's Minecraft#setFullscreen mixin reads the client config during this same
         // constructor, so the entrypoint that registers that config has to run first. Running them

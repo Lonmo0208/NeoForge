@@ -17,16 +17,24 @@ import net.fabricmc.loader.impl.game.minecraft.Hooks;
  * <p>{@link #runFabricEntrypoints()} is called by NeoForge's mod loader
  * ({@code CommonModLoader#begin}) inside the registry-initialization window, where the registries
  * are open, so Fabric mods can register content exactly like they do in a pure Fabric
- * environment. On a client run that window is stretched over the client entrypoints with
- * {@link #deferRegistryFreeze(Runnable)} and closed again in {@link #attachGameInstance(Object)}.
+ * environment. On a client run the whole Fabric window - the entrypoints, the attribute pass
+ * behind them and the registry freeze - moves to {@link #attachGameInstance(Object)} instead:
+ * Fabric entrypoints may use the client, and Fabric itself runs them from inside the Minecraft
+ * constructor. NeoForge hands that window over with {@link #deferFabricWindow(Runnable, Runnable)}.
  * The remaining methods are invoked from small runtime patches the bridge applies to Minecraft
  * classes (game instance hand-off and server branding).
  */
 public final class FabricBridgeHooks {
     private static final Logger LOGGER = LoggerFactory.getLogger(FabricBridgeHooks.class);
 
-    /** NeoForge's {@code GameData.freezeData}, held here while the registry window stays open. */
-    private static volatile Runnable deferredRegistryFreeze;
+    /** The Fabric window NeoForge handed over, held until the game instance exists. */
+    private static volatile DeferredFabricWindow deferredFabricWindow;
+
+    /**
+     * The callbacks of a Fabric window handed over by NeoForge: the attribute pass that runs directly
+     * behind the Fabric entrypoints, and the registry freeze the entrypoints need kept back.
+     */
+    private record DeferredFabricWindow(Runnable rebaseAttributes, Runnable freeze) {}
 
     /**
      * The fluid attributes Fabric's fluid-behaviour registry declares, keyed by the fluid itself. Built on
@@ -86,8 +94,15 @@ public final class FabricBridgeHooks {
 
     /**
      * Boots the fabric-loader runtime (if needed) and invokes the Fabric entrypoints
-     * ({@code preLaunch}, {@code main} and the side entrypoint). Called while the registries are
-     * unfrozen, right after NeoForge's own registration events.
+     * ({@code preLaunch}, {@code main} and the side entrypoint), followed by the hooks that belong
+     * directly behind them.
+     *
+     * <p>On datagen and the dedicated server this runs while the registries are unfrozen, right after
+     * NeoForge's own registration events. On a client run it runs from {@link #attachGameInstance(Object)}
+     * instead - the window {@link #deferFabricWindow(Runnable, Runnable)} takes over - because a Fabric
+     * main entrypoint may use the client exactly like a client one does: a Fabric mod reads
+     * {@code Minecraft.getInstance()} in its class initialiser, and Fabric itself invokes both
+     * entrypoint sets from inside the Minecraft constructor.
      */
     public static void runFabricEntrypoints() {
         if (!bridgeActive()) {
@@ -159,50 +174,48 @@ public final class FabricBridgeHooks {
     }
 
     /**
-     * Takes the registry freeze over for a client run, so the Fabric client entrypoints - which can
-     * only run from inside the Minecraft constructor - still see open registries.
+     * Takes the Fabric window over for a client run: the entrypoints, the attribute pass that belongs
+     * directly behind them and the registry freeze they need kept back.
      *
-     * <p>Registering content from a client entrypoint is normal on the Fabric side (particle types
-     * are the classic case, Fabric API's own particle test mod does it), but NeoForge closes the
-     * registries while the game is still loading, long before any client entrypoint can run.
-     * Fabric's own registry sync arrives at the same place from the other side: it moves the
-     * registry freeze to after the mod initialisers. The bridge therefore takes the freeze here and
-     * runs it as soon as the client entrypoints are through ({@link #attachGameInstance}), keeping
-     * the registries open in the meantime.
+     * <p>Fabric mods register content from both entrypoint sets (particle types are the classic case
+     * for the client ones), but NeoForge closes the registries while the game is still loading, long
+     * before any entrypoints that may use the client can run. Fabric's own registry sync arrives at
+     * the same place from the other side: it moves the registry freeze to after the mod initialisers.
+     * The bridge therefore takes the window here, has both entrypoint sets run from
+     * {@link #attachGameInstance(Object)} ({@link #runFabricEntrypoints()} first, matching Fabric's
+     * main-then-client order), and closes it once they are through.
      *
-     * <p>The action is NeoForge's own {@code GameData.freezeData}, passed as a callback to keep
-     * this module free of compile-time neoforge dependencies; being a lambda of NeoForge's class
-     * loader, it also freezes the registries the game actually uses, whatever class loader the
-     * bridge itself was defined in.
+     * <p>The actions are NeoForge's own {@code GameData.freezeData} and
+     * {@code CommonHooks.rebaseAttributesAfterFabricEntrypoints}, passed as callbacks to keep this
+     * module free of compile-time neoforge dependencies; being lambdas of NeoForge's class loader,
+     * they also act on the registries the game actually uses, whatever class loader the bridge
+     * itself was defined in.
      *
      * @param freezeAction what NeoForge would have run at the end of its registry window
-     * @return whether the freeze was taken over; {@code false} means the caller keeps it and must
-     *         freeze as it always did
+     * @param rebaseAttributesAction the attribute pass NeoForge runs directly behind the Fabric
+     *        entrypoints, so the fabric-written vanilla attribute map is copied over
+     * @return whether the window was taken over; {@code false} means the caller keeps it and runs
+     *         everything as it always did
      */
-    public static boolean deferRegistryFreeze(Runnable freezeAction) {
+    public static boolean deferFabricWindow(Runnable freezeAction, Runnable rebaseAttributesAction) {
         if (!bridgeActive() || Boolean.getBoolean("neofobric.noClientEntrypoints")) {
             return false;
         }
 
-        deferredRegistryFreeze = freezeAction;
-        LOGGER.info("[NeoFobric] Registries stay open until the Fabric client entrypoints have run");
+        deferredFabricWindow = new DeferredFabricWindow(rebaseAttributesAction, freezeAction);
+        LOGGER.info("[NeoFobric] The Fabric entrypoints and the registries move to the client window");
         return true;
     }
 
     /**
-     * Runs the freeze that {@link #deferRegistryFreeze(Runnable)} held back, if there is one. Called
-     * once the client entrypoints are through; harmless when the freeze was never deferred.
+     * Closes the window {@link #deferFabricWindow(Runnable, Runnable)} took over: drops the intrusive
+     * holders a Fabric mod built but never registered, then runs the freeze it held back. Called once
+     * both entrypoint sets are through.
      */
-    private static void closeDeferredRegistryFreeze() {
-        var freezeAction = deferredRegistryFreeze;
-        if (freezeAction == null) {
-            return;
-        }
-
-        deferredRegistryFreeze = null;
+    private static void closeDeferredFabricWindow(DeferredFabricWindow fabricWindow) {
         dropUnregisteredIntrusiveHolders();
-        freezeAction.run();
-        LOGGER.info("[NeoFobric] Registries frozen after the Fabric client entrypoints");
+        fabricWindow.freeze().run();
+        LOGGER.info("[NeoFobric] Registries frozen after the Fabric entrypoints");
     }
 
     /**
@@ -719,19 +732,22 @@ public final class FabricBridgeHooks {
 
     /**
      * Hands the constructed game instance to the fabric-loader runtime and, on the client, runs the
-     * Fabric client entrypoints. Injected into the client {@code Minecraft} constructor.
+     * Fabric window NeoForge handed over: the main entrypoints, the attribute pass behind them and
+     * the client entrypoints, then closes the registries.
      *
-     * <p>The client entrypoints have to run here rather than in {@link #runFabricEntrypoints()}:
-     * that happens during NeoForge's registry window, where no game instance exists yet, while the
-     * entrypoints legitimately use the client (Sodium's config builder reads
-     * {@code Minecraft.getInstance().getWindow()}). They equally cannot wait until after the
-     * constructor, because Sodium's {@code Minecraft#setFullscreen} mixin reads the client config
-     * <em>during</em> the same constructor - so the entrypoint that registers it must already have
-     * run. This insertion point sits after the game instance is assigned and before the window is
-     * created, which satisfies both.
+     * <p>Both entrypoint sets have to run here rather than in {@link #runFabricEntrypoints()}: the
+     * main ones may legitimately use the client (a Fabric mod reads {@code Minecraft.getInstance()}
+     * in its class initialiser, Sodium's config builder reads {@code Minecraft.getInstance().getWindow()}),
+     * and that point has no game instance yet. They equally cannot wait until after the constructor,
+     * because Sodium's {@code Minecraft#setFullscreen} mixin reads the client config <em>during</em>
+     * the same constructor - so the entrypoint that registers it must already have run. This
+     * insertion point sits after the game instance is assigned and before the window is created,
+     * which satisfies all of it; it is also the point fabric-loader itself uses, and it runs the
+     * main set first, matching Fabric's order.
      *
      * <p>Because NeoForge's registries stay open until exactly this point on a client run
-     * ({@link #deferRegistryFreeze}), the freeze is run here, directly after the entrypoints.
+     * ({@link #deferFabricWindow}), the attribute rebase and the freeze run here too, directly
+     * behind the entrypoints.
      */
     public static void attachGameInstance(Object gameInstance) {
         if (!bridgeActive()) {
@@ -747,6 +763,21 @@ public final class FabricBridgeHooks {
             }
         }
 
+        var fabricWindow = deferredFabricWindow;
+        if (fabricWindow != null) {
+            deferredFabricWindow = null;
+            try {
+                runFabricEntrypoints();
+            } catch (Throwable t) {
+                LOGGER.error("[NeoFobric] Failed to run the Fabric entrypoints", t);
+            }
+            try {
+                fabricWindow.rebaseAttributes().run();
+            } catch (Throwable t) {
+                LOGGER.error("[NeoFobric] Failed to rebase the default attributes behind the Fabric entrypoints", t);
+            }
+        }
+
         if (!Boolean.getBoolean("neofobric.noClientEntrypoints")) {
             try {
                 FabricBridge.invokeClientEntrypoints();
@@ -756,8 +787,10 @@ public final class FabricBridgeHooks {
         }
 
         // The client entrypoints are the last Fabric-side chance to register content, so this is where
-        // the registry window that runFabricEntrypoints left open closes again (see deferRegistryFreeze).
-        closeDeferredRegistryFreeze();
+        // the registry window that runFabricEntrypoints left open closes again (see deferFabricWindow).
+        if (fabricWindow != null) {
+            closeDeferredFabricWindow(fabricWindow);
+        }
     }
 
     /**
