@@ -10,7 +10,7 @@
      private final Object registryWriteLock = new Object();
      protected final RegistryDataLoader.RegistryData<T> data;
      private final WritableRegistry<T> registry;
-@@ -35,8 +_,11 @@
+@@ -35,9 +_,11 @@
      private volatile boolean elementsRegistered;
  
      protected RegistryLoadTask(RegistryDataLoader.RegistryData<T> data, Lifecycle lifecycle, Map<ResourceKey<?>, Exception> loadingErrors) {
@@ -20,9 +20,72 @@
          this.data = data;
 -        this.registry = new MappedRegistry<>(data.key(), lifecycle);
 +        this.registry = (WritableRegistry<T>) registryBuilder.disableRegistrationCheck().create();
++        // NeoFobric: a registry that is both a built-in and loaded from datapacks (the codec-type
++        // registries, like enchantment effect types) gets a fresh instance here, and anything a mod
++        // registered into the built-in instance at init would not be in it. Carry the built-in's entries
++        // over, so the loaded instance is a superset of the code-side view no matter when that
++        // registration ran relative to the loader's own registry passes.
++        carryBuiltInEntries(this.registry, data.key());
          this.loadingErrors = loadingErrors;
          this.concurrentRegistrationGetter = new ConcurrentHolderGetter<>(this.registryWriteLock, this.registry.createRegistrationLookup());
      }
+ 
++    /**
++     * NeoFobric: copies every entry of the built-in registry with the same key that the target does not
++     * have yet. A registry key that has no built-in counterpart (the everyday datapack registry) does
++     * nothing here; the codec-type registries (which mods fill with plain {@code Registry.register} calls)
++     * get their content carried.
++     */
++    @SuppressWarnings({"rawtypes", "unchecked"})
++    private static <T> void carryBuiltInEntries(WritableRegistry<T> target, ResourceKey<? extends Registry<T>> key) {
++        var builtIn = builtInFor(key);
++        if (builtIn == null || builtIn == target) {
++            return;
++        }
++
++        var carried = 0;
++        for (var entry : builtIn.entrySet()) {
++            if (!target.containsKey(entry.getKey().identifier())) {
++                target.register((ResourceKey) entry.getKey(), (T) entry.getValue(), RegistrationInfo.BUILT_IN);
++                carried++;
++            }
++        }
++
++        if (carried > 0) {
++            LOGGER.info("Carried {} built-in entr{} over into the datapack-loaded registry {}", carried,
++                    carried == 1 ? "y" : "ies", key.identifier());
++        }
++    }
++
++    /**
++     * NeoFobric: the built-in registry for {@code key}, or null when the key has none. The
++     * registry-of-registries lookup misses registries whose root-registry entry was never made (the
++     * codec-type registries, which are only reachable through their {@code BuiltInRegistries} field -
++     * exactly the object a mod's {@code Registry.register} call writes into), so fall back to scanning
++     * that class's fields.
++     */
++    private static net.minecraft.core.Registry<?> builtInFor(ResourceKey<? extends Registry<?>> key) {
++        var byName = net.minecraft.core.registries.BuiltInRegistries.REGISTRY.getValue(key.identifier());
++        if (byName != null) {
++            return byName;
++        }
++        for (var field : net.minecraft.core.registries.BuiltInRegistries.class.getFields()) {
++            if (!net.minecraft.core.Registry.class.isAssignableFrom(field.getType())) {
++                continue;
++            }
++            try {
++                var value = (net.minecraft.core.Registry<?>) field.get(null);
++                if (value != null && value.key().equals(key)) {
++                    return value;
++                }
++            } catch (ReflectiveOperationException ignored) {
++                // A field we cannot read is simply not a candidate.
++            }
++        }
++        return null;
++    }
++
+     protected ResourceKey<? extends Registry<T>> registryKey() {
 @@ -64,7 +_,13 @@
              elements.forEach(
                  element -> element.value

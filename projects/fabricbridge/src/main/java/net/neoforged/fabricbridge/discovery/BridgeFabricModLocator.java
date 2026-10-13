@@ -227,6 +227,18 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // copy of the mod file, which claims the original and takes its place in the pipeline.
         relaxFabricSatisfiableRequirements(context, pipeline, modsDir, fabricJars);
 
+        // NeoFobric: Architectury's NeoForge build resolves a mod's event bus through FML's mod list
+        // (`EventBusesHooks.getModEventBus(modId)` -> `ModList.get().getModContainerById(id)`), and a
+        // Fabric mod has no entry there - every `DeferredRegister.register()` in a Fabric mod then dies
+        // with `NoSuchElementException: No value present` before a single entry is registered.
+        // MoreSpearEnchantments is the everyday case: its seven enchantment effect types never register,
+        // and the moment a world's data pack decodes those enchantments the world refuses to open
+        // (the "当前选中的数据包中出现了错误" screen). Each Architectury-using Fabric mod gets a shell FML
+        // mod - its id and version, no code - so the lookup finds a container with an event bus, and
+        // Architectury's direct registration path then runs inside the registry window the bridge keeps
+        // open for the Fabric entrypoints.
+        registerArchitecturyShellMods(pipeline, modsDir, fabricJars);
+
         // Packages the platform (Minecraft, NeoForge, FML and the libraries they bring) already
         // provides must not be merged into the composite module: a JPMS module may not claim a
         // package another module of the same layer owns, and FML then refuses to start with
@@ -1073,6 +1085,80 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         var upper = entryName.toUpperCase(java.util.Locale.ROOT);
         return upper.startsWith("META-INF/")
                 && (upper.endsWith(".SF") || upper.endsWith(".RSA") || upper.endsWith(".DSA") || upper.endsWith(".EC"));
+    }
+
+    private static final String SHELL_SUFFIX = ".neofobric-shell.jar";
+
+    /**
+     * NeoFobric: writes the shell FML mod for every Fabric mod that ships Architectury classes, so
+     * Architectury's NeoForge build can resolve an event bus for it (see the call site). The shell
+     * carries nothing but the mod metadata: same id and version as the Fabric mod, no classes, so it
+     * cannot conflict with the Fabric side's copy of the mod.
+     */
+    private static void registerArchitecturyShellMods(IDiscoveryPipeline pipeline, Path modsDir,
+            Map<Path, FabricModInfo> fabricJars) {
+        if (fabricJars.isEmpty()) {
+            return;
+        }
+        var cacheDir = modsDir.resolve(MixinJarPatcher.CACHE_DIR_NAME);
+        var shellIds = new ArrayList<String>();
+        for (var entry : fabricJars.entrySet()) {
+            var jarPath = entry.getKey();
+            var info = entry.getValue();
+            var displayName = info.displayName() == null || info.displayName().isBlank()
+                    ? info.modId() : info.displayName();
+            if (!usesArchitectury(jarPath)) {
+                continue;
+            }
+            var shell = cacheDir.resolve(jarPath.getFileName().toString() + SHELL_SUFFIX);
+            try {
+                Files.createDirectories(cacheDir);
+                var toml = ("modLoader=\"javafml\"\n"
+                        + "loaderVersion=\"[3,)\"\n"
+                        + "license=\"See the Fabric build of this mod\"\n"
+                        + "\n"
+                        + "[[mods]]\n"
+                        + "modId=\"" + info.modId() + "\"\n"
+                        + "version=\"" + info.version() + "\"\n"
+                        + "displayName=\"" + displayName.replace("\"", "'") + " (Fabric, bridged)\"\n")
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(shell,
+                        java.nio.file.StandardOpenOption.CREATE,
+                        java.nio.file.StandardOpenOption.TRUNCATE_EXISTING))) {
+                    out.putNextEntry(new java.util.zip.ZipEntry("META-INF/neoforge.mods.toml"));
+                    out.write(toml);
+                    out.closeEntry();
+                }
+            } catch (IOException e) {
+                LOGGER.error("[NeoFobric] Could not write the shell mod copy for {}", jarPath, e);
+                continue;
+            }
+            pipeline.addPath(shell, ModFileDiscoveryAttributes.DEFAULT, IncompatibleFileReporting.WARN_ALWAYS);
+            shellIds.add(info.modId());
+            LOGGER.info("[NeoFobric] Registered the shell FML mod {} {} so the Fabric build's Architectury "
+                    + "registrations can resolve it", info.modId(), info.version());
+        }
+        if (!shellIds.isEmpty()) {
+            // The platform re-posts the RegisterEvent pass for these buses right behind the Fabric
+            // entrypoints (Architectury's listeners arrive too late for the first pass): see
+            // GameData.postRegisterEventsForShellMods.
+            System.setProperty("neofobric.shellMods", String.join(",", shellIds));
+        }
+    }
+
+    /** {@return whether the jar was built with Architectury's plugin (its common jar injection, or the API itself)} */
+    private static boolean usesArchitectury(Path jarPath) {        try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
+            var entries = zip.entries();
+            while (entries.hasMoreElements()) {
+                var name = entries.nextElement().getName();
+                if (name.startsWith("dev/architectury/") || name.startsWith("architectury_inject")) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.debug("[NeoFobric] Could not scan {} for Architectury classes", jarPath, e);
+        }
+        return false;
     }
 
     /**

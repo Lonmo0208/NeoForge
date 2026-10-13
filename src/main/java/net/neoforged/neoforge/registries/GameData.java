@@ -26,6 +26,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRuleCategory;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.loading.progress.StartupNotificationManager;
 import net.neoforged.neoforge.common.CommonHooks;
@@ -116,6 +118,46 @@ public class GameData {
             CreativeModeTabRegistry.sortTabs();
             GameRuleCategory.registerModdedCategories();
             ItemTooltipHandler.init();
+        }
+    }
+
+    /**
+     * NeoFobric: a second register pass for the shell FML mods the bridge creates for bridged Fabric mods
+     * ({@code neofobric.shellMods}). A Fabric mod's registrations arrive late - the Fabric entrypoints run
+     * inside the open registry window, after {@link #postRegisterEvents()} already posted the
+     * {@code RegisterEvent} on every mod's bus - and Architectury queues its {@code DeferredRegister}
+     * entries for exactly that event, so without this pass they are never registered at all (the entry
+     * stays quiet and, say, an enchantment effect type the world's data packs reference simply does not
+     * exist). Only the shell buses are posted to, and nothing but the bridge's listeners sits on those.
+     */
+    public static void postRegisterEventsForShellMods() {
+        String shells = System.getProperty("neofobric.shellMods");
+        if (shells == null || shells.isBlank()) {
+            return;
+        }
+
+        RuntimeException aggregate = new RuntimeException();
+        for (Identifier rootRegistryName : GameData.getRegistrationOrder()) {
+            try {
+                ResourceKey<? extends Registry<?>> registryKey = ResourceKey.createRegistryKey(rootRegistryName);
+                Registry<?> registry = BuiltInRegistries.REGISTRY.getValue(rootRegistryName);
+                if (registry == null) {
+                    continue;
+                }
+                RegisterEvent registerEvent = new RegisterEvent(registryKey, registry);
+                for (String modId : shells.split(",")) {
+                    ModList.get().getModContainerById(modId).map(ModContainer::getEventBus)
+                            .ifPresent(bus -> bus.post(registerEvent));
+                }
+            } catch (Throwable t) {
+                aggregate.addSuppressed(t);
+            }
+        }
+        if (aggregate.getSuppressed().length > 0) {
+            LOGGER.error("Failed to register some bridged Fabric entries, see suppressed exceptions for details",
+                    aggregate);
+        } else {
+            LOGGER.info("[NeoFobric] Register events re-posted for the bridged mods: {}", shells);
         }
     }
 

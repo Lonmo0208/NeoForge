@@ -743,16 +743,19 @@ tasks.withType(JavaCompile.class).configureEach(task -> {
 });
 
 // NeoFobric: 开发客户端直接进入指定存档，便于在没有人手操作窗口的环境里验证"能进世界"。
-// 用法：./gradlew :neoforge:runClient -Pneofobric.quickPlayWorld=<存档目录名>
+// 用法：./gradlew :neoforge:runClient                                   # 默认进入 nb（用户要求 dev 默认自动进世界）
+//       ./gradlew :neoforge:runClient -Pneofobric.quickPlayWorld=<存档目录名>
 //       ./gradlew :neoforge:runClient -Pneofobric.quickPlayServer=<主机:端口>
-// 不传参数时行为不变，正常停在主菜单。
-if (project.hasProperty('neofobric.quickPlayWorld')) {
-    neoDev.runs.client {
-        programArguments.addAll('--quickPlaySingleplayer', project.property('neofobric.quickPlayWorld'))
-    }
-}
-if (project.hasProperty('neofobric.quickPlayServer')) {
-    neoDev.runs.client {
-        programArguments.addAll('--quickPlayMultiplayer', project.property('neofobric.quickPlayServer'))
+//       ./gradlew :neoforge:runClient -Pneofobric.noQuickPlay           # 关闭自动进世界，停在主菜单
+if (!project.hasProperty('neofobric.noQuickPlay')) {
+    if (project.hasProperty('neofobric.quickPlayServer')) {
+        neoDev.runs.client {
+            programArguments.addAll('--quickPlayMultiplayer', project.property('neofobric.quickPlayServer'))
+        }
+    } else {
+        neoDev.runs.client {
+            programArguments.addAll('--quickPlaySingleplayer',
+                    project.findProperty('neofobric.quickPlayWorld') ?: 'nb')
+        }
     }
 }

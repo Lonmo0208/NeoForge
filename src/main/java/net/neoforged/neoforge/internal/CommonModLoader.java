@@ -67,9 +67,18 @@ public abstract class CommonModLoader {
             // dedicated server keep everything here, where the freeze cannot be deferred past.
             if (datagen || FMLEnvironment.getDist() != Dist.CLIENT
                     || !net.neoforged.fabricbridge.FabricBridgeHooks.deferFabricWindow(
-                            GameData::freezeData,
+                            () -> {
+                                // NeoFobric: the Fabric entrypoints just ran inside the still-open window;
+                                // Architectury's listeners (only just registered on their shell mods' buses)
+                                // get their RegisterEvent pass here, before the freeze below closes it.
+                                GameData.postRegisterEventsForShellMods();
+                                GameData.freezeData();
+                            },
                             net.neoforged.neoforge.common.CommonHooks::rebaseAttributesAfterFabricEntrypoints)) {
                 net.neoforged.fabricbridge.FabricBridgeHooks.runFabricEntrypoints();
+                // NeoFobric: the same late pass on the paths that run the entrypoints here (datagen and
+                // the dedicated server) - the registries are still open right up to freezeData below.
+                GameData.postRegisterEventsForShellMods();
                 // NeoFobric: Fabric's default attribute registry does not use NeoForge's
                 // EntityAttributeCreationEvent; it replaces the (immutable) vanilla default attribute map with a
                 // mutable copy - its mixin does that at the tail of DefaultAttributes' static initialiser - and

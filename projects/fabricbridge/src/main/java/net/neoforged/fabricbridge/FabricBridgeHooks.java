@@ -685,8 +685,44 @@ public final class FabricBridgeHooks {
                 return true;
             }
         }
+
+        // Fabric mods may also send payloads they never announced to fabric-networking at all - polymer
+        // moves its handshake as a raw custom payload, exempting its own sends but not the peer's reply -
+        // so a channel in the namespace of a loaded Fabric mod counts as a Fabric channel too.
+        var colon = channelName.indexOf(':');
+        if (colon > 0 && fabricModNamespaces().contains(channelName.substring(0, colon))) {
+            return true;
+        }
         return false;
     }
+
+    /** {@return the namespaces of the loaded Fabric mods, resolved once} */
+    private static java.util.Set<String> fabricModNamespaces() {
+        var resolved = fabricNamespaces;
+        if (resolved != null) {
+            return resolved;
+        }
+
+        var namespaces = new java.util.HashSet<String>();
+        try {
+            for (var mod : net.fabricmc.loader.api.FabricLoader.getInstance().getAllMods()) {
+                var id = mod.getMetadata().getId();
+                namespaces.add(id);
+                // Mod families share a namespace that is the first segment of their ids: polymer-core
+                // and polymer-networking send on "polymer", wover-core on "wover", c2me-base on "c2me".
+                var dash = id.indexOf('-');
+                if (dash > 0) {
+                    namespaces.add(id.substring(0, dash));
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not list the Fabric mods for the channel check", t);
+        }
+        fabricNamespaces = namespaces;
+        return namespaces;
+    }
+
+    private static volatile java.util.Set<String> fabricNamespaces;
 
     private static java.util.List<java.util.function.Predicate<String>> fabricChannelTests() {
         var resolved = fabricChannelTests;

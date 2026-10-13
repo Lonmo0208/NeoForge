@@ -633,9 +633,90 @@ public final class MixinJarPatcher {
         }
     }
 
+    private static final String MOVED_ENTITY_TYPE_OWNER = "net/minecraft/world/entity/EntityType";
+    private static final String ENTITY_TYPES_OWNER = "net/minecraft/world/entity/EntityTypes";
+
+    /**
+     * 26.2 moved the entity type constants out of {@code net.minecraft.world.entity.EntityType} into
+     * {@code net.minecraft.world.entity.EntityTypes}, and a Fabric mod built against the older layout
+     * still references the old owner. polymer's add-entity packet mixin dies on it with
+     * {@code NoSuchFieldError: ... EntityType ... FALLING_BLOCK} while the server writes a packet, which
+     * takes the connection down seconds after joining. A field reference moves when the new owner
+     * declares the same name and descriptor; everything else on the old class stays untouched.
+     */
+    private static byte[] retargetMovedEntityTypeConstants(byte[] classBytes, String entryName, TargetResolver resolver) {
+        if (classBytes == null || !containsAscii(classBytes, MOVED_ENTITY_TYPE_OWNER)) {
+            return null;
+        }
+        try {
+            var node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+            var changed = false;
+            for (var method : node.methods) {
+                for (var insn : method.instructions) {
+                    if (insn instanceof org.objectweb.asm.tree.FieldInsnNode field
+                            && MOVED_ENTITY_TYPE_OWNER.equals(field.owner)
+                            && movedEntityTypeConstant(field.name, field.desc, resolver)) {
+                        field.owner = ENTITY_TYPES_OWNER;
+                        changed = true;
+                    }
+                }
+            }
+            if (!changed) {
+                return null;
+            }
+            var writer = new ClassWriter(0);
+            node.accept(writer);
+            LOGGER.info("[NeoFobric] Retargeted the moved entity type constants in {}", entryName);
+            return writer.toByteArray();
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not retarget the moved entity type constants in {}", entryName, t);
+            return null;
+        }
+    }
+
+    /** {@code name -> descriptor} of the constants the new owner declares, resolved once. */
+    private static volatile java.util.Map<String, String> entityTypeConstants;
+
+    private static boolean movedEntityTypeConstant(String name, String desc, TargetResolver resolver) {
+        var constants = entityTypeConstants;
+        if (constants == null) {
+            var map = new java.util.HashMap<String, String>();
+            var bytes = resolver.apply(ENTITY_TYPES_OWNER);
+            if (bytes != null) {
+                try {
+                    var node = new ClassNode();
+                    new ClassReader(bytes).accept(node, ClassReader.SKIP_CODE);
+                    for (var field : node.fields) {
+                        map.put(field.name, field.desc);
+                    }
+                } catch (Throwable t) {
+                    LOGGER.warn("[NeoFobric] Could not read the entity type constants from the game classes", t);
+                }
+            }
+            entityTypeConstants = map;
+            constants = map;
+        }
+        return desc.equals(constants.get(name));
+    }
+
+    /** {@return whether the needle appears in the bytes} */
+    private static boolean containsAscii(byte[] haystack, String needle) {
+        var target = needle.getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        outer:
+        for (int i = 0; i <= haystack.length - target.length; i++) {
+            for (int j = 0; j < target.length; j++) {
+                if (haystack[i + j] != target[j]) {
+                    continue outer;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     /** The vanilla shape of the dynamic-registry element parse Fabric's condition hook anchors on. */
-    private static final String DECODER_PARSE_ANCHOR =
-            "Lcom/mojang/serialization/Decoder;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;";
+    private static final String DECODER_PARSE_ANCHOR =            "Lcom/mojang/serialization/Decoder;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;";
     /** The shape the same call compiles to once the platform's conditional wrapper owns the receiver. */
     private static final String CODEC_PARSE_ANCHOR =
             "Lcom/mojang/serialization/Codec;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;";
@@ -5422,6 +5503,14 @@ public final class MixinJarPatcher {
                 var environmentStripped = stripForeignEnvironmentMembers(versionMoved, entry.getName(), currentEnvironmentName());
                 if (environmentStripped != null) {
                     versionMoved = environmentStripped;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                // 26.2 moved the entity type constants out of EntityType into EntityTypes, and a Fabric mod
+                // built against the older layout keeps referencing the old owner (see the method). Runs for
+                // every class: an ordinary class breaks the same way the polymer mixin here does.
+                var entityTypeConstantsMoved = retargetMovedEntityTypeConstants(versionMoved, entry.getName(), resolver);
+                if (entityTypeConstantsMoved != null) {
+                    versionMoved = entityTypeConstantsMoved;
                     patched.put(entry.getName(), versionMoved);
                 }
                 allClasses.add(versionMoved);
