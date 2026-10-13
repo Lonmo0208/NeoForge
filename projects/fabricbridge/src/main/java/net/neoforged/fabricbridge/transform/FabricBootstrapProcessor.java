@@ -325,6 +325,9 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         // <config>.mixins.json which owns package ...". Twilight Forest goes through Fabric API's atlas
         // registry and hits exactly that when Sodium's bundled Fabric API differs from the standalone one.
         var registeredConfigPaths = new java.util.HashSet<String>();
+        // Parent configs already fed to the mixin service this pass (a config path shared by many children
+        // must only be fed once; the service tolerates repeats, but this keeps the log honest).
+        var fedParentConfigs = new java.util.HashSet<String>();
         // Iterate the registry directly: all Fabric jars live in one composite game library,
         // so the loading mod list does not carry one entry per Fabric mod.
         for (var entry : net.neoforged.fabricbridge.discovery.FabricJarRegistry.getEntries().entrySet()) {
@@ -375,6 +378,9 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
                     if (configContent != null) {
                         configContent = relaxMixinConfig(configContent, client, configPath);
                         configContent = MixinConflictFilter.filter(configContent, jar, info.modId(), client);
+                        // A config may build on a "parent" config - a settings carrier no mod declares as
+                        // one of its own; feed those into the service too (see feedParentMixinConfigs).
+                        feedParentMixinConfigs(fmlMixinService, configContent, jar, fedParentConfigs);
                     }
                 } catch (Exception e) {
                     configContent = null;
@@ -438,6 +444,81 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             LOGGER.debug("[NeoFobric] Could not pin a mixin config to the DEFAULT environment", t);
             return content;
         }
+    }
+
+    /**
+     * Feeds the parent mixin configs a config builds on into FML's mixin service.
+     *
+     * <p>A "parent" config is a settings carrier that no mod declares as one of its own configs - in a pure
+     * Fabric install the mixin service simply reads it out of the jar by name when a child names it. Here
+     * the Fabric jars are not on the by-name-visible classpath while the configs are registered (the game
+     * layer is built after this point), so the service only knows the configs it was fed; a child naming a
+     * parent nobody fed then fails with
+     *
+     * <pre>Error initialising parent mixin config c2me.mixins.json of c2me-base.mixins.json: The specified
+     * resource 'c2me.mixins.json' was invalid or could not be read</pre>
+     *
+     * which is how c2me's 22 module configs - all parented to {@code c2me.mixins.json} in its base jar -
+     * lost every one of their mixins. The parent is only fed, never registered: pure Fabric does not
+     * register it either, it just resolves it as a resource.
+     */
+    private static void feedParentMixinConfigs(FMLMixinService service, byte[] configContent,
+            net.neoforged.fml.jarcontents.JarContents jar, java.util.Set<String> fed) {
+        try {
+            var parent = parentConfigOf(configContent);
+            for (var depth = 0; parent != null && depth < 4 && fed.add(parent); depth++) {
+                var parentContent = findConfigResource(jar, parent);
+                if (parentContent == null) {
+                    LOGGER.warn("[NeoFobric] Mixin config parent {} is referenced but exists in no Fabric jar", parent);
+                    return;
+                }
+                // Pinned like a registered config: Mixin reads the parent while the child is created at
+                // this same phase, so an unpinned parent would land in the phase the platform has left.
+                parentContent = pinMixinEnvironment(parentContent);
+                service.addMixinConfigContent(parent, parentContent);
+                parent = parentConfigOf(parentContent);
+            }
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not feed a mixin config parent", t);
+        }
+    }
+
+    /** {@return the "parent" resource a mixin config names, or null} */
+    private static String parentConfigOf(byte[] configContent) {
+        try {
+            var text = new String(configContent, java.nio.charset.StandardCharsets.UTF_8);
+            var parent = com.google.gson.JsonParser.parseString(text).getAsJsonObject().get("parent");
+            return parent == null || parent.isJsonNull() ? null : parent.getAsString();
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /**
+     * {@return the named config resource} Looked up in the jar that declares the child first - c2me keeps
+     * the parent in its base jar while the children live in their own module jars - and then across every
+     * Fabric jar, because the two need not share a jar at all.
+     */
+    private static byte[] findConfigResource(net.neoforged.fml.jarcontents.JarContents primary, String path) {
+        try {
+            var content = primary.readFile(path);
+            if (content != null) {
+                return content;
+            }
+        } catch (Throwable ignored) {
+            // Fall through to the scan.
+        }
+        for (var other : net.neoforged.fabricbridge.discovery.FabricJarRegistry.getEntries().keySet()) {
+            try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(other)) {
+                var content = jar.readFile(path);
+                if (content != null) {
+                    return content;
+                }
+            } catch (Throwable ignored) {
+                // The next jar may have it.
+            }
+        }
+        return null;
     }
 
     /**

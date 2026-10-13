@@ -2718,6 +2718,24 @@ public final class MixinJarPatcher {
             "Lcom/llamalad7/mixinextras/injector/modifyreceiver/ModifyReceiver;",
             "Lcom/llamalad7/mixinextras/injector/modifyargs/ModifyArgs;");
 
+    /**
+     * The value-modifying injections: their handler's last parameter is the value being modified, not a host
+     * parameter, so a moved host only has to start with the parameters in front of it.
+     *
+     * <p>c2me's No-Tick-View-Distance mixin is the case this exists for: its {@code @ModifyArg} handler takes
+     * nothing but the modified {@code FullChunkStatus}, and the platform lifted the call it anchors on out of
+     * {@code Level#setBlock} into {@code markAndNotifyBlock}. Read as a host parameter, that status demanded
+     * a host starting with it, the move was refused, and the mixin failed the whole client at startup.
+     */
+    private static final java.util.Set<String> VALUE_MODIFYING_INJECTIONS = java.util.Set.of(
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArg;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArgs;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyVariable;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyConstant;",
+            "Lcom/llamalad7/mixinextras/injector/modifyexpressionvalue/ModifyExpressionValue;",
+            "Lcom/llamalad7/mixinextras/injector/modifyreceiver/ModifyReceiver;",
+            "Lcom/llamalad7/mixinextras/injector/modifyargs/ModifyArgs;");
+
     /** MixinExtras sugar a handler reads out of the host method's frame, which a retarget must not move. */
     private static final java.util.Set<String> HOST_FRAME_SUGAR = java.util.Set.of(
             "Lcom/llamalad7/mixinextras/sugar/Local;",
@@ -2796,7 +2814,7 @@ public final class MixinJarPatcher {
             // Whatever the injector, a handler that binds the host's own parameters needs a host that starts
             // with them - in front for @Inject, behind the wrapped call and its Operation for the wrapping ones.
             if (!hostStartsWithHandlerParams(resolver, targets, host,
-                    declaredHostParams(method, anchor, CALL_SIDE_INJECTIONS.contains(annotation.desc)))) {
+                    declaredHostParams(method, anchor, CALL_SIDE_INJECTIONS.contains(annotation.desc), annotation.desc))) {
                 continue;
             }
             if (!hostIsCalledBySelection(resolver, targets, selector, host)
@@ -3095,15 +3113,18 @@ public final class MixinJarPatcher {
      * can move to. Carrier parameters are skipped wherever they appear.
      */
     private static java.util.List<String> declaredHostParams(org.objectweb.asm.tree.MethodNode handler,
-            String anchor, boolean callSide) {
+            String anchor, boolean callSide, String injection) {
         var types = parametersFor(handler);
         var skip = 0;
         if (callSide) {
             var wanted = parseAnchorMember(anchor);
             skip = 1 + (wanted == null || wanted.desc() == null ? 0 : countParameters(wanted.desc()));
         }
+        // A value modifier's last parameter is the value it modifies (see VALUE_MODIFYING_INJECTIONS): the
+        // parameters in front of it are the host arguments this check is about.
+        var end = VALUE_MODIFYING_INJECTIONS.contains(injection) ? types.size() - 1 : types.size();
         var out = new java.util.ArrayList<String>();
-        for (var index = skip; index < types.size(); index++) {
+        for (var index = skip; index < end; index++) {
             var type = types.get(index);
             if (hasSugar(handler, index) || type.equals("Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;")
                     || type.equals("Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;")

@@ -72,6 +72,24 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
     private static final java.util.List<Path> fmlProvidedJars = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     /**
+     * Packages the FML side of the game layer will provide, so the Fabric composite module must not claim
+     * them. Filled while the mods folder is scanned: every jar that is not a Fabric mod (an FML mod, or a
+     * jar with no metadata at all) contributes the packages of its classes - recursively, because these
+     * jars carry more jars: a NeoForge mod's JiJ modules, and the wrapper artifacts with which a mod hands
+     * its own dependencies to the loader. c2me's OpenCL wrapper is the case this exists for: it nests
+     * lwjgl-zstd, lwjgl-opencl and friends under {@code META-INF/jars/}, and c2me's language provider adds
+     * them to FML's file set, so they become automatic modules of FML's layer ({@code lwjgl.zstd}). A
+     * Fabric mod that bundles a copy of the same library - voxy ships lwjgl-zstd for the dedicated servers
+     * that have no LWJGL of their own - would put the same package into the Fabric module too, and the JDK
+     * refuses to build the layer:
+     * <pre>Modules neofobric.fabric.mods and lwjgl.zstd export package org.lwjgl.util.zstd to module jei</pre>
+     * Whichever copy the FML side supplies wins; the classes stay visible to both loaders' mods through the
+     * shared layer, and a run without the c2me wrapper keeps the Fabric copy because nothing claims the
+     * package then.
+     */
+    private static final java.util.Set<String> fmlSidePackages = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /**
      * {@return the mod ids every NeoForge mod in the folder provides}
      *
      * <p>Read before the Fabric jars are examined, because a Fabric jar can only be skipped once it is known
@@ -174,6 +192,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // and into the Fabric one, and the JDK refuses to resolve that (Sodium and Iris both died with
         // "Modules neofobric.fabric.mods and sodium export package net.caffeinemc.mods.sodium.api.util").
         fmlProvidedJars.clear();
+        fmlSidePackages.clear();
         fmlProvidedModIds = readForgeModIds(modsDir);
 
         try (var files = Files.list(modsDir)) {
@@ -654,6 +673,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 LOGGER.info("[NeoFobric] Leaving {} to FML - it declares META-INF/neoforge.mods.toml",
                         path.getFileName());
                 FabricJarRegistry.markForeignModPath(path);
+                noteFmlSidePackages(path);
                 return;
             }
             // Below NeoForge sits Fabric. A Fabric build that also ships a stray legacy mods.toml is still a
@@ -665,10 +685,15 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 LOGGER.info("[NeoFobric] Leaving {} to FML - it declares META-INF/mods.toml and no fabric.mod.json",
                         path.getFileName());
                 FabricJarRegistry.markForeignModPath(path);
+                noteFmlSidePackages(path);
                 return;
             }
             if (metadata == null) {
-                return; // Not a Fabric mod.
+                // Not a Fabric mod. A jar with no metadata can still put its content into the FML layer (a
+                // mod's language provider adds the wrapper jars it nests - see fmlSidePackages), so its
+                // packages count as FML-side content too.
+                noteFmlSidePackages(path);
+                return;
             }
             info = FabricModJsonParser.parse(metadata);
             if (info == null) {
@@ -1211,7 +1236,73 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 break;
             }
         }
+        // Packages the FML side will provide count the same as the classpath's: the jars that are not
+        // Fabric mods (and what those jars nest) end up in FML's layer, and a package exported by both
+        // modules makes the JDK refuse to build the layer - see fmlSidePackages for the c2me/voxy case.
+        for (var packageName : fabricPackages) {
+            if (fmlSidePackages.contains(packageName)) {
+                platform.add(packageName);
+            }
+        }
         return platform;
+    }
+
+    /**
+     * Records the packages of a jar that belongs to FML's side of the layer, nested jars included.
+     *
+     * <p>Called for every mods-folder jar that the bridge does not claim as a Fabric mod. The nesting
+     * matters: an FML mod's JiJ modules and the wrapper jars a mod hides under {@code META-INF/jars/}
+     * (c2me's OpenCL wrapper keeps lwjgl-zstd and friends there) are added to the FML layer at runtime,
+     * and their packages then clash with a Fabric mod that bundles the same library.
+     */
+    private static void noteFmlSidePackages(Path jar) {
+        try (var zip = new java.util.zip.ZipFile(jar.toFile())) {
+            collectPackages(zip, 0);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not index the packages of the FML-side jar {}", jar, t);
+        }
+    }
+
+    private static void collectPackages(java.util.zip.ZipFile zip, int depth) throws IOException {
+        var nested = new java.util.ArrayList<java.util.zip.ZipEntry>();
+        var entries = zip.entries();
+        while (entries.hasMoreElements()) {
+            var entry = entries.nextElement();
+            if (entry.isDirectory()) {
+                continue;
+            }
+            var name = entry.getName();
+            if (name.endsWith(".class")) {
+                var packageName = packageOfEntry(name);
+                if (packageName != null) {
+                    fmlSidePackages.add(packageName);
+                }
+            } else if (depth < 2 && name.endsWith(".jar")) {
+                nested.add(entry);
+            }
+        }
+        for (var entry : nested) {
+            Path temp = null;
+            try {
+                temp = Files.createTempFile("neofobric-fmlside", ".jar");
+                try (var in = zip.getInputStream(entry)) {
+                    Files.copy(in, temp, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+                try (var inner = new java.util.zip.ZipFile(temp.toFile())) {
+                    collectPackages(inner, depth + 1);
+                }
+            } catch (Throwable t) {
+                LOGGER.debug("[NeoFobric] Could not read the nested jar {} of an FML-side mod jar", entry.getName(), t);
+            } finally {
+                if (temp != null) {
+                    try {
+                        Files.deleteIfExists(temp);
+                    } catch (IOException ignored) {
+                        // A leftover temp file is harmless.
+                    }
+                }
+            }
+        }
     }
 
     /**
