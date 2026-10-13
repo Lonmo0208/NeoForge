@@ -49,8 +49,14 @@ public abstract class CommonModLoader {
         ModLoader.gatherAndInitializeMods(syncExecutor, ModWorkManager.parallelExecutor(), periodicTask);
 
         ModLoader.runInitTask("Registry initialization", syncExecutor, periodicTask, () -> {
-            RegistryManager.postNewRegistryEvent();
+            // NeoFobric: open the built-in registries before the NewRegistry events fire. A Fabric mod's
+            // mixin can reach the built-in registries from inside those events - wover registers its
+            // structure type from a mixin on RegistryDataLoader's static initialiser, which the data pack
+            // registry event triggers - and Fabric never freezes them, so the upstream order (events, then
+            // unfreeze) turns that into a hard crash on a dedicated server: "Registry is already frozen
+            // (trying to add key ResourceKey[minecraft:worldgen/structure_type / wover:random_nbt_structure])".
             GameData.unfreezeData();
+            RegistryManager.postNewRegistryEvent();
             GameData.postRegisterEvents();
             // NeoFobric: run the Fabric Loader entrypoints while the registries are still open, so
             // Fabric mods can register their content just like they do in a pure Fabric environment.

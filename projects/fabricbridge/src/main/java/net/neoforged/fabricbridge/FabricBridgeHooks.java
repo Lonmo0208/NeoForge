@@ -786,6 +786,11 @@ public final class FabricBridgeHooks {
             }
         }
 
+        // After the client mods have initialised: Mod Menu fills its mod registry in its own client
+        // initialiser, so the update link has to wait for it (unlike the config link, which reads the
+        // entrypoint declarations directly and runs with the main set).
+        net.neoforged.fabricbridge.compbridlnk.ModMenuUpdateLink.linkModMenuUpdateChecks();
+
         // The client entrypoints are the last Fabric-side chance to register content, so this is where
         // the registry window that runFabricEntrypoints left open closes again (see deferFabricWindow).
         if (fabricWindow != null) {

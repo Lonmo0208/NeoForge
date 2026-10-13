@@ -48,6 +48,8 @@ public final class BridgeSelfCheck {
     private static volatile int ticksInWorld;
     private static volatile boolean canarySent;
     private static volatile int canarySentAtTick = -1;
+    /** The player the JOIN listener saw, for the dedicated-server half of the negotiation readout. */
+    private static volatile Object lastJoinedPlayer;
     private static volatile boolean reported;
     /** Dedicated servers have no client tick to report from, so their verdict rides the server tick instead. */
     private static volatile int ticksWithPlayer;
@@ -167,6 +169,109 @@ public final class BridgeSelfCheck {
         LOGGER.info("[NeoFobric] Fabric networking: {}", String.join(", ", parts));
     }
 
+    /**
+     * Logs what the per-connection channel negotiation produced, on both halves, and names every channel
+     * this side holds a receiver for that the other side did not negotiate - that is the shape of "the mod
+     * is installed on both sides and its payload silently never arrives".
+     *
+     * <p>The readout is also the proof that the negotiation itself ran: Fabric moves it over its own
+     * payload channels, so non-empty sets mean those travelled through NeoForge's handshake in both
+     * directions. Client side that is a singleplayer join into the integrated server just as much as a
+     * multiplayer one; a dedicated run has no client half and answers from the player the JOIN listener
+     * saw.
+     */
+    private static void logNegotiation() {
+        if (!enabled() || !FabricBridge.hasFabricMods()) {
+            return;
+        }
+        if (gameLoader == null) {
+            try {
+                gameLoader = net.fabricmc.loader.impl.launch.FabricLauncherBase.getLauncher().getTargetClassLoader();
+            } catch (Throwable t) {
+                return;
+            }
+        }
+
+        // Client half: `player` exists once the client is in a world.
+        try {
+            var minecraft = Class.forName("net.minecraft.client.Minecraft", false, gameLoader);
+            var instance = minecraft.getMethod("getInstance").invoke(null);
+            var player = instance == null ? null : minecraft.getField("player").get(instance);
+            if (player != null) {
+                var holder = Class.forName("net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking", false, gameLoader);
+                var received = (java.util.Set<?>) holder.getMethod("getReceived").invoke(null);
+                var sendable = (java.util.Set<?>) holder.getMethod("getSendable").invoke(null);
+                var receivers = (java.util.Set<?>) holder.getMethod("getGlobalReceivers").invoke(null);
+                LOGGER.info("[NeoFobric] Fabric negotiation (client): received={}, sendable={}, receivers here={}",
+                        received.size(), sendable.size(), receivers.size());
+                warnUnnegotiated("the server", receivers, received, sendable);
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Self-check could not read the client-side channel negotiation", t);
+        }
+
+        // Server half: the player the JOIN listener saw (integrated servers report through the client half
+        // above, which shows the same connection from the other end).
+        var player = lastJoinedPlayer;
+        if (player != null) {
+            try {
+                var holder = Class.forName("net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking", false, gameLoader);
+                var received = (java.util.Set<?>) invokePerPlayer(holder, "getReceived", player);
+                var sendable = (java.util.Set<?>) invokePerPlayer(holder, "getSendable", player);
+                var receivers = (java.util.Set<?>) holder.getMethod("getGlobalReceivers").invoke(null);
+                if (received != null && sendable != null) {
+                    LOGGER.info("[NeoFobric] Fabric negotiation (server): received={}, sendable={}, receivers here={}",
+                            received.size(), sendable.size(), receivers.size());
+                    warnUnnegotiated("the client", receivers, received, sendable);
+                }
+            } catch (Throwable t) {
+                LOGGER.debug("[NeoFobric] Self-check could not read the server-side channel negotiation", t);
+            }
+        }
+    }
+
+    /**
+     * {@return what the per-player overload of {@code name} answers for this player, or null}
+     *
+     * <p>Its parameter type is looked up by {@code isInstance} rather than by the player's exact class:
+     * the holder declares the overload for the server player and the one for the packet listener.
+     */
+    private static Object invokePerPlayer(Class<?> holder, String name, Object player) {
+        for (var method : holder.getMethods()) {
+            if (method.getName().equals(name) && method.getParameterCount() == 1
+                    && method.getParameterTypes()[0].isInstance(player)) {
+                try {
+                    return method.invoke(null, player);
+                } catch (Throwable t) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Names every receiver channel that appears in neither negotiated set. Whichever way the two sets map
+     * to directions, a channel in neither was not agreed on with the other side, so a payload on it cannot
+     * arrive - and saying so beats letting the sending mod time out silently.
+     */
+    private static void warnUnnegotiated(String otherSide, java.util.Set<?> receivers, java.util.Set<?> setA, java.util.Set<?> setB) {
+        for (var id : receivers) {
+            if (!setA.contains(id) && !setB.contains(id)) {
+                LOGGER.warn("[NeoFobric] Channel {} has a receiver here but {} did not negotiate it - payloads on it will not arrive", id, otherSide);
+            }
+        }
+    }
+
+    /** {@return the server player behind a packet listener, or null} */
+    private static Object playerOf(Object packetListener) {
+        try {
+            return packetListener.getClass().getField("player").get(packetListener);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
     private static boolean enabled() {
         return !"false".equals(System.getProperty("neofobric.selfCheck"));
     }
@@ -241,6 +346,11 @@ public final class BridgeSelfCheck {
                     };
                 }
                 fired.put(label, Boolean.TRUE);
+                if (label.endsWith(".JOIN") && args != null && args.length > 0) {
+                    // ServerPlayConnectionEvents.Join hands the packet listener; its player field answers
+                    // for the per-player channel negotiation on a dedicated run.
+                    lastJoinedPlayer = playerOf(args[0]);
+                }
                 if (label.endsWith(".END_CLIENT_TICK")) {
                     progress();
                 } else if (label.endsWith(".END_SERVER_TICK")) {
@@ -369,6 +479,12 @@ public final class BridgeSelfCheck {
                 canarySent = true;
                 canarySentAtTick = ticksInWorld;
                 sendCanary(instance);
+            }
+
+            // The fabric-channel payload probe rides the same first seconds of the world; its verdict is
+            // printed with the report below.
+            if (ticksInWorld == 30) {
+                BridgePayloadProbe.sendProbeIfReady();
             }
 
             if (ticksInWorld == 200) {
@@ -1186,6 +1302,16 @@ public final class BridgeSelfCheck {
     }
 
     private static void report(Object minecraft, boolean playerSeen) {
+        logNegotiation();
+        var payloadVerdict = BridgePayloadProbe.verdict();
+        if (payloadVerdict != null) {
+            if (payloadVerdict.contains("ok")) {
+                LOGGER.info("[NeoFobric] {}", payloadVerdict);
+            } else {
+                // A payload that never arrives is exactly the silent failure this bridge keeps hunting for.
+                LOGGER.warn("[NeoFobric] {}", payloadVerdict);
+            }
+        }
         var silent = new ArrayList<String>();
         var wired = 0;
         for (var entry : fired.entrySet()) {

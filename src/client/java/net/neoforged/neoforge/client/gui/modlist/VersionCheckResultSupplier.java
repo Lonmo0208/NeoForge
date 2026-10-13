@@ -21,5 +21,7 @@ interface VersionCheckResultSupplier {
             .map(ModContainer::getModInfo)
             .map(VersionChecker::getResult)
             .filter(result -> result.status() == VersionChecker.Status.OUTDATED || result.status() == VersionChecker.Status.BETA_OUTDATED)
-            .orElse(null);
+            // Fabric mods have no FML container to read an update URL from; the bridge runs their Mod Menu
+            // checkers instead and registers what those report (see ModListUpdateChecks).
+            .orElseGet(() -> ModListUpdateChecks.get(modId));
 }

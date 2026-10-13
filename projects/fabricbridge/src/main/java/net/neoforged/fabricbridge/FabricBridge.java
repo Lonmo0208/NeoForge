@@ -161,6 +161,9 @@ public final class FabricBridge {
             invokeIsolated("preLaunch", net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint.class,
                     net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint::onPreLaunch);
             invokeIsolated("main", net.fabricmc.api.ModInitializer.class, net.fabricmc.api.ModInitializer::onInitialize);
+            // The payload round-trip probe registers its own throwaway channels through Fabric's networking
+            // API right where the mods' own registrations happened (see BridgePayloadProbe).
+            BridgePayloadProbe.install();
 
             if (FMLEnvironmentHolder.dist() != Dist.CLIENT) {
                 invokeIsolated("server", net.fabricmc.api.DedicatedServerModInitializer.class,
@@ -201,6 +204,7 @@ public final class FabricBridge {
             clientEntrypointsInvoked = true;
             invokeIsolated("client", net.fabricmc.api.ClientModInitializer.class,
                     net.fabricmc.api.ClientModInitializer::onInitializeClient);
+            BridgePayloadProbe.installClient();
             LOGGER.info("[NeoFobric] Fabric client entrypoints invoked");
             // Second reading of the inventory: the client entrypoints are where the clientbound payloads and
             // receivers get registered, so this line is the one that shows them.
