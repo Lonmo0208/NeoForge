@@ -131,8 +131,20 @@ final class BridgedGameProvider implements GameProvider {
 
     @Override
     public boolean canOpenErrorGui() {
-        // FML owns error reporting.
-        return false;
+        // Mirror the vanilla provider (MinecraftGameProvider#canOpenErrorGui): Fabric's error window may
+        // open on a client, and on a server only when the launch did not ask for nogui. With this false -
+        // it used to be, "FML owns error reporting" - FabricGuiEntry refuses to open its window at all, so
+        // a Fabric mod set that cannot resolve had no window to report itself in and the missing
+        // dependency surfaced as a crash report instead. FML still owns the game's own crash handling;
+        // this flag is only about Fabric's own failures.
+        //
+        // The check reads FML's launch arguments because this provider's own Arguments are never parsed:
+        // nothing calls locateGame, the game was located long before this provider exists.
+        if (FabricBridge.toEnvType(net.neoforged.fml.loading.FMLEnvironment.getDist()) == EnvType.CLIENT) {
+            return true;
+        }
+        var args = java.util.Arrays.asList(getLaunchArguments(false));
+        return !args.contains("nogui") && !args.contains("--nogui");
     }
 
     /**

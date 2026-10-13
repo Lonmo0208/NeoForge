@@ -91,8 +91,16 @@ public final class FabricBridge {
             var start = System.currentTimeMillis();
             ensureLauncherRegistered();
 
-            FabricLoaderImpl.INSTANCE.load();
-            FabricLoaderImpl.INSTANCE.freeze();
+            try {
+                FabricLoaderImpl.INSTANCE.load();
+                FabricLoaderImpl.INSTANCE.freeze();
+            } catch (net.fabricmc.loader.impl.FormattedException e) {
+                // The loader could not resolve the installed mods (a missing dependency being the everyday
+                // case). Fabric's own launcher would show its error window here; report it the same way
+                // and never continue with a half-booted loader.
+                reportFabricLoadFailure(e);
+                throw e;
+            }
             booted = true;
 
             // Read every mod's access widener / class tweaker into Fabric's own ClassTweaker. Knot does
@@ -110,6 +118,32 @@ public final class FabricBridge {
 
             LOGGER.info("[NeoFobric] Fabric Loader {} started with {} Fabric mod(s) in {} ms",
                     FabricLoaderImpl.VERSION, FabricLoaderImpl.INSTANCE.getAllMods().size(), System.currentTimeMillis() - start);
+        }
+    }
+
+    /**
+     * Reports a Fabric mod-set failure - the loader could not resolve the installed mods, a missing
+     * dependency being the everyday case - the way fabric-loader reports it from its own launcher: the
+     * loader's error window on a client, its readable message plus a clean exit on a server.
+     *
+     * <p>The bridge boots the loader directly (no Knot {@code launch()}), so Fabric's own error path
+     * ({@code FabricLauncherBase#handleFormattedException}, protected to Fabric's launcher hierarchy)
+     * never runs. Without this, a mod set that does not resolve never loads a single Fabric mod and the
+     * failure unwinds into FML's bootstrap - either as a crash report with the missing mod's name buried
+     * in a stack trace, or as a logged-and-swallowed early boot whose later symptoms point anywhere but
+     * at the missing dependency. The few lines below are that handler, on public API only, so a Fabric
+     * failure looks the same here as it does in a Fabric-only install.
+     */
+    private static void reportFabricLoadFailure(net.fabricmc.loader.impl.FormattedException exc) {
+        var actual = exc.getMessage() != null ? exc : exc.getCause();
+        LOGGER.error("[NeoFobric] Fabric Loader cannot start with this mod set: {}", exc.getMainText(), actual);
+        var provider = FabricLoaderImpl.INSTANCE.tryGetGameProvider();
+        if (provider == null || !provider.displayCrash(actual, exc.getDisplayedText())) {
+            // Blocks on the client until the window is closed, then exits the JVM; on a server (or with
+            // nogui) no window opens and the log line above is the report, followed by the same exit.
+            net.fabricmc.loader.impl.gui.FabricGuiEntry.displayError(exc.getDisplayedText(), actual, true);
+        } else {
+            System.exit(1);
         }
     }
 
