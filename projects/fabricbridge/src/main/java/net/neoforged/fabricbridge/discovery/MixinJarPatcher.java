@@ -568,6 +568,151 @@ public final class MixinJarPatcher {
     }
 
     /**
+     * Points Fabric API's overlay-condition handler at {@link net.neoforged.fabricbridge.PackOverlayGuard}.
+     *
+     * <p>Two rewrites, both in {@code fabric-resource-conditions-api-v1}'s Pack mixin. The section lookup is
+     * guarded: the handler reads a {@code fabric:overlays} section out of every pack it meets, and a pack
+     * belonging to a NeoForge-build jar of a dual-loader mod names NeoForge-side condition types its parser
+     * does not know - the whole pack read then fails, the pack comes back null, and a mod that trusts it
+     * (Tectonic hands it straight into the pack repository) takes world creation and re-creation down with
+     * an NPE. The guard answers "no section" for packs owned by FML mods, whose {@code fabric:} metadata
+     * belongs to their Fabric twin, and defers everything else to the pack.
+     *
+     * <p>The handler's closing {@code List.copyOf} is redirected too: it would hand the {@code overlaySet}
+     * local back as an immutable list, but NeoForge's own patch to {@code readPackMetadata} appends the
+     * {@code neoforge:overlays} entries to that local with {@code addAll} - which dies on an immutable list
+     * with an {@code UnsupportedOperationException} for every dual-loader pack that has NeoForge-format
+     * overlays. The guard returns an ordinary mutable copy instead.
+     *
+     * @return the rewritten bytes, or null when this class does not carry the handler
+     */
+    private static byte[] guardForeignPackOverlayConditions(byte[] classBytes, String entryName) {
+        if (!"net/fabricmc/fabric/mixin/resource/conditions/PackMixin.class".equals(entryName)) {
+            return null;
+        }
+        try {
+            var node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+            var changed = false;
+            for (var method : node.methods) {
+                if (!"applyOverlayConditions".equals(method.name)) {
+                    continue;
+                }
+                for (var insn : method.instructions) {
+                    if (!(insn instanceof MethodInsnNode call)) {
+                        continue;
+                    }
+                    if ("getMetadataSection".equals(call.name)
+                            && "(Lnet/minecraft/server/packs/metadata/MetadataSectionType;)Ljava/lang/Object;".equals(call.desc)) {
+                        call.setOpcode(Opcodes.INVOKESTATIC);
+                        call.owner = "net/neoforged/fabricbridge/PackOverlayGuard";
+                        call.name = "getOverlaySection";
+                        call.desc = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
+                        call.itf = false;
+                        changed = true;
+                    } else if ("java/util/List".equals(call.owner) && "copyOf".equals(call.name)
+                            && "(Ljava/util/Collection;)Ljava/util/List;".equals(call.desc)) {
+                        call.setOpcode(Opcodes.INVOKESTATIC);
+                        call.owner = "net/neoforged/fabricbridge/PackOverlayGuard";
+                        call.name = "copyOfOverlays";
+                        call.itf = false;
+                        changed = true;
+                    }
+                }
+            }
+            if (!changed) {
+                return null;
+            }
+            var writer = new ClassWriter(0);
+            node.accept(writer);
+            LOGGER.info("[NeoFobric] Guarded foreign-build packs' Fabric overlay conditions in {}", entryName);
+            return writer.toByteArray();
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not guard the Fabric overlay conditions in {}", entryName, t);
+            return null;
+        }
+    }
+
+    /** The vanilla shape of the dynamic-registry element parse Fabric's condition hook anchors on. */
+    private static final String DECODER_PARSE_ANCHOR =
+            "Lcom/mojang/serialization/Decoder;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;";
+    /** The shape the same call compiles to once the platform's conditional wrapper owns the receiver. */
+    private static final String CODEC_PARSE_ANCHOR =
+            "Lcom/mojang/serialization/Codec;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;";
+
+    /**
+     * Points Fabric API's registry-load condition hook at the receiver the platform compiles the parse call on.
+     *
+     * <p>{@code fabric-resource-conditions-api-v1} cancels the element parse of a dynamic registry entry whose
+     * conditions exclude it, anchored on the vanilla shape of that call - {@code Decoder#parse}. NeoForge wraps
+     * the call in a conditional codec before parsing, and Java then compiles the invocation against
+     * {@code Codec} - the vanilla-shaped anchor finds nothing, the hook stays silently unbound, and every
+     * condition in a dynamic registry is ignored. The platform keeps the upstream shape on purpose (NeoForge
+     * mods compiled against it anchor on {@code Codec}; moving the platform to satisfy Fabric instead broke
+     * lithostitched with a fatal injection failure), so the anchor is the side that moves.
+     *
+     * @return the rewritten bytes, or null when this class does not carry the anchor
+     */
+    private static byte[] retargetRegistryParseReceiver(byte[] classBytes, String entryName) {
+        if (!"net/fabricmc/fabric/mixin/resource/conditions/RegistryLoadTaskPendingRegistrationMixin.class".equals(entryName)) {
+            return null;
+        }
+        try {
+            var node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+            var changed = false;
+            for (var method : node.methods) {
+                changed |= rewriteAnchorValues(method.visibleAnnotations);
+                changed |= rewriteAnchorValues(method.invisibleAnnotations);
+            }
+            if (!changed) {
+                return null;
+            }
+            var writer = new ClassWriter(0);
+            node.accept(writer);
+            LOGGER.info("[NeoFobric] Pointed the registry-load parse anchor at the Codec receiver in {}", entryName);
+            return writer.toByteArray();
+        } catch (Throwable t) {
+            LOGGER.warn("[NeoFobric] Could not point the registry-load parse anchor in {}", entryName, t);
+            return null;
+        }
+    }
+
+    /** {@return whether a Decoder-shaped parse anchor was found and swapped for the Codec-shaped one} */
+    @SuppressWarnings("unchecked")
+    private static boolean rewriteAnchorValues(java.util.List<org.objectweb.asm.tree.AnnotationNode> annotations) {
+        if (annotations == null) {
+            return false;
+        }
+        var changed = false;
+        for (var annotation : annotations) {
+            changed |= rewriteAnchorElements(annotation.values);
+        }
+        return changed;
+    }
+
+    /** Walks annotation values (strings, nested annotations, arrays) and swaps the parse anchor wherever it sits. */
+    @SuppressWarnings("unchecked")
+    private static boolean rewriteAnchorElements(java.util.List<Object> values) {
+        if (values == null) {
+            return false;
+        }
+        var changed = false;
+        for (var i = 0; i < values.size(); i++) {
+            var value = values.get(i);
+            if (DECODER_PARSE_ANCHOR.equals(value)) {
+                values.set(i, CODEC_PARSE_ANCHOR);
+                changed = true;
+            } else if (value instanceof org.objectweb.asm.tree.AnnotationNode nested) {
+                changed |= rewriteAnchorElements(nested.values);
+            } else if (value instanceof java.util.List<?> nestedList) {
+                changed |= rewriteAnchorElements((java.util.List<Object>) nestedList);
+            }
+        }
+        return changed;
+    }
+
+    /**
      * Temporary diagnostic for the connected-textures pipeline, off unless asked for with
      * {@code -Dneofobric.debugContinuity=true}.
      *
@@ -5201,6 +5346,16 @@ public final class MixinJarPatcher {
                 var resourceLookupRedirected = redirectFabricModResourceLookup(versionMoved, jarPath);
                 if (resourceLookupRedirected != null) {
                     versionMoved = resourceLookupRedirected;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var overlayConditionsGuarded = guardForeignPackOverlayConditions(versionMoved, entry.getName());
+                if (overlayConditionsGuarded != null) {
+                    versionMoved = overlayConditionsGuarded;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var registryParseAnchorRetargeted = retargetRegistryParseReceiver(versionMoved, entry.getName());
+                if (registryParseAnchorRetargeted != null) {
+                    versionMoved = registryParseAnchorRetargeted;
                     patched.put(entry.getName(), versionMoved);
                 }
                 var blockStateModelTypesRedirected = redirectFabricBlockStateModelTypes(versionMoved);

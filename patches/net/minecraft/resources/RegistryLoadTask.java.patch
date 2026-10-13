@@ -38,19 +38,14 @@
              );
              this.elementsRegistered = true;
          }
-@@ -103,7 +_,20 @@
+@@ -103,7 +_,15 @@
          ) {
              try (Reader reader = thunk.openAsReader()) {
                  JsonElement json = StrictJsonParser.parse(reader);
 -                return Either.left(elementDecoder.parse(ops, json).getOrThrow());
 +
 +                // Neo: Allow a condition to skip the entire element, in which case we return a special marker error to skip it in the loader. Look for uses of SKIPPED_ELEMENT_MARKER
-+                // NeoFobric: declared as the decoder interface (rather than with var) so the parse call below
-+                // keeps the vanilla instruction owner - Fabric API's resource conditions bind their hook to
-+                // Decoder#parse, and with the codec's own type as the receiver the call would be compiled
-+                // against Codec, which silently leaves their hook unbound and every condition in a dynamic
-+                // registry ignored.
-+                Decoder<Optional<T>> conditionalDecoder = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodec(net.neoforged.neoforge.common.util.NeoForgeExtraCodecs.decodeOnly(elementDecoder));
++                var conditionalDecoder = net.neoforged.neoforge.common.conditions.ConditionalOps.createConditionalCodec(net.neoforged.neoforge.common.util.NeoForgeExtraCodecs.decodeOnly(elementDecoder));
 +                var candidate = conditionalDecoder.parse(ops, json).getOrThrow();
 +                if (candidate.isPresent()) {
 +                    return Either.left(candidate.get());
