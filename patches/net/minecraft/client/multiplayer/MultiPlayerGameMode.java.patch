@@ -38,6 +38,17 @@
          }
  
          if (SharedConstants.DEBUG_BLOCK_BREAK) {
+@@ -148,6 +_,10 @@
+         return changed;
+     }
+ 
++    /** NeoFobric: carries the start-destroy event into the lambda below without adding a capture - a
++     *  Fabric mod wraps that lambda by its vanilla descriptor, and an extra capture changes it. */
++    private net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock neoforge$startDestroyBlockEvent;
++
+     public boolean startDestroyBlock(BlockPos pos, Direction direction) {
+         if (this.minecraft.player.blockActionRestricted(this.minecraft.level, pos, this.localPlayerMode)) {
+             return false;
 @@ -165,6 +_,7 @@
              }
  
@@ -50,7 +61,7 @@
                  this.connection
                      .send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, this.destroyBlockPos, direction));
              }
-+            net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event = net.neoforged.neoforge.common.CommonHooks.onLeftClickBlock(this.minecraft.player, pos, direction, ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK);
++            this.neoforge$startDestroyBlockEvent = net.neoforged.neoforge.common.CommonHooks.onLeftClickBlock(this.minecraft.player, pos, direction, ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK);
  
              BlockState state = this.minecraft.level.getBlockState(pos);
              this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, pos, state, 0.0F);
@@ -58,24 +69,26 @@
              this.startPrediction(this.minecraft.level, sequence -> {
                  boolean notAir = !state.isAir();
                  if (notAir && this.destroyProgress == 0.0F) {
-+                    if (event.getUseBlock() != net.minecraft.util.TriState.FALSE)
++                    if (this.neoforge$startDestroyBlockEvent.getUseBlock() != net.minecraft.util.TriState.FALSE)
                      state.attack(this.minecraft.level, pos, this.minecraft.player);
                  }
  
 +                ServerboundPlayerActionPacket packet = new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
-+                if (event.getUseItem().isFalse()) return packet;
++                if (this.neoforge$startDestroyBlockEvent.getUseItem().isFalse()) return packet;
                  if (notAir && state.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), pos) >= 1.0F) {
                      this.destroyBlock(pos);
                  } else {
-@@ -202,7 +_,7 @@
+@@ -202,8 +_,9 @@
                      this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, this.getDestroyStage());
                  }
  
 -                return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
 +                return packet;
              });
++            this.neoforge$startDestroyBlockEvent = null;
          }
  
+         return true;
 @@ -242,6 +_,7 @@
              }
  

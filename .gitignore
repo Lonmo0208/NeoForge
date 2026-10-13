@@ -91,3 +91,5 @@ build
 
 # NeoFobric: the static mixin reference check the handoff work order tells you to run
 !/tools/mixin-targets
+/tools/mixin-targets/out/
+/tools/mixin-targets/report.txt

@@ -1,6 +1,19 @@
 --- a/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java
 +++ b/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java
-@@ -34,7 +_,15 @@
+@@ -29,11 +_,23 @@
+     private static final Logger LOGGER = LogUtils.getLogger();
+     private static final FileToIdConverter ATLAS_INFO_CONVERTER = new FileToIdConverter("atlases", ".json");
+     private final List<SpriteSource> sources;
++    /**
++     * NeoFobric: the atlas metadata the overload below hands to the vanilla-shaped method above. It travels
++     * through this ThreadLocal rather than a parameter because that method's locals must stay exactly as
++     * vanilla had them - a Fabric mixin captures them with {@code LocalCapture.CAPTURE_FAILHARD} to wrap the
++     * {@code ImmutableList.builder()} call - and through a field rather than a local because atlas loads run
++     * on the sprite-load executor, where several atlases load in parallel.
++     */
++    private static final ThreadLocal<java.util.Set<net.minecraft.server.packs.metadata.MetadataSectionType<?>>> NEOFORGE_ADDITIONAL_METADATA = ThreadLocal.withInitial(java.util.Set::of);
+ 
+     private SpriteSourceList(List<SpriteSource> sources) {
          this.sources = sources;
      }
  
@@ -9,19 +22,30 @@
 +     */
 +    @Deprecated
      public List<SpriteSource.Loader> list(ResourceManager resourceManager) {
-+        return this.list(resourceManager, java.util.Set.of());
-+    }
-+
-+    public List<SpriteSource.Loader> list(ResourceManager resourceManager, java.util.Set<net.minecraft.server.packs.metadata.MetadataSectionType<?>> additionalMetadata) {
          final Map<Identifier, SpriteSource.DiscardableLoader> sprites = new HashMap<>();
          SpriteSource.Output output = new SpriteSource.Output() {
-             @Override
-@@ -58,7 +_,7 @@
+@@ -58,11 +_,23 @@
                  }
              }
          };
 -        this.sources.forEach(s -> s.run(resourceManager, output));
-+        this.sources.forEach(s -> s.run(resourceManager, output, additionalMetadata));
++        this.sources.forEach(s -> s.run(resourceManager, output, NEOFORGE_ADDITIONAL_METADATA.get()));
          Builder<SpriteSource.Loader> result = ImmutableList.builder();
          result.add(loader -> MissingTextureAtlasSprite.create());
          result.addAll(sprites.values());
+         return result.build();
++    }
++
++    public List<SpriteSource.Loader> list(ResourceManager resourceManager, java.util.Set<net.minecraft.server.packs.metadata.MetadataSectionType<?>> additionalMetadata) {
++        // NeoFobric: this overload feeds the metadata through the ThreadLocal and runs the vanilla-shaped
++        // method above - the per-atlas call site in SpriteLoader goes through here, so the body with its
++        // builder call and its locals stays where the Fabric mixin and the vanilla shape expect it.
++        NEOFORGE_ADDITIONAL_METADATA.set(additionalMetadata);
++        try {
++            return this.list(resourceManager);
++        } finally {
++            NEOFORGE_ADDITIONAL_METADATA.remove();
++        }
+     }
+ 
+     public static SpriteSourceList load(ResourceManager resourceManager, Identifier atlasId) {
