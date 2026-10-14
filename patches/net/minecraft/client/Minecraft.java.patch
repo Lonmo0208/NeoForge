@@ -1,10 +1,15 @@
 --- a/net/minecraft/client/Minecraft.java
 +++ b/net/minecraft/client/Minecraft.java
-@@ -282,6 +_,7 @@
+@@ -282,6 +_,12 @@
      public final LevelExtractor levelExtractor;
      public final LevelRenderer levelRenderer;
      private final EntityRenderDispatcher entityRenderDispatcher;
 +    private final BlockModelResolver blockModelResolver;
++    // NeoFobric: the use-input event lives in a field instead of a local so startUseItem keeps a
++    // vanilla-shaped local variable table at the ItemStack.isEmpty() anchors - Fabric mixins grab
++    // the locals there with LocalCapture.CAPTURE_FAILHARD, which needs every live local to match
++    // vanilla exactly (Architectury's rightClickAir).
++    private net.neoforged.neoforge.client.event.InputEvent.InteractionKeyMappingTriggered useInputEvent;
      private final ItemModelResolver itemModelResolver;
      private final MapRenderer mapRenderer;
      public final ParticleEngine particleEngine;
@@ -289,9 +294,9 @@
                  }
  
                  for (InteractionHand hand : InteractionHand.values()) {
-+                    var inputEvent = net.neoforged.neoforge.client.ClientHooks.onClickInput(1, this.options.keyUse, hand);
-+                    if (inputEvent.isCanceled()) {
-+                        if (inputEvent.shouldSwingHand()) this.player.swing(hand);
++                    this.useInputEvent = net.neoforged.neoforge.client.ClientHooks.onClickInput(1, this.options.keyUse, hand);
++                    if (this.useInputEvent.isCanceled()) {
++                        if (this.useInputEvent.shouldSwingHand()) this.player.swing(hand);
 +                        return;
 +                    }
                      ItemStack heldItem = this.player.getItemInHand(hand);
@@ -302,7 +307,7 @@
                                  if (this.player.isWithinEntityInteractionRange(entity, 0.0)
                                      && this.gameMode.interact(this.player, entity, entityHit, hand) instanceof InteractionResult.Success success) {
 -                                    if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
-+                                    if (success.swingSource() == InteractionResult.SwingSource.CLIENT && inputEvent.shouldSwingHand()) {
++                                    if (success.swingSource() == InteractionResult.SwingSource.CLIENT && this.useInputEvent.shouldSwingHand()) {
                                          this.player.swing(hand);
                                      }
  
@@ -311,7 +316,7 @@
                                  InteractionResult useResult = this.gameMode.useItemOn(this.player, hand, blockHit);
                                  if (useResult instanceof InteractionResult.Success success) {
 -                                    if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
-+                                    if (success.swingSource() == InteractionResult.SwingSource.CLIENT && inputEvent.shouldSwingHand()) {
++                                    if (success.swingSource() == InteractionResult.SwingSource.CLIENT && this.useInputEvent.shouldSwingHand()) {
                                          this.player.swing(hand);
                                          if (!heldItem.isEmpty() && (heldItem.getCount() != oldCount || this.player.hasInfiniteMaterials())) {
                                              this.gameRenderer.itemInHandRenderer.itemUsed(hand);
@@ -319,12 +324,12 @@
                          }
                      }
  
-+                    if (heldItem.isEmpty() && (this.hitResult == null || this.hitResult.getType() == HitResult.Type.MISS))
-+                        net.neoforged.neoforge.common.CommonHooks.onEmptyClick(this.player, hand);
++                    if (this.hitResult == null || this.hitResult.getType() == HitResult.Type.MISS)
++                        net.neoforged.neoforge.common.CommonHooks.onEmptyClick(this.player, hand, heldItem);
 +
                      if (!heldItem.isEmpty() && this.gameMode.useItem(this.player, hand) instanceof InteractionResult.Success success) {
 -                        if (success.swingSource() == InteractionResult.SwingSource.CLIENT) {
-+                        if (success.swingSource() == InteractionResult.SwingSource.CLIENT && inputEvent.shouldSwingHand()) {
++                        if (success.swingSource() == InteractionResult.SwingSource.CLIENT && this.useInputEvent.shouldSwingHand()) {
                              this.player.swing(hand);
                          }
  

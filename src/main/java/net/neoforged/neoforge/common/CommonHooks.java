@@ -879,6 +879,19 @@ public class CommonHooks {
         NeoForge.EVENT_BUS.post(new PlayerInteractEvent.RightClickEmpty(player, hand));
     }
 
+    /**
+     * Fires {@link PlayerInteractEvent.RightClickEmpty} only for an empty hand. The emptiness check
+     * lives here rather than in the caller so that {@code Minecraft.startUseItem} does not gain an
+     * extra {@code ItemStack.isEmpty} call, which would shift the call sites Fabric mixins target
+     * by ordinal.
+     */
+    public static void onEmptyClick(Player player, InteractionHand hand, ItemStack stack) {
+        if (!stack.isEmpty()) {
+            return;
+        }
+        onEmptyClick(player, hand);
+    }
+
     public static void onEmptyLeftClick(Player player) {
         NeoForge.EVENT_BUS.post(new PlayerInteractEvent.LeftClickEmpty(player));
     }

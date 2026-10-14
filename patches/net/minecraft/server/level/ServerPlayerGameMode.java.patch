@@ -30,18 +30,28 @@
                      blockState.attack(this.level, pos, this.player);
                      progress = blockState.getDestroyProgress(this.player, this.player.level(), pos);
                  }
-@@ -258,8 +_,10 @@
+@@ -258,12 +_,16 @@
      }
  
      public boolean destroyBlock(BlockPos pos) {
-+        // Neo: Fire the BlockBreakEvent, and ignore the original ItemStack#canDestroyBlock check since the break event manages the status of it.
-         BlockState state = this.level.getBlockState(pos);
+-        BlockState state = this.level.getBlockState(pos);
 -        if (!this.player.getMainHandItem().canDestroyBlock(state, this.level, pos, this.player)) {
-+        var event = net.neoforged.neoforge.common.CommonHooks.fireBlockBreak(level, gameModeForPlayer, player, pos, state);
-+        if (event.isCanceled()) {
-             return false;
-         }
- 
+-            return false;
+-        }
+-
++        // Neo: Fire the BlockBreakEvent, and ignore the original ItemStack#canDestroyBlock check since the break event manages the status of it.
++        // NeoFobric: blockEntity is looked up before state, and the event is not kept in a local, so the
++        // local variable table at the BlockState.getBlock() call stays vanilla-shaped (blockEntity,
++        // blockState) - Fabric mixins capture those locals there with LocalCapture.CAPTURE_FAILHARD.
+         BlockEntity blockEntity = this.level.getBlockEntity(pos);
++        BlockState state = this.level.getBlockState(pos);
++        if (net.neoforged.neoforge.common.CommonHooks.fireBlockBreak(level, gameModeForPlayer, player, pos, state).isCanceled()) {
++            return false;
++        }
++
+         Block block = state.getBlock();
+         if (block instanceof GameMasterBlock && !this.player.canUseGameMasterBlocks()) {
+             this.level.sendBlockUpdated(pos, state, state, 3);
 @@ -275,30 +_,66 @@
          }
  

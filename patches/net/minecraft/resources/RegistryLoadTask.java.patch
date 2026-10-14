@@ -10,7 +10,7 @@
      private final Object registryWriteLock = new Object();
      protected final RegistryDataLoader.RegistryData<T> data;
      private final WritableRegistry<T> registry;
-@@ -35,9 +_,11 @@
+@@ -35,12 +_,76 @@
      private volatile boolean elementsRegistered;
  
      protected RegistryLoadTask(RegistryDataLoader.RegistryData<T> data, Lifecycle lifecycle, Map<ResourceKey<?>, Exception> loadingErrors) {
@@ -86,6 +86,8 @@
 +    }
 +
      protected ResourceKey<? extends Registry<T>> registryKey() {
+         return this.registry.key();
+     }
 @@ -64,7 +_,13 @@
              elements.forEach(
                  element -> element.value
