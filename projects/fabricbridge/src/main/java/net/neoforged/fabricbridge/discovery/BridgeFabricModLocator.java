@@ -272,9 +272,15 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 var shadowed = duplicatesHere == null ? platformPackages
                         : platformPackages.isEmpty() ? duplicatesHere
                                 : union(duplicatesHere, platformPackages);
-                contentFilters.add(shadowed.isEmpty()
+                var danglingServices = danglingServiceFiles(path, platformPackages);
+                if (!danglingServices.isEmpty()) {
+                    LOGGER.info("[NeoFobric] Hid {} service file(s) whose providers live in a"
+                                    + " platform-provided package from {}: {}",
+                            danglingServices.size(), path.getFileName(), danglingServices);
+                }
+                contentFilters.add(shadowed.isEmpty() && danglingServices.isEmpty()
                         ? null
-                        : platformShadowFilter(path, shadowed, shadowedPackages));
+                        : platformShadowFilter(path, shadowed, shadowedPackages, danglingServices));
             } catch (Exception e) {
                 LOGGER.error("[NeoFobric] Failed to open Fabric mod jar {}", path, e);
                 // Un-claim so the file is reported by the regular discovery pipeline instead.
@@ -1504,14 +1510,19 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
 
     /**
      * {@return a filter that hides the classes of {@code jar} living in {@link
-     * #platformProvidedPackages platform-provided packages}} Those classes cannot be part of the
-     * composite module (split package), and the platform implementation is the one that should be
-     * used anyway. Non-class entries (assets, fabric.mod.json, ...) are never filtered. What was
-     * hidden is recorded in {@code shadowedPackages} for the startup report.
+     * #platformProvidedPackages platform-provided packages}, and the {@code META-INF/services} files
+     * named in {@code hiddenServiceFiles}} Those classes cannot be part of the composite module
+     * (split package), and the platform implementation is the one that should be used anyway. Other
+     * non-class entries (assets, fabric.mod.json, ...) are never filtered. What was hidden is
+     * recorded in {@code shadowedPackages} for the startup report.
      */
     private static JarContents.PathFilter platformShadowFilter(
-            Path jar, java.util.Set<String> platformPackages, Map<Path, java.util.Set<String>> shadowedPackages) {
+            Path jar, java.util.Set<String> platformPackages, Map<Path, java.util.Set<String>> shadowedPackages,
+            java.util.Set<String> hiddenServiceFiles) {
         return relativePath -> {
+            if (hiddenServiceFiles.contains(relativePath)) {
+                return false;
+            }
             var packageName = packageOfEntry(relativePath);
             if (packageName == null || !platformPackages.contains(packageName)) {
                 return true;
@@ -1520,6 +1531,53 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                     .add(packageName);
             return false;
         };
+    }
+
+    /**
+     * {@return the {@code META-INF/services} files of {@code jar} whose listed providers live in a
+     * platform-provided package} Filtering the classes of such a package out of the composite leaves
+     * the service file pointing at a class the module no longer contains, and FML's module scan
+     * rejects that outright ({@code InvalidModuleDescriptorException}: service not in this Jar file)
+     * during startup. Annotation processors are the usual occupant: a NeoForge mod nesting its own
+     * flavor of a library whose Fabric twin is loaded through the bridge puts the Fabric copy's
+     * classes behind the platform's (AsyncParticles' mixinsquared next to c2me's Fabric copy).
+     */
+    private static java.util.Set<String> danglingServiceFiles(Path jar, java.util.Set<String> platformPackages) {
+        if (platformPackages.isEmpty()) {
+            return java.util.Set.of();
+        }
+        var dangling = new java.util.HashSet<String>();
+        try (var zip = new java.util.zip.ZipFile(jar.toFile())) {
+            var entries = zip.entries();
+            while (entries.hasMoreElements()) {
+                var entry = entries.nextElement();
+                if (entry.isDirectory() || !entry.getName().startsWith("META-INF/services/")) {
+                    continue;
+                }
+                try (var reader = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(zip.getInputStream(entry), java.nio.charset.StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        var comment = line.indexOf('#');
+                        if (comment >= 0) {
+                            line = line.substring(0, comment);
+                        }
+                        line = line.trim();
+                        if (line.isEmpty()) {
+                            continue;
+                        }
+                        var lastDot = line.lastIndexOf('.');
+                        if (lastDot > 0 && platformPackages.contains(line.substring(0, lastDot))) {
+                            dangling.add(entry.getName());
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not inspect the service files of {}", jar, t);
+        }
+        return dangling;
     }
 
     /**
