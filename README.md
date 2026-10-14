@@ -25,38 +25,101 @@ bug 可能还有很多，兼容性也可能还不够好，**甚至无法和 FFAP
 
 **Fabric API 仓库自带的测试流程**跑完了：服务端套件 **`All 114 required tests passed`** ✓ —— 上游那套 gametest 全量 114 条必测项全绿，这是本仓库最硬的一条证据。客户端套件同样跑到收尾，**唯一没过的是上游测试用例自己内部互斥**（`fabric-tag-api-v1-testmod`：同一个数据包既要给 `sword_efficient` 加 `dirt`、又要移除另一个标签的内容，两条断言要求同一个包"在/不在"，本环境无解）—— 记档的已知差异，不算桥的缺口。桥内置自检：事件清单在客户端 **11/11 wired** ✓，专服没有玩家也能打出报表 ✓。生产安装链：用本仓库构建的安装器装出来的**专服**能起到 `Done`、**客户端**能进游戏。
 
-之后又补跑了几轮把上面这条坐实：① **Fabric API 官方测试包**在客户端重跑 —— 世界正常加载、`LifecycleEventsTest` 跑到 3400+ tick、入口点失败 / 编码失败 / 崩档全部 0；② **专服**带 bclib/wover 全系起服（修复前会崩在注册表冻结窗口，见上）；③ 桥自检新增两条硬证据 —— **Fabric 通道协商读数**（单机 74/41 对 41/74、联机同样对镜；任何"这边有接收器、对面没协商过"的通道都会被点名警告）和**真·payload 往返探针**（现场生成的 payload 走完客户端 → 服务端 → 客户端，判词 `fabric payload round trip ok`）；④ **NeoForge 自带模组列表**现在也给 Fabric 模组显示更新（跑 Mod Menu 的检查器 + 直连 Modrinth 的哈希回退）。装了 c2me 的模组集里事件自检读数是 **10/11**，静默的那条是该模组重写区块系统后的已知行为（文档有档，与桥无关）。
+之后又补跑了几轮把上面这条坐实：① **Fabric API 官方测试包**在客户端重跑 —— 世界正常加载、`LifecycleEventsTest` 跑到 3400+ tick、入口点失败 / 编码失败 / 崩档全部 0；② **专服**带 bclib/wover 全系起服（修复前会崩在注册表冻结窗口，见上）；③ 桥自检新增两条硬证据 —— **Fabric 通道协商读数**（单机 74/41 对 41/74、联机同样对镜；任何"这边有接收器、对面没协商过"的通道都会被点名警告）和**真·payload 往返探针**（现场生成的 payload 走完客户端 → 服务端 → 客户端，判词 `fabric payload round trip ok`）；④ **NeoForge 自带模组列表**现在也给 Fabric 模组显示更新（跑 Mod Menu 的检查器 + 直连 Modrinth 的哈希回退）。装了 c2me 的模组集里事件自检读数是 **10/11**，静默的那条是该模组重写区块系统后的已知行为（文档有档，与桥无关）；⑤ **2026-10-14**：下面列表里的**完整 90 件套**实机进世界并游玩（世界生成全家桶、Create、AE2、TechReborn 等），同日修掉两批"进世界 / 掉线"问题 —— **世界加载注册表链**（"存档进不去 / 数据包错误"）与 **polymer 握手通道 + 26.2 实体常量迁移**（"连接丢失"）；另外 **Architectury 的 Fabric 版现在也能启动并进世界**（按 Fabric 编译、靠 `LocalCapture` 抓局部变量的 mixin，此前会被平台补丁的形状差异打死）。这几项已随 **26.2.0.128** 发布。
 
-### 实测能跑的模组（53 个）
+### 实测能跑的模组（90 个）
 
 ```
-EchoChest-v26.2.0-mc26.2.x-NeoForge          FarmersDelight-26.2-3.6.28+refabricated
-ForgeConfigAPIPort-v26.2.1-mc26.2.x-Fabric   FrozenLib-3.0.3-mc26.2-fabric
-IllagerInvasion-v26.2.0-mc26.2.x-NeoForge    Jade-mc26.2-NeoForge-26.2.10
-MutantMonsters-v26.2.2-mc26.2.x-NeoForge     NetherChested-v26.2.0-mc26.2.x-NeoForge
-PuzzlesLib-v26.2.4-mc26.2.x-NeoForge         RebornCore-6.1.1
-ResourcefulConfig-5.0.1                      TechReborn-6.1.1
-VoxyServer-1.2.4-26.2                        WilderWild-4.3-mc26.2-fabric
-appliedenergistics2-26.2.1-alpha             bagus_lib-26.2-27.7.0
-bclib-26.201.3                               better-end-26.201.3
-better-nether-26.201.3                       biolith-neoforge-3.7.0-beta.1
-byepregen-neoforge-26.2-1.1.2.5              c2me-neoforge-mc26.2-0.4.2-alpha.0.98
-cloth-config-26.2.155-neoforge               continuity-3.0.1+26.2
-create-fly-26.2-rc-2-6.0.9-1                 create_ultimate_factory-2.2.4-fabric-26.2
-delightlib-26.06.23-26.2-fabric              earthmobsmod-26.2-30.5.0
-entityculling-neoforge-1.11.3-mc26.2         exdeorum-5.1
-fabric-api-0.161.0+26.2                      ferritecore-9.0.0-neoforge
-framework-neoforge-26.2-0.13.26              goldenhopper-neoforge-26.2-1.7.0
-guideme-26.2.2-alpha                         iris-fabric/neoforge+mc26.2
-jei-26.2-neoforge-30.39.0.233                mezz_config-26.2-neoforge-0.6.8-standalone
-modmenu-20.0.3                               moredelight-26.06.23-26.2-fabric
-sodium-extra-fabric-0.9.4+mc26.2             sodium-fabric/neoforge+mc26.2
-sophisticatedbackpacks-26.2-3.26.10.2199     sophisticatedcore-26.2-1.5.7.2388
-sophisticatedstorage-26.2-1.5.118.2162       structure_layout_optimizer-1.1.4+26.1-neoforge
-toms_storage_fabric-26.2-2.11.3              twilightforest.re26-26.2-4.8.4207-hotfix-fabric
-voxy-0.2.19-beta                             voxy-extra-0.2.6
-voxy-seam-fix-0.1.0-26.2                     voxy-server-side-fabric
+appleskin-neoforge-mc26.2-3.0.10
+appliedenergistics2-26.2.1-alpha
+architectury-neoforge-21.1.12
+bagus_lib-26.2-27.7.0
+bclib-26.201.3
+better-end-26.201.3
+better-nether-26.201.3
+biolith-neoforge-3.7.0-beta.1
+BiomesOPlenty-neoforge-26.2-26.2.0.0.28
+byepregen-neoforge-26.2-1.1.2.5
+c2me-fabric-mc26.2-0.4.2-alpha.0.60
+c2me-fabric-opts-accel-opencl-mc26.2-0.4.2-alpha.0.60
+Chunky-NeoForge-1.5.4
+cinderscapes-6.1.0-alpha.2
+cloth-config-26.2.155-neoforge
+constructionwand-2.1.3+26.2
+constructionwandpolymer-1.0.1
+continuity-3.0.1+26.2
+create-fly-26.2-rc-2-6.0.9-1
+create_ultimate_factory-2.2.4-fabric-26.2
+cristellib-neoforge-26.2-3.1.13
+delightlib-26.06.23-26.2-fabric
+earthmobsmod-26.2-30.5.0
+EchoChest-v26.2.0-mc26.2.x-NeoForge
+EnchantingInfuser-v26.2.0-mc26.2.x-NeoForge
+enchantment-effects-1.1.0+26.2
+EnchantmentDescriptions-neoforge-MC26.2-26.2.0.2
+enderscape-fabric-3.0.3+mc26.2
+entityculling-neoforge-1.11.3-mc26.2
+EternalNether-v26.2.0-mc26.2.x-NeoForge
+exdeorum-5.1
+fabric-api-0.161.0+26.2
+FarmersDelight-26.2-3.6.28+refabricated
+ferritecore-9.0.0-neoforge
+ForgeConfigAPIPort-v26.2.1-mc26.2.x-Fabric
+framework-neoforge-26.2-0.13.26
+FrozenLib-3.0.3-mc26.2-fabric
+GlitchCore-neoforge-26.2-26.2.0.0.0
+goldenhopper-neoforge-26.2-1.7.0
+guideme-26.2.2-alpha
+IllagerInvasion-v26.2.0-mc26.2.x-NeoForge
+ImmediatelyFast-NeoForge-1.16.5+26.2
+iris-fabric-1.11.2+mc26.2
+Jade-mc26.2-Fabric-26.2.11
+jei-26.2-neoforge-30.42.0.236
+lithium-neoforge-0.25.3+mc26.2
+lithostitched-1.8.0-neoforge-26.2
+mezz_config-26.2-neoforge-0.6.8-standalone
+modernfix-neoforge-5.27.21+mc26.2
+modmenu-20.0.3
+moredelight-26.06.23-26.2-fabric
+MoreSpearEnchantments-fabric-1.1.2+26.2
+MutantMonsters-v26.2.2-mc26.2.x-NeoForge
+NaturesCompass-26.2-3.3.0-neoforge
+NetherChested-v26.2.0-mc26.2.x-NeoForge
+Nullscape_26.2_v1.2.20
+PrickleMC-neoforge-MC26.2-26.2.0.3
+puzzleslib-v26.2.5-mc26.2.x+neoforge
+RebornCore-6.1.1
+ResourcefulConfig-5.0.1
+rusticdelight-fabric-26.2-1.7.0
+ScalableLux-neoforge-0.3.0-alpha.0.16-all
+sodium-extra-fabric-0.9.4+mc26.2
+sodium-fabric-0.9.1+mc26.2
+sophisticatedbackpacks-26.2-3.26.10.2199
+sophisticatedcore-26.2-1.5.9.2396
+sophisticatedstorage-26.2-1.5.119.2171
+Stellarity-6.0.1
+structure_layout_optimizer-1.1.4+26.1-neoforge
+TechReborn-6.1.1
+tectonic-3.0.28-neoforge-26.2
+TerraBlender-neoforge-26.2-26.2.0.0.2
+Terralith_26.2_v2.6.4_Neoforge
+terrestria-8.1.0-beta.2
+toms_storage_fabric-26.2-2.11.3
+trek-B0.6.2
+Trim Patcher-2.1-mc26.2-neoforge
+twilightforest.re26-26.2-4.8.4207-hotfix-fabric
+t_and_t-fabric-neoforge-1.13.11
+ubesdelight-fabric-26.2-0.4.15
+voxy-0.2.19-beta
+voxy-extra-0.2.6
+voxy-seam-fix-0.1.0-26.2
+voxy-server-side-fabric
+VoxyServer-1.2.4-26.2
+WilderWild-4.3-mc26.2-fabric
 worldweaver-26.201.3
+yet_another_config_lib_v3-3.9.7+26.2-neoforge
+[26.2+]MYEC-v1.10.1-NeoForge
+[Neoforge]ctov-26-2-4.1.0
 ```
 
 > 这一批能"进游戏并正常玩一阵" —— 不代表每个功能都对。
@@ -137,38 +200,101 @@ There are probably still plenty of bugs, compatibility may still be rough, and i
 
 We ran **Fabric API's own test flow** end to end: the server suite reports **`All 114 required tests passed`** ✓ — every one of upstream's required gametests is green, and that is the strongest evidence this repository has. The client suite also runs to completion; **the only failure is an upstream test case that contradicts itself** (`fabric-tag-api-v1-testmod`: one data pack both adds `dirt` to `sword_efficient` and removes content from another tag, so two assertions demand the same pack be present and absent at once — unsolvable here). That is a documented known difference, not a gap in the bridge. The bridge's built-in self-check reports its event inventory as **11/11 wired** on the client ✓, and a dedicated server prints the report even with no player ✓. Production install chain: a dedicated server installed with the installer built from this repository reaches `Done`, and the client reaches the game.
 
-Several follow-up rounds hardened exactly that claim: (1) the **official Fabric API test mods** ran again on the client — the world loads, `LifecycleEventsTest` reaches 3400+ ticks, and entrypoint failures / encoding failures / crashes are all zero; (2) a **dedicated server** boots with the whole bclib/wover family (it used to crash on the registry freeze window mentioned above); (3) the bridge's self-check grew two hard evidences: the **Fabric channel negotiation readout** (74/41 versus 41/74 in singleplayer, mirrored on a server; any channel whose receiver the other side never negotiated is named as a warning) and a **real payload round-trip probe** (a payload generated on the spot travels client → server → client; the verdict reads `fabric payload round trip ok`); (4) the **NeoForge mod list now shows updates for Fabric mods too** (Mod Menu's own checkers plus a direct Modrinth hash lookup). On a pack that includes c2me the event self-check reads **10/11** — the silent row is that mod's own documented behaviour as it rewrites the chunk system, not the bridge.
+Several follow-up rounds hardened exactly that claim: (1) the **official Fabric API test mods** ran again on the client — the world loads, `LifecycleEventsTest` reaches 3400+ ticks, and entrypoint failures / encoding failures / crashes are all zero; (2) a **dedicated server** boots with the whole bclib/wover family (it used to crash on the registry freeze window mentioned above); (3) the bridge's self-check grew two hard evidences: the **Fabric channel negotiation readout** (74/41 versus 41/74 in singleplayer, mirrored on a server; any channel whose receiver the other side never negotiated is named as a warning) and a **real payload round-trip probe** (a payload generated on the spot travels client → server → client; the verdict reads `fabric payload round trip ok`); (4) the **NeoForge mod list now shows updates for Fabric mods too** (Mod Menu's own checkers plus a direct Modrinth hash lookup). On a pack that includes c2me the event self-check reads **10/11** — the silent row is that mod's own documented behaviour as it rewrites the chunk system, not the bridge. (5) 2026-10-14: the full 90-mod set listed below launches into the world and plays (worldgen family, Create, AE2, TechReborn and more), and two more batches of world-load / disconnect problems were fixed the same day — the **world-load registry chain** ("the save will not load / datapack errors") and **polymer's handshake channel plus 26.2's moved entity constants** ("connection lost"); additionally **architectury-fabric can now boot and open a world** (Fabric-compiled `LocalCapture` mixins used to be killed by the platform patches' shapes). All of this shipped in **26.2.0.128**.
 
-### The 53 mods that have actually been run
+### The 90 mods that have actually been run
 
 ```
-EchoChest-v26.2.0-mc26.2.x-NeoForge          FarmersDelight-26.2-3.6.28+refabricated
-ForgeConfigAPIPort-v26.2.1-mc26.2.x-Fabric   FrozenLib-3.0.3-mc26.2-fabric
-IllagerInvasion-v26.2.0-mc26.2.x-NeoForge    Jade-mc26.2-NeoForge-26.2.10
-MutantMonsters-v26.2.2-mc26.2.x-NeoForge     NetherChested-v26.2.0-mc26.2.x-NeoForge
-PuzzlesLib-v26.2.4-mc26.2.x-NeoForge         RebornCore-6.1.1
-ResourcefulConfig-5.0.1                      TechReborn-6.1.1
-VoxyServer-1.2.4-26.2                        WilderWild-4.3-mc26.2-fabric
-appliedenergistics2-26.2.1-alpha             bagus_lib-26.2-27.7.0
-bclib-26.201.3                               better-end-26.201.3
-better-nether-26.201.3                       biolith-neoforge-3.7.0-beta.1
-byepregen-neoforge-26.2-1.1.2.5              c2me-neoforge-mc26.2-0.4.2-alpha.0.98
-cloth-config-26.2.155-neoforge               continuity-3.0.1+26.2
-create-fly-26.2-rc-2-6.0.9-1                 create_ultimate_factory-2.2.4-fabric-26.2
-delightlib-26.06.23-26.2-fabric              earthmobsmod-26.2-30.5.0
-entityculling-neoforge-1.11.3-mc26.2         exdeorum-5.1
-fabric-api-0.161.0+26.2                      ferritecore-9.0.0-neoforge
-framework-neoforge-26.2-0.13.26              goldenhopper-neoforge-26.2-1.7.0
-guideme-26.2.2-alpha                         iris-fabric/neoforge+mc26.2
-jei-26.2-neoforge-30.39.0.233                mezz_config-26.2-neoforge-0.6.8-standalone
-modmenu-20.0.3                               moredelight-26.06.23-26.2-fabric
-sodium-extra-fabric-0.9.4+mc26.2             sodium-fabric/neoforge+mc26.2
-sophisticatedbackpacks-26.2-3.26.10.2199     sophisticatedcore-26.2-1.5.7.2388
-sophisticatedstorage-26.2-1.5.118.2162       structure_layout_optimizer-1.1.4+26.1-neoforge
-toms_storage_fabric-26.2-2.11.3              twilightforest.re26-26.2-4.8.4207-hotfix-fabric
-voxy-0.2.19-beta                             voxy-extra-0.2.6
-voxy-seam-fix-0.1.0-26.2                     voxy-server-side-fabric
+appleskin-neoforge-mc26.2-3.0.10
+appliedenergistics2-26.2.1-alpha
+architectury-neoforge-21.1.12
+bagus_lib-26.2-27.7.0
+bclib-26.201.3
+better-end-26.201.3
+better-nether-26.201.3
+biolith-neoforge-3.7.0-beta.1
+BiomesOPlenty-neoforge-26.2-26.2.0.0.28
+byepregen-neoforge-26.2-1.1.2.5
+c2me-fabric-mc26.2-0.4.2-alpha.0.60
+c2me-fabric-opts-accel-opencl-mc26.2-0.4.2-alpha.0.60
+Chunky-NeoForge-1.5.4
+cinderscapes-6.1.0-alpha.2
+cloth-config-26.2.155-neoforge
+constructionwand-2.1.3+26.2
+constructionwandpolymer-1.0.1
+continuity-3.0.1+26.2
+create-fly-26.2-rc-2-6.0.9-1
+create_ultimate_factory-2.2.4-fabric-26.2
+cristellib-neoforge-26.2-3.1.13
+delightlib-26.06.23-26.2-fabric
+earthmobsmod-26.2-30.5.0
+EchoChest-v26.2.0-mc26.2.x-NeoForge
+EnchantingInfuser-v26.2.0-mc26.2.x-NeoForge
+enchantment-effects-1.1.0+26.2
+EnchantmentDescriptions-neoforge-MC26.2-26.2.0.2
+enderscape-fabric-3.0.3+mc26.2
+entityculling-neoforge-1.11.3-mc26.2
+EternalNether-v26.2.0-mc26.2.x-NeoForge
+exdeorum-5.1
+fabric-api-0.161.0+26.2
+FarmersDelight-26.2-3.6.28+refabricated
+ferritecore-9.0.0-neoforge
+ForgeConfigAPIPort-v26.2.1-mc26.2.x-Fabric
+framework-neoforge-26.2-0.13.26
+FrozenLib-3.0.3-mc26.2-fabric
+GlitchCore-neoforge-26.2-26.2.0.0.0
+goldenhopper-neoforge-26.2-1.7.0
+guideme-26.2.2-alpha
+IllagerInvasion-v26.2.0-mc26.2.x-NeoForge
+ImmediatelyFast-NeoForge-1.16.5+26.2
+iris-fabric-1.11.2+mc26.2
+Jade-mc26.2-Fabric-26.2.11
+jei-26.2-neoforge-30.42.0.236
+lithium-neoforge-0.25.3+mc26.2
+lithostitched-1.8.0-neoforge-26.2
+mezz_config-26.2-neoforge-0.6.8-standalone
+modernfix-neoforge-5.27.21+mc26.2
+modmenu-20.0.3
+moredelight-26.06.23-26.2-fabric
+MoreSpearEnchantments-fabric-1.1.2+26.2
+MutantMonsters-v26.2.2-mc26.2.x-NeoForge
+NaturesCompass-26.2-3.3.0-neoforge
+NetherChested-v26.2.0-mc26.2.x-NeoForge
+Nullscape_26.2_v1.2.20
+PrickleMC-neoforge-MC26.2-26.2.0.3
+puzzleslib-v26.2.5-mc26.2.x+neoforge
+RebornCore-6.1.1
+ResourcefulConfig-5.0.1
+rusticdelight-fabric-26.2-1.7.0
+ScalableLux-neoforge-0.3.0-alpha.0.16-all
+sodium-extra-fabric-0.9.4+mc26.2
+sodium-fabric-0.9.1+mc26.2
+sophisticatedbackpacks-26.2-3.26.10.2199
+sophisticatedcore-26.2-1.5.9.2396
+sophisticatedstorage-26.2-1.5.119.2171
+Stellarity-6.0.1
+structure_layout_optimizer-1.1.4+26.1-neoforge
+TechReborn-6.1.1
+tectonic-3.0.28-neoforge-26.2
+TerraBlender-neoforge-26.2-26.2.0.0.2
+Terralith_26.2_v2.6.4_Neoforge
+terrestria-8.1.0-beta.2
+toms_storage_fabric-26.2-2.11.3
+trek-B0.6.2
+Trim Patcher-2.1-mc26.2-neoforge
+twilightforest.re26-26.2-4.8.4207-hotfix-fabric
+t_and_t-fabric-neoforge-1.13.11
+ubesdelight-fabric-26.2-0.4.15
+voxy-0.2.19-beta
+voxy-extra-0.2.6
+voxy-seam-fix-0.1.0-26.2
+voxy-server-side-fabric
+VoxyServer-1.2.4-26.2
+WilderWild-4.3-mc26.2-fabric
 worldweaver-26.201.3
+yet_another_config_lib_v3-3.9.7+26.2-neoforge
+[26.2+]MYEC-v1.10.1-NeoForge
+[Neoforge]ctov-26-2-4.1.0
 ```
 
 > This set launches the game and plays for a while — it does **not** mean every feature is correct.
