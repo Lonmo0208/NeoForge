@@ -707,6 +707,18 @@ public final class FabricBridgeHooks {
         try {
             for (var mod : net.fabricmc.loader.api.FabricLoader.getInstance().getAllMods()) {
                 var id = mod.getMetadata().getId();
+
+                // NeoFobric: the bridge's own exposure shells (neofobric-platform-<id>.jar, built by
+                // BridgeFabricModLocator#exposePlatformMods) are NeoForge mods wearing a fabric.mod.json so
+                // that isModLoaded probes answer true. They are not Fabric mods, and counting their
+                // namespaces here made isFabricChannel claim every NeoForge mod's own payloads: modernfix's
+                // optional load-finished sentinel was routed away from NeoForge's payload handling, its
+                // client handler never ran, the integrated server's load suspension was never lifted and
+                // all entity ticking stayed frozen for the whole session.
+                if (isPlatformExposureShell(mod)) {
+                    continue;
+                }
+
                 namespaces.add(id);
                 // Mod families share a namespace that is the first segment of their ids: polymer-core
                 // and polymer-networking send on "polymer", wover-core on "wover", c2me-base on "c2me".
@@ -720,6 +732,21 @@ public final class FabricBridgeHooks {
         }
         fabricNamespaces = namespaces;
         return namespaces;
+    }
+
+    /** {@return whether this mod is one of the bridge's own NeoForge exposure shells} */
+    private static boolean isPlatformExposureShell(net.fabricmc.loader.api.ModContainer mod) {
+        try {
+            for (var path : mod.getOrigin().getPaths()) {
+                var name = path.getFileName();
+                if (name != null && name.toString().startsWith("neofobric-platform-")) {
+                    return true;
+                }
+            }
+        } catch (Throwable ignored) {
+            // An origin that cannot list paths is not one of ours.
+        }
+        return false;
     }
 
     private static volatile java.util.Set<String> fabricNamespaces;
