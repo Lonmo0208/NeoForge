@@ -1120,7 +1120,15 @@ public class EventHooks {
      */
     @ApiStatus.Internal
     public static void onCreativeModeTabBuildContents(CreativeModeTab tab, CreativeModeTab.DisplayItemsGenerator originalGenerator, CreativeModeTab.ItemDisplayParameters params, CreativeModeTab.Output output) {
-        var tabKey = BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(tab).orElseThrow();
+        var tabKey = BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(tab);
+        if (tabKey.isEmpty()) {
+            // Bridged Fabric mods can surface tabs that were never registered in the vanilla
+            // creative-tab registry (polymer appends its client item groups to the tab stream). Such a
+            // tab has no key the event could address, so skip the event and let the vanilla generator
+            // feed the display builder directly, as it does on Fabric.
+            originalGenerator.accept(params, output);
+            return;
+        }
 
         final var parentEntries = new InsertableLinkedOpenCustomHashSet<ItemStack>(ItemStackLinkedSet.TYPE_AND_TAG);
         final var searchEntries = new InsertableLinkedOpenCustomHashSet<ItemStack>(ItemStackLinkedSet.TYPE_AND_TAG);
@@ -1141,7 +1149,7 @@ public class EventHooks {
             }
         });
 
-        ModLoader.postEvent(new BuildCreativeModeTabContentsEvent(tab, tabKey, params, parentEntries, searchEntries));
+        ModLoader.postEvent(new BuildCreativeModeTabContentsEvent(tab, tabKey.get(), params, parentEntries, searchEntries));
 
         for (var entry : parentEntries) {
             output.accept(entry, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
