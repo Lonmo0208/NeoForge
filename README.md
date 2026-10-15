@@ -25,15 +25,17 @@ bug 可能还有很多，兼容性也可能还不够好，**甚至无法和 FFAP
 
 **Fabric API 仓库自带的测试流程**跑完了：服务端套件 **`All 114 required tests passed`** ✓ —— 上游那套 gametest 全量 114 条必测项全绿，这是本仓库最硬的一条证据。客户端套件同样跑到收尾，**唯一没过的是上游测试用例自己内部互斥**（`fabric-tag-api-v1-testmod`：同一个数据包既要给 `sword_efficient` 加 `dirt`、又要移除另一个标签的内容，两条断言要求同一个包"在/不在"，本环境无解）—— 记档的已知差异，不算桥的缺口。桥内置自检：事件清单在客户端 **11/11 wired** ✓，专服没有玩家也能打出报表 ✓。生产安装链：用本仓库构建的安装器装出来的**专服**能起到 `Done`、**客户端**能进游戏。
 
-之后又补跑了几轮把上面这条坐实：① **Fabric API 官方测试包**在客户端重跑 —— 世界正常加载、`LifecycleEventsTest` 跑到 3400+ tick、入口点失败 / 编码失败 / 崩档全部 0；② **专服**带 bclib/wover 全系起服（修复前会崩在注册表冻结窗口，见上）；③ 桥自检新增两条硬证据 —— **Fabric 通道协商读数**（单机 74/41 对 41/74、联机同样对镜；任何"这边有接收器、对面没协商过"的通道都会被点名警告）和**真·payload 往返探针**（现场生成的 payload 走完客户端 → 服务端 → 客户端，判词 `fabric payload round trip ok`）；④ **NeoForge 自带模组列表**现在也给 Fabric 模组显示更新（跑 Mod Menu 的检查器 + 直连 Modrinth 的哈希回退）。装了 c2me 的模组集里事件自检读数是 **10/11**，静默的那条是该模组重写区块系统后的已知行为（文档有档，与桥无关）；⑤ **2026-10-14**：下面列表里的**完整 90 件套**实机进世界并游玩（世界生成全家桶、Create、AE2、TechReborn 等），同日修掉两批"进世界 / 掉线"问题 —— **世界加载注册表链**（"存档进不去 / 数据包错误"）与 **polymer 握手通道 + 26.2 实体常量迁移**（"连接丢失"）；另外 **Architectury 的 Fabric 版现在也能启动并进世界**（按 Fabric 编译、靠 `LocalCapture` 抓局部变量的 mixin，此前会被平台补丁的形状差异打死）。这几项已随 **26.2.0.128** 发布。
+之后又补跑了几轮把上面这条坐实：① **Fabric API 官方测试包**在客户端重跑 —— 世界正常加载、`LifecycleEventsTest` 跑到 3400+ tick、入口点失败 / 编码失败 / 崩档全部 0；② **专服**带 bclib/wover 全系起服（修复前会崩在注册表冻结窗口，见上）；③ 桥自检新增两条硬证据 —— **Fabric 通道协商读数**（单机 74/41 对 41/74、联机同样对镜；任何"这边有接收器、对面没协商过"的通道都会被点名警告）和**真·payload 往返探针**（现场生成的 payload 走完客户端 → 服务端 → 客户端，判词 `fabric payload round trip ok`）；④ **NeoForge 自带模组列表**现在也给 Fabric 模组显示更新（跑 Mod Menu 的检查器 + 直连 Modrinth 的哈希回退）。装了 c2me 的模组集里事件自检读数是 **10/11**，静默的那条是该模组重写区块系统后的已知行为（文档有档，与桥无关）；⑤ **2026-10-14**：当时列表里的**完整 90 件套**实机进世界并游玩（世界生成全家桶、Create、AE2、TechReborn 等），同日修掉两批"进世界 / 掉线"问题 —— **世界加载注册表链**（"存档进不去 / 数据包错误"）与 **polymer 握手通道 + 26.2 实体常量迁移**（"连接丢失"）；另外 **Architectury 的 Fabric 版现在也能启动并进世界**（按 Fabric 编译、靠 `LocalCapture` 抓局部变量的 mixin，此前会被平台补丁的形状差异打死）。这几项已随 **26.2.0.128** 发布。**2026-10-15/16**：把这套**完整 98 件套**（列表已更新）实机跑通 —— 进世界、挖方块、**掉落物拾取**、**创造飞行切生存正常摔落**全部通过；Fabric API 官方测试包在客户端再次全绿（`LifecycleEventsTest` 跑到 6000+ tick，断言 / 编码 / 崩档全 0）；同时修掉三个深坑：**桥把 NeoForge 模组自己的自定义包误判成 Fabric 通道**（modernfix 的加载挂起哨兵包被丢弃，服务端整局冻结 —— 表现为掉落物捡不起来、创造切生存在空中不落）、**分包器测量绕过了编码器的包上下文**（polymer 类模组在 `level_event` 上掉线）、**创造模式物品栏在未注册 tab 上崩溃**（polymer 模组集）。已并入 **26.2.0.129**。
 
-### 实测能跑的模组（90 个）
+### 实测能跑的模组（98 个）
 
 ```
 appleskin-neoforge-mc26.2-3.0.10
 appliedenergistics2-26.2.1-alpha
 architectury-neoforge-21.1.12
+AsyncParticles-26.2.2.10+26.2
 bagus_lib-26.2-27.7.0
+bbe-neoforge-1.3.8-beta.1+mc26.2
 bclib-26.201.3
 better-end-26.201.3
 better-nether-26.201.3
@@ -59,6 +61,7 @@ enchantment-effects-1.1.0+26.2
 EnchantmentDescriptions-neoforge-MC26.2-26.2.0.2
 enderscape-fabric-3.0.3+mc26.2
 entityculling-neoforge-1.11.3-mc26.2
+entity_collision_optimizer-1.0.0-mc26.2-alpha.10
 EternalNether-v26.2.0-mc26.2.x-NeoForge
 exdeorum-5.1
 fabric-api-0.161.0+26.2
@@ -72,9 +75,11 @@ goldenhopper-neoforge-26.2-1.7.0
 guideme-26.2.2-alpha
 IllagerInvasion-v26.2.0-mc26.2.x-NeoForge
 ImmediatelyFast-NeoForge-1.16.5+26.2
-iris-fabric-1.11.2+mc26.2
+iris-fabric-1.11.4+mc26.2
+Ixeris-4.6.8+26.2-neoforge
 Jade-mc26.2-Fabric-26.2.11
 jei-26.2-neoforge-30.42.0.236
+kreno-neoforge-26.2-26.3.2-26.2
 lithium-neoforge-0.25.3+mc26.2
 lithostitched-1.8.0-neoforge-26.2
 mezz_config-26.2-neoforge-0.6.8-standalone
@@ -92,11 +97,14 @@ RebornCore-6.1.1
 ResourcefulConfig-5.0.1
 rusticdelight-fabric-26.2-1.7.0
 ScalableLux-neoforge-0.3.0-alpha.0.16-all
+sclp-neoforge-5.6.7-snapshot+mc26.1-local
+SkeletonAIFix-v26.2.0-mc26.2.x-NeoForge
 sodium-extra-fabric-0.9.4+mc26.2
-sodium-fabric-0.9.1+mc26.2
+sodium-neoforge-0.9.2+mc26.2
 sophisticatedbackpacks-26.2-3.26.10.2199
 sophisticatedcore-26.2-1.5.9.2396
 sophisticatedstorage-26.2-1.5.119.2171
+springlotus-neoforge-1.2.2+26.2
 Stellarity-6.0.1
 structure_layout_optimizer-1.1.4+26.1-neoforge
 TechReborn-6.1.1
@@ -110,7 +118,7 @@ Trim Patcher-2.1-mc26.2-neoforge
 twilightforest.re26-26.2-4.8.4207-hotfix-fabric
 t_and_t-fabric-neoforge-1.13.11
 ubesdelight-fabric-26.2-0.4.15
-voxy-0.2.19-beta
+voxy-0.2.21-beta-f473097
 voxy-extra-0.2.6
 voxy-seam-fix-0.1.0-26.2
 voxy-server-side-fabric
@@ -120,6 +128,7 @@ worldweaver-26.201.3
 yet_another_config_lib_v3-3.9.7+26.2-neoforge
 [26.2+]MYEC-v1.10.1-NeoForge
 [Neoforge]ctov-26-2-4.1.0
+
 ```
 
 > 这一批能"进游戏并正常玩一阵" —— 不代表每个功能都对。
@@ -139,7 +148,7 @@ yet_another_config_lib_v3-3.9.7+26.2-neoforge
 
 **注意这是"能跑通"级别的保证**（覆盖：启动 → 进世界 → 水面渲染 → 设置页链接）；非常规版本搭配、重度光影包请自行测试，出问题照常带日志报 bug。
 
-PS：这是个趣味实验性测试，出问题不负责~ 如果想用voxy的话，我建议还是使用fabric的Sodium和Iris，当然，注意版本号，Voxy自身的Bug导致Sodium 0.9.2和Iris 1.11.4在开启光影的时候Lod会不加载。在Voxy未修复之前，建议使用Sodium 0.9.1和Iris 1.11.2 以确保Voxy的Lod区块正常加载
+PS：这是个趣味实验性测试，出问题不负责~ 关于 voxy：请使用**本仓库作者构建的 voxy 0.2.21-beta**（分支 [`Up-dev`](https://github.com/Lonmo0208/voxy/tree/Up-dev)；下面列表里的就是这个）—— 它修复了与最新版 Sodium / Iris 的兼容（开光影时 LOD 正常加载），也**修复了与 Ixeris 同开时的帧缓冲崩溃**（两者现在可以同时启用，本仓库已实测进世界无崩溃）。Sodium / Iris 依旧建议用 Fabric 版。
 
 ## 已知不兼容
 
@@ -200,15 +209,17 @@ There are probably still plenty of bugs, compatibility may still be rough, and i
 
 We ran **Fabric API's own test flow** end to end: the server suite reports **`All 114 required tests passed`** ✓ — every one of upstream's required gametests is green, and that is the strongest evidence this repository has. The client suite also runs to completion; **the only failure is an upstream test case that contradicts itself** (`fabric-tag-api-v1-testmod`: one data pack both adds `dirt` to `sword_efficient` and removes content from another tag, so two assertions demand the same pack be present and absent at once — unsolvable here). That is a documented known difference, not a gap in the bridge. The bridge's built-in self-check reports its event inventory as **11/11 wired** on the client ✓, and a dedicated server prints the report even with no player ✓. Production install chain: a dedicated server installed with the installer built from this repository reaches `Done`, and the client reaches the game.
 
-Several follow-up rounds hardened exactly that claim: (1) the **official Fabric API test mods** ran again on the client — the world loads, `LifecycleEventsTest` reaches 3400+ ticks, and entrypoint failures / encoding failures / crashes are all zero; (2) a **dedicated server** boots with the whole bclib/wover family (it used to crash on the registry freeze window mentioned above); (3) the bridge's self-check grew two hard evidences: the **Fabric channel negotiation readout** (74/41 versus 41/74 in singleplayer, mirrored on a server; any channel whose receiver the other side never negotiated is named as a warning) and a **real payload round-trip probe** (a payload generated on the spot travels client → server → client; the verdict reads `fabric payload round trip ok`); (4) the **NeoForge mod list now shows updates for Fabric mods too** (Mod Menu's own checkers plus a direct Modrinth hash lookup). On a pack that includes c2me the event self-check reads **10/11** — the silent row is that mod's own documented behaviour as it rewrites the chunk system, not the bridge. (5) 2026-10-14: the full 90-mod set listed below launches into the world and plays (worldgen family, Create, AE2, TechReborn and more), and two more batches of world-load / disconnect problems were fixed the same day — the **world-load registry chain** ("the save will not load / datapack errors") and **polymer's handshake channel plus 26.2's moved entity constants** ("connection lost"); additionally **architectury-fabric can now boot and open a world** (Fabric-compiled `LocalCapture` mixins used to be killed by the platform patches' shapes). All of this shipped in **26.2.0.128**.
+Several follow-up rounds hardened exactly that claim: (1) the **official Fabric API test mods** ran again on the client — the world loads, `LifecycleEventsTest` reaches 3400+ ticks, and entrypoint failures / encoding failures / crashes are all zero; (2) a **dedicated server** boots with the whole bclib/wover family (it used to crash on the registry freeze window mentioned above); (3) the bridge's self-check grew two hard evidences: the **Fabric channel negotiation readout** (74/41 versus 41/74 in singleplayer, mirrored on a server; any channel whose receiver the other side never negotiated is named as a warning) and a **real payload round-trip probe** (a payload generated on the spot travels client → server → client; the verdict reads `fabric payload round trip ok`); (4) the **NeoForge mod list now shows updates for Fabric mods too** (Mod Menu's own checkers plus a direct Modrinth hash lookup). On a pack that includes c2me the event self-check reads **10/11** — the silent row is that mod's own documented behaviour as it rewrites the chunk system, not the bridge. (5) 2026-10-14: the full 90-mod set (as then listed) launches into the world and plays (worldgen family, Create, AE2, TechReborn and more), and two more batches of world-load / disconnect problems were fixed the same day — the **world-load registry chain** ("the save will not load / datapack errors") and **polymer's handshake channel plus 26.2's moved entity constants** ("connection lost"); additionally **architectury-fabric can now boot and open a world** (Fabric-compiled `LocalCapture` mixins used to be killed by the platform patches' shapes). All of this shipped in **26.2.0.128**. (6) 2026-10-15/16: the now **98-mod set** (list updated below) ran end to end — world entry, mining, item pickup and the creative-flight→survival fall all pass; the official Fabric API test mods are green again on the client (`LifecycleEventsTest` past 6000 ticks; assertions / encoding / crashes all zero). Three deep fixes landed too: **the bridge misclassified NeoForge mods' own payloads as Fabric channels** (modernfix's load-suspension sentinel was dropped and the server stayed frozen all session — items would not be picked up and creative flight never fell), **the packet splitter measured around the encoder's packet context** (polymer-style mods got kicked on `level_event`), and **the creative inventory crashed on unregistered tabs** (polymer packs). All folded into **26.2.0.129**.
 
-### The 90 mods that have actually been run
+### The 98 mods that have actually been run
 
 ```
 appleskin-neoforge-mc26.2-3.0.10
 appliedenergistics2-26.2.1-alpha
 architectury-neoforge-21.1.12
+AsyncParticles-26.2.2.10+26.2
 bagus_lib-26.2-27.7.0
+bbe-neoforge-1.3.8-beta.1+mc26.2
 bclib-26.201.3
 better-end-26.201.3
 better-nether-26.201.3
@@ -234,6 +245,7 @@ enchantment-effects-1.1.0+26.2
 EnchantmentDescriptions-neoforge-MC26.2-26.2.0.2
 enderscape-fabric-3.0.3+mc26.2
 entityculling-neoforge-1.11.3-mc26.2
+entity_collision_optimizer-1.0.0-mc26.2-alpha.10
 EternalNether-v26.2.0-mc26.2.x-NeoForge
 exdeorum-5.1
 fabric-api-0.161.0+26.2
@@ -247,9 +259,11 @@ goldenhopper-neoforge-26.2-1.7.0
 guideme-26.2.2-alpha
 IllagerInvasion-v26.2.0-mc26.2.x-NeoForge
 ImmediatelyFast-NeoForge-1.16.5+26.2
-iris-fabric-1.11.2+mc26.2
+iris-fabric-1.11.4+mc26.2
+Ixeris-4.6.8+26.2-neoforge
 Jade-mc26.2-Fabric-26.2.11
 jei-26.2-neoforge-30.42.0.236
+kreno-neoforge-26.2-26.3.2-26.2
 lithium-neoforge-0.25.3+mc26.2
 lithostitched-1.8.0-neoforge-26.2
 mezz_config-26.2-neoforge-0.6.8-standalone
@@ -267,11 +281,14 @@ RebornCore-6.1.1
 ResourcefulConfig-5.0.1
 rusticdelight-fabric-26.2-1.7.0
 ScalableLux-neoforge-0.3.0-alpha.0.16-all
+sclp-neoforge-5.6.7-snapshot+mc26.1-local
+SkeletonAIFix-v26.2.0-mc26.2.x-NeoForge
 sodium-extra-fabric-0.9.4+mc26.2
-sodium-fabric-0.9.1+mc26.2
+sodium-neoforge-0.9.2+mc26.2
 sophisticatedbackpacks-26.2-3.26.10.2199
 sophisticatedcore-26.2-1.5.9.2396
 sophisticatedstorage-26.2-1.5.119.2171
+springlotus-neoforge-1.2.2+26.2
 Stellarity-6.0.1
 structure_layout_optimizer-1.1.4+26.1-neoforge
 TechReborn-6.1.1
@@ -285,7 +302,7 @@ Trim Patcher-2.1-mc26.2-neoforge
 twilightforest.re26-26.2-4.8.4207-hotfix-fabric
 t_and_t-fabric-neoforge-1.13.11
 ubesdelight-fabric-26.2-0.4.15
-voxy-0.2.19-beta
+voxy-0.2.21-beta-f473097
 voxy-extra-0.2.6
 voxy-seam-fix-0.1.0-26.2
 voxy-server-side-fabric
@@ -295,6 +312,7 @@ worldweaver-26.201.3
 yet_another_config_lib_v3-3.9.7+26.2-neoforge
 [26.2+]MYEC-v1.10.1-NeoForge
 [Neoforge]ctov-26-2-4.1.0
+
 ```
 
 > This set launches the game and plays for a while — it does **not** mean every feature is correct.
@@ -314,7 +332,7 @@ Under the hood the bridge does two things: it **renames Sodium's loader-specific
 
 **This is an "it runs" guarantee** — the coverage is launch → world → water rendering → settings-page links. Unusual version pairings and heavy shader packs are on you to test; if something breaks, report it with logs as usual.
 
-PS: this is a just-for-fun experimental test — if things break, we take no responsibility~ If you want to use voxy, I would still suggest the Fabric builds of Sodium and Iris; and mind the version numbers: a bug in voxy itself makes the LODs not load on Sodium 0.9.2 and Iris 1.11.4 with shaders enabled. Until voxy fixes that, use Sodium 0.9.1 and Iris 1.11.2 to keep voxy's LOD chunks loading normally.
+PS: this is a just-for-fun experimental test — if things break, we take no responsibility~ About voxy: use **voxy 0.2.21-beta, the build made in this project's own fork** (branch [`Up-dev`](https://github.com/Lonmo0208/voxy/tree/Up-dev); it is the one in the list below) — it fixes compatibility with the latest Sodium / Iris (LODs load normally with shaders enabled) and **fixes the frame-buffer crash when Ixeris is enabled** (the two can now run together; verified in this repo, world entry with no crash). Fabric builds of Sodium and Iris are still the suggestion.
 
 ## Known incompatibilities
 
