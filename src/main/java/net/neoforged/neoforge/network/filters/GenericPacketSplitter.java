@@ -5,7 +5,6 @@
 
 package net.neoforged.neoforge.network.filters;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
@@ -17,7 +16,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.HandlerNames;
 import net.minecraft.network.PacketEncoder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -98,6 +96,15 @@ public class GenericPacketSplitter extends MessageToMessageEncoder<Packet<?>> im
             return;
         }
 
+        // NeoFobric: a terminal packet swaps the protocol phase right after it is encoded, and the swap
+        // is performed on the encoder the packet passes through. Measuring one must not run that swap,
+        // and terminal packets are far too small to ever need splitting; Fabric's own splitter lets
+        // terminal packets pass untouched as well.
+        if (packet.isTerminal()) {
+            out.add(packet);
+            return;
+        }
+
         if (!((ctx.pipeline().get(HandlerNames.ENCODER) instanceof PacketEncoder<?> encoder))) {
             // No encoder in pipeline, pipeline is probably unbound
             out.add(packet);
@@ -110,9 +117,11 @@ public class GenericPacketSplitter extends MessageToMessageEncoder<Packet<?>> im
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         try {
-            @SuppressWarnings({ "unchecked", "rawtypes" }) // Eclipse requires the extra rawtype cast first.
-            var codec = (StreamCodec<ByteBuf, Packet<?>>) (StreamCodec) encoder.getProtocolInfo().codec();
-            codec.encode(buf, packet);
+            // NeoFobric: measure through the encoder's own encode path. Fabric mixins wrap that method
+            // to expose the packet context (polymer & co. read it while serializing), and measuring
+            // with a raw codec call serializes without the context and kicks such mods off the
+            // connection. Fabric's splitter measures through PacketEncoder#encode as well.
+            encoder.encodeForSplitting(ctx, packet, buf);
             if (buf.readableBytes() <= sizeLimits.packet()) {
                 out.add(packet);
                 return;

@@ -1,11 +1,21 @@
 --- a/net/minecraft/network/PacketEncoder.java
 +++ b/net/minecraft/network/PacketEncoder.java
-@@ -46,4 +_,8 @@
+@@ -46,4 +_,18 @@
              ProtocolSwapHandler.handleOutboundTerminalPacket(ctx, packet);
          }
      }
 +
 +    public ProtocolInfo<T> getProtocolInfo() {
 +        return protocolInfo;
++    }
++
++    /**
++     * NeoFobric: measures a packet through the encoder's own encode path. Fabric mixins wrap this
++     * method to expose the packet context, and measuring around it would serialize packets without
++     * that context and kick bridged Fabric mods (polymer) off the connection.
++     */
++    @SuppressWarnings("unchecked")
++    public void encodeForSplitting(ChannelHandlerContext ctx, Packet<?> packet, ByteBuf output) throws Exception {
++        this.encode(ctx, (Packet<T>) packet, output);
 +    }
  }
