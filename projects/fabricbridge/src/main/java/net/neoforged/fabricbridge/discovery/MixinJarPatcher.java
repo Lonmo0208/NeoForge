@@ -836,7 +836,7 @@ public final class MixinJarPatcher {
         if (!injected) {
             return null;
         }
-        var writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        var writer = new ClassWriter(0);
         node.accept(writer);
         LOGGER.info("[NeoFobric] Injected the CTM probe into {}", entryName);
         return writer.toByteArray();
@@ -2138,6 +2138,9 @@ public final class MixinJarPatcher {
      */
     private static byte[] extendInjectorHandlerParams(byte[] classBytes, String entryName,
             java.util.function.Function<String, byte[]> targetBytecode) {
+        if (Boolean.getBoolean("neofobric.noHandlerExtension")) {
+            return null;
+        }
         ClassNode node;
         try {
             node = new ClassNode();
@@ -2324,7 +2327,25 @@ public final class MixinJarPatcher {
         if (!changed) {
             return null;
         }
-        var writer = new ClassWriter(0);
+        // COMPUTE_FRAMES is required: appending the missing parameters shifts the handler's locals
+        // (every VarInsn/Iinc/LVT entry at or after the callback moved by addedSlots) while the
+        // StackMapTable frames the handler carries still describe the OLD slot layout. Mixin inlines
+        // these handler bodies into the game class, and a stale frame riding along surfaces as
+        // "VerifyError: Expecting a stackmap frame" / "Bad local variable type" on the GAME class the
+        // first time it links (VFP's ClientPacketListener handlers, fabric-data-attachment's respawn
+        // bridge - all died that way). The common-superclass lookup needs a hierarchy the jar alone
+        // cannot answer, so it falls back to java/lang/Object: a verifier-acceptable answer wherever
+        // two unrelated reference types merge, which is all these synthetic handlers ever need.
+        var writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES) {
+            @Override
+            protected String getCommonSuperClass(String type1, String type2) {
+                try {
+                    return super.getCommonSuperClass(type1, type2);
+                } catch (Throwable t) {
+                    return "java/lang/Object";
+                }
+            }
+        };
         node.accept(writer);
         return writer.toByteArray();
     }
@@ -2617,7 +2638,7 @@ public final class MixinJarPatcher {
             return null;
         }
         LOGGER.info("[NeoFobric] Made Create's behaviour lookup initialise the block entity first");
-        var writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        var writer = new ClassWriter(0);
         node.accept(writer);
         return writer.toByteArray();
     }
@@ -3644,6 +3665,13 @@ public final class MixinJarPatcher {
                 call.name = hook;
                 call.desc = desc;
                 call.itf = false;
+                // The rewrite pushes one more reference than the virtual call consumed: at the call the
+                // stack now holds (receiver, name, path) where it held (receiver, name) before, and the
+                // static call replaces all three. maxStack must grow by at least that one slot. Raised
+                // here directly: it is exact, offline, and keeps this pass from relying on the writer's
+                // frame machinery. Raising per rewrite can overshoot when one method rewrites twice; a
+                // larger maxStack than needed is always legal.
+                method.maxStack += 1;
                 changed = true;
             }
         }

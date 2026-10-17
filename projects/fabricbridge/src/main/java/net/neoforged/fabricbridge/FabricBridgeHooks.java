@@ -221,19 +221,8 @@ public final class FabricBridgeHooks {
     }
 
     /**
-     * Closes the window {@link #deferFabricWindow(Runnable, Runnable)} took over: drops the intrusive
-     * holders a Fabric mod built but never registered, then runs the freeze it held back. Called once
-     * both entrypoint sets are through.
-     */
-    private static void closeDeferredFabricWindow(DeferredFabricWindow fabricWindow) {
-        dropUnregisteredIntrusiveHolders();
-        fabricWindow.freeze().run();
-        LOGGER.info("[NeoFobric] Registries frozen after the Fabric entrypoints");
-    }
-
-    /**
      * Drops the intrusive holders a Fabric mod built but never registered, before the registry window
-     * closes.
+     * closes, then runs the freeze the window held back.
      *
      * <p>Minecraft's registries with intrusive-holder support ({@code BuiltInRegistries.BLOCK},
      * {@code ITEM}, {@code BLOCK_ENTITY_TYPE}, {@code ENTITY_TYPE}, {@code FLUID}) remember every value
@@ -870,10 +859,49 @@ public final class FabricBridgeHooks {
         // entrypoint declarations directly and runs with the main set).
         net.neoforged.fabricbridge.compbridlnk.ModMenuUpdateLink.linkModMenuUpdateChecks();
 
-        // The client entrypoints are the last Fabric-side chance to register content, so this is where
-        // the registry window that runFabricEntrypoints left open closes again (see deferFabricWindow).
+        // The client entrypoints are the last Fabric-side chance to register content *from an
+        // entrypoint*, but not the last chance overall: Fabric API's registry sync re-runs
+        // bootStrap() from its Minecraft-constructor mixin (in front of which this hand-off sits),
+        // and mods hang their own late registrations inside that second bootstrap - ViaFabricPlus
+        // registers a particle type from an injection behind bootStrap's createContents() call.
+        // Freezing here would hand those mods "Registry is already frozen", so the freeze only gets
+        // *armed*; BuiltInRegistries.bootStrap() runs it once its own work is through (see
+        // freezeRegistriesAfterBootstrap, injected at the tail of that method).
         if (fabricWindow != null) {
-            closeDeferredFabricWindow(fabricWindow);
+            pendingFabricWindow = fabricWindow;
+        }
+    }
+
+    /** The window {@link #deferFabricWindow(Runnable, Runnable)} took over, waiting for the freeze point. */
+    private static volatile DeferredFabricWindow pendingFabricWindow;
+
+    /**
+     * Closes the registry window once the second bootstrap is through. Injected at the tail of
+     * {@code BuiltInRegistries.bootStrap()} (see the class tweaker), which Fabric API's registry sync
+     * re-runs from its Minecraft-constructor mixin - the last registry-writing step of client startup.
+     * Everything that registers inside that bootstrap (ViaFabricPlus's particle type and friends) has
+     * registered by then, and the freeze the entrypoints left armed finally closes the window.
+     *
+     * <p>The window carries two held-back steps and both run here, in the order the old close point
+     * used: first the shell-mod RegisterEvent pass (Architectury's listeners register their content on
+     * NeoForge buses - that pass needs the registries open, so it must precede the freeze), then the
+     * freeze itself. Runs at most once: bootStrap() can run more than once in principle, and only the
+     * first arrival behind an armed window has anything to close. On the datagen and dedicated-server
+     * paths the window was never taken over (deferFabricWindow returned false and NeoForge ran both
+     * steps inline), so there is nothing pending and this is a no-op.
+     */
+    public static void freezeRegistriesAfterBootstrap() {
+        var fabricWindow = pendingFabricWindow;
+        if (fabricWindow == null) {
+            return;
+        }
+        pendingFabricWindow = null;
+        try {
+            dropUnregisteredIntrusiveHolders();
+            fabricWindow.freeze().run();
+            LOGGER.info("[NeoFobric] Registries frozen after the second bootstrap");
+        } catch (Throwable t) {
+            LOGGER.error("[NeoFobric] Failed to freeze the registries after the second bootstrap", t);
         }
     }
 

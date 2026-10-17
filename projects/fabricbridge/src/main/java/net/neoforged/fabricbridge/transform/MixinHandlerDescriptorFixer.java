@@ -133,7 +133,25 @@ public final class MixinHandlerDescriptorFixer {
         if (!changed) {
             return null;
         }
-        var writer = new ClassWriter(0);
+        // COMPUTE_FRAMES is required: reorder() permutes a handler's leading parameters, and when that
+        // moves a type across slots (mixed-type handlers, long/double slot widths) the frames the class
+        // already carries describe the OLD layout. Mixin inlines these handler bodies into the game
+        // class, so a stale frame surfaces as "VerifyError: Expecting a stackmap frame" / "Bad local
+        // variable type" on the GAME class the moment it first links (fabric-data-attachment's
+        // copyAttachmentsOnClientRespawn bridge, VFP's connection handlers - all died that way).
+        // Recomputing needs a class hierarchy the jar alone cannot answer, so the common-superclass
+        // lookup falls back to java/lang/Object: frames only ever need a real answer where two
+        // unrelated reference types merge, and "Object" is a verifier-acceptable answer there.
+        var writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES) {
+            @Override
+            protected String getCommonSuperClass(String type1, String type2) {
+                try {
+                    return super.getCommonSuperClass(type1, type2);
+                } catch (Throwable t) {
+                    return "java/lang/Object";
+                }
+            }
+        };
         node.accept(writer);
         return writer.toByteArray();
     }

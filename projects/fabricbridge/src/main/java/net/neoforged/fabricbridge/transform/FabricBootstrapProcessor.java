@@ -79,6 +79,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
 
     private static final String MINECRAFT_CLASS = "net/minecraft/client/Minecraft";
     private static final String MINECRAFT_SERVER_CLASS = "net/minecraft/server/MinecraftServer";
+    private static final String BUILT_IN_REGISTRIES_CLASS = "net/minecraft/core/registries/BuiltInRegistries";
     private static final String CLIENT_BRAND_RETRIEVER_CLASS = "net/minecraft/client/ClientBrandRetriever";
     private static final String SERVER_MAIN_CLASS = "net/minecraft/server/Main";
     private static final String DEDICATED_SERVER_CLASS = "net/minecraft/server/dedicated/DedicatedServer";
@@ -134,7 +135,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             return false;
         }
         return switch (context.type().getInternalName()) {
-            case MINECRAFT_CLASS, MINECRAFT_SERVER_CLASS, CLIENT_BRAND_RETRIEVER_CLASS, SERVER_MAIN_CLASS,
+            case MINECRAFT_CLASS, MINECRAFT_SERVER_CLASS, BUILT_IN_REGISTRIES_CLASS, CLIENT_BRAND_RETRIEVER_CLASS, SERVER_MAIN_CLASS,
                     DEDICATED_SERVER_CLASS, NETWORK_REGISTRY_CLASS, SHARED_CONSTANTS_CLASS -> true;
             default -> false;
         };
@@ -164,6 +165,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         var changed = switch (node.name) {
             case MINECRAFT_CLASS -> injectClientGameInstanceHandoff(node);
             case MINECRAFT_SERVER_CLASS -> wrapBranding(node, "getServerModName");
+            case BUILT_IN_REGISTRIES_CLASS -> injectBootstrapFreeze(node);
             case CLIENT_BRAND_RETRIEVER_CLASS -> wrapBranding(node, "getClientModName");
             case SERVER_MAIN_CLASS -> injectServerGameInstanceHandoff(node);
             case NETWORK_REGISTRY_CLASS -> injectFabricCodecFallback(node);
@@ -243,6 +245,51 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             method.maxLocals = 3;
             LOGGER.info("[NeoFobric] Redirected NetworkRegistry#getCodec through the Fabric payload lookup");
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Injects the deferred registry freeze into {@code BuiltInRegistries#bootStrap}, directly in front
+     * of its own {@code freeze()} call.
+     *
+     * <p>The registry window the bridge keeps open for the Fabric entrypoints (see
+     * {@code FabricBridgeHooks#deferFabricWindow}) used to close right behind the entrypoints, inside
+     * the Minecraft-constructor hand-off. That is too early: Fabric API's registry sync re-runs
+     * {@code bootStrap()} from its own mixin on that same constructor, and mods register late content
+     * inside that second bootstrap - ViaFabricPlus hangs its particle-type registration behind
+     * {@code bootStrap}'s {@code createContents()} call. Freezing behind the entrypoints handed those
+     * registrations "Registry is already frozen". The hand-off now only arms the freeze; this injection
+     * runs it inside the second bootstrap, after {@code createContents()} (so the late registrations
+     * are in) and before {@code freeze()} (so the registries are still open for the shell-mod
+     * RegisterEvent pass that runs here too) - the last registry-writing step of client startup.
+     *
+     * <p>The first bootstrap never reaches this code: Fabric's registry-sync redirects the
+     * {@code BuiltInRegistries.bootStrap()} call inside {@code Bootstrap.bootStrap()} to
+     * {@code createContents()} only, so this method body - and the hook with it - first runs from the
+     * registry-sync mixin's own deferred call. On the datagen and dedicated-server paths nothing is
+     * armed (the window was never taken over) and the hook is a no-op.
+     */
+    private static boolean injectBootstrapFreeze(ClassNode node) {
+        for (var method : node.methods) {
+            if (!"bootStrap".equals(method.name) || !"()V".equals(method.desc)) {
+                continue;
+            }
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (insn instanceof MethodInsnNode call
+                        && call.getOpcode() == Opcodes.INVOKESTATIC
+                        && "freeze".equals(call.name)
+                        && "()V".equals(call.desc)
+                        && node.name.equals(call.owner)) {
+                    method.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKESTATIC,
+                            "net/neoforged/fabricbridge/FabricBridgeHooks",
+                            "freezeRegistriesAfterBootstrap",
+                            "()V",
+                            false));
+                    LOGGER.info("[NeoFobric] Registry freeze armed behind the Fabric entrypoints now runs in front of BuiltInRegistries.bootStrap's own freeze");
+                    return true;
+                }
+            }
         }
         return false;
     }
