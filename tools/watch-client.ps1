@@ -14,20 +14,21 @@ $clog = Join-Path $root 'projects\neoforge\run\client\logs\latest.log'
 $crashDir = Join-Path $root 'projects\neoforge\run\client\crash-reports'
 
 function Get-GameProcess {
-    Get-CimInstance Win32_Process -Filter "Name='java.exe'" -ErrorAction SilentlyContinue | ForEach-Object {
+    # The dev game is identified by the FML mod-folders marker in its command line; the old
+    # "largest java over 300 MB" heuristic could pick (or kill) an unrelated production game.
+    Get-CimInstance Win32_Process -Filter "Name='java.exe'" -ErrorAction SilentlyContinue | Where-Object {
+        $_.CommandLine -like '*fml.modFolders*'
+    } | ForEach-Object {
         $mb = 0
         try { $mb = [int]((Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue).WorkingSet64 / 1MB) } catch {}
-        if ($mb -gt 300) { [pscustomobject]@{ Id = $_.ProcessId; MB = $mb } }
+        [pscustomobject]@{ Id = $_.ProcessId; MB = $mb }
     } | Sort-Object MB -Descending | Select-Object -First 1
 }
 
 function Kill-Game {
-    Get-CimInstance Win32_Process -Filter "Name='java.exe'" -ErrorAction SilentlyContinue | ForEach-Object {
-        $mb = 0
-        try { $mb = [int]((Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue).WorkingSet64 / 1MB) } catch {}
-        $isGradle = $_.CommandLine -like '*GradleDaemon*'
-        if (-not $isGradle -and $mb -gt 300) { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-    }
+    Get-CimInstance Win32_Process -Filter "Name='java.exe'" -ErrorAction SilentlyContinue | Where-Object {
+        $_.CommandLine -like '*fml.modFolders*'
+    } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 }
 
 # Record which crash reports already existed, so only new ones are reported.

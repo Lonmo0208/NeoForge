@@ -31,7 +31,9 @@ public class ServerModLoader extends CommonModLoader {
             // construction is single-shot: the first DeferredRegister throws "Cannot register new entries to
             // DeferredRegister after RegisterEvent has been fired" and the second instance cannot start at
             // all. Everything the loaders set up is process-wide and still in place, so the instance reuses
-            // it, exactly as a second world does on the client.
+            // it, exactly as a second world does on the client. Logged, because "skipped silently" and
+            // "happened to run mid-load on a client" are indistinguishable otherwise.
+            LOGGER.info("[NeoFobric] Mods are already loaded in this process; the new server instance reuses them");
             return;
         }
         LanguageHook.loadBuiltinLanguages();

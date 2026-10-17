@@ -14,12 +14,13 @@ $clog = Join-Path $root 'projects\neoforge\run\client\logs\latest.log'
 $saves = Join-Path $root 'projects\neoforge\run\client\saves'
 
 function Kill-Game {
-    Get-CimInstance Win32_Process -Filter "Name='java.exe'" -EA SilentlyContinue | ForEach-Object {
-        $m = 0
-        try { $m = [int]((Get-Process -Id $_.ProcessId -EA SilentlyContinue).WorkingSet64 / 1MB) } catch {}
-        if ($_.CommandLine -notlike '*GradleDaemon*' -and $m -gt 300) {
-            Stop-Process -Id $_.ProcessId -Force -EA SilentlyContinue
-        }
+    # Only the dev game: its command line carries the FML mod-folders marker. The old heuristic
+    # ("any java over 300 MB that is not the Gradle daemon") also killed a running production
+    # Minecraft or any other large JVM on this machine.
+    Get-CimInstance Win32_Process -Filter "Name='java.exe'" -EA SilentlyContinue | Where-Object {
+        $_.CommandLine -like '*fml.modFolders*'
+    } | ForEach-Object {
+        Stop-Process -Id $_.ProcessId -Force -EA SilentlyContinue
     }
     Start-Sleep -Seconds 3
 }

@@ -20,6 +20,12 @@ fi
 
 if [ $# -ge 1 ]; then
     NEW=$1
+    # The value goes straight into a sed replacement on a tracked file: reject anything that is not a
+    # plain 26.2.0.<n> version (an '&' or '|' in the argument would corrupt gradle.properties).
+    if ! printf '%s' "$NEW" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z._-]+)?$'; then
+        echo "版本号 '$NEW' 不是 数字.数字.数字.数字[-后缀] 形式，拒绝写进 gradle.properties" >&2
+        exit 1
+    fi
 else
     SUFFIX=$(printf '%s' "$CURRENT" | sed -E 's/^26\.2\.0\.[0-9]+//')
     NUMBER=$(printf '%s' "$CURRENT" | sed -E 's/^26\.2\.0\.([0-9]+).*/\1/')

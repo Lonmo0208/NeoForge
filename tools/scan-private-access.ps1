@@ -10,7 +10,15 @@ $root = 'E:\NeoFobric'
 $mixinJars = Get-ChildItem (Join-Path $root 'projects\neoforge\run\client\.neofobric\processedMods') -Recurse -Filter '*.jar' -EA SilentlyContinue |
     Where-Object { $_.Name -notlike '*realigned*' }
 $gameJar = Join-Path $root 'projects\neoforge\build\neodev\artifacts\clean\joined.jar'
-$neoJar = Join-Path $root 'projects\neoforge\build\libs\neoforge-26.2.0.90-26.2-NeoFobric-universal.jar'
+# The NeoForge jar name carries the build's version - find it instead of pinning one, so a version
+# bump cannot silently drop the platform jar from the scan (that made this tool report "clean" on a
+# scan that never looked at NeoForge at all).
+$neoJar = Get-ChildItem (Join-Path $root 'projects\neoforge\build\libs') -Filter 'neoforge-*-universal.jar' -EA SilentlyContinue |
+    Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+if (-not $neoJar) {
+    Write-Warning "No neoforge-*-universal.jar under projects\neoforge\build\libs - the NeoForge side of the scan is missing"
+    $neoJar = Join-Path $root 'projects\neoforge\build\libs\no-universal-jar-present.jar'
+}
 
 # Build a lookup: internal class name -> set of private field/method names, from both game and NeoForge jars.
 $privateMembers = @{}
