@@ -54,20 +54,30 @@ public final class FabricBridgeHooks {
      * when the site is the caller, and keeps its ordinary behaviour for every other caller. The value is a
      * {@link java.util.function.BooleanSupplier} because the platform's removal needs the block state, the tool
      * and the drop decision, none of which fit the vanilla two-argument shape.
+     *
+     * <p>The pending entry remembers its position (packed as {@code BlockPos#asLong}), and only that position
+     * may claim it. A mod's mixin at the head of {@code Level#removeBlock} that removes *another* block (a
+     * door's other half, a support block) re-enters the method before the original call reaches it; without
+     * the position check that inner call would consume the carried removal for the wrong block - the original
+     * block would go through the plain path with its drops lost, while the inner caller would be told the
+     * platform removed a block it never touched.
      */
-    private static final ThreadLocal<java.util.function.BooleanSupplier> destroyAction = new ThreadLocal<>();
+    private record PendingDestroy(long pos, java.util.function.BooleanSupplier action) {}
 
-    public static void pushDestroyAction(java.util.function.BooleanSupplier action) {
-        destroyAction.set(action);
+    private static final ThreadLocal<PendingDestroy> destroyAction = new ThreadLocal<>();
+
+    public static void pushDestroyAction(long pos, java.util.function.BooleanSupplier action) {
+        destroyAction.set(new PendingDestroy(pos, action));
     }
 
     public static void popDestroyAction() {
         destroyAction.remove();
     }
 
-    /** {@return whether the platform's own block removal is waiting behind the vanilla-shaped call} */
-    public static boolean hasDestroyAction() {
-        return destroyAction.get() != null;
+    /** {@return whether the platform's own block removal is waiting for exactly this position (as {@code BlockPos#asLong})} */
+    public static boolean hasDestroyAction(long pos) {
+        var pending = destroyAction.get();
+        return pending != null && pending.pos() == pos;
     }
 
     /**
@@ -79,10 +89,13 @@ public final class FabricBridgeHooks {
      * ({@code fake_player_tests_test_fake_player_break_beehive}). Cleared, the inner call takes the plain path,
      * which is exactly what it would take without this bridge.
      */
-    public static boolean runDestroyAction() {
-        var action = destroyAction.get();
+    public static boolean runDestroyAction(long pos) {
+        var pending = destroyAction.get();
+        if (pending == null || pending.pos() != pos) {
+            return false;
+        }
         destroyAction.remove();
-        return action != null && action.getAsBoolean();
+        return pending.action().getAsBoolean();
     }
 
     /**
@@ -529,14 +542,17 @@ public final class FabricBridgeHooks {
                 initialise = blockEntity.getClass().getMethod("initialize");
                 createInitialiseMethods.put(blockEntity.getClass(), initialise);
             }
-            field.setBoolean(blockEntity, true);
+            // Call first, mark after: with the flag set early, an initialize() that throws would leave the
+            // block entity permanently marked as initialised with no behaviours - every later lookup would
+            // early-return, nothing would ever retry, and the first real crash would carry no trace of this.
             initialise.invoke(blockEntity);
+            field.setBoolean(blockEntity, true);
             if (PROBED.add("early" + simpleName)) {
                 LOGGER.debug("[NeoFobric] Initialised a block entity from its behaviour lookup, before its first tick: {}", simpleName);
             }
         } catch (Throwable t) {
             if (PROBED.add("failed" + simpleName)) {
-                LOGGER.debug("[NeoFobric] Behaviour-lookup initialisation of {} failed", simpleName, t);
+                LOGGER.warn("[NeoFobric] Behaviour-lookup initialisation of {} failed - the block entity stays uninitialised and the next lookup will retry", simpleName, t);
             }
         }
     }

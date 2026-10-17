@@ -83,7 +83,7 @@
 +        // call site like this moves. The platform's own removal rides along in the carrier and runs from
 +        // Level#removeBlock, so the block is removed once, by the platform's path, whoever is listening.
 +        net.neoforged.fabricbridge.FabricBridgeHooks
-+                .pushDestroyAction(() -> removeBlock(pos, adjustedState, canDestroy, destroyedWith.copy()));
++                .pushDestroyAction(pos.asLong(), () -> removeBlock(pos, adjustedState, canDestroy, destroyedWith.copy()));
 +        boolean changed;
 +        try {
 +            changed = this.level.removeBlock(pos, false);

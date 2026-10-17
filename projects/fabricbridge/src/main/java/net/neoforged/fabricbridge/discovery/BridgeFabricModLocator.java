@@ -65,6 +65,37 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
     /** A plain mod id, as both loaders spell them. */
     private static final java.util.regex.Pattern MOD_ID = java.util.regex.Pattern.compile("[a-z0-9_.-]+");
 
+    /**
+     * {@return the mod id when it is usable as a cache directory name, otherwise null}
+     *
+     * <p>Mod ids arrive from a jar's own {@code fabric.mod.json}, so they are attacker-controlled
+     * input: an id like {@code ../../Downloads} would walk out of the cache directory the moment it
+     * is resolved into a path.
+     */
+    private static String safeCacheId(String modId) {
+        return modId != null && MOD_ID.matcher(modId).matches() ? modId : null;
+    }
+
+    /**
+     * {@return the plain file name of a nested jar entry, or null when it is not one}
+     *
+     * <p>The same trust question as {@link #safeCacheId}: an entry name is split on both separators
+     * (a zip may use either), must come back a plain name, and must not carry {@code ..} or the
+     * drive/stream separator {@code :} into a write.
+     */
+    private static String safeNestedFileName(String nestedJar) {
+        var name = nestedJar == null ? "" : nestedJar;
+        var slash = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
+        if (slash >= 0) {
+            name = name.substring(slash + 1);
+        }
+        if (name.isEmpty() || name.equals(".") || name.equals("..") || name.indexOf(':') >= 0
+                || name.indexOf('\\') >= 0 || name.indexOf('/') >= 0) {
+            return null;
+        }
+        return name;
+    }
+
     /** The mod ids the NeoForge mods in the mods folder provide, for the current discovery pass. */
     private static volatile java.util.Set<String> fmlProvidedModIds = java.util.Set.of();
 
@@ -1233,13 +1264,14 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             throw new IOException("Nested jar " + nestedJar + " does not exist in " + parentPath);
         }
 
-        var fileName = nestedJar;
-        int slash = fileName.lastIndexOf('/');
-        if (slash >= 0) {
-            fileName = fileName.substring(slash + 1);
+        var fileName = safeNestedFileName(nestedJar);
+        var cacheId = safeCacheId(parentInfo.modId());
+        if (fileName == null || cacheId == null) {
+            throw new IOException("Refusing to extract nested jar '" + nestedJar + "' of mod '"
+                    + parentInfo.modId() + "': the entry name or the mod id is not usable as a file name");
         }
 
-        var targetDir = getCacheDirectory().resolve(parentInfo.modId());
+        var targetDir = getCacheDirectory().resolve(cacheId);
         Files.createDirectories(targetDir);
         var target = targetDir.resolve(fileName);
 
@@ -1874,9 +1906,17 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
     private static java.util.Map<String, Path> nestedReplacements(String parentModId,
             java.util.List<String> nestedJarPaths) {
         var replacements = new java.util.HashMap<String, Path>();
+        var cacheId = safeCacheId(parentModId);
+        if (cacheId == null) {
+            return replacements;
+        }
         for (var nested : nestedJarPaths) {
-            var patched = getCacheDirectory().resolve(parentModId)
-                    .resolve(nested.substring(nested.lastIndexOf('/') + 1) + ".neofobric-realigned.jar");
+            var fileName = safeNestedFileName(nested);
+            if (fileName == null) {
+                continue;
+            }
+            var patched = getCacheDirectory().resolve(cacheId)
+                    .resolve(fileName + ".neofobric-realigned.jar");
             if (Files.isRegularFile(patched)) {
                 replacements.put(nested, patched);
             }

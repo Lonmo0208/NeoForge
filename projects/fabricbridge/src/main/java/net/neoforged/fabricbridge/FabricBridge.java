@@ -202,7 +202,6 @@ public final class FabricBridge {
             if (FMLEnvironmentHolder.dist() != Dist.CLIENT) {
                 invokeIsolated("server", net.fabricmc.api.DedicatedServerModInitializer.class,
                         net.fabricmc.api.DedicatedServerModInitializer::onInitializeServer);
-                entrypointsInvoked = true;
             } else {
                 // Client entrypoints need a usable Minecraft instance, which does not exist on the
                 // paths that run the main set here (datagen, and servers never reach this branch).
@@ -210,6 +209,11 @@ public final class FabricBridge {
                 // (FabricBridgeHooks#attachGameInstance), main set first, then these.
                 LOGGER.info("[NeoFobric] Deferring Fabric client entrypoints until the client is set up");
             }
+            // Armed for both branches: everything this method runs has run now, and deferring the client
+            // set is a decision it has already made - that set runs from attachGameInstance under its own
+            // guard. Left unarmed on the client path, a second call (a second game instance in one process)
+            // would replay every mod's onInitialize.
+            entrypointsInvoked = true;
 
             LOGGER.info("[NeoFobric] Fabric entrypoints invoked");
             // The mod initializers are the stage that registers payloads and channel receivers, so this is

@@ -70,8 +70,8 @@
 +        // NeoFobric: the break path calls this - the vanilla-shaped call a Fabric-side mixin replaces - and
 +        // carries the platform's own removal with it, because that removal needs the block state, the tool and
 +        // the drop decision that this signature has no room for. Any other caller gets the vanilla behaviour.
-+        if (net.neoforged.fabricbridge.FabricBridgeHooks.hasDestroyAction()) {
-+            return net.neoforged.fabricbridge.FabricBridgeHooks.runDestroyAction();
++        if (net.neoforged.fabricbridge.FabricBridgeHooks.hasDestroyAction(pos.asLong())) {
++            return net.neoforged.fabricbridge.FabricBridgeHooks.runDestroyAction(pos.asLong());
 +        }
          FluidState fluidState = this.getFluidState(pos);
          return this.setBlock(pos, fluidState.createLegacyBlock(), 3 | (movedByPiston ? 64 : 0));

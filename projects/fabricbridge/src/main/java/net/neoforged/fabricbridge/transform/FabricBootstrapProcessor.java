@@ -97,6 +97,8 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
     private static boolean mixinRegistrationDone;
     /** Set once Mixin has really prepared the Fabric configs; see {@link #forceMixinPreparationIfPending}. */
     private static volatile boolean mixinPrepared;
+    /** Consecutive failed forced-preparation attempts, for escalation out of the DEBUG retry noise. */
+    private static int forcedPreparationFailures;
 
     @Override
     public ProcessorName name() {
@@ -594,6 +596,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             var select = processorClass.getDeclaredMethod("select", environmentClass);
             select.setAccessible(true);
             select.invoke(processor, environment);
+            forcedPreparationFailures = 0;
             var pending = Mixins.getConfigs().size();
             if (pending == 0) {
                 mixinPrepared = true;
@@ -602,8 +605,16 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
                 LOGGER.debug("[NeoFobric] Mixin kept {} Fabric mixin config(s) pending, will retry", pending);
             }
         } catch (Throwable t) {
-            // Expected on the very first attempts, before the platform's mixin facade has run.
-            LOGGER.debug("[NeoFobric] Mixin is not ready to prepare the Fabric configs yet, will retry", t);
+            // Expected on the very first attempts, before the platform's mixin facade has run. A run of
+            // failures that does not stop, however, means every Fabric mixin config stays unprepared -
+            // and an unprepared config does not apply, silently. That must not stay hidden in DEBUG.
+            var failures = ++forcedPreparationFailures;
+            if (failures == 64) {
+                LOGGER.error("[NeoFobric] Mixin refused to prepare the Fabric configs {} times in a row - "
+                        + "Fabric mixins stay unapplied unless this recovers. Report this with the log.", failures, t);
+            } else {
+                LOGGER.debug("[NeoFobric] Mixin is not ready to prepare the Fabric configs yet, will retry", t);
+            }
         }
     }
 
@@ -887,7 +898,11 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             }
         }
         if (insertionPoint == null) {
-            LOGGER.warn("[NeoFobric] Could not find an injection point in the Minecraft constructor");
+            // No anchor means no attachGameInstance hand-off: the Fabric entrypoints never run and the
+            // registry window never freezes - the game would boot with Fabric content missing and open
+            // registries. Upstream drift (a reshaped constructor) must not degrade into a single warning.
+            LOGGER.error("[NeoFobric] Could not find an injection point in the Minecraft constructor - "
+                    + "Fabric entrypoints will not run and the registries will not freeze. This is a bridge bug; report it with the log.");
             return false;
         }
         LOGGER.info("[NeoFobric] Client hand-off anchored at {} in the Minecraft constructor", anchor);
