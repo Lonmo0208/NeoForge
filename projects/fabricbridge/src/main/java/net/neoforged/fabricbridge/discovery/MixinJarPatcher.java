@@ -6011,11 +6011,13 @@ public final class MixinJarPatcher {
                         || !"viaFabricPlus$translatingVersion".equals(call.name)) {
                     continue;
                 }
-                // The result sits on the stack where the translation wants a String: append toString().
-                method.instructions.insert(call, new org.objectweb.asm.tree.MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-                        "com/viaversion/viaversion/api/protocol/version/ProtocolVersion",
-                        "toString",
-                        "()Ljava/lang/String;",
+                // The result sits on the stack where the translation wants a String. String.valueOf is
+                // null-safe: the polled "checking..." entries return a null version, and the first
+                // attempt (a plain toString call) died on exactly those with an NPE.
+                method.instructions.insert(call, new org.objectweb.asm.tree.MethodInsnNode(Opcodes.INVOKESTATIC,
+                        "java/lang/String",
+                        "valueOf",
+                        "(Ljava/lang/Object;)Ljava/lang/String;",
                         false));
                 changed = true;
                 LOGGER.info("[NeoFobric] Pointed {}#{}'s target-version argument at its toString so the translatable-argument validation accepts it",
