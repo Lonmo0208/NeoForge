@@ -5519,6 +5519,11 @@ public final class MixinJarPatcher {
                     versionMoved = movedAnchorsRetargeted;
                     patched.put(entry.getName(), versionMoved);
                 }
+                var wrapConditionOverloadRealigned = realignWrapConditionOverload(versionMoved, entry.getName());
+                if (wrapConditionOverloadRealigned != null) {
+                    versionMoved = wrapConditionOverloadRealigned;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 var behaviourLookupGuarded = initialiseCreateBehavioursOnLookup(versionMoved, entry.getName());
                 if (behaviourLookupGuarded != null) {
                     versionMoved = behaviourLookupGuarded;
@@ -5963,6 +5968,104 @@ public final class MixinJarPatcher {
 
     private static boolean hasAnnotation(MethodNode method, String descriptor) {
         return findAnnotation(method, descriptor) != null;
+    }
+
+    /**
+     * Repoints ViaFabricPlus's {@code startWaitingForNewLevel} wrap at the overload that actually runs, and
+     * widens its handler to the new call shape.
+     *
+     * <p>ViaFabricPlus wraps the {@code startWaitingForNewLevel(LocalPlayer, ClientLevel, Reason)} call
+     * inside {@code handleRespawn} with a {@code @WrapWithCondition} whose handler takes the wrapped call's
+     * arguments plus one {@code @Local(name = "dimensionKey")} sugar parameter. NeoForge split that method
+     * into a delegating three-argument overload with no call sites left and a five-argument overload that
+     * {@code handleRespawn} actually invokes, carrying the two dimension keys the sugar used to fish out of
+     * the frame. Against this platform the injection therefore dies in MixinExtras' parameter validation
+     * during the apply's post-phase - the target class is left half-transformed with frames that describe
+     * the pre-injection layout, and the first link of {@code ClientPacketListener} verifies a different
+     * method every launch ("Expecting a stackmap frame").
+     *
+     * <p>The fix points the {@code @At} target at the five-argument overload and lets the handler read the
+     * two keys as explicit call arguments: the sugar parameter's slot and type are the first new argument's,
+     * so the handler body reads it unchanged; only the second key is appended and the stale {@code @Local}
+     * annotation removed.
+     */
+    private static byte[] realignWrapConditionOverload(byte[] classBytes, String entryName) {
+        if (!"com/viaversion/viafabricplus/injection/mixin/features/v1_20_3/network/MixinClientPacketListener.class".equals(entryName)) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var oldCallArgs = "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;)V";
+        var newCallArgs = "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)V";
+        var resourceKeyDesc = "Lnet/minecraft/resources/ResourceKey;";
+        var localSugar = "Lcom/llamalad7/mixinextras/sugar/Local;";
+
+        var changed = false;
+        for (var method : node.methods) {
+            // ViaFabricPlus uses MixinExtras' own WrapWithCondition, not sponge's - match both spellings.
+            var wrap = findAnnotation(method, "Lorg/spongepowered/asm/mixin/injection/WrapWithCondition;");
+            if (wrap == null) {
+                wrap = findAnnotation(method, "Lcom/llamalad7/mixinextras/injector/v2/WrapWithCondition;");
+            }
+            if (wrap == null || wrap.values == null) {
+                continue;
+            }
+            for (var i = 0; i + 1 < wrap.values.size(); i += 2) {
+                if (!"at".equals(wrap.values.get(i)) || !(wrap.values.get(i + 1) instanceof org.objectweb.asm.tree.AnnotationNode at)
+                        || at.values == null) {
+                    continue;
+                }
+                for (var j = 0; j + 1 < at.values.size(); j += 2) {
+                    if ("target".equals(at.values.get(j)) && at.values.get(j + 1) instanceof String target
+                            && target.startsWith("Lnet/minecraft/client/multiplayer/ClientPacketListener;startWaitingForNewLevel(")
+                            && target.contains(oldCallArgs)) {
+                        at.values.set(j + 1, target.replace(oldCallArgs, newCallArgs));
+                        changed = true;
+                    }
+                }
+            }
+
+            if (!method.name.equals("checkDimensionChange")) {
+                continue;
+            }
+            var args = org.objectweb.asm.Type.getArgumentTypes(method.desc);
+            if (args.length == 0 || !args[args.length - 1].getDescriptor().equals(resourceKeyDesc)) {
+                continue;
+            }
+            var newArgs = new org.objectweb.asm.Type[args.length + 1];
+            System.arraycopy(args, 0, newArgs, 0, args.length);
+            newArgs[args.length] = org.objectweb.asm.Type.getObjectType("net/minecraft/resources/ResourceKey");
+            method.desc = org.objectweb.asm.Type.getMethodDescriptor(org.objectweb.asm.Type.getReturnType(method.desc), newArgs);
+            // The last parameter was the @Local sugar; the first appended parameter takes over its slot
+            // (same type, the wrapper's own toDimension), so only the annotation goes.
+            if (method.visibleParameterAnnotations != null && method.visibleParameterAnnotations.length == args.length) {
+                method.visibleParameterAnnotations[args.length - 1] = null;
+            }
+            if (method.invisibleParameterAnnotations != null && method.invisibleParameterAnnotations.length == args.length) {
+                method.invisibleParameterAnnotations[args.length - 1] = null;
+            }
+            if (args[args.length - 1].getSize() == 1) {
+                method.maxLocals += 1;
+            } else {
+                method.maxLocals += 2;
+            }
+            method.signature = null;
+            changed = true;
+            LOGGER.info("[NeoFobric] Repointed {}#{} at the five-argument startWaitingForNewLevel overload and widened the handler by the explicit dimension keys", node.name.replace('/', '.'), method.name);
+        }
+
+        if (!changed) {
+            return null;
+        }
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
     }
 
     /**
