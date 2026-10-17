@@ -1331,7 +1331,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         // NeoForge install, unlike "net.minecraftforge.*" (the pre-1.20.5 Forge namespace), which only
         // ForgeConfigAPIPort provides and which must therefore stay with the Fabric jar that ships it.
         for (var packageName : fabricPackages) {
-            if (isPlatformNamespace(packageName)) {
+            if (isPlatformNamespace(packageName) || isAlwaysPlatformLibrary(packageName)) {
                 platform.add(packageName);
             }
         }
@@ -1438,6 +1438,24 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
     private static boolean isPlatformNamespace(String packageName) {
         return packageName.equals("net.neoforged") || packageName.startsWith("net.neoforged.")
                 || packageName.equals("cpw.mods") || packageName.startsWith("cpw.mods.");
+    }
+
+    /**
+     * {@return whether the package belongs to a library the platform always provides}
+     *
+     * <p>MixinExtras travels inside the platform's own {@code mixinextras.neoforge} module, which FML
+     * adds to the transforming layer on every install and which exports its packages to the game's
+     * module. A Fabric jar bundling its own copy of the library (ViaFabricPlus and IAS do) then files
+     * the same package into the composite module, and the JDK refuses the whole layer:
+     *   Modules mixinextras.neoforge and neofobric.fabric.mods export package
+     *   com.llamalad7.mixinextras.sugar.ref to module minecraft
+     * This library is not on the launch classpath and not a mods-folder jar, so neither probe in
+     * {@link #platformProvidedPackages} could see it; the platform's copy stays and the bundled one is
+     * shadowed, exactly like the platform namespaces above.
+     */
+    private static boolean isAlwaysPlatformLibrary(String packageName) {
+        return packageName.equals("com.llamalad7.mixinextras")
+                || packageName.startsWith("com.llamalad7.mixinextras.");
     }
 
     /**
