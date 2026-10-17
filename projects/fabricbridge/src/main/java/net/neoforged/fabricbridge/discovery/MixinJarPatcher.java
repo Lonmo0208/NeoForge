@@ -5524,6 +5524,11 @@ public final class MixinJarPatcher {
                     versionMoved = wrapConditionOverloadRealigned;
                     patched.put(entry.getName(), versionMoved);
                 }
+                var lambdaOverwritesPublicised = publiciseLambdaOverwrites(versionMoved, entry.getName());
+                if (lambdaOverwritesPublicised != null) {
+                    versionMoved = lambdaOverwritesPublicised;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 var behaviourLookupGuarded = initialiseCreateBehavioursOnLookup(versionMoved, entry.getName());
                 if (behaviourLookupGuarded != null) {
                     versionMoved = behaviourLookupGuarded;
@@ -5968,6 +5973,50 @@ public final class MixinJarPatcher {
 
     private static boolean hasAnnotation(MethodNode method, String descriptor) {
         return findAnnotation(method, descriptor) != null;
+    }
+
+    /**
+     * Raises a private {@code @Overwrite} of a synthetic lambda to public.
+     *
+     * <p>A lambda handler compiled private fails Mixin's visibility conformance the moment the runtime
+     * target method is anything but private - ViaFabricPlus's 1.12.2 useItemOn packet-lambda overwrite
+     * died with "cannot reduce visibility of PUBLIC target method" even though the platform's own widen
+     * scan had deliberately left the lambda private for it (measured: the exclusion worked, the public
+     * target came from the merged context, and the mixin was refused wholesale). A {@code lambda$}
+     * member is a compilation detail with no external callers, so the merged method being public costs
+     * nothing and is immune to whoever widens the target.
+     */
+    private static byte[] publiciseLambdaOverwrites(byte[] classBytes, String entryName) {
+        if (!entryName.endsWith(".class") || !entryName.contains("mixin")) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            if ((method.access & Opcodes.ACC_PRIVATE) == 0
+                    || !method.name.startsWith("lambda$")
+                    || findAnnotation(method, "Lorg/spongepowered/asm/mixin/Overwrite;") == null) {
+                continue;
+            }
+            method.access = (method.access & ~Opcodes.ACC_PRIVATE) | Opcodes.ACC_PUBLIC;
+            changed = true;
+            LOGGER.info("[NeoFobric] Raised the private lambda overwrite {}#{} to public so the visibility conformance cannot refuse it",
+                    node.name.replace('/', '.'), method.name);
+        }
+
+        if (!changed) {
+            return null;
+        }
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
     }
 
     /**
