@@ -5529,6 +5529,11 @@ public final class MixinJarPatcher {
                     versionMoved = lambdaOverwritesPublicised;
                     patched.put(entry.getName(), versionMoved);
                 }
+                var protocolVersionArgsStringified = stringifyViaFabricPlusVersionArgs(versionMoved, entry.getName());
+                if (protocolVersionArgsStringified != null) {
+                    versionMoved = protocolVersionArgsStringified;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 var behaviourLookupGuarded = initialiseCreateBehavioursOnLookup(versionMoved, entry.getName());
                 if (behaviourLookupGuarded != null) {
                     versionMoved = behaviourLookupGuarded;
@@ -5973,6 +5978,57 @@ public final class MixinJarPatcher {
 
     private static boolean hasAnnotation(MethodNode method, String descriptor) {
         return findAnnotation(method, descriptor) != null;
+    }
+
+    /**
+     * Turns ViaFabricPlus's raw {@code ProtocolVersion} translation arguments into strings.
+     *
+     * <p>ViaFabricPlus's server-list tooltip feeds {@code Component.translatable} the
+     * {@code ProtocolVersion} object itself. This platform's development environment validates
+     * translatable arguments (Component, Number, Boolean or String - production skips the check), so
+     * the moment a target version is set, rendering any server-list entry crashed the render thread
+     * with {@code TranslatableContents' arguments must be either ...}. The call whose result the
+     * translation consumes is rewritten to its {@code toString()} - exactly what the translation line
+     * prints anyway ({@code 1.21-1.21.1 (767)}).
+     */
+    private static byte[] stringifyViaFabricPlusVersionArgs(byte[] classBytes, String entryName) {
+        if (!entryName.endsWith(".class")) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof org.objectweb.asm.tree.MethodInsnNode call)
+                        || !(call.owner.equals("com/viaversion/viafabricplus/injection/access/core/IServerData"))
+                        || !"viaFabricPlus$translatingVersion".equals(call.name)) {
+                    continue;
+                }
+                // The result sits on the stack where the translation wants a String: append toString().
+                method.instructions.insert(call, new org.objectweb.asm.tree.MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                        "com/viaversion/viaversion/api/protocol/version/ProtocolVersion",
+                        "toString",
+                        "()Ljava/lang/String;",
+                        false));
+                changed = true;
+                LOGGER.info("[NeoFobric] Pointed {}#{}'s target-version argument at its toString so the translatable-argument validation accepts it",
+                        node.name.replace('/', '.'), method.name);
+            }
+        }
+
+        if (!changed) {
+            return null;
+        }
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        return writer.toByteArray();
     }
 
     /**
