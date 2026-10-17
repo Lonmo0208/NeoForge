@@ -13,6 +13,7 @@ import java.util.Set;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -103,6 +104,19 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
      * everything else about the class intact.
      */
     private static final String INGREDIENT = "net/minecraft/world/item/crafting/Ingredient";
+
+    /**
+     * The creative inventory screen, for polymer's tab teardown.
+     *
+     * <p>Polymer's {@code InternalClientRegistry.clearTabs} resets the open screen's page by
+     * reflection: it walks the screen's declared fields for a name containing {@code currentPage} and
+     * writes {@code setInt(null, 0)} - a static int on pure Fabric. This platform's screen carries the
+     * page as an instance field of {@code CreativeTabsScreenPage} instead, so the write throws, the
+     * teardown reports an error, and the reload that follows a settings change (ViaFabricPlus's GUI
+     * among them) stalls on the render thread. A harmless static int companion field satisfies the
+     * reflection exactly: same name fragment, static, int - and nobody reads it.
+     */
+    private static final String CREATIVE_SCREEN = "net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen";
 
     /**
      * Fabric renderer API's baked-model interface, and the NeoForge extension it must hang off of.
@@ -377,6 +391,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
         return RESOURCE_IMPL_CANDIDATES.contains(name) || FABRIC_CHANNEL_CLASSES.contains(name)
                 || FABRIC_NETWORKING_IMPL.equals(name)
                 || BUILT_IN_REGISTRIES.equals(name) || INGREDIENT.equals(name)
+                || CREATIVE_SCREEN.equals(name)
                 || FABRIC_BLOCK_STATE_MODEL.equals(name) || FABRIC_BLOCK_STATE.equals(name) || FABRIC_BLOCK.equals(name)
                 || FABRIC_ITEM_STACK.equals(name)
                 || WIDEN_PRIVATE_MEMBERS.containsKey(name)
@@ -407,6 +422,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 && !FABRIC_NETWORKING_IMPL.equals(context.node().name)
                 && !BUILT_IN_REGISTRIES.equals(context.node().name)
                 && !INGREDIENT.equals(context.node().name)
+                && !CREATIVE_SCREEN.equals(context.node().name)
                 && !FABRIC_BLOCK_STATE_MODEL.equals(context.node().name)
                 && !FABRIC_BLOCK_STATE.equals(context.node().name)
                 && !FABRIC_BLOCK.equals(context.node().name)
@@ -426,6 +442,16 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
             changed = true;
             LOGGER.info("[NeoFobric] Dropped the IExtensibleEnum marker from {} so the Fabric enum extension applies",
                     node.name.replace('/', '.'));
+        }
+        // The static int page cursor polymer's tab teardown writes reflectively - see CREATIVE_SCREEN.
+        // Polymer's loop takes the FIRST declared field whose name contains "currentPage" and stops, so
+        // the companion must sit ahead of the platform's own instance field.
+        if (node.name.equals(CREATIVE_SCREEN)
+                && node.fields.stream().noneMatch(f -> f.name.equals("neofobric$currentPage"))) {
+            var cursor = new FieldNode(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "neofobric$currentPage", "I", null, 0);
+            node.fields.add(0, cursor);
+            changed = true;
+            LOGGER.info("[NeoFobric] Gave the creative inventory screen a static int page cursor for polymer's teardown");
         }
         // First: a mod's access widener can widen or un-final anything, and the rest of this method
         // (and Mixin, which runs later) should see the tweaked class.
