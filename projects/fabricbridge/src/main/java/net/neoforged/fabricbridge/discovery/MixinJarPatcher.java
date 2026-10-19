@@ -983,7 +983,8 @@ public final class MixinJarPatcher {
         for (var name : candidates) {
             if (name.startsWith("java/") || name.startsWith("javax/") || name.startsWith("jdk/")
                     || name.startsWith("sun/") || name.startsWith("com/sun/")
-                    || resolver.apply(name) != null || allModJarClassNames().contains(name)) {
+                    || resolver.apply(name) != null || allModJarClassNames().contains(name)
+                    || fmlLayerClassNames().contains(name)) {
                 continue;
             }
             try {
@@ -1072,6 +1073,96 @@ public final class MixinJarPatcher {
         } catch (Throwable t) {
             // A jar that cannot be read contributes nothing to the name set.
         }
+    }
+
+    /** Class names carried by the FML/NeoForge layer of the install, for the frame-stub check. */
+    private static final java.util.concurrent.atomic.AtomicReference<java.util.Set<String>> FML_LAYER_CLASS_NAMES =
+            new java.util.concurrent.atomic.AtomicReference<>();
+
+    /**
+     * {@return the class names FML's own layer provides, so a frame type they define is never stubbed}
+     *
+     * <p>NeoForge embeds libraries through jar-in-jar - {@code com.llamalad7.mixinextras} is the one that
+     * matters here - and FML puts them on the game layer as their own modules. At realigning time that
+     * layer does not exist yet, and neither {@code TargetResolver} (game content only) nor
+     * {@code allModJarClassNames} (the mods folder only) can see them, so a class such as
+     * {@code mixinextras.injector.wrapoperation.Operation} looked like it existed nowhere. Stubbing it
+     * then wrote that package into the Fabric composite module, and the JDK refused the layer:
+     *   Modules mixinextras.neoforge and neofobric.fabric.mods export package
+     *   com.llamalad7.mixinextras.injector.wrapoperation to module minecraft
+     * Reading the NeoForge jars here closes that gap: whatever the FML layer ships is off limits for stubs.
+     *
+     * <p>Scanned from {@code libraries/net/neoforged}, the same root {@code installedGameContent} uses, and
+     * only the jars whose name starts with {@code neoforge-} or {@code fml-} are read - the patched
+     * Minecraft jars next to them are already covered by the resolver. Nested {@code META-INF/jarjar}
+     * jars are followed one level, which is where mixinextras lives. The development launch has no
+     * libraries directory; the jars on the JVM class/module path are read as a fallback there.
+     */
+    private static java.util.Set<String> fmlLayerClassNames() {
+        var cached = FML_LAYER_CLASS_NAMES.get();
+        if (cached != null) {
+            return cached;
+        }
+        var names = java.util.concurrent.ConcurrentHashMap.<String>newKeySet();
+        try {
+            var root = FMLPaths.GAMEDIR.get().resolve("libraries").resolve("net").resolve("neoforged");
+            if (Files.isDirectory(root)) {
+                try (var libs = Files.list(root)) {
+                    for (var lib : (Iterable<Path>) libs::iterator) {
+                        if (!Files.isDirectory(lib)) {
+                            continue;
+                        }
+                        try (var versions = Files.list(lib)) {
+                            for (var versionDir : (Iterable<Path>) versions::iterator) {
+                                if (!Files.isDirectory(versionDir)) {
+                                    continue;
+                                }
+                                try (var jars = Files.list(versionDir)) {
+                                    for (var jar : (Iterable<Path>) jars::iterator) {
+                                        var fileName = jar.getFileName().toString();
+                                        if (Files.isRegularFile(jar) && fileName.endsWith(".jar")
+                                                && isFmlLayerJar(fileName)) {
+                                            collectJarClassNames(jar, names, 1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not scan the FML layer jars for the frame type check", t);
+        }
+        try {
+            for (var property : List.of("java.class.path", "jdk.module.path")) {
+                var value = System.getProperty(property, "");
+                for (var entry : value.split(java.io.File.pathSeparator)) {
+                    if (entry.isEmpty()) {
+                        continue;
+                    }
+                    var path = Path.of(entry);
+                    var fileName = path.getFileName() == null ? "" : path.getFileName().toString();
+                    if (Files.isRegularFile(path) && fileName.endsWith(".jar") && isFmlLayerJar(fileName)) {
+                        collectJarClassNames(path, names, 1);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not scan the class/module path for the FML layer check", t);
+        }
+        FML_LAYER_CLASS_NAMES.compareAndSet(null, names);
+        return FML_LAYER_CLASS_NAMES.get();
+    }
+
+    /** {@return whether {@code fileName} names a jar the FML/NeoForge layer contributes} */
+    private static boolean isFmlLayerJar(String fileName) {
+        return fileName.startsWith("neoforge-") || fileName.startsWith("fml-")
+                || fileName.startsWith("loader-") || fileName.startsWith("core-")
+                // The jarjar modules ship under their own names (mixinextras-neoforge-0.5.5.jar and
+                // friends); they are the whole reason this scan exists, so they are matched by content
+                // rather than by a prefix list that would go stale.
+                || fileName.contains("mixinextras");
     }
 
     /** {@return the probe line for one method, or null when it carries no probe point} */

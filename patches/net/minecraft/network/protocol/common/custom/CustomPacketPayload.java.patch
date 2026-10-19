@@ -47,13 +47,26 @@
              }
  
              public void encode(B output, CustomPacketPayload value) {
-@@ -44,9 +_,27 @@
+@@ -44,9 +_,51 @@
  
              public CustomPacketPayload decode(B input) {
                  Identifier identifier = input.readIdentifier();
 -                return (CustomPacketPayload)this.findCodec(identifier).decode(input);
 +                try {
++                    // NeoFobric: a channel a Fabric mod registered with Fabric's networking API has its codec
++                    // in Fabric's own registry, and the mixin Fabric prepends to this method looks there - but
++                    // only before this line resolves anything through the fallback. The fallback answers
++                    // "unknown channel, DiscardedPayload", so a Fabric mod's payload was decoded as an
++                    // unknown channel and the Fabric receiver waiting for it never ran. Throwing here hands
++                    // exactly those channels to that mixin, which decodes them with the codec Fabric
++                    // registered and returns without calling on.
++                    if (net.neoforged.neoforge.network.registration.FabricChannelDecodeHooks
++                            .letFabricDecode(identifier)) {
++                        throw new FabricDecodeEverything(identifier);
++                    }
 +                    return (CustomPacketPayload)this.findCodec(identifier).decode(input);
++                } catch (FabricDecodeEverything forwarded) {
++                    throw forwarded;
 +                } catch (RuntimeException e) {
 +                    throw new RuntimeException("Failed decoding custom payload " + identifier + ": " + e, e); // Make it easier to debug which mod payload failed to be decoded
 +                }
@@ -73,6 +86,17 @@
 +     */
 +    default net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket toVanillaServerbound() {
 +        return new net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket(this);
++    }
++
++    /**
++     * NeoFobric: what the vanilla decode path throws for a channel Fabric registered, so that the decode
++     * mixin Fabric prepends to that path gets the chance to decode it first. Only the type matters; the id
++     * is carried so a stack trace names the channel.
++     */
++    class FabricDecodeEverything extends RuntimeException {
++        FabricDecodeEverything(Identifier id) {
++            super("Forwarding " + id + " to Fabric's networking", null, false, false);
++        }
      }
  
      interface FallbackProvider<B extends FriendlyByteBuf> {

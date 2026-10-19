@@ -78,6 +78,24 @@ public final class FabricBridge {
         }
     }
 
+    /**
+     * Hands the bridge's Fabric-channel test to the platform's payload decode path.
+     *
+     * <p>Reflection keeps the platform source free of a compile-time dependency on the bridge module; both
+     * classes are in the game layer at runtime. A missing hook is not fatal - the ordinary fallback keeps
+     * answering as before, Fabric channels just lose the hand-off.
+     */
+    private static void installFabricChannelDecodeHook() {
+        try {
+            var hooks = Class.forName(
+                    "net.neoforged.neoforge.network.registration.FabricChannelDecodeHooks");
+            hooks.getMethod("setFabricChannelTest", java.util.function.Predicate.class)
+                    .invoke(null, (java.util.function.Predicate<Object>) FabricBridgeHooks::letFabricDecode);
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not install the Fabric channel decode hook", t);
+        }
+    }
+
     public static void bootIfNeeded() {
         if (booted || !hasFabricMods()) {
             return;
@@ -91,6 +109,13 @@ public final class FabricBridge {
             var start = System.currentTimeMillis();
             ensureLauncherRegistered();
 
+            // Before the loader logs anything of its own: its builtin handler buffers instead of printing,
+            // so without this the "Loading N mod(s)" block stays invisible until the shutdown hook dumps it
+            // into fabricloader.log - the one line a Fabric user looks for, missing from console and
+            // latest.log. Log.init replays what the buffer already holds, so nothing logged before this
+            // point is lost.
+            BridgedLogHandler.install();
+
             try {
                 FabricLoaderImpl.INSTANCE.load();
                 FabricLoaderImpl.INSTANCE.freeze();
@@ -102,6 +127,7 @@ public final class FabricBridge {
                 throw e;
             }
             booted = true;
+            installFabricChannelDecodeHook();
 
             // Read every mod's access widener / class tweaker into Fabric's own ClassTweaker. Knot does
             // this as part of its launch and nothing else does, so without this call the rules stay

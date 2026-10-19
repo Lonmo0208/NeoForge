@@ -624,6 +624,30 @@ public final class FabricBridgeHooks {
         return false;
     }
 
+    /**
+     * {@return whether Fabric should decode this channel itself, before NeoForge's decode path answers it}
+     *
+     * <p>Fabric's networking module prepends its own handler to vanilla's payload decode, but it only runs
+     * while the payload is still an id: it looks the id up in {@code PayloadTypeRegistry} and decodes with
+     * whatever codec it finds there. What it cannot recover from is vanilla having decoded the payload
+     * already, and NeoForge's fallback answers "an unknown channel" for every id its registry does not know
+     * - which includes every channel a Fabric mod registered. Those payloads therefore arrived as
+     * {@code DiscardedPayload}, and Fabric's own receivers never saw them.
+     *
+     * <p>The fix is to throw from the vanilla decode path for exactly those ids: Fabric's mixin runs first
+     * (it is prepended), decodes with its own codec and returns without calling on. Every other channel
+     * behaves as before - a channel Fabric never registered propagates out of the mixin and is answered by
+     * the ordinary fallback, and a NeoForge-registered channel has its codec there anyway.
+     *
+     * <p>This is the same set {@link #isFabricChannel} answers, so the two directions stay symmetric: what
+     * NeoForge lets Fabric send is what NeoForge lets Fabric decode.
+     *
+     * @param channel the payload id being decoded, or null when there is none
+     */
+    public static boolean letFabricDecode(Object channel) {
+        return channel != null && isFabricChannel(channel.toString());
+    }
+
     /** {@return the namespaces of the loaded Fabric mods, resolved once} */
     private static java.util.Set<String> fabricModNamespaces() {
         var resolved = fabricNamespaces;
