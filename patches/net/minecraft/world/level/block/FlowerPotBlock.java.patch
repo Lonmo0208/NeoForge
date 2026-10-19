@@ -1,6 +1,11 @@
 --- a/net/minecraft/world/level/block/FlowerPotBlock.java
 +++ b/net/minecraft/world/level/block/FlowerPotBlock.java
-@@ -35,17 +_,50 @@
+@@ -31,21 +_,54 @@
+ 
+ public class FlowerPotBlock extends Block {
+     public static final MapCodec<FlowerPotBlock> CODEC = RecordCodecBuilder.mapCodec(
+-        i -> i.group(BuiltInRegistries.BLOCK.byNameCodec().fieldOf("potted").forGetter(b -> b.potted), propertiesCodec()).apply(i, FlowerPotBlock::new)
++        i -> i.group(BuiltInRegistries.BLOCK.byNameCodec().fieldOf("potted").forGetter(b -> b.getPotted()), propertiesCodec()).apply(i, FlowerPotBlock::new)
      );
      private static final Map<Block, Block> POTTED_BY_CONTENT = Maps.newHashMap();
      private static final VoxelShape SHAPE = Block.column(6.0, 0.0, 6.0);
@@ -62,7 +67,13 @@
                  : Blocks.AIR)
              .defaultBlockState();
          if (newContents.isAir()) {
-@@ -87,7 +_,7 @@
+@@ -82,23 +_,23 @@
+             return InteractionResult.CONSUME;
+         }
+ 
+-        ItemStack plant = new ItemStack(this.potted);
++        ItemStack plant = new ItemStack(this.getPotted());
+         if (!player.addItem(plant)) {
              player.drop(plant, false);
          }
  
@@ -71,7 +82,20 @@
          level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
          return InteractionResult.SUCCESS;
      }
-@@ -118,12 +_,57 @@
+ 
+     @Override
+     protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
+-        return this.isEmpty() ? super.getCloneItemStack(level, pos, state, includeData) : new ItemStack(this.potted);
++        return this.isEmpty() ? super.getCloneItemStack(level, pos, state, includeData) : new ItemStack(this.getPotted());
+     }
+ 
+     private boolean isEmpty() {
+-        return this.potted == Blocks.AIR;
++        return this.getPotted() == Blocks.AIR;
+     }
+ 
+     @Override
+@@ -118,7 +_,7 @@
      }
  
      public Block getPotted() {
@@ -80,10 +104,10 @@
      }
  
      @Override
-     protected boolean isPathfindable(BlockState state, PathComputationType type) {
+@@ -126,6 +_,51 @@
          return false;
-+    }
-+
+     }
+ 
 +    public FlowerPotBlock getEmptyPot() {
 +         return emptyPot == null ? this : emptyPot.get();
 +    }
@@ -127,6 +151,17 @@
 +        } else {
 +            return java.util.Collections.unmodifiableMap(net.neoforged.neoforge.registries.GameData.getLegacyFlowerPotBlockTable().row(getEmptyPot()));
 +        }
-     }
- 
++    }
++
      @Override
+     protected boolean isRandomlyTicking(BlockState state) {
+         return state.is(Blocks.POTTED_OPEN_EYEBLOSSOM) || state.is(Blocks.POTTED_CLOSED_EYEBLOSSOM);
+@@ -134,7 +_,7 @@
+     @Override
+     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+         if (this.isRandomlyTicking(state)) {
+-            boolean isOpen = this.potted == Blocks.OPEN_EYEBLOSSOM;
++            boolean isOpen = this.getPotted() == Blocks.OPEN_EYEBLOSSOM;
+             boolean shouldBeOpen = level.environmentAttributes().getValue(EnvironmentAttributes.EYEBLOSSOM_OPEN, pos).toBoolean(isOpen);
+             if (isOpen != shouldBeOpen) {
+                 level.setBlock(pos, this.opposite(state), 3);

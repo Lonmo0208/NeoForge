@@ -150,7 +150,25 @@ yet_another_config_lib_v3-3.9.7+26.2-neoforge
 
 **注意这是"能跑通"级别的保证**（覆盖：启动 → 进世界 → 水面渲染 → 设置页链接）；非常规版本搭配、重度光影包请自行测试，出问题照常带日志报 bug。
 
+**CTM 补充（2026-10-19 更新）**：Continuity 的连接纹理在 **Fabric 版 Sodium** 上走原生 FRAPI emitter（`emitQuads`），在 **NeoForge 版 Sodium** 上走 Neo 的默认 emitter（level-aware 5 参 `collectParts`）。桥为此在 Continuity 的 jar 里注入了一个自包含 helper（`ContinuityCompat` + `NeoFobricCtmHelper`），并把 Fabric 的 `WrapperBlockStateModel` 的 5 参调用透传给被包裹的模型——Iris 的 wrapper 之前正是把世界上下文吞掉、让 NeoForge 回退到 2 参路径的原因。**两个 Sodium 构建现在都能和 Continuity 正常配合**；Neo 版自己的 `sodium-frapi` 配置仍然按它自己的 `requiredMods` 被跳过（不需要打开，也不建议造别名壳）。全模组 + Iris 光影开/关、最小 Neo 集、最小 Fabric 集均已实测玻璃整面连接、书架连续。
+
 PS：这是个趣味实验性测试，出问题不负责~ 关于 voxy：请使用**本仓库作者构建的 voxy 0.2.21-beta**（分支 [`Up-dev`](https://github.com/Lonmo0208/voxy/tree/Up-dev)；下面列表里的就是这个）—— 它修复了与最新版 Sodium / Iris 的兼容（开光影时 LOD 正常加载），也**修复了与 Ixeris 同开时的帧缓冲崩溃**（两者现在可以同时启用，本仓库已实测进世界无崩溃）。Sodium / Iris 依旧建议用 Fabric 版。
+
+### 点名兼容单独归档（`compbridlnk`）
+
+桥的主体只做通用规则；凡是**必须直接点某个模组的类、包或字段名**才能修的问题，全部集中在 `projects/fabricbridge/src/main/java/net/neoforged/fabricbridge/compbridlnk/`，一个模组一个类，注释写明为什么非它不可：
+
+- `ViaFabricPlusCompat` —— 版本选择 GUI 的 wrap 重载对齐 + 服务器列表翻译参数转字符串 + 1.10 花盆注入点对齐
+- `CreateCompat` —— 方块实体 behaviour 的提前初始化、partial model 的模型发现注入
+- `ForgeConfigAPIPortCompat` —— `ConfigTracker#registerConfig(modid)` 调用重定向
+- `PolymerCompat` —— 创造模式物品栏的静态页游标
+- `SodiumCompat` / `SodiumConfigApiLink` / `SodiumLoaderLayoutLink` —— 入口点顺序与设置页链接
+- `ContinuityCompat` —— Neo Sodium 默认 emitter 的 level-aware 5 参 `collectParts` 适配（helper 注入 Continuity 自己的 jar；Fabric `WrapperBlockStateModel` 的 5 参透传）
+- `ArchitecturyCompat` —— 含 Architectury 注入的 jar 识别（外壳 FML 模组）
+- `ModernfixMixinGuard` —— 关掉与平台字段形状冲突的 mixin
+- `ModMenuConfigLink` / `ModMenuUpdateLink` —— 模组列表的配置页与更新检查
+
+Fabric API 自身的适配不在此列 —— 那是宿主 API 的一部分，走通用处理器。
 
 ## 已知不兼容
 
@@ -335,6 +353,8 @@ yet_another_config_lib_v3-3.9.7+26.2-neoforge
 Under the hood the bridge does two things: it **renames Sodium's loader-specific classes across the two builds, in both directions** (a measured `sodium.fabric.*` ↔ `sodium.neoforge.*` name mapping) so that Iris's mixins compiled against one build's layout land on the build that actually loads (that rewrite is exactly what fixes the crash on the first rendered water surface); and it relaxes FML's hard "requires some Sodium" so the Fabric build of Sodium can satisfy it. As a bonus, **the mod pages inside Sodium's video settings are filled in from both sides too**: with NeoForge Sodium running, the Fabric mods' pages appear (iris / voxy / continuity / lss / sodium-extra); with Fabric Sodium running, the NeoForge mods' pages appear (iris / c2me and others).
 
 **This is an "it runs" guarantee** — the coverage is launch → world → water rendering → settings-page links. Unusual version pairings and heavy shader packs are on you to test; if something breaks, report it with logs as usual.
+
+**CTM note (updated 2026-10-19)**: Continuity's connected textures run through Sodium's native FRAPI emitter (`emitQuads`) on the **Fabric Sodium** build, and through Sodium's default level-aware emitter (the five-argument `collectParts`) on the **NeoForge Sodium** build. The bridge adds a self-contained helper inside Continuity's jar (`ContinuityCompat` + `NeoFobricCtmHelper`) and makes Fabric's `WrapperBlockStateModel` pass the five-argument call through to the wrapped model — Iris's wrapper was swallowing the world context and making NeoForge fall back to the two-argument path. **Both Sodium builds now work with Continuity**; the Neo build's own `sodium-frapi` config stays skipped by its `requiredMods` (no need to enable it, and a fake mod-id shell remains a bad idea). Verified with the full set + Iris (shaders on and off), the minimal Neo set, and the minimal Fabric set: connected glass walls and connected bookshelves.
 
 PS: this is a just-for-fun experimental test — if things break, we take no responsibility~ About voxy: use **voxy 0.2.21-beta, the build made in this project's own fork** (branch [`Up-dev`](https://github.com/Lonmo0208/voxy/tree/Up-dev); it is the one in the list below) — it fixes compatibility with the latest Sodium / Iris (LODs load normally with shaders enabled) and **fixes the frame-buffer crash when Ixeris is enabled** (the two can now run together; verified in this repo, world entry with no crash). Fabric builds of Sodium and Iris are still the suggestion.
 

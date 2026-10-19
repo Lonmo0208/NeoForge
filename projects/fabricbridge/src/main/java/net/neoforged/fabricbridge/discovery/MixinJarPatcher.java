@@ -831,6 +831,11 @@ public final class MixinJarPatcher {
             probe.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
                     "org/slf4j/Logger", "info", "(Ljava/lang/String;)V", true));
             method.instructions.insert(probe);
+            // The injected logger call peaks at two stack slots (logger factory result plus message).
+            // ClassWriter(0) does not recompute maxStack, and without this every probe target whose
+            // original maxStack was 1 fails verification with "Operand stack overflow" - which is
+            // exactly what killed CtmQuadTransform.isActive and every chunk build that reached it.
+            method.maxStack = Math.max(method.maxStack, 2);
             injected = true;
         }
         if (!injected) {
@@ -839,6 +844,59 @@ public final class MixinJarPatcher {
         var writer = new ClassWriter(0);
         node.accept(writer);
         LOGGER.info("[NeoFobric] Injected the CTM probe into {}", entryName);
+        return writer.toByteArray();
+    }
+
+    private static final String COLLECT_PARTS_5ARG =
+            "(Lnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;"
+                    + "Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/util/RandomSource;"
+                    + "Ljava/util/List;)V";
+
+    /**
+     * Adds the level-aware five-argument {@code collectParts} to Fabric's model wrapper.
+     *
+     * <p>NeoForge only calls the five-argument form when the model class overrides it (the
+     * {@code collectsWithContext} check). A model wrapped by {@code WrapperBlockStateModel} - which is
+     * how Iris and the Fabric model-loading plugins present models - therefore falls back to the
+     * vanilla two-argument form, and the world context never reaches the wrapped model. Delegating the
+     * five-argument form to the wrapped model keeps the context on the way to Continuity's CTM model.
+     */
+    private static byte[] addContextAwareWrapperCollectParts(byte[] classBytes, String entryName) {
+        if (!"net/fabricmc/fabric/api/client/model/loading/v1/wrapper/WrapperBlockStateModel.class"
+                .equals(entryName)) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        for (var method : node.methods) {
+            if ("collectParts".equals(method.name) && COLLECT_PARTS_5ARG.equals(method.desc)) {
+                return null;
+            }
+        }
+        var method = new MethodNode(Opcodes.ACC_PUBLIC, "collectParts", COLLECT_PARTS_5ARG, null, null);
+        var insns = method.instructions;
+        insns.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        insns.add(new FieldInsnNode(Opcodes.GETFIELD, node.name, "wrapped",
+                "Lnet/minecraft/client/renderer/block/dispatch/BlockStateModel;"));
+        for (var slot = 1; slot < 6; slot++) {
+            insns.add(new VarInsnNode(Opcodes.ALOAD, slot));
+        }
+        insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE,
+                "net/minecraft/client/renderer/block/dispatch/BlockStateModel", "collectParts",
+                COLLECT_PARTS_5ARG, true));
+        insns.add(new InsnNode(Opcodes.RETURN));
+        method.maxStack = 6;
+        method.maxLocals = 6;
+        node.methods.add(method);
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        LOGGER.info("[NeoFobric] Made Fabric's block model wrapper pass the level-aware collectParts "
+                + "call through to the wrapped model");
         return writer.toByteArray();
     }
 
@@ -1025,8 +1083,20 @@ public final class MixinJarPatcher {
         if (entryName.endsWith("CtmPropertiesLoader$LoadingContainer.class")) {
             return methodName.equals("<init>") ? "probe: one CTM definition parsed" : null;
         }
+        if (entryName.endsWith("CtmBlockStateModel$CtmQuadTransform.class")) {
+            return switch (methodName) {
+                case "prepare" -> "probe: CTM transform prepared";
+                case "transform" -> "probe: CTM quad transform called";
+                case "isActive" -> "probe: CTM isActive queried";
+                case "transformOnce" -> "probe: CTM transformOnce";
+                default -> null;
+            };
+        }
         if (entryName.endsWith("CtmBlockStateModel.class")) {
-            return methodName.equals("<init>") ? "probe: one block model wrapped for CTM" : null;
+            if (methodName.equals("<init>")) {
+                return "probe: one block model wrapped for CTM";
+            }
+            return methodName.equals("emitQuads") ? "probe: CTM emitQuads reached" : null;
         }
         if (entryName.endsWith("ModelLoadingPluginManager.class")) {
             return methodName.equals("preparePlugins") ? "probe: model loading plugins are being prepared" : null;
@@ -1459,7 +1529,7 @@ public final class MixinJarPatcher {
      * Rewrites a renamed member, keeping whatever class qualifier the annotation carried.
      *
      * <p>Matched on the tail so that {@code placeEntities(...)V} (a selector) and
-     * {@code Lnet/minecraft/…/StructureTemplate;placeEntities(...)V} (a call target) both resolve.
+     * {@code Lnet/minecraft/…StructureTemplate;placeEntities(...)V} (a call target) both resolve.
      */
     static String renamedMember(String descriptor) {
         for (var entry : ANNOTATION_MEMBER_RENAMES.entrySet()) {
@@ -1601,17 +1671,13 @@ public final class MixinJarPatcher {
      * {@link #patchJar}. Written here because the bridge compiles without Minecraft on its classpath;
      * the generated class references only types that the game layer can see at runtime.
      *
-     * <p>{@code createSide} picks which source of extra models the handler feeds into discovery: the
-     * Fabric plugin dispatcher (generated into fabric-model-loading-api-v1's jar, whose classes it
-     * references) or Create's registered partial models (generated into create's jar). Each variant
-     * only ever lands in the jar whose classes it needs, so neither has to guard against the other
-     * being absent - and, being straight-line code with a single loop, it needs none of the frame
-     * computation tricks an exception-guarded body would.
+     * <p>The handler feeds Fabric's plugin-registered extra models into discovery. Create's registered
+     * partial models, which need the same feed, are handled by {@code compbridlnk.CreateCompat}. Each
+     * variant only ever lands in the jar whose classes it needs, and, being straight-line code with a
+     * single loop, it needs none of the frame computation tricks an exception-guarded body would.
      */
-    private static byte[] generateBridgeModelDiscoveryMixin(boolean createSide) {
-        var self = createSide
-                ? "com/zurrtum/create/client/mixin/BridgeCreatePartialModelMixin"
-                : "net/fabricmc/fabric/mixin/client/model/loading/BridgeModelDiscoveryMixin";
+    private static byte[] generateFabricModelDiscoveryMixin() {
+        var self = "net/fabricmc/fabric/mixin/client/model/loading/BridgeModelDiscoveryMixin";
         var discovery = "net/minecraft/client/resources/model/ModelDiscovery";
         var cls = new ClassNode();
         cls.visit(Opcodes.V17, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, self, null, "java/lang/Object", null);
@@ -1632,7 +1698,7 @@ public final class MixinJarPatcher {
         ctor.visitEnd();
 
         var handler = new MethodNode(Opcodes.ACC_PRIVATE,
-                createSide ? "neofobric$feedCreatePartials" : "neofobric$feedExtraModels",
+                "neofobric$feedExtraModels",
                 "(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V", null, null);
         cls.methods.add(handler);
         var inject = handler.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/Inject;", true);
@@ -1646,34 +1712,24 @@ public final class MixinJarPatcher {
         var done = new org.objectweb.asm.tree.LabelNode();
         var insns = handler.instructions;
 
-        if (createSide) {
-            // for (Identifier id : PartialModelEventHandler.getRegisterAdditional().keySet())
-            //     ((ModelDiscovery) (Object) this).getOrCreateModel(id);
-            insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-                    "com/zurrtum/create/client/flywheel/lib/model/baked/PartialModelEventHandler", "getRegisterAdditional",
-                    "()Ljava/util/Map;", false));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "keySet", "()Ljava/util/Set;", true));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Set", "iterator", "()Ljava/util/Iterator;", true));
-        } else {
-            // ModelLoadingEventDispatcher dispatcher = ModelLoadingEventDispatcher.CURRENT.get();
-            // if (dispatcher == null) return;
-            // for (UnbakedExtraModel<?> model : dispatcher.getExtraModels().values())
-            //     ((ModelDiscovery) (Object) this).addRoot(model);
-            insns.add(new FieldInsnNode(Opcodes.GETSTATIC,
-                    "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher", "CURRENT",
-                    "Ljava/lang/ThreadLocal;"));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/ThreadLocal", "get", "()Ljava/lang/Object;", false));
-            insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher"));
-            insns.add(new VarInsnNode(Opcodes.ASTORE, 1));
-            insns.add(new VarInsnNode(Opcodes.ALOAD, 1));
-            insns.add(new JumpInsnNode(Opcodes.IFNULL, done));
-            insns.add(new VarInsnNode(Opcodes.ALOAD, 1));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-                    "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher", "getExtraModels",
-                    "()Ljava/util/Map;", false));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "values", "()Ljava/util/Collection;", true));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Collection", "iterator", "()Ljava/util/Iterator;", true));
-        }
+        // ModelLoadingEventDispatcher dispatcher = ModelLoadingEventDispatcher.CURRENT.get();
+        // if (dispatcher == null) return;
+        // for (UnbakedExtraModel<?> model : dispatcher.getExtraModels().values())
+        //     ((ModelDiscovery) (Object) this).addRoot(model);
+        insns.add(new FieldInsnNode(Opcodes.GETSTATIC,
+                "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher", "CURRENT",
+                "Ljava/lang/ThreadLocal;"));
+        insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/ThreadLocal", "get", "()Ljava/lang/Object;", false));
+        insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher"));
+        insns.add(new VarInsnNode(Opcodes.ASTORE, 1));
+        insns.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        insns.add(new JumpInsnNode(Opcodes.IFNULL, done));
+        insns.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                "net/fabricmc/fabric/impl/client/model/loading/ModelLoadingEventDispatcher", "getExtraModels",
+                "()Ljava/util/Map;", false));
+        insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "values", "()Ljava/util/Collection;", true));
+        insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Collection", "iterator", "()Ljava/util/Iterator;", true));
         insns.add(new VarInsnNode(Opcodes.ASTORE, 2));
         insns.add(loop);
         insns.add(new VarInsnNode(Opcodes.ALOAD, 2));
@@ -1683,17 +1739,9 @@ public final class MixinJarPatcher {
         insns.add(new TypeInsnNode(Opcodes.CHECKCAST, discovery));
         insns.add(new VarInsnNode(Opcodes.ALOAD, 2));
         insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Iterator", "next", "()Ljava/lang/Object;", true));
-        if (createSide) {
-            insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/resources/Identifier"));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, discovery, "getOrCreateModel",
-                    "(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/resources/model/ModelDiscovery$ModelWrapper;",
-                    false));
-            insns.add(new InsnNode(Opcodes.POP));
-        } else {
-            insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/client/resources/model/ResolvableModel"));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, discovery, "addRoot",
-                    "(Lnet/minecraft/client/resources/model/ResolvableModel;)V", false));
-        }
+        insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/client/resources/model/ResolvableModel"));
+        insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, discovery, "addRoot",
+                "(Lnet/minecraft/client/resources/model/ResolvableModel;)V", false));
         insns.add(new JumpInsnNode(Opcodes.GOTO, loop));
         insns.add(done);
         insns.add(new InsnNode(Opcodes.RETURN));
@@ -2587,60 +2635,6 @@ public final class MixinJarPatcher {
             }
         }
         return true;
-    }
-
-    /**
-     * Makes Create's block entity behaviours available before the first tick, not only after it.
-     *
-     * <p>{@code SmartBlockEntity} attaches its behaviours - client ones included - from {@code initialize()},
-     * which it runs lazily on the entity's first tick. A block entity that reaches the client during chunk
-     * handling can be rendered in that same frame, before that tick has happened, and a renderer that needs a
-     * behaviour (Create's mixer, for one) then throws on the null it gets back. Every diagnostic probe run
-     * confirmed that ordering by accident: inserting anything at all into this class made the crash disappear,
-     * because the extra work let the tick win the race.
-     *
-     * <p>The lookup therefore completes the initialisation itself - see
-     * {@link FabricBridgeHooks#ensureCreateBlockEntityInitialised(Object)}, which also reports the cases it
-     * cannot handle, so a run that still crashes says why.
-     *
-     * @return the class bytes with the lookup guarded, or the original when nothing needed to change
-     */
-    private static byte[] initialiseCreateBehavioursOnLookup(byte[] classBytes, String entryName) {
-        if (!"com/zurrtum/create/foundation/blockEntity/SmartBlockEntity".equals(entryName.replace(".class", ""))) {
-            return null;
-        }
-        ClassNode node;
-        try {
-            node = new ClassNode();
-            new ClassReader(classBytes).accept(node, 0);
-        } catch (Throwable t) {
-            return null;
-        }
-
-        var changed = false;
-        for (var method : node.methods) {
-            if (!"getBehaviour".equals(method.name)
-                    || !"(Lcom/zurrtum/create/foundation/blockEntity/behaviour/BehaviourType;)Lcom/zurrtum/create/api/behaviour/BlockEntityBehaviour;".equals(method.desc)) {
-                continue;
-            }
-            // An unconditional call, so no branch and no new stack map frames are needed; the guard lives in
-            // the helper, which returns immediately once the entity is initialised.
-            var ensure = new org.objectweb.asm.tree.InsnList();
-            ensure.add(new org.objectweb.asm.tree.VarInsnNode(org.objectweb.asm.Opcodes.ALOAD, 0));
-            ensure.add(new org.objectweb.asm.tree.MethodInsnNode(org.objectweb.asm.Opcodes.INVOKESTATIC,
-                    "net/neoforged/fabricbridge/FabricBridgeHooks", "ensureCreateBlockEntityInitialised",
-                    "(Ljava/lang/Object;)V", false));
-            method.instructions.insert(ensure);
-            changed = true;
-        }
-
-        if (!changed) {
-            return null;
-        }
-        LOGGER.info("[NeoFobric] Made Create's behaviour lookup initialise the block entity first");
-        var writer = new ClassWriter(0);
-        node.accept(writer);
-        return writer.toByteArray();
     }
 
     /**
@@ -3686,61 +3680,6 @@ public final class MixinJarPatcher {
     }
 
     /**
-     * Points ForgeConfigAPIPort's config registration at a helper that can serve it on NeoForge.
-     *
-     * <p>ForgeConfigAPIPort's Fabric build ships its own copy of {@code net.neoforged.fml.config}, and its
-     * {@code ConfigTracker#registerConfig} takes the <em>mod id</em> as its third parameter. On NeoForge that
-     * copy is shadowed by the platform's classes - the two cannot both be in the layer - and the platform's
-     * overload takes a {@code ModContainer} instead, so the call dies with {@code NoSuchMethodError} inside
-     * the calling mod's entrypoint. Twilight Forest registers its configs that way, and its aborted
-     * entrypoint is what leaves the game without its content and, later, without a working resource reload.
-     *
-     * <p>{@code FabricConfigHooks} registers the config with a synthetic container for the Fabric mod id, so
-     * the config is tracked and loaded exactly like a NeoForge mod's. The receiver is already on the stack
-     * when the call is made, so the static helper takes it as its first argument and the call keeps its shape.
-     *
-     * @return the class bytes with the call redirected, or the original when it does not contain it
-     */
-    private static byte[] redirectFabricModConfigRegistration(byte[] classBytes, String entryName) {
-        ClassNode node;
-        try {
-            node = new ClassNode();
-            new ClassReader(classBytes).accept(node, 0);
-        } catch (Throwable t) {
-            return null;
-        }
-
-        var changed = false;
-        for (var method : node.methods) {
-            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-                if (!(insn instanceof org.objectweb.asm.tree.MethodInsnNode call)
-                        || !"net/neoforged/fml/config/ConfigTracker".equals(call.owner)
-                        || !"registerConfig".equals(call.name)) {
-                    continue;
-                }
-                var takesModId = call.desc.startsWith("(Lnet/neoforged/fml/config/ModConfig$Type;Lnet/neoforged/fml/config/IConfigSpec;Ljava/lang/String;");
-                if (!takesModId) {
-                    continue;
-                }
-                call.setOpcode(Opcodes.INVOKESTATIC);
-                call.owner = "net/neoforged/neoforge/common/FabricConfigHooks";
-                call.name = "registerFabricModConfig";
-                call.desc = "(Lnet/neoforged/fml/config/ConfigTracker;" + call.desc.substring(1);
-                call.itf = false;
-                changed = true;
-            }
-        }
-
-        if (!changed) {
-            return null;
-        }
-        LOGGER.info("[NeoFobric] Pointed ForgeConfigAPIPort's config registration at FabricConfigHooks");
-        var writer = new ClassWriter(0);
-        node.accept(writer);
-        return writer.toByteArray();
-    }
-
-    /**
      * Points Fabric API's tooltip-order scan at the method NeoForge moved the list into.
      *
      * <p>{@code VanillaTooltipProviderOrder} reads the {@code DataComponents} field references out of
@@ -4665,9 +4604,27 @@ public final class MixinJarPatcher {
         try {
             var source = MixinJarPatcher.class.getProtectionDomain().getCodeSource();
             var path = source == null || source.getLocation() == null ? null : Path.of(source.getLocation().toURI());
-            return path != null && Files.isRegularFile(path)
-                    ? Files.size(path) + ":" + Files.getLastModifiedTime(path).toMillis()
-                    : "exploded";
+            if (path == null) {
+                return "unknown";
+            }
+            if (Files.isRegularFile(path)) {
+                return Files.size(path) + ":" + Files.getLastModifiedTime(path).toMillis();
+            }
+            // Development runs load the bridge from its class directory, and a directory's mtime does not
+            // move when a class is recompiled in place: without folding the files in, a rebuilt bridge keeps
+            // being served the previous run's patched jars (a new pass silently never runs).
+            if (Files.isDirectory(path)) {
+                long total = 0;
+                long latest = 0;
+                try (var files = Files.walk(path)) {
+                    for (var file : (Iterable<Path>) files.filter(Files::isRegularFile)::iterator) {
+                        total += Files.size(file);
+                        latest = Math.max(latest, Files.getLastModifiedTime(file).toMillis());
+                    }
+                }
+                return "exploded:" + total + ":" + latest;
+            }
+            return "unknown";
         } catch (Throwable t) {
             return "unknown";
         }
@@ -5366,20 +5323,18 @@ public final class MixinJarPatcher {
                         var withEntry = configText.replaceFirst("(\"client\"\\s*:\\s*\\[)", "$1\n    \"BridgeModelDiscoveryMixin\",");
                         patched.put("fabric-model-loading-api-v1.mixins.json", withEntry.getBytes(java.nio.charset.StandardCharsets.UTF_8));
                         entries.add(mixinClassPath);
-                        patched.put(mixinClassPath, generateBridgeModelDiscoveryMixin(false));
+                        patched.put(mixinClassPath, generateFabricModelDiscoveryMixin());
                         LOGGER.info("[NeoFobric] Injected BridgeModelDiscoveryMixin into {}", jarPath.getFileName());
                     }
                 }
-                if (entry.getName().equals("create.client.mixins.json")) {
+                if (net.neoforged.fabricbridge.compbridlnk.CreateCompat.handlesMixinConfig(entry.getName())) {
                     var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-                    // Only Create Fly's own config (its mixin package is com.zurrtum.create.client.mixin).
-                    if (configText.contains("\"package\": \"com.zurrtum.create.client.mixin\"")
-                            && !configText.contains("BridgeCreatePartialModelMixin")) {
-                        var withEntry = configText.replaceFirst("(\"client\"\\s*:\\s*\\[)", "$1\n    \"BridgeCreatePartialModelMixin\",");
+                    var withEntry = net.neoforged.fabricbridge.compbridlnk.CreateCompat.addPartialModelMixin(configText);
+                    if (withEntry != null) {
                         patched.put(entry.getName(), withEntry.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                        var mixinClassPath = "com/zurrtum/create/client/mixin/BridgeCreatePartialModelMixin.class";
+                        var mixinClassPath = net.neoforged.fabricbridge.compbridlnk.CreateCompat.PARTIAL_MODEL_MIXIN_CLASS;
                         entries.add(mixinClassPath);
-                        patched.put(mixinClassPath, generateBridgeModelDiscoveryMixin(true));
+                        patched.put(mixinClassPath, net.neoforged.fabricbridge.compbridlnk.CreateCompat.generatePartialModelDiscoveryMixin());
                         LOGGER.info("[NeoFobric] Injected BridgeCreatePartialModelMixin into {}", jarPath.getFileName());
                     }
                 }
@@ -5434,6 +5389,28 @@ public final class MixinJarPatcher {
                     versionMoved = ctmProbed;
                     patched.put(entry.getName(), versionMoved);
                 }
+                // The five-argument model path is answered inside Continuity's own jar: a Fabric mod's
+                // class loader cannot see the bridge's module, so the helper class is written into that
+                // jar rather than linked from here. Sodium's NeoForge build collects models through this
+                // path when its FRAPI emitter is unavailable.
+                var ctmParts = net.neoforged.fabricbridge.compbridlnk.ContinuityCompat
+                        .addContextAwareCollectParts(versionMoved, entry.getName());
+                if (ctmParts != null) {
+                    versionMoved = ctmParts;
+                    patched.put(entry.getName(), versionMoved);
+                    var ctmHelper = net.neoforged.fabricbridge.compbridlnk.ContinuityCompat.helperClass();
+                    if (ctmHelper != null && !patched.containsKey(
+                            net.neoforged.fabricbridge.compbridlnk.ContinuityCompat.HELPER_ENTRY)) {
+                        entries.add(net.neoforged.fabricbridge.compbridlnk.ContinuityCompat.HELPER_ENTRY);
+                        patched.put(net.neoforged.fabricbridge.compbridlnk.ContinuityCompat.HELPER_ENTRY,
+                                ctmHelper);
+                    }
+                }
+                var wrapperParts = addContextAwareWrapperCollectParts(versionMoved, entry.getName());
+                if (wrapperParts != null) {
+                    versionMoved = wrapperParts;
+                    patched.put(entry.getName(), versionMoved);
+                }
                 // First of the retargets: everything below reads targets and anchors, so a reference to a
                 // sibling build's loader package has to be on the build that loads before they look.
                 var loaderLayoutRetargeted = retargetLoaderSpecificLayout(versionMoved, entry.getName(), resolver);
@@ -5468,7 +5445,7 @@ public final class MixinJarPatcher {
                     versionMoved = tagParseRedirected;
                     patched.put(entry.getName(), versionMoved);
                 }
-                var configRegistrationRedirected = redirectFabricModConfigRegistration(versionMoved, entry.getName());
+                var configRegistrationRedirected = net.neoforged.fabricbridge.compbridlnk.ForgeConfigAPIPortCompat.redirectConfigRegistration(versionMoved, entry.getName());
                 if (configRegistrationRedirected != null) {
                     versionMoved = configRegistrationRedirected;
                     patched.put(entry.getName(), versionMoved);
@@ -5519,9 +5496,14 @@ public final class MixinJarPatcher {
                     versionMoved = movedAnchorsRetargeted;
                     patched.put(entry.getName(), versionMoved);
                 }
-                var wrapConditionOverloadRealigned = realignWrapConditionOverload(versionMoved, entry.getName());
+                var wrapConditionOverloadRealigned = net.neoforged.fabricbridge.compbridlnk.ViaFabricPlusCompat.realignWrapConditionOverload(versionMoved, entry.getName());
                 if (wrapConditionOverloadRealigned != null) {
                     versionMoved = wrapConditionOverloadRealigned;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var flowerPotAnchorRetargeted = net.neoforged.fabricbridge.compbridlnk.ViaFabricPlusCompat.retargetFlowerPotUseAnchor(versionMoved, entry.getName());
+                if (flowerPotAnchorRetargeted != null) {
+                    versionMoved = flowerPotAnchorRetargeted;
                     patched.put(entry.getName(), versionMoved);
                 }
                 var lambdaOverwritesPublicised = publiciseLambdaOverwrites(versionMoved, entry.getName());
@@ -5529,12 +5511,12 @@ public final class MixinJarPatcher {
                     versionMoved = lambdaOverwritesPublicised;
                     patched.put(entry.getName(), versionMoved);
                 }
-                var protocolVersionArgsStringified = stringifyViaFabricPlusVersionArgs(versionMoved, entry.getName());
+                var protocolVersionArgsStringified = net.neoforged.fabricbridge.compbridlnk.ViaFabricPlusCompat.stringifyVersionArgs(versionMoved, entry.getName());
                 if (protocolVersionArgsStringified != null) {
                     versionMoved = protocolVersionArgsStringified;
                     patched.put(entry.getName(), versionMoved);
                 }
-                var behaviourLookupGuarded = initialiseCreateBehavioursOnLookup(versionMoved, entry.getName());
+                var behaviourLookupGuarded = net.neoforged.fabricbridge.compbridlnk.CreateCompat.initialiseBehavioursOnLookup(versionMoved, entry.getName());
                 if (behaviourLookupGuarded != null) {
                     versionMoved = behaviourLookupGuarded;
                     patched.put(entry.getName(), versionMoved);
@@ -5981,59 +5963,6 @@ public final class MixinJarPatcher {
     }
 
     /**
-     * Turns ViaFabricPlus's raw {@code ProtocolVersion} translation arguments into strings.
-     *
-     * <p>ViaFabricPlus's server-list tooltip feeds {@code Component.translatable} the
-     * {@code ProtocolVersion} object itself. This platform's development environment validates
-     * translatable arguments (Component, Number, Boolean or String - production skips the check), so
-     * the moment a target version is set, rendering any server-list entry crashed the render thread
-     * with {@code TranslatableContents' arguments must be either ...}. The call whose result the
-     * translation consumes is rewritten to its {@code toString()} - exactly what the translation line
-     * prints anyway ({@code 1.21-1.21.1 (767)}).
-     */
-    private static byte[] stringifyViaFabricPlusVersionArgs(byte[] classBytes, String entryName) {
-        if (!entryName.endsWith(".class")) {
-            return null;
-        }
-        ClassNode node;
-        try {
-            node = new ClassNode();
-            new ClassReader(classBytes).accept(node, 0);
-        } catch (Throwable t) {
-            return null;
-        }
-
-        var changed = false;
-        for (var method : node.methods) {
-            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-                if (!(insn instanceof org.objectweb.asm.tree.MethodInsnNode call)
-                        || !(call.owner.equals("com/viaversion/viafabricplus/injection/access/core/IServerData"))
-                        || !"viaFabricPlus$translatingVersion".equals(call.name)) {
-                    continue;
-                }
-                // The result sits on the stack where the translation wants a String. String.valueOf is
-                // null-safe: the polled "checking..." entries return a null version, and the first
-                // attempt (a plain toString call) died on exactly those with an NPE.
-                method.instructions.insert(call, new org.objectweb.asm.tree.MethodInsnNode(Opcodes.INVOKESTATIC,
-                        "java/lang/String",
-                        "valueOf",
-                        "(Ljava/lang/Object;)Ljava/lang/String;",
-                        false));
-                changed = true;
-                LOGGER.info("[NeoFobric] Pointed {}#{}'s target-version argument at its toString so the translatable-argument validation accepts it",
-                        node.name.replace('/', '.'), method.name);
-            }
-        }
-
-        if (!changed) {
-            return null;
-        }
-        var writer = new ClassWriter(0);
-        node.accept(writer);
-        return writer.toByteArray();
-    }
-
-    /**
      * Raises a private {@code @Overwrite} of a synthetic lambda to public.
      *
      * <p>A lambda handler compiled private fails Mixin's visibility conformance the moment the runtime
@@ -6067,104 +5996,6 @@ public final class MixinJarPatcher {
             changed = true;
             LOGGER.info("[NeoFobric] Raised the private lambda overwrite {}#{} to public so the visibility conformance cannot refuse it",
                     node.name.replace('/', '.'), method.name);
-        }
-
-        if (!changed) {
-            return null;
-        }
-        var writer = new ClassWriter(0);
-        node.accept(writer);
-        return writer.toByteArray();
-    }
-
-    /**
-     * Repoints ViaFabricPlus's {@code startWaitingForNewLevel} wrap at the overload that actually runs, and
-     * widens its handler to the new call shape.
-     *
-     * <p>ViaFabricPlus wraps the {@code startWaitingForNewLevel(LocalPlayer, ClientLevel, Reason)} call
-     * inside {@code handleRespawn} with a {@code @WrapWithCondition} whose handler takes the wrapped call's
-     * arguments plus one {@code @Local(name = "dimensionKey")} sugar parameter. NeoForge split that method
-     * into a delegating three-argument overload with no call sites left and a five-argument overload that
-     * {@code handleRespawn} actually invokes, carrying the two dimension keys the sugar used to fish out of
-     * the frame. Against this platform the injection therefore dies in MixinExtras' parameter validation
-     * during the apply's post-phase - the target class is left half-transformed with frames that describe
-     * the pre-injection layout, and the first link of {@code ClientPacketListener} verifies a different
-     * method every launch ("Expecting a stackmap frame").
-     *
-     * <p>The fix points the {@code @At} target at the five-argument overload and lets the handler read the
-     * two keys as explicit call arguments: the sugar parameter's slot and type are the first new argument's,
-     * so the handler body reads it unchanged; only the second key is appended and the stale {@code @Local}
-     * annotation removed.
-     */
-    private static byte[] realignWrapConditionOverload(byte[] classBytes, String entryName) {
-        if (!"com/viaversion/viafabricplus/injection/mixin/features/v1_20_3/network/MixinClientPacketListener.class".equals(entryName)) {
-            return null;
-        }
-        ClassNode node;
-        try {
-            node = new ClassNode();
-            new ClassReader(classBytes).accept(node, 0);
-        } catch (Throwable t) {
-            return null;
-        }
-
-        var oldCallArgs = "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;)V";
-        var newCallArgs = "(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/LevelLoadingScreen$Reason;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)V";
-        var resourceKeyDesc = "Lnet/minecraft/resources/ResourceKey;";
-        var localSugar = "Lcom/llamalad7/mixinextras/sugar/Local;";
-
-        var changed = false;
-        for (var method : node.methods) {
-            // ViaFabricPlus uses MixinExtras' own WrapWithCondition, not sponge's - match both spellings.
-            var wrap = findAnnotation(method, "Lorg/spongepowered/asm/mixin/injection/WrapWithCondition;");
-            if (wrap == null) {
-                wrap = findAnnotation(method, "Lcom/llamalad7/mixinextras/injector/v2/WrapWithCondition;");
-            }
-            if (wrap == null || wrap.values == null) {
-                continue;
-            }
-            for (var i = 0; i + 1 < wrap.values.size(); i += 2) {
-                if (!"at".equals(wrap.values.get(i)) || !(wrap.values.get(i + 1) instanceof org.objectweb.asm.tree.AnnotationNode at)
-                        || at.values == null) {
-                    continue;
-                }
-                for (var j = 0; j + 1 < at.values.size(); j += 2) {
-                    if ("target".equals(at.values.get(j)) && at.values.get(j + 1) instanceof String target
-                            && target.startsWith("Lnet/minecraft/client/multiplayer/ClientPacketListener;startWaitingForNewLevel(")
-                            && target.contains(oldCallArgs)) {
-                        at.values.set(j + 1, target.replace(oldCallArgs, newCallArgs));
-                        changed = true;
-                    }
-                }
-            }
-
-            if (!method.name.equals("checkDimensionChange")) {
-                continue;
-            }
-            var args = org.objectweb.asm.Type.getArgumentTypes(method.desc);
-            if (args.length == 0 || !args[args.length - 1].getDescriptor().equals(resourceKeyDesc)) {
-                continue;
-            }
-            var newArgs = new org.objectweb.asm.Type[args.length + 1];
-            System.arraycopy(args, 0, newArgs, 0, args.length);
-            newArgs[args.length] = org.objectweb.asm.Type.getObjectType("net/minecraft/resources/ResourceKey");
-            method.desc = org.objectweb.asm.Type.getMethodDescriptor(org.objectweb.asm.Type.getReturnType(method.desc), newArgs);
-            // The last parameter was the @Local sugar; the first appended parameter takes over its slot
-            // (same type, the wrapper's own toDimension), so only the annotation goes.
-            if (method.visibleParameterAnnotations != null && method.visibleParameterAnnotations.length == args.length) {
-                method.visibleParameterAnnotations[args.length - 1] = null;
-            }
-            if (method.invisibleParameterAnnotations != null && method.invisibleParameterAnnotations.length == args.length) {
-                method.invisibleParameterAnnotations[args.length - 1] = null;
-            }
-            if (args[args.length - 1].getSize() == 1) {
-                method.maxLocals += 1;
-            } else {
-                method.maxLocals += 2;
-            }
-            method.signature = null;
-            changed = true;
-            LOGGER.info("[NeoFobric] Repointed {}#{} at the five-argument startWaitingForNewLevel overload and widened the handler by the explicit dimension keys", node.name.replace('/', '.'), method.name);
         }
 
         if (!changed) {

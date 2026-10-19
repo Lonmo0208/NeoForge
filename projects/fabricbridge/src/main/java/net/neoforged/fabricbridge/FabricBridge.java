@@ -258,11 +258,11 @@ public final class FabricBridge {
      */
     private static <T> void invokeIsolated(String key, Class<T> type, java.util.function.Consumer<? super T> invoker) {
         var containers = new java.util.ArrayList<>(FabricLoaderImpl.INSTANCE.getEntrypointContainers(key, type));
-        pinSodiumBeforeIndigo(containers);
+        net.neoforged.fabricbridge.compbridlnk.SodiumCompat.pinBeforeIndigo(containers);
         for (var container : containers) {
             try {
                 var modId = container.getProvider().getMetadata().getId();
-                if (yieldsRendererToSodium(key, modId)) {
+                if (net.neoforged.fabricbridge.compbridlnk.SodiumCompat.yieldsRendererToSodium(key, modId)) {
                     LOGGER.info("[NeoFobric] Skipping the '{}' entrypoint of '{}' - Sodium registers the"
                             + " FRAPI renderer, and the registry accepts only one", key, modId);
                     continue;
@@ -272,81 +272,6 @@ public final class FabricBridge {
                 LOGGER.error("[NeoFobric] Entrypoint '{}' of Fabric mod '{}' failed and was skipped",
                         key, container.getProvider().getMetadata().getId(), t);
             }
-        }
-    }
-
-    /**
-     * Runs Sodium's entrypoints before Indigo's.
-     *
-     * <p>Fabric's renderer registry accepts exactly one rendering plug-in and throws
-     * {@code UnsupportedOperationException} at the second registration, so on an instance carrying both
-     * Sodium and Indigo the winner is simply whichever client entrypoint fabric-loader happens to return
-     * first - an order this bridge does not control, and one that has been observed to flip between
-     * otherwise identical launches. The two possible winners are not equally good: with Indigo holding
-     * the plug-in slot, Sodium's {@code ExtendedBlockModelFeatureRenderer} still runs and replays
-     * Indigo-built meshes into Sodium's own quad emitter, and Indigo's {@code MeshViewImpl} casts that
-     * emitter to its own type - the first frame dies with
-     * {@code ClassCastException: MutableQuadViewWrapper cannot be cast to MutableQuadViewImpl}. With
-     * Sodium first, Indigo's registration fails exactly as it always has on those launches and
-     * everything else keeps working, which is the configuration every successful run used.
-     *
-     * <p>Only reorders when both are present, so no other mod's entrypoint order changes.
-     */
-    private static <T> void pinSodiumBeforeIndigo(java.util.List<net.fabricmc.loader.api.entrypoint.EntrypointContainer<T>> containers) {
-        var hasSodium = false;
-        var hasIndigo = false;
-        for (var container : containers) {
-            var modId = container.getProvider().getMetadata().getId();
-            hasSodium |= "sodium".equals(modId);
-            hasIndigo |= "fabric-renderer-indigo".equals(modId);
-        }
-        if (!hasSodium || !hasIndigo) {
-            return;
-        }
-        java.util.List<net.fabricmc.loader.api.entrypoint.EntrypointContainer<T>> ordered = new java.util.ArrayList<>(containers.size());
-        for (var container : containers) {
-            if ("sodium".equals(container.getProvider().getMetadata().getId())) {
-                ordered.add(container);
-            }
-        }
-        for (var container : containers) {
-            if (!"sodium".equals(container.getProvider().getMetadata().getId())) {
-                ordered.add(container);
-            }
-        }
-        containers.clear();
-        containers.addAll(ordered);
-        LOGGER.info("[NeoFobric] Pinned Sodium's entrypoint ahead of the Fabric renderer to keep the"
-                + " one renderer plug-in slot");
-    }
-
-    /**
-     * {@return whether this entrypoint should stand down so Sodium can take the renderer slot}
-     *
-     * <p>Fabric's renderer API keeps exactly one plug-in, and whoever registers first wins. Indigo
-     * registers from its client entrypoint, which runs before Sodium's, so with both installed Sodium's
-     * FRAPI integration was rejected with "Attempted to register a second rendering plug-in" and the
-     * mod never took over block rendering. Blocks then only appeared once something forced a rebuild -
-     * breaking a block re-rendered its own chunk - and items drew through a pipeline that left them
-     * unlit and dark.
-     *
-     * <p>Only applies when Sodium is present; on its own, Indigo is the renderer and must register.
-     */
-    private static boolean yieldsRendererToSodium(String key, String modId) {
-        // Off by default: Indigo is not only a renderer, it is also the model baker, so standing it down
-        // left every block and item model without a texture - the game drew black-and-magenta placeholders.
-        // Kept behind a flag because taking the renderer slot is still the right move once Indigo's model
-        // loading is routed through NeoForge's.
-        if (!Boolean.getBoolean("neofobric.indigoYieldsToSodium")) {
-            return false;
-        }
-        if (!"client".equals(key) || !"fabric-renderer-indigo".equals(modId)) {
-            return false;
-        }
-        try {
-            return FabricLoaderImpl.INSTANCE.isModLoaded("sodium");
-        } catch (Throwable t) {
-            return false;
         }
     }
 

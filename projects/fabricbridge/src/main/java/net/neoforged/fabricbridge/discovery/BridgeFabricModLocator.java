@@ -1144,7 +1144,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             var info = entry.getValue();
             var displayName = info.displayName() == null || info.displayName().isBlank()
                     ? info.modId() : info.displayName();
-            if (!usesArchitectury(jarPath)) {
+            if (!net.neoforged.fabricbridge.compbridlnk.ArchitecturyCompat.usesArchitectury(jarPath)) {
                 continue;
             }
             var shell = cacheDir.resolve(jarPath.getFileName().toString() + SHELL_SUFFIX);
@@ -1181,21 +1181,6 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             // GameData.postRegisterEventsForShellMods.
             System.setProperty("neofobric.shellMods", String.join(",", shellIds));
         }
-    }
-
-    /** {@return whether the jar was built with Architectury's plugin (its common jar injection, or the API itself)} */
-    private static boolean usesArchitectury(Path jarPath) {        try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
-            var entries = zip.entries();
-            while (entries.hasMoreElements()) {
-                var name = entries.nextElement().getName();
-                if (name.startsWith("dev/architectury/") || name.startsWith("architectury_inject")) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.debug("[NeoFobric] Could not scan {} for Architectury classes", jarPath, e);
-        }
-        return false;
     }
 
     /**

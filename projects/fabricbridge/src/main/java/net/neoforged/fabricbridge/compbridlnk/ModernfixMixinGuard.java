@@ -1,4 +1,4 @@
-package net.neoforged.fabricbridge;
+package net.neoforged.fabricbridge.compbridlnk;
 
 import net.neoforged.fml.loading.FMLPaths;
 import org.slf4j.Logger;

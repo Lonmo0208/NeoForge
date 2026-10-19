@@ -78,6 +78,7 @@ build
 !/tools/mc-api-diff
 !/tools/mixin-anchor-verify
 !/tools/vanilla-call-diff
+!/tools/ctm-helper
 
 # NeoFobric: the diff tool writes its report here
 /tools/mc-api-diff/report.txt

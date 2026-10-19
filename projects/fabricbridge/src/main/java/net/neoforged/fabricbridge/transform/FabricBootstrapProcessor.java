@@ -119,7 +119,7 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
         net.neoforged.fabricbridge.FabricBridge.ensureLauncherRegistered();
         // Same reason for the earliest possible moment: modernfix's mixin plugin reads its options file
         // when its config is first selected, and the option this writes must be in place by then.
-        net.neoforged.fabricbridge.ModernfixMixinGuard.ensure();
+        net.neoforged.fabricbridge.compbridlnk.ModernfixMixinGuard.ensure();
         // Provide the bytecode source for conflict pre-filtering before any registration.
         net.neoforged.fabricbridge.transform.MixinConflictFilter.install(context);
         if (mixinRegistrationDone) {
