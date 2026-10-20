@@ -648,6 +648,11 @@ public final class FabricBridgeHooks {
         return channel != null && isFabricChannel(channel.toString());
     }
 
+    /** {@return whether this namespace belongs to one of the loaded Fabric mods} */
+    public static boolean isFabricModNamespace(String namespace) {
+        return namespace != null && fabricModNamespaces().contains(namespace);
+    }
+
     /** {@return the namespaces of the loaded Fabric mods, resolved once} */
     private static java.util.Set<String> fabricModNamespaces() {
         var resolved = fabricNamespaces;

@@ -793,6 +793,66 @@ public final class MixinJarPatcher {
         return changed;
     }
 
+    private static final String FABRIC_REGISTRY_SYNC_MANAGER =
+            "net/fabricmc/fabric/impl/registry/sync/RegistrySyncManager";
+
+    /**
+     * Keeps a client Fabric API's registry sync cannot talk to, instead of letting it disconnect.
+     *
+     * <p>{@code RegistrySyncManager.configureClient} asks
+     * {@code ServerConfigurationNetworking.canSend(listener, RegistrySyncPayload.ID)} and, when the answer
+     * is false, disconnects with "This server requires Fabric API installed on your client!". That test
+     * fits a Fabric server, where a peer without the payload type cannot decode the registry dump - but a
+     * NeoForge client syncs the registries its mods add through NeoForge's own channel, and the Fabric
+     * payload type is only registered for a Fabric peer. The disconnect is therefore a false alarm; the
+     * platform hook keeps the connection, records the related namespaces and warns the player in chat
+     * after the join.
+     *
+     * <p>Only the {@code disconnect(Component)} call is rewritten. The method still returns immediately
+     * after it, so no {@code SyncConfigurationTask} is queued and NeoForge's own configuration handling
+     * continues.
+     */
+    private static byte[] keepClientsRejectedByRegistrySync(byte[] classBytes, String entryName) {
+        if (!FABRIC_REGISTRY_SYNC_MANAGER.equals(entryName.replace(".class", ""))) {
+            return null;
+        }
+        ClassNode node;
+        try {
+            node = new ClassNode();
+            new ClassReader(classBytes).accept(node, 0);
+        } catch (Throwable t) {
+            return null;
+        }
+        var changed = false;
+        for (var method : node.methods) {
+            for (var insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof MethodInsnNode call)
+                        || !"net/minecraft/server/network/ServerConfigurationPacketListenerImpl".equals(call.owner)
+                        || !"disconnect".equals(call.name)
+                        || !"(Lnet/minecraft/network/chat/Component;)V".equals(call.desc)) {
+                    continue;
+                }
+                // The receiver (the listener) and the reason are both on the stack already, which is
+                // exactly the shape the hook takes, so only the call target changes.
+                call.setOpcode(Opcodes.INVOKESTATIC);
+                call.owner = "net/neoforged/neoforge/network/registration/FabricRegistrySyncHooks";
+                call.name = "keepInsteadOfDisconnecting";
+                call.desc = "(Lnet/minecraft/server/network/ServerConfigurationPacketListenerImpl;"
+                        + "Lnet/minecraft/network/chat/Component;)V";
+                call.itf = false;
+                changed = true;
+            }
+        }
+        if (!changed) {
+            return null;
+        }
+        var writer = new ClassWriter(0);
+        node.accept(writer);
+        LOGGER.info("[NeoFobric] Fabric API's registry-sync screen now keeps the client and warns the"
+                + " player in chat instead of disconnecting");
+        return writer.toByteArray();
+    }
+
     /**
      * Temporary diagnostic for the connected-textures pipeline, off unless asked for with
      * {@code -Dneofobric.debugContinuity=true}.
@@ -5554,6 +5614,11 @@ public final class MixinJarPatcher {
                 var registryParseAnchorRetargeted = retargetRegistryParseReceiver(versionMoved, entry.getName());
                 if (registryParseAnchorRetargeted != null) {
                     versionMoved = registryParseAnchorRetargeted;
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var registrySyncKept = keepClientsRejectedByRegistrySync(versionMoved, entry.getName());
+                if (registrySyncKept != null) {
+                    versionMoved = registrySyncKept;
                     patched.put(entry.getName(), versionMoved);
                 }
                 var blockStateModelTypesRedirected = redirectFabricBlockStateModelTypes(versionMoved);

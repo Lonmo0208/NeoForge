@@ -96,6 +96,25 @@ public final class FabricBridge {
         }
     }
 
+    /**
+     * Hands the bridge's Fabric-mod namespace test to the platform's registry-sync warning hook.
+     *
+     * <p>Fabric API's disconnect reason lists up to four registry namespaces; this test narrows them to
+     * the namespaces of the loaded Fabric mods before the warning is sent in chat.
+     */
+    private static void installFabricRegistrySyncHook() {
+        try {
+            var hooks = Class.forName(
+                    "net.neoforged.neoforge.network.registration.FabricRegistrySyncHooks");
+            hooks.getMethod("setFabricNamespaceTest", java.util.function.Predicate.class)
+                    .invoke(null, (java.util.function.Predicate<String>) FabricBridgeHooks::isFabricModNamespace);
+            LOGGER.info("[NeoFobric] Fabric API's registry-sync warning hook is installed; related"
+                    + " namespaces are narrowed to the loaded Fabric mods");
+        } catch (Throwable t) {
+            LOGGER.debug("[NeoFobric] Could not install the Fabric registry-sync warning hook", t);
+        }
+    }
+
     public static void bootIfNeeded() {
         if (booted || !hasFabricMods()) {
             return;
@@ -128,6 +147,7 @@ public final class FabricBridge {
             }
             booted = true;
             installFabricChannelDecodeHook();
+            installFabricRegistrySyncHook();
 
             // Read every mod's access widener / class tweaker into Fabric's own ClassTweaker. Knot does
             // this as part of its launch and nothing else does, so without this call the rules stay
