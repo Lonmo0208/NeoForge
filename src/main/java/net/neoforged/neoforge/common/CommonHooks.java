@@ -1863,6 +1863,15 @@ public class CommonHooks {
             return;
         }
 
+        if (Boolean.getBoolean("neofobric.allowForeignEntityData")) {
+            // Fabric mods add synced data to vanilla entities through mixins; that is the normal pattern
+            // on Fabric and both peers in a bridge install carry the same mod set. Keep the warning, but
+            // do not turn it into a boot failure.
+            LOGGER.warn("Allowing synced data from {} for {} because the Fabric compatibility layer is active",
+                    callerClass.getName(), holderClass.getName());
+            return;
+        }
+
         final var message = new StringBuilder();
         message.append("Identified an attempt to add synced data to a foreign entity: this is highly discouraged.\n");
         message.append("Entity class: ").append(holderClass.getName()).append('\n');

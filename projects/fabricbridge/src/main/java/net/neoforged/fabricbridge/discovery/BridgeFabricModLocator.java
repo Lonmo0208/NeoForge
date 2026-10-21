@@ -543,6 +543,13 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      */
     private static void writeModsMenuFile(Map<Path, FabricModInfo> fabricJars, Map<Path, Path> realignedJars) {
         System.setProperty("neofobric.active", "true");
+        if (!fabricJars.isEmpty()) {
+            // Fabric mods routinely add synced data to vanilla entities through a mixin; NeoForge's
+            // verifyEntityDataAccessorRegistration rejects that outright. The bridge sets this flag so
+            // the platform logs a warning instead, keeping those mods loadable when both peers run the
+            // same Fabric mod set.
+            System.setProperty("neofobric.allowForeignEntityData", "true");
+        }
         var file = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get()
                 .resolve(".neofobric").resolve("mods-menu.json");
         try {
