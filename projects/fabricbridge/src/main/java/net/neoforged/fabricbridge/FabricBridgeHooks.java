@@ -123,6 +123,7 @@ public final class FabricBridgeHooks {
         }
 
         FabricBridge.bootIfNeeded();
+        net.neoforged.fabricbridge.transform.FabricBootstrapProcessor.prepareBeforeEntrypoints();
         FabricBridge.invokeEntrypoints();
         // Name-specific compat links live in the compbridlnk package (see its package docs): handing a Fabric
         // mod's Sodium settings page to the NeoForge build of Sodium is the first of them, and each link is a

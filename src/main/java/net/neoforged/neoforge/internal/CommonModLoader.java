@@ -46,7 +46,16 @@ public abstract class CommonModLoader {
     protected static void begin(Runnable periodicTask, boolean datagen) {
         var syncExecutor = ModWorkManager.syncExecutor();
 
-        ModLoader.gatherAndInitializeMods(syncExecutor, ModWorkManager.parallelExecutor(), periodicTask);
+        // NeoFobric: Fabric loader constructs mods on the calling thread. Some Fabric mods mutate
+        // shared maps from their constructors without synchronisation - amecs' key-modifier layer
+        // registers every KeyMapping in a plain HashMap - so NeoForge's parallel construction turns
+        // that into a ConcurrentModificationException, surfaces as ExceptionInInitializerError from
+        // whichever mod happened to create a KeyMapping, and aborts the whole launch. Serialise mod
+        // construction whenever Fabric mods are present; it costs a little startup time, not correctness.
+        var constructionExecutor = net.neoforged.fabricbridge.FabricBridge.hasFabricMods()
+                ? syncExecutor
+                : ModWorkManager.parallelExecutor();
+        ModLoader.gatherAndInitializeMods(syncExecutor, constructionExecutor, periodicTask);
 
         ModLoader.runInitTask("Registry initialization", syncExecutor, periodicTask, () -> {
             // NeoFobric: open the built-in registries before the NewRegistry events fire. A Fabric mod's

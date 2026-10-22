@@ -425,17 +425,22 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
                     }
                 }
                 byte[] configContent;
-                try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(entry.getKey())) {
-                    configContent = jar.readFile(configPath);
-                    if (configContent != null) {
-                        configContent = relaxMixinConfig(configContent, client, configPath);
-                        configContent = MixinConflictFilter.filter(configContent, jar, info.modId(), client);
-                        // A config may build on a "parent" config - a settings carrier no mod declares as
-                        // one of its own; feed those into the service too (see feedParentMixinConfigs).
-                        feedParentMixinConfigs(fmlMixinService, configContent, jar, fedParentConfigs);
-                    }
-                } catch (Exception e) {
+                var configJarPath = locateMixinConfigJar(configPath, entry.getKey());
+                if (configJarPath == null) {
                     configContent = null;
+                } else {
+                    try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(configJarPath)) {
+                        configContent = jar.readFile(configPath);
+                        if (configContent != null) {
+                            configContent = relaxMixinConfig(configContent, client, configPath);
+                            configContent = MixinConflictFilter.filter(configContent, jar, info.modId(), client);
+                            // A config may build on a "parent" config - a settings carrier no mod declares as
+                            // one of its own; feed those into the service too (see feedParentMixinConfigs).
+                            feedParentMixinConfigs(fmlMixinService, configContent, jar, fedParentConfigs);
+                        }
+                    } catch (Exception e) {
+                        configContent = null;
+                    }
                 }
                 if (configContent == null) {
                     LOGGER.warn("[NeoFobric] Fabric mod {} declares mixin config {}, which does not exist in its jar", info.modId(), configPath);
@@ -496,6 +501,38 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
             LOGGER.debug("[NeoFobric] Could not pin a mixin config to the DEFAULT environment", t);
             return content;
         }
+    }
+
+    /**
+     * {@return the Fabric jar that actually carries {@code configPath}, or {@code null}} A mod's
+     * {@code fabric.mod.json} may list mixin configs that live in one of its nested jars: Adventure
+     * Platform declares the shared module's configs, but the files sit in the nested
+     * {@code adventure-platform-mod-shared} jar. Reading the config from the declaring jar alone
+     * loses them silently, and with them the shared mixins - including the one that makes
+     * {@code Identifier} implement Adventure's {@code Key}, without which every {@code Key} cast
+     * fails at runtime.
+     */
+    private static java.nio.file.Path locateMixinConfigJar(String configPath, java.nio.file.Path declaredJar) {
+        try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(declaredJar)) {
+            if (jar.containsFile(configPath)) {
+                return declaredJar;
+            }
+        } catch (Exception ignored) {
+            // Fall through to the nested jars.
+        }
+        for (var candidate : net.neoforged.fabricbridge.discovery.FabricJarRegistry.getEntries().keySet()) {
+            if (candidate.equals(declaredJar)) {
+                continue;
+            }
+            try (var jar = net.neoforged.fml.jarcontents.JarContents.ofPath(candidate)) {
+                if (jar.containsFile(configPath)) {
+                    return candidate;
+                }
+            } catch (Exception ignored) {
+                // A removed or unreadable jar is not this config's source.
+            }
+        }
+        return null;
     }
 
     /**
@@ -663,6 +700,17 @@ public final class FabricBootstrapProcessor implements ClassProcessor {
                 LOGGER.debug("[NeoFobric] Mixin is not ready to prepare the Fabric configs yet, will retry", t);
             }
         }
+    }
+
+    /**
+     * Prepares the Fabric mixin configs before the Fabric entrypoints run. A Fabric mod can start its own
+     * worker threads from its entrypoint (c2me does); if those workers load a class while Mixin is still
+     * selecting/adding configs, the config list is modified under the transformer and the worker dies with
+     * a ConcurrentModificationException. The entrypoints are the last point that is still guaranteed to be
+     * on the main thread before such workers exist.
+     */
+    public static void prepareBeforeEntrypoints() {
+        forceMixinPreparationIfPending();
     }
 
     /** {@return whether Mixin's own machinery is on this thread's stack} */

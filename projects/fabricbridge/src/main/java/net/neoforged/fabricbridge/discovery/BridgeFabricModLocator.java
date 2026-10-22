@@ -725,7 +725,14 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             // resolves the Fabric half of the metadata and dies on the sibling it names ("Mod 'Iris' (iris)
             // requires any 0.9.x version of sodium, which is missing", because the installed Sodium is the
             // NeoForge build).
-            if (jar.readFile("META-INF/neoforge.mods.toml") != null) {
+            //
+            // A jar nested inside a Fabric mod is the exception: Fabric's JiJ puts it on the parent's
+            // classpath, so a multi-loader library there (SkinShuffle nests SpruceUI) has to stay on the
+            // Fabric side even though it also declares neoforge.mods.toml - handing it to FML puts its
+            // classes in another module, and the Fabric parent cannot see them (NoClassDefFoundError:
+            // dev/lambdaurora/spruceui/screen/SpruceScreen).
+            byte[] metadata = jar.readFile(FabricJarRegistry.FABRIC_MOD_JSON);
+            if (jar.readFile("META-INF/neoforge.mods.toml") != null && (bundledBy.isEmpty() || metadata == null)) {
                 LOGGER.info("[NeoFobric] Leaving {} to FML - it declares META-INF/neoforge.mods.toml",
                         path.getFileName());
                 FabricJarRegistry.markForeignModPath(path);
@@ -736,7 +743,6 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             // Fabric mod - Create: Ultimate Factory's carries one with modLoader="javafml" and
             // loaderVersion="[47,)" left over from a Forge build - and leaving it to FML means FML skips the
             // jar as an old Forge build while the bridge never picks it up either, so the mod never loads.
-            byte[] metadata = jar.readFile(FabricJarRegistry.FABRIC_MOD_JSON);
             if (metadata == null && jar.readFile("META-INF/mods.toml") != null) {
                 LOGGER.info("[NeoFobric] Leaving {} to FML - it declares META-INF/mods.toml and no fabric.mod.json",
                         path.getFileName());
@@ -1146,12 +1152,19 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         }
         var cacheDir = modsDir.resolve(MixinJarPatcher.CACHE_DIR_NAME);
         var shellIds = new ArrayList<String>();
+        var writtenShellIds = new java.util.HashSet<String>();
         for (var entry : fabricJars.entrySet()) {
             var jarPath = entry.getKey();
             var info = entry.getValue();
             var displayName = info.displayName() == null || info.displayName().isBlank()
                     ? info.modId() : info.displayName();
             if (!net.neoforged.fabricbridge.compbridlnk.ArchitecturyCompat.usesArchitectury(jarPath)) {
+                continue;
+            }
+            // Fabric allows hyphens in mod ids; FML does not. The shell only exists so FML can hand the
+            // Fabric mod an event bus, so its FML id can differ from the Fabric id (nothing depends on it).
+            var shellId = fmlShellModId(info.modId());
+            if (!writtenShellIds.add(shellId)) {
                 continue;
             }
             var shell = cacheDir.resolve(jarPath.getFileName().toString() + SHELL_SUFFIX);
@@ -1162,7 +1175,7 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                         + "license=\"See the Fabric build of this mod\"\n"
                         + "\n"
                         + "[[mods]]\n"
-                        + "modId=\"" + info.modId() + "\"\n"
+                        + "modId=\"" + shellId + "\"\n"
                         + "version=\"" + info.version() + "\"\n"
                         + "displayName=\"" + displayName.replace("\"", "'") + " (Fabric, bridged)\"\n")
                         .getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -1178,9 +1191,9 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 continue;
             }
             pipeline.addPath(shell, ModFileDiscoveryAttributes.DEFAULT, IncompatibleFileReporting.WARN_ALWAYS);
-            shellIds.add(info.modId());
-            LOGGER.info("[NeoFobric] Registered the shell FML mod {} {} so the Fabric build's Architectury "
-                    + "registrations can resolve it", info.modId(), info.version());
+            shellIds.add(shellId);
+            LOGGER.info("[NeoFobric] Registered the shell FML mod {} ({}) {} so the Fabric build's Architectury "
+                    + "registrations can resolve it", shellId, info.modId(), info.version());
         }
         if (!shellIds.isEmpty()) {
             // The platform re-posts the RegisterEvent pass for these buses right behind the Fabric
@@ -1188,6 +1201,15 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             // GameData.postRegisterEventsForShellMods.
             System.setProperty("neofobric.shellMods", String.join(",", shellIds));
         }
+    }
+
+    /** {@return a mod id that passes FML's {@code ^[a-z][a-z0-9_]*$} check} */
+    private static String fmlShellModId(String modId) {
+        var id = modId.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
+        if (id.isEmpty() || id.charAt(0) < 'a' || id.charAt(0) > 'z') {
+            id = "fabric_" + id;
+        }
+        return id;
     }
 
     /**
@@ -1646,10 +1668,9 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             return null;
         }
         var directory = relativePath.substring(0, lastSlash);
-        if (!directory.contains("/")) {
-            // The default package - never a package of its own in JPMS terms.
-            return null;
-        }
+        // A single-segment directory (twilightforest/Foo.class) is a normal JPMS package named
+        // "twilightforest", not the default package. Only a path with no directory at all is the
+        // default package, which lastSlash < 1 already rejected.
         var packageName = directory.replace('/', '.');
         return isValidPackageName(packageName) ? packageName : null;
     }
@@ -2025,18 +2046,56 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
         @Override
         public java.lang.module.ModuleDescriptor createDescriptor(JarContents contents) {
             var builder = java.lang.module.ModuleDescriptor.newAutomaticModule(name());
-            JarModuleInfo.scanAutomaticModule(contents, builder);
             // 复合模块必须登记每个 Fabric jar 的包。FML 的 ModuleClassLoader 按"包名 -> 模块"查表来
             // 定位类，包没登记就直接抛 ClassNotFoundException —— 这正是 Fabric 入口点全部加载失败的原因
-            // （Minecraft 自己的包登记在别的模块里，所以只有 mod 的类受影响）。自动模块扫描只覆盖
-            // 一部分内容，所以这里对全部内容补扫一遍，重复的包名并集去重即可：所有 Fabric jar 本来就
-            // 合并在这一个模块里，包共享是这里的既定设计。
+            // （Minecraft 自己的包登记在别的模块里，所以只有 mod 的类受影响）。
             var packages = new java.util.HashSet<String>();
-            contents.visitContent((path, resource) -> collectPackage(packages, path));
-            for (var modulePackage : builder.build().packages()) {
-                packages.add(modulePackage);
-            }
+            var serviceFiles = new java.util.ArrayList<String>();
+            contents.visitContent((path, resource) -> {
+                collectPackage(packages, path);
+                if (path.startsWith("META-INF/services/") && !path.endsWith("/")) {
+                    serviceFiles.add(path);
+                }
+            });
             builder.packages(packages);
+            // 不能调用 scanAutomaticModule：只要有一个 service 指向不存在的可选 provider
+            // (Jackson core 的 ObjectCodec -> 未安装的 databind ObjectMapper)，它就会整份失败。
+            // 那会把 IrisPlatformHelpers 这类合法 ServiceLoader 入口也一起丢掉，Iris 的
+            // Mixin plugin 随即 NPE。这里逐条校验 provider 类是否真的在复合模块里，只丢坏条目。
+            var seenProviders = new java.util.HashSet<String>();
+            for (var serviceFile : serviceFiles) {
+                var serviceName = serviceFile.substring("META-INF/services/".length());
+                String text;
+                try {
+                    text = new String(contents.readFile(serviceFile), java.nio.charset.StandardCharsets.UTF_8);
+                } catch (Exception e) {
+                    LOGGER.debug("[NeoFobric] Could not read service file {}", serviceFile, e);
+                    continue;
+                }
+                for (var raw : text.split("\\R")) {
+                    var line = raw;
+                    var comment = line.indexOf('#');
+                    if (comment >= 0) {
+                        line = line.substring(0, comment);
+                    }
+                    line = line.strip();
+                    if (line.isEmpty()) {
+                        continue;
+                    }
+                    if (!contents.containsFile(line.replace('.', '/') + ".class")) {
+                        LOGGER.debug("[NeoFobric] Dropping stale service provider {} for {}", line, serviceName);
+                        continue;
+                    }
+                    if (!seenProviders.add(serviceName + " " + line)) {
+                        continue;
+                    }
+                    try {
+                        builder.provides(serviceName, java.util.List.of(line));
+                    } catch (RuntimeException e) {
+                        LOGGER.debug("[NeoFobric] Dropping invalid service entry {} -> {}", serviceName, line, e);
+                    }
+                }
+            }
             if (!strandedClasses.isEmpty()) {
                 LOGGER.warn("[NeoFobric] Dropped {} class(es) that live in a platform-owned package and"
                                 + " therefore cannot be loaded from the Fabric composite module: {}",

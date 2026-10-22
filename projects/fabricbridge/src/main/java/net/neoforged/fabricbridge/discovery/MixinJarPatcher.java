@@ -5478,11 +5478,44 @@ public final class MixinJarPatcher {
                         LOGGER.info("[NeoFobric] Injected BridgeModelDiscoveryMixin into {}", jarPath.getFileName());
                     }
                 }
+                // Reglass replaces the creative screen's tab layout with its own single-page one. NeoForge
+                // splits the creative tabs into pages and draws its own page arrows, so the two layouts
+                // fight over the same buttons. The screen is the only thing Reglass has to give up: its
+                // other container widgets stay glass. The property keeps the old behaviour for debugging.
+                if (jarPath.getFileName().toString().startsWith("reglass-")
+                        && entry.getName().equals("reglass.mixins.json")
+                        && !Boolean.getBoolean("neofobric.keepReglassCreativeMixin")) {
+                    var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    var filtered = configText.replaceAll(
+                            "(?m)^\\s*\"client\\.CreativeModeInventoryScreenMixin\"\\s*,?\\s*\\r?\\n", "");
+                    if (!filtered.equals(configText)) {
+                        patched.put(entry.getName(), filtered.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        LOGGER.info("[NeoFobric] Skipped Reglass's creative-screen mixin so NeoForge's paged creative tabs keep working");
+                    }
+                }
                 if (net.neoforged.fabricbridge.compbridlnk.CreateCompat.handlesMixinConfig(entry.getName())) {
                     var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-                    var withEntry = net.neoforged.fabricbridge.compbridlnk.CreateCompat.addPartialModelMixin(configText);
+                    var rewritten = configText;
+                    var partialModel = false;
+                    var withEntry = net.neoforged.fabricbridge.compbridlnk.CreateCompat.addPartialModelMixin(rewritten);
                     if (withEntry != null) {
-                        patched.put(entry.getName(), withEntry.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        rewritten = withEntry;
+                        partialModel = true;
+                    }
+                    if (!Boolean.getBoolean("neofobric.keepCreateWorldOpenFlowsMixin")) {
+                        var withoutWorldgen = net.neoforged.fabricbridge.compbridlnk.CreateCompat
+                                .withoutWorldOpenFlowsMixin(rewritten);
+                        if (withoutWorldgen != null) {
+                            rewritten = withoutWorldgen;
+                            LOGGER.info("[NeoFobric] Skipped Create's WorldOpenFlows worldgen mixin - NeoForge's"
+                                    + " registry does not carry LevelStem when it runs, so it would NPE before the"
+                                    + " world loads (Create's ore features are left out)");
+                        }
+                    }
+                    if (!rewritten.equals(configText)) {
+                        patched.put(entry.getName(), rewritten.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    }
+                    if (partialModel) {
                         var mixinClassPath = net.neoforged.fabricbridge.compbridlnk.CreateCompat.PARTIAL_MODEL_MIXIN_CLASS;
                         entries.add(mixinClassPath);
                         patched.put(mixinClassPath, net.neoforged.fabricbridge.compbridlnk.CreateCompat.generatePartialModelDiscoveryMixin());
@@ -5529,6 +5562,12 @@ public final class MixinJarPatcher {
                 }
                 var versionMoved = renameFabricVersionChannel(bytes, entry.getName());
                 if (versionMoved != bytes) {
+                    patched.put(entry.getName(), versionMoved);
+                }
+                var c2mePrologue = net.neoforged.fabricbridge.compbridlnk.C2meCompat
+                        .neutraliseWorkerPrologue(versionMoved, entry.getName());
+                if (c2mePrologue != null) {
+                    versionMoved = c2mePrologue;
                     patched.put(entry.getName(), versionMoved);
                 }
                 // Temporary diagnostic for the connected-textures pipeline, off unless asked for with

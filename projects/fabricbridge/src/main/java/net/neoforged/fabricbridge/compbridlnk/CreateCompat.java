@@ -170,6 +170,31 @@ public final class CreateCompat {
     }
 
     /**
+     * Removes Create's {@code WorldOpenFlowsMixin} from its client config.
+     *
+     * <p>The mixin wraps the biome-feature step of Fabric's world-open flow and reads
+     * {@code LevelStem.OVERWORLD} from the registry access handed to it. On NeoForge the level-stem
+     * registry is not populated at that point, so the lookup returns null and every world load dies with
+     * an NPE before the server starts. Its only job is adding Create's zinc/striated-ore features to the
+     * biomes; dropping it costs those features but lets the world load. The property keeps the old
+     * behaviour for debugging once NeoForge's world-open flow carries the stems.
+     *
+     * @return the config text without the entry, or {@code null} when it was not present
+     */
+    public static String withoutWorldOpenFlowsMixin(String configText) {
+        if (!configText.contains("\"package\": \"com.zurrtum.create.client.mixin\"")
+                || !configText.contains("WorldOpenFlowsMixin")) {
+            return null;
+        }
+        // The entry is last in Create Fly's config, so its separator is the comma *before* it.
+        var filtered = configText.replaceFirst(",\\s*\"WorldOpenFlowsMixin\"", "");
+        if (filtered.equals(configText)) {
+            filtered = configText.replaceFirst("\"WorldOpenFlowsMixin\"\\s*,", "");
+        }
+        return filtered.equals(configText) ? null : filtered;
+    }
+
+    /**
      * Adds the partial-model mixin to Create's client mixin config.
      *
      * @return the config text with the entry, or {@code null} when it is not Create's config or already carries it

@@ -94,3 +94,4 @@ build
 !/tools/mixin-targets
 /tools/mixin-targets/out/
 /tools/mixin-targets/report.txt
+/modstaging
