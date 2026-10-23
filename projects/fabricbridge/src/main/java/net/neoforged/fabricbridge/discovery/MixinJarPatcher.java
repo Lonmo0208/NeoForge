@@ -5493,6 +5493,20 @@ public final class MixinJarPatcher {
                         LOGGER.info("[NeoFobric] Skipped Reglass's creative-screen mixin so NeoForge's paged creative tabs keep working");
                     }
                 }
+                // owo's CompoundTagMixin is applied by the class tweaker instead (OwoCompat): CompoundTag is
+                // loaded before the Fabric mixin configs are prepared, so Mixin skips it. Keeping the entry
+                // would add the methods a second time once the config is selected in a different order.
+                if (jarPath.getFileName().toString().startsWith("owo-lib-")
+                        && entry.getName().equals("owo.mixins.json")
+                        && !Boolean.getBoolean("neofobric.keepOwoCompoundTagMixin")) {
+                    var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    var filtered = configText.replaceAll(
+                            "(?m)^\\s*\"serialization\\.CompoundTagMixin\"\\s*,?\\s*\\r?\\n", "");
+                    if (!filtered.equals(configText)) {
+                        patched.put(entry.getName(), filtered.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        LOGGER.info("[NeoFobric] Handed owo's CompoundTagMixin to the class tweaker; Mixin cannot reach CompoundTag this early");
+                    }
+                }
                 if (net.neoforged.fabricbridge.compbridlnk.CreateCompat.handlesMixinConfig(entry.getName())) {
                     var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
                     var rewritten = configText;

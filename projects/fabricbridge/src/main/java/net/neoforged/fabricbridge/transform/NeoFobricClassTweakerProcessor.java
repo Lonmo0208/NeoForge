@@ -385,6 +385,7 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 || WIDEN_PRIVATE_MEMBERS.containsKey(name)
                 || InjectedInterfaceSource.get().containsKey(name)
                 || ENUM_EXTENSION_TARGETS.contains(name)
+                || net.neoforged.fabricbridge.compbridlnk.OwoCompat.handlesClass(name)
                 || isFabricClassTweakerTarget(name);
     }
 
@@ -418,12 +419,18 @@ public final class NeoFobricClassTweakerProcessor implements ClassProcessor {
                 && !WIDEN_PRIVATE_MEMBERS.containsKey(context.node().name)
                 && !InjectedInterfaceSource.get().containsKey(context.node().name)
                 && !ENUM_EXTENSION_TARGETS.contains(context.node().name)
+                && !net.neoforged.fabricbridge.compbridlnk.OwoCompat.handlesClass(context.node().name)
                 && !isFabricClassTweakerTarget(context.node().name)) {
             return ComputeFlags.NO_REWRITE;
         }
 
         var node = context.node();
         var changed = false;
+        // CompoundTag is defined before the Fabric mixin configs are prepared, so owo's mixin never sees it;
+        // the tweaker adds the same MapCarrier methods while the class is still being transformed.
+        if (net.neoforged.fabricbridge.compbridlnk.OwoCompat.handlesClass(node.name)) {
+            changed |= net.neoforged.fabricbridge.compbridlnk.OwoCompat.addMapCarrier(node);
+        }
         // A Fabric enum extension cannot apply while the platform's marker sits on the class - FML rejects the
         // mixin for it - and a Fabric mod has no way to know about the platform API that marker stands for.
         if (ENUM_EXTENSION_TARGETS.contains(node.name) && node.interfaces.remove(I_EXTENSIBLE_ENUM)) {
