@@ -189,7 +189,12 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             // it carries an FMLModType manifest attribute, so FML's InDevJarLocator already loads
             // it as its own game library when present on the classpath, and the production JiJ
             // expansion covers installed clients.)
-            "com/mojang/datafixers/DSL.class"
+            "com/mojang/datafixers/DSL.class",
+            // JOML, mixin-ed by owo: Matrix3x2fStackAccessor adds an accessor interface onto
+            // Matrix3x2fStack for braid's matrix stacks. Without this the mixin never applies (the
+            // library sits on the system classpath, outside the transformation pipeline) and every
+            // owo braid screen/HUD dies with a ClassCastException when it pushes a matrix.
+            "org/joml/Matrix3x2fStack.class"
     };
 
     @Override
