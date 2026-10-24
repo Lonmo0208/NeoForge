@@ -5507,6 +5507,27 @@ public final class MixinJarPatcher {
                         LOGGER.info("[NeoFobric] Handed owo's CompoundTagMixin to the class tweaker; Mixin cannot reach CompoundTag this early");
                     }
                 }
+                // fabric-registry-sync's BlocksMixin hooks the block registry's entry-added event and
+                // re-runs BlockState.initCache for the added block right away - on Fabric that is needed,
+                // because mod blocks register after Blocks.<clinit> built the vanilla caches. Under the
+                // bridge the same event also fires for every NeoForge RegisterEvent write, so a mod whose
+                // getShape reads a sibling DeferredHolder (Occultism's sacrificial bowl -> eldritch
+                // chalice, registered a few entries later) explodes mid-registration. NeoForge builds the
+                // caches itself at the right moment instead (NeoForgeRegistryCallbacks: "State cache init
+                // cannot be done in onAdd because some of it might depend on other registries being
+                // populated in mod code"), so the eager hook is dropped, not deferred.
+                if (jarPath.getFileName().toString().startsWith("fabric-registry-sync-v0-")
+                        && entry.getName().equals("fabric-registry-sync-v0.mixins.json")
+                        && !Boolean.getBoolean("neofobric.keepRegistrySyncBlocksMixin")) {
+                    var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    var filtered = configText.replaceAll("(?m)^\\s*\"BlocksMixin\"\\s*,?\\s*\\r?\\n", "");
+                    if (!filtered.equals(configText)) {
+                        patched.put(entry.getName(), filtered.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        LOGGER.info("[NeoFobric] Skipped fabric-registry-sync's BlocksMixin - its per-entry block"
+                                + " state cache rebuild fires mid-NeoForge-registration; NeoForge's own onBake"
+                                + " callback builds those caches once registration is complete");
+                    }
+                }
                 if (net.neoforged.fabricbridge.compbridlnk.CreateCompat.handlesMixinConfig(entry.getName())) {
                     var configText = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
                     var rewritten = configText;

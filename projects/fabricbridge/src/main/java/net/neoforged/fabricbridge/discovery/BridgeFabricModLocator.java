@@ -822,6 +822,13 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
      * a Fabric mod asking about them would take loader-specific code paths that this bridge does not
      * provide, whereas sodium/iris-style content mods are exactly the ported counterpart the bridge
      * stands on. Ids already claimed by a real Fabric jar are skipped - the real mod wins.
+     *
+     * <p>When the jar is multi-loader (a {@code fabric.mod.json} sits next to the toml), the top-level
+     * {@code custom} object of that file is carried into the synthetic metadata: custom values are
+     * plain data, and Fabric-side code does read them across mods - Tapestry's platform adapter scans
+     * every mod's {@code custom.tapestry.implementations} to find its platform methods and fails its
+     * class init when the block is missing. Everything else of the Fabric side (entry points, mixins)
+     * stays out: the FML side of the jar already runs those.
      */
     private static void exposePlatformMods(Path modsDir, Path view, Map<Path, FabricModInfo> fabricJars) {
         var claimed = new java.util.HashSet<String>();
@@ -839,7 +846,20 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 if (!Files.isRegularFile(jarPath) || !jarPath.toString().endsWith(".jar")) {
                     continue;
                 }
-                for (var mod : readForgeModsDotToml(jarPath)) {
+                // Multi-loader jars also carry a fabric.mod.json; its `custom` block is plain data that
+                // Fabric-side lookups read (Tapestry's platform adapter is the canonical case - it scans
+                // every Fabric mod's custom.tapestry.implementations to find its platform methods, and
+                // with the block dropped it fails its own class init). Entry points and mixins stay out:
+                // the FML side of the jar already runs those.
+                //
+                // When the toml carries [modproperties] for the mod, THOSE win over the fabric.mod.json
+                // values: the mod properties name this platform's implementation classes (Tapestry again -
+                // its Fabric adapter hands out implementations to code that runs on the FML side, and the
+                // Fabric-named class fails the caller's cast), so the flavour that matches the loader the
+                // jar actually runs under is the only one that composes.
+                var customInner = readTopLevelCustomInner(jarPath);
+                var platformMods = readForgeModsDotToml(jarPath);
+                for (var mod : platformMods) {
                     var id = mod[0];
                     if (id.isEmpty() || blocked.contains(id) || claimed.contains(id)) {
                         continue;
@@ -854,18 +874,28 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                                 id, jarPath.getFileName());
                         continue;
                     }
-                    var version = sanitizeFabricVersion(mod[1]);
-                    var name = mod[2].isEmpty() ? id : mod[2];
-                    var target = view.resolve("neofobric-platform-" + id + ".jar");
-                    try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(target))) {
-                        out.putNextEntry(new java.util.zip.ZipEntry("fabric.mod.json"));
-                        out.write(("{\"schemaVersion\":1,\"id\":\"" + id + "\",\"version\":\"" + version
-                                + "\",\"name\":\"" + escapeJson(name)
-                                + "\",\"environment\":\"*\",\"custom\":{\"neofobric\":\"platform-mod\"}}")
-                                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                        out.closeEntry();
+                    var effectiveCustom = customInner;
+                    try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
+                        var entry = zip.getEntry("META-INF/neoforge.mods.toml");
+                        if (entry != null) {
+                            var propsInner = extractModPropertiesJson(new String(
+                                    zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8), id);
+                            if (propsInner != null) {
+                                effectiveCustom = propsInner;
+                            }
+                        }
+                    } catch (java.io.IOException ignored) {
                     }
-                    exposed.add(id + " " + version);
+                    writePlatformModJar(view.resolve("neofobric-platform-" + id + ".jar"), id,
+                            sanitizeFabricVersion(mod[1]), mod[2].isEmpty() ? id : mod[2], effectiveCustom, jarPath, exposed);
+                }
+                // The same data gap exists one level down: FML loads a nested jar through its own JarInJar
+                // mechanics, so a multi-loader library shipped inside a platform mod (Tapestry inside
+                // Camerapture) is invisible to Fabric-side custom-value lookups in exactly the same way.
+                // Only jars FML itself owns are scanned: a nested jar inside a Fabric mod is not an FML
+                // mod, and claiming it here would answer isModLoaded with a lie.
+                if (!platformMods.isEmpty()) {
+                    exposeNestedPlatformMods(jarPath, view, claimed, blocked, exposed);
                 }
             }
         } catch (IOException | RuntimeException e) {
@@ -876,6 +906,237 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
             LOGGER.info("[NeoFobric] Exposed {} NeoForge mod(s) to fabric-loader (mods probing isModLoaded see them): {}",
                     exposed.size(), String.join(", ", exposed));
         }
+    }
+
+    /**
+     * Exposes the {@code META-INF/jars} entries of a platform jar that FML loads as nested mods, but
+     * only when the nested jar is itself multi-loader and carries custom values worth handing over -
+     * bare nested mods keep the previous behaviour of staying invisible, so mod probing answers do not
+     * change for the packs that have none of these libraries.
+     */
+    private static void exposeNestedPlatformMods(Path jarPath, Path view, java.util.Set<String> claimed,
+            java.util.Set<String> blocked, ArrayList<String> exposed) {
+        try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
+            var nestedEntries = zip.entries();
+            while (nestedEntries.hasMoreElements()) {
+                var entry = nestedEntries.nextElement();
+                var name = entry.getName();
+                if (!name.startsWith("META-INF/jars/") || !name.endsWith(".jar")) {
+                    continue;
+                }
+                var nested = zip.getInputStream(entry).readAllBytes();
+                var toml = readEntryTextFromZip(nested, "META-INF/neoforge.mods.toml");
+                if (toml == null) {
+                    continue;
+                }
+                var fabricModJson = readEntryTextFromZip(nested, "fabric.mod.json");
+                if (fabricModJson == null) {
+                    continue;
+                }
+                var customInner = extractTopLevelCustomInner(fabricModJson);
+                if (customInner == null) {
+                    continue;
+                }
+                for (var mod : parseForgeModsDotToml(toml)) {
+                    var id = mod[0];
+                    if (id.isEmpty() || blocked.contains(id) || claimed.contains(id) || !MOD_ID.matcher(id).matches()) {
+                        continue;
+                    }
+                    // Same flavour rule as the top-level jars: the toml's [modproperties] name the
+                    // NeoForge implementations, which is the platform the code reading them runs on here.
+                    var effectiveCustom = extractModPropertiesJson(toml, id);
+                    if (effectiveCustom == null) {
+                        effectiveCustom = customInner;
+                    }
+                    writePlatformModJar(view.resolve("neofobric-platform-" + id + ".jar"), id,
+                            sanitizeFabricVersion(mod[1]), mod[2].isEmpty() ? id : mod[2], effectiveCustom, null, exposed);
+                }
+            }
+        } catch (java.io.IOException | RuntimeException e) {
+            LOGGER.debug("[NeoFobric] Did not expose nested mods of {}", jarPath, e);
+        }
+    }
+
+    /**
+     * Writes the jar that stands in for a platform mod inside the Fabric mods view: the synthetic
+     * {@code fabric.mod.json}, plus every resource of the real jar. The metadata carries no entry
+     * points and no mixins (the FML side of the jar already runs those), but the files have to be
+     * there: multi-loader libraries read their own defaults through the loader's mod container -
+     * Yumi's {@code ModContainer.findPath}, which LambDynamicLights uses for its {@code .toml}, is
+     * the canonical case - and against a metadata-only jar that lookup answers "broken distribution".
+     * Byte-identical copies are safe to stack next to the FML-applied originals. A null
+     * {@code sourceJar} writes the metadata alone, which is all a nested library needs.
+     */
+    private static void writePlatformModJar(Path target, String id, String version, String name,
+            String customInner, Path sourceJar, ArrayList<String> exposed) {
+        var customJson = customInner == null || customInner.isBlank()
+                ? "{\"neofobric\":\"platform-mod\"}"
+                // The original object's members are spliced in verbatim: the text is lifted from a
+                // fabric.mod.json that already parsed, so it needs no re-encoding.
+                : "{\"neofobric\":\"platform-mod\"," + customInner + "}";
+        var metadata = ("{\"schemaVersion\":1,\"id\":\"" + id + "\",\"version\":\"" + version
+                + "\",\"name\":\"" + escapeJson(name)
+                + "\",\"environment\":\"*\",\"custom\":" + customJson + "}")
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        if (sourceJar == null) {
+            try (var out = new java.util.zip.ZipOutputStream(java.nio.file.Files.newOutputStream(target))) {
+                out.putNextEntry(new java.util.zip.ZipEntry("fabric.mod.json"));
+                out.write(metadata);
+                out.closeEntry();
+                exposed.add(id + " " + version);
+            } catch (java.io.IOException e) {
+                LOGGER.warn("[NeoFobric] Failed to write the Fabric view of platform mod {}", id, e);
+            }
+            return;
+        }
+        try (var source = new java.util.zip.ZipFile(sourceJar.toFile());
+                var out = new java.util.zip.ZipOutputStream(java.nio.file.Files.newOutputStream(target))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("fabric.mod.json"));
+            out.write(metadata);
+            out.closeEntry();
+            var entries = source.entries();
+            while (entries.hasMoreElements()) {
+                var entry = entries.nextElement();
+                var entryName = entry.getName();
+                // Classes stay out (the FML module owns them, and a second copy would only invite
+                // classloader ambiguity), META-INF carries signatures that would not match the new
+                // jar, and fabric.mod.json is replaced by the metadata written above.
+                if (entry.isDirectory() || entryName.endsWith(".class")
+                        || entryName.startsWith("META-INF/") || entryName.equals("fabric.mod.json")) {
+                    continue;
+                }
+                out.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                try (var in = source.getInputStream(entry)) {
+                    in.transferTo(out);
+                }
+                out.closeEntry();
+            }
+            exposed.add(id + " " + version);
+        } catch (java.io.IOException e) {
+            LOGGER.warn("[NeoFobric] Failed to write the Fabric view of platform mod {}", id, e);
+        }
+    }
+
+    /**
+     * {@return the members of the top-level {@code custom} object of the jar's {@code fabric.mod.json},
+     * without the outer braces, or {@code null} when the jar has no such object}
+     *
+     * <p>A string-aware scan rather than a JSON tree: the goal is to splice the original text into the
+     * synthetic metadata, and the object is found by tracking whether the parser is between a key and
+     * its value, so a {@code "custom"} string that appears as a value elsewhere in the file is not
+     * mistaken for the key.
+     */
+    private static String readTopLevelCustomInner(Path jarPath) {
+        try (var zip = new java.util.zip.ZipFile(jarPath.toFile())) {
+            var entry = zip.getEntry("fabric.mod.json");
+            if (entry == null) {
+                return null;
+            }
+            return extractTopLevelCustomInner(
+                    new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+        } catch (java.io.IOException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Extracts the inside of the top-level {@code "custom"} object, or {@code null} when the document
+     * has none. Understands just enough JSON to walk past strings (with escapes) and nesting.
+     */
+    private static String extractTopLevelCustomInner(String json) {
+        int depth = 0;
+        boolean expectKey = false;
+        int i = 0;
+        while (i < json.length()) {
+            char c = json.charAt(i);
+            if (c == '"') {
+                int end = i + 1;
+                while (end < json.length()) {
+                    char e = json.charAt(end);
+                    if (e == '\\') {
+                        end += 2;
+                        continue;
+                    }
+                    if (e == '"') {
+                        break;
+                    }
+                    end++;
+                }
+                if (end >= json.length()) {
+                    return null;
+                }
+                if (depth == 1 && expectKey && "custom".equals(json.substring(i + 1, end))) {
+                    int v = end + 1;
+                    while (v < json.length() && Character.isWhitespace(json.charAt(v))) v++;
+                    if (v >= json.length() || json.charAt(v) != ':') {
+                        return null;
+                    }
+                    v++;
+                    while (v < json.length() && Character.isWhitespace(json.charAt(v))) v++;
+                    if (v >= json.length() || json.charAt(v) != '{') {
+                        return null;
+                    }
+                    int body = v + 1;
+                    int balance = 1;
+                    int j = body;
+                    while (j < json.length() && balance > 0) {
+                        char x = json.charAt(j);
+                        if (x == '"') {
+                            j++;
+                            while (j < json.length()) {
+                                char y = json.charAt(j);
+                                if (y == '\\') {
+                                    j += 2;
+                                    continue;
+                                }
+                                if (y == '"') {
+                                    break;
+                                }
+                                j++;
+                            }
+                        } else if (x == '{') {
+                            balance++;
+                        } else if (x == '}') {
+                            balance--;
+                        }
+                        j++;
+                    }
+                    if (balance != 0) {
+                        return null;
+                    }
+                    var inner = json.substring(body, j - 1).strip();
+                    return inner.isEmpty() ? null : inner;
+                }
+                i = end + 1;
+                continue;
+            }
+            if (c == '{') {
+                depth++;
+                expectKey = true;
+            } else if (c == '}') {
+                depth--;
+            } else if (c == ',' && depth >= 1) {
+                expectKey = true;
+            } else if (c == ':' && depth >= 1) {
+                expectKey = false;
+            }
+            i++;
+        }
+        return null;
+    }
+
+    /** {@return the UTF-8 text of a zip entry stored in the given bytes, or {@code null} when absent} */
+    private static String readEntryTextFromZip(byte[] zipBytes, String wanted) {
+        try (var in = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(zipBytes))) {
+            for (var entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
+                if (wanted.equals(entry.getName())) {
+                    return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                }
+            }
+        } catch (java.io.IOException e) {
+            return null;
+        }
+        return null;
     }
 
     /**
@@ -895,50 +1156,234 @@ public final class BridgeFabricModLocator implements IModFileCandidateLocator {
                 return mods;
             }
             var text = new String(zip.getInputStream(entry).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-            String id = null;
-            String version = "";
-            String displayName = "";
-            var inModsSection = false;
-            for (var rawLine : text.split("\n")) {
-                var line = rawLine.strip();
-                if (line.isEmpty() || line.startsWith("#")) {
-                    continue;
-                }
-                if (line.startsWith("[")) {
-                    if (inModsSection && id != null) {
-                        mods.add(new String[] { id, version, displayName });
-                    }
-                    inModsSection = line.startsWith("[[mods]]");
-                    if (!inModsSection) {
-                        id = null;
-                        version = "";
-                        displayName = "";
-                    }
-                    continue;
-                }
-                if (!inModsSection) {
-                    continue;
-                }
-                var eq = line.indexOf('=');
-                if (eq < 0) {
-                    continue;
-                }
-                var key = line.substring(0, eq).strip();
-                var value = tomlValue(line.substring(eq + 1).strip());
-                switch (key) {
-                    case "modId" -> id = value;
-                    case "version" -> version = value;
-                    case "displayName" -> displayName = value;
-                    default -> { }
-                }
-            }
-            if (inModsSection && id != null) {
-                mods.add(new String[] { id, version, displayName });
-            }
+            mods.addAll(parseForgeModsDotToml(text));
         } catch (Exception e) {
             LOGGER.debug("[NeoFobric] Could not read neoforge.mods.toml of {}", jarPath, e);
         }
         return mods;
+    }
+
+    /** The text-level half of {@link #readForgeModsDotToml(Path)}, reusable for nested-jar bytes. */
+    private static java.util.List<String[]> parseForgeModsDotToml(String text) {        var mods = new ArrayList<String[]>();
+        String id = null;
+        String version = "";
+        String displayName = "";
+        var inModsSection = false;
+        for (var rawLine : text.split("\n")) {
+            var line = rawLine.strip();
+            if (line.isEmpty() || line.startsWith("#")) {
+                continue;
+            }
+            if (line.startsWith("[")) {
+                if (inModsSection && id != null) {
+                    mods.add(new String[] { id, version, displayName });
+                }
+                inModsSection = line.startsWith("[[mods]]");
+                if (!inModsSection) {
+                    id = null;
+                    version = "";
+                    displayName = "";
+                }
+                continue;
+            }
+            if (!inModsSection) {
+                continue;
+            }
+            var eq = line.indexOf('=');
+            if (eq < 0) {
+                continue;
+            }
+            var key = line.substring(0, eq).strip();
+            var value = tomlValue(line.substring(eq + 1).strip());
+            switch (key) {
+                case "modId" -> id = value;
+                case "version" -> version = value;
+                case "displayName" -> displayName = value;
+                default -> { }
+            }
+        }
+        if (inModsSection && id != null) {
+            mods.add(new String[] { id, version, displayName });
+        }
+        return mods;
+    }
+
+    /**
+     * {@return the JSON members for the synthetic Fabric {@code custom} block built from the mod's
+     * {@code [modproperties.<id>...]} tables, without the outer braces, or {@code null} when there
+     * are none}
+     *
+     * <p>Mod properties are how a multi-loader mod hands loader-specific data to code on the NeoForge
+     * side (Tapestry declares its platform implementations there), and they mirror the Fabric
+     * {@code custom} block's shape - so the tables are re-encoded as JSON and offered under the same
+     * key. Only the subset these tables actually use is understood: nested table paths, quoted
+     * strings, string arrays, numbers and booleans; anything else stops the conversion for that
+     * value (and a value that fails to convert makes the whole block back off to the Fabric copy).
+     */
+    private static String extractModPropertiesJson(String toml, String modId) {
+        // The bracket is already stripped from the header at this point, so the prefix matches on
+        // the plain dotted path.
+        var prefix = "modproperties." + modId;
+        var root = new java.util.LinkedHashMap<String, Object>();
+        java.util.List<String> path = null;
+        for (var rawLine : toml.split("\n")) {
+            var line = rawLine.strip();
+            if (line.isEmpty() || line.startsWith("#")) {
+                continue;
+            }
+            if (line.startsWith("[")) {
+                var end = line.indexOf(']');
+                if (end < 0) {
+                    path = null;
+                    continue;
+                }
+                var header = line.substring(1, end).strip();
+                if (!header.startsWith(prefix + ".") || header.length() <= prefix.length() + 1) {
+                    path = null;
+                    continue;
+                }
+                var parts = new ArrayList<>(java.util.List.of(header.substring(prefix.length() + 1).split("\\.")));
+                for (int i = 0; i < parts.size(); i++) {
+                    // Segments are bare identifiers in practice, but a quoted one keeps its quotes off.
+                    var segment = parts.get(i).strip();
+                    var unquoted = unquote(segment);
+                    parts.set(i, unquoted != null ? unquoted : segment);
+                }
+                path = parts;
+                continue;
+            }
+            if (path == null) {
+                continue;
+            }
+            var eq = line.indexOf('=');
+            if (eq < 0) {
+                continue;
+            }
+            var rawKey = line.substring(0, eq).strip();
+            var unquotedKey = unquote(rawKey);
+            var key = unquotedKey != null ? unquotedKey : rawKey;
+            var value = convertTomlValue(line.substring(eq + 1).strip());
+            if (key == null || value == null) {
+                // One unreadable entry would corrupt the whole block, so the conversion gives up
+                // and the caller falls back to the Fabric copy of the data.
+                return null;
+            }
+            java.util.Map<String, Object> dir = root;
+            for (int i = 0; i < path.size(); i++) {
+                var segment = path.get(i);
+                @SuppressWarnings("unchecked")
+                var next = (java.util.Map<String, Object>) dir.computeIfAbsent(segment,
+                        k -> new java.util.LinkedHashMap<String, Object>());
+                if (i == path.size() - 1) {
+                    next.put(key, value);
+                }
+                dir = next;
+            }
+        }
+        if (root.isEmpty()) {
+            return null;
+        }
+        var json = new StringBuilder();
+        writeJsonMembers(root, json);
+        return json.toString();
+    }
+
+    /** One member list of a JSON object; values are the maps/lists/strings produced above. */
+    private static void writeJsonMembers(java.util.Map<String, Object> map, StringBuilder json) {
+        var first = true;
+        for (var entry : map.entrySet()) {
+            if (!first) {
+                json.append(',');
+            }
+            first = false;
+            json.append('"').append(escapeJson(entry.getKey())).append("\":");
+            var value = entry.getValue();
+            if (value instanceof String s) {
+                json.append('"').append(escapeJson(s)).append('"');
+            } else if (value instanceof RawJson raw) {
+                json.append(raw.text());
+            } else if (value instanceof java.util.List<?> list) {
+                json.append('[');
+                var firstItem = true;
+                for (var item : list) {
+                    if (!firstItem) {
+                        json.append(',');
+                    }
+                    firstItem = false;
+                    json.append('"').append(escapeJson(String.valueOf(item))).append('"');
+                }
+                json.append(']');
+            } else {
+                @SuppressWarnings("unchecked")
+                var nested = (java.util.Map<String, Object>) value;
+                json.append('{');
+                writeJsonMembers(nested, json);
+                json.append('}');
+            }
+        }
+    }
+
+    /** A toml value of the shapes these tables use, or {@code null} for anything richer. */
+    private static Object convertTomlValue(String value) {
+        if (value.startsWith("[")) {
+            if (!value.endsWith("]")) {
+                return null;
+            }
+            var items = new ArrayList<String>();
+            for (var part : splitTopLevel(value.substring(1, value.length() - 1))) {
+                var item = unquote(part.strip());
+                if (item == null) {
+                    return null;
+                }
+                items.add(item);
+            }
+            return items;
+        }
+        var unquoted = unquote(value);
+        if (unquoted != null) {
+            return unquoted;
+        }
+        // Numbers and booleans pass through: their toml and JSON spellings are the same.
+        if (value.matches("-?\\d+(\\.\\d+)?|true|false")) {
+            return new RawJson(value);
+        }
+        return null;
+    }
+
+    /** A toml scalar kept in its JSON spelling, so numbers and booleans stay unquoted. */
+    private record RawJson(String text) {}
+
+    /** Splits on commas that are not inside a quoted string. */
+    private static java.util.List<String> splitTopLevel(String text) {
+        var parts = new ArrayList<String>();
+        var current = new StringBuilder();
+        var inString = false;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '"' && (i == 0 || text.charAt(i - 1) != '\\')) {
+                inString = !inString;
+                current.append(c);
+            } else if (c == ',' && !inString) {
+                parts.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        if (!current.toString().strip().isEmpty()) {
+            parts.add(current.toString());
+        }
+        return parts;
+    }
+
+    /** The content of a quoted toml string, or {@code null} when the value is not one. */
+    private static String unquote(String value) {
+        if (value.length() >= 2 && value.startsWith("\"") && value.endsWith("\"")) {
+            return value.substring(1, value.length() - 1)
+                    .replace("\\\\", "\\")
+                    .replace("\\\"", "\"");
+        }
+        return null;
     }
 
     /** Suffix of the rewritten copy of an FML mod whose unsatisfiable-in-FML requirements were relaxed. */
